@@ -3,8 +3,8 @@ import { constellations } from "../constellations";
 
 export const moonPhasesWithConstellations = {
   january: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.sagittarius, constellations.capricorn],
       information: {
         sagittarius: {
@@ -19,7 +19,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.pisces,
+      constellation: [constellations.pisces],
       information: {
         pisces: {
           details: "First Quarter in Pisces involves facing emotional and spiritual challenges. It's a time to grow through compassion, creativity, and intuition, making decisions that align with your inner self.",
@@ -27,8 +27,8 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
+    full: {
+      phase: moonPhases.full,
       constellation: [constellations.leo, constellations.cancer],
       information: {
         leo: {
@@ -43,7 +43,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.virgo,
+      constellation: [constellations.virgo],
       information: {
         virgo: {
           details: "Last Quarter in Virgo is about releasing perfectionist tendencies and focusing on practical improvements. It's a time to clear out what no longer serves you and refine your routines for better efficiency.",
@@ -53,8 +53,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   february: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.capricorn, constellations.aquarius],
       information: {
         capricorn: {
@@ -69,7 +69,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.taurus,
+      constellation: [constellations.taurus],
       information: {
         taurus: {
           details: "First Quarter in Taurus involves practical challenges and decisions related to security and stability. It's a time to build solid foundations and take steady actions towards your goals.",
@@ -77,9 +77,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.leo,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.leo],
       information: {
         leo: {
           details: "Full Moon in Leo emphasizes the culmination of creative efforts and personal achievements. It's a time to express yourself boldly and celebrate your successes.",
@@ -89,7 +89,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.libra,
+      constellation: [constellations.libra],
       information: {
         libra: {
           details: "Last Quarter in Libra focuses on releasing imbalances and seeking harmony. It's a time to let go of relationships or situations that disrupt your peace and work towards equilibrium.",
@@ -99,8 +99,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   march: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.aquarius, constellations.pisces],
       information: {
         aquarius: {
@@ -115,7 +115,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.gemini,
+      constellation: [constellations.gemini],
       information: {
         gemini: {
           details: "First Quarter in Gemini challenges you to adapt and communicate effectively. It's a time to make decisions based on clear information and flexibility.",
@@ -123,9 +123,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.virgo,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.virgo],
       information: {
         virgo: {
           details: "Full Moon in Virgo brings clarity and completion to practical and analytical efforts. It's a time to celebrate accomplishments in health, work, and service.",
@@ -135,7 +135,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.sagittarius,
+      constellation: [constellations.sagittarius],
       information: {
         sagittarius: {
           details: "Last Quarter in Sagittarius is about releasing outdated beliefs and expanding your horizons. It's a time to embrace change and seek new philosophical or educational pursuits.",
@@ -145,8 +145,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   april: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.pisces, constellations.aries],
       information: {
         pisces: {
@@ -161,7 +161,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.cancer,
+      constellation: [constellations.cancer],
       information: {
         cancer: {
           details: "First Quarter in Cancer involves addressing emotional and home-related challenges. It's a time to make decisions that nurture your well-being and strengthen family bonds.",
@@ -169,9 +169,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.libra,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.libra],
       information: {
         libra: {
           details: "Full Moon in Libra emphasizes the culmination of efforts in relationships and balance. It's a time to celebrate harmony and beauty in your partnerships and surroundings.",
@@ -181,7 +181,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.capricorn,
+      constellation: [constellations.capricorn],
       information: {
         capricorn: {
           details: "Last Quarter in Capricorn focuses on releasing structures and goals that no longer serve you. It's a time to refine your plans and maintain discipline in pursuit of your true ambitions.",
@@ -191,8 +191,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   may: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.aries, constellations.taurus],
       information: {
         aries: {
@@ -207,7 +207,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.leo,
+      constellation: [constellations.leo],
       information: {
         leo: {
           details: "First Quarter in Leo challenges you to act with courage and creativity. It's a time to face obstacles with confidence and inspire others through your actions.",
@@ -215,9 +215,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.scorpio,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.scorpio],
       information: {
         scorpio: {
           details: "Full Moon in Scorpio brings intensity and transformation. It's a time to confront deep emotions, embrace change, and celebrate personal growth.",
@@ -227,7 +227,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.aquarius,
+      constellation: [constellations.aquarius],
       information: {
         aquarius: {
           details: "Last Quarter in Aquarius is about releasing outdated ideas and embracing innovation. It's a time to focus on progressive changes and humanitarian efforts.",
@@ -237,8 +237,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   june: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.taurus, constellations.gemini],
       information: {
         taurus: {
@@ -253,7 +253,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.virgo,
+      constellation: [constellations.virgo],
       information: {
         virgo: {
           details: "First Quarter in Virgo involves tackling practical and analytical challenges. It's a time to refine your plans and address details with precision.",
@@ -261,9 +261,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.sagittarius,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.sagittarius],
       information: {
         sagittarius: {
           details: "Full Moon in Sagittarius emphasizes the completion of educational and philosophical pursuits. It's a time to celebrate knowledge gained and experiences broadened.",
@@ -273,7 +273,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.pisces,
+      constellation: [constellations.pisces],
       information: {
         pisces: {
           details: "Last Quarter in Pisces focuses on releasing emotional baggage and embracing spiritual clarity. It's a time to let go of what no longer serves your emotional well-being.",
@@ -283,8 +283,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   july: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.gemini, constellations.cancer],
       information: {
         gemini: {
@@ -299,7 +299,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.libra,
+      constellation: [constellations.libra],
       information: {
         libra: {
           details: "First Quarter in Libra challenges you to address imbalances and seek harmony. It's a time to make decisions that promote peace and fairness in your relationships.",
@@ -307,9 +307,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.capricorn,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.capricorn],
       information: {
         capricorn: {
           details: "Full Moon in Capricorn brings completion and clarity to career and long-term goals. It's a time to celebrate professional achievements and practical success.",
@@ -319,7 +319,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.aries,
+      constellation: [constellations.aries],
       information: {
         aries: {
           details: "Last Quarter in Aries focuses on releasing impatience and impulsivity. It's a time to refine your actions and embrace strategic planning.",
@@ -329,8 +329,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   august: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.cancer, constellations.leo],
       information: {
         cancer: {
@@ -345,7 +345,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.scorpio,
+      constellation: [constellations.scorpio],
       information: {
         scorpio: {
           details: "First Quarter in Scorpio challenges you to confront intense emotions and transformative situations. It's a time to embrace change and grow through emotional depth.",
@@ -353,9 +353,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.aquarius,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.aquarius],
       information: {
         aquarius: {
           details: "Full Moon in Aquarius brings clarity and completion to innovative and humanitarian efforts. It's a time to celebrate social progress and community achievements.",
@@ -365,7 +365,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.taurus,
+      constellation: [constellations.taurus],
       information: {
         taurus: {
           details: "Last Quarter in Taurus focuses on releasing material attachments and embracing simplicity. It's a time to refine your values and seek stability.",
@@ -375,8 +375,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   september: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.leo, constellations.virgo],
       information: {
         leo: {
@@ -391,7 +391,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.sagittarius,
+      constellation: [constellations.sagittarius],
       information: {
         sagittarius: {
           details: "First Quarter in Sagittarius challenges you to expand your horizons and seek adventure. It's a time to face obstacles with optimism and embrace new experiences.",
@@ -399,9 +399,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.pisces,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.pisces],
       information: {
         pisces: {
           details: "Full Moon in Pisces brings emotional clarity and spiritual fulfillment. It's a time to celebrate creative accomplishments and deep connections.",
@@ -411,7 +411,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.gemini,
+      constellation: [constellations.gemini],
       information: {
         gemini: {
           details: "Last Quarter in Gemini focuses on releasing outdated ideas and embracing adaptability. It's a time to refine your communication and stay open to new perspectives.",
@@ -421,8 +421,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   october: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.virgo, constellations.libra],
       information: {
         virgo: {
@@ -437,7 +437,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.capricorn,
+      constellation: [constellations.capricorn],
       information: {
         capricorn: {
           details: "First Quarter in Capricorn challenges you to tackle practical and career-related obstacles. It's a time to make decisions that support your long-term goals and ambitions.",
@@ -445,9 +445,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.aries,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.aries],
       information: {
         aries: {
           details: "Full Moon in Aries brings clarity and completion to personal initiatives and leadership efforts. It's a time to celebrate bold actions and individual achievements.",
@@ -457,7 +457,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.cancer,
+      constellation: [constellations.cancer],
       information: {
         cancer: {
           details: "Last Quarter in Cancer focuses on releasing emotional burdens and embracing nurturing qualities. It's a time to refine your emotional well-being and strengthen family bonds.",
@@ -467,8 +467,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   november: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.libra, constellations.scorpio],
       information: {
         libra: {
@@ -483,7 +483,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.aquarius,
+      constellation: [constellations.aquarius],
       information: {
         aquarius: {
           details: "First Quarter in Aquarius challenges you to innovate and embrace change. It's a time to tackle obstacles with creativity and seek progress.",
@@ -491,9 +491,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.taurus,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.taurus],
       information: {
         taurus: {
           details: "Full Moon in Taurus brings clarity and completion to material and financial efforts. It's a time to celebrate stability and enjoy the fruits of your labor.",
@@ -503,7 +503,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.leo,
+      constellation: [constellations.leo],
       information: {
         leo: {
           details: "Last Quarter in Leo focuses on releasing ego-driven desires and embracing humility. It's a time to refine your self-expression and lead with authenticity.",
@@ -513,8 +513,8 @@ export const moonPhasesWithConstellations = {
     }
   },
   december: {
-    newMoon: {
-      phase: moonPhases.newMoon,
+    new: {
+      phase: moonPhases.new,
       constellation: [constellations.scorpio, constellations.ophiuchus],
       information: {
         scorpio: {
@@ -529,7 +529,7 @@ export const moonPhasesWithConstellations = {
     },
     firstQuarter: {
       phase: moonPhases.firstQuarter,
-      constellation: constellations.pisces,
+      constellation: [constellations.pisces],
       information: {
         pisces: {
           details: "First Quarter in Pisces challenges you to address emotional and spiritual obstacles. It's a time to make decisions that align with your intuition and creativity.",
@@ -537,9 +537,9 @@ export const moonPhasesWithConstellations = {
         }
       }
     },
-    fullMoon: {
-      phase: moonPhases.fullMoon,
-      constellation: constellations.gemini,
+    full: {
+      phase: moonPhases.full,
+      constellation: [constellations.gemini],
       information: {
         gemini: {
           details: "Full Moon in Gemini brings clarity and completion to communication and intellectual efforts. It's a time to celebrate learning and share your knowledge.",
@@ -549,7 +549,7 @@ export const moonPhasesWithConstellations = {
     },
     lastQuarter: {
       phase: moonPhases.lastQuarter,
-      constellation: constellations.virgo,
+      constellation: [constellations.virgo],
       information: {
         virgo: {
           details: "Last Quarter in Virgo focuses on releasing perfectionist tendencies and embracing practical improvements. It's a time to refine your routines and clear out what no longer serves you.",
