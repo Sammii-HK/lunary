@@ -1,5 +1,5 @@
 export const monthlyMoonPhases = {
-  newMoon: {
+  new: {
     keywords: ["Beginnings", "Intention", "Renewal"],
     symbol: "🌑",
     information: "The New Moon is a time of new beginnings, setting intentions, and starting fresh. It's a time to plant the seeds for future growth. Focus on setting clear goals, starting new projects, and embracing change."
@@ -19,7 +19,7 @@ export const monthlyMoonPhases = {
     symbol: "🌔",
     information: "The Waxing Gibbous Moon is a time for refinement and preparation. It's a time to review your progress, make improvements, and prepare for the fruition of your efforts. Focus on fine-tuning your plans, being patient, and staying dedicated."
   },
-  fullMoon: {
+  full: {
     keywords: ["Completion", "Clarity", "Manifestation"],
     symbol: "🌕",
     information: "The Full Moon is a time of completion, clarity, and manifestation. It's a time to celebrate your achievements and see the results of your efforts. Focus on gratitude, releasing what no longer serves you, and enjoying the fruits of your labor."
