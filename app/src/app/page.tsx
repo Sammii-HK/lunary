@@ -1,33 +1,8 @@
 import { Moon } from "lunarphase-js";
 import { moonPhasesWithConstellations } from "../../utils/moon/anualPhases";
+import { months } from "../../utils/months";
+import { stringToCamelCase } from "../../utils/moon/moonPhases";
 
-export const months = [
-	"january",
-	"february",
-	"march",
-	"april",
-	"may",
-	"june",
-	"july",
-	"august",
-	"september",
-	"october",
-	"november",
-	"december",
-] as const;
-
-const stringToCamelCase = (string: string) => {
-	return string[0].toLowerCase() + string.substring(1).replace(" ", "");
-};
-
-export type CamelCaseMoonPhase =
-	| "new"
-	| "waxingCrescent"
-	| "firstQuarter"
-	| "waxingGibbous"
-	| "full"
-	| "waningGibbous"
-	| "lastQuarter";
 ("waningCrescent");
 
 export default function Home() {
