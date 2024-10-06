@@ -3,49 +3,62 @@
 import { Moon } from "lunarphase-js";
 import { moonPhasesWithConstellations } from "../../utils/moon/anualPhases";
 import { months } from "../../utils/months";
-import { stringToCamelCase } from "../../utils/moon/moonPhases";
+import { stringToCamelCase, getNextMoonPhase, getLunarAgeToNextPhase, moonPhaseLabels } from "../../utils/moon/moonPhases";
+import { useEffect, useState } from "react";
+import { ConstellationPhaseWidget } from "./ConstellationPhaseWidget";
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export const MoonWidget = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const date = new Date();
 	const monthNumber = date.getMonth();
 	const month = months[monthNumber];
 	const phaseString = Moon.lunarPhase(date);
-	const agePercent = Moon.lunarAgePercent();
+	const [agePercent, setAgePercent] = useState(1);
 	const emoji = Moon.emojiForLunarPhase(Moon.lunarPhase(date));
 	const phase = stringToCamelCase(Moon.lunarPhase(date));
+  const lunarAge = Moon.lunarAge(date); 
 
 	const phasesWithConstellationsInMonth = moonPhasesWithConstellations[month];
 
-	const moonPhaseInConstellation =
-		phase in phasesWithConstellationsInMonth
-			? phasesWithConstellationsInMonth[
-					phase as keyof typeof phasesWithConstellationsInMonth
-			]
-			: undefined;
+  const moonPhaseInConstellation = ({phase}: {phase: string}) => {
+    return phase in phasesWithConstellationsInMonth
+      ? phasesWithConstellationsInMonth[
+          phase as keyof typeof phasesWithConstellationsInMonth
+        ]
+      : undefined;
+  };
 
-  // make it work with 2 new moons a mnonth
-  const constellation = moonPhaseInConstellation?.constellation[0];
+  const constellation = moonPhaseInConstellation({phase})?.constellation[0];
+
+  useEffect(() => {
+    setAgePercent(Moon.lunarAgePercent());
+  }, [])
+
+  const nextMoonPhase = stringToCamelCase(getNextMoonPhase(phase));
+  const nextMoonPhaseInConstellation = moonPhaseInConstellation({phase: nextMoonPhase})?.constellation[0];
+
+  const lunarAgeToNextPhase = getLunarAgeToNextPhase(lunarAge);  
 
   return(
-    <div>
-      <p className="mt-2">{emoji} {phaseString} Moon {constellation && <> in {constellation?.name}</>}</p>
-        <p className="my-2">Age: {agePercent}</p>
-        {constellation && <>
-          <div>
-            <p>Element: {constellation.element}</p>
-            <p>Quality: {constellation.quality}</p>
-            <p>Planet: {constellation.rulingPlanet}</p>
-            <p>Symbol: {constellation.symbol}</p>
-          </div>
-          <div className="flex mt-2">
-            <p>Keywords: </p>
-            {constellation.keywords.map(keyword => ` ${keyword}`)}
-          </div>
-          <div className="flex mt-2">
-            <p>Crystals: </p>
-            {constellation.crystals.map(crystal => ` ${crystal}`)}
-          </div>
-          <p className="mt-2">{constellation.information}</p>
+    <div className="border-stone-500 border-2 p-3 flex flex-col">
+      <div className="flex w-full justify-between">
+        <div className="flex align-middle">
+          <span className="self-center">{emoji} {phaseString} Moon {constellation && <> in {constellation?.name}</>}</span>
+          {isExpanded && <span className="text-xs ml-5 self-center">Age: {agePercent.toFixed(8)}</span>}
+        </div>
+        <div className="justify-self-end">
+          <button onClick={() => setIsExpanded(!isExpanded)}>
+            {!isExpanded && <ChevronDown />}
+            {isExpanded && <ChevronUp />}
+          </button>
+        </div>
+      </div>        
+        {constellation && <ConstellationPhaseWidget isExpanded={isExpanded} constellation={moonPhaseInConstellation} />}
+        {!constellation && nextMoonPhaseInConstellation && <>
+          <hr className="my-2" />
+          <p className="font-bold text-xs mb-3"><span className="text-xs text-stone-500">{lunarAgeToNextPhase} days until </span>{moonPhaseLabels[nextMoonPhase]} Moon {nextMoonPhaseInConstellation && <> in {nextMoonPhaseInConstellation?.name}</>}</p>
+          <ConstellationPhaseWidget isExpanded={isExpanded} constellation={nextMoonPhaseInConstellation} />
         </>}
     </div>
   )
