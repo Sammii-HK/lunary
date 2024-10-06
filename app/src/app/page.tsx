@@ -1,3 +1,4 @@
+import { TarotWidget } from "@/components/TarotWidget";
 import { MoonWidget } from "../components/MoonWidget"
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
 					{/* {emoji} */}
 				</p>
         <MoonWidget />
+        <TarotWidget />
 			</div>
 		</main>
 	);
