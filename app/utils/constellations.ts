@@ -1,3 +1,5 @@
+// export type Constellation
+
 export const constellations = {
   aries: {
     name: "Aries",

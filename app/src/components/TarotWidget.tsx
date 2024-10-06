@@ -9,7 +9,7 @@ export const TarotWidget = () => {
   const majorArcana = Object.keys(tarotCards.majorArcana)
   const getAllCardNames = () => {
     const getSuitCards = (suit: TarotSuit) => Object.keys(tarotCards.minorArcana[suit])
-    const minorArcana = tarotSuits.flatMap(suit => Object.keys(tarotCards.minorArcana[suit]))
+    const minorArcana = tarotSuits.flatMap(suit => Object.keys(tarotCards.minorArcana[suit as keyof typeof tarotCards.minorArcana]))
     console.log("minorArcana", minorArcana);
     return [...majorArcana, ...minorArcana]
   }
@@ -31,16 +31,16 @@ export const TarotWidget = () => {
     const number = getRandomInt(allCardNames.length -1)
     console.log("number", number);
     const tarotCard = allCardNames[number]
-    const majorArcanaCard = tarotCards.majorArcana[tarotCard]
-    const cupsCard = tarotCards.minorArcana.cups[tarotCard]
-    const wandsCard = tarotCards.minorArcana.wands[tarotCard]
-    const swordsCard = tarotCards.minorArcana.swords[tarotCard]
-    const pentaclesCard = tarotCards.minorArcana.pentacles[tarotCard]
+    const majorArcanaCard = tarotCards.majorArcana[tarotCard as keyof typeof tarotCards.majorArcana]
+    const cupsCard = tarotCards.minorArcana.cups[tarotCard as keyof typeof tarotCards.minorArcana.cups]
+    const wandsCard = tarotCards.minorArcana.wands[tarotCard as keyof typeof tarotCards.minorArcana.wands]
+    const swordsCard = tarotCards.minorArcana.swords[tarotCard as keyof typeof tarotCards.minorArcana.swords]
+    const pentaclesCard = tarotCards.minorArcana.pentacles[tarotCard as keyof typeof tarotCards.minorArcana.pentacles]
     // const tarotInfo = majorArcanaCard | cupsCard | wandsCard | swordsCard | pentaclesCard
     console.log("majorArcanaCard | cupsCard | wandsCard | swordsCard | pentaclesCard", majorArcanaCard, cupsCard, wandsCard, swordsCard, pentaclesCard);
     
     // console.log("tarotInfo", tarotInfo);
-    return { ...majorArcanaCard, ...cupsCard, ...wandsCard, ...swordsCard, ...pentaclesCard }
+    return { ...majorArcanaCard as any, ...cupsCard as any, ...wandsCard as any, ...swordsCard as any, ...pentaclesCard as any }
     
   }
 

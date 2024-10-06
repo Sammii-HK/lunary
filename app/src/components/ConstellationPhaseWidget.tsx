@@ -7,7 +7,7 @@ export const ConstellationPhaseWidget = ({
   constellation: any,
   isExpanded: boolean
 }) => {
-  const constellationItems = [ 'element', 'rulingPlanet', 'quality', 'symbol' ];
+  const constellationItems = [ 'element', 'rulingPlanet', 'quality', 'symbol' ] as const;
   if (!constellation) return null;
   return (
     <>
@@ -19,11 +19,11 @@ export const ConstellationPhaseWidget = ({
     {isExpanded && <div className="text-xs">
       <div className="flex mb-3 mt-5">
         <p className="mr-3">Keywords:</p>
-        {constellation.keywords?.map(keyword => ` ${keyword}`)}
+        {constellation.keywords?.map((keyword: string) => ` ${keyword}`)}
       </div>
       <div className="flex mb-3">
         <p className="mr-3">Crystals:</p>
-        {constellation.crystals?.map(crystal => ` ${crystal}`)}
+        {constellation.crystals?.map((crystal: string) => ` ${crystal}`)}
       </div>
       <p className="mt-4">{constellation.information}</p>
     </div>}
@@ -86,17 +86,17 @@ const ConstellationItem = ({
 
   const getIcon = (type: constellationItems, item: string) => {
     if (type === 'element') {
-      return elementUnicode[constellation[type].toLowerCase()];
+      return elementUnicode[constellation[type].toLowerCase() as keyof typeof elementUnicode];
     }
     if (type === 'rulingPlanet') {
-      return planetUnicode[constellation[type].toLowerCase()];
+      return planetUnicode[constellation[type].toLowerCase() as keyof typeof planetUnicode];
     }
     if (type === 'quality') {
-      return qualityUnicode[constellation[type].toLowerCase()];
+      return qualityUnicode[constellation[type].toLowerCase() as keyof typeof qualityUnicode];
     }
     if (type === 'symbol') {
       const constellationName = constellation.name.toLowerCase();
-      return symbolUnicode[constellationName];
+      return symbolUnicode[constellationName as keyof typeof symbolUnicode];
     }
     return item;
   };

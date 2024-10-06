@@ -45,7 +45,7 @@ export type CamelCaseMoonPhase =
     waxingGibbous: [9.22, 11.07, 12.91],
     full: [12.91, 14.76, 16.61],
     waningGibbous: [16.61, 18.45, 20.30],
-    lastQuarter: [20.30, 22.14,, 23.99],
+    lastQuarter: [20.30, 22.14, 23.99],
     waningCrescent: [23.99, 25.83, 27.68],
   }
 
