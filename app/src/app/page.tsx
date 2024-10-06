@@ -15,3 +15,5 @@ export default function Home() {
 		</main>
 	);
 }
+
+export const revalidate = 60; // never cache for longer than a minute
