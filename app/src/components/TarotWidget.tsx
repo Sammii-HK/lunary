@@ -53,7 +53,7 @@ export const TarotWidget = () => {
   return (
     <div className="p-5 border border-stone-800 my-6 rounded-md">
       <p className="mb-3">{tarot.name}</p>
-      <p className="w-full">{tarot.keywords.map(keyword => `${keyword} `)}</p>
+      <p className="w-full">{tarot.keywords.map((keyword: string) => `${keyword} `)}</p>
       <p className="mt-3">{tarot.information}</p>
     </div>
   )
