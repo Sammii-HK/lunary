@@ -46,11 +46,11 @@ export const MoonWidget = () => {
   
 
   return(
-    <div className="border-stone-500 border-2 p-3 flex flex-col">
+    <div className="border-stone-800 border p-3 flex flex-col">
       <div className="flex w-full justify-between">
-        <div className="flex align-middle">
-          <span className="self-center">{emoji} {phaseString} Moon {constellation && <> in {constellation?.name}</>}</span>
-          {isExpanded && <span className="text-xs ml-5 self-center">Age: {agePercent.toFixed(8)}</span>}
+        <div className="flex align-middle flex-col md:flex-row">
+          <p className="self-center">{emoji} {phaseString} Moon {constellation && <> in {constellation?.name}</>}</p>
+          {/* {isExpanded && <p className="text-xs ml-5 mt-2 md:mt-0 md:self-center">Age: {agePercent.toFixed(8)}</p>} */}
         </div>
         <div className="justify-self-end">
           <button onClick={() => setIsExpanded(!isExpanded)}>
@@ -61,7 +61,7 @@ export const MoonWidget = () => {
       </div>        
         {constellation && <ConstellationPhaseWidget isExpanded={isExpanded} constellation={moonPhaseInConstellation} />}
         {!constellation && nextMoonPhaseInConstellation && <>
-          <hr className="my-2" />
+          <hr className="my-2 border-stone-800" />
           <p className="font-bold text-xs mb-3"><span className="text-xs text-stone-500">{lunarAgeToNextPhase} days until </span>{moonPhaseLabels[nextMoonPhase as keyof typeof moonPhaseLabels]} Moon {nextMoonPhaseInConstellation && <> in {nextMoonPhaseInConstellation?.name}</>}</p>
           <ConstellationPhaseWidget isExpanded={isExpanded} constellation={nextMoonPhaseInConstellation} />
         </>}
