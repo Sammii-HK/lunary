@@ -19,7 +19,7 @@ export const MoonWidget = () => {
 	const phase = stringToCamelCase(Moon.lunarPhase(date));
   const lunarAge = Moon.lunarAge(date); 
 
-	const phasesWithConstellationsInMonth = moonPhasesWithConstellations[month];
+	const phasesWithConstellationsInMonth = moonPhasesWithConstellations[month.toLowerCase() as keyof typeof moonPhasesWithConstellations];
 
   const moonPhaseInConstellation = ({phase}: {phase: string}) => {
     return phase in phasesWithConstellationsInMonth
@@ -46,7 +46,7 @@ export const MoonWidget = () => {
   
 
   return(
-    <div className="border-stone-800 border p-3 flex flex-col">
+    <div className="border-stone-800 border p-3 flex flex-col w-full rounded-md">
       <div className="flex w-full justify-between">
         <div className="flex align-middle flex-col md:flex-row">
           <p className="self-center">{emoji} {phaseString} Moon {constellation && <> in {constellation?.name}</>}</p>
