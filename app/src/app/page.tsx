@@ -1,14 +1,14 @@
 import { TarotWidget } from "@/components/TarotWidget";
 import { MoonWidget } from "../components/MoonWidget"
+import { AstronomyWidget } from "@/components/AstronomyWidget";
+import { DateWidget } from "@/components/DateWidget";
 
 export default function Home() {
-
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-between p-8 lg:p-24">
-			<div className="z-10 w-full h-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-				{/* <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30"> */}
-					{/* {emoji} */}
-				{/* </p> */}
+			<div className="z-10 max-w-md w-full h-100 items-center justify-between font-mono text-sm gap-4 grid">
+        <DateWidget />
+        <AstronomyWidget />
         <MoonWidget />
         <TarotWidget />
 			</div>
