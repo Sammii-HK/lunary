@@ -1,4 +1,4 @@
-type constellationItems = "element" | "quality" | "rulingPlanet" | "symbol";
+import { constellationItems, getIcon, } from "../../utils/zodiac/zodiac";
 
 export const ConstellationPhaseWidget = ({
   constellation, 
@@ -42,71 +42,12 @@ const ConstellationItem = ({
   isExpanded?: boolean,
 }) => {
 
-  const elementUnicode = {
-    earth: '🜃',
-    fire: '🜂',
-    air: '🜁',
-    water: '🜄',
-  };
-
-  const planetUnicode = {
-    sun: '☉',
-    moon: '☽',
-    mercury: '☿',
-    venus: '♀',
-    mars: '♂',
-    jupiter: '♃',
-    saturn: '♄',
-    uranus: '♅',
-    neptune: '♆',
-    pluto: '♇',
-  };
-
-  const qualityUnicode = {
-    cardinal: '🜍',
-    fixed: '🜔',
-    mutable: '☿',
-  };
-
-  const symbolUnicode = {
-    capricorn: '♑',
-    aquarius: '♒',
-    pisces: '♓',
-    aries: '♈',
-    taurus: '♉',
-    gemini: '♊',
-    cancer: '♋',
-    leo: '♌',
-    virgo: '♍',
-    libra: '♎',
-    scorpio: '♏',
-    sagittarius: '♐',
-  };
-
-
-  const getIcon = (type: constellationItems, item: string) => {
-    if (type === 'element') {
-      return elementUnicode[constellation[type].toLowerCase() as keyof typeof elementUnicode];
-    }
-    if (type === 'rulingPlanet') {
-      return planetUnicode[constellation[type].toLowerCase() as keyof typeof planetUnicode];
-    }
-    if (type === 'quality') {
-      return qualityUnicode[constellation[type].toLowerCase() as keyof typeof qualityUnicode];
-    }
-    if (type === 'symbol') {
-      const constellationName = constellation.name.toLowerCase();
-      return symbolUnicode[constellationName as keyof typeof symbolUnicode];
-    }
-    return item;
-  };
-
-  const icon = getIcon(item as 'element' | 'rulingPlanet', constellation[item]); 
+  const icon = getIcon(item as 'element' | 'rulingPlanet', constellation[item], constellation); 
   
 
   // const ExpandedItem = `${item}: ${icon} ${constellation[item]}`;
   const ExpandedItem = `${icon} ${constellation[item]}`;
-  const UnexpandedItem = getIcon(item as 'element' | 'rulingPlanet', constellation[item]);
+  // const UnexpandedItem = getIcon(item as 'element' | 'rulingPlanet', constellation[item]);
 
   return (
     <p>{ExpandedItem}</p>
