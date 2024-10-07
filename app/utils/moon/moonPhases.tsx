@@ -51,7 +51,7 @@ export type CamelCaseMoonPhase =
 
   export const getLunarAgeToNextPhase = (lunarAge: number) => {
     const phase = moonPhases.find(phase => {
-      const [min, max] = lunarAgeRanges[phase];
+      const [min, event, max] = lunarAgeRanges[phase];
       return lunarAge >= min && lunarAge < max;
     });
 
