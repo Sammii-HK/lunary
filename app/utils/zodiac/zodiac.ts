@@ -59,16 +59,16 @@ let constellation: any
 
 export const getIcon = (type: constellationItems, item: string, constellation: any) => {
   if (type === 'element') {
-    return elementUnicode[constellation[type].toLowerCase() as keyof typeof elementUnicode];
+    return elementUnicode[constellation[type]?.toLowerCase() as keyof typeof elementUnicode];
   }
   if (type === 'rulingPlanet') {
-    return planetSymbol[constellation[type].toLowerCase() as keyof typeof planetSymbol];
+    return planetSymbol[constellation[type]?.toLowerCase() as keyof typeof planetSymbol];
   }
   if (type === 'quality') {
-    return qualityUnicode[constellation[type].toLowerCase() as keyof typeof qualityUnicode];
+    return qualityUnicode[constellation[type]?.toLowerCase() as keyof typeof qualityUnicode];
   }
   if (type === 'symbol') {
-    const constellationName = constellation.name.toLowerCase();
+    const constellationName = constellation.name?.toLowerCase();
     return zodiacSymbol[constellationName as keyof typeof zodiacSymbol];
   }
   return item;
