@@ -40,7 +40,7 @@ export const MoonWidget = () => {
 
   const lunarAgeToNextPhase = getLunarAgeToNextPhase(lunarAge);  
 
-  console.log("Moon", Moon.lunationNumber(date));
+  // console.log("Moon", Moon.lunationNumber(date));
   // last new/full moon
   // next new/full moon
   
@@ -59,7 +59,7 @@ export const MoonWidget = () => {
           </button>
         </div>
       </div>        
-        {constellation && <ConstellationPhaseWidget isExpanded={isExpanded} constellation={moonPhaseInConstellation} />}
+        {constellation && <ConstellationPhaseWidget isExpanded={isExpanded} constellation={constellation} />}
         {!constellation && nextMoonPhaseInConstellation && <>
           <hr className="my-2 border-stone-800" />
           <p className="font-bold text-xs mb-3"><span className="text-xs text-stone-500">{lunarAgeToNextPhase} days until </span>{moonPhaseLabels[nextMoonPhase as keyof typeof moonPhaseLabels]} Moon {nextMoonPhaseInConstellation && <> in {nextMoonPhaseInConstellation?.name}</>}</p>
