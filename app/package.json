@@ -11,6 +11,7 @@
   "dependencies": {
     "@astrodraw/astrochart": "^3.0.2",
     "astronomy-engine": "^2.1.19",
+    "classnames": "^2.5.1",
     "lucide-react": "^0.447.0",
     "lunarphase-js": "^2.0.3",
     "next": "14.2.3",
