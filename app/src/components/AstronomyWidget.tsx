@@ -1,24 +1,33 @@
 "use client"
 
-import { getCurrentAstrologicalChart, planetSymbol, zodiacSymbol } from "../../utils/zodiac/zodiac";
+import { useCurrentAstrologicalChart } from "../../utils/astrology/astrology";
+import { bodiesSymbols, zodiacSymbol } from "../../utils/zodiac/zodiac";
+import classNames from "classnames";
 
-export const AstronomyWidget = () => {  
-  const astrologicalChart = getCurrentAstrologicalChart();
+const cx = classNames;
+
+export const AstronomyWidget = () => {
+  const chart = useCurrentAstrologicalChart();
 
   return (
-    <div className="py-5 p-x-2 border border-stone-800 rounded-md grid grid-cols-10">
-      <p className="mb-3 col-span-10">Astronomy</p>
-      {astrologicalChart.map(({degree, sign, body}, index) => {
-        
+    <div className="py-3 px-1 border border-stone-800 rounded-md grid grid-cols-10">
+      {!chart.length && <p className="py-3">Loading...</p>}
+      {chart && chart.map(({formattedDegree, sign, body}, index) => {
+        const isInRetrograde = chart[index].retrograde;
         return (
           <div key={body} className="col-span-1">
             <div className="flex justify-center flex-col align-middle text-center">
-              <p>{planetSymbol[body.toLowerCase() as keyof typeof planetSymbol]}</p>
-              <p className="text-xs"><span className="text-[8px]">{degree}°</span> {zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol]}</p>
+              <p className={cx({"text-red-500": isInRetrograde}, "text-[22px] mb-1")}>{bodiesSymbols[body.toLowerCase() as keyof typeof bodiesSymbols]}</p>
+              {/* <p className="text-xs"><span className="text-[8px]">{formattedDegree}</span> {zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol]}</p> */}
+              <div className="text-s flex align-middle justify-evenly">
+                <span className="text-[8px]">{formattedDegree.degree}°</span>
+              {zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol]}</div>
+              {/* <p>{body}</p>
+              <p className="text-xs"> {sign}</p> */}
             </div>
           </div>
         )
       })}
     </div>
-  )
+  );
 };
