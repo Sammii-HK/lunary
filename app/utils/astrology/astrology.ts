@@ -1,5 +1,6 @@
+'use client'
 import { useEffect, useMemo, useState } from "react";
-import { Body, GeoVector, Observer, AstroTime, Horizon, EquatorFromVector, EclipticLongitude, Ecliptic } from "astronomy-engine";
+import { Body, GeoVector, Observer, AstroTime, Ecliptic } from "astronomy-engine";
 
 export const ZODIAC_SIGNS = [
   "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
@@ -62,7 +63,7 @@ export function planetaryPositions(date: Date, observer: Observer): { [key: stri
   return positions;
 }
 
-type AstroChartInformation = {
+export type AstroChartInformation = {
   body: Body;
   formattedDegree: FormattedDegree;
   sign: string;

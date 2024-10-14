@@ -1,13 +1,16 @@
 "use client"
 
-import { useCurrentAstrologicalChart } from "../../utils/astrology/astrology";
+import { AstronomyContext } from "@/context/AstronomyContext";
+// import { useCurrentAstrologicalChart } from "../../utils/astrology/astrology";
 import { bodiesSymbols, zodiacSymbol } from "../../utils/zodiac/zodiac";
 import classNames from "classnames";
+import { useContext } from "react";
 
 const cx = classNames;
 
 export const AstronomyWidget = () => {
-  const chart = useCurrentAstrologicalChart();
+  const getAstronomyContext = useContext(AstronomyContext);
+  const chart = getAstronomyContext().currentAstrologicalChart;
 
   return (
     <div className="py-3 px-1 border border-stone-800 rounded-md grid grid-cols-10">
