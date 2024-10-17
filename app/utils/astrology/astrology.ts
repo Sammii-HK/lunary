@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useMemo, useState } from "react";
-import { Body, GeoVector, Observer, AstroTime, Ecliptic } from "astronomy-engine";
+import { Body, GeoVector, Observer, AstroTime, Ecliptic, MoonPhase } from "astronomy-engine";
 
 export const ZODIAC_SIGNS = [
   "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
@@ -24,6 +24,25 @@ function formatDegree(longitude: number): FormattedDegree {
 type FormattedDegree = {
   degree: number;
   minute: number;
+}
+
+export function getMoonPhase(date: Date): string {
+  const moonPhase = MoonPhase(date);
+
+  const getPhase = (phase: number): string => {
+    if (phase >= 0 && phase < 22.5) return "New Moon";
+    if (phase >= 22.5 && phase < 67.5) return "Waxing Crescent";
+    if (phase >= 67.5 && phase < 112.5) return "First Quarter";
+    if (phase >= 112.5 && phase < 157.5) return "Waxing Gibbous";
+    if (phase >= 157.5 && phase < 202.5) return "Full Moon";
+    if (phase >= 202.5 && phase < 247.5) return "Waning Gibbous";
+    if (phase >= 247.5 && phase < 292.5) return "Last Quarter";
+    if (phase >= 292.5 && phase < 337.5) return "Waning Crescent";
+    return "New Moon"; // for phase >= 337.5 to 360
+  };
+
+  const moonPhaseString = getPhase(moonPhase);
+  return moonPhaseString;
 }
 
 export function planetaryPositions(date: Date, observer: Observer): { [key: string]: { longitude: number, retrograde: boolean } } {
@@ -122,5 +141,9 @@ export function useAstrologicalPositions(date: Date): AstroChartInformation[] {
 
 export function useCurrentAstrologicalChart(): AstroChartInformation[] {
   const date = useMemo(() => new Date(), []);
+  return useAstrologicalPositions(date);
+}
+
+export function useAstrologicalChart(date: Date): AstroChartInformation[] {
   return useAstrologicalPositions(date);
 }

@@ -1,19 +1,21 @@
 import { useEffect } from "react"
 
+import { monthlyMoonPhases } from "../../utils/moon/monthlyPhases";
+import { stringToCamelCase } from "../../utils/moon/moonPhases";
+
 export const MoonConstellation = ({
   phaseString,
-  emoji,
   moonConstellationPosition,
 }: {
   phaseString: string,
-  emoji: string,
   moonConstellationPosition: string,
-}) => {
+}) => { 
+  const symbol = monthlyMoonPhases[stringToCamelCase(phaseString) as keyof typeof monthlyMoonPhases]?.symbol;
 
   useEffect(() => {}, [moonConstellationPosition]);
   return (
     <div>
-      <p className="self-center">{emoji} {phaseString} Moon {moonConstellationPosition && <> in {moonConstellationPosition}</>}</p>
+      <p className="self-center">{symbol} {phaseString} {moonConstellationPosition && <> in {moonConstellationPosition}</>}</p>
     </div>
   )
 }
