@@ -4,8 +4,6 @@ import { monthlyMoonPhases } from "./monthlyPhases";
 import dayjs from "dayjs";
 
 export const stringToCamelCase = (string: string) => {
-  console.log("string", string);
-  
 	return string[0].toLowerCase() + string.substring(1).replace(" ", "");
 };
 
