@@ -7,6 +7,8 @@ export const ZODIAC_SIGNS = [
   "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
 ];
 
+export type ZodiacSign = "Aries" | "Taurus" | "Gemini" | "Cancer" | "Leo" | "Virgo" | "Libra" | "Scorpio" | "Sagittarius" | "Capricorn" | "Aquarius" | "Pisces";
+
 type Bodies = "Sun" | "Moon" | "Mercury" | "Venus" | "Mars" | "Jupiter" | "Saturn" | "Uranus" | "Neptune" | "Pluto";
 
 function getZodiacSign(longitude: number): string {
@@ -24,25 +26,6 @@ function formatDegree(longitude: number): FormattedDegree {
 type FormattedDegree = {
   degree: number;
   minute: number;
-}
-
-export function getMoonPhase(date: Date): string {
-  const moonPhase = MoonPhase(date);
-
-  const getPhase = (phase: number): string => {
-    if (phase >= 0 && phase < 22.5) return "New Moon";
-    if (phase >= 22.5 && phase < 67.5) return "Waxing Crescent";
-    if (phase >= 67.5 && phase < 112.5) return "First Quarter";
-    if (phase >= 112.5 && phase < 157.5) return "Waxing Gibbous";
-    if (phase >= 157.5 && phase < 202.5) return "Full Moon";
-    if (phase >= 202.5 && phase < 247.5) return "Waning Gibbous";
-    if (phase >= 247.5 && phase < 292.5) return "Last Quarter";
-    if (phase >= 292.5 && phase < 337.5) return "Waning Crescent";
-    return "New Moon"; // for phase >= 337.5 to 360
-  };
-
-  const moonPhaseString = getPhase(moonPhase);
-  return moonPhaseString;
 }
 
 export function planetaryPositions(date: Date, observer: Observer): { [key: string]: { longitude: number, retrograde: boolean } } {
