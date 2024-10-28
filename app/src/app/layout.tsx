@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Moon } from "lunarphase-js";
 
 const inter = Inter({ subsets: ["latin"] });
-const phase = Moon.lunarPhase();
-const emoji = Moon.emojiForLunarPhase(phase);
+
+import { getMoonSymbol } from "../../utils/moon/moonPhases";
 
 export const metadata: Metadata = {
-  title: `${emoji} Lunary`,
-  description: "Your Lunary Diary",
+  title: `${getMoonSymbol()} Lunary`,
+  description: "Your Lunar Diary",
 };
 
 export default function RootLayout({
