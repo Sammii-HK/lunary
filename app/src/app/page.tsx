@@ -8,13 +8,12 @@ export default function Home() {
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-between p-4 lg:p-24">
 			<div className="z-10 max-w-md w-full h-100 items-center justify-between font-mono text-sm gap-4 grid">
-        {/* <CalendarWidget /> */}
         <AstronomyContextProvider>
           <DateWidget />
           <AstronomyWidget />
           <MoonWidget />
+          <TarotWidget />
         </AstronomyContextProvider>
-        <TarotWidget />
 			</div>
 		</main>
 	);
