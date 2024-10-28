@@ -339,6 +339,40 @@ export const constellationsMoonPhases = {
       crystals: ["Selenite", "Clear Quartz"]
     }
   },
+  capricorn: {
+    newMoon: {
+      details: "New Moon in Capricorn is a time to set ambitious goals and focus on long-term achievements. It’s perfect for laying the foundation for future success.",
+      crystals: ["Garnet", "Onyx"]
+    },
+    waxingCrescent: {
+      details: "Waxing Crescent in Capricorn encourages slow, steady progress toward your goals. It's a time to build structures and create a solid foundation for success.",
+      crystals: ["Hematite", "Smoky Quartz"]
+    },
+    firstQuarter: {
+      details: "First Quarter in Capricorn brings challenges in discipline and determination. It's a time to push through obstacles and stay focused on your long-term ambitions.",
+      crystals: ["Pyrite", "Tiger's Eye"]
+    },
+    waxingGibbous: {
+      details: "Waxing Gibbous in Capricorn is a time to refine your plans and ensure that your efforts are leading to tangible results. Focus on efficiency and practicality.",
+      crystals: ["Black Tourmaline", "Jet"]
+    },
+    fullMoon: {
+      details: "Full Moon in Capricorn brings completion to career and long-term projects. It’s a time to celebrate professional success and acknowledge your hard work.",
+      crystals: ["Garnet", "Onyx"]
+    },
+    waningGibbous: {
+      details: "Waning Gibbous in Capricorn encourages reflecting on your achievements and sharing your wisdom with others. Focus on mentoring and supporting others in their goals.",
+      crystals: ["Smoky Quartz", "Lapis Lazuli"]
+    },
+    lastQuarter: {
+      details: "Last Quarter in Capricorn is a time to release outdated goals and structures. Focus on letting go of rigid plans and embrace flexibility.",
+      crystals: ["Clear Quartz", "Shungite"]
+    },
+    waningCrescent: {
+      details: "Waning Crescent in Capricorn is a time for rest and renewal. Reflect on your career and achievements, and prepare for the next cycle of productivity.",
+      crystals: ["Selenite", "Amethyst"]
+    }
+  },
   pisces: {
     newMoon: {
       details: "New Moon in Pisces is a time to set intentions around creativity, spirituality, and compassion. Focus on your dreams and embrace your intuitive nature.",
