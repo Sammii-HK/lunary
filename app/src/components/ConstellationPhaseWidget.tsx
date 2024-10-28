@@ -7,10 +7,10 @@ import { constellationsMoonPhases } from "../../utils/moon/zodiacPhases";
 import { MoonPhase } from "../../utils/moon/moonPhases";
 
 export const ConstellationPhaseWidget = () => {
-  const currentMoonConstellation = useAstronomyContext().currentMoonConstellation;
+  const {currentMoonConstellation, currentMoonPhase} = useAstronomyContext()
+
   if (!currentMoonConstellation) return null;
 
-  const currentMoonPhase = useAstronomyContext().currentMoonPhase;
   const constellationItems = [ 'element', 'rulingPlanet', 'quality', 'symbol' ] as const;
   const currentMoonConstellationName = currentMoonConstellation.name?.toLowerCase() as keyof typeof constellationsMoonPhases;
   const currentConstellationMoonPhases = constellationsMoonPhases[currentMoonConstellationName]
