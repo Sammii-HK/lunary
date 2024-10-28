@@ -1,3 +1,5 @@
+"use client";
+
 import { constellationItems, getIcon, } from "../../utils/zodiac/zodiac";
 import { useAstronomyContext } from "@/context/AstronomyContext";
 import { stringToCamelCase } from "../../utils/moon/moonPhases";
