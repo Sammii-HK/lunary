@@ -12,7 +12,9 @@ export const ConstellationPhaseWidget = () => {
 
   const currentMoonPhase = useAstronomyContext().currentMoonPhase;
   const constellationItems = [ 'element', 'rulingPlanet', 'quality', 'symbol' ] as const;
-  const phaseConstellationInformation = constellationsMoonPhases[currentMoonConstellation.name?.toLowerCase() as keyof typeof constellationsMoonPhases & string][stringToCamelCase(currentMoonPhase) as MoonPhase];
+  const currentMoonConstellationName = currentMoonConstellation.name?.toLowerCase() as keyof typeof constellationsMoonPhases;
+  const currentConstellationMoonPhases = constellationsMoonPhases[currentMoonConstellationName]
+  const phaseConstellationInformation = currentConstellationMoonPhases[stringToCamelCase(currentMoonPhase) as MoonPhase];
   
   return (
     <>
