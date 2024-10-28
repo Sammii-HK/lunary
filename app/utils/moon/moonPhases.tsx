@@ -1,17 +1,13 @@
-import { Moon } from "lunarphase-js";
+
+import { MoonPhase } from "astronomy-engine";
+import { monthlyMoonPhases } from "./monthlyPhases";
+import dayjs from "dayjs";
 
 export const stringToCamelCase = (string: string) => {
+  console.log("string", string);
+  
 	return string[0].toLowerCase() + string.substring(1).replace(" ", "");
 };
-
-export type CamelCaseMoonPhase =
-	| "newMoon"
-	| "waxingCrescent"
-	| "firstQuarter"
-	| "waxingGibbous"
-	| "fullMoon"
-	| "waningGibbous"
-	| "lastQuarter";
 
 export const moonPhases = [
   "newMoon", 
@@ -36,12 +32,6 @@ export const moonPhaseLabels = {
   waningCrescent: "Waning",
 }
 
-export const getNextMoonPhase = (currentPhase: CamelCaseMoonPhase) => {
-  const currentPhaseIndex = moonPhases.indexOf(currentPhase);
-  const nextPhaseIndex = (currentPhaseIndex + 1) % moonPhases.length;
-  return moonPhases[nextPhaseIndex];
-};
-
 const lunarAgeRanges = {
   newMoon: [27.68, 29.53, 1.84],
   waxingCrescent: [1.84, 3.69, 5.53],
@@ -53,55 +43,28 @@ const lunarAgeRanges = {
   waningCrescent: [23.99, 25.83, 27.68],
 }
 
-export const getLunarAgeToNextPhase = (lunarAge: number) => {
-  const phase = moonPhases.find(phase => {
-    const [min, event, max] = lunarAgeRanges[phase];
-    return lunarAge >= min && lunarAge < max;
-  });
+export type MoonPhaseLabels = "New Moon" | "Waxing Crescent" | "First Quarter" | "Waxing Gibbous" | "Full Moon" | "Waning Gibbous" | "Last Quarter" | "Waning Crescent";
 
-  const daysUntilNextPhase = (lunarAgeRanges[phase as CamelCaseMoonPhase][2]) - lunarAge;
+export function getMoonPhase(date: Date): MoonPhaseLabels {
+  const moonPhase = MoonPhase(date);
 
-  return daysUntilNextPhase.toFixed(1);
-};
+  const getPhase = (phase: number): MoonPhaseLabels => {
+    if (phase >= 0 && phase < 22.5) return "New Moon";
+    if (phase >= 22.5 && phase < 67.5) return "Waxing Crescent";
+    if (phase >= 67.5 && phase < 112.5) return "First Quarter";
+    if (phase >= 112.5 && phase < 157.5) return "Waxing Gibbous";
+    if (phase >= 157.5 && phase < 202.5) return "Full Moon";
+    if (phase >= 202.5 && phase < 247.5) return "Waning Gibbous";
+    if (phase >= 247.5 && phase < 292.5) return "Last Quarter";
+    if (phase >= 292.5 && phase < 337.5) return "Waning Crescent";
+    return "New Moon"; // for phase >= 337.5 to 360
+  };
 
-export const todaysDate = new Date(); // make this based on context
+  const moonPhaseString = getPhase(moonPhase);
+  return moonPhaseString;
+}
 
-// const monthNumber = todaysDate.getMonth();
-// const month = months[monthNumber];
-
-export const currentMoon = Moon.lunarPhase(todaysDate);
-
-export const currentMoonPhase = stringToCamelCase(Moon.lunarPhase(todaysDate));
-
-// const phasesWithConstellationsInMonth = moonPhasesWithConstellations[month.toLowerCase() as keyof typeof moonPhasesWithConstellations];
-
-export const nextMoonPhase = stringToCamelCase(getNextMoonPhase(currentMoonPhase as CamelCaseMoonPhase));
-
-
-// export const moonPhaseInConstellation = ({phase}: {phase: string}) => {
-//   return phase in phasesWithConstellationsInMonth
-//   ? phasesWithConstellationsInMonth[
-//     phase as keyof typeof phasesWithConstellationsInMonth
-//   ]
-//   : undefined;
-// };
-
-// const getMoonPhaseInConstellation = (phase: string) => {
-//   const constellationsInPhase =  moonPhaseInConstellation({phase});
-//   const phaseConstellation = () => {
-//     if (constellationsInPhase?.constellation?.length === 1) return constellationsInPhase?.constellation[0];
-//     if (todaysDate.getDate() < 15) return constellationsInPhase?.constellation[0];
-//     if (todaysDate.getDate() >= 15) return constellationsInPhase?.constellation[1];
-//   }
-//   const constellation = phaseConstellation();
-
-//   if (!constellation) return null;
-//   return {
-//     name: constellation,
-//     information: constellationsInPhase?.information[constellation?.toLowerCase() as keyof typeof constellationsInPhase.information],
-//   }
-// };
-
-// export const currentMoonPhaseInConstellation = getMoonPhaseInConstellation(currentMoonPhase)//?.constellation[0]; // make this dynamic based on if beginning or end of the month
-
-// export const nextMoonPhaseInConstellation = getMoonPhaseInConstellation(nextMoonPhase)//?.constellation[0]; // make this dynamic based on if beginning or end of the month
+export const getMoonSymbol = () => {
+  const currentMoonPhase = getMoonPhase(dayjs().toDate());
+  return monthlyMoonPhases[stringToCamelCase(currentMoonPhase) as keyof typeof monthlyMoonPhases]?.symbol;
+}
