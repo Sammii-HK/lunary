@@ -20,6 +20,7 @@ export const AstronomyContext = createContext<{
   writtenDate: string,
   currentTarotCard: any,
   symbol: string,
+  currentDate: string,
 } | null>(null);
 
 export function useAstronomyContext() {
@@ -59,6 +60,7 @@ export const AstronomyContextProvider = ({ children }: { children: React.ReactNo
       writtenDate,
       currentTarotCard,
       symbol,
+      currentDate,
     }}>
       {children}
     </AstronomyContext.Provider>
