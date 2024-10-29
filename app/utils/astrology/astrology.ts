@@ -70,6 +70,7 @@ export type AstroChartInformation = {
   formattedDegree: FormattedDegree;
   sign: string;
   retrograde: boolean;
+  eclipticLongitude: number;
 }
 
 export function calculateAstrologicalChart(positions: { [key: string]: { longitude: number, retrograde: boolean } }): AstroChartInformation[] {
@@ -78,7 +79,8 @@ export function calculateAstrologicalChart(positions: { [key: string]: { longitu
     const retrograde = positions[body].retrograde;
     const sign = getZodiacSign(eclipticLongitude);
     const formattedDegree = formatDegree(eclipticLongitude);
-    return { body: body as Body, formattedDegree, sign, retrograde };
+    
+    return { body: body as Body, formattedDegree, sign, retrograde, eclipticLongitude };
   });
 }
 
