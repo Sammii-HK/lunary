@@ -1,0 +1,58 @@
+export const wiccanWeek = [
+  {
+      dayOfWeek: "Sunday",
+      wiccanName: "Sun's Day",
+      correspondingCrystal: ["Citrine", "Sunstone"],
+      planet: "Sun",
+      deities: ["Apollo", "Ra", "Helios"],
+      magicalFocuses: ["Wealth", "Health", "Vitality", "Personal Power"]
+  },
+  {
+      dayOfWeek: "Monday",
+      wiccanName: "Moon's Day",
+      correspondingCrystal: ["Moonstone", "Pearl"],
+      planet: "Moon",
+      deities: ["Diana", "Selene", "Hecate"],
+      magicalFocuses: ["Psychic Abilities", "Dreams", "Emotional Work"]
+  },
+  {
+      dayOfWeek: "Tuesday",
+      wiccanName: "Tyr's Day",
+      correspondingCrystal: ["Red Jasper", "Garnet"],
+      planet: "Mars",
+      deities: ["Tyr", "Ares", "Mars"],
+      magicalFocuses: ["Courage", "Conflict", "Physical Strength"]
+  },
+  {
+      dayOfWeek: "Wednesday",
+      wiccanName: "Woden's Day",
+      correspondingCrystal: ["Amethyst", "Labradorite"],
+      planet: "Mercury",
+      deities: ["Odin", "Hermes", "Mercury"],
+      magicalFocuses: ["Communication", "Wisdom", "Enlightenment"]
+  },
+  {
+      dayOfWeek: "Thursday",
+      wiccanName: "Thor's Day",
+      correspondingCrystal: ["Lapis Lazuli", "Turquoise"],
+      planet: "Jupiter",
+      deities: ["Thor", "Zeus", "Jupiter"],
+      magicalFocuses: ["Growth", "Expansion", "Prosperity"]
+  },
+  {
+      dayOfWeek: "Friday",
+      wiccanName: "Freya's Day",
+      correspondingCrystal: ["Rose Quartz", "Emerald"],
+      planet: "Venus",
+      deities: ["Freya", "Aphrodite", "Venus"],
+      magicalFocuses: ["Love", "Friendship", "Beauty"]
+  },
+  {
+      dayOfWeek: "Saturday",
+      wiccanName: "Saturn's Day",
+      correspondingCrystal: ["Obsidian", "Jet"],
+      planet: "Saturn",
+      deities: ["Saturn", "Cronus"],
+      magicalFocuses: ["Banishing", "Protection", "Reflection"]
+  }
+];
