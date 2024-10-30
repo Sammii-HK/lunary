@@ -22,7 +22,7 @@ export const DateWidget = () => {
   
   return (
     <>
-      <p className="w-full flex justify-center" onClick={() => setIsOpen(true)}>{writtenDate}</p>
+      <p className="w-full flex justify-center cursor-pointer" onClick={() => setIsOpen(!isOpen)}>{writtenDate}</p>
       {isOpen && <LocalizationProvider dateAdapter={AdapterDayjs}>
         <ThemeProvider theme={darkTheme}>
           <DateCalendar views={['day']} value={value} onChange={(newValue) => {
