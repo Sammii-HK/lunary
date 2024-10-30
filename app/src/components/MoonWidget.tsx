@@ -1,5 +1,5 @@
-import { ConstellationPhaseWidget } from "./ConstellationPhaseWidget";
-import { MoonConstellation } from "./MoonConstellation";
+import { ConstellationPhaseWidget } from './ConstellationPhaseWidget';
+import { MoonConstellation } from './MoonConstellation';
 
 export const MoonWidget = () => {
   
@@ -21,5 +21,5 @@ export const MoonWidget = () => {
         </p>
       } */}
     </div>
-  )
+  );
 };

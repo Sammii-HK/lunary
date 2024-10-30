@@ -1,5 +1,5 @@
-"use client";
-import { useAstronomyContext } from "@/context/AstronomyContext";
+'use client';
+import { useAstronomyContext } from '@/context/AstronomyContext';
 
 export const TarotWidget = () => {
   const { currentTarotCard } = useAstronomyContext();
@@ -10,5 +10,5 @@ export const TarotWidget = () => {
       {/* <p className="w-full">{currentTarotCard.keywords.map((keyword: string) => `${keyword} `)}</p> */}
       <p className="mt-3 text-[12px]">{currentTarotCard.information}</p>
     </div>
-  )
-}
+  );
+};

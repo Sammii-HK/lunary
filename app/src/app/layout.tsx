@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
-import { getMoonSymbol } from "../../utils/moon/moonPhases";
+import { getMoonSymbol } from '../../utils/moon/moonPhases';
 
 export const metadata: Metadata = {
   title: `${getMoonSymbol()} Lunary`,
-  description: "Your Lunar Diary",
+  description: 'Your Lunar Diary',
 };
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
-"use client";
-import { useAstronomyContext } from "@/context/AstronomyContext";
-import { useEffect } from "react"
+'use client';
+import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useEffect } from 'react';
 
 export const MoonConstellation = ({
 }: {
@@ -11,5 +11,5 @@ export const MoonConstellation = ({
     <div>
       <p className="self-center">{symbol} {currentMoonPhase} {currentMoonConstellationPosition && <> in {currentMoonConstellationPosition}</>}</p>
     </div>
-  )
-}
+  );
+};
