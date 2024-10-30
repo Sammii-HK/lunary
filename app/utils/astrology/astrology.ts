@@ -103,32 +103,7 @@ export function getObserverLocation(callback: (observer: Observer) => void): voi
   }
 }
 
-export function useAstrologicalPositions(date: Date): AstroChartInformation[] {
-  const [chart, setChart] = useState<AstroChartInformation[]>([]);
-  const [observer, setObserver] = useState<Observer | null>(null);
-
-  useEffect(() => {
-    if (!observer) {
-      getObserverLocation((obs) => setObserver(obs));
-    }
-  }, [observer]);
-
-  useEffect(() => {
-    if (observer) {
-      const positions = planetaryPositions(date, observer);
-      const astrologicalChart = calculateAstrologicalChart(positions);
-      setChart(astrologicalChart);
-    }
-  }, [date, observer]);
-
-  return useMemo(() => chart, [chart]);
-}
-
-export function useCurrentAstrologicalChart(): AstroChartInformation[] {
-  const date = useMemo(() => new Date(), []);
-  return useAstrologicalPositions(date);
-}
-
-export function useAstrologicalChart(date: Date): AstroChartInformation[] {
-  return useAstrologicalPositions(date);
+export function getAstrologicalChart(date: Date, observer: Observer): AstroChartInformation[] {
+  const positions = planetaryPositions(date, observer);
+  return calculateAstrologicalChart(positions);
 }
