@@ -3,7 +3,7 @@ import { MoonWidget } from '../components/MoonWidget';
 import { AstronomyWidget } from '@/components/AstronomyWidget';
 import { DateWidget } from '@/components/DateWidget';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
-import { HoroscopeWidget } from '@/components/HoroscopeWidget';
+// import { HoroscopeWidget } from '@/components/HoroscopeWidget';
 
 export default function Home() {
   return (
