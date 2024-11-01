@@ -3,21 +3,26 @@ import { MoonWidget } from '../components/MoonWidget';
 import { AstronomyWidget } from '@/components/AstronomyWidget';
 import { DateWidget } from '@/components/DateWidget';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
-// import { HoroscopeWidget } from '@/components/HoroscopeWidget';
+import { HoroscopeWidget } from '@/components/HoroscopeWidget';
+// import { Navbar } from '@/components/Navbar';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 lg:p-24">
-      <div className="z-10 max-w-md w-full h-100 items-center justify-between font-mono text-sm gap-4 grid">
-        <AstronomyContextProvider>
-          <DateWidget />
-          <AstronomyWidget />
-          <MoonWidget />
-          <TarotWidget />
-          <HoroscopeWidget />
-        </AstronomyContextProvider>
-      </div>
-    </main>
+    <div className="flex h-full w-full flex-col items-center justify-between gap-4 ">
+      {/* bg-stone-900 bg-neutral-950 */}
+      {/* // <div className="flex max-h-screen min-w-full flex-col z-10 max-w-md w-screen min-h-screen items-center justify-between font-mono text-sm gap-4 overflow-auto"> */}
+      {/* <div className="z-10 max-w-md w-screen min-h-screen items-center justify-between font-mono text-sm gap-4 overflow-auto"> */}
+      {/* <Layout> */}
+      <AstronomyContextProvider>
+        <DateWidget />
+        <AstronomyWidget />
+        <MoonWidget />
+        <TarotWidget />
+        <HoroscopeWidget />
+      </AstronomyContextProvider>
+      {/* </Layout>  */}
+    </div>
+    // </div>
   );
 }
 
