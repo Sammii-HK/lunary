@@ -8,6 +8,7 @@ import Astronomy from './components/Astronomy';
 import Correspondences from './components/Correspondences';
 import Practices from './components/Practices';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 const GrimoireContent = {
   moon: <Moon />,
