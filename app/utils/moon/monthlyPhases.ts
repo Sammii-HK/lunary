@@ -41,4 +41,10 @@ export const monthlyMoonPhases = {
   }
 };
 
+export type MonthlyMoonPhase = {
+  keywords: string[];
+  symbol: string;
+  information: string;
+}
+
 // console.log(moonPhases);
