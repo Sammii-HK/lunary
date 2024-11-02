@@ -10,7 +10,7 @@ export const AstronomyWidget = () => {
   const chart = useAstronomyContext().currentAstrologicalChart;
 
   return (
-    <div className="py-3 px-1 border border-stone-800 rounded-md grid grid-cols-10">
+    <div className="py-3 px-1 border border-stone-800 rounded-md grid grid-cols-10 w-full">
       {!chart.length && <p className="py-3">Loading...</p>}
       {chart && chart.map(({formattedDegree, sign, body}, index) => {
         const isInRetrograde = chart[index].retrograde;
