@@ -23,7 +23,7 @@ export const AstronomyContext = createContext<{
   currentTarotCard: any,
   symbol: string,
   currentDate: string,
-  horoscope: string,
+  // horoscope: string,
     } | null>(null);
 
 export function useAstronomyContext() {
@@ -59,7 +59,7 @@ export const AstronomyContextProvider = ({ children }: { children: React.ReactNo
 
   const natalChart = useMemo(() => getAstrologicalChart(dayjs('1994-01-20').toDate(), natalObserver), [natalObserver]);
   // const natalChart = useAstrologicalChart(dayjs("1994-01-20").toDate());
-  const horoscope = useMemo(() => getHoroscope(currentAstrologicalChart, natalChart), [currentAstrologicalChart, natalChart]);
+  // const horoscope = useMemo(() => getHoroscope(currentAstrologicalChart, natalChart), [currentAstrologicalChart, natalChart]);
 
   useEffect(() => {
     setCurrentDate(currentDateTime.toDateString());
@@ -78,7 +78,7 @@ export const AstronomyContextProvider = ({ children }: { children: React.ReactNo
       currentTarotCard,
       symbol,
       currentDate,
-      horoscope,
+      // horoscope,
     }}>
       {children}
     </AstronomyContext.Provider>
