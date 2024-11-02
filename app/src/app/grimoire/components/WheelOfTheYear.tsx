@@ -1,6 +1,6 @@
-import { wheelOfTheYearSabbats } from "@/constants/sabbats";
+import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 
-const wheelOfTheYear = () => {
+const WheelOfTheYear = () => {
   return (
     <div className="my-3">
       <h1 className="font-bold text-lg mb-4">Wheel of the Year</h1>
@@ -12,7 +12,7 @@ const wheelOfTheYear = () => {
       ))
       }
     </div>
-  )
+  );
 };
 
-export default wheelOfTheYear;
+export default WheelOfTheYear;

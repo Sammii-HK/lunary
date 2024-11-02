@@ -1,10 +1,10 @@
-import { bodiesSymbols, zodiacSymbol } from "../../../../utils/zodiac/zodiac";
+import { bodiesSymbols, zodiacSymbol } from '../../../../utils/zodiac/zodiac';
 
 const Astronomy = () => {
   const planets = Object.keys(bodiesSymbols);
-  const zodiac = Object.keys(zodiacSymbol)
-  console.log("planets", planets);
-  console.log("zodiac", zodiac);
+  const zodiac = Object.keys(zodiacSymbol);
+  console.log('planets', planets);
+  console.log('zodiac', zodiac);
   
   
   return (
@@ -17,7 +17,7 @@ const Astronomy = () => {
           <div key={planet} className="mb-3">
             <h2 className="font-bold">{planet}</h2>
             <p>{bodiesSymbols[planet as keyof typeof bodiesSymbols]}</p>
-            </div>
+          </div>
         ))}
       </div>
       <h2 id="zodiac" className="mb-1 mt-3 font-bold">Zodiac</h2>
@@ -26,7 +26,7 @@ const Astronomy = () => {
           <div key={sign} className="mb-3">
             <h2 className="mb-1">{sign}</h2>
             <p>{zodiacSymbol[sign as keyof typeof zodiacSymbol]}</p>
-            </div>
+          </div>
         ))}
       </div>
     </div>
