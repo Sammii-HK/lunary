@@ -1,4 +1,4 @@
-export const fullMoonsOfYear = {
+export const annualFullMoons = {
   'January': {
     'name': 'Old Moon',
     'description': 'This moon is associated with protection and divination. It\'s a time for planning the year ahead and making decisions based on introspection.'
@@ -47,4 +47,9 @@ export const fullMoonsOfYear = {
     'name': 'Cold Moon',
     'description': 'This moon represents the culmination of the year and is linked to rest, peace, and deep, transformative magic.'
   }
+};
+
+export type FullMoon = {
+  name: string;
+  description: string;
 };
