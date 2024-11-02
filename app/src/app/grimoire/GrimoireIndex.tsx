@@ -26,7 +26,7 @@ const GrimoireIndex = () => {
   return (
     <div className='flex flex-row col-3 justify-between'>
       <div className='mr-9'>
-        <h1 className="text-lg font-bold mb-4 col-span-full">Grimoire</h1>
+        <Link href="/grimoire" className="text-lg font-bold mb-4 col-span-full">Grimoire</Link>
         <p>Search...</p>
         <ul className='col-span-1'>
           {grimoireItems.map((item: string) => (
