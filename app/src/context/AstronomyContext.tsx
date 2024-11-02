@@ -8,7 +8,7 @@ import { getWrittenDate } from '../../utils/date/date';
 import { getTarotCard } from '../../utils/tarot/tarot';
 import { monthlyMoonPhases } from '../../utils/moon/monthlyPhases';
 import { getMoonPhase, MoonPhaseLabels, stringToCamelCase } from '../../utils/moon/moonPhases';
-import { getHoroscope } from '../../utils/astrology/horoscope';
+// import { getHoroscope } from '../../utils/astrology/horoscope';
 import { Observer } from 'astronomy-engine';
 
 export const AstronomyContext = createContext<{
