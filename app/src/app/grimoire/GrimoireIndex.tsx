@@ -21,8 +21,7 @@ const GrimoireContent = {
 
 const GrimoireIndex = () => {
   const item = useSearchParams().get('item');
-  console.log('item', item);
-  
+  const hasSearch = useSearchParams().size > 0;
   
   return (
     <div className='flex flex-row col-3 justify-between'>
@@ -45,7 +44,7 @@ const GrimoireIndex = () => {
           ))}
         </ul>
       </div>
-      {window.location.search && (
+      {hasSearch && (
         <div className='col-span-2 my-9 mx-2 flex-auto'>
           {GrimoireContent[item as keyof typeof GrimoireContent]}
         </div>
