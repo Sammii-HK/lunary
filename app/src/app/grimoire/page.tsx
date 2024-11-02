@@ -14,8 +14,8 @@ const grimoire: { [key: string]: { title: string; contents?: string[] } } = {
     //   'sabbats',
     // ]
   },
-  astrology: {
-    title: 'Astrology',
+  astronomy: {
+    title: 'Astronomy',
     contents: [
       'Planets',
       'Zodiac',
