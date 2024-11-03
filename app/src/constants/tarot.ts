@@ -1,3 +1,4 @@
+// @stylistic/js/max-len: ignore
 export const tarotSuits = {
   wands: {
     name: 'Wands',

@@ -1,3 +1,4 @@
+// @stylistic/js/max-len: ignore
 const getExactDateOfCelestialEvent = (year: number, event: string) => {
   
 };

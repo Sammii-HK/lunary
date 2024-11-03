@@ -1,3 +1,4 @@
+// @stylistic/js/max-len: ignore
 export const runesList = {
   fehu: {
     name: 'Fehu',

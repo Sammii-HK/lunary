@@ -1,3 +1,5 @@
+// @stylistic/js/max-len: ignore
+
 export const annualFullMoons = {
   'January': {
     'name': 'Old Moon',

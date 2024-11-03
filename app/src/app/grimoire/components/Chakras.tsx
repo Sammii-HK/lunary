@@ -1,4 +1,4 @@
-import { chakras } from "@/constants/chakras";
+import { chakras } from '@/constants/chakras';
 
 const Chakras = () => {
   const chakraList = Object.keys(chakras);
