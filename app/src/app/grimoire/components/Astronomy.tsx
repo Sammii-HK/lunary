@@ -16,7 +16,7 @@ const Astronomy = () => {
 
 const AstronomyItems = ({type} : {type: string}) => {
   const items = type === 'zodiac' ? planetSymbols : zodiacSymbol;
-  const content = type === 'zodiac' ? planetaryBodies : zodiacSigns;
+  const content = type === 'zodiac' ? planetaryBodies : zodiacSigns as { [key: string]: Content };
 
   type Content = {
     name: string;
@@ -29,7 +29,7 @@ const AstronomyItems = ({type} : {type: string}) => {
       <h2 className="mb-1 pb-5 font-bold">{type}</h2>
       {Object.keys(items).map((item: string) => (
         <div key={item.toLowerCase()} className="mb-3">
-          <h2 className="font-bold">{items[item as keyof typeof items]} {content[item as keyof typeof content].name}</h2>
+          <h2 className="font-bold">{items[item as keyof typeof items]} {type === 'zodiac' ? (content[item as keyof typeof content] as Content).name : ''}</h2>
           <p>{content[item as keyof typeof content].mysticalProperties}</p>
         </div>
       ))}
