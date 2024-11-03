@@ -16,7 +16,7 @@ const Moon = () => {
           </li>
         ))}
       </ul>
-      <h2 id="full-moon-names" className="text-lg font-bold mb-4 mt-9">Annual Full Moons</h2>
+      <h2 id="full-moon-names" className="text-lg font-bold mb-4 pt-9">Annual Full Moons</h2>
       <ul className='my-3'>
         {fullMoonNames.map((fullMoon: string, index: number) => {
           const moon: FullMoon = annualFullMoons[fullMoon as keyof typeof annualFullMoons];
