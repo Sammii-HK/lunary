@@ -10,6 +10,7 @@ import Practices from './components/Practices';
 import { useSearchParams } from 'next/navigation';
 import Tarot from './components/Tarot';
 import Runes from './components/Runes';
+import Chakras from './components/Chakras';
 
 const GrimoireContent = {
   moon: <Moon />,
@@ -19,6 +20,7 @@ const GrimoireContent = {
   practices: <Practices />,
   tarot: <Tarot />,
   runes: <Runes />,
+  chakras: <Chakras />,
 };
 
 const GrimoireIndex = () => {
