@@ -7,7 +7,7 @@ import WheelOfTheYear from './components/WheelOfTheYear';
 import Astronomy from './components/Astronomy';
 import Correspondences from './components/Correspondences';
 import Practices from './components/Practices';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Tarot from './components/Tarot';
 import Runes from './components/Runes';
 import Chakras from './components/Chakras';
@@ -26,15 +26,19 @@ const GrimoireContent = {
 const GrimoireIndex = () => {
   const item = useSearchParams().get('item');
   const hasSearch = useSearchParams().size > 0;
+  const router = useRouter();
 
   return (
-    <div className='flex flex-row col-3 justify-between'>
-      <div className='mr-9'>
-        <Link href='/grimoire' className='text-lg font-bold mb-4 col-span-full'>
+    <div className='flex flex-row col-3 justify-between h-[93dvh] overflow-auto'>
+      <div className='mr-9 py-8 fixed top-0'>
+        <div
+          onClick={() => router.replace('/grimoire', undefined)}
+          className='cursor-pointer text-lg font-bold mb-4 col-span-full'
+        >
           Grimoire
-        </Link>
+        </div>
         <p>Search...</p>
-        <ul className='col-span-1'>
+        <ul className='overflow-scroll scroll-m-0'>
           {grimoireItems.map((item: string) => (
             <div key={item} className='w-full flex flex-col'>
               <Link
@@ -57,7 +61,7 @@ const GrimoireIndex = () => {
         </ul>
       </div>
       {hasSearch && (
-        <div className='col-span-2 my-9 mx-2 flex-auto'>
+        <div className='col-span-2 pt-4 pb-8 ml-44 flex-auto'>
           {GrimoireContent[item as keyof typeof GrimoireContent]}
         </div>
       )}
