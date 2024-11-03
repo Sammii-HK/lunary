@@ -39,9 +39,7 @@ const AstronomyItems = ({ type }: { type: string }) => {
         <div key={item.toLowerCase()} className='mb-3'>
           <h2 className='font-bold'>
             {items[item as keyof typeof items]}{' '}
-            {type === 'zodiac'
-              ? (content[item as keyof typeof content] as Content).name
-              : ''}
+            {content[item as keyof typeof content].name}
           </h2>
           <p>{content[item as keyof typeof content].mysticalProperties}</p>
         </div>
