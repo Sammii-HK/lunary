@@ -1,34 +1,38 @@
-import { bodiesSymbols, zodiacSymbol } from '../../../../utils/zodiac/zodiac';
+import { planetSymbols, zodiacSigns, zodiacSymbol, planetaryBodies } from '../../../../utils/zodiac/zodiac';
 
 const Astronomy = () => {
-  const planets = Object.keys(bodiesSymbols);
-  const zodiac = Object.keys(zodiacSymbol);
-  console.log('planets', planets);
-  console.log('zodiac', zodiac);
+  const astronomyItems = [
+    'Planets',
+    'Zodiac',
+  ] as const;
   
   
   return (
     <div className="w-full">
-      <h1 className="font-bold text-lg w-full">Astronomy</h1>
-      <h2 id="planets" className="mb-1 mt-3 font-bold">Planets</h2>
-      {/* <div className="flex flex-row flex-wrap"> */}
-      <div className="grid grid-cols-5">
-        {planets.map((planet) => (
-          <div key={planet} className="mb-3">
-            <h2 className="font-bold">{planet}</h2>
-            <p>{bodiesSymbols[planet as keyof typeof bodiesSymbols]}</p>
-          </div>
-        ))}
-      </div>
-      <h2 id="zodiac" className="mb-1 mt-3 font-bold">Zodiac</h2>
-      <div className="grid grid-cols-5">
-        {zodiac.map((sign) => (
-          <div key={sign} className="mb-3">
-            <h2 className="mb-1">{sign}</h2>
-            <p>{zodiacSymbol[sign as keyof typeof zodiacSymbol]}</p>
-          </div>
-        ))}
-      </div>
+      {astronomyItems.map(item => <AstronomyItems key={item} type={item} />)}
+    </div>
+  );
+};
+
+const AstronomyItems = ({type} : {type: string}) => {
+  const items = type === 'zodiac' ? planetSymbols : zodiacSymbol;
+  const content = type === 'zodiac' ? planetaryBodies : zodiacSigns;
+
+  type Content = {
+    name: string;
+    mysticalProperties: string;
+  }
+  
+  return (
+    <div id={type} className="grid grid-cols-1 pb-5">
+      <h2 id="phases my-3" className="text-lg font-bold mb-4">Astronomy</h2>
+      <h2 className="mb-1 pb-5 font-bold">{type}</h2>
+      {Object.keys(items).map((item: string) => (
+        <div key={item.toLowerCase()} className="mb-3">
+          <h2 className="font-bold">{items[item as keyof typeof items]} {content[item as keyof typeof content].name}</h2>
+          <p>{content[item as keyof typeof content].mysticalProperties}</p>
+        </div>
+      ))}
     </div>
   );
 };
