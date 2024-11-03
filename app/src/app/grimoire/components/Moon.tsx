@@ -11,7 +11,7 @@ const Moon = () => {
   const fullMoonNames = Object.keys(annualFullMoons);
   return (
     <div className='h-[91vh] py-3'>
-      <h2 id='phases my-3' className='text-lg font-bold mb-4'>
+      <h2 id='phases' className='text-lg font-bold mb-4'>
         Moon Phases
       </h2>
       <ul>
