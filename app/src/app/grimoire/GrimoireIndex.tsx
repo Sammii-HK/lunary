@@ -9,6 +9,7 @@ import Correspondences from './components/Correspondences';
 import Practices from './components/Practices';
 import { useSearchParams } from 'next/navigation';
 import Tarot from './components/Tarot';
+import Runes from './components/Runes';
 
 const GrimoireContent = {
   moon: <Moon />,
@@ -17,6 +18,7 @@ const GrimoireContent = {
   correspondences: <Correspondences />,
   practices: <Practices />,
   tarot: <Tarot />,
+  runes: <Runes />,
 };
 
 const GrimoireIndex = () => {
