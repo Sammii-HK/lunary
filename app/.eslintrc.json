@@ -9,6 +9,6 @@
     "semi": ["error", "always"],
     "indent": ["error", 2],
     "no-multi-spaces": ["error"],
-    "@stylisitc/js/max-len": ["error", 80]
+    "@stylistic/js/max-len": ["error", 80]
   }
 }
