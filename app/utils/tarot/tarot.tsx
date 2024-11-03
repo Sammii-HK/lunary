@@ -17,7 +17,13 @@ const majorArcana = Object.keys(tarotCards.majorArcana)
 
 const allCardNames = getAllCardNames()
 
-export const getTarotCard = (date: string) => {
+type TarotCard = {
+  name: string;
+  keywords: string[];
+  information: string;
+}
+
+export const getTarotCard = (date: string): TarotCard => {
   const number = getRandomInt(allCardNames.length -1, new Date(date))
   const tarotCard = allCardNames[number]
   const majorArcanaCard = tarotCards.majorArcana[tarotCard as keyof typeof tarotCards.majorArcana]
