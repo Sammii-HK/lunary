@@ -28,27 +28,27 @@ import {
 import { Observer } from 'astronomy-engine';
 
 export const AstronomyContext = createContext<{
-	currentAstrologicalChart: AstroChartInformation[];
-	currentMoonPosition: AstroChartInformation | undefined;
-	currentMoonConstellationPosition: ZodiacSign | undefined;
-	currentMoonConstellation:
-		| (typeof constellations)[keyof typeof constellations]
-		  | undefined;
-	currentDateTime: Date;
-	setCurrentDateTime: (date: Date) => void;
-	currentMoonPhase: MoonPhaseLabels;
-	writtenDate: string;
-	currentTarotCard: any;
-	symbol: string;
-	currentDate: string;
-	// horoscope: string,
-		  } | null>(null);
+  currentAstrologicalChart: AstroChartInformation[];
+  currentMoonPosition: AstroChartInformation | undefined;
+  currentMoonConstellationPosition: ZodiacSign | undefined;
+  currentMoonConstellation:
+    | (typeof constellations)[keyof typeof constellations]
+    | undefined;
+  currentDateTime: Date;
+  setCurrentDateTime: (date: Date) => void;
+  currentMoonPhase: MoonPhaseLabels;
+  writtenDate: string;
+  currentTarotCard: any;
+  symbol: string;
+  currentDate: string;
+  // horoscope: string,
+} | null>(null);
 
 export function useAstronomyContext() {
   const context = useContext(AstronomyContext);
   if (!context) {
     throw new Error(
-      'useAstronomyContext must be used within an AstronomyContextProvider'
+      'useAstronomyContext must be used within an AstronomyContextProvider',
     );
   }
   return context;
@@ -57,16 +57,16 @@ export function useAstronomyContext() {
 export const AstronomyContextProvider = ({
   children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }) => {
   const [currentDateTime, setCurrentDateTime] = useState(dayjs().toDate());
   const [currentDate, setCurrentDate] = useState(
-    currentDateTime.toDateString()
+    currentDateTime.toDateString(),
   );
   console.log('currentDate', currentDate);
 
   const [observer, setObserver] = useState<Observer>(
-    new Observer(51.4769, 0.0005, 0)
+    new Observer(51.4769, 0.0005, 0),
   );
   const natalObserver = observer;
 
@@ -78,39 +78,39 @@ export const AstronomyContextProvider = ({
 
   const currentAstrologicalChart = useMemo(
     () => getAstrologicalChart(currentDateTime, observer),
-    [currentDateTime, observer]
+    [currentDateTime, observer],
   );
   const currentMoonPosition = currentAstrologicalChart.find(
-    ({ body }) => body === 'Moon'
+    ({ body }) => body === 'Moon',
   );
   const currentMoonConstellationPosition = useMemo(
     () => currentMoonPosition?.sign as ZodiacSign,
-    [currentMoonPosition]
+    [currentMoonPosition],
   );
   const currentMoonConstellation = useMemo(
     () =>
       constellations[
-				currentMoonConstellationPosition?.toLowerCase() as keyof typeof constellations
+        currentMoonConstellationPosition?.toLowerCase() as keyof typeof constellations
       ],
-    [currentMoonConstellationPosition]
+    [currentMoonConstellationPosition],
   );
   const currentMoonPhase = getMoonPhase(currentDateTime);
   const writtenDate = useMemo(
     () => getWrittenDate(currentDateTime),
-    [currentDateTime]
+    [currentDateTime],
   );
   const currentTarotCard = useMemo(
     () => getTarotCard(currentDate),
-    [currentDate]
+    [currentDate],
   );
   const symbol =
-		monthlyMoonPhases[
-			stringToCamelCase(currentMoonPhase) as keyof typeof monthlyMoonPhases
-		]?.symbol;
+    monthlyMoonPhases[
+      stringToCamelCase(currentMoonPhase) as keyof typeof monthlyMoonPhases
+    ]?.symbol;
 
   const natalChart = useMemo(
     () => getAstrologicalChart(dayjs('1994-01-20').toDate(), natalObserver),
-    [natalObserver]
+    [natalObserver],
   );
   // const natalChart = useAstrologicalChart(dayjs("1994-01-20").toDate());
   // const horoscope = useMemo(() => getHoroscope(currentAstrologicalChart, natalChart), [currentAstrologicalChart, natalChart]);

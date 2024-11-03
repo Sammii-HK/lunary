@@ -1,5 +1,5 @@
 export const grimoire: {
-	[key: string]: { title: string; contents?: string[] };
+  [key: string]: { title: string; contents?: string[] };
 } = {
   moon: {
     title: 'Moon',

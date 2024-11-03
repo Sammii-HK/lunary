@@ -6,9 +6,13 @@ const Tarot = () => {
     <div>
       <h1 className='text-lg font-bold mb-3'>Tarot</h1>
       {suits.map((suit: string) => (
-        <div key={suit} className="mb-3">
-          <h2 className='font-bold pb-1'>{tarotSuits[suit as keyof typeof tarotSuits].name}</h2>
-          <p>{tarotSuits[suit as keyof typeof tarotSuits].mysticalProperties}</p>
+        <div key={suit} className='mb-3'>
+          <h2 className='font-bold pb-1'>
+            {tarotSuits[suit as keyof typeof tarotSuits].name}
+          </h2>
+          <p>
+            {tarotSuits[suit as keyof typeof tarotSuits].mysticalProperties}
+          </p>
         </div>
       ))}
     </div>

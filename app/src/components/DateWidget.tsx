@@ -19,20 +19,30 @@ export const DateWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState<Dayjs | null>(dayjs());
   const { writtenDate, setCurrentDateTime } = useAstronomyContext();
-  
+
   return (
     <>
-      <p className="w-full flex justify-center cursor-pointer" onClick={() => setIsOpen(!isOpen)}>{writtenDate}</p>
-      {isOpen && <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <ThemeProvider theme={darkTheme}>
-          <DateCalendar views={['day']} value={value} onChange={(newValue) => {
-            setValue(newValue);
-            setCurrentDateTime(newValue.toDate());
-            setIsOpen(false);
-          }} />
-        </ThemeProvider>
-      </LocalizationProvider>
-      }
+      <p
+        className='w-full flex justify-center cursor-pointer'
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {writtenDate}
+      </p>
+      {isOpen && (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <ThemeProvider theme={darkTheme}>
+            <DateCalendar
+              views={['day']}
+              value={value}
+              onChange={(newValue) => {
+                setValue(newValue);
+                setCurrentDateTime(newValue.toDate());
+                setIsOpen(false);
+              }}
+            />
+          </ThemeProvider>
+        </LocalizationProvider>
+      )}
     </>
   );
 };

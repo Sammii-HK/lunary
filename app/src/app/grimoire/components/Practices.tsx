@@ -1,6 +1,6 @@
 const Practices = () => {
   return (
-    <div className="h-[91vh]">
+    <div className='h-[91vh]'>
       <h1>Practices</h1>
       <ul>
         <li>Spells</li>

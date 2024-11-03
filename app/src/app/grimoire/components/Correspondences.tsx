@@ -1,7 +1,7 @@
 const Correspondences = () => {
   return (
-    <div className="h-[91vh]">
-      <h1 className="text-lg font-bold mb-4">Correspondences</h1>
+    <div className='h-[91vh]'>
+      <h1 className='text-lg font-bold mb-4'>Correspondences</h1>
       <ul>
         <li>Elements</li>
         <li>Colors</li>

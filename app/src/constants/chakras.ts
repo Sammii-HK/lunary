@@ -7,7 +7,8 @@ export const chakras = {
     color: 'Red',
     symbol: '🔴',
     properties: 'Grounding, stability, physical energy, survival',
-    mysticalProperties: 'Connects individuals to their physical world, enhances feeling of security and safety.'
+    mysticalProperties:
+      'Connects individuals to their physical world, enhances feeling of security and safety.',
   },
   sacral: {
     name: 'Sacral',
@@ -15,7 +16,8 @@ export const chakras = {
     color: 'Orange',
     symbol: '🟠',
     properties: 'Creativity, sexuality, pleasure, emotional body',
-    mysticalProperties: 'Fosters personal creativity and joy, helps in managing life\'s changes and emotional fluctuations.'
+    mysticalProperties:
+      "Fosters personal creativity and joy, helps in managing life's changes and emotional fluctuations.",
   },
   solarPlexus: {
     name: 'Solar Plexus',
@@ -23,7 +25,8 @@ export const chakras = {
     color: 'Yellow',
     symbol: '🟡',
     properties: 'Self-esteem, willpower, self-discipline',
-    mysticalProperties: 'Increases confidence and the ability to assert personal power in a balanced manner.'
+    mysticalProperties:
+      'Increases confidence and the ability to assert personal power in a balanced manner.',
   },
   heart: {
     name: 'Heart',
@@ -31,7 +34,8 @@ export const chakras = {
     color: 'Green',
     symbol: '🟢',
     properties: 'Love, healing, inner peace',
-    mysticalProperties: 'Enhances the capacity to love others and oneself, brings healing and peace.'
+    mysticalProperties:
+      'Enhances the capacity to love others and oneself, brings healing and peace.',
   },
   throat: {
     name: 'Throat',
@@ -39,7 +43,8 @@ export const chakras = {
     color: 'Blue',
     symbol: '🔵',
     properties: 'Communication, expression, truth',
-    mysticalProperties: 'Facilitates honest and clear communication from the heart.'
+    mysticalProperties:
+      'Facilitates honest and clear communication from the heart.',
   },
   thirdEye: {
     name: 'Third Eye',
@@ -47,7 +52,8 @@ export const chakras = {
     color: 'Indigo',
     symbol: '🟣',
     properties: 'Intuition, insight, mental ability',
-    mysticalProperties: 'Promotes intuition and the ability to sense beyond the tangible world.'
+    mysticalProperties:
+      'Promotes intuition and the ability to sense beyond the tangible world.',
   },
   crown: {
     name: 'Crown',
@@ -55,6 +61,7 @@ export const chakras = {
     color: 'Violet',
     symbol: '🟪',
     properties: 'Spirituality, enlightenment, consciousness',
-    mysticalProperties: 'Connects individual with the universe, fostering spiritual openness and enlightenment.'
-  }
+    mysticalProperties:
+      'Connects individual with the universe, fostering spiritual openness and enlightenment.',
+  },
 };
