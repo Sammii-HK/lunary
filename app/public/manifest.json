@@ -1,0 +1,7 @@
+{
+  "name": "Lunary, your lunar diary and ephemeris",
+  "short_name": "Lunary",
+  "description": "The home of your book of shadows, lunar diary, grimoire and ephemeris",
+  "start_url": "/",
+  "display": "standalone"
+}
