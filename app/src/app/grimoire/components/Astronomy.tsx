@@ -10,6 +10,9 @@ const Astronomy = () => {
 
   return (
     <div className='w-full'>
+      <h2 id='astronomy' className='pt-12 text-lg font-bold'>
+        Astronomy
+      </h2>
       {astronomyItems.map((item) => (
         <AstronomyItems key={item} type={item} />
       ))}
@@ -18,11 +21,15 @@ const Astronomy = () => {
 };
 
 const AstronomyItems = ({ type }: { type: string }) => {
-  const items = type === 'zodiac' ? planetSymbols : zodiacSymbol;
-  const content =
-    type === 'zodiac'
-      ? planetaryBodies
-      : (zodiacSigns as { [key: string]: Content });
+  const items = type === 'Zodiac' ? zodiacSymbol : planetSymbols;
+  type AstronomyItem = {
+    name: string;
+    mysticalProperties: string;
+    properties?: string;
+    dates?: string;
+    element?: string;
+  };
+  const content = type === 'Zodiac' ? zodiacSigns : planetaryBodies;
 
   type Content = {
     name: string;
@@ -30,18 +37,22 @@ const AstronomyItems = ({ type }: { type: string }) => {
   };
 
   return (
-    <div id={type} className='grid grid-cols-1 pb-5'>
-      <h2 id='phases my-3' className='text-lg font-bold mb-4'>
-        Astronomy
+    <div className='grid grid-cols-1 pb-5'>
+      <h2 id={type.toLowerCase()} className='mt-1 py-5 font-bold'>
+        {type}
       </h2>
-      <h2 className='mb-1 pb-5 font-bold'>{type}</h2>
       {Object.keys(items).map((item: string) => (
         <div key={item.toLowerCase()} className='mb-3'>
           <h2 className='font-bold'>
             {items[item as keyof typeof items]}{' '}
-            {content[item as keyof typeof content].name}
+            {(content[item as keyof typeof content] as AstronomyItem).name}
           </h2>
-          <p>{content[item as keyof typeof content].mysticalProperties}</p>
+          <p>
+            {
+              (content[item as keyof typeof content] as AstronomyItem)
+                .mysticalProperties
+            }
+          </p>
         </div>
       ))}
     </div>

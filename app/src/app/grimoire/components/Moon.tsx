@@ -10,8 +10,8 @@ const Moon = () => {
   const moonPhases = Object.keys(monthlyMoonPhases);
   const fullMoonNames = Object.keys(annualFullMoons);
   return (
-    <div className='h-[91vh] py-3'>
-      <h2 id='phases' className='text-lg font-bold mb-4'>
+    <div className='h-[91vh]'>
+      <h2 id='phases' className='text-lg font-bold mb-4 pt-12'>
         Moon Phases
       </h2>
       <ul>
@@ -22,7 +22,7 @@ const Moon = () => {
           </li>
         ))}
       </ul>
-      <h2 id='full-moon-names' className='text-lg font-bold mb-4 pt-9'>
+      <h2 id='full-moon-names' className='text-lg font-bold mb-4 pt-12'>
         Annual Full Moons
       </h2>
       <ul className='my-3'>

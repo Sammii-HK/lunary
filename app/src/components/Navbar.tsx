@@ -4,8 +4,8 @@ import Link from 'next/link';
 export const Navbar = () => {
   return (
     <>
-      <nav className='sticky bottom-0 w-full h-fit border-stone-800 border-t border-spacing-5 flex justify-center bg-stone-950 bg-neutral-950'>
-        <ul className='flex justify-around my-1 pb-1 w-full lg:w-[50dvw]'>
+      <nav className='sticky bottom-0 w-full h-fit border-stone-800 border-t border-spacing-5 flex justify-center bg-zinc-950'>
+        <ul className='flex justify-around my-1 pb-1 w-full lg:w-[50dvw] text-white'>
           <li>
             <Link
               href='/'

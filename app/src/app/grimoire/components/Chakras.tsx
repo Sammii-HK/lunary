@@ -4,7 +4,7 @@ const Chakras = () => {
   const chakraList = Object.keys(chakras);
   return (
     <div>
-      <h1 className='text-lg font-bold mb-3'>Chakras</h1>
+      <h1 className='text-lg font-bold mb-3 pt-12'>Chakras</h1>
       {chakraList.map((chakra: string) => (
         <div key={chakra} className='mb-3'>
           <h2 className='font-bold pb-1'>

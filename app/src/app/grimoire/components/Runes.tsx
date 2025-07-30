@@ -4,7 +4,7 @@ const Runes = () => {
   const runes = Object.keys(runesList);
   return (
     <div>
-      <h1 className='text-lg font-bold mb-3'>Runes</h1>
+      <h1 className='text-lg font-bold mb-3 pt-12'>Runes</h1>
       {runes.map((rune: string) => (
         <div key={rune} className='mb-3'>
           <h2 className='font-bold pb-1'>
