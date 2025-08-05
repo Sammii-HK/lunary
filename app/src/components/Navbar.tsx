@@ -1,4 +1,4 @@
-import { BookMarked, Eclipse, Notebook, Sparkles } from 'lucide-react';
+import { BookMarked, Eclipse, Notebook, Sparkles, User } from 'lucide-react';
 import Link from 'next/link';
 
 export const Navbar = () => {
@@ -36,6 +36,14 @@ export const Navbar = () => {
               className='flex items-center columns-1 cursor-pointer p-2'
             >
               <Notebook />
+            </Link>
+          </li>
+          <li>
+            <Link
+              href='/profile'
+              className='flex items-center columns-1 cursor-pointer p-2'
+            >
+              <User />
             </Link>
           </li>
         </ul>
