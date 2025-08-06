@@ -27,10 +27,20 @@ export const grimoire: {
   },
   numerology: {
     title: 'Numerology',
-    contents: ['Core Numbers', 'Master Numbers', 'Planetary Days', 'Calculations'],
+    contents: [
+      'Core Numbers',
+      'Master Numbers',
+      'Planetary Days',
+      'Calculations',
+    ],
   },
   crystals: {
     title: 'Crystals',
+    contents: [
+      'Daily Selection',
+      'Crystal Categories',
+      'Working with Crystals',
+    ],
   },
   correspondences: {
     title: 'Correspondences',

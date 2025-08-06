@@ -12,6 +12,7 @@ import Tarot from './components/Tarot';
 import Runes from './components/Runes';
 import Chakras from './components/Chakras';
 import { Numerology } from './components/Numerology';
+import Crystals from './components/Crystals';
 import { stringToKebabCase } from '../../../utils/string';
 import { scrollToTop } from '../../../utils/scroll';
 
@@ -25,6 +26,7 @@ const GrimoireContent = {
   runes: <Runes />,
   chakras: <Chakras />,
   numerology: <Numerology />,
+  crystals: <Crystals />,
 };
 
 const GrimoireIndex = () => {
