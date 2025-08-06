@@ -33,79 +33,12 @@ export default function HoroscopePage() {
       </h1>
 
       {/* Enhanced Daily Horoscope Widget */}
-      <div className='space-y-4'>
+      {/* <div className='space-y-4'>
         <h2 className='text-lg font-semibold text-purple-400'>
           Today&apos;s Cosmic Guidance
         </h2>
         <HoroscopeWidget />
-      </div>
-
-      {/* Cosmic Profile Section */}
-      <div className='bg-zinc-800 rounded-lg p-4'>
-        <h2 className='text-lg font-semibold text-blue-400 mb-3'>
-          Your Cosmic Profile
-        </h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <h3 className='font-medium text-yellow-400 mb-2'>Sun Sign</h3>
-            <p className='text-xl font-semibold'>{horoscope.sunSign}</p>
-            {userBirthday && (
-              <p className='text-sm text-zinc-400 mt-1'>
-                Born {new Date(userBirthday).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-          <div>
-            <h3 className='font-medium text-yellow-400 mb-2'>
-              Current Moon Phase
-            </h3>
-            <p className='text-xl font-semibold'>{horoscope.moonPhase}</p>
-            <p className='text-sm text-zinc-400 mt-1'>
-              Influencing your emotional energy
-            </p>
-          </div>
-        </div>
-
-        {/* Birth Chart Summary */}
-        {birthChart && birthChart.length > 0 && (
-          <div className='mt-4 pt-4 border-t border-zinc-700'>
-            <h3 className='font-medium text-blue-400 mb-3'>
-              Your Birth Chart Highlights
-            </h3>
-            <div className='grid grid-cols-3 gap-4 text-center'>
-              {birthChart.find((p) => p.body === 'Sun') && (
-                <div>
-                  <p className='text-xs text-zinc-400'>Sun</p>
-                  <p className='text-sm font-medium text-yellow-400'>
-                    {birthChart.find((p) => p.body === 'Sun')?.sign}
-                  </p>
-                  <p className='text-xs text-zinc-500'>
-                    Identity & Life Purpose
-                  </p>
-                </div>
-              )}
-              {birthChart.find((p) => p.body === 'Moon') && (
-                <div>
-                  <p className='text-xs text-zinc-400'>Moon</p>
-                  <p className='text-sm font-medium text-blue-400'>
-                    {birthChart.find((p) => p.body === 'Moon')?.sign}
-                  </p>
-                  <p className='text-xs text-zinc-500'>Emotions & Intuition</p>
-                </div>
-              )}
-              {birthChart.find((p) => p.body === 'Ascendant') && (
-                <div>
-                  <p className='text-xs text-zinc-400'>Rising</p>
-                  <p className='text-sm font-medium text-purple-400'>
-                    {birthChart.find((p) => p.body === 'Ascendant')?.sign}
-                  </p>
-                  <p className='text-xs text-zinc-500'>Outer Personality</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      </div> */}
 
       {/* Daily Guidance */}
       <div className='bg-zinc-800 rounded-lg p-4'>
