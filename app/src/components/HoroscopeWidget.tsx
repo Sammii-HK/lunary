@@ -708,6 +708,7 @@ export const HoroscopeWidget = () => {
 
   return (
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+{/* 
       <div className='flex justify-center items-center gap-3 mb-3'>
         {primaryTransit && (
           <div className='text-center'>
@@ -736,7 +737,7 @@ export const HoroscopeWidget = () => {
             <div className='text-xs text-zinc-400'>{moonTransit.sign}</div>
           </div>
         )}
-      </div>
+      </div> */}
 
       <div className='text-center text-sm text-zinc-300 leading-relaxed mb-3 max-h-48 overflow-y-auto'>
         {horoscope}
