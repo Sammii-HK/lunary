@@ -6,7 +6,13 @@ import {
   generateBirthChart,
   saveBirthChartToProfile,
   hasBirthChart,
+  getBirthChartFromProfile,
 } from '../../../utils/astrology/birthChart';
+import {
+  savePersonalCardToProfile,
+  hasPersonalCard,
+  getPersonalCardFromProfile,
+} from '../../../utils/tarot/personalCard';
 
 export default function ProfilePage() {
   const { me } = useAccount();
@@ -36,21 +42,40 @@ export default function ProfilePage() {
     }
   }, [me?.profile]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (me?.profile) {
       try {
         // Actually save to Jazz profile
         (me.profile as any).name = name;
         (me.profile as any).birthday = birthday;
 
-        // Generate and save birth chart if birthday is provided and chart doesn't exist
+        // Generate and save cosmic data if birthday is provided
         if (birthday) {
+          console.log('Profile before cosmic data generation:', me.profile);
+
           const hasExistingChart = hasBirthChart(me.profile);
+          const hasExistingPersonalCard = hasPersonalCard(me.profile);
+
+          console.log('Cosmic data check:', {
+            hasChart: hasExistingChart,
+            hasPersonalCard: hasExistingPersonalCard,
+            birthday,
+            name,
+          });
 
           if (!hasExistingChart) {
+            console.log('Generating birth chart...');
             const birthChart = generateBirthChart(birthday);
-            saveBirthChartToProfile(me.profile, birthChart);
+            await saveBirthChartToProfile(me.profile, birthChart);
+          }
+
+          if (!hasExistingPersonalCard) {
+            console.log('Generating personal card for:', name, birthday);
+            await savePersonalCardToProfile(me.profile, birthday, name);
+            console.log('Personal card generation completed');
+            console.log('Profile after personal card save:', me.profile);
           } else {
+            console.log('Personal card already exists, skipping generation');
           }
         }
 
@@ -138,12 +163,180 @@ export default function ProfilePage() {
         )}
       </div>
 
+      {/* Cosmic Data Sections */}
+      {!isEditing && birthday && (
+        <>
+          {/* Personal Card Section */}
+          <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+            <h3 className='text-lg font-semibold text-purple-400 mb-3'>
+              Your Personal Card
+            </h3>
+            {(() => {
+              console.log('Checking personal card in profile render...');
+              const personalCard = getPersonalCardFromProfile(me?.profile);
+              console.log('Personal card retrieved:', personalCard);
+              if (personalCard) {
+                return (
+                  <div className='space-y-3'>
+                    <div className='text-center'>
+                      <h4 className='font-bold text-white text-lg'>
+                        {personalCard.name}
+                      </h4>
+                      <p className='text-sm text-purple-300'>
+                        {personalCard.keywords.slice(0, 3).join(' • ')}
+                      </p>
+                    </div>
+                    <p className='text-sm text-zinc-300'>
+                      {personalCard.information}
+                    </p>
+                    <p className='text-xs text-zinc-500 italic'>
+                      {personalCard.reason}
+                    </p>
+                  </div>
+                );
+              }
+              return (
+                <p className='text-zinc-400'>
+                  Calculating your personal card...
+                </p>
+              );
+            })()}
+          </div>
+
+          {/* Cosmic Profile Section */}
+          <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+            <h3 className='text-lg font-semibold text-blue-400 mb-3'>
+              Your Cosmic Profile
+            </h3>
+            {(() => {
+              const birthChart = getBirthChartFromProfile(me?.profile);
+              if (birthChart && birthChart.length > 0) {
+                const sunSign = birthChart.find((p) => p.body === 'Sun')?.sign;
+                const moonSign = birthChart.find(
+                  (p) => p.body === 'Moon',
+                )?.sign;
+                const risingSign = birthChart.find(
+                  (p) => p.body === 'Ascendant',
+                )?.sign;
+                const mercury = birthChart.find(
+                  (p) => p.body === 'Mercury',
+                )?.sign;
+                const venus = birthChart.find((p) => p.body === 'Venus')?.sign;
+                const mars = birthChart.find((p) => p.body === 'Mars')?.sign;
+
+                return (
+                  <div className='space-y-4'>
+                    {/* Big Three */}
+                    <div>
+                      <h4 className='text-sm font-medium text-zinc-300 mb-2'>
+                        The Big Three
+                      </h4>
+                      <div className='grid grid-cols-3 gap-2 text-center'>
+                        {sunSign && (
+                          <div>
+                            <p className='text-xs text-zinc-400'>Sun</p>
+                            <p className='text-sm font-medium text-yellow-400'>
+                              {sunSign}
+                            </p>
+                            <p className='text-xs text-zinc-500'>Identity</p>
+                          </div>
+                        )}
+                        {moonSign && (
+                          <div>
+                            <p className='text-xs text-zinc-400'>Moon</p>
+                            <p className='text-sm font-medium text-blue-400'>
+                              {moonSign}
+                            </p>
+                            <p className='text-xs text-zinc-500'>Emotions</p>
+                          </div>
+                        )}
+                        {risingSign && (
+                          <div>
+                            <p className='text-xs text-zinc-400'>Rising</p>
+                            <p className='text-sm font-medium text-purple-400'>
+                              {risingSign}
+                            </p>
+                            <p className='text-xs text-zinc-500'>Personality</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Personal Planets */}
+                    <div>
+                      <h4 className='text-sm font-medium text-zinc-300 mb-2'>
+                        Personal Planets
+                      </h4>
+                      <div className='grid grid-cols-3 gap-2 text-center'>
+                        {mercury && (
+                          <div>
+                            <p className='text-xs text-zinc-400'>Mercury</p>
+                            <p className='text-sm font-medium text-green-400'>
+                              {mercury}
+                            </p>
+                            <p className='text-xs text-zinc-500'>
+                              Communication
+                            </p>
+                          </div>
+                        )}
+                        {venus && (
+                          <div>
+                            <p className='text-xs text-zinc-400'>Venus</p>
+                            <p className='text-sm font-medium text-pink-400'>
+                              {venus}
+                            </p>
+                            <p className='text-xs text-zinc-500'>
+                              Love & Beauty
+                            </p>
+                          </div>
+                        )}
+                        {mars && (
+                          <div>
+                            <p className='text-xs text-zinc-400'>Mars</p>
+                            <p className='text-sm font-medium text-red-400'>
+                              {mars}
+                            </p>
+                            <p className='text-xs text-zinc-500'>
+                              Action & Drive
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Links */}
+                    <div className='flex justify-between text-xs'>
+                      <a
+                        href='/birth-chart'
+                        className='text-blue-400 hover:text-blue-300 underline'
+                      >
+                        View Full Birth Chart →
+                      </a>
+                      <a
+                        href='/horoscope'
+                        className='text-purple-400 hover:text-purple-300 underline'
+                      >
+                        Today&apos;s Horoscope →
+                      </a>
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <p className='text-zinc-400'>
+                  Calculating your cosmic profile...
+                </p>
+              );
+            })()}
+          </div>
+        </>
+      )}
+
       <div className='text-sm text-zinc-400 text-center max-w-md'>
         <p>
-          Your profile information is stored securely and encrypted. It is
-          completely optional but providing this information allows us to create
-          a more personalized experience for you, with custom tarot readings,
-          custom horoscopes, and a birth chart.
+          Your cosmic profile information is stored securely and encrypted. This
+          includes your personal tarot card and birth chart data, which create a
+          personalized spiritual experience with custom readings and insights.
         </p>
       </div>
     </div>

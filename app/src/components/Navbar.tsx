@@ -31,7 +31,7 @@ export const Navbar = () => {
           </li>
           <li>
             <Link
-              href='/birth-chart'
+              href='/horoscope'
               className='flex items-center columns-1 cursor-pointer p-2'
             >
               <Circle />

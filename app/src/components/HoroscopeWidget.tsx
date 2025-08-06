@@ -708,7 +708,7 @@ export const HoroscopeWidget = () => {
 
   return (
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
-{/* 
+      {/* 
       <div className='flex justify-center items-center gap-3 mb-3'>
         {primaryTransit && (
           <div className='text-center'>

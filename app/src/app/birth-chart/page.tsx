@@ -389,7 +389,9 @@ const getChartPatterns = (birthChart: BirthChartData[]): ChartPattern[] => {
     const squarePlanets = new Set(
       squares.flatMap((s) => [s.planet1, s.planet2]),
     );
-    const crossPlanets = new Set([...oppositionPlanets, ...squarePlanets]);
+    const crossPlanets = new Set(
+      Array.from(oppositionPlanets).concat(Array.from(squarePlanets)),
+    );
 
     if (crossPlanets.size >= 4) {
       patterns.push({

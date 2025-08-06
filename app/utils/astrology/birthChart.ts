@@ -45,18 +45,37 @@ export const generateBirthChart = (
   return birthChartData;
 };
 
-export const saveBirthChartToProfile = (
+export const saveBirthChartToProfile = async (
   profile: any,
   birthChart: BirthChartData[],
-): void => {
+): Promise<void> => {
   try {
     console.log('Attempting to save birth chart:', birthChart);
 
-    // Store as JSON string (simpler for Jazz)
-    const birthChartJson = JSON.stringify(birthChart);
-    profile.birthChartData = birthChartJson;
+    // Import the schema
+    const { BirthChart, BirthChartPlanet } = await import('../../schema');
+    
+    // Create birth chart as CoValue list
+    const birthChartCoValue = BirthChart.create([], profile._owner || profile);
+    
+    // Create and add each planet as a CoMap
+    for (const planet of birthChart) {
+      const planetCoValue = BirthChartPlanet.create({
+        body: planet.body,
+        sign: planet.sign,
+        degree: planet.degree,
+        minute: planet.minute,
+        eclipticLongitude: planet.eclipticLongitude,
+        retrograde: planet.retrograde,
+      }, profile._owner || profile);
+      
+      birthChartCoValue.push(planetCoValue);
+    }
+    
+    // Save to profile
+    profile.birthChart = birthChartCoValue;
 
-    console.log('Birth chart saved as JSON string');
+    console.log('Birth chart saved as CoValue');
   } catch (error) {
     console.error('Error saving birth chart to profile:', error);
     if (error instanceof Error) {
@@ -70,11 +89,27 @@ export const getBirthChartFromProfile = (
   profile: any,
 ): BirthChartData[] | null => {
   try {
-    if (!profile?.birthChartData) return null;
+    if (!profile?.birthChart) return null;
 
-    // Parse from JSON string
-    const birthChart = JSON.parse(profile.birthChartData);
-    return birthChart as BirthChartData[];
+    // Convert CoValue list to BirthChartData array
+    const birthChartCoValue = profile.birthChart;
+    const birthChart: BirthChartData[] = [];
+    
+    for (let i = 0; i < birthChartCoValue.length; i++) {
+      const planet = birthChartCoValue[i];
+      if (planet) {
+        birthChart.push({
+          body: planet.body,
+          sign: planet.sign,
+          degree: planet.degree,
+          minute: planet.minute,
+          eclipticLongitude: planet.eclipticLongitude,
+          retrograde: planet.retrograde,
+        });
+      }
+    }
+    
+    return birthChart;
   } catch (error) {
     console.error('Error retrieving birth chart from profile:', error);
     return null;
@@ -82,10 +117,11 @@ export const getBirthChartFromProfile = (
 };
 
 export const hasBirthChart = (profile: any): boolean => {
-  const result = !!profile?.birthChartData;
+  const result = !!profile?.birthChart && profile.birthChart.length > 0;
   console.log('hasBirthChart check:', {
     profile: !!profile,
-    birthChartData: !!profile?.birthChartData,
+    birthChart: !!profile?.birthChart,
+    length: profile?.birthChart?.length,
     result,
   });
   return result;
