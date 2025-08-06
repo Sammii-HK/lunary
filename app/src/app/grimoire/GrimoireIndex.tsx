@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Tarot from './components/Tarot';
 import Runes from './components/Runes';
 import Chakras from './components/Chakras';
+import { Numerology } from './components/Numerology';
 import { stringToKebabCase } from '../../../utils/string';
 import { scrollToTop } from '../../../utils/scroll';
 
@@ -23,6 +24,7 @@ const GrimoireContent = {
   tarot: <Tarot />,
   runes: <Runes />,
   chakras: <Chakras />,
+  numerology: <Numerology />,
 };
 
 const GrimoireIndex = () => {

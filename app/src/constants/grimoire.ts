@@ -25,6 +25,10 @@ export const grimoire: {
   chakras: {
     title: 'Chakras',
   },
+  numerology: {
+    title: 'Numerology',
+    contents: ['Core Numbers', 'Master Numbers', 'Planetary Days', 'Calculations'],
+  },
   crystals: {
     title: 'Crystals',
   },
