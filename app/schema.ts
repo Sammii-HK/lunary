@@ -30,6 +30,18 @@ export const PersonalCard = co.map({
 // Birth Chart Schema (list of planets)
 export const BirthChart = co.list(BirthChartPlanet);
 
+// Subscription Schema
+export const Subscription = co.map({
+  status: z.enum(['free', 'trial', 'active', 'cancelled', 'past_due']),
+  plan: z.enum(['free', 'monthly', 'yearly']),
+  stripeCustomerId: z.string().optional(),
+  stripeSubscriptionId: z.string().optional(),
+  currentPeriodEnd: z.string().optional(),
+  trialEndsAt: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
 export const AccountRoot = co.map({
   notes: co.list(NoteItem),
 });
@@ -41,5 +53,6 @@ export const MyAppAccount = co.account({
     birthday: z.string(),
     birthChart: BirthChart.optional(),
     personalCard: PersonalCard.optional(),
+    subscription: Subscription.optional(),
   }),
 });

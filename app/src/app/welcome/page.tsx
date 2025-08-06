@@ -36,14 +36,17 @@ export default function WelcomePage() {
         <Link href="/" className="text-2xl font-light text-white tracking-wide">
           Lunary
         </Link>
-        <div className="flex space-x-6">
-          <Link href="/" className="text-zinc-300 hover:text-white transition-colors">
-            Daily Insights
-          </Link>
-          <Link href="/profile" className="text-zinc-300 hover:text-white transition-colors">
-            Get Started
-          </Link>
-        </div>
+                 <div className="flex space-x-6">
+           <Link href="/pricing" className="text-zinc-300 hover:text-white transition-colors">
+             Pricing
+           </Link>
+           <Link href="/" className="text-zinc-300 hover:text-white transition-colors">
+             Daily Insights
+           </Link>
+           <Link href="/profile" className="text-zinc-300 hover:text-white transition-colors">
+             Get Started
+           </Link>
+         </div>
       </nav>
 
       {/* Hero Section */}
