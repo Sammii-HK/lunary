@@ -26,6 +26,7 @@ import {
 } from '../../utils/moon/moonPhases';
 // import { getHoroscope } from '../../utils/astrology/horoscope';
 import { Observer } from 'astronomy-engine';
+import { useAccount } from 'jazz-tools/react';
 
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
@@ -59,11 +60,13 @@ export const AstronomyContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { me } = useAccount();
+  const userName = (me?.profile as any)?.name;
+
   const [currentDateTime, setCurrentDateTime] = useState(dayjs().toDate());
   const [currentDate, setCurrentDate] = useState(
     currentDateTime.toDateString(),
   );
-  console.log('currentDate', currentDate);
 
   const [observer, setObserver] = useState<Observer>(
     new Observer(51.4769, 0.0005, 0),
@@ -100,8 +103,8 @@ export const AstronomyContextProvider = ({
     [currentDateTime],
   );
   const currentTarotCard = useMemo(
-    () => getTarotCard(currentDate),
-    [currentDate],
+    () => getTarotCard(currentDate, userName),
+    [currentDate, userName],
   );
   const symbol =
     monthlyMoonPhases[
@@ -109,7 +112,7 @@ export const AstronomyContextProvider = ({
     ]?.symbol;
 
   const natalChart = useMemo(
-    () => getAstrologicalChart(dayjs('1994-01-20').toDate(), natalObserver),
+    () => getAstrologicalChart(dayjs('2000-01-01').toDate(), natalObserver),
     [natalObserver],
   );
   // const natalChart = useAstrologicalChart(dayjs("1994-01-20").toDate());

@@ -2,6 +2,11 @@
 
 import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect } from 'react';
+import {
+  generateBirthChart,
+  saveBirthChartToProfile,
+  hasBirthChart,
+} from '../../../utils/astrology/birthChart';
 
 export default function ProfilePage() {
   const { me } = useAccount();
@@ -37,7 +42,18 @@ export default function ProfilePage() {
         // Actually save to Jazz profile
         (me.profile as any).name = name;
         (me.profile as any).birthday = birthday;
-        console.log('Profile saved to Jazz:', { name, birthday });
+
+        // Generate and save birth chart if birthday is provided and chart doesn't exist
+        if (birthday) {
+          const hasExistingChart = hasBirthChart(me.profile);
+
+          if (!hasExistingChart) {
+            const birthChart = generateBirthChart(birthday);
+            saveBirthChartToProfile(me.profile, birthChart);
+          } else {
+          }
+        }
+
         setIsEditing(false);
       } catch (error) {
         console.error('Error saving profile:', error);
