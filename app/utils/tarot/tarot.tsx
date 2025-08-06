@@ -4,8 +4,9 @@ import seed from 'seed-random';
 type TarotSuit = 'cups' | 'swords' | 'wands' | 'pentacles';
 
 const tarotSuits = ['cups', 'swords', 'wands', 'pentacles'];
-const getRandomInt = (max: number, currentDate: Date) => {
-  const rand = seed('Sammii' + currentDate);
+const getRandomInt = (max: number, currentDate: Date, userName?: string) => {
+  const seedValue = (userName || 'Guest') + currentDate;
+  const rand = seed(seedValue);
   return Math.floor(rand() * max);
 };
 
@@ -27,8 +28,8 @@ type TarotCard = {
   information: string;
 };
 
-export const getTarotCard = (date: string): TarotCard => {
-  const number = getRandomInt(allCardNames.length - 1, new Date(date));
+export const getTarotCard = (date: string, userName?: string): TarotCard => {
+  const number = getRandomInt(allCardNames.length - 1, new Date(date), userName);
   const tarotCard = allCardNames[number];
   const majorArcanaCard =
     tarotCards.majorArcana[tarotCard as keyof typeof tarotCards.majorArcana];
