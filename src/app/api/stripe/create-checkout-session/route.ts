@@ -22,6 +22,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Build base URL from request if env not set
+    const originFromRequest = new URL(request.url).origin;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || originFromRequest;
+
     // Get the price to determine trial period
     const price = await stripe.prices.retrieve(priceId);
     const isMonthly = price.recurring?.interval === 'month';
@@ -38,8 +42,8 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/pricing`,
       subscription_data: {
         trial_period_days: trialDays,
         metadata: {
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       priceId,
-      baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+      baseUrl: process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin,
       hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
     });
     return NextResponse.json(
