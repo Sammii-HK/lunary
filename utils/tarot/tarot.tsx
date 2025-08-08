@@ -1,4 +1,4 @@
-import { tarotCards } from '../../utils/tarot/tarot-cards';
+import { tarotCards } from './tarot-cards';
 import seed from 'seed-random';
 
 type TarotSuit = 'cups' | 'swords' | 'wands' | 'pentacles';
@@ -29,7 +29,11 @@ type TarotCard = {
 };
 
 export const getTarotCard = (date: string, userName?: string): TarotCard => {
-  const number = getRandomInt(allCardNames.length - 1, new Date(date), userName);
+  const number = getRandomInt(
+    allCardNames.length - 1,
+    new Date(date),
+    userName,
+  );
   const tarotCard = allCardNames[number];
   const majorArcanaCard =
     tarotCards.majorArcana[tarotCard as keyof typeof tarotCards.majorArcana];
