@@ -3,29 +3,33 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'jazz-tools/react';
-import { PRICING_PLANS, hasFeatureAccess, getTrialDaysRemaining } from '../../../utils/pricing';
+import {
+  PRICING_PLANS,
+  hasFeatureAccess,
+  getTrialDaysRemaining,
+} from '../../../utils/pricing';
 import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
 import { Check, Star, Zap } from 'lucide-react';
 
 export default function PricingPage() {
   const { me } = useAccount();
   const [loading, setLoading] = useState<string | null>(null);
-  
+
   const subscription = (me?.profile as any)?.subscription;
   const subscriptionStatus = subscription?.status || 'free';
   const trialDaysRemaining = getTrialDaysRemaining(subscription?.trialEndsAt);
 
   const handleSubscribe = async (priceId: string, planId: string) => {
     if (!priceId) return;
-    
+
     setLoading(planId);
-    
+
     try {
       const { sessionId } = await createCheckoutSession(
-        priceId, 
-        subscription?.stripeCustomerId
+        priceId,
+        subscription?.stripeCustomerId,
       );
-      
+
       const stripe = await stripePromise;
       if (stripe) {
         await stripe.redirectToCheckout({ sessionId });
@@ -39,28 +43,28 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-purple-900/20 to-zinc-900">
+    <div className='min-h-screen bg-gradient-to-br from-zinc-900 via-purple-900/20 to-zinc-900'>
       {/* Header */}
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="text-center space-y-6">
-          <h1 className="text-4xl md:text-6xl font-light text-white leading-tight">
+      <div className='max-w-6xl mx-auto px-6 py-12'>
+        <div className='text-center space-y-6'>
+          <h1 className='text-4xl md:text-6xl font-light text-white leading-tight'>
             Choose Your
             <br />
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
               Cosmic Journey
             </span>
           </h1>
-          
-          <p className="text-xl text-zinc-300 max-w-2xl mx-auto">
-            Unlock the full power of personalized astrology with complete birth chart analysis, 
-            daily insights, and meaningful spiritual guidance.
+
+          <p className='text-xl text-zinc-300 max-w-2xl mx-auto'>
+            Unlock the full power of personalized astrology with complete birth
+            chart analysis, daily insights, and meaningful spiritual guidance.
           </p>
-          
+
           {subscriptionStatus === 'trial' && (
-            <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 rounded-lg p-4 border border-purple-500/30 max-w-md mx-auto">
-              <div className="flex items-center gap-2 justify-center">
-                <Zap className="w-4 h-4 text-yellow-400" />
-                <span className="text-yellow-300 font-medium">
+            <div className='bg-gradient-to-r from-purple-900/40 to-pink-900/40 rounded-lg p-4 border border-purple-500/30 max-w-md mx-auto'>
+              <div className='flex items-center gap-2 justify-center'>
+                <Zap className='w-4 h-4 text-yellow-400' />
+                <span className='text-yellow-300 font-medium'>
                   {trialDaysRemaining} days left in your free trial
                 </span>
               </div>
@@ -70,8 +74,8 @@ export default function PricingPage() {
       </div>
 
       {/* Pricing Cards */}
-      <div className="max-w-6xl mx-auto px-6 pb-12">
-        <div className="grid md:grid-cols-3 gap-8">
+      <div className='max-w-6xl mx-auto px-6 pb-12'>
+        <div className='grid md:grid-cols-3 gap-8'>
           {PRICING_PLANS.map((plan) => (
             <div
               key={plan.id}
@@ -83,42 +87,44 @@ export default function PricingPage() {
             >
               {/* Popular Badge */}
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1">
-                    <Star className="w-3 h-3" />
+                <div className='absolute -top-4 left-1/2 transform -translate-x-1/2'>
+                  <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1'>
+                    <Star className='w-3 h-3' />
                     Most Popular
                   </div>
                 </div>
               )}
-              
+
               {/* Savings Badge */}
               {plan.savings && (
-                <div className="absolute -top-4 right-4">
-                  <div className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                <div className='absolute -top-4 right-4'>
+                  <div className='bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
                     {plan.savings}
                   </div>
                 </div>
               )}
 
-              <div className="space-y-6">
+              <div className='space-y-6'>
                 {/* Plan Header */}
-                <div className="text-center space-y-2">
-                  <h3 className="text-2xl font-semibold text-white">{plan.name}</h3>
-                  <p className="text-zinc-400">{plan.description}</p>
-                  
-                  <div className="py-4">
+                <div className='text-center space-y-2'>
+                  <h3 className='text-2xl font-semibold text-white'>
+                    {plan.name}
+                  </h3>
+                  <p className='text-zinc-400'>{plan.description}</p>
+
+                  <div className='py-4'>
                     {plan.price === 0 ? (
-                      <div className="text-3xl font-bold text-white">Free</div>
+                      <div className='text-3xl font-bold text-white'>Free</div>
                     ) : (
-                      <div className="space-y-1">
-                        <div className="text-4xl font-bold text-white">
+                      <div className='space-y-1'>
+                        <div className='text-4xl font-bold text-white'>
                           ${plan.price}
-                          <span className="text-lg font-normal text-zinc-400">
+                          <span className='text-lg font-normal text-zinc-400'>
                             /{plan.interval}
                           </span>
                         </div>
                         {plan.interval === 'year' && (
-                          <div className="text-sm text-zinc-400">
+                          <div className='text-sm text-zinc-400'>
                             Just $3.33/month billed annually
                           </div>
                         )}
@@ -128,31 +134,34 @@ export default function PricingPage() {
                 </div>
 
                 {/* Features */}
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <Check className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-zinc-300 text-sm">{feature}</span>
+                    <div key={index} className='flex items-start gap-3'>
+                      <Check className='w-4 h-4 text-green-400 mt-0.5 flex-shrink-0' />
+                      <span className='text-zinc-300 text-sm'>{feature}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* CTA Button */}
-                <div className="pt-4">
+                <div className='pt-4'>
                   {plan.id === 'free' ? (
                     <Link
-                      href="/"
-                      className="w-full bg-zinc-700 hover:bg-zinc-600 text-white py-3 px-6 rounded-lg font-medium transition-colors text-center block"
+                      href='/'
+                      className='w-full bg-zinc-700 hover:bg-zinc-600 text-white py-3 px-6 rounded-lg font-medium transition-colors text-center block'
                     >
                       Current Plan
                     </Link>
-                  ) : subscriptionStatus === 'active' && subscription?.plan === plan.id ? (
-                    <div className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center">
+                  ) : subscriptionStatus === 'active' &&
+                    subscription?.plan === plan.id ? (
+                    <div className='w-full bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center'>
                       Current Plan
                     </div>
                   ) : (
                     <button
-                      onClick={() => handleSubscribe(plan.stripePriceId, plan.id)}
+                      onClick={() =>
+                        handleSubscribe(plan.stripePriceId, plan.id)
+                      }
                       disabled={loading === plan.id || !plan.stripePriceId}
                       className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-300 ${
                         plan.popular
@@ -161,8 +170,8 @@ export default function PricingPage() {
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {loading === plan.id ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        <div className='flex items-center justify-center gap-2'>
+                          <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin'></div>
                           Loading...
                         </div>
                       ) : subscriptionStatus === 'trial' ? (
@@ -180,66 +189,71 @@ export default function PricingPage() {
       </div>
 
       {/* FAQ Section */}
-      <div className="max-w-4xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-light text-white text-center mb-12">
+      <div className='max-w-4xl mx-auto px-6 py-16'>
+        <h2 className='text-3xl font-light text-white text-center mb-12'>
           Frequently Asked Questions
         </h2>
-        
-        <div className="space-y-8">
-          <div className="bg-zinc-800/50 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-white mb-3">
+
+        <div className='space-y-8'>
+          <div className='bg-zinc-800/50 rounded-lg p-6'>
+            <h3 className='text-lg font-medium text-white mb-3'>
               What's included in the free trial?
             </h3>
-            <p className="text-zinc-300">
-              Get full access to all premium features including your complete birth chart analysis, 
-              personalized daily horoscopes, tarot patterns, and cosmic insights. No credit card required to start.
+            <p className='text-zinc-300'>
+              Get full access to all premium features including your complete
+              birth chart analysis, personalized daily horoscopes, tarot
+              patterns, and cosmic insights. No credit card required to start.
             </p>
           </div>
-          
-          <div className="bg-zinc-800/50 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-white mb-3">
+
+          <div className='bg-zinc-800/50 rounded-lg p-6'>
+            <h3 className='text-lg font-medium text-white mb-3'>
               Can I cancel anytime?
             </h3>
-            <p className="text-zinc-300">
-              Absolutely. Cancel your subscription at any time through your account settings. 
-              You'll continue to have access to premium features until the end of your billing period.
+            <p className='text-zinc-300'>
+              Absolutely. Cancel your subscription at any time through your
+              account settings. You'll continue to have access to premium
+              features until the end of your billing period.
             </p>
           </div>
-          
-          <div className="bg-zinc-800/50 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-white mb-3">
+
+          <div className='bg-zinc-800/50 rounded-lg p-6'>
+            <h3 className='text-lg font-medium text-white mb-3'>
               How accurate are the birth chart calculations?
             </h3>
-            <p className="text-zinc-300">
-              We use professional-grade astronomical algorithms to calculate planetary positions 
-              accurate to within minutes of arc, the same precision used by professional astrologers.
+            <p className='text-zinc-300'>
+              We use professional-grade astronomical algorithms to calculate
+              planetary positions accurate to within minutes of arc, the same
+              precision used by professional astrologers.
             </p>
           </div>
-          
-          <div className="bg-zinc-800/50 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-white mb-3">
+
+          <div className='bg-zinc-800/50 rounded-lg p-6'>
+            <h3 className='text-lg font-medium text-white mb-3'>
               What makes this different from other astrology apps?
             </h3>
-            <p className="text-zinc-300">
-              Unlike apps that give generic horoscopes, every insight is calculated from your exact 
-              birth chart. We respect your intelligence with thoughtful guidance, never prescriptive advice.
+            <p className='text-zinc-300'>
+              Unlike apps that give generic horoscopes, every insight is
+              calculated from your exact birth chart. We respect your
+              intelligence with thoughtful guidance, never prescriptive advice.
             </p>
           </div>
         </div>
       </div>
 
       {/* Footer CTA */}
-      <div className="max-w-4xl mx-auto px-6 py-16 text-center">
-        <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-2xl p-8 border border-purple-700/30">
-          <h3 className="text-2xl font-light text-white mb-4">
+      <div className='max-w-4xl mx-auto px-6 py-16 text-center'>
+        <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-2xl p-8 border border-purple-700/30'>
+          <h3 className='text-2xl font-light text-white mb-4'>
             Still have questions?
           </h3>
-          <p className="text-zinc-300 mb-6">
-            Experience the difference personalized astrology makes. Start your free trial today.
+          <p className='text-zinc-300 mb-6'>
+            Experience the difference personalized astrology makes. Start your
+            free trial today.
           </p>
           <Link
-            href="/profile"
-            className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+            href='/profile'
+            className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl'
           >
             Get Started Free
           </Link>
@@ -247,4 +261,4 @@ export default function PricingPage() {
       </div>
     </div>
   );
-} 
+}
