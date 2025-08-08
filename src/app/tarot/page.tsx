@@ -16,7 +16,11 @@ const TarotReadings = () => {
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
 
   // Get improved reading with selected time frame
-  const personalizedReading = getImprovedTarotReading(userName, true, timeFrame);
+  const personalizedReading = getImprovedTarotReading(
+    userName,
+    true,
+    timeFrame,
+  );
 
   // Previous week readings
   const currentDate = dayjs();
@@ -179,27 +183,43 @@ const TarotReadings = () => {
                       key={index}
                       className='bg-purple-900/30 p-3 rounded border border-purple-800'
                     >
-                      <div 
+                      <div
                         className='flex justify-between items-center cursor-pointer'
-                        onClick={() => setExpandedSuit(expandedSuit === pattern.suit ? null : pattern.suit)}
+                        onClick={() =>
+                          setExpandedSuit(
+                            expandedSuit === pattern.suit ? null : pattern.suit,
+                          )
+                        }
                       >
                         <p className='font-medium text-purple-200 mb-1'>
-                          {pattern.suit} ({pattern.count}/{personalizedReading.trendAnalysis?.timeFrame} days)
+                          {pattern.suit} ({pattern.count}/
+                          {personalizedReading.trendAnalysis?.timeFrame} days)
                         </p>
                         <span className='text-purple-400 text-sm'>
                           {expandedSuit === pattern.suit ? '▼' : '▶'}
                         </span>
                       </div>
-                      <p className='text-xs text-purple-300 mb-2'>{pattern.reading}</p>
-                      
+                      <p className='text-xs text-purple-300 mb-2'>
+                        {pattern.reading}
+                      </p>
+
                       {expandedSuit === pattern.suit && (
                         <div className='mt-3 pt-3 border-t border-purple-700'>
-                          <p className='text-xs text-purple-400 mb-2'>Individual Cards:</p>
+                          <p className='text-xs text-purple-400 mb-2'>
+                            Individual Cards:
+                          </p>
                           <div className='grid grid-cols-1 gap-1'>
                             {pattern.cards.map((card, cardIndex) => (
-                              <div key={cardIndex} className='flex justify-between text-xs'>
-                                <span className='text-purple-200'>{card.name}</span>
-                                <span className='text-purple-400'>{card.count}x</span>
+                              <div
+                                key={cardIndex}
+                                className='flex justify-between text-xs'
+                              >
+                                <span className='text-purple-200'>
+                                  {card.name}
+                                </span>
+                                <span className='text-purple-400'>
+                                  {card.count}x
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -214,7 +234,9 @@ const TarotReadings = () => {
 
           {/* Time Frame Controls */}
           <div className='mb-4'>
-            <h3 className='font-medium text-indigo-400 mb-2'>Analysis Period</h3>
+            <h3 className='font-medium text-indigo-400 mb-2'>
+              Analysis Period
+            </h3>
             <div className='flex gap-2'>
               {[7, 14, 30, 60, 90].map((days) => (
                 <button
@@ -235,7 +257,9 @@ const TarotReadings = () => {
           {/* Number Patterns */}
           {personalizedReading.trendAnalysis.numberPatterns.length > 0 && (
             <div className='mb-4'>
-              <h3 className='font-medium text-orange-400 mb-2'>Number Patterns</h3>
+              <h3 className='font-medium text-orange-400 mb-2'>
+                Number Patterns
+              </h3>
               <div className='space-y-3'>
                 {personalizedReading.trendAnalysis.numberPatterns.map(
                   (pattern, index) => (
@@ -246,7 +270,9 @@ const TarotReadings = () => {
                       <p className='font-medium text-orange-200 mb-1'>
                         {pattern.number}s ({pattern.count} times)
                       </p>
-                      <p className='text-xs text-orange-300 mb-2'>{pattern.reading}</p>
+                      <p className='text-xs text-orange-300 mb-2'>
+                        {pattern.reading}
+                      </p>
                       <p className='text-xs text-orange-400'>
                         Cards: {pattern.cards.join(', ')}
                       </p>
@@ -260,7 +286,9 @@ const TarotReadings = () => {
           {/* Arcana Patterns */}
           {personalizedReading.trendAnalysis.arcanaPatterns.length > 0 && (
             <div>
-              <h3 className='font-medium text-yellow-400 mb-2'>Arcana Balance</h3>
+              <h3 className='font-medium text-yellow-400 mb-2'>
+                Arcana Balance
+              </h3>
               <div className='space-y-3'>
                 {personalizedReading.trendAnalysis.arcanaPatterns.map(
                   (pattern, index) => (
@@ -268,10 +296,13 @@ const TarotReadings = () => {
                       key={index}
                       className='bg-yellow-900/30 p-3 rounded border border-yellow-800'
                     >
-                                             <p className='font-medium text-yellow-200 mb-1'>
-                         {pattern.type} ({pattern.count}/{personalizedReading.trendAnalysis?.timeFrame} days)
-                       </p>
-                      <p className='text-xs text-yellow-300'>{pattern.reading}</p>
+                      <p className='font-medium text-yellow-200 mb-1'>
+                        {pattern.type} ({pattern.count}/
+                        {personalizedReading.trendAnalysis?.timeFrame} days)
+                      </p>
+                      <p className='text-xs text-yellow-300'>
+                        {pattern.reading}
+                      </p>
                     </div>
                   ),
                 )}
