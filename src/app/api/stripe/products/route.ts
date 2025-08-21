@@ -24,15 +24,15 @@ export async function GET(request: NextRequest) {
       products.data.map(async (product) => {
         // Find all prices for this product
         const productPrices = prices.data.filter(
-          (price) => price.product === product.id
+          (price) => price.product === product.id,
         );
 
         const priceDetails = await Promise.all(
           productPrices.map(async (price) => {
             // Check if this price has any associated trial period metadata
-            const trialPeriodDays = 
-              product.metadata?.trial_period_days || 
-              price.metadata?.trial_period_days || 
+            const trialPeriodDays =
+              product.metadata?.trial_period_days ||
+              price.metadata?.trial_period_days ||
               (price.recurring?.interval === 'month' ? '7' : '14'); // fallback to hardcoded
 
             return {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
               trial_period_days: parseInt(trialPeriodDays),
               metadata: price.metadata,
             };
-          })
+          }),
         );
 
         return {
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
           metadata: product.metadata,
           prices: priceDetails,
         };
-      })
+      }),
     );
 
     return NextResponse.json({ products: productInfo });
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         error: 'Failed to fetch products',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     if (!priceId) {
       return NextResponse.json(
         { error: 'Price ID is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         error: 'Failed to fetch price information',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

@@ -7,8 +7,11 @@ import {
   BirthChartData,
 } from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
+import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
 import { Observer } from 'astronomy-engine';
 import { bodiesSymbols } from '../../utils/zodiac/zodiac';
+import { useSubscription } from '../hooks/useSubscription';
+import { hasBirthChartAccess } from '../../utils/pricing';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 
@@ -652,14 +655,53 @@ const getAspectInterpretation = (aspect: any): string => {
 
 export const HoroscopeWidget = () => {
   const { me } = useAccount();
+  const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
 
+  const hasChartAccess = hasBirthChartAccess(subscription.status);
+
+  // If user doesn't have birth chart access, show general horoscope
+  if (!hasChartAccess) {
+    const generalHoroscope = getGeneralHoroscope();
+    return (
+      <div className="py-3 px-4 border border-stone-800 rounded-md w-full">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold">Daily Cosmic Energy</h3>
+            <span className="text-xs text-zinc-500">{generalHoroscope.moonPhase}</span>
+          </div>
+          
+          <div className="space-y-2 text-xs">
+            <p className="text-zinc-300 leading-relaxed">
+              {generalHoroscope.reading}
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20">
+            <p className="text-xs text-purple-200 mb-1">🌟 Start Your Free Trial</p>
+            <p className="text-xs text-zinc-400 mb-2">
+              Unlock horoscopes tailored to YOUR birth chart. Experience the difference personalized astrology makes!
+            </p>
+            <Link
+              href="/pricing"
+              className="text-xs text-purple-400 underline font-medium"
+            >
+              Start Free Trial
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // For premium users, we need both profile data AND subscription access
   if (!me || !userBirthday) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
-          <h3 className='font-bold mb-2'>Daily Horoscope</h3>
+          <h3 className='font-bold mb-2'>Personal Horoscope</h3>
+          <span className='text-xs text-purple-400'>✨ Premium</span>
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday for personalized cosmic insights
           </p>
@@ -680,7 +722,8 @@ export const HoroscopeWidget = () => {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
-          <h3 className='font-bold mb-2'>Daily Horoscope</h3>
+          <h3 className='font-bold mb-2'>Personal Horoscope</h3>
+          <span className='text-xs text-purple-400'>✨ Premium</span>
           <p className='text-zinc-400 text-xs'>
             Calculating your cosmic influences...
           </p>
@@ -702,45 +745,16 @@ export const HoroscopeWidget = () => {
     userBirthday,
   );
 
-  // Get primary transit for display
-  const primaryTransit = currentTransits.find((p) => p.body === 'Sun');
-  const moonTransit = currentTransits.find((p) => p.body === 'Moon');
-
   return (
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
-      {/* 
-      <div className='flex justify-center items-center gap-3 mb-3'>
-        {primaryTransit && (
-          <div className='text-center'>
-            <div className='text-lg mb-1'>
-              {
-                bodiesSymbols[
-                  primaryTransit.body.toLowerCase() as keyof typeof bodiesSymbols
-                ]
-              }
-            </div>
-            <div className='text-xs text-zinc-400'>{primaryTransit.sign}</div>
-          </div>
-        )}
-
-        <div className='text-zinc-500'>→</div>
-
-        {moonTransit && (
-          <div className='text-center'>
-            <div className='text-lg mb-1'>
-              {
-                bodiesSymbols[
-                  moonTransit.body.toLowerCase() as keyof typeof bodiesSymbols
-                ]
-              }
-            </div>
-            <div className='text-xs text-zinc-400'>{moonTransit.sign}</div>
-          </div>
-        )}
-      </div> */}
-
-      <div className='text-center text-sm text-zinc-300 leading-relaxed mb-3 max-h-48 overflow-y-auto'>
-        {horoscope}
+      <div className='space-y-2'>
+        <div className='flex items-center justify-between'>
+          <h3 className='font-bold'>Personal Horoscope</h3>
+          <span className='text-xs text-purple-400'>✨ Premium</span>
+        </div>
+        <div className='text-center text-sm text-zinc-300 leading-relaxed max-h-48 overflow-y-auto'>
+          {horoscope}
+        </div>
       </div>
     </div>
   );

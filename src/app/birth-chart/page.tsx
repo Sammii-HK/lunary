@@ -8,6 +8,8 @@ import {
 } from '../../../utils/astrology/birthChart';
 import { BirthChart } from '@/components/BirthChart';
 import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
+import { useSubscription } from '../../hooks/useSubscription';
+import { hasBirthChartAccess } from '../../../utils/pricing';
 import Link from 'next/link';
 
 // Function to generate concise planetary interpretations
@@ -788,8 +790,11 @@ const getBowlPattern = (birthChart: BirthChartData[]): ChartPattern | null => {
 
 const BirthChartPage = () => {
   const { me } = useAccount();
+  const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
+
+  const hasChartAccess = hasBirthChartAccess(subscription.status);
 
   if (!me) {
     return (
@@ -802,11 +807,37 @@ const BirthChartPage = () => {
     );
   }
 
-  // Check if user has birth chart data
-  const hasBirthChartData = hasBirthChart(me.profile);
-  const birthChartData = hasBirthChartData
-    ? getBirthChartFromProfile(me.profile)
-    : null;
+  // Check subscription access first
+  if (!hasChartAccess) {
+    return (
+      <div className='h-[91vh] flex items-center justify-center'>
+        <div className='text-center max-w-lg px-4'>
+          <h1 className='text-3xl font-bold text-white mb-6'>
+            🌟 Your Birth Chart Awaits
+          </h1>
+          <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-6 border border-purple-500/30 mb-6'>
+            <p className='text-zinc-300 mb-4'>
+              Unlock your complete cosmic blueprint with a detailed birth chart
+              analysis. Discover your planetary positions, aspects, and the
+              deeper meaning behind your astrological profile.
+            </p>
+            <ul className='text-sm text-zinc-400 space-y-2 mb-6 text-left'>
+              <li>✨ Complete planetary positions at your birth</li>
+              <li>🌙 Sun, Moon, and Rising sign analysis</li>
+              <li>⭐ Cosmic aspects and their interpretations</li>
+              <li>🎯 Personality insights and guidance</li>
+            </ul>
+          </div>
+          <Link
+            href='/pricing'
+            className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-8 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl'
+          >
+            Start Free Trial
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!userBirthday) {
     return (
@@ -830,6 +861,14 @@ const BirthChartPage = () => {
     );
   }
 
+  // Check if user has birth chart data (but they still need subscription to view it)
+  const hasBirthChartData = hasBirthChart(me.profile);
+  const birthChartData = hasBirthChartData
+    ? getBirthChartFromProfile(me.profile)
+    : null;
+
+  // Note: Even if birth chart exists, user still can't access it without subscription
+  // This preserves data for users who had trial/paid but keeps paywall intact
   if (!hasBirthChartData || !birthChartData) {
     return (
       <div className='h-[91vh] flex items-center justify-center'>

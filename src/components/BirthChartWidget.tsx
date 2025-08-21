@@ -6,12 +6,54 @@ import {
   hasBirthChart,
 } from '../../utils/astrology/birthChart';
 import { bodiesSymbols, zodiacSymbol } from '../../utils/zodiac/zodiac';
+import { useSubscription } from '../hooks/useSubscription';
+import { hasBirthChartAccess } from '../../utils/pricing';
 import Link from 'next/link';
 
 export const BirthChartWidget = () => {
   const { me } = useAccount();
+  const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
+
+  const hasChartAccess = hasBirthChartAccess(subscription.status);
+
+  // If user doesn't have birth chart access, show paywall
+  if (!hasChartAccess) {
+    return (
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between'>
+            <h3 className='font-bold'>Birth Chart Analysis</h3>
+            <span className='text-lg'>⭐</span>
+          </div>
+
+          <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-4 border border-purple-500/30'>
+            <h4 className='text-white font-medium mb-2'>
+              🌟 Your Cosmic Blueprint
+            </h4>
+            <p className='text-zinc-300 text-sm mb-3'>
+              Unlock your complete birth chart analysis with planetary
+              positions, aspects, and detailed interpretations of your cosmic
+              nature.
+            </p>
+            <ul className='text-xs text-zinc-400 space-y-1 mb-3'>
+              <li>• Sun, Moon, and Rising sign placements</li>
+              <li>• Planetary positions in zodiac signs</li>
+              <li>• Cosmic aspects and their meanings</li>
+              <li>• Detailed personality insights</li>
+            </ul>
+            <Link
+              href='/pricing'
+              className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300'
+            >
+              Start Free Trial
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!me || !userBirthday) {
     return (
@@ -39,6 +81,7 @@ export const BirthChartWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Birth Chart</h3>
+          <span className='text-xs text-purple-400'>✨ Premium</span>
           <p className='text-zinc-400 text-xs'>Generating chart...</p>
         </div>
       </div>

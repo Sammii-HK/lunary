@@ -433,7 +433,7 @@ export default function WelcomePage() {
               href='/'
               className='text-purple-300 hover:text-purple-200 px-8 py-4 font-medium text-lg transition-colors'
             >
-              Explore daily insights →
+              Explore daily insights
             </Link>
           </div>
 

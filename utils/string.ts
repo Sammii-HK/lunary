@@ -1,1 +1,2 @@
-export const stringToKebabCase = (string: string) => string.replaceAll(' ', '-').toLowerCase();
+export const stringToKebabCase = (string: string) =>
+  string.replaceAll(' ', '-').toLowerCase();

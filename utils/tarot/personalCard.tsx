@@ -13,39 +13,46 @@ type PersonalCardData = {
 };
 
 // Calculate personal card based on birth date (unchanging)
-const calculatePersonalCard = (userBirthday: string, userName?: string): PersonalCardData => {
+const calculatePersonalCard = (
+  userBirthday: string,
+  userName?: string,
+): PersonalCardData => {
   // Use birth year + name for completely static personal card
   const birthDate = dayjs(userBirthday);
   const seed = `${userName || 'seeker'}-${birthDate.year()}-${birthDate.month()}-${birthDate.date()}-personal`;
-  
+
   const card = getTarotCard(seed, userName);
-  
+
   // Get detailed card information
   const cardDetails = getCardDetails(card);
-  
+
   const reason = `Your personal card is determined by your birth date (${dayjs(userBirthday).format('MMMM D, YYYY')}) and reflects your core spiritual essence and life path energy.`;
-  
+
   return {
     name: card.name,
     keywords: cardDetails.keywords,
     information: cardDetails.information,
     calculatedDate: dayjs().toISOString(),
-    reason
+    reason,
   };
 };
 
 // Get card details from tarot constants
-const getCardDetails = (card: { name: string; keywords: string[]; information: string }) => {
+const getCardDetails = (card: {
+  name: string;
+  keywords: string[];
+  information: string;
+}) => {
   // Search through major arcana
   for (const [key, cardData] of Object.entries(tarotCards.majorArcana)) {
     if (cardData.name === card.name) {
       return {
         keywords: cardData.keywords,
-        information: cardData.information
+        information: cardData.information,
       };
     }
   }
-  
+
   // Search through minor arcana suits
   const minorArcana = tarotCards.minorArcana;
   for (const suit of Object.values(minorArcana)) {
@@ -53,16 +60,16 @@ const getCardDetails = (card: { name: string; keywords: string[]; information: s
       if (cardData.name === card.name) {
         return {
           keywords: cardData.keywords,
-          information: cardData.information
+          information: cardData.information,
         };
       }
     }
   }
-  
+
   // Fallback to card's own data
   return {
     keywords: card.keywords,
-    information: card.information
+    information: card.information,
   };
 };
 
@@ -70,30 +77,33 @@ const getCardDetails = (card: { name: string; keywords: string[]; information: s
 export const savePersonalCardToProfile = async (
   profile: any,
   userBirthday: string,
-  userName?: string
+  userName?: string,
 ): Promise<void> => {
   try {
     console.log('Calculating personal card for:', userName, userBirthday);
-    
+
     const personalCardData = calculatePersonalCard(userBirthday, userName);
-    
+
     console.log('Personal card calculated:', personalCardData);
-    
+
     // Import the schema
     const { PersonalCard } = await import('../../schema');
-    
+
     // Create personal card as CoValue
-    const personalCardCoValue = PersonalCard.create({
-      name: personalCardData.name,
-      keywords: personalCardData.keywords as any, // Jazz will auto-convert array to CoList
-      information: personalCardData.information,
-      calculatedDate: personalCardData.calculatedDate,
-      reason: personalCardData.reason,
-    }, profile._owner || profile);
-    
+    const personalCardCoValue = PersonalCard.create(
+      {
+        name: personalCardData.name,
+        keywords: personalCardData.keywords as any, // Jazz will auto-convert array to CoList
+        information: personalCardData.information,
+        calculatedDate: personalCardData.calculatedDate,
+        reason: personalCardData.reason,
+      },
+      profile._owner || profile,
+    );
+
     // Save to profile
     profile.personalCard = personalCardCoValue;
-    
+
     console.log('Personal card saved to profile as CoValue');
   } catch (error) {
     console.error('Error saving personal card:', error);
@@ -101,15 +111,17 @@ export const savePersonalCardToProfile = async (
 };
 
 // Get personal card from Jazz profile
-export const getPersonalCardFromProfile = (profile: any): PersonalCardData | null => {
+export const getPersonalCardFromProfile = (
+  profile: any,
+): PersonalCardData | null => {
   try {
     if (!profile?.personalCard) {
       console.log('No personal card data found in profile');
       return null;
     }
-    
+
     const personalCardCoValue = profile.personalCard;
-    
+
     // Convert CoValue to plain object
     const personalCard: PersonalCardData = {
       name: personalCardCoValue.name,
@@ -118,7 +130,7 @@ export const getPersonalCardFromProfile = (profile: any): PersonalCardData | nul
       calculatedDate: personalCardCoValue.calculatedDate,
       reason: personalCardCoValue.reason,
     };
-    
+
     console.log('Retrieved personal card from profile:', personalCard);
     return personalCard;
   } catch (error) {
@@ -133,7 +145,7 @@ export const hasPersonalCard = (profile: any): boolean => {
   console.log('hasPersonalCard check:', {
     profile: Boolean(profile),
     personalCard: hasCard,
-    result: hasCard
+    result: hasCard,
   });
   return hasCard;
-}; 
+};

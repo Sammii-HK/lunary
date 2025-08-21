@@ -54,24 +54,27 @@ export const saveBirthChartToProfile = async (
 
     // Import the schema
     const { BirthChart, BirthChartPlanet } = await import('../../schema');
-    
+
     // Create birth chart as CoValue list
     const birthChartCoValue = BirthChart.create([], profile._owner || profile);
-    
+
     // Create and add each planet as a CoMap
     for (const planet of birthChart) {
-      const planetCoValue = BirthChartPlanet.create({
-        body: planet.body,
-        sign: planet.sign,
-        degree: planet.degree,
-        minute: planet.minute,
-        eclipticLongitude: planet.eclipticLongitude,
-        retrograde: planet.retrograde,
-      }, profile._owner || profile);
-      
+      const planetCoValue = BirthChartPlanet.create(
+        {
+          body: planet.body,
+          sign: planet.sign,
+          degree: planet.degree,
+          minute: planet.minute,
+          eclipticLongitude: planet.eclipticLongitude,
+          retrograde: planet.retrograde,
+        },
+        profile._owner || profile,
+      );
+
       birthChartCoValue.push(planetCoValue);
     }
-    
+
     // Save to profile
     profile.birthChart = birthChartCoValue;
 
@@ -94,7 +97,7 @@ export const getBirthChartFromProfile = (
     // Convert CoValue list to BirthChartData array
     const birthChartCoValue = profile.birthChart;
     const birthChart: BirthChartData[] = [];
-    
+
     for (let i = 0; i < birthChartCoValue.length; i++) {
       const planet = birthChartCoValue[i];
       if (planet) {
@@ -108,7 +111,7 @@ export const getBirthChartFromProfile = (
         });
       }
     }
-    
+
     return birthChart;
   } catch (error) {
     console.error('Error retrieving birth chart from profile:', error);

@@ -1,5 +1,5 @@
 {
-  "extends": [ "next/core-web-vitals", "plugin:prettier/recommended"],
+  "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
   "rules": {
     "react/no-unescaped-entities": "off"
   }
@@ -7,13 +7,13 @@
   //   "@stylistic/js"
   // ],
   // "rules": {
-    // "@stylistic/js/indent": ["error", 2],
-    // "quotes": ["error", "single"],
-    // "semi": ["error", "always"],
-    // "indent": ["error", 2],
-    // "trailing-comma": ["always"],
-    // "bracket-spacing": ["true"],
-    // "no-multi-spaces": ["error"],
-    // "@stylistic/js/max-len": ["warn", 80]
+  // "@stylistic/js/indent": ["error", 2],
+  // "quotes": ["error", "single"],
+  // "semi": ["error", "always"],
+  // "indent": ["error", 2],
+  // "trailing-comma": ["always"],
+  // "bracket-spacing": ["true"],
+  // "no-multi-spaces": ["error"],
+  // "@stylistic/js/max-len": ["warn", 80]
   // }
 }

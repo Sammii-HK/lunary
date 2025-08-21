@@ -108,10 +108,10 @@ const retrograde = eclipticLongitudeNow < eclipticLongitudePast;
 
 The app has a minimail steamlined design with only 4 pages:
 
- 1. The main dashboard with planetary positions and moon phase information
- 2. Tarot card reading review, to display readings from the past few days
- 3. A Grimoire, a reference guide for all information displayed on the app
- 4. A Book of Shadows - this is a work in progress but will be place for diary like entries
+1.  The main dashboard with planetary positions and moon phase information
+2.  Tarot card reading review, to display readings from the past few days
+3.  A Grimoire, a reference guide for all information displayed on the app
+4.  A Book of Shadows - this is a work in progress but will be place for diary like entries
 
 ### Challenges & Achievements
 

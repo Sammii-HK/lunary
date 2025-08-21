@@ -7,7 +7,10 @@ import {
   BirthChartData,
 } from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
+import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCrystals';
 import { Observer } from 'astronomy-engine';
+import { useSubscription } from '../hooks/useSubscription';
+import { hasBirthChartAccess } from '../../utils/pricing';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { Info } from 'lucide-react';
@@ -855,14 +858,64 @@ const getCrystalGuidance = (
 
 export const CrystalWidget = () => {
   const { me } = useAccount();
+  const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
 
+  const hasChartAccess = hasBirthChartAccess(subscription.status);
+
+  // If user doesn't have birth chart access, show general crystal recommendation
+  if (!hasChartAccess) {
+    const generalCrystal = getGeneralCrystalRecommendation();
+
+    return (
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+        <div className='space-y-2'>
+          <div className='flex items-center justify-between'>
+            <h3 className='font-bold'>Crystal Energy</h3>
+            <div className='text-lg'>💎</div>
+          </div>
+
+          <div className='space-y-2'>
+            <div className='text-center'>
+              <h4 className='font-semibold text-purple-300'>
+                {generalCrystal.name}
+              </h4>
+              <p className='text-xs text-zinc-400'>
+                {generalCrystal.properties.slice(0, 3).join(' • ')}
+              </p>
+            </div>
+
+            <p className='text-xs text-zinc-300'>{generalCrystal.reason}</p>
+          </div>
+
+          <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20'>
+            <p className='text-xs text-purple-200 mb-1'>
+              💎 Start Your Free Trial
+            </p>
+            <p className='text-xs text-zinc-400 mb-2'>
+              Get crystals chosen specifically for YOUR birth chart. See what
+              the universe has selected for you!
+            </p>
+            <Link
+              href='/pricing'
+              className='text-xs text-purple-400 underline font-medium'
+            >
+              Start Free Trial
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // For premium users, we need both profile data AND subscription access
   if (!me || !userBirthday) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
-          <h3 className='font-bold mb-2'>Crystal of the Day</h3>
+          <h3 className='font-bold mb-2'>Personal Crystal</h3>
+          <span className='text-xs text-purple-400'>✨ Premium</span>
           <div className='text-4xl mb-2'>💎</div>
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday for personalized crystal guidance
@@ -884,7 +937,8 @@ export const CrystalWidget = () => {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
-          <h3 className='font-bold mb-2'>Crystal of the Day</h3>
+          <h3 className='font-bold mb-2'>Personal Crystal</h3>
+          <span className='text-xs text-purple-400'>✨ Premium</span>
           <div className='text-4xl mb-2'>🔮</div>
           <p className='text-zinc-400 text-xs'>
             Calculating your crystal alignment...
@@ -915,63 +969,88 @@ export const CrystalWidget = () => {
   );
 
   return (
-    <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative'>
-      {/* Info Icon with Popover */}
-      <Popover.Root>
-        <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'>
-          <Info size={14} />
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner sideOffset={8}>
-            <Popover.Popup className='bg-zinc-800 border border-zinc-700 rounded-lg p-4 max-w-sm text-xs text-zinc-300 shadow-lg z-50'>
-              <div className='space-y-3'>
-                <div>
-                  <h4 className='font-semibold text-white mb-2'>
-                    Crystal Selection Process
-                  </h4>
-                  <p className='mb-2'>
-                    Your daily crystal is calculated using:
-                  </p>
-                  <ul className='list-disc list-inside space-y-1 text-zinc-400'>
-                    <li>Your birth chart placements (Sun, Moon, planets)</li>
-                    <li>Current planetary positions and transits</li>
-                    <li>Today&apos;s numerological vibration</li>
-                    <li>Day-of-week planetary ruler energies</li>
-                    <li>Astrological aspects and alignments</li>
-                  </ul>
-                </div>
-                <div>
-                  <p className='text-zinc-400'>
-                    Each crystal&apos;s properties are matched against these
-                    cosmic factors to find your most beneficial stone for the
-                    day.
-                  </p>
-                </div>
-              </div>
-            </Popover.Popup>
-          </Popover.Positioner>
-        </Popover.Portal>
-      </Popover.Root>
-
-      <div className='text-center mb-3'>
-        <div className='text-md font-semibold text-white'>
-          {recommendedCrystal.name}
+    <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='space-y-2'>
+        <div className='flex items-center justify-between'>
+          <h3 className='font-bold'>Personal Crystal</h3>
+          <span className='text-xs text-purple-400'>✨ Premium</span>
         </div>
-        <div className='text-xs text-zinc-400 mb-2'>
-          {recommendedCrystal.chakra} Chakra
+
+        <div className='text-center mb-3'>
+          <div className='text-md font-semibold text-white'>
+            {recommendedCrystal.name}
+          </div>
+          <div className='text-xs text-zinc-400 mb-2'>
+            {recommendedCrystal.chakra} Chakra
+          </div>
         </div>
-      </div>
 
-      <div className='text-center text-sm text-zinc-300 leading-relaxed mb-3'>
-        <p className='mb-2'>{recommendedCrystal.description}</p>
-        <p className='text-xs text-zinc-400'>{guidance}</p>
-      </div>
+        <div className='text-center text-sm text-zinc-300 leading-relaxed mb-3'>
+          <p className='mb-2'>{recommendedCrystal.description}</p>
+          <p className='text-xs text-zinc-400'>{guidance}</p>
+        </div>
 
-      <div className='text-center mb-3'>
-        <div className='text-xs text-zinc-500 italic'>
-          &quot;{recommendedCrystal.intention}&quot;
+        <div className='text-center mb-3'>
+          <div className='text-xs text-zinc-500 italic'>
+            &quot;{recommendedCrystal.intention}&quot;
+          </div>
         </div>
       </div>
     </div>
   );
+  <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative'>
+    {/* Info Icon with Popover */}
+    <Popover.Root>
+      <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'>
+        <Info size={14} />
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner sideOffset={8}>
+          <Popover.Popup className='bg-zinc-800 border border-zinc-700 rounded-lg p-4 max-w-sm text-xs text-zinc-300 shadow-lg z-50'>
+            <div className='space-y-3'>
+              <div>
+                <h4 className='font-semibold text-white mb-2'>
+                  Crystal Selection Process
+                </h4>
+                <p className='mb-2'>Your daily crystal is calculated using:</p>
+                <ul className='list-disc list-inside space-y-1 text-zinc-400'>
+                  <li>Your birth chart placements (Sun, Moon, planets)</li>
+                  <li>Current planetary positions and transits</li>
+                  <li>Today&apos;s numerological vibration</li>
+                  <li>Day-of-week planetary ruler energies</li>
+                  <li>Astrological aspects and alignments</li>
+                </ul>
+              </div>
+              <div>
+                <p className='text-zinc-400'>
+                  Each crystal&apos;s properties are matched against these
+                  cosmic factors to find your most beneficial stone for the day.
+                </p>
+              </div>
+            </div>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
+
+    <div className='text-center mb-3'>
+      <div className='text-md font-semibold text-white'>
+        {recommendedCrystal.name}
+      </div>
+      <div className='text-xs text-zinc-400 mb-2'>
+        {recommendedCrystal.chakra} Chakra
+      </div>
+    </div>
+
+    <div className='text-center text-sm text-zinc-300 leading-relaxed mb-3'>
+      <p className='mb-2'>{recommendedCrystal.description}</p>
+      <p className='text-xs text-zinc-400'>{guidance}</p>
+    </div>
+
+    <div className='text-center mb-3'>
+      <div className='text-xs text-zinc-500 italic'>
+        &quot;{recommendedCrystal.intention}&quot;
+      </div>
+    </div>
+  </div>;
 };

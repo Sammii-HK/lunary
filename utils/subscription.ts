@@ -29,7 +29,7 @@ export function getSubscriptionStatus(subscription: any): SubscriptionStatus {
 
 export async function createTrialSubscription(planType: 'monthly' | 'yearly') {
   let trialDays: number;
-  
+
   try {
     // Fetch trial days from Stripe
     const trialData = await getTrialDaysFromStripe();
@@ -37,7 +37,8 @@ export async function createTrialSubscription(planType: 'monthly' | 'yearly') {
   } catch (error) {
     console.error('Error fetching trial days from Stripe:', error);
     // Fallback to hardcoded values
-    trialDays = planType === 'monthly' ? FREE_TRIAL_DAYS.monthly : FREE_TRIAL_DAYS.yearly;
+    trialDays =
+      planType === 'monthly' ? FREE_TRIAL_DAYS.monthly : FREE_TRIAL_DAYS.yearly;
   }
 
   const trialEndsAt = dayjs().add(trialDays, 'day').toISOString();

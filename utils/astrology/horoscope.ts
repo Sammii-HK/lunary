@@ -34,7 +34,6 @@
 //     return aspects;
 // };
 
-
 // const interpretAspects = (aspects: Aspects) => {
 //   return aspects.map(aspect => {
 //       const { type, natalPlanet, transitPlanet } = aspect;
@@ -69,4 +68,3 @@
 //   const interpretations = interpretAspects(aspects);
 //   return interpretations.join(' \n');
 // };
-

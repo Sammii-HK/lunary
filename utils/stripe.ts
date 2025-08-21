@@ -1,8 +1,13 @@
 import { loadStripe } from '@stripe/stripe-js';
 
-export const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+export const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
 
-export async function createCheckoutSession(priceId: string, customerId?: string) {
+export async function createCheckoutSession(
+  priceId: string,
+  customerId?: string,
+) {
   const response = await fetch('/api/stripe/create-checkout-session', {
     method: 'POST',
     headers: {
@@ -84,7 +89,7 @@ export async function getTrialPeriodForPrice(priceId: string): Promise<number> {
 export async function getStripeProducts() {
   try {
     const response = await fetch('/api/stripe/products');
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch Stripe products');
     }
@@ -95,4 +100,4 @@ export async function getStripeProducts() {
     console.error('Error fetching Stripe products:', error);
     return [];
   }
-} 
+}

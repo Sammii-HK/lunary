@@ -7,7 +7,6 @@ const inter = Inter({ subsets: ['latin'] });
 import { getMoonSymbol } from '../../utils/moon/moonPhases';
 import { Navbar } from '@/components/Navbar';
 import { LunaryJazzProvider } from '@/components/JazzProvider';
-import { UpgradePrompt } from '@/components/Paywall';
 
 export const metadata: Metadata = {
   title: `${getMoonSymbol()} Lunary`,
@@ -29,7 +28,6 @@ export default function RootLayout({
             {children}
           </main>
           <Navbar />
-          <UpgradePrompt />
         </LunaryJazzProvider>
       </body>
     </html>

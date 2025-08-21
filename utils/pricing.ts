@@ -23,8 +23,8 @@ export const PRICING_PLANS: PricingPlan[] = [
       'General tarot card of the day',
       'Basic lunar calendar',
       'Sun sign horoscope',
-      'Access to grimoire knowledge'
-    ]
+      'Access to grimoire knowledge',
+    ],
   },
   {
     id: 'monthly',
@@ -43,8 +43,8 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Crystal & herb recommendations',
       'Solar return insights',
       'Unlimited cosmic profile access',
-      '7-day free trial'
-    ]
+      '7-day free trial',
+    ],
   },
   {
     id: 'yearly',
@@ -61,85 +61,107 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Yearly cosmic forecast',
       'Export your cosmic data',
       'Email support',
-      '14-day free trial'
-    ]
-  }
+      '14-day free trial',
+    ],
+  },
 ];
 
 export const FREE_TRIAL_DAYS = {
   monthly: 7,
-  yearly: 14
+  yearly: 14,
 };
 
 export const FEATURE_ACCESS = {
   free: [
     'moon_phases',
+    'general_horoscope',
     'general_tarot',
-    'sun_sign_horoscope', 
+    'general_crystal_recommendations',
     'grimoire',
-    'lunar_calendar'
+    'lunar_calendar',
   ],
   trial: [
     'birth_chart',
+    'birthday_collection',
     'personalized_horoscope',
     'personal_tarot',
+    'personalized_crystal_recommendations',
     'transit_calendar',
     'tarot_patterns',
-    'crystal_recommendations',
     'solar_return',
-    'cosmic_profile'
+    'cosmic_profile',
   ],
   active: [
     'birth_chart',
-    'personalized_horoscope', 
+    'birthday_collection',
+    'personalized_horoscope',
     'personal_tarot',
+    'personalized_crystal_recommendations',
     'transit_calendar',
     'tarot_patterns',
-    'crystal_recommendations',
     'solar_return',
     'cosmic_profile',
     'advanced_patterns',
     'data_export',
-    'priority_support'
-  ]
+    'priority_support',
+  ],
 };
 
 export function hasFeatureAccess(
   subscriptionStatus: string | undefined,
-  feature: string
+  feature: string,
 ): boolean {
   if (!subscriptionStatus || subscriptionStatus === 'free') {
     return FEATURE_ACCESS.free.includes(feature);
   }
-  
+
   if (subscriptionStatus === 'trial') {
-    return FEATURE_ACCESS.free.includes(feature) || FEATURE_ACCESS.trial.includes(feature);
+    return (
+      FEATURE_ACCESS.free.includes(feature) ||
+      FEATURE_ACCESS.trial.includes(feature)
+    );
   }
-  
+
   if (subscriptionStatus === 'active') {
-    return FEATURE_ACCESS.free.includes(feature) || 
-           FEATURE_ACCESS.trial.includes(feature) || 
-           FEATURE_ACCESS.active.includes(feature);
+    return (
+      FEATURE_ACCESS.free.includes(feature) ||
+      FEATURE_ACCESS.trial.includes(feature) ||
+      FEATURE_ACCESS.active.includes(feature)
+    );
   }
-  
+
   return false;
+}
+
+// Helper function to check if user has access to birth chart features
+export function hasBirthChartAccess(
+  subscriptionStatus: string | undefined,
+): boolean {
+  return hasFeatureAccess(subscriptionStatus, 'birth_chart');
+}
+
+// Helper function to check if user can collect birthday
+export function canCollectBirthday(
+  subscriptionStatus: string | undefined,
+): boolean {
+  return hasFeatureAccess(subscriptionStatus, 'birthday_collection');
 }
 
 export function getTrialDaysRemaining(trialEndsAt: string | undefined): number {
   if (!trialEndsAt) return 0;
-  
+
   const trialEnd = new Date(trialEndsAt);
   const now = new Date();
   const diffTime = trialEnd.getTime() - now.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return Math.max(0, diffDays);
 }
 
 export function isTrialExpired(trialEndsAt: string | undefined): boolean {
   if (!trialEndsAt) return false;
   return new Date(trialEndsAt) < new Date();
-} 
+}
 
 // Dynamic function to get pricing plans with actual trial periods from Stripe
 export async function getPricingPlansWithStripeData(): Promise<PricingPlan[]> {
@@ -191,7 +213,7 @@ export async function getPricingPlansWithStripeData(): Promise<PricingPlan[]> {
           features: plan.features.map((feature) =>
             feature.includes('day free trial')
               ? `${monthlyTrialDays}-day free trial`
-              : feature
+              : feature,
           ),
         };
       }
@@ -201,7 +223,7 @@ export async function getPricingPlansWithStripeData(): Promise<PricingPlan[]> {
           features: plan.features.map((feature) =>
             feature.includes('day free trial')
               ? `${yearlyTrialDays}-day free trial`
-              : feature
+              : feature,
           ),
         };
       }
@@ -214,7 +236,10 @@ export async function getPricingPlansWithStripeData(): Promise<PricingPlan[]> {
 }
 
 // Update the FREE_TRIAL_DAYS to be dynamic
-export async function getTrialDaysFromStripe(): Promise<{ monthly: number; yearly: number }> {
+export async function getTrialDaysFromStripe(): Promise<{
+  monthly: number;
+  yearly: number;
+}> {
   try {
     const monthlyPriceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
     const yearlyPriceId = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID;
@@ -227,7 +252,9 @@ export async function getTrialDaysFromStripe(): Promise<{ monthly: number; yearl
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ priceId: monthlyPriceId }),
-        }).then(response => response.ok ? response.json() : { trial_period_days: 7 })
+        }).then((response) =>
+          response.ok ? response.json() : { trial_period_days: 7 },
+        ),
       );
     } else {
       promises.push(Promise.resolve({ trial_period_days: 7 }));
@@ -239,7 +266,9 @@ export async function getTrialDaysFromStripe(): Promise<{ monthly: number; yearl
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ priceId: yearlyPriceId }),
-        }).then(response => response.ok ? response.json() : { trial_period_days: 14 })
+        }).then((response) =>
+          response.ok ? response.json() : { trial_period_days: 14 },
+        ),
       );
     } else {
       promises.push(Promise.resolve({ trial_period_days: 14 }));
@@ -255,4 +284,4 @@ export async function getTrialDaysFromStripe(): Promise<{ monthly: number; yearl
     console.error('Error fetching trial days from Stripe:', error);
     return FREE_TRIAL_DAYS; // fallback to hardcoded values
   }
-} 
+}

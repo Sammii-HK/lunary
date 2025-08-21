@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Get the price to determine trial period from Stripe
     const price = await stripe.prices.retrieve(priceId);
     const isMonthly = price.recurring?.interval === 'month';
-    
+
     // Fetch trial period from Stripe product/price metadata
     const trialDays = await getTrialPeriodForPrice(priceId);
 
