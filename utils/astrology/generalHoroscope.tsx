@@ -13,7 +13,11 @@ export type GeneralHoroscopeReading = {
   generalAdvice: string;
 };
 
-const getComprehensiveReading = (currentChart: any[], moonPhase: string, dayOfWeek: string): string => {
+const getComprehensiveReading = (
+  currentChart: any[],
+  moonPhase: string,
+  dayOfWeek: string,
+): string => {
   const sun = currentChart.find((p) => p.body === 'Sun');
   const moon = currentChart.find((p) => p.body === 'Moon');
   const mercury = currentChart.find((p) => p.body === 'Mercury');
@@ -27,7 +31,7 @@ const getComprehensiveReading = (currentChart: any[], moonPhase: string, dayOfWe
   // Sun and Moon influence
   if (sun && moon) {
     readingParts.push(
-      `The Sun in ${sun.sign} illuminates themes of ${getSunInfluence(sun.sign)}, while the Moon in ${moon.sign} brings emotional energy around ${getMoonInfluence(moon.sign)}.`
+      `The Sun in ${sun.sign} illuminates themes of ${getSunInfluence(sun.sign)}, while the Moon in ${moon.sign} brings emotional energy around ${getMoonInfluence(moon.sign)}.`,
     );
   }
 
@@ -41,11 +45,11 @@ const getComprehensiveReading = (currentChart: any[], moonPhase: string, dayOfWe
   if (mercury) {
     if (mercury.retrograde) {
       readingParts.push(
-        `Mercury retrograde in ${mercury.sign} encourages reflection and review in communication and thinking, offering an opportunity to revisit and refine your approach.`
+        `Mercury retrograde in ${mercury.sign} encourages reflection and review in communication and thinking, offering an opportunity to revisit and refine your approach.`,
       );
     } else {
       readingParts.push(
-        `Mercury in ${mercury.sign} enhances ${getMercuryInfluence(mercury.sign)}, supporting clear expression and mental clarity.`
+        `Mercury in ${mercury.sign} enhances ${getMercuryInfluence(mercury.sign)}, supporting clear expression and mental clarity.`,
       );
     }
   }
@@ -53,20 +57,20 @@ const getComprehensiveReading = (currentChart: any[], moonPhase: string, dayOfWe
   // Venus and Mars
   if (venus && mars) {
     readingParts.push(
-      `Venus in ${venus.sign} influences relationships and values with ${venus.retrograde ? 'introspective and reviewing' : 'harmonious and attractive'} energy, while Mars in ${mars.sign} brings ${mars.retrograde ? 'reflective and cautious' : 'dynamic and motivated'} energy to your actions and desires.`
+      `Venus in ${venus.sign} influences relationships and values with ${venus.retrograde ? 'introspective and reviewing' : 'harmonious and attractive'} energy, while Mars in ${mars.sign} brings ${mars.retrograde ? 'reflective and cautious' : 'dynamic and motivated'} energy to your actions and desires.`,
     );
   }
 
   // Jupiter and Saturn
   if (jupiter) {
     readingParts.push(
-      `Jupiter in ${jupiter.sign} expands opportunities in areas related to ${getJupiterInfluence(jupiter.sign)}.`
+      `Jupiter in ${jupiter.sign} expands opportunities in areas related to ${getJupiterInfluence(jupiter.sign)}.`,
     );
   }
 
   if (saturn) {
     readingParts.push(
-      `Saturn in ${saturn.sign} ${saturn.retrograde ? 'retrograde ' : ''}brings lessons in ${getSaturnInfluence(saturn.sign)}, encouraging patience and responsibility.`
+      `Saturn in ${saturn.sign} ${saturn.retrograde ? 'retrograde ' : ''}brings lessons in ${getSaturnInfluence(saturn.sign)}, encouraging patience and responsibility.`,
     );
   }
 
@@ -85,13 +89,20 @@ const getComprehensiveReading = (currentChart: any[], moonPhase: string, dayOfWe
 
 const getDayGuidance = (dayOfWeek: string): string => {
   const dayGuidance: { [key: string]: string } = {
-    Monday: 'Monday\'s Moon energy supports intuition and emotional reflection, making it ideal for inner work and setting intentions.',
-    Tuesday: 'Tuesday\'s Mars energy encourages action and courage, perfect for tackling challenges and moving projects forward.',
-    Wednesday: 'Wednesday\'s Mercury energy enhances communication and learning, favoring important conversations and new information.',
-    Thursday: 'Thursday\'s Jupiter energy expands opportunities and wisdom, opening doors for growth and understanding.',
-    Friday: 'Friday\'s Venus energy highlights love, beauty, and relationships, drawing focus to harmony and connection.',
-    Saturday: 'Saturday\'s Saturn energy supports structure and discipline, excellent for organization and long-term planning.',
-    Sunday: 'Sunday\'s Sun energy illuminates purpose and vitality, encouraging self-expression and creative pursuits.',
+    Monday:
+      "Monday's Moon energy supports intuition and emotional reflection, making it ideal for inner work and setting intentions.",
+    Tuesday:
+      "Tuesday's Mars energy encourages action and courage, perfect for tackling challenges and moving projects forward.",
+    Wednesday:
+      "Wednesday's Mercury energy enhances communication and learning, favoring important conversations and new information.",
+    Thursday:
+      "Thursday's Jupiter energy expands opportunities and wisdom, opening doors for growth and understanding.",
+    Friday:
+      "Friday's Venus energy highlights love, beauty, and relationships, drawing focus to harmony and connection.",
+    Saturday:
+      "Saturday's Saturn energy supports structure and discipline, excellent for organization and long-term planning.",
+    Sunday:
+      "Sunday's Sun energy illuminates purpose and vitality, encouraging self-expression and creative pursuits.",
   };
 
   return dayGuidance[dayOfWeek] || '';
@@ -99,16 +110,24 @@ const getDayGuidance = (dayOfWeek: string): string => {
 
 const getMoonPhaseGuidance = (moonPhase: string): string => {
   const phaseGuidance: { [key: string]: string } = {
-    'New Moon': 'This is a time for setting intentions and planting seeds for the future. Focus on new beginnings and what you want to manifest',
-    'Waxing Crescent': 'Energy is building and taking action on your intentions feels natural. Small steps lead to big changes',
-    'First Quarter': 'A time of decision and action where challenges offer opportunities for growth and learning',
-    'Waxing Gibbous': 'Refinement and adjustment are key as you fine-tune your approach and prepare for culmination',
-    'Full Moon': 'Emotions and energy peak, making this a time of completion, celebration, and releasing what no longer serves',
-    'Waning Gibbous': 'Gratitude and sharing wisdom flow naturally as you reflect on achievements and knowledge gained',
-    'Third Quarter': 'Release and forgiveness become important as old patterns make way for new growth',
-    'Waning Crescent': 'Rest and reflection prepare you for the next cycle through introspection and self-care',
+    'New Moon':
+      'This is a time for setting intentions and planting seeds for the future. Focus on new beginnings and what you want to manifest',
+    'Waxing Crescent':
+      'Energy is building and taking action on your intentions feels natural. Small steps lead to big changes',
+    'First Quarter':
+      'A time of decision and action where challenges offer opportunities for growth and learning',
+    'Waxing Gibbous':
+      'Refinement and adjustment are key as you fine-tune your approach and prepare for culmination',
+    'Full Moon':
+      'Emotions and energy peak, making this a time of completion, celebration, and releasing what no longer serves',
+    'Waning Gibbous':
+      'Gratitude and sharing wisdom flow naturally as you reflect on achievements and knowledge gained',
+    'Third Quarter':
+      'Release and forgiveness become important as old patterns make way for new growth',
+    'Waning Crescent':
+      'Rest and reflection prepare you for the next cycle through introspection and self-care',
   };
-  
+
   return phaseGuidance[moonPhase] || '';
 };
 
@@ -168,16 +187,26 @@ const getMercuryInfluence = (sign: string): string => {
 
 const getGeneralGuidance = (moonPhase: string, dayOfWeek: string): string => {
   const dayGuidance: { [key: string]: string } = {
-    Monday: 'Moon day energy supports intuition and emotional reflection, making it ideal for inner work and setting intentions.',
-    Tuesday: 'Mars energy encourages action and courage, perfect for tackling challenges and moving projects forward.',
-    Wednesday: 'Mercury energy enhances communication and learning, favoring important conversations and new information.',
-    Thursday: 'Jupiter energy expands opportunities and wisdom, opening doors for growth and understanding.',
-    Friday: 'Venus energy highlights love, beauty, and relationships, drawing focus to harmony and connection.',
-    Saturday: 'Saturn energy supports structure and discipline, excellent for organization and long-term planning.',
-    Sunday: 'Sun energy illuminates purpose and vitality, encouraging self-expression and creative pursuits.',
+    Monday:
+      'Moon day energy supports intuition and emotional reflection, making it ideal for inner work and setting intentions.',
+    Tuesday:
+      'Mars energy encourages action and courage, perfect for tackling challenges and moving projects forward.',
+    Wednesday:
+      'Mercury energy enhances communication and learning, favoring important conversations and new information.',
+    Thursday:
+      'Jupiter energy expands opportunities and wisdom, opening doors for growth and understanding.',
+    Friday:
+      'Venus energy highlights love, beauty, and relationships, drawing focus to harmony and connection.',
+    Saturday:
+      'Saturn energy supports structure and discipline, excellent for organization and long-term planning.',
+    Sunday:
+      'Sun energy illuminates purpose and vitality, encouraging self-expression and creative pursuits.',
   };
 
-  return dayGuidance[dayOfWeek] || 'Trust your intuition and stay present to the cosmic energies surrounding you.';
+  return (
+    dayGuidance[dayOfWeek] ||
+    'Trust your intuition and stay present to the cosmic energies surrounding you.'
+  );
 };
 
 const getEnergyForecast = (currentChart: any[]): string => {
@@ -217,25 +246,25 @@ const getPlanetaryInsights = (currentChart: any[]): string => {
 
   if (saturn) {
     insights.push(
-      `Saturn in ${saturn.sign} ${saturn.retrograde ? 'retrograde ' : ''}brings lessons in ${getSaturnInfluence(saturn.sign)}, encouraging patience and responsibility`
+      `Saturn in ${saturn.sign} ${saturn.retrograde ? 'retrograde ' : ''}brings lessons in ${getSaturnInfluence(saturn.sign)}, encouraging patience and responsibility`,
     );
   }
 
   if (uranus) {
     insights.push(
-      `Uranus in ${uranus.sign} sparks innovation and change in areas of ${getUranusInfluence(uranus.sign)}`
+      `Uranus in ${uranus.sign} sparks innovation and change in areas of ${getUranusInfluence(uranus.sign)}`,
     );
   }
 
   if (neptune) {
     insights.push(
-      `Neptune in ${neptune.sign} dissolves boundaries around ${getNeptuneInfluence(neptune.sign)}, inviting spiritual awareness`
+      `Neptune in ${neptune.sign} dissolves boundaries around ${getNeptuneInfluence(neptune.sign)}, inviting spiritual awareness`,
     );
   }
 
   if (pluto) {
     insights.push(
-      `Pluto in ${pluto.sign} transforms deep structures related to ${getPlutoInfluence(pluto.sign)}`
+      `Pluto in ${pluto.sign} transforms deep structures related to ${getPlutoInfluence(pluto.sign)}`,
     );
   }
 

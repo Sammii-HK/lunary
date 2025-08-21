@@ -665,27 +665,32 @@ export const HoroscopeWidget = () => {
   if (!hasChartAccess) {
     const generalHoroscope = getGeneralHoroscope();
     return (
-      <div className="py-3 px-4 border border-stone-800 rounded-md w-full">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold">Daily Cosmic Energy</h3>
-            <span className="text-xs text-zinc-500">{generalHoroscope.moonPhase}</span>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+        <div className='space-y-2'>
+          <div className='flex items-center justify-between'>
+            <h3 className='font-bold'>Daily Cosmic Energy</h3>
+            <span className='text-xs text-zinc-500'>
+              {generalHoroscope.moonPhase}
+            </span>
           </div>
-          
-          <div className="space-y-2 text-xs">
-            <p className="text-zinc-300 leading-relaxed">
+
+          <div className='space-y-2 text-xs'>
+            <p className='text-zinc-300 leading-relaxed'>
               {generalHoroscope.reading}
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20">
-            <p className="text-xs text-purple-200 mb-1">🌟 Start Your Free Trial</p>
-            <p className="text-xs text-zinc-400 mb-2">
-              Unlock horoscopes tailored to YOUR birth chart. Experience the difference personalized astrology makes!
+          <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20'>
+            <p className='text-xs text-purple-200 mb-1'>
+              🌟 Start Your Free Trial
+            </p>
+            <p className='text-xs text-zinc-400 mb-2'>
+              Unlock horoscopes tailored to YOUR birth chart. Experience the
+              difference personalized astrology makes!
             </p>
             <Link
-              href="/pricing"
-              className="text-xs text-purple-400 underline font-medium"
+              href='/pricing'
+              className='text-xs text-purple-400 underline font-medium'
             >
               Start Free Trial
             </Link>

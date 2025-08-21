@@ -3,19 +3,190 @@
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useAccount } from 'jazz-tools/react';
+import Link from 'next/link';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
+import { getGeneralTarotReading } from '../../../utils/tarot/generalTarot';
+import { useSubscription } from '../../hooks/useSubscription';
+import { hasBirthChartAccess } from '../../../utils/pricing';
 
 const TarotReadings = () => {
   const { me } = useAccount();
+  const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
+  const hasChartAccess = hasBirthChartAccess(subscription.status);
 
   // State for time frame selection
   const [timeFrame, setTimeFrame] = useState(30);
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
 
-  // Get improved reading with selected time frame
+  if (!me) {
+    return (
+      <div className='h-[91vh] flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4'></div>
+          <p className='text-zinc-400'>Loading your tarot reading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check subscription access first
+  if (!hasChartAccess) {
+    const generalTarot = getGeneralTarotReading();
+
+    // Previous week readings (7 days) with general tarot
+    const currentDate = dayjs();
+    const previousWeek = () => {
+      let week = [];
+      for (let i = 0; i < 7; i++) {
+        week.push(currentDate.subtract(i, 'day'));
+      }
+      return week;
+    };
+    const week = previousWeek();
+
+    const previousReadings = week.map((day) => {
+      const dayOfYear = day.dayOfYear();
+      const seed = `cosmic-${day.format('YYYY-MM-DD')}-${dayOfYear}-energy`;
+      return {
+        day: day.format('dddd'),
+        date: day.format('MMM D'),
+        card: getTarotCard(seed, 'cosmic-daily-energy'),
+      };
+    });
+
+    return (
+      <div className='h-[91vh] space-y-6 pb-4'>
+        <h1 className='py-4 text-lg font-bold'>Your Tarot Readings</h1>
+
+        {/* General Reading Section - Same structure as premium */}
+        <div className='bg-zinc-800 rounded-lg p-4 space-y-4'>
+          <h2 className='text-lg font-semibold text-blue-400'>
+            Your Cosmic Reading
+          </h2>
+
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='text-center'>
+              <h3 className='font-medium text-yellow-400 mb-2'>Daily Card</h3>
+              <p className='font-semibold'>{generalTarot.daily.name}</p>
+              <p className='text-sm text-zinc-300 mt-1'>
+                {generalTarot.daily.keywords.slice(0, 2).join(', ')}
+              </p>
+            </div>
+
+            <div className='text-center'>
+              <h3 className='font-medium text-yellow-400 mb-2'>Weekly Card</h3>
+              <p className='font-semibold'>{generalTarot.weekly.name}</p>
+              <p className='text-sm text-zinc-300 mt-1'>
+                {generalTarot.weekly.keywords.slice(0, 2).join(', ')}
+              </p>
+            </div>
+          </div>
+
+          {/* Daily Message */}
+          <div className='mt-4 p-3 bg-zinc-700 rounded'>
+            <h3 className='font-medium text-purple-400 mb-2'>Daily Message</h3>
+            <p className='text-sm text-zinc-200 mb-3'>
+              {generalTarot.guidance.dailyMessage}
+            </p>
+          </div>
+
+          {/* Weekly Energy */}
+          <div className='mt-4 p-3 bg-indigo-900/30 rounded border border-indigo-800'>
+            <h3 className='font-medium text-indigo-400 mb-2'>Weekly Energy</h3>
+            <p className='text-sm text-indigo-200'>
+              {generalTarot.guidance.weeklyMessage}
+            </p>
+          </div>
+
+          {/* Action Points */}
+          <div className='mt-4 p-3 bg-green-900/30 rounded border border-green-800'>
+            <h3 className='font-medium text-green-400 mb-2'>Key Guidance</h3>
+            <ul className='text-sm text-green-200 space-y-1'>
+              {generalTarot.guidance.actionPoints.map((point, index) => (
+                <li key={index} className='flex items-start'>
+                  <span className='text-green-400 mr-2'>•</span>
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Upsell Section */}
+          <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-4 border border-purple-500/30 mt-6'>
+            <h3 className='text-white font-medium mb-2'>
+              🔮 Unlock Personal Tarot Patterns
+            </h3>
+            <p className='text-zinc-300 text-sm mb-4'>
+              Get readings based on YOUR name and birthday, plus discover your
+              personal tarot patterns and card trends over time.
+            </p>
+            <ul className='text-xs text-zinc-400 space-y-1 mb-4'>
+              <li>• Cards chosen specifically for you</li>
+              <li>• 30-90 day pattern analysis</li>
+              <li>• Personal card frequency tracking</li>
+              <li>• Suit and number pattern insights</li>
+            </ul>
+            <Link
+              href='/pricing'
+              className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-md font-medium transition-all duration-300'
+            >
+              Start Free Trial
+            </Link>
+          </div>
+        </div>
+
+        {/* Previous Readings - Disabled Preview for Free Users */}
+        <div>
+          <div className='flex justify-between items-center mb-3'>
+            <h2 className='text-lg font-semibold'>Recent Daily Cards</h2>
+            <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
+              Premium Feature
+            </div>
+          </div>
+          <div className='space-y-2 relative'>
+            {/* Blurred preview cards */}
+            <div className='filter blur-sm pointer-events-none'>
+              {[...Array(7)].map((_, index) => (
+                <div
+                  key={index}
+                  className='bg-zinc-800 rounded-lg p-3 flex justify-between items-center opacity-60'
+                >
+                  <div>
+                    <span className='font-bold'>●●●●●●●</span> ●●● ●
+                  </div>
+                  <div className='text-right'>
+                    <p className='font-medium'>●●●●●●● ●● ●●●●●●</p>
+                    <p className='text-sm text-zinc-400'>●●●●●●●●●</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Overlay with trial prompt */}
+            <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/80 rounded-lg'>
+              <div className='text-center p-6'>
+                <h3 className='text-white font-medium mb-2'>🔮 Card History</h3>
+                <p className='text-zinc-300 text-sm mb-4'>
+                  Track your personal tarot journey with 7+ days of card history
+                </p>
+                <Link
+                  href='/pricing'
+                  className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md font-medium transition-all duration-300'
+                >
+                  Start Free Trial
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Premium user content
   const personalizedReading = getImprovedTarotReading(
     userName,
     true,
@@ -40,19 +211,6 @@ const TarotReadings = () => {
       card: getTarotCard(dayjs(day).toDate().toDateString(), userName),
     };
   });
-
-  if (!me) {
-    return (
-      <div className='h-[91vh] flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4'></div>
-          <p className='text-zinc-400'>
-            Loading your personalized tarot reading...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className='h-[91vh] space-y-6 pb-4'>
