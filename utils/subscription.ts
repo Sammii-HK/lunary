@@ -4,6 +4,7 @@ import {
   getTrialDaysRemaining,
   isTrialExpired,
   FREE_TRIAL_DAYS,
+  getTrialDaysFromStripe,
 } from './pricing';
 
 export type SubscriptionStatus =
@@ -26,9 +27,19 @@ export function getSubscriptionStatus(subscription: any): SubscriptionStatus {
   return status;
 }
 
-export function createTrialSubscription(planType: 'monthly' | 'yearly') {
-  const trialDays =
-    planType === 'monthly' ? FREE_TRIAL_DAYS.monthly : FREE_TRIAL_DAYS.yearly;
+export async function createTrialSubscription(planType: 'monthly' | 'yearly') {
+  let trialDays: number;
+  
+  try {
+    // Fetch trial days from Stripe
+    const trialData = await getTrialDaysFromStripe();
+    trialDays = planType === 'monthly' ? trialData.monthly : trialData.yearly;
+  } catch (error) {
+    console.error('Error fetching trial days from Stripe:', error);
+    // Fallback to hardcoded values
+    trialDays = planType === 'monthly' ? FREE_TRIAL_DAYS.monthly : FREE_TRIAL_DAYS.yearly;
+  }
+
   const trialEndsAt = dayjs().add(trialDays, 'day').toISOString();
 
   return {
@@ -236,8 +247,18 @@ export async function createTrialSubscriptionInProfile(profile: any) {
   try {
     const { Subscription } = await import('../schema');
 
+    let trialDays: number;
+    try {
+      // Fetch trial days from Stripe
+      const trialData = await getTrialDaysFromStripe();
+      trialDays = trialData.monthly; // Default to monthly trial for profile creation
+    } catch (error) {
+      console.error('Error fetching trial days from Stripe:', error);
+      trialDays = FREE_TRIAL_DAYS.monthly; // Fallback
+    }
+
     const trialEndDate = new Date();
-    trialEndDate.setDate(trialEndDate.getDate() + FREE_TRIAL_DAYS.monthly);
+    trialEndDate.setDate(trialEndDate.getDate() + trialDays);
 
     const subscriptionCoValue = Subscription.create(
       {

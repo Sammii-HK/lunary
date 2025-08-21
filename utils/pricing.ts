@@ -140,3 +140,119 @@ export function isTrialExpired(trialEndsAt: string | undefined): boolean {
   if (!trialEndsAt) return false;
   return new Date(trialEndsAt) < new Date();
 } 
+
+// Dynamic function to get pricing plans with actual trial periods from Stripe
+export async function getPricingPlansWithStripeData(): Promise<PricingPlan[]> {
+  try {
+    // Fetch trial periods from Stripe for our price IDs
+    const monthlyPriceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
+    const yearlyPriceId = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID;
+
+    let monthlyTrialDays = 7; // fallback
+    let yearlyTrialDays = 14; // fallback
+
+    if (monthlyPriceId) {
+      try {
+        const response = await fetch('/api/stripe/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceId: monthlyPriceId }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          monthlyTrialDays = data.trial_period_days || 7;
+        }
+      } catch (error) {
+        console.error('Error fetching monthly trial period:', error);
+      }
+    }
+
+    if (yearlyPriceId) {
+      try {
+        const response = await fetch('/api/stripe/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceId: yearlyPriceId }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          yearlyTrialDays = data.trial_period_days || 14;
+        }
+      } catch (error) {
+        console.error('Error fetching yearly trial period:', error);
+      }
+    }
+
+    // Update the pricing plans with actual trial periods
+    return PRICING_PLANS.map((plan) => {
+      if (plan.id === 'monthly') {
+        return {
+          ...plan,
+          features: plan.features.map((feature) =>
+            feature.includes('day free trial')
+              ? `${monthlyTrialDays}-day free trial`
+              : feature
+          ),
+        };
+      }
+      if (plan.id === 'yearly') {
+        return {
+          ...plan,
+          features: plan.features.map((feature) =>
+            feature.includes('day free trial')
+              ? `${yearlyTrialDays}-day free trial`
+              : feature
+          ),
+        };
+      }
+      return plan;
+    });
+  } catch (error) {
+    console.error('Error fetching pricing plans with Stripe data:', error);
+    return PRICING_PLANS; // fallback to hardcoded plans
+  }
+}
+
+// Update the FREE_TRIAL_DAYS to be dynamic
+export async function getTrialDaysFromStripe(): Promise<{ monthly: number; yearly: number }> {
+  try {
+    const monthlyPriceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
+    const yearlyPriceId = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID;
+
+    const promises = [];
+
+    if (monthlyPriceId) {
+      promises.push(
+        fetch('/api/stripe/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceId: monthlyPriceId }),
+        }).then(response => response.ok ? response.json() : { trial_period_days: 7 })
+      );
+    } else {
+      promises.push(Promise.resolve({ trial_period_days: 7 }));
+    }
+
+    if (yearlyPriceId) {
+      promises.push(
+        fetch('/api/stripe/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceId: yearlyPriceId }),
+        }).then(response => response.ok ? response.json() : { trial_period_days: 14 })
+      );
+    } else {
+      promises.push(Promise.resolve({ trial_period_days: 14 }));
+    }
+
+    const [monthlyData, yearlyData] = await Promise.all(promises);
+
+    return {
+      monthly: monthlyData.trial_period_days || 7,
+      yearly: yearlyData.trial_period_days || 14,
+    };
+  } catch (error) {
+    console.error('Error fetching trial days from Stripe:', error);
+    return FREE_TRIAL_DAYS; // fallback to hardcoded values
+  }
+} 

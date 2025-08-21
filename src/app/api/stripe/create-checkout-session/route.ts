@@ -1,12 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { FREE_TRIAL_DAYS } from '../../../../../utils/pricing';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Helper function to get trial period from Stripe product/price metadata
+async function getTrialPeriodForPrice(priceId: string): Promise<number> {
+  try {
+    // Get the price and its associated product
+    const price = await stripe.prices.retrieve(priceId, {
+      expand: ['product'],
+    });
+
+    const product = price.product as Stripe.Product;
+
+    // Check for trial period in product metadata first, then price metadata
+    const trialPeriodDays =
+      product.metadata?.trial_period_days ||
+      price.metadata?.trial_period_days ||
+      // Fallback to default values if no metadata is set
+      (price.recurring?.interval === 'month' ? '7' : '14');
+
+    return parseInt(trialPeriodDays);
+  } catch (error) {
+    console.error('Error fetching trial period from Stripe:', error);
+    // Fallback to default values in case of error
+    return 7; // default monthly trial
+  }
+}
 
 export async function POST(request: NextRequest) {
   let priceId: string | undefined;
@@ -26,12 +50,12 @@ export async function POST(request: NextRequest) {
     const originFromRequest = new URL(request.url).origin;
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || originFromRequest;
 
-    // Get the price to determine trial period
+    // Get the price to determine trial period from Stripe
     const price = await stripe.prices.retrieve(priceId);
     const isMonthly = price.recurring?.interval === 'month';
-    const trialDays = isMonthly
-      ? FREE_TRIAL_DAYS.monthly
-      : FREE_TRIAL_DAYS.yearly;
+    
+    // Fetch trial period from Stripe product/price metadata
+    const trialDays = await getTrialPeriodForPrice(priceId);
 
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',

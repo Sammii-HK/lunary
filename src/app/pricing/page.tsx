@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'jazz-tools/react';
 import {
   PRICING_PLANS,
+  getPricingPlansWithStripeData,
   hasFeatureAccess,
   getTrialDaysRemaining,
+  type PricingPlan,
 } from '../../../utils/pricing';
 import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
 import { Check, Star, Zap } from 'lucide-react';
@@ -14,6 +16,25 @@ import { Check, Star, Zap } from 'lucide-react';
 export default function PricingPage() {
   const { me } = useAccount();
   const [loading, setLoading] = useState<string | null>(null);
+  const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>(PRICING_PLANS);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+
+  // Load dynamic pricing plans with Stripe trial data on component mount
+  useEffect(() => {
+    async function loadPricingPlans() {
+      try {
+        const dynamicPlans = await getPricingPlansWithStripeData();
+        setPricingPlans(dynamicPlans);
+      } catch (error) {
+        console.error('Error loading dynamic pricing plans:', error);
+        // Keep the static plans as fallback
+      } finally {
+        setLoadingPlans(false);
+      }
+    }
+
+    loadPricingPlans();
+  }, []);
 
   const subscription = (me?.profile as any)?.subscription;
   const subscriptionStatus = subscription?.status || 'free';
@@ -75,8 +96,14 @@ export default function PricingPage() {
 
       {/* Pricing Cards */}
       <div className='max-w-6xl mx-auto px-6 pb-12'>
-        <div className='grid md:grid-cols-3 gap-8'>
-          {PRICING_PLANS.map((plan) => (
+        {loadingPlans ? (
+          <div className='flex justify-center items-center py-12'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400'></div>
+            <span className='ml-3 text-zinc-400'>Loading pricing information...</span>
+          </div>
+        ) : (
+          <div className='grid md:grid-cols-3 gap-8'>
+            {pricingPlans.map((plan) => (
             <div
               key={plan.id}
               className={`relative rounded-2xl p-8 border ${
@@ -185,7 +212,8 @@ export default function PricingPage() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* FAQ Section */}
