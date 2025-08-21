@@ -2,9 +2,27 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { spells, spellCategories, getSpellsByCategory, Spell } from '@/constants/spells';
+import {
+  spells,
+  spellCategories,
+  getSpellsByCategory,
+  Spell,
+} from '@/constants/spells';
 import { getMoonPhase } from '../../../../utils/moon/moonPhases';
-import { Clock, Star, Moon, Leaf, Shield, Heart, DollarSign, Cross, Sparkles, Eye, Zap, X } from 'lucide-react';
+import {
+  Clock,
+  Star,
+  Moon,
+  Leaf,
+  Shield,
+  Heart,
+  DollarSign,
+  Cross,
+  Sparkles,
+  Eye,
+  Zap,
+  X,
+} from 'lucide-react';
 
 const Practices = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -21,7 +39,7 @@ const Practices = () => {
       cleansing: <Sparkles className='w-4 h-4' />,
       divination: <Eye className='w-4 h-4' />,
       manifestation: <Star className='w-4 h-4' />,
-      banishing: <X className='w-4 h-4' />
+      banishing: <X className='w-4 h-4' />,
     };
     return iconMap[category] || <Leaf className='w-4 h-4' />;
   };
@@ -30,17 +48,18 @@ const Practices = () => {
     const colorMap: { [key: string]: string } = {
       beginner: 'text-green-400 bg-green-900/30',
       intermediate: 'text-yellow-400 bg-yellow-900/30',
-      advanced: 'text-red-400 bg-red-900/30'
+      advanced: 'text-red-400 bg-red-900/30',
     };
     return colorMap[difficulty] || 'text-zinc-400 bg-zinc-800';
   };
 
-  const filteredSpells = selectedCategory 
-    ? getSpellsByCategory(selectedCategory) 
-    : spells.filter(spell => 
-        spell.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        spell.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        spell.purpose.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSpells = selectedCategory
+    ? getSpellsByCategory(selectedCategory)
+    : spells.filter(
+        (spell) =>
+          spell.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          spell.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          spell.purpose.toLowerCase().includes(searchTerm.toLowerCase()),
       );
 
   return (
@@ -48,27 +67,29 @@ const Practices = () => {
       {/* Header */}
       <div className='mb-6'>
         <div className='mb-2'>
-          <h1 className='text-3xl font-bold'>
-            Spells & Rituals
-          </h1>
+          <h1 className='text-3xl font-bold'>Spells & Rituals</h1>
         </div>
         <p className='text-zinc-300 text-lg mb-4'>
-          A comprehensive collection of magical practices, rituals, and spells organized by purpose and moon phase.
+          A comprehensive collection of magical practices, rituals, and spells
+          organized by purpose and moon phase.
         </p>
-        
+
         <div className='bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-lg p-4 border border-indigo-700/30 mb-4'>
           <div className='flex items-center gap-2 mb-2'>
             <Moon className='w-5 h-5 text-indigo-300' />
-            <h3 className='font-semibold text-indigo-300'>Current Moon Phase: {currentMoonPhase}</h3>
+            <h3 className='font-semibold text-indigo-300'>
+              Current Moon Phase: {currentMoonPhase}
+            </h3>
           </div>
           <p className='text-indigo-200 text-sm'>
-            Certain spells work best during specific moon phases. Look for the moon phase indicators on each spell.
+            Certain spells work best during specific moon phases. Look for the
+            moon phase indicators on each spell.
           </p>
         </div>
       </div>
 
       {/* Search and Filter */}
-          <div className='space-y-4'>
+      <div className='space-y-4'>
         <div>
           <input
             type='text'
@@ -83,25 +104,25 @@ const Practices = () => {
           <button
             onClick={() => setSelectedCategory(null)}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              !selectedCategory 
-                ? 'bg-purple-600 text-white' 
+              !selectedCategory
+                ? 'bg-purple-600 text-white'
                 : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
             }`}
           >
             All Categories ({spells.length})
           </button>
-          
+
           {Object.entries(spellCategories).map(([key, category]) => (
             <button
               key={key}
               onClick={() => setSelectedCategory(key)}
               className={`px-3 py-1 rounded-full text-sm font-medium transition-colors flex items-center gap-1 ${
-                selectedCategory === key 
-                  ? 'bg-purple-600 text-white' 
+                selectedCategory === key
+                  ? 'bg-purple-600 text-white'
                   : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
               }`}
             >
-                             {category.name} ({getSpellsByCategory(key).length})
+              {category.name} ({getSpellsByCategory(key).length})
             </button>
           ))}
         </div>
@@ -110,14 +131,21 @@ const Practices = () => {
       {/* Category Description */}
       {selectedCategory && (
         <div className='bg-zinc-800 rounded-lg p-4 border border-zinc-700'>
-                               <div className='mb-2'>
+          <div className='mb-2'>
             <h2 className='text-xl font-semibold text-purple-400'>
-              {spellCategories[selectedCategory as keyof typeof spellCategories].name}
+              {
+                spellCategories[
+                  selectedCategory as keyof typeof spellCategories
+                ].name
+              }
             </h2>
           </div>
-           <p className='text-zinc-300'>
-             {spellCategories[selectedCategory as keyof typeof spellCategories].description}
-           </p>
+          <p className='text-zinc-300'>
+            {
+              spellCategories[selectedCategory as keyof typeof spellCategories]
+                .description
+            }
+          </p>
         </div>
       )}
 
@@ -138,7 +166,9 @@ const Practices = () => {
                     {spell.title}
                   </h3>
                 </div>
-                <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(spell.difficulty)}`}>
+                <span
+                  className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(spell.difficulty)}`}
+                >
                   {spell.difficulty}
                 </span>
               </div>
@@ -166,18 +196,20 @@ const Practices = () => {
                     <div className='flex items-center gap-1'>
                       <Moon className='w-3 h-3 text-indigo-400' />
                       <div className='flex gap-1'>
-                        {spell.timing.moonPhase.slice(0, 2).map((phase, index) => (
-                          <span 
-                            key={index} 
-                            className={`text-xs px-1 py-0.5 rounded ${
-                              phase === currentMoonPhase 
-                                ? 'bg-indigo-600 text-white' 
-                                : 'bg-indigo-900/40 text-indigo-300'
-                            }`}
-                          >
-                            {phase.split(' ')[0]}
-                          </span>
-                        ))}
+                        {spell.timing.moonPhase
+                          .slice(0, 2)
+                          .map((phase, index) => (
+                            <span
+                              key={index}
+                              className={`text-xs px-1 py-0.5 rounded ${
+                                phase === currentMoonPhase
+                                  ? 'bg-indigo-600 text-white'
+                                  : 'bg-indigo-900/40 text-indigo-300'
+                              }`}
+                            >
+                              {phase.split(' ')[0]}
+                            </span>
+                          ))}
                         {spell.timing.moonPhase.length > 2 && (
                           <span className='text-xs text-indigo-400'>
                             +{spell.timing.moonPhase.length - 2}
@@ -191,8 +223,12 @@ const Practices = () => {
                 {/* Ingredients Preview */}
                 <div className='text-xs text-zinc-500'>
                   <span className='font-medium'>Key ingredients: </span>
-                  {spell.ingredients.slice(0, 2).map(ingredient => ingredient.name).join(', ')}
-                  {spell.ingredients.length > 2 && ` +${spell.ingredients.length - 2} more`}
+                  {spell.ingredients
+                    .slice(0, 2)
+                    .map((ingredient) => ingredient.name)
+                    .join(', ')}
+                  {spell.ingredients.length > 2 &&
+                    ` +${spell.ingredients.length - 2} more`}
                 </div>
               </div>
 
@@ -210,12 +246,13 @@ const Practices = () => {
       {/* No Results */}
       {filteredSpells.length === 0 && (
         <div className='text-center py-12'>
-          <h3 className='text-xl font-medium text-zinc-400 mb-2'>No spells found</h3>
+          <h3 className='text-xl font-medium text-zinc-400 mb-2'>
+            No spells found
+          </h3>
           <p className='text-zinc-500'>
-            {searchTerm 
+            {searchTerm
               ? `No spells match "${searchTerm}". Try a different search term.`
-              : 'No spells in this category yet. Check back soon for more magical practices!'
-            }
+              : 'No spells in this category yet. Check back soon for more magical practices!'}
           </p>
         </div>
       )}
@@ -226,13 +263,15 @@ const Practices = () => {
           About These Spells & Rituals
         </h3>
         <p className='text-zinc-300 text-sm mb-3'>
-          Each spell and ritual has been thoroughly researched and includes historical context, 
-          proper timing, safety considerations, and variations. All practices are based on 
-          traditional magical systems and folklore.
+          Each spell and ritual has been thoroughly researched and includes
+          historical context, proper timing, safety considerations, and
+          variations. All practices are based on traditional magical systems and
+          folklore.
         </p>
         <p className='text-zinc-400 text-xs'>
-          Always practice magic responsibly and with respect for all beings. These are for educational 
-          and spiritual purposes. Use your intuition and adapt practices to your personal beliefs.
+          Always practice magic responsibly and with respect for all beings.
+          These are for educational and spiritual purposes. Use your intuition
+          and adapt practices to your personal beliefs.
         </p>
       </div>
     </div>

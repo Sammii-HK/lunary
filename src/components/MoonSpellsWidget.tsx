@@ -3,12 +3,17 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getMoonPhase, MoonPhaseLabels } from '../../utils/moon/moonPhases';
-import { getSpellsByMoonPhase, spellCategories, Spell } from '@/constants/spells';
+import {
+  getSpellsByMoonPhase,
+  spellCategories,
+  Spell,
+} from '@/constants/spells';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import dayjs from 'dayjs';
 
 export const MoonSpellsWidget = () => {
-  const [currentMoonPhase, setCurrentMoonPhase] = useState<MoonPhaseLabels | null>(null);
+  const [currentMoonPhase, setCurrentMoonPhase] =
+    useState<MoonPhaseLabels | null>(null);
   const [moonSpells, setMoonSpells] = useState<Spell[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -21,20 +26,26 @@ export const MoonSpellsWidget = () => {
     setMoonSpells(spells.slice(0, 3)); // Show top 3 spells
   }, []);
 
-
-
   const getMoonPhaseDescription = (phase: MoonPhaseLabels) => {
     const descriptions: { [key: string]: string } = {
-      'New Moon': 'Perfect for new beginnings, setting intentions, and cleansing work',
-      'Waxing Crescent': 'Ideal for attraction spells, growth, and building energy',
-      'First Quarter': 'Time for taking action, overcoming obstacles, and decision-making',
-      'Waxing Gibbous': 'Focus on refinement, adjustment, and manifestation work',
+      'New Moon':
+        'Perfect for new beginnings, setting intentions, and cleansing work',
+      'Waxing Crescent':
+        'Ideal for attraction spells, growth, and building energy',
+      'First Quarter':
+        'Time for taking action, overcoming obstacles, and decision-making',
+      'Waxing Gibbous':
+        'Focus on refinement, adjustment, and manifestation work',
       'Full Moon': 'Peak power for all magical work, healing, and divination',
-      'Waning Gibbous': 'Perfect for gratitude, sharing wisdom, and gentle release',
-      'Last Quarter': 'Time for banishing, breaking habits, and major release work',
-      'Waning Crescent': 'Deep cleansing, rest, and preparation for new cycles'
+      'Waning Gibbous':
+        'Perfect for gratitude, sharing wisdom, and gentle release',
+      'Last Quarter':
+        'Time for banishing, breaking habits, and major release work',
+      'Waning Crescent': 'Deep cleansing, rest, and preparation for new cycles',
     };
-    return descriptions[phase] || 'A time for magical work aligned with lunar energy';
+    return (
+      descriptions[phase] || 'A time for magical work aligned with lunar energy'
+    );
   };
 
   if (!currentMoonPhase) {
@@ -62,7 +73,7 @@ export const MoonSpellsWidget = () => {
           </p>
         </div>
 
-                <div>
+        <div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className='w-full flex items-center justify-between text-sm font-medium text-purple-300 hover:text-purple-200 transition-colors py-2'
@@ -74,7 +85,7 @@ export const MoonSpellsWidget = () => {
               <ChevronRight className='w-4 h-4' />
             )}
           </button>
-          
+
           {isExpanded && (
             <div className='space-y-3 mt-2'>
               {moonSpells.length > 0 ? (
@@ -89,12 +100,16 @@ export const MoonSpellsWidget = () => {
                         <span className='font-medium'>{spell.title}</span>
                       </div>
                       <div className='flex items-center justify-between'>
-                        <span className='text-purple-300/80'>{spell.type.replace('_', ' ')}</span>
+                        <span className='text-purple-300/80'>
+                          {spell.type.replace('_', ' ')}
+                        </span>
                         <span className='text-xs bg-purple-800/40 text-purple-300 px-2 py-0.5 rounded'>
                           {spell.difficulty}
                         </span>
                       </div>
-                      <p className='text-purple-300/80 mt-1'>{spell.purpose.slice(0, 60)}...</p>
+                      <p className='text-purple-300/80 mt-1'>
+                        {spell.purpose.slice(0, 60)}...
+                      </p>
                     </Link>
                   ))}
                 </div>
@@ -129,4 +144,4 @@ export const MoonSpellsWidget = () => {
       </div>
     </div>
   );
-}; 
+};

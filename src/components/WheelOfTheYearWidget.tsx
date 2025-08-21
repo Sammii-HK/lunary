@@ -26,7 +26,7 @@ export const WheelOfTheYearWidget = () => {
         { name: 'Beltane', month: 5, day: 1, season: 'spring' },
         { name: 'Litha', month: 6, day: 21, season: 'summer' },
         { name: 'Lammas or Lughnasadh', month: 8, day: 1, season: 'summer' },
-        { name: 'Mabon', month: 9, day: 21, season: 'autumn' }
+        { name: 'Mabon', month: 9, day: 21, season: 'autumn' },
       ];
 
       // Find current or approaching sabbat
@@ -35,16 +35,18 @@ export const WheelOfTheYearWidget = () => {
 
       for (let i = 0; i < sabbatDates.length; i++) {
         const sabbat = sabbatDates[i];
-        const sabbatDate = dayjs().month(sabbat.month - 1).date(sabbat.day);
-        
+        const sabbatDate = dayjs()
+          .month(sabbat.month - 1)
+          .date(sabbat.day);
+
         // Check if we're within 7 days of this sabbat
         const daysDiff = sabbatDate.diff(now, 'days');
-        
+
         if (Math.abs(daysDiff) <= 7) {
           current = sabbat.name;
           break;
         }
-        
+
         // Find next upcoming sabbat
         if (daysDiff > 0 && !next) {
           next = sabbat.name;
@@ -69,10 +71,8 @@ export const WheelOfTheYearWidget = () => {
     getCurrentSabbat();
   }, []);
 
-
-
   const getSabbatInfo = (sabbatName: string) => {
-    return wheelOfTheYearSabbats.find(sabbat => sabbat.name === sabbatName);
+    return wheelOfTheYearSabbats.find((sabbat) => sabbat.name === sabbatName);
   };
 
   // Only show widget if there's a current sabbat happening soon
@@ -95,28 +95,20 @@ export const WheelOfTheYearWidget = () => {
       <div className='space-y-3'>
         <div>
           <div className='flex items-center gap-2 mb-1'>
-            <h4 className='font-medium text-orange-200'>
-              Current Season
-            </h4>
-            <span className='text-sm text-orange-400'>
-              {displaySabbat}
-            </span>
+            <h4 className='font-medium text-orange-200'>Current Season</h4>
+            <span className='text-sm text-orange-400'>{displaySabbat}</span>
           </div>
-          
+
           {sabbatInfo && (
             <>
-              <p className='text-sm text-orange-100 mb-2'>
-                {sabbatInfo.date}
-              </p>
+              <p className='text-sm text-orange-100 mb-2'>{sabbatInfo.date}</p>
               <p className='text-xs text-orange-200 leading-relaxed'>
                 {sabbatInfo.description}
               </p>
             </>
           )}
         </div>
-
-
       </div>
     </div>
   );
-}; 
+};

@@ -53,7 +53,6 @@ export default function HoroscopePage() {
           </p>
         </div>
 
-
         {/* General Cosmic Insight */}
         <div className='bg-zinc-800 rounded-lg p-4'>
           <h2 className='text-lg font-semibold text-green-400 mb-3'>
@@ -70,7 +69,9 @@ export default function HoroscopePage() {
         {/* Preview of Personal Insight - Premium Feature */}
         <div>
           <div className='flex justify-between items-center mb-3'>
-            <h2 className='text-lg font-semibold text-green-400'>Personal Insight</h2>
+            <h2 className='text-lg font-semibold text-green-400'>
+              Personal Insight
+            </h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
               Premium Feature
             </div>
@@ -80,17 +81,23 @@ export default function HoroscopePage() {
             <div className='filter blur-sm pointer-events-none'>
               <div className='bg-zinc-800 rounded-lg p-4 opacity-60'>
                 <p className='text-zinc-200 leading-relaxed'>
-                  ●●●●● ●●●●● ●●● ●●●●●●●● ●●●●●●●● ●●● ●●●●●●● ●●●●●●●●● ●●●●●●● ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●● ●●●●●●●●● ●●●●●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●● ●●●●●●●● ●●●●●●●●● ●●●●●●●●●.
+                  ●●●●● ●●●●● ●●● ●●●●●●●● ●●●●●●●● ●●● ●●●●●●● ●●●●●●●●●
+                  ●●●●●●● ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●●
+                  ●●●●●●●●● ●●●●●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●● ●●●●●●●●
+                  ●●●●●●●●● ●●●●●●●●●.
                 </p>
               </div>
             </div>
-            
+
             {/* Overlay with upgrade prompt */}
             <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/80 rounded-lg'>
               <div className='text-center p-6'>
-                <h3 className='text-white font-medium mb-2'>🌟 Personal Insight</h3>
+                <h3 className='text-white font-medium mb-2'>
+                  🌟 Personal Insight
+                </h3>
                 <p className='text-zinc-300 text-sm mb-4'>
-                  Get insights specifically tailored to your birth chart and cosmic profile
+                  Get insights specifically tailored to your birth chart and
+                  cosmic profile
                 </p>
                 <Link
                   href='/pricing'
@@ -117,7 +124,9 @@ export default function HoroscopePage() {
         {/* Preview of Personalized Lucky Elements - Premium Feature */}
         <div>
           <div className='flex justify-between items-center mb-3'>
-            <h2 className='text-lg font-semibold text-pink-400'>Your Lucky Elements</h2>
+            <h2 className='text-lg font-semibold text-pink-400'>
+              Your Lucky Elements
+            </h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
               Premium Feature
             </div>
@@ -127,24 +136,30 @@ export default function HoroscopePage() {
             <div className='filter blur-sm pointer-events-none'>
               <div className='bg-zinc-800 rounded-lg p-4 opacity-60'>
                 <p className='text-sm text-zinc-400 mb-3'>
-                  ●●●●●●●●●● ●●●●● ●●●●●●● ●●●●● ●● ●●●●●●●● ●●●●●●●●●, ●●●●●●●●●, ●●● ●●●● ●●●●● ●●●●●
+                  ●●●●●●●●●● ●●●●● ●●●●●●● ●●●●● ●● ●●●●●●●● ●●●●●●●●●,
+                  ●●●●●●●●●, ●●● ●●●● ●●●●● ●●●●●
                 </p>
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                   {[...Array(4)].map((_, index) => (
                     <div key={index} className='bg-zinc-700 rounded p-3'>
-                      <p className='text-sm font-medium text-center'>●●●●●● & ●●●●●●</p>
+                      <p className='text-sm font-medium text-center'>
+                        ●●●●●● & ●●●●●●
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-            
+
             {/* Overlay with upgrade prompt */}
             <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/80 rounded-lg'>
               <div className='text-center p-6'>
-                <h3 className='text-white font-medium mb-2'>✨ Personal Lucky Elements</h3>
+                <h3 className='text-white font-medium mb-2'>
+                  ✨ Personal Lucky Elements
+                </h3>
                 <p className='text-zinc-300 text-sm mb-4'>
-                  Get colors, crystals, and timing based on your unique birth chart
+                  Get colors, crystals, and timing based on your unique birth
+                  chart
                 </p>
                 <Link
                   href='/pricing'
@@ -186,7 +201,9 @@ export default function HoroscopePage() {
         {/* Preview of Solar Return - Premium Feature */}
         <div>
           <div className='flex justify-between items-center mb-3'>
-            <h2 className='text-lg font-semibold text-orange-300'>🌅 Solar Return Insights</h2>
+            <h2 className='text-lg font-semibold text-orange-300'>
+              🌅 Solar Return Insights
+            </h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
               Premium Feature
             </div>
@@ -210,16 +227,19 @@ export default function HoroscopePage() {
                     <span className='text-orange-200 font-medium'>●</span>
                   </div>
                   <p className='text-orange-100 leading-relaxed text-sm'>
-                    ●●●● ●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●●●● ●●● ●●●●●●●●●● ●●●●●●●●●● ●●●●●●●● ●●●●●●●●●●●.
+                    ●●●● ●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●●●● ●●● ●●●●●●●●●●
+                    ●●●●●●●●●● ●●●●●●●● ●●●●●●●●●●●.
                   </p>
                 </div>
               </div>
             </div>
-            
+
             {/* Overlay with upgrade prompt */}
             <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/80 rounded-lg'>
               <div className='text-center p-6'>
-                <h3 className='text-white font-medium mb-2'>🌅 Solar Return Analysis</h3>
+                <h3 className='text-white font-medium mb-2'>
+                  🌅 Solar Return Analysis
+                </h3>
                 <p className='text-zinc-300 text-sm mb-4'>
                   Discover your personal year themes and birthday insights
                 </p>
@@ -288,7 +308,9 @@ export default function HoroscopePage() {
         {/* Preview of Personal Transit Impact - Premium Feature */}
         <div>
           <div className='flex justify-between items-center mb-3'>
-            <h2 className='text-lg font-semibold text-indigo-400'>🌟 Personal Transit Impact</h2>
+            <h2 className='text-lg font-semibold text-indigo-400'>
+              🌟 Personal Transit Impact
+            </h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
               Premium Feature
             </div>
@@ -298,11 +320,15 @@ export default function HoroscopePage() {
             <div className='filter blur-sm pointer-events-none'>
               <div className='bg-gradient-to-r from-indigo-900/30 to-purple-900/30 rounded-lg p-4 border border-indigo-700 opacity-60'>
                 <p className='text-sm text-indigo-300 mb-4'>
-                  ●●● ●●●●● ●●●●●●● ●●●●●● ●●●●●●●●● ●●● ●●●● ●●●●● ●●●●● ●●●●●●●●●
+                  ●●● ●●●●● ●●●●●●● ●●●●●● ●●●●●●●●● ●●● ●●●● ●●●●● ●●●●●
+                  ●●●●●●●●●
                 </p>
                 <div className='space-y-3'>
                   {[...Array(3)].map((_, index) => (
-                    <div key={index} className='bg-indigo-800/40 rounded p-3 border-l-4 border-purple-500'>
+                    <div
+                      key={index}
+                      className='bg-indigo-800/40 rounded p-3 border-l-4 border-purple-500'
+                    >
                       <div className='flex justify-between items-start mb-2'>
                         <div>
                           <h4 className='font-medium text-indigo-200 text-sm'>
@@ -317,20 +343,24 @@ export default function HoroscopePage() {
                         </span>
                       </div>
                       <p className='text-sm text-indigo-300 leading-relaxed'>
-                        ●●●● ●●●●●● ●●● ●●●●●●●●● ●●●●●●● ●●●●●●● ●●● ●●●●●●●●●● ●●●●●●●●●.
+                        ●●●● ●●●●●● ●●● ●●●●●●●●● ●●●●●●● ●●●●●●● ●●● ●●●●●●●●●●
+                        ●●●●●●●●●.
                       </p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-            
+
             {/* Overlay with upgrade prompt */}
             <div className='absolute inset-0 flex items-center justify-center bg-zinc-900/80 rounded-lg'>
               <div className='text-center p-6'>
-                <h3 className='text-white font-medium mb-2'>🌟 Personal Transit Impact</h3>
+                <h3 className='text-white font-medium mb-2'>
+                  🌟 Personal Transit Impact
+                </h3>
                 <p className='text-zinc-300 text-sm mb-4'>
-                  See how planetary transits specifically affect your birth chart
+                  See how planetary transits specifically affect your birth
+                  chart
                 </p>
                 <Link
                   href='/pricing'
@@ -349,9 +379,9 @@ export default function HoroscopePage() {
             🌟 Unlock Your Complete Cosmic Profile
           </h3>
           <p className='text-zinc-300 text-sm mb-4'>
-            Get access to all the personalized features you see previewed above - 
-            horoscopes based on YOUR birth chart with deep personal insights and 
-            cosmic guidance tailored specifically to you.
+            Get access to all the personalized features you see previewed above
+            - horoscopes based on YOUR birth chart with deep personal insights
+            and cosmic guidance tailored specifically to you.
           </p>
           <ul className='text-xs text-zinc-400 space-y-1 mb-4'>
             <li>• Personal insight based on your birth chart</li>
