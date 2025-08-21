@@ -1,4 +1,4 @@
-import { MoonPhaseLabels } from '../utils/moon/moonPhases';
+import { MoonPhaseLabels } from '../../utils/moon/moonPhases';
 
 export interface Spell {
   id: string;
@@ -784,7 +784,7 @@ export const moonSpells = {
 };
 
 // Sabbat specific spell recommendations
-export const sabbatSpells = {
+export const sabbatSpells: { [key: string]: string[] } = {
   Samhain: [
     'samhain-ancestor-connection',
     'black-tourmaline-shield',
