@@ -871,10 +871,10 @@ export const CrystalWidget = () => {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='space-y-2'>
-          <div className='flex items-center justify-between'>
+          {/* <div className='flex items-center justify-between'>
             <h3 className='font-bold'>Crystal Energy</h3>
             <div className='text-lg'>💎</div>
-          </div>
+          </div> */}
 
           <div className='space-y-2'>
             <div className='text-center'>

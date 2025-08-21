@@ -20,10 +20,10 @@ export const TarotWidget = () => {
     return (
       <div className='p-5 border border-stone-800 rounded-md w-full'>
         <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
+          {/* <div className='flex items-center justify-between'>
             <h3 className='font-bold'>Daily Tarot Guidance</h3>
             <span className='text-lg'>🔮</span>
-          </div>
+          </div> */}
 
           {/* Daily Card Display */}
           <div className='text-center'>
