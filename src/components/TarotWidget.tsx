@@ -42,9 +42,9 @@ export const TarotWidget = () => {
 
           {/* Upsell Section */}
           <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-3 border border-purple-500/20'>
-            <p className='text-xs text-purple-200 mb-1'>
+            {/* <p className='text-xs text-purple-200 mb-1'>
               🔮 Start Your Free Trial
-            </p>
+            </p> */}
             <p className='text-xs text-zinc-400 mb-2'>
               Get tarot readings based on YOUR name and birthday. Discover what
               the cards reveal about you!
@@ -53,7 +53,7 @@ export const TarotWidget = () => {
               href='/pricing'
               className='text-xs text-purple-400 underline font-medium'
             >
-              Start Free Trial
+              Start Your Free Trial
             </Link>
           </div>
         </div>
