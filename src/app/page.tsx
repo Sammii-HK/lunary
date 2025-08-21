@@ -5,6 +5,7 @@ import { DateWidget } from '@/components/DateWidget';
 import { HoroscopeWidget } from '@/components/HoroscopeWidget';
 import { CrystalWidget } from '@/components/CrystalWidget';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
+// import { LuckyElements } from '@/components/LuckyElements';
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
         <AstronomyWidget />
         <MoonWidget />
         <HoroscopeWidget />
+        {/* <LuckyElements /> */}
         <CrystalWidget />
         <TarotWidget />
       </AstronomyContextProvider>
