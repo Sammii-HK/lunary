@@ -4,6 +4,8 @@ import { AstronomyWidget } from '@/components/AstronomyWidget';
 import { DateWidget } from '@/components/DateWidget';
 import { HoroscopeWidget } from '@/components/HoroscopeWidget';
 import { CrystalWidget } from '@/components/CrystalWidget';
+import { WheelOfTheYearWidget } from '@/components/WheelOfTheYearWidget';
+import { MoonSpellsWidget } from '@/components/MoonSpellsWidget';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
 // import { LuckyElements } from '@/components/LuckyElements';
 
@@ -18,6 +20,8 @@ export default function Home() {
         {/* <LuckyElements /> */}
         <CrystalWidget />
         <TarotWidget />
+        <WheelOfTheYearWidget />
+        <MoonSpellsWidget />
       </AstronomyContextProvider>
     </div>
   );

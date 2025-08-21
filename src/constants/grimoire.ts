@@ -58,7 +58,7 @@ export const grimoire: {
   },
   practices: {
     title: 'Practices',
-    contents: ['Spells', 'Rituals', 'Recipes', 'Divination'],
+    contents: ['Spells & Rituals', 'Protection', 'Love & Relationships', 'Prosperity', 'Healing', 'Cleansing', 'Divination', 'Manifestation', 'Banishing'],
   },
 };
 
