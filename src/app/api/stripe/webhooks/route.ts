@@ -110,22 +110,52 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   console.log('Subscription updated:', subscription.id);
 
-  // TODO: Update user's subscription status in Jazz
+  const { updateUserSubscriptionStatus } = await import(
+    '../../../../../utils/subscription'
+  );
+
   const customerId = subscription.customer as string;
   const status = subscription.status;
+  const planType =
+    subscription.items.data[0]?.price?.recurring?.interval === 'month'
+      ? 'monthly'
+      : 'yearly';
+
+  const result = await updateUserSubscriptionStatus(customerId, {
+    id: subscription.id,
+    status: status,
+    plan: planType,
+    trialEnd: subscription.trial_end || undefined,
+    currentPeriodEnd: (subscription as any).current_period_end,
+  });
 
   console.log(
-    `Customer ${customerId} subscription updated to status: ${status}`,
+    `Customer ${customerId} subscription updated to status: ${status} - sync result:`,
+    result,
   );
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   console.log('Subscription deleted:', subscription.id);
 
-  // TODO: Update user's subscription status to cancelled in Jazz
+  const { updateUserSubscriptionStatus } = await import(
+    '../../../../../utils/subscription'
+  );
+
   const customerId = subscription.customer as string;
 
-  console.log(`Customer ${customerId} subscription cancelled`);
+  const result = await updateUserSubscriptionStatus(customerId, {
+    id: subscription.id,
+    status: 'cancelled',
+    plan: 'free',
+    trialEnd: undefined,
+    currentPeriodEnd: (subscription as any).current_period_end,
+  });
+
+  console.log(
+    `Customer ${customerId} subscription cancelled - sync result:`,
+    result,
+  );
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {

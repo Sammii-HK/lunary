@@ -11,6 +11,7 @@ interface CheckoutSession {
   id: string;
   status: string;
   customer_email: string;
+  customer_id: string;
   subscription: {
     id: string;
     status: string;
@@ -37,7 +38,7 @@ export default function SuccessPage() {
     console.log('Jazz account not available');
   }
 
-  // Create trial subscription directly in Jazz profile
+
   const [trialCreated, setTrialCreated] = useState(false);
 
   useEffect(() => {
@@ -59,18 +60,13 @@ export default function SuccessPage() {
         !trialCreated &&
         !(profile as any).subscription
       ) {
-        console.log('Creating trial subscription in Jazz profile...');
         try {
+          if (session.customer_id) {
+            (profile as any).stripeCustomerId = session.customer_id;
+          }
           const result = await createTrialSubscriptionInProfile(profile);
           console.log('Trial creation result:', result);
           if (result.success) {
-            console.log(
-              'Trial subscription created successfully, checking profile...',
-            );
-            console.log(
-              'Profile after trial creation:',
-              (profile as any).subscription,
-            );
             setTrialCreated(true);
           } else {
             console.error('Trial creation failed:', result);

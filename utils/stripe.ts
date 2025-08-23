@@ -44,25 +44,6 @@ export async function createCustomerPortalSession(customerId: string) {
   return response.json();
 }
 
-export async function cancelSubscription(subscriptionId: string) {
-  const response = await fetch('/api/stripe/cancel-subscription', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      subscriptionId,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to cancel subscription');
-  }
-
-  return response.json();
-}
-
-// Fetch trial period for a specific price ID from Stripe
 export async function getTrialPeriodForPrice(priceId: string): Promise<number> {
   try {
     const response = await fetch('/api/stripe/products', {
@@ -78,14 +59,13 @@ export async function getTrialPeriodForPrice(priceId: string): Promise<number> {
     }
 
     const data = await response.json();
-    return data.trial_period_days || 7; // fallback to 7 days
+    return data.trial_period_days || 7;
   } catch (error) {
     console.error('Error fetching trial period:', error);
-    return 7; // fallback to 7 days
+    return 7;
   }
 }
 
-// Fetch all Stripe products with trial information
 export async function getStripeProducts() {
   try {
     const response = await fetch('/api/stripe/products');

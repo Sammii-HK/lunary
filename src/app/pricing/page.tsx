@@ -12,15 +12,17 @@ import {
 } from '../../../utils/pricing';
 import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
 import { Check, Star, Zap } from 'lucide-react';
+import { useSubscription } from '../../hooks/useSubscription';
 
 export default function PricingPage() {
   const { me } = useAccount();
+  const subscription = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
   const [loadingPlans, setLoadingPlans] = useState(true);
 
-  // Load dynamic pricing plans with Stripe trial data on component mount
+
   useEffect(() => {
     async function loadPricingPlans() {
       try {
@@ -28,7 +30,7 @@ export default function PricingPage() {
         setPricingPlans(dynamicPlans);
       } catch (error) {
         console.error('Error loading dynamic pricing plans:', error);
-        // Keep the static plans as fallback
+
       } finally {
         setLoadingPlans(false);
       }
@@ -37,9 +39,9 @@ export default function PricingPage() {
     loadPricingPlans();
   }, []);
 
-  const subscription = (me?.profile as any)?.subscription;
-  const subscriptionStatus = subscription?.status || 'free';
-  const trialDaysRemaining = getTrialDaysRemaining(subscription?.trialEndsAt);
+  const subscriptionStatus = subscription.status || 'free';
+  const trialDaysRemaining = subscription.trialDaysRemaining;
+
 
   const handleSubscribe = async (priceId: string, planId: string) => {
     if (!priceId) return;
@@ -49,7 +51,7 @@ export default function PricingPage() {
     try {
       const { sessionId } = await createCheckoutSession(
         priceId,
-        subscription?.stripeCustomerId,
+        subscription.customerId,
       );
 
       const stripe = await stripePromise;
@@ -117,7 +119,7 @@ export default function PricingPage() {
                     : 'bg-zinc-800/50 border-zinc-700'
                 }`}
               >
-                {/* Popular Badge */}
+
                 {plan.popular && (
                   <div className='absolute -top-3 left-1/2 transform -translate-x-1/2'>
                     <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1'>
@@ -177,20 +179,23 @@ export default function PricingPage() {
                     ))}
                   </div>
 
-                  {/* CTA Button */}
+
                   <div className='pt-3'>
-                    {plan.id === 'free' ? (
+                    {plan.id === 'free' && subscriptionStatus === 'free' ? (
                       <Link
                         href='/'
                         className='w-full bg-zinc-700 hover:bg-zinc-600 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center block text-sm'
                       >
                         Current Plan
                       </Link>
-                    ) : subscriptionStatus === 'active' &&
-                      subscription?.plan === plan.id ? (
-                      <div className='w-full bg-green-600 text-white py-2 px-4 rounded-lg font-medium text-center text-sm'>
-                        Current Plan
-                      </div>
+                    ) : (subscriptionStatus === 'active' || subscriptionStatus === 'trial') &&
+                      subscription.plan === plan.id ? (
+                      <a
+                        href='/profile'
+                        className='w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium text-center text-sm block transition-colors'
+                      >
+                        Current Plan {subscriptionStatus === 'trial' ? `(${trialDaysRemaining} days left)` : ''}
+                      </a>
                     ) : (
                       <button
                         onClick={() =>

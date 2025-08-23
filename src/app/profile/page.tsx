@@ -19,6 +19,8 @@ import {
   canCollectBirthday,
   hasBirthChartAccess,
 } from '../../../utils/pricing';
+import SubscriptionManagement from '../../components/SubscriptionManagement';
+import CustomerIdSetup from '../../components/CustomerIdSetup';
 
 export default function ProfilePage() {
   const { me } = useAccount();
@@ -325,6 +327,17 @@ export default function ProfilePage() {
             })()}
           </div>
         </>
+      )}
+
+      {/* Customer ID Setup */}
+      {!isEditing && <CustomerIdSetup />}
+
+      {/* Subscription Management Section */}
+      {!isEditing && (
+        <SubscriptionManagement
+          customerId={(me?.profile as any)?.stripeCustomerId || (me?.profile as any)?.subscription?.stripeCustomerId}
+          subscriptionId={(me?.profile as any)?.subscription?.stripeSubscriptionId}
+        />
       )}
 
       {/* Debug Info */}

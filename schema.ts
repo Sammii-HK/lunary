@@ -1,4 +1,4 @@
-// schema.ts
+
 import { co, z } from 'jazz-tools';
 
 export const NoteItem = co.map({
@@ -8,7 +8,7 @@ export const NoteItem = co.map({
   updatedAt: z.string(),
 });
 
-// Birth Chart Planet Schema
+
 export const BirthChartPlanet = co.map({
   body: z.string(),
   sign: z.string(),
@@ -18,7 +18,7 @@ export const BirthChartPlanet = co.map({
   retrograde: z.boolean(),
 });
 
-// Personal Tarot Card Schema
+
 export const PersonalCard = co.map({
   name: z.string(),
   keywords: co.list(z.string()),
@@ -27,10 +27,10 @@ export const PersonalCard = co.map({
   reason: z.string(),
 });
 
-// Birth Chart Schema (list of planets)
+
 export const BirthChart = co.list(BirthChartPlanet);
 
-// Subscription Schema
+
 export const Subscription = co.map({
   status: z.enum(['free', 'trial', 'active', 'cancelled', 'past_due']),
   plan: z.enum(['free', 'monthly', 'yearly']),
@@ -54,5 +54,6 @@ export const MyAppAccount = co.account({
     birthChart: BirthChart.optional(),
     personalCard: PersonalCard.optional(),
     subscription: Subscription.optional(),
+    stripeCustomerId: z.string().optional(),
   }),
 });

@@ -21,7 +21,7 @@ export async function GET(
       );
     }
 
-    // Retrieve the checkout session with expanded subscription data
+
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ['subscription', 'customer'],
     });
@@ -30,12 +30,15 @@ export async function GET(
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    // Format the response
+
     const subscription = session.subscription as any;
+    const customer = session.customer as any;
+    
     const formattedSession = {
       id: session.id,
       status: session.status,
       customer_email: session.customer_details?.email || 'Unknown',
+      customer_id: customer?.id || session.customer,
       subscription: subscription
         ? {
             id: subscription.id,
