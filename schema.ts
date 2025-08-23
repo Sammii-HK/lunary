@@ -46,6 +46,15 @@ export const AccountRoot = co.map({
   notes: co.list(NoteItem),
 });
 
+export const UserLocation = co.map({
+  latitude: z.number(),
+  longitude: z.number(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  timezone: z.string().optional(),
+  lastUpdated: z.string(),
+});
+
 export const MyAppAccount = co.account({
   root: AccountRoot,
   profile: co.map({
@@ -55,5 +64,6 @@ export const MyAppAccount = co.account({
     personalCard: PersonalCard.optional(),
     subscription: Subscription.optional(),
     stripeCustomerId: z.string().optional(),
+    location: UserLocation.optional(),
   }),
 });

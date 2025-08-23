@@ -81,9 +81,12 @@ export default function ManualCustomerIdEntry() {
         </button>
 
         <div className='text-xs text-zinc-400 text-center'>
-          <p>Temporary widget for testing. Enter your Stripe customer ID to debug subscription issues.</p>
+          <p>
+            Temporary widget for testing. Enter your Stripe customer ID to debug
+            subscription issues.
+          </p>
         </div>
       </div>
     </div>
   );
-} 
+}
