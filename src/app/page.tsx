@@ -7,6 +7,7 @@ import { CrystalWidget } from '@/components/CrystalWidget';
 import { WheelOfTheYearWidget } from '@/components/WheelOfTheYearWidget';
 import { MoonSpellsWidget } from '@/components/MoonSpellsWidget';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
+import EphemerisWidget from '@/components/EphemerisWidget';
 // import { LuckyElements } from '@/components/LuckyElements';
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
         <DateWidget />
         <AstronomyWidget />
         <MoonWidget />
+        <EphemerisWidget />
         <HoroscopeWidget />
         {/* <LuckyElements /> */}
         <CrystalWidget />
