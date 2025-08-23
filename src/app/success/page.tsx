@@ -38,7 +38,6 @@ export default function SuccessPage() {
     console.log('Jazz account not available');
   }
 
-
   const [trialCreated, setTrialCreated] = useState(false);
 
   useEffect(() => {

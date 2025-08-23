@@ -26,7 +26,8 @@ export default function SubscriptionManagement({
   const subscription = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [stripeSubscription, setStripeSubscription] = useState<StripeSubscription | null>(null);
+  const [stripeSubscription, setStripeSubscription] =
+    useState<StripeSubscription | null>(null);
 
   const displaySubscription = stripeSubscription || subscription;
 
@@ -62,7 +63,7 @@ export default function SubscriptionManagement({
 
   const handleBillingPortal = async () => {
     let customerIdToUse = customerId || stripeSubscription?.customerId;
-    
+
     if (!customerIdToUse) {
       setError('Customer ID not found. Please contact support.');
       return;
@@ -70,7 +71,7 @@ export default function SubscriptionManagement({
 
     setLoading('portal');
     setError(null);
-    
+
     try {
       const response = await fetch('/api/stripe/create-portal-session', {
         method: 'POST',
@@ -97,7 +98,10 @@ export default function SubscriptionManagement({
     }
   };
 
-  if ((displaySubscription as any)?.isSubscribed === false && displaySubscription.status === 'free') {
+  if (
+    (displaySubscription as any)?.isSubscribed === false &&
+    displaySubscription.status === 'free'
+  ) {
     return (
       <div className='bg-zinc-800 rounded-lg p-4 w-full max-w-md border border-zinc-700'>
         <div className='text-center'>
@@ -118,23 +122,33 @@ export default function SubscriptionManagement({
     );
   }
 
-  const isActiveSubscription = displaySubscription.status === 'active' || displaySubscription.status === 'trialing';
+  const isActiveSubscription =
+    displaySubscription.status === 'active' ||
+    displaySubscription.status === 'trialing';
   const customerIdToUse = customerId || stripeSubscription?.customerId;
 
   return (
     <div className='bg-zinc-800 rounded-lg p-4 w-full max-w-md border border-zinc-700'>
       <div className='flex justify-between items-start mb-3'>
         <h3 className='text-lg font-semibold text-white'>Subscription</h3>
-        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-          displaySubscription.status === 'active' ? 'bg-green-900 text-green-300' :
-          displaySubscription.status === 'trialing' ? 'bg-blue-900 text-blue-300' :
-          displaySubscription.status === 'canceled' ? 'bg-yellow-900 text-yellow-300' :
-          'bg-zinc-700 text-zinc-300'
-        }`}>
-          {displaySubscription.status === 'trialing' ? 'Free Trial' : 
-           displaySubscription.status === 'active' ? 'Active' :
-           displaySubscription.status === 'canceled' ? 'Ending Soon' :
-           displaySubscription.status}
+        <div
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            displaySubscription.status === 'active'
+              ? 'bg-green-900 text-green-300'
+              : displaySubscription.status === 'trialing'
+                ? 'bg-blue-900 text-blue-300'
+                : displaySubscription.status === 'canceled'
+                  ? 'bg-yellow-900 text-yellow-300'
+                  : 'bg-zinc-700 text-zinc-300'
+          }`}
+        >
+          {displaySubscription.status === 'trialing'
+            ? 'Free Trial'
+            : displaySubscription.status === 'active'
+              ? 'Active'
+              : displaySubscription.status === 'canceled'
+                ? 'Ending Soon'
+                : displaySubscription.status}
         </div>
       </div>
 
@@ -142,33 +156,43 @@ export default function SubscriptionManagement({
         <div className='flex justify-between'>
           <span className='text-zinc-400 text-sm'>Plan:</span>
           <span className='text-white text-sm font-medium'>
-            {stripeSubscription?.planName || displaySubscription.planName || 'Cosmic Guide'}
+            {stripeSubscription?.planName ||
+              displaySubscription.planName ||
+              'Cosmic Guide'}
           </span>
         </div>
 
-        {displaySubscription.status === 'trialing' && stripeSubscription?.trialEnd && (
-          <div className='flex justify-between'>
-            <span className='text-zinc-400 text-sm'>Trial ends:</span>
-            <span className='text-blue-300 text-sm'>
-              {new Date(parseInt(stripeSubscription.trialEnd) * 1000).toLocaleDateString()}
-            </span>
-          </div>
-        )}
+        {displaySubscription.status === 'trialing' &&
+          stripeSubscription?.trialEnd && (
+            <div className='flex justify-between'>
+              <span className='text-zinc-400 text-sm'>Trial ends:</span>
+              <span className='text-blue-300 text-sm'>
+                {new Date(
+                  parseInt(stripeSubscription.trialEnd) * 1000,
+                ).toLocaleDateString()}
+              </span>
+            </div>
+          )}
 
-        {displaySubscription.status === 'active' && stripeSubscription?.currentPeriodEnd && (
-          <div className='flex justify-between'>
-            <span className='text-zinc-400 text-sm'>Next billing:</span>
-            <span className='text-white text-sm'>
-              {new Date(parseInt(stripeSubscription.currentPeriodEnd) * 1000).toLocaleDateString()}
-            </span>
-          </div>
-        )}
+        {displaySubscription.status === 'active' &&
+          stripeSubscription?.currentPeriodEnd && (
+            <div className='flex justify-between'>
+              <span className='text-zinc-400 text-sm'>Next billing:</span>
+              <span className='text-white text-sm'>
+                {new Date(
+                  parseInt(stripeSubscription.currentPeriodEnd) * 1000,
+                ).toLocaleDateString()}
+              </span>
+            </div>
+          )}
 
         {stripeSubscription?.cancelAtPeriodEnd && (
           <div className='flex justify-between'>
             <span className='text-zinc-400 text-sm'>Ends:</span>
             <span className='text-yellow-300 text-sm'>
-              {new Date(parseInt(stripeSubscription.currentPeriodEnd) * 1000).toLocaleDateString()}
+              {new Date(
+                parseInt(stripeSubscription.currentPeriodEnd) * 1000,
+              ).toLocaleDateString()}
             </span>
           </div>
         )}
@@ -193,4 +217,4 @@ export default function SubscriptionManagement({
       )}
     </div>
   );
-} 
+}

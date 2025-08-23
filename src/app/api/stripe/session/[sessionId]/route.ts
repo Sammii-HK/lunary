@@ -21,7 +21,6 @@ export async function GET(
       );
     }
 
-
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ['subscription', 'customer'],
     });
@@ -30,10 +29,9 @@ export async function GET(
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-
     const subscription = session.subscription as any;
     const customer = session.customer as any;
-    
+
     const formattedSession = {
       id: session.id,
       status: session.status,

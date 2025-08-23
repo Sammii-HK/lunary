@@ -14,14 +14,12 @@ export async function POST(request: NextRequest) {
     if (!customerId) {
       return NextResponse.json(
         { error: 'Customer ID is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-
     const originFromRequest = new URL(request.url).origin;
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || originFromRequest;
-
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
@@ -33,7 +31,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating customer portal session:', error);
     return NextResponse.json(
       { error: 'Failed to create customer portal session' },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

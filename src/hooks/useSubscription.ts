@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { MyAppAccount } from '../../schema';
 import {
@@ -24,56 +24,60 @@ export interface SubscriptionStatus {
 }
 
 export function useSubscription(): SubscriptionStatus {
+  const defaultState: SubscriptionStatus = useMemo(
+    () => ({
+      isSubscribed: false,
+      isTrialActive: false,
+      trialDaysRemaining: 0,
+      plan: 'free',
+      status: 'free',
+      hasAccess: (feature) => hasFeatureAccess(feature, 'free'),
+      showUpgradePrompt: true,
+      loading: false,
+    }),
+    [],
+  );
 
-  const defaultState: SubscriptionStatus = {
-    isSubscribed: false,
-    isTrialActive: false,
-    trialDaysRemaining: 0,
-    plan: 'free',
-    status: 'free',
-    hasAccess: (feature) => hasFeatureAccess(feature, 'free'),
-    showUpgradePrompt: true,
-    loading: false,
-  };
-
-  const [subscriptionState, setSubscriptionState] = useState<SubscriptionStatus>(defaultState);
+  const [subscriptionState, setSubscriptionState] =
+    useState<SubscriptionStatus>(defaultState);
   const [hasCheckedStripe, setHasCheckedStripe] = useState(false);
 
-
-  let me;
+  let me: any;
+  let hasJazzProvider = true;
   try {
     const result = useAccount();
     me = result.me;
   } catch (error) {
-
-    console.warn('Jazz provider not available, using default subscription state');
-    return defaultState;
+    console.warn(
+      'Jazz provider not available, using default subscription state',
+    );
+    hasJazzProvider = false;
   }
 
+  const getCustomerId = useCallback((): string | null => {
+    if (!me?.profile) return null;
 
-  const getCustomerId = (): string | null => {
-
-    const profileCustomerId = (me?.profile as any)?.stripeCustomerId;
+    const profileCustomerId = (me.profile as any)?.stripeCustomerId;
     if (profileCustomerId) {
       return profileCustomerId;
     }
 
-    const profileSubscription = (me?.profile as any)?.subscription;
+    const profileSubscription = (me.profile as any)?.subscription;
     if (profileSubscription?.stripeCustomerId) {
       return profileSubscription.stripeCustomerId;
     }
-    
+
     return null;
-  };
+  }, [me?.profile]);
 
-
-
-
-  const fetchFromStripe = async (customerId: string) => {
+  const fetchFromStripe = useCallback(async (customerId: string) => {
     try {
-      console.log('Fetching subscription from Stripe for customer:', customerId);
-      setSubscriptionState(prev => ({ ...prev, loading: true }));
-      
+      console.log(
+        'Fetching subscription from Stripe for customer:',
+        customerId,
+      );
+      setSubscriptionState((prev) => ({ ...prev, loading: true }));
+
       const response = await fetch('/api/stripe/get-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,8 +89,14 @@ export function useSubscription(): SubscriptionStatus {
         if (data.hasSubscription) {
           const sub = data.subscription;
           const status = sub.status === 'trialing' ? 'trial' : sub.status;
-          const trialDaysRemaining = sub.trialEnd ? 
-            Math.max(0, Math.ceil((sub.trialEnd * 1000 - Date.now()) / (1000 * 60 * 60 * 24))) : 0;
+          const trialDaysRemaining = sub.trialEnd
+            ? Math.max(
+                0,
+                Math.ceil(
+                  (sub.trialEnd * 1000 - Date.now()) / (1000 * 60 * 60 * 24),
+                ),
+              )
+            : 0;
           const isTrialActive = status === 'trial' && trialDaysRemaining > 0;
           const isSubscribed = status === 'active' || isTrialActive;
 
@@ -96,7 +106,12 @@ export function useSubscription(): SubscriptionStatus {
             trialDaysRemaining,
             plan: sub.plan as 'free' | 'monthly' | 'yearly',
             planName: sub.planName,
-            status: status as 'free' | 'trial' | 'active' | 'cancelled' | 'past_due',
+            status: status as
+              | 'free'
+              | 'trial'
+              | 'active'
+              | 'cancelled'
+              | 'past_due',
             hasAccess: (feature) => hasFeatureAccess(feature, sub.plan),
             showUpgradePrompt: !isSubscribed && status !== 'cancelled',
             customerId: sub.customerId,
@@ -112,11 +127,15 @@ export function useSubscription(): SubscriptionStatus {
     } catch (error) {
       console.error('Error fetching subscription from Stripe:', error);
     }
-    
-    setSubscriptionState(prev => ({ ...prev, loading: false }));
-  };
+
+    setSubscriptionState((prev) => ({ ...prev, loading: false }));
+  }, []);
 
   useEffect(() => {
+    if (!hasJazzProvider) {
+      return;
+    }
+
     if (!me?.profile) {
       console.log('useSubscription: No profile found');
       setSubscriptionState(defaultState);
@@ -124,15 +143,22 @@ export function useSubscription(): SubscriptionStatus {
     }
 
     const profileSubscription = (me.profile as any)?.subscription;
-    console.log('useSubscription: Profile found, subscription:', profileSubscription);
+    console.log(
+      'useSubscription: Profile found, subscription:',
+      profileSubscription,
+    );
 
-
-    if (profileSubscription && profileSubscription.status && profileSubscription.status !== 'free') {
+    if (
+      profileSubscription &&
+      profileSubscription.status &&
+      profileSubscription.status !== 'free'
+    ) {
       const status = profileSubscription.status;
       const plan = profileSubscription.plan || 'free';
-      const isTrialActive = status === 'trial' && profileSubscription.trialEndsAt
-        ? new Date(profileSubscription.trialEndsAt) > new Date()
-        : false;
+      const isTrialActive =
+        status === 'trial' && profileSubscription.trialEndsAt
+          ? new Date(profileSubscription.trialEndsAt) > new Date()
+          : false;
       const trialDaysRemaining = profileSubscription.trialEndsAt
         ? getTrialDaysRemaining(profileSubscription.trialEndsAt)
         : 0;
@@ -143,10 +169,17 @@ export function useSubscription(): SubscriptionStatus {
         isTrialActive,
         trialDaysRemaining,
         plan: plan as 'free' | 'monthly' | 'yearly',
-        status: status as 'free' | 'trial' | 'active' | 'cancelled' | 'past_due',
+        status: status as
+          | 'free'
+          | 'trial'
+          | 'active'
+          | 'cancelled'
+          | 'past_due',
         hasAccess: (feature) => hasFeatureAccess(feature, plan),
         showUpgradePrompt: !isSubscribed && status !== 'cancelled',
-        customerId: profileSubscription.stripeCustomerId || (me?.profile as any)?.stripeCustomerId,
+        customerId:
+          profileSubscription.stripeCustomerId ||
+          (me?.profile as any)?.stripeCustomerId,
         subscriptionId: profileSubscription.stripeSubscriptionId,
         loading: false,
       };
@@ -157,13 +190,14 @@ export function useSubscription(): SubscriptionStatus {
       return;
     }
 
-
     if (!hasCheckedStripe) {
       setHasCheckedStripe(true);
       const customerId = getCustomerId();
-      
+
       if (customerId) {
-        console.log('No profile subscription but found customer ID, fetching from Stripe...');
+        console.log(
+          'No profile subscription but found customer ID, fetching from Stripe...',
+        );
         fetchFromStripe(customerId);
         return;
       } else {
@@ -171,7 +205,18 @@ export function useSubscription(): SubscriptionStatus {
         setSubscriptionState(defaultState);
       }
     }
-  }, [me?.profile, hasCheckedStripe]);
+  }, [
+    me?.profile,
+    hasCheckedStripe,
+    hasJazzProvider,
+    defaultState,
+    getCustomerId,
+    fetchFromStripe,
+  ]);
+
+  if (!hasJazzProvider) {
+    return defaultState;
+  }
 
   return subscriptionState;
 }

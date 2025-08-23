@@ -49,20 +49,25 @@ export default function CustomerIdSetup() {
     }
   };
 
-
   const existingCustomerId = (me?.profile as any)?.stripeCustomerId;
   const existingSubscription = (me?.profile as any)?.subscription;
 
-  if (existingCustomerId || (existingSubscription && existingSubscription.status !== 'free')) {
+  if (
+    existingCustomerId ||
+    (existingSubscription && existingSubscription.status !== 'free')
+  ) {
     return null;
   }
 
   return (
     <div className='w-full max-w-md p-4 bg-orange-900/20 border border-orange-500/50 rounded-lg'>
       <h3 className='text-orange-300 font-semibold mb-3'>🔧 Manual Setup</h3>
-      
+
       <div className='text-sm text-orange-200 mb-4 space-y-2'>
-        <p><strong>Backup Setup:</strong> Customer ID wasn't automatically captured during signup.</p>
+        <p>
+          <strong>Backup Setup:</strong> Customer ID wasn't automatically
+          captured during signup.
+        </p>
         <ol className='list-decimal list-inside space-y-1 text-xs'>
           <li>Check your email for Stripe receipts</li>
           <li>Look for "Customer ID" (starts with cus_)</li>
@@ -91,7 +96,7 @@ export default function CustomerIdSetup() {
           className='w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded text-white placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500'
           disabled={loading}
         />
-        
+
         <button
           onClick={handleSaveCustomerId}
           disabled={!customerId || loading}
@@ -102,8 +107,9 @@ export default function CustomerIdSetup() {
       </div>
 
       <div className='mt-3 text-xs text-orange-300'>
-        This is a one-time setup. Your Customer ID will be securely stored in your profile.
+        This is a one-time setup. Your Customer ID will be securely stored in
+        your profile.
       </div>
     </div>
   );
-} 
+}

@@ -22,7 +22,6 @@ export default function PricingPage() {
     useState<PricingPlan[]>(PRICING_PLANS);
   const [loadingPlans, setLoadingPlans] = useState(true);
 
-
   useEffect(() => {
     async function loadPricingPlans() {
       try {
@@ -30,7 +29,6 @@ export default function PricingPage() {
         setPricingPlans(dynamicPlans);
       } catch (error) {
         console.error('Error loading dynamic pricing plans:', error);
-
       } finally {
         setLoadingPlans(false);
       }
@@ -41,7 +39,6 @@ export default function PricingPage() {
 
   const subscriptionStatus = subscription.status || 'free';
   const trialDaysRemaining = subscription.trialDaysRemaining;
-
 
   const handleSubscribe = async (priceId: string, planId: string) => {
     if (!priceId) return;
@@ -119,7 +116,6 @@ export default function PricingPage() {
                     : 'bg-zinc-800/50 border-zinc-700'
                 }`}
               >
-
                 {plan.popular && (
                   <div className='absolute -top-3 left-1/2 transform -translate-x-1/2'>
                     <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1'>
@@ -179,7 +175,6 @@ export default function PricingPage() {
                     ))}
                   </div>
 
-
                   <div className='pt-3'>
                     {plan.id === 'free' && subscriptionStatus === 'free' ? (
                       <Link
@@ -188,13 +183,17 @@ export default function PricingPage() {
                       >
                         Current Plan
                       </Link>
-                    ) : (subscriptionStatus === 'active' || subscriptionStatus === 'trial') &&
+                    ) : (subscriptionStatus === 'active' ||
+                        subscriptionStatus === 'trial') &&
                       subscription.plan === plan.id ? (
                       <a
                         href='/profile'
                         className='w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium text-center text-sm block transition-colors'
                       >
-                        Current Plan {subscriptionStatus === 'trial' ? `(${trialDaysRemaining} days left)` : ''}
+                        Current Plan{' '}
+                        {subscriptionStatus === 'trial'
+                          ? `(${trialDaysRemaining} days left)`
+                          : ''}
                       </a>
                     ) : (
                       <button

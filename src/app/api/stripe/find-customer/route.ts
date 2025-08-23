@@ -12,12 +12,8 @@ export async function POST(request: NextRequest) {
     const { email } = await request.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
-
 
     const customers = await stripe.customers.list({
       email: email,
@@ -46,7 +42,7 @@ export async function POST(request: NextRequest) {
         email: customer.email,
         created: customer.created,
       },
-      subscriptions: subscriptions.data.map(sub => ({
+      subscriptions: subscriptions.data.map((sub) => ({
         id: sub.id,
         status: sub.status,
         current_period_end: (sub as any).current_period_end,
@@ -57,7 +53,7 @@ export async function POST(request: NextRequest) {
     console.error('Error finding customer:', error);
     return NextResponse.json(
       { error: 'Failed to find customer' },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

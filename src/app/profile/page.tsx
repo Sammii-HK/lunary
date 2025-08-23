@@ -335,8 +335,13 @@ export default function ProfilePage() {
       {/* Subscription Management Section */}
       {!isEditing && (
         <SubscriptionManagement
-          customerId={(me?.profile as any)?.stripeCustomerId || (me?.profile as any)?.subscription?.stripeCustomerId}
-          subscriptionId={(me?.profile as any)?.subscription?.stripeSubscriptionId}
+          customerId={
+            (me?.profile as any)?.stripeCustomerId ||
+            (me?.profile as any)?.subscription?.stripeCustomerId
+          }
+          subscriptionId={
+            (me?.profile as any)?.subscription?.stripeSubscriptionId
+          }
         />
       )}
 

@@ -14,10 +14,9 @@ export async function POST(request: NextRequest) {
     if (!customerId) {
       return NextResponse.json(
         { error: 'Customer ID is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
 
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
@@ -32,19 +31,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
-
     const subscription = subscriptions.data[0];
-    
 
     const priceId = subscription.items.data[0]?.price?.id;
     const price = await stripe.prices.retrieve(priceId!, {
       expand: ['product'],
     });
-    
-    const product = price.product as any;
-    const planType = price.recurring?.interval === 'month' ? 'monthly' : 'yearly';
-    const productName = product.name || 'Unknown Plan';
 
+    const product = price.product as any;
+    const planType =
+      price.recurring?.interval === 'month' ? 'monthly' : 'yearly';
+    const productName = product.name || 'Unknown Plan';
 
     const status = subscription.status;
 
@@ -66,7 +63,7 @@ export async function POST(request: NextRequest) {
     console.error('Error fetching subscription:', error);
     return NextResponse.json(
       { error: 'Failed to fetch subscription data' },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}
