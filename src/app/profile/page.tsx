@@ -13,16 +13,13 @@ import {
   hasPersonalCard,
   getPersonalCardFromProfile,
 } from '../../../utils/tarot/personalCard';
-import { Paywall } from '../../components/Paywall';
 import { useSubscription } from '../../hooks/useSubscription';
 import {
   canCollectBirthday,
   hasBirthChartAccess,
 } from '../../../utils/pricing';
 import SubscriptionManagement from '../../components/SubscriptionManagement';
-import CustomerIdSetup from '../../components/CustomerIdSetup';
 import LocationRefresh from '../../components/LocationRefresh';
-import ManualCustomerIdEntry from '../../components/ManualCustomerIdEntry';
 
 export default function ProfilePage() {
   const { me } = useAccount();
@@ -333,12 +330,6 @@ export default function ProfilePage() {
 
       {/* Location Setup */}
       {!isEditing && <LocationRefresh />}
-
-      {/* Manual Customer ID Entry */}
-      {!isEditing && <ManualCustomerIdEntry />}
-
-      {/* Customer ID Setup */}
-      {!isEditing && <CustomerIdSetup />}
 
       {/* Subscription Management Section */}
       {!isEditing && (
