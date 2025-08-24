@@ -211,7 +211,15 @@ export const getZodiacSign = (longitude: number): string => {
 };
 
 export const getConstellation = (ra: number, dec: number): string => {
-  return 'Unknown';
+  // Simple constellation mapping based on ecliptic longitude
+  const constellations = [
+    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+    'Libra', 'Scorpius', 'Sagittarius', 'Capricornus', 'Aquarius', 'Pisces'
+  ];
+  
+  // Convert to constellation index (simplified)
+  const index = Math.floor(((ra % 360) + 360) % 360 / 30);
+  return constellations[index] || 'Unknown';
 };
 
 export const calculatePlanetEphemeris = (
@@ -226,7 +234,7 @@ export const calculatePlanetEphemeris = (
     
     const longitude = Math.atan2(vector.y, vector.x) * (180 / Math.PI);
     const sign = getZodiacSign(longitude);
-    const constellation = getConstellation(0, 0);
+    const constellation = getConstellation(longitude, 0);
 
     return {
       body: name,
