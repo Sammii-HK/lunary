@@ -8,7 +8,38 @@ import { WheelOfTheYearWidget } from '@/components/WheelOfTheYearWidget';
 import { MoonSpellsWidget } from '@/components/MoonSpellsWidget';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import EphemerisWidget from '@/components/EphemerisWidget';
+import { Metadata } from 'next';
 // import { LuckyElements } from '@/components/LuckyElements';
+
+export const metadata: Metadata = {
+  title: 'Lunary - Your Daily Cosmic Guide',
+  description:
+    "Discover today's cosmic alignments, moon phases, planetary positions, and personalized astrological insights.",
+  openGraph: {
+    title: 'Lunary - Your Daily Cosmic Guide',
+    description:
+      "Discover today's cosmic alignments, moon phases, and personalized astrological insights.",
+    url: 'https://lunary.app',
+    siteName: 'Lunary',
+    images: [
+      {
+        url: '/api/og/cosmic',
+        width: 1200,
+        height: 630,
+        alt: "Today's Cosmic Alignments - Lunary",
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lunary - Your Daily Cosmic Guide',
+    description:
+      "Discover today's cosmic alignments, moon phases, and personalized astrological insights.",
+    images: ['/api/og/cosmic'],
+  },
+};
 
 export default function Home() {
   return (
