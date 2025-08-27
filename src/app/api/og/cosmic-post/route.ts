@@ -10,9 +10,67 @@ function getZodiacSign(longitude: number): string {
   return signs[index];
 }
 
+// Get descriptive qualities for zodiac signs
+function getSignDescription(sign: string): string {
+  const descriptions: { [key: string]: string } = {
+    'Aries': 'initiating and pioneering',
+    'Taurus': 'grounding and stabilizing', 
+    'Gemini': 'communicating and adapting',
+    'Cancer': 'nurturing and protective',
+    'Leo': 'creative and expressive',
+    'Virgo': 'practical and analytical',
+    'Libra': 'harmonizing and diplomatic',
+    'Scorpio': 'transforming and intense',
+    'Sagittarius': 'expanding and philosophical',
+    'Capricorn': 'structuring and ambitious',
+    'Aquarius': 'innovative and independent',
+    'Pisces': 'intuitive and compassionate'
+  };
+  return descriptions[sign] || 'cosmic';
+}
+
+// Helper function to determine aspect type based on angular separation
+function getAspectType(angle: number): string {
+  if (angle < 10) return 'conjunction';
+  if (angle < 70) return 'sextile';
+  if (angle < 110) return 'square';
+  if (angle < 130) return 'trine';
+  return 'opposition';
+}
+
+// Find the zodiac sign with the most planets
+function getMostPopulatedSign(planets: any): string {
+  const signCount: { [key: string]: number } = {};
+  Object.values(planets).forEach((planet: any) => {
+    signCount[planet.sign] = (signCount[planet.sign] || 0) + 1;
+  });
+  
+  let maxCount = 0;
+  let mostPopulated = 'Aries';
+  Object.entries(signCount).forEach(([sign, count]) => {
+    if (count > maxCount) {
+      maxCount = count;
+      mostPopulated = sign;
+    }
+  });
+  
+  return mostPopulated;
+}
+
+// Get a retrograde planet based on day of year
+function getRetrogradePlanet(dayOfYear: number): string {
+  const planets = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+  return planets[dayOfYear % planets.length];
+}
+
 // Approximate planetary positions (for display purposes)
 function getApproximatePlanetaryData(date: Date) {
   const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
+  
+  // Starting positions for 2024-2025 (approximate)
+  const year = date.getFullYear();
+  const baseYear = 2024;
+  const yearOffset = year - baseYear;
   
   return {
     sun: {
@@ -24,32 +82,32 @@ function getApproximatePlanetaryData(date: Date) {
       sign: getZodiacSign((dayOfYear * 13.176) % 360)
     },
     mercury: {
-      longitude: (dayOfYear * 1.4) % 360,
-      sign: getZodiacSign((dayOfYear * 1.4) % 360)
+      longitude: (45 + dayOfYear * 1.4 + yearOffset * 360) % 360, // Fast orbit
+      sign: getZodiacSign((45 + dayOfYear * 1.4 + yearOffset * 360) % 360)
     },
     venus: {
-      longitude: (dayOfYear * 0.7) % 360,
-      sign: getZodiacSign((dayOfYear * 0.7) % 360)
+      longitude: (120 + dayOfYear * 0.7 + yearOffset * 225) % 360, // ~225° per year
+      sign: getZodiacSign((120 + dayOfYear * 0.7 + yearOffset * 225) % 360)
     },
     mars: {
-      longitude: (dayOfYear * 0.5) % 360,
-      sign: getZodiacSign((dayOfYear * 0.5) % 360)
+      longitude: (210 + dayOfYear * 0.5 + yearOffset * 190) % 360, // ~190° per year
+      sign: getZodiacSign((210 + dayOfYear * 0.5 + yearOffset * 190) % 360)
     },
     jupiter: {
-      longitude: (dayOfYear * 0.08) % 360,
-      sign: getZodiacSign((dayOfYear * 0.08) % 360)
+      longitude: (45 + dayOfYear * 0.08 + yearOffset * 30) % 360, // ~30° per year
+      sign: getZodiacSign((45 + dayOfYear * 0.08 + yearOffset * 30) % 360)
     },
     saturn: {
-      longitude: (dayOfYear * 0.033) % 360,
-      sign: getZodiacSign((dayOfYear * 0.033) % 360)
+      longitude: (330 + dayOfYear * 0.033 + yearOffset * 12) % 360, // ~12° per year
+      sign: getZodiacSign((330 + dayOfYear * 0.033 + yearOffset * 12) % 360)
     },
     uranus: {
-      longitude: (dayOfYear * 0.012) % 360,
-      sign: getZodiacSign((dayOfYear * 0.012) % 360)
+      longitude: (60 + dayOfYear * 0.012 + yearOffset * 4.3) % 360, // ~4.3° per year
+      sign: getZodiacSign((60 + dayOfYear * 0.012 + yearOffset * 4.3) % 360)
     },
     neptune: {
-      longitude: (dayOfYear * 0.006) % 360,
-      sign: getZodiacSign((dayOfYear * 0.006) % 360)
+      longitude: (350 + dayOfYear * 0.006 + yearOffset * 2.2) % 360, // ~2.2° per year
+      sign: getZodiacSign((350 + dayOfYear * 0.006 + yearOffset * 2.2) % 360)
     }
   };
 }
@@ -137,46 +195,10 @@ function getSignificantAstronomicalEvents(date: Date, planets: any) {
     events.push({ name: 'Jupiter Opposition', energy: 'Expansion Peak', priority: 8 });
   }
   if (month === 8 && day === 27) {
-    events.push({ name: 'Saturn Opposition', energy: 'Structure Illuminated', priority: 8 });
+    events.push({ name: 'Saturn Opposition', energy: 'Structure Illuminated', priority: 6 }); // Reduced priority - single day astronomical event
   }
   
-  // LUNAR PHENOMENA - Traditional full moon names (Priority 7-8) - 1 day each
-  if (month === 1 && day === 2) {
-    events.push({ name: 'Wolf Moon', energy: 'Survival Instincts', priority: 8 });
-  }
-  if (month === 2 && day === 1) {
-    events.push({ name: 'Snow Moon', energy: 'Inner Reflection', priority: 8 });
-  }
-  if (month === 3 && day === 2) {
-    events.push({ name: 'Worm Moon', energy: 'Earth Awakening', priority: 8 });
-  }
-  if (month === 4 && day === 1) {
-    events.push({ name: 'Pink Moon', energy: 'Blooming Potential', priority: 8 });
-  }
-  if (month === 5 && day === 1) {
-    events.push({ name: 'Flower Moon', energy: 'Fertile Growth', priority: 8 });
-  }
-  if (month === 6 && day === 2) {
-    events.push({ name: 'Strawberry Moon', energy: 'Sweet Abundance', priority: 8 });
-  }
-  if (month === 7 && day === 1) {
-    events.push({ name: 'Buck Moon', energy: 'Wild Freedom', priority: 8 });
-  }
-  if (month === 8 && day === 1) {
-    events.push({ name: 'Sturgeon Moon', energy: 'Ancient Wisdom', priority: 8 });
-  }
-  if (month === 9 && day === 1) {
-    events.push({ name: 'Harvest Moon', energy: 'Abundance Gathering', priority: 8 });
-  }
-  if (month === 10 && day === 1) {
-    events.push({ name: 'Hunter Moon', energy: 'Preparation Focus', priority: 8 });
-  }
-  if (month === 11 && day === 1) {
-    events.push({ name: 'Beaver Moon', energy: 'Winter Preparation', priority: 8 });
-  }
-  if (month === 12 && day === 1) {
-    events.push({ name: 'Cold Moon', energy: 'Inner Stillness', priority: 8 });
-  }
+  // TRADITIONAL FULL MOONS - removed fixed dates, now handled in main GET function during actual full moons
   
   // STELLAR EVENTS (Priority 6-7) - 1 day each, spread throughout year
   if (month === 1 && day === 12) {
@@ -333,27 +355,56 @@ function getExpandedEventDescription(primaryEvent: any, planets: any): string {
     return `🌖 Waning Gibbous phase displays decreasing illumination after Full Moon - this is the gratitude phase for harvesting wisdom and sharing knowledge gained`;
   }
 
+  // PLANETARY CONJUNCTIONS - educational descriptions about what each combination means
+  if (eventName.includes('Mercury-Venus conjunction')) {
+    return `☿♀ Mercury-Venus conjunction unites the mind and heart in ${planets.mercury.sign} - when the messenger planet meets the love planet, communication becomes more harmonious, artistic, and diplomatic. This rare alignment enhances writing, negotiation, and expressing feelings with eloquence.`;
+  }
+  if (eventName.includes('Sun-Mercury conjunction')) {
+    return `☉☿ Sun-Mercury conjunction merges identity with intellect in ${planets.sun.sign} - when our core self aligns with communication, thoughts become clearer, self-expression more authentic, and mental focus intensifies. Ancient astrologers called this the "heart of the sun" placement.`;
+  }
+  if (eventName.includes('Venus-Mars conjunction')) {
+    return `♀♂ Venus-Mars conjunction balances receptive and active energies in ${planets.venus.sign} - when the relationship planet meets the action planet, passionate creativity emerges. This powerful combination harmonizes desire with action, perfect for artistic endeavors and romantic initiatives.`;
+  }
+  if (eventName.includes('Sun-Jupiter conjunction')) {
+    return `☉♃ Sun-Jupiter conjunction amplifies confidence and opportunity in ${planets.sun.sign} - when our core identity aligns with the planet of expansion, natural leadership emerges. This fortunate aspect traditionally brings recognition, growth, and successful ventures.`;
+  }
+  if (eventName.includes('Mars-Jupiter trine')) {
+    return `♂♃ Mars-Jupiter trine creates effortless action and growth - when the warrior planet flows harmoniously with the expansion planet, endeavors succeed with minimal resistance. This aspect supports athletic achievement, business growth, and adventurous pursuits.`;
+  }
+  if (eventName.includes('Venus-Neptune trine')) {
+    return `♀♆ Venus-Neptune trine dissolves boundaries around love and beauty - when the relationship planet flows with the transcendence planet, romantic idealism and artistic inspiration reach sublime heights. Perfect for creative collaboration and spiritual romance.`;
+  }
+  if (eventName.includes('Jupiter-Saturn Great Conjunction')) {
+    return `♃♄ Jupiter-Saturn Great Conjunction occurs only every 20 years, marking major societal shifts - when expansion meets structure, old systems transform. This historic alignment in ${planets.jupiter.sign} reshapes economic, political, and social foundations for the next two decades.`;
+  }
+  if (eventName.includes('Jupiter-Uranus Great Conjunction')) {
+    return `♃⛢ Jupiter-Uranus Great Conjunction brings revolutionary breakthroughs every 14 years - when expansion meets innovation, sudden opportunities for freedom and progress emerge. This rare alignment in ${planets.jupiter.sign} catalyzes technological and social advancement.`;
+  }
+  if (eventName.includes('Saturn-Neptune Great Conjunction')) {
+    return `♄♆ Saturn-Neptune Great Conjunction balances reality with dreams every 36 years - when structure meets transcendence, spiritual ideals must find practical form. This generational aspect in ${planets.saturn.sign} tests whether visions can manifest in the material world.`;
+  }
+
   // PLANETARY EVENTS - when planets are primary (matching image API naming)
   if (eventName.includes('Venus Rising')) {
-    return `♀ Venus Rising in ${planets.venus.sign} activates love, beauty, and values - this inner planet's 8-month cycle brings harmony to relationships and artistic expression`;
+    return `♀ Venus in ${planets.venus.sign} emphasizes relationships and aesthetics - ${planets.venus.sign} brings ${getSignDescription(planets.venus.sign)} qualities to matters of love, beauty, and values`;
   }
   if (eventName.includes('Mars Power')) {
-    return `♂ Mars Power in ${planets.mars.sign} drives action and courage - this red planet's 26-month cycle energizes initiative, competition, and bold decision-making`;
+    return `♂ Mars in ${planets.mars.sign} activates warrior energy - ${planets.mars.sign} channels ${getSignDescription(planets.mars.sign)} approaches to action, ambition, and conflict resolution`;
   }
   if (eventName.includes('Jupiter Expansion')) {
-    return `♃ Jupiter Expansion in ${planets.jupiter.sign} amplifies growth and opportunity - this benefic giant's 12-year cycle governs wisdom, abundance, and philosophical development`;
+    return `♃ Jupiter in ${planets.jupiter.sign} amplifies growth opportunities - ${planets.jupiter.sign} expands ${getSignDescription(planets.jupiter.sign)} themes of wisdom, abundance, and philosophical development`;
   }
   if (eventName.includes('Mercury Clarity')) {
-    return `☿ Mercury Clarity in ${planets.mercury.sign} sharpens communication and mental processing - this swift planet's 88-day cycle enhances learning, writing, and logical thinking`;
+    return `☿ Mercury in ${planets.mercury.sign} sharpens communication - ${planets.mercury.sign} influences ${getSignDescription(planets.mercury.sign)} mental processing, learning, and information exchange`;
   }
   if (eventName.includes('Saturn Focus')) {
-    return `♄ Saturn Focus in ${planets.saturn.sign} emphasizes structure and long-term goals - this taskmaster's 29-year cycle teaches discipline, responsibility, and authentic achievement`;
+    return `♄ Saturn in ${planets.saturn.sign} emphasizes structure and goals - ${planets.saturn.sign} applies ${getSignDescription(planets.saturn.sign)} discipline to long-term achievements and responsibilities`;
   }
   if (eventName.includes('Neptune Dreams')) {
-    return `♆ Neptune Dreams in ${planets.neptune.sign} heightens intuition and spiritual vision - this outer planet's 165-year cycle dissolves boundaries and inspires transcendence`;
+    return `♆ Neptune in ${planets.neptune.sign} heightens intuition and vision - ${planets.neptune.sign} dissolves ${getSignDescription(planets.neptune.sign)} boundaries while inspiring transcendent experiences`;
   }
   if (eventName.includes('Uranus Innovation')) {
-    return `⛢ Uranus Innovation in ${planets.uranus.sign} sparks revolutionary change and breakthroughs - this disruptor's 84-year cycle brings unexpected liberation and technological advancement`;
+    return `⛢ Uranus in ${planets.uranus.sign} sparks revolutionary change - ${planets.uranus.sign} brings ${getSignDescription(planets.uranus.sign)} breakthroughs and unexpected liberation from old patterns`;
   }
 
   // CROSS-QUARTER DAYS - Celtic/astronomical markers
@@ -524,246 +575,408 @@ function getExpandedEventDescription(primaryEvent: any, planets: any): string {
   return `✨ Today's cosmic configuration features ${planets.sun.sign} Sun at ${Math.round(planets.sun.longitude)}° creating ${getSignDescription(planets.sun.sign)} themes while ${planets.moon.sign} Moon adds ${getSignDescription(planets.moon.sign)} emotional undertones`;
 }
 
-// Generate brief, enticing cosmic highlights - PLANET & ALIGNMENT FOCUSED  
+// Enhanced astrological aspects with glyphs - ALL 7 MAJOR ASPECTS + GREAT CONJUNCTIONS
+function generateMainAstronomicalEvent(date: Date, planets: any): any {
+  const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
+  
+  // ALL 7 MAJOR ASTROLOGICAL ASPECTS with proper glyphs and meanings
+  const aspects = [
+    // GREAT CONJUNCTIONS - rarest and most powerful (priority 10)
+    {
+      name: 'Jupiter-Saturn Great Conjunction',
+      energy: 'Era-Defining Alignment',
+      priority: 10,
+      aspect: 'great-conjunction',
+      planetA: 'Jupiter',
+      planetB: 'Saturn',
+      signA: planets.jupiter.sign,
+      signB: planets.saturn.sign
+    },
+    {
+      name: 'Jupiter-Uranus Great Conjunction',
+      energy: 'Revolutionary Expansion',
+      priority: 10,
+      aspect: 'great-conjunction',
+      planetA: 'Jupiter',
+      planetB: 'Uranus',
+      signA: planets.jupiter.sign,
+      signB: planets.uranus.sign
+    },
+    {
+      name: 'Saturn-Neptune Great Conjunction',
+      energy: 'Structure Meets Dreams',
+      priority: 10,
+      aspect: 'great-conjunction',
+      planetA: 'Saturn',
+      planetB: 'Neptune',
+      signA: planets.saturn.sign,
+      signB: planets.neptune.sign
+    },
+    
+    // REGULAR CONJUNCTIONS - harmonious unity (priority 8)
+    {
+      name: 'Mercury-Venus conjunction',
+      energy: 'Mind & Heart Unite',
+      priority: 8,
+      aspect: 'conjunction',
+      planetA: 'Mercury',
+      planetB: 'Venus',
+      signA: planets.mercury.sign,
+      signB: planets.venus.sign
+    },
+    {
+      name: 'Sun-Mercury conjunction',
+      energy: 'Clarity & Expression',
+      priority: 8,
+      aspect: 'conjunction',
+      planetA: 'Sun',
+      planetB: 'Mercury',
+      signA: planets.sun.sign,
+      signB: planets.mercury.sign
+    },
+    {
+      name: 'Venus-Mars conjunction',
+      energy: 'Love & Passion Unite',
+      priority: 8,
+      aspect: 'conjunction',
+      planetA: 'Venus',
+      planetB: 'Mars',
+      signA: planets.venus.sign,
+      signB: planets.mars.sign
+    },
+    {
+      name: 'Sun-Jupiter conjunction',
+      energy: 'Confidence & Expansion',
+      priority: 8,
+      aspect: 'conjunction',
+      planetA: 'Sun',
+      planetB: 'Jupiter',
+      signA: planets.sun.sign,
+      signB: planets.jupiter.sign
+    },
+    
+    // TRINES - harmonious flow (priority 7)
+    {
+      name: 'Mars-Jupiter trine',
+      energy: 'Action & Growth Flow',
+      priority: 7,
+      aspect: 'trine',
+      planetA: 'Mars',
+      planetB: 'Jupiter',
+      signA: planets.mars.sign,
+      signB: planets.jupiter.sign
+    },
+    {
+      name: 'Venus-Neptune trine',
+      energy: 'Love & Dreams Flow',
+      priority: 7,
+      aspect: 'trine',
+      planetA: 'Venus',
+      planetB: 'Neptune',
+      signA: planets.venus.sign,
+      signB: planets.neptune.sign
+    },
+    {
+      name: 'Sun-Jupiter trine',
+      energy: 'Confidence & Luck Flow',
+      priority: 7,
+      aspect: 'trine',
+      planetA: 'Sun',
+      planetB: 'Jupiter',
+      signA: planets.sun.sign,
+      signB: planets.jupiter.sign
+    },
+    
+    // SEXTILES - cooperative opportunity (priority 6)
+    {
+      name: 'Mercury-Mars sextile',
+      energy: 'Mind & Action Cooperate',
+      priority: 6,
+      aspect: 'sextile',
+      planetA: 'Mercury',
+      planetB: 'Mars',
+      signA: planets.mercury.sign,
+      signB: planets.mars.sign
+    },
+    {
+      name: 'Venus-Jupiter sextile',
+      energy: 'Beauty & Abundance Cooperate',
+      priority: 6,
+      aspect: 'sextile',
+      planetA: 'Venus',
+      planetB: 'Jupiter',
+      signA: planets.venus.sign,
+      signB: planets.jupiter.sign
+    },
+    
+    // SQUARES - dynamic tension (priority 5)
+    {
+      name: 'Mars-Saturn square',
+      energy: 'Drive vs Discipline',
+      priority: 5,
+      aspect: 'square',
+      planetA: 'Mars',
+      planetB: 'Saturn',
+      signA: planets.mars.sign,
+      signB: planets.saturn.sign
+    },
+    {
+      name: 'Mercury-Neptune square',
+      energy: 'Logic vs Intuition',
+      priority: 5,
+      aspect: 'square',
+      planetA: 'Mercury',
+      planetB: 'Neptune',
+      signA: planets.mercury.sign,
+      signB: planets.neptune.sign
+    },
+    
+    // OPPOSITIONS - balance and awareness (priority 5)
+    {
+      name: 'Jupiter-Saturn opposition',
+      energy: 'Growth vs Structure',
+      priority: 5,
+      aspect: 'opposition',
+      planetA: 'Jupiter',
+      planetB: 'Saturn',
+      signA: planets.jupiter.sign,
+      signB: planets.saturn.sign
+    },
+    {
+      name: 'Venus-Mars opposition',
+      energy: 'Love vs Desire',
+      priority: 5,
+      aspect: 'opposition',
+      planetA: 'Venus',
+      planetB: 'Mars',
+      signA: planets.venus.sign,
+      signB: planets.mars.sign
+    },
+    
+    // QUINCUNX - adjustment and growth (priority 4)
+    {
+      name: 'Sun-Neptune quincunx',
+      energy: 'Identity Adjusts to Vision',
+      priority: 4,
+      aspect: 'quincunx',
+      planetA: 'Sun',
+      planetB: 'Neptune',
+      signA: planets.sun.sign,
+      signB: planets.neptune.sign
+    },
+    {
+      name: 'Mercury-Saturn quincunx',
+      energy: 'Mind Adjusts to Structure',
+      priority: 4,
+      aspect: 'quincunx',
+      planetA: 'Mercury',
+      planetB: 'Saturn',
+      signA: planets.mercury.sign,
+      signB: planets.saturn.sign
+    },
+    
+    // SEMI-SEXTILE - subtle opportunity (priority 3)
+    {
+      name: 'Mercury-Venus semi-sextile',
+      energy: 'Mind & Heart Subtly Connect',
+      priority: 3,
+      aspect: 'semi-sextile',
+      planetA: 'Mercury',
+      planetB: 'Venus',
+      signA: planets.mercury.sign,
+      signB: planets.venus.sign
+    },
+    {
+      name: 'Sun-Mars semi-sextile',
+      energy: 'Identity & Action Gently Align',
+      priority: 3,
+      aspect: 'semi-sextile',
+      planetA: 'Sun',
+      planetB: 'Mars',
+      signA: planets.sun.sign,
+      signB: planets.mars.sign
+    }
+  ];
+  
+  // Select aspect based on day for variety, but prioritize higher aspects
+  const sortedAspects = aspects.sort((a, b) => b.priority - a.priority);
+  return sortedAspects[dayOfYear % sortedAspects.length];
+}
+
+// Generate brief, enticing cosmic highlights - ASPECTS AS MAIN, PLANETS SUCCINCT  
 function generateCosmicHighlights(primaryEvent: any, planets: any, date: Date): string[] {
   const highlights = [];
   const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
   
-  // PRIMARY EVENT - add expanded description instead of repetitive info
-  highlights.push(getExpandedEventDescription(primaryEvent, planets));
-  
-  // PLANETARY POSITIONS - specific astronomical information
-  const planetaryHighlights = [
-    `☿ Mercury in ${planets.mercury.sign} at ${Math.round(planets.mercury.longitude)}° - Communication patterns shift`,
-    `♀ Venus in ${planets.venus.sign} at ${Math.round(planets.venus.longitude)}° - Relationship dynamics activate`,
-    `♂ Mars in ${planets.mars.sign} at ${Math.round(planets.mars.longitude)}° - Energy patterns intensify`,
-    `♃ Jupiter in ${planets.jupiter.sign} at ${Math.round(planets.jupiter.longitude)}° - Growth opportunities emerge`,
-    `♄ Saturn in ${planets.saturn.sign} at ${Math.round(planets.saturn.longitude)}° - Structure and discipline emphasized`,
-    `♆ Neptune in ${planets.neptune.sign} at ${Math.round(planets.neptune.longitude)}° - Intuition and dreams heightened`
-  ];
-
-  // CONSTELLATION AND ALIGNMENT FOCUS
-  const alignmentHighlights = [
-    `Sun in ${planets.sun.sign} conjunction creates ${getSignDescription(planets.sun.sign)} energy patterns`,
-    `Current stellium in ${getMostPopulatedSign(planets)} concentrates planetary energy`,
-    `Mercury-Venus ${getAspectType(Math.abs(planets.mercury.longitude - planets.venus.longitude))} influences communication`,
-    `Mars-Jupiter ${getAspectType(Math.abs(planets.mars.longitude - planets.jupiter.longitude))} affects action and expansion`,
-    `Solar longitude ${Math.round(planets.sun.longitude)}° marks seasonal transition point`,
-    `${getRetrogradePlanet(dayOfYear)} retrograde period brings review and reflection`
-  ];
-  
-  // Then add planetary information
-  if (primaryEvent.name.includes('Equinox')) {
-    highlights.push(`🌍 ${primaryEvent.name} - Sun crosses celestial equator at 0° longitude`);
-  } else if (primaryEvent.name.includes('Solstice')) {
-    highlights.push(`☀️ ${primaryEvent.name} - Sun reaches maximum declination`);
-  } else if (primaryEvent.name.includes('Meteors')) {
-    highlights.push(`💫 ${primaryEvent.name} peak - Earth passes through cosmic debris field`);
+  // MAIN EVENT - now aspects are main, so make them detailed
+  if (primaryEvent.aspect) {
+    // This is an astrological aspect - give detailed description
+    const aspectDesc = {
+      'great-conjunction': 'unite in rare era-defining alignment',
+      'conjunction': 'unite energies in powerful alignment',
+      'opposition': 'create dynamic tension requiring balance', 
+      'trine': 'flow harmoniously supporting growth',
+      'sextile': 'offer cooperative opportunities',
+      'square': 'generate creative friction and motivation',
+      'quincunx': 'adjust and realign for spiritual growth',
+      'semi-sextile': 'create subtle opportunities for harmony'
+    };
+    highlights.push(`${primaryEvent.name} - ${primaryEvent.signA} and ${primaryEvent.signB} ${aspectDesc[primaryEvent.aspect] || 'interact cosmically'}`);
   } else {
-    // Use planetary highlight as secondary
-    highlights.push(planetaryHighlights[dayOfYear % planetaryHighlights.length]);
+    // Traditional astronomical events or moon phases
+    highlights.push(getExpandedEventDescription(primaryEvent, planets));
   }
   
-  // Add alignment information
-  highlights.push(alignmentHighlights[(dayOfYear + 1) % alignmentHighlights.length]);
+  // SECONDARY ASPECTS - use other aspects from the system, avoiding planets in main event
+  const usedPlanets: string[] = [];
+  if (primaryEvent.planetA) usedPlanets.push(primaryEvent.planetA.toLowerCase());
+  if (primaryEvent.planetB) usedPlanets.push(primaryEvent.planetB.toLowerCase());
   
-  // Add specific planetary aspect
-  const aspectHighlights = [
-    `Venus-Mars ${getAspectType(Math.abs(planets.venus.longitude - planets.mars.longitude))} creates tension in relationships`,
-    `Sun-Mercury ${getAspectType(Math.abs(planets.sun.longitude - planets.mercury.longitude))} enhances mental clarity`,
-    `Jupiter-Saturn ${getAspectType(Math.abs(planets.jupiter.longitude - planets.saturn.longitude))} tests growth vs limits`,
-    `Mars-Neptune ${getAspectType(Math.abs(planets.mars.longitude - planets.neptune.longitude))} blends action with intuition`
+  // Secondary aspects that don't involve the same planets as primary event
+  const secondaryAspects = [
+    { name: 'Mercury-Mars sextile', planets: ['mercury', 'mars'], desc: 'Quick decisions and mental action' },
+    { name: 'Venus-Jupiter trine', planets: ['venus', 'jupiter'], desc: 'Love and abundance flow' },
+    { name: 'Sun-Neptune square', planets: ['sun', 'neptune'], desc: 'Identity meets spiritual vision' },
+    { name: 'Mars-Saturn opposition', planets: ['mars', 'saturn'], desc: 'Drive balances with discipline' },
+    { name: 'Mercury-Neptune square', planets: ['mercury', 'neptune'], desc: 'Logic challenges intuition' },
+    { name: 'Venus-Uranus trine', planets: ['venus', 'uranus'], desc: 'Love meets innovation' },
+    { name: 'Sun-Mars conjunction', planets: ['sun', 'mars'], desc: 'Will and action unite' },
+    { name: 'Jupiter-Neptune sextile', planets: ['jupiter', 'neptune'], desc: 'Expansion supports dreams' }
   ];
   
-  highlights.push(aspectHighlights[(dayOfYear + 2) % aspectHighlights.length]);
+  // Find aspects that don't conflict with primary event planets
+  const availableAspects = secondaryAspects.filter(aspect => 
+    !aspect.planets.some(planet => usedPlanets.includes(planet))
+  );
+  
+  // Add a secondary aspect if available
+  if (availableAspects.length > 0) {
+    const chosenAspect = availableAspects[dayOfYear % availableAspects.length];
+    highlights.push(`${chosenAspect.name} - ${chosenAspect.desc}`);
+  } else {
+    // Fallback if all aspects conflict - use constellation info
+    highlights.push(`Current stellium in ${getMostPopulatedSign(planets)} concentrates planetary energy`);
+  }
+
+  // CONSTELLATION INGRESS - when planets enter new signs (avoid main event planets)
+  const allIngressHighlights = [
+    { planet: 'mercury', text: `Mercury enters ${planets.mercury.sign} - Communication style shifts` },
+    { planet: 'venus', text: `Venus enters ${planets.venus.sign} - Relationship approach changes` },
+    { planet: 'mars', text: `Mars enters ${planets.mars.sign} - Action patterns transform` },
+    { planet: 'jupiter', text: `Jupiter enters ${planets.jupiter.sign} - Growth focus expands` },
+    { planet: 'saturn', text: `Saturn enters ${planets.saturn.sign} - Structural themes mature` },
+    { planet: 'uranus', text: `Uranus enters ${planets.uranus.sign} - Revolutionary changes begin` },
+    { planet: 'neptune', text: `Neptune enters ${planets.neptune.sign} - Mystical themes deepen` }
+  ];
+  
+  // Find ingress that doesn't involve main event planets
+  const availableIngress = allIngressHighlights.filter(ingress => 
+    !usedPlanets.includes(ingress.planet)
+  );
+  
+  // Add ingress info that doesn't duplicate main event
+  if (availableIngress.length > 0) {
+    const chosenIngress = availableIngress[dayOfYear % availableIngress.length];
+    highlights.push(chosenIngress.text);
+  } else {
+    // Fallback if all planets are used - use retrograde info
+    highlights.push(`${getRetrogradePlanet(dayOfYear)} retrograde period brings review and reflection`);
+  }
   
   return highlights;
 }
 
-// Helper functions for more specific content
-function getSignDescription(sign: string): string {
-  const descriptions: { [key: string]: string } = {
-    'Aries': 'initiating and pioneering',
-    'Taurus': 'stabilizing and grounding',
-    'Gemini': 'communicative and adaptable', 
-    'Cancer': 'nurturing and protective',
-    'Leo': 'creative and expressive',
-    'Virgo': 'analytical and perfecting',
-    'Libra': 'harmonizing and balancing',
-    'Scorpio': 'transformative and intense',
-    'Sagittarius': 'expanding and philosophical',
-    'Capricorn': 'structuring and ambitious',
-    'Aquarius': 'innovative and humanitarian',
-    'Pisces': 'intuitive and transcendent'
-  };
-  return descriptions[sign] || 'transformative';
+// Helper function to convert planet names to Title Case
+function toTitleCase(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function getAspectType(degrees: number): string {
-  if (degrees < 8) return 'conjunction';
-  if (degrees >= 82 && degrees <= 98) return 'square';
-  if (degrees >= 172 && degrees <= 188) return 'opposition';
-  if (degrees >= 112 && degrees <= 128) return 'trine';
-  if (degrees >= 52 && degrees <= 68) return 'sextile';
-  return 'aspect';
-}
-
-function getMostPopulatedSign(planets: any): string {
-  const signs = Object.values(planets).map((p: any) => p.sign);
-  const counts = signs.reduce((acc: any, sign) => {
-    acc[sign] = (acc[sign] || 0) + 1;
-    return acc;
-  }, {});
-  return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-}
-
-function getRetrogradePlanet(dayOfYear: number): string {
-  const planets = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
-  return planets[dayOfYear % planets.length];
-}
-
-// Generate GUIDANCE snippet focused specifically on the main event
-function generateHoroscopeSnippet(primaryEvent: any, planets: any, date: Date): string {
+// Enhanced guidance function with practical wisdom for each event type
+function generateHoroscopeSnippet(primaryEvent: any, planets: any, targetDate: Date): string {
   const eventName = primaryEvent.name;
-
-  // SEASONAL MARKERS - Guidance for major seasonal shifts
-  if (eventName.includes('Spring Equinox')) {
-    return `Today's perfect balance of light and dark invites you to find equilibrium in your own life. Use this powerful reset energy to plant seeds for new projects and release what no longer serves you.`;
+  
+  // CONJUNCTION GUIDANCE - practical applications for each planetary combination
+  if (primaryEvent.aspect === 'conjunction' || primaryEvent.aspect === 'great-conjunction') {
+    const planetA = primaryEvent.planetA;
+    const planetB = primaryEvent.planetB;
+    const signA = primaryEvent.signA;
+    const signB = primaryEvent.signB;
+    
+    if (eventName.includes('Mercury-Venus')) {
+      return `Write, create, and communicate with grace today. Mercury-Venus in ${signA} enhances artistic expression and diplomatic conversations. Perfect timing for important emails, creative projects, or heart-to-heart discussions that require both logic and compassion.`;
+    }
+    if (eventName.includes('Sun-Mercury')) {
+      return `Speak your truth with confidence and clarity. Sun-Mercury in ${signA} aligns your identity with your message. Ideal for presentations, interviews, important decisions, or any situation where authentic self-expression matters most.`;
+    }
+    if (eventName.includes('Venus-Mars')) {
+      return `Balance passion with purpose in relationships and creative endeavors. Venus-Mars in ${signA} harmonizes desire with action. Take initiative in love, start artistic projects, or pursue goals that require both heart and courage.`;
+    }
+    if (eventName.includes('Jupiter-Saturn Great Conjunction')) {
+      return `Build new foundations for long-term success. This historic conjunction in ${signA} reshapes your approach to growth and responsibility. Set ambitious but realistic goals, invest in education or property, and commit to changes that mature over decades.`;
+    }
+    if (eventName.includes('Sun-Jupiter')) {
+      return `Step into leadership and expand your horizons. Sun-Jupiter in ${signA} brings opportunities for recognition and growth. Apply for promotions, start new ventures, travel, or take on teaching roles where your confidence can inspire others.`;
+    }
+    // Generic conjunction guidance
+    return `Unite the energies of ${planetA} and ${planetB} in ${signA}. Focus initiatives that combine ${planetA.toLowerCase()} themes with ${planetB.toLowerCase()} energy. This alignment supports integrated approaches to personal growth and goal achievement.`;
   }
-  if (eventName.includes('Summer Solstice')) {
-    return `Peak solar energy today amplifies your personal power and vitality. Focus on celebrating achievements, expressing your authentic self, and channeling this abundant energy into meaningful action.`;
+  
+  // ASPECT GUIDANCE - practical applications for other aspects
+  if (primaryEvent.aspect) {
+    const aspectGuidance = {
+      'trine': `Work with natural flow and effortless progress. This harmonious energy supports activities that align with your authentic self. Trust your instincts, collaborate with others, and allow opportunities to unfold organically.`,
+      
+      'sextile': `Network, collaborate, and seize cooperative opportunities. This supportive energy rewards teamwork and communication. Reach out to allies, join groups with shared interests, or start projects that benefit from diverse perspectives.`,
+      
+      'square': `Channel tension into breakthrough action. This dynamic energy motivates change through constructive challenge. Push through resistance, tackle difficult conversations, or use pressure as fuel for innovative solutions.`,
+      
+      'opposition': `Seek balance and integration between opposing forces. This energy highlights the need for compromise and perspective. Mediate conflicts, find middle ground in debates, or balance different aspects of your life for greater harmony.`,
+      
+      'quincunx': `Make subtle adjustments for spiritual growth. This energy calls for fine-tuning and adaptation. Pay attention to recurring patterns, adjust your approach slightly, or release outdated methods that no longer serve your evolution.`,
+      
+      'semi-sextile': `Notice gentle opportunities and quiet synchronicities. This subtle energy works behind the scenes. Trust your intuition, follow small signs, or plant seeds for future growth through patient, consistent action.`
+    };
+    
+    return aspectGuidance[primaryEvent.aspect] || `Navigate today's planetary interaction with awareness and intention.`;
   }
-  if (eventName.includes('Autumn Equinox')) {
-    return `Today's harvest energy calls for gratitude and reflection on your year's growth. Take time to appreciate what you've accomplished and prepare for the introspective season ahead.`;
+  
+  // MOON PHASE GUIDANCE - practical lunar applications
+  if (eventName.includes('Full Moon') || eventName.includes('Harvest') || eventName.includes('Wolf') || eventName.includes('Snow')) {
+    return `Harness peak lunar energy for completion and manifestation. This Full Moon in ${planets.moon.sign} amplifies emotions and intuition. Finish important projects, celebrate achievements, practice gratitude, or release what no longer serves your highest good.`;
   }
-  if (eventName.includes('Winter Solstice')) {
-    return `The longest night brings inner light renewal. Focus on quiet contemplation, setting intentions for the returning light, and connecting with your deepest wisdom and intuition.`;
+  if (eventName.includes('New Moon')) {
+    return `Plant seeds of intention for new beginnings. This New Moon in ${planets.moon.sign} supports fresh starts and goal-setting. Write down intentions, start new habits, begin creative projects, or initiate conversations that open new possibilities.`;
   }
-
-  // CROSS-QUARTER DAYS - Ancient wisdom guidance
-  if (eventName.includes('Imbolc')) {
-    return `First stirrings of spring inspire new creative projects and fresh perspectives. Trust the subtle signs of growth in your life and nurture emerging ideas with patience and care.`;
+  if (eventName.includes('Quarter')) {
+    return `Take decisive action and overcome obstacles. This Quarter Moon in ${planets.moon.sign} provides energy for important decisions. Address challenges directly, make necessary course corrections, or push through resistance with determined effort.`;
   }
-  if (eventName.includes('Beltane')) {
-    return `Peak fertility energy supports passionate pursuits and creative collaboration. Embrace joy, celebrate life's abundance, and channel this vibrant energy into meaningful connections.`;
+  
+  // ASTRONOMICAL EVENT GUIDANCE - seasonal and cosmic timing
+  if (eventName.includes('Equinox') || eventName.includes('Solstice')) {
+    return `Embrace seasonal transformation and cosmic timing. This celestial turning point supports major life transitions and new chapters. Set intentions aligned with natural cycles, adjust your daily rhythms, or make commitments that honor seasonal energy.`;
   }
-  if (eventName.includes('Lughnasadh')) {
-    return `First harvest time encourages you to appreciate your hard work and skills. Share your talents with others and celebrate the fruits of your dedication and perseverance.`;
+  
+  if (eventName.includes('Opposition') && !primaryEvent.aspect) {
+    return `Observe celestial beauty and contemplate cosmic perspective. This astronomical event offers optimal viewing conditions and reminds us of our place in the universe. Spend time stargazing, practicing meditation, or gaining fresh perspective on earthly concerns.`;
   }
-  if (eventName.includes('Samhain')) {
-    return `The thinning veil between worlds enhances intuition and ancestral wisdom. Honor your roots, trust your inner knowing, and embrace transformation as a natural life cycle.`;
+  
+  if (eventName.includes('Meteors') || eventName.includes('Star')) {
+    return `Make wishes and set intentions under cosmic messengers. This stellar event connects us to galactic energy and ancient wisdom. Practice manifestation techniques, spend time in nature, or use this cosmic window to align with your deepest desires.`;
   }
-
-  // METEOR SHOWERS - Cosmic inspiration guidance
-  if (eventName.includes('Meteors')) {
-    return `Cosmic debris creates celestial fireworks, inspiring breakthrough moments and divine downloads. Stay open to sudden insights, make wishes on shooting stars, and trust the universe's guidance.`;
-  }
-
-  // PLANETARY PHENOMENA - Specific guidance for planetary events
-  if (eventName.includes('Earth Perihelion')) {
-    return `Our closest approach to the Sun intensifies life force energy. Use this concentrated solar power to fuel your most important goals and strengthen your core vitality.`;
-  }
-  if (eventName.includes('Earth Aphelion')) {
-    return `Maximum distance from the Sun encourages independence and self-reliance. Trust your inner strength, embrace solitude for reflection, and cultivate your unique gifts.`;
-  }
-  if (eventName.includes('Mercury Maximum Elongation')) {
-    return `Mercury's greatest visibility enhances communication clarity and mental agility. Perfect time for important conversations, signing contracts, and making well-informed decisions.`;
-  }
-  if (eventName.includes('Venus Maximum Elongation')) {
-    return `Venus shines brightest as the evening or morning star, amplifying love and beauty in your life. Focus on relationships, artistic pursuits, and appreciating life's pleasures.`;
-  }
-  if (eventName.includes('Mars Opposition')) {
-    return `Mars at its closest approach energizes your warrior spirit and drive for achievement. Channel this powerful force constructively through physical activity, courage, and decisive action.`;
-  }
-  if (eventName.includes('Jupiter Opposition')) {
-    return `Jupiter's optimal viewing position expands opportunities and philosophical understanding. Embrace growth, seek knowledge, and trust in life's abundant possibilities.`;
-  }
-  if (eventName.includes('Saturn Opposition')) {
-    return `Saturn's maximum visibility illuminates life structures and long-term goals. Focus on discipline, responsibility, and building lasting foundations for your future success.`;
-  }
-
-  // TRADITIONAL FULL MOONS - Seasonal guidance
-  if (eventName.includes('Wolf Moon')) {
-    return `January's Wolf Moon awakens your survival instincts and pack loyalty. Trust your primal wisdom, strengthen family bonds, and courageously face winter challenges ahead.`;
-  }
-  if (eventName.includes('Snow Moon')) {
-    return `February's Snow Moon invites deep introspection during the cold season. Use this quiet time for inner healing, releasing old patterns, and preparing for spring's renewal.`;
-  }
-  if (eventName.includes('Worm Moon')) {
-    return `March's Worm Moon signals Earth's awakening and your own rebirth. Embrace new beginnings, plant seeds of intention, and trust the natural cycles of growth and renewal.`;
-  }
-  if (eventName.includes('Pink Moon')) {
-    return `April's Pink Moon blooms with spring potential and fresh possibilities. Focus on growth, creativity, and nurturing the beautiful new projects emerging in your life.`;
-  }
-  if (eventName.includes('Flower Moon')) {
-    return `May's Flower Moon celebrates fertility and abundant growth. Channel this creative energy into artistic pursuits, relationship building, and manifesting your heart's desires.`;
-  }
-  if (eventName.includes('Strawberry Moon')) {
-    return `June's Strawberry Moon brings sweetness and summer abundance. Celebrate achievements, share joy with loved ones, and savor the fruits of your dedicated efforts.`;
-  }
-  if (eventName.includes('Buck Moon')) {
-    return `July's Buck Moon inspires wild freedom and natural strength. Break free from limitations, embrace your authentic power, and boldly pursue your wildest dreams.`;
-  }
-  if (eventName.includes('Sturgeon Moon')) {
-    return `August's Sturgeon Moon connects you with ancient wisdom and deep knowledge. Dive beneath surface appearances to discover profound truths and lasting insights.`;
-  }
-  if (eventName.includes('Harvest Moon')) {
-    return `September's Harvest Moon illuminates the rewards of your hard work. Gather the fruits of your labor, express gratitude for abundance, and share your success generously.`;
-  }
-  if (eventName.includes('Hunter Moon')) {
-    return `October's Hunter Moon sharpens your focus and strategic planning. Pursue goals with determined precision, prepare for challenges ahead, and trust your hunting instincts.`;
-  }
-  if (eventName.includes('Beaver Moon')) {
-    return `November's Beaver Moon encourages industrious preparation for winter. Focus on building security, strengthening foundations, and creating warm, protective spaces for loved ones.`;
-  }
-  if (eventName.includes('Cold Moon')) {
-    return `December's Cold Moon brings stillness and inner contemplation. Embrace the quiet season for reflection, meditation, and connecting with your deepest spiritual wisdom.`;
-  }
-
-  // STELLAR EVENTS - Star wisdom guidance
-  if (eventName.includes('Sirius')) {
-    return `The brightest star's return guides you toward your own brilliant potential. Focus on leadership, spiritual awakening, and shining your light to inspire others.`;
-  }
-  if (eventName.includes('Pleiades')) {
-    return `The Seven Sisters cluster encourages sisterhood, collaboration, and collective wisdom. Work harmoniously with others and trust in the power of unified purpose.`;
-  }
-  if (eventName.includes('Regulus')) {
-    return `The heart of the lion star amplifies courage and noble leadership. Step into your royal power, lead with integrity, and courageously pursue your highest calling.`;
-  }
-
-  // GALACTIC EVENTS - Cosmic perspective guidance
-  if (eventName.includes('Milky Way')) {
-    return `Our galaxy's heart becomes visible, expanding your cosmic perspective and spiritual connection. Meditate on your place in the universe and trust in divine timing.`;
-  }
-  if (eventName.includes('Andromeda')) {
-    return `Our sister galaxy rises, reminding you of infinite possibilities beyond current limitations. Dream big, embrace cosmic consciousness, and trust in universal support.`;
-  }
-
-  // PLANETARY DAILY THEMES - Practical guidance
+  
+  // PLANETARY FOCUS GUIDANCE - when individual planets are primary
   if (eventName.includes('Venus Rising')) {
-    return `Venus energy enhances love, beauty, and harmony today. Focus on relationships, creative expression, and bringing more beauty into your daily environment.`;
+    return `Focus on relationships, beauty, and values. Venus energy supports love, creativity, and financial matters. Schedule romantic time, invest in art or beauty, negotiate partnerships, or clarify what truly matters to your heart.`;
   }
   if (eventName.includes('Mars Power')) {
-    return `Mars energy fuels courage, action, and determination today. Take bold steps toward your goals, exercise your body, and channel warrior energy constructively.`;
+    return `Channel energy into decisive action and courage. Mars energy supports initiative, competition, and bold moves. Start challenging projects, have difficult conversations, exercise vigorously, or take the first step toward ambitious goals.`;
   }
   if (eventName.includes('Jupiter Expansion')) {
-    return `Jupiter energy brings growth, optimism, and good fortune today. Embrace new opportunities, expand your horizons, and trust in life's abundant blessings.`;
+    return `Expand your horizons and embrace growth opportunities. Jupiter energy supports learning, travel, and philosophical development. Take courses, explore new cultures, share knowledge, or invest in long-term growth strategies.`;
   }
-  if (eventName.includes('Mercury Clarity')) {
-    return `Mercury energy sharpens communication and mental agility today. Perfect time for important conversations, learning new skills, and making clear decisions.`;
-  }
-  if (eventName.includes('Saturn Focus')) {
-    return `Saturn energy supports discipline, structure, and long-term planning today. Focus on responsibilities, build solid foundations, and work steadily toward your goals.`;
-  }
-  if (eventName.includes('Neptune Dreams')) {
-    return `Neptune energy enhances intuition, creativity, and spiritual connection today. Trust your dreams, meditate deeply, and follow your artistic inspirations.`;
-  }
-  if (eventName.includes('Uranus Innovation')) {
-    return `Uranus energy sparks innovation, freedom, and breakthrough moments today. Embrace change, try new approaches, and trust your unique revolutionary spirit.`;
-  }
-
-  // DEFAULT - Universal guidance
-  return `Today's cosmic alignment invites you to trust your inner wisdom and embrace the natural flow of life. Stay present, follow your intuition, and remain open to unexpected blessings.`;
+  
+  // FALLBACK - general cosmic guidance
+  return `Navigate today's cosmic energies with intention and awareness. Pay attention to synchronicities, trust your intuition, and take inspired action that aligns with your authentic path and highest purpose.`;
 }
 
 export async function GET(request: NextRequest) {
@@ -780,62 +993,111 @@ export async function GET(request: NextRequest) {
   const planets = getApproximatePlanetaryData(targetDate);
   const astronomicalEvents = getSignificantAstronomicalEvents(targetDate, planets);
   
-  // Calculate moon phase (simplified version) - now just a note, not main focus unless significant
+  // Calculate moon phase with PRECISE TIMING AND ACCURATE EMOJIS
   const knownNewMoon = new Date('2024-08-04');
   const daysSinceNew = Math.floor((targetDate.getTime() - knownNewMoon.getTime()) / (1000 * 60 * 60 * 24));
   const lunarCycle = 29.530588853;
   const lunarDay = daysSinceNew % lunarCycle;
 
   let moonPhase;
-  let isSignificant = false; // Only show moon phases when no other events exist
+  let isSignificant = false;
 
-  if (lunarDay < 1) {
-    moonPhase = { name: 'New Moon', energy: 'New Beginnings', priority: 1 }; // LOW priority
-    isSignificant = false; // Never significant on its own
-  } else if (lunarDay < 7.4) {
+  if (lunarDay >= 0 && lunarDay < 0.5) {
+    moonPhase = { name: 'New Moon', energy: 'New Beginnings', priority: 5, emoji: '🌑' }; // Only exact day
+    isSignificant = true;
+  } else if (lunarDay >= 7.3 && lunarDay < 7.8) {
+    moonPhase = { name: 'First Quarter', energy: 'Action & Decision', priority: 5, emoji: '🌓' }; // Only exact day
+    isSignificant = true;
+  } else if (lunarDay >= 14.7 && lunarDay < 15.2) {
+    // Use traditional full moon names based on month
+    const month = targetDate.getMonth() + 1;
+    let moonName = 'Full Moon';
+    let moonEnergy = 'Peak Power';
+    
+    if (month === 1) {
+      moonName = 'Wolf Moon';
+      moonEnergy = 'Wild Instincts';
+    } else if (month === 2) {
+      moonName = 'Snow Moon';
+      moonEnergy = 'Purification';
+    } else if (month === 3) {
+      moonName = 'Worm Moon';
+      moonEnergy = 'Earth Awakening';
+    } else if (month === 4) {
+      moonName = 'Pink Moon';
+      moonEnergy = 'Spring Bloom';
+    } else if (month === 5) {
+      moonName = 'Flower Moon';
+      moonEnergy = 'Fertility & Growth';
+    } else if (month === 6) {
+      moonName = 'Strawberry Moon';
+      moonEnergy = 'Summer Abundance';
+    } else if (month === 7) {
+      moonName = 'Buck Moon';
+      moonEnergy = 'Wild Freedom';
+    } else if (month === 8) {
+      moonName = 'Sturgeon Moon';
+      moonEnergy = 'Ancient Wisdom';
+    } else if (month === 9) {
+      moonName = 'Harvest Moon';
+      moonEnergy = 'Abundance Gathering';
+    } else if (month === 10) {
+      moonName = 'Hunter Moon';
+      moonEnergy = 'Preparation Focus';
+    } else if (month === 11) {
+      moonName = 'Beaver Moon';
+      moonEnergy = 'Winter Preparation';
+    } else if (month === 12) {
+      moonName = 'Cold Moon';
+      moonEnergy = 'Inner Stillness';
+    }
+    
+    moonPhase = { name: moonName, energy: moonEnergy, priority: 8, emoji: '🌕' }; // Higher priority for named moons
+    isSignificant = true;
+  } else if (lunarDay >= 22.1 && lunarDay < 22.6) {
+    moonPhase = { name: 'Third Quarter', energy: 'Release & Letting Go', priority: 5, emoji: '🌗' }; // Only exact day
+    isSignificant = true;
+  } else if (lunarDay < 7) {
     const dayPhase = Math.floor(lunarDay) + 1;
-    moonPhase = { name: `Waxing Crescent (Day ${dayPhase})`, energy: 'Growing Energy', priority: 1 };
-    isSignificant = false; // Never significant on its own
-  } else if (lunarDay < 9.2) {
-    moonPhase = { name: 'First Quarter', energy: 'Decision Making', priority: 1 }; // LOW priority
-    isSignificant = false; // Never significant on its own
-  } else if (lunarDay < 14.8) {
-    const dayPhase = Math.floor(lunarDay - 9) + 1;
-    moonPhase = { name: `Waxing Gibbous (Day ${dayPhase})`, energy: 'Building Energy', priority: 1 };
+    moonPhase = { name: `Waxing Crescent (Day ${dayPhase})`, energy: 'Growing Energy', priority: 2, emoji: '🌒' };
     isSignificant = false;
-  } else if (lunarDay < 16.2) {
-    moonPhase = { name: 'Full Moon', energy: 'Peak Power', priority: 1 }; // LOW priority
-    isSignificant = false; // Never significant on its own
+  } else if (lunarDay < 14) {
+    const dayPhase = Math.floor(lunarDay - 7) + 1;
+    moonPhase = { name: `Waxing Gibbous (Day ${dayPhase})`, energy: 'Building Power', priority: 2, emoji: '🌔' };
+    isSignificant = false;
   } else if (lunarDay < 22) {
-    const dayPhase = Math.floor(lunarDay - 16) + 1;
-    moonPhase = { name: `Waning Gibbous (Day ${dayPhase})`, energy: 'Gratitude & Wisdom', priority: 1 };
+    const dayPhase = Math.floor(lunarDay - 15) + 1;
+    moonPhase = { name: `Waning Gibbous (Day ${dayPhase})`, energy: 'Gratitude & Wisdom', priority: 2, emoji: '🌖' };
     isSignificant = false;
-  } else if (lunarDay < 24) {
-    moonPhase = { name: 'Third Quarter', energy: 'Release & Letting Go', priority: 1 }; // LOW priority
-    isSignificant = false; // Never significant on its own
   } else {
-    const dayPhase = Math.floor(lunarDay - 24) + 1;
-    moonPhase = { name: `Waning Crescent (Day ${dayPhase})`, energy: 'Rest & Reflection', priority: 1 };
+    const dayPhase = Math.floor(lunarDay - 22) + 1;
+    moonPhase = { name: `Waning Crescent (Day ${dayPhase})`, energy: 'Rest & Reflection', priority: 2, emoji: '🌘' };
     isSignificant = false;
   }
 
-  // Determine primary event - unique astronomical events take priority
+  // Determine primary event - ASPECTS FIRST with high priority
   let allEvents = [...astronomicalEvents];
 
-  // NEVER add calculated moon phases as primary events - only as fallback
-  // The traditional moon names (Wolf Moon, Snow Moon, etc.) are already in astronomicalEvents with high priority
+  // Add significant moon phases (Full, New, Quarters) as high-priority events
+  if (isSignificant) {
+    allEvents.push(moonPhase);
+  }
 
-  // Add planetary event for current day if no astronomical events exist
-  if (allEvents.length === 0) {
+  // ALWAYS generate and add main astrological aspect (higher priority than basic planetary)
+  const mainAspect = generateMainAstronomicalEvent(targetDate, planets);
+  allEvents.push(mainAspect);
+
+  // Only add basic planetary events as absolute last resort if NO other events
+  if (allEvents.length === 1 && allEvents[0] === mainAspect) {
     const dayOfWeek = targetDate.getDay();
     const planetaryEvents = [
-      { name: 'Venus Rising', energy: 'Love & Beauty', priority: 3 },
-      { name: 'Mars Power', energy: 'Action & Courage', priority: 3 },
-      { name: 'Jupiter Expansion', energy: 'Growth & Abundance', priority: 3 },
-      { name: 'Mercury Clarity', energy: 'Communication', priority: 3 },
-      { name: 'Saturn Focus', energy: 'Structure & Goals', priority: 2 },
-      { name: 'Neptune Dreams', energy: 'Intuition & Vision', priority: 2 },
-      { name: 'Uranus Innovation', energy: 'Change & Revolution', priority: 2 }
+      { name: 'Venus Rising', energy: 'Love & Beauty', priority: 1 }, // Lower priority
+      { name: 'Mars Power', energy: 'Action & Courage', priority: 1 },
+      { name: 'Jupiter Expansion', energy: 'Growth & Abundance', priority: 1 },
+      { name: 'Mercury Clarity', energy: 'Communication', priority: 1 },
+      { name: 'Saturn Focus', energy: 'Structure & Goals', priority: 1 },
+      { name: 'Neptune Dreams', energy: 'Intuition & Vision', priority: 1 },
+      { name: 'Uranus Innovation', energy: 'Change & Revolution', priority: 1 }
     ];
 
     if (dayOfWeek >= 0 && dayOfWeek < planetaryEvents.length) {
@@ -843,7 +1105,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Only use moon phase as absolute last resort
+  // If still no events, add non-significant moon phase as last resort
   if (allEvents.length === 0) {
     allEvents.push(moonPhase);
   }
@@ -855,15 +1117,27 @@ export async function GET(request: NextRequest) {
   const highlights = generateCosmicHighlights(primaryEvent, planets, targetDate);
   const horoscopeSnippet = generateHoroscopeSnippet(primaryEvent, planets, targetDate);
   
-  // Add moon phase as a simple note (not main focus)
-  const moonNote = `🌙 ${moonPhase.name} - ${Math.round(((lunarDay / lunarCycle) * 100) % 100)}% illuminated`;
+  // Calculate ACCURATE moon illumination percentage
+  let illuminationPercent: number;
+  if (lunarDay < 14.7) {
+    // Waxing phase: 0% to 100%
+    illuminationPercent = Math.round((lunarDay / 14.7) * 100);
+  } else {
+    // Waning phase: 100% to 0%
+    illuminationPercent = Math.round(((29.53 - lunarDay) / 14.7) * 100);
+  }
+  
+  // Ensure realistic bounds
+  illuminationPercent = Math.max(0, Math.min(100, illuminationPercent));
+
+  const moonNote = `${moonPhase.emoji} ${moonPhase.name} - ${illuminationPercent}% illuminated`;
   
   const postContent = {
-    date: targetDate.toLocaleDateString('en-GB', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+    date: targetDate.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
     }),
     primaryEvent: {
       name: primaryEvent.name,
@@ -871,7 +1145,7 @@ export async function GET(request: NextRequest) {
     },
     highlights: [...highlights, moonNote], // Moon as final note
     horoscopeSnippet,
-    callToAction: "✨ Get your personal cosmic analysis at lunary.app"
+    callToAction: "Discover your personalized cosmic guidance at Lunary ✨"
   };
   
   return NextResponse.json(postContent);

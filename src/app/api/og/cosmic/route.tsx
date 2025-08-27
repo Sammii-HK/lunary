@@ -15,6 +15,11 @@ function getZodiacSign(longitude: number): string {
 function getApproximatePlanetaryData(date: Date) {
   const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
   
+  // Starting positions for 2024-2025 (approximate)
+  const year = date.getFullYear();
+  const baseYear = 2024;
+  const yearOffset = year - baseYear;
+  
   // Simple approximations for display (not astronomically precise)
   return {
     sun: {
@@ -26,32 +31,32 @@ function getApproximatePlanetaryData(date: Date) {
       sign: getZodiacSign((dayOfYear * 13.176) % 360)
     },
     mercury: {
-      longitude: (dayOfYear * 1.4) % 360,
-      sign: getZodiacSign((dayOfYear * 1.4) % 360)
+      longitude: (45 + dayOfYear * 1.4 + yearOffset * 360) % 360, // Fast orbit
+      sign: getZodiacSign((45 + dayOfYear * 1.4 + yearOffset * 360) % 360)
     },
     venus: {
-      longitude: (dayOfYear * 0.7) % 360,
-      sign: getZodiacSign((dayOfYear * 0.7) % 360)
+      longitude: (120 + dayOfYear * 0.7 + yearOffset * 225) % 360, // ~225° per year
+      sign: getZodiacSign((120 + dayOfYear * 0.7 + yearOffset * 225) % 360)
     },
     mars: {
-      longitude: (dayOfYear * 0.5) % 360,
-      sign: getZodiacSign((dayOfYear * 0.5) % 360)
+      longitude: (210 + dayOfYear * 0.5 + yearOffset * 190) % 360, // ~190° per year
+      sign: getZodiacSign((210 + dayOfYear * 0.5 + yearOffset * 190) % 360)
     },
     jupiter: {
-      longitude: (dayOfYear * 0.08) % 360,
-      sign: getZodiacSign((dayOfYear * 0.08) % 360)
+      longitude: (45 + dayOfYear * 0.08 + yearOffset * 30) % 360, // ~30° per year
+      sign: getZodiacSign((45 + dayOfYear * 0.08 + yearOffset * 30) % 360)
     },
     saturn: {
-      longitude: (dayOfYear * 0.033) % 360, // ~29.5 year orbit
-      sign: getZodiacSign((dayOfYear * 0.033) % 360)
+      longitude: (330 + dayOfYear * 0.033 + yearOffset * 12) % 360, // ~12° per year
+      sign: getZodiacSign((330 + dayOfYear * 0.033 + yearOffset * 12) % 360)
     },
     uranus: {
-      longitude: (dayOfYear * 0.012) % 360, // ~84 year orbit  
-      sign: getZodiacSign((dayOfYear * 0.012) % 360)
+      longitude: (60 + dayOfYear * 0.012 + yearOffset * 4.3) % 360, // ~4.3° per year
+      sign: getZodiacSign((60 + dayOfYear * 0.012 + yearOffset * 4.3) % 360)
     },
     neptune: {
-      longitude: (dayOfYear * 0.006) % 360, // ~165 year orbit
-      sign: getZodiacSign((dayOfYear * 0.006) % 360)
+      longitude: (350 + dayOfYear * 0.006 + yearOffset * 2.2) % 360, // ~2.2° per year
+      sign: getZodiacSign((350 + dayOfYear * 0.006 + yearOffset * 2.2) % 360)
     }
   };
 }
@@ -183,171 +188,195 @@ function getSignificantAstronomicalEvents(date: Date) {
     events.push({ name: 'Samhain Cross-Quarter', emoji: '🍂', energy: 'Veil Thinning', description: 'Boundary between worlds', detail: 'Midpoint between Autumn Equinox and Winter Solstice', priority: 9 });
   }
   
-  // MAJOR METEOR SHOWERS (Priority 8-9) - 1 day each
-  if (month === 1 && day === 3) {
-    events.push({ name: 'Quadrantid Meteors', emoji: '💫', energy: 'New Year Clarity', description: 'Sharp intense shower', detail: '40 meteors/hour from Boötes', priority: 9 });
-  }
-  if (month === 4 && day === 22) {
-    events.push({ name: 'Lyrid Meteors', emoji: '🌟', energy: 'Spring Awakening', description: 'Ancient meteor shower', detail: 'From Comet Thatcher debris', priority: 8 });
-  }
-  if (month === 5 && day === 5) {
-    events.push({ name: 'Eta Aquariid Meteors', emoji: '☄️', energy: 'Comet Wisdom', description: 'Halley\'s debris trail', detail: 'Swift pre-dawn meteors', priority: 8 });
-  }
-  if (month === 8 && day === 12) {
-    events.push({ name: 'Perseid Meteors', emoji: '💫', energy: 'Cosmic Inspiration', description: 'Peak meteor shower', detail: 'Swift-Tuttle debris field', priority: 9 });
-  }
-  if (month === 10 && day === 8) {
-    events.push({ name: 'Draconid Meteors', emoji: '🐉', energy: 'Dragon Fire', description: 'Evening meteor show', detail: 'From Comet Giacobini-Zinner', priority: 8 });
-  }
-  if (month === 10 && day === 21) {
-    events.push({ name: 'Orionid Meteors', emoji: '🏹', energy: 'Hunter\'s Vision', description: 'Fast glowing trails', detail: 'Another Halley\'s gift', priority: 8 });
-  }
-  if (month === 11 && day === 17) {
-    events.push({ name: 'Leonid Meteors', emoji: '🦁', energy: 'Cosmic Awakening', description: 'Legendary meteor storms', detail: 'Comet Tempel-Tuttle stream', priority: 8 });
-  }
-  if (month === 12 && day === 14) {
-    events.push({ name: 'Geminid Meteors', emoji: '✨', energy: 'Divine Connection', description: 'Year\'s best meteor shower', detail: 'Asteroid 3200 Phaethon debris', priority: 9 });
-  }
-  if (month === 12 && day === 22) {
-    events.push({ name: 'Ursid Meteors', emoji: '🐻', energy: 'Bear Spirit', description: 'Year-end celestial finale', detail: 'Comet Tuttle debris', priority: 8 });
-  }
-
-  // PLANETARY PHENOMENA (Priority 7-8) - 1 day each
-  if (month === 1 && day === 4) {
-    events.push({ name: 'Earth Perihelion', emoji: '🌍', energy: 'Closest Solar Bond', description: 'Nearest point to Sun', detail: '91.4 million miles distance', priority: 8 });
-  }
-  if (month === 7 && day === 5) {
-    events.push({ name: 'Earth Aphelion', emoji: '🌍', energy: 'Solar Independence', description: 'Farthest from Sun', detail: '94.5 million miles distance', priority: 8 });
-  }
-  if (month === 3 && day === 17) {
-    events.push({ name: 'Mercury Maximum Elongation', emoji: '☿', energy: 'Mental Clarity Peak', description: 'Best Mercury viewing', detail: '28° separation from Sun', priority: 7 });
-  }
-  if (month === 6 && day === 18) {
-    events.push({ name: 'Venus Maximum Elongation', emoji: '♀', energy: 'Love\'s Greatest Reach', description: 'Brilliant morning/evening star', detail: '47° separation from Sun', priority: 7 });
-  }
-  if (month === 9 && day === 18) {
-    events.push({ name: 'Mars Opposition', emoji: '♂', energy: 'Warrior\'s Strength', description: 'Red planet closest', detail: 'Magnitude -2.9 brightness', priority: 8 });
-  }
-  if (month === 11 && day === 3) {
-    events.push({ name: 'Jupiter Opposition', emoji: '♃', energy: 'Expansion Peak', description: 'Giant planet optimal', detail: 'Cloud bands and moons visible', priority: 8 });
-  }
-  if (month === 8 && day === 27) {
-    events.push({ name: 'Saturn Opposition', emoji: '♄', energy: 'Structure Illuminated', description: 'Ringed planet showcase', detail: 'Optimal ring visibility', priority: 8 });
-  }
-
-  // LUNAR PHENOMENA - Traditional full moon names (Priority 7-8) - 1 day each
-  if (month === 1 && day === 2) {
-    events.push({ name: 'Wolf Moon', emoji: '🐺', energy: 'Survival Instincts', description: 'January\'s full moon', detail: 'Hungry wolves howling', priority: 8 });
-  }
-  if (month === 2 && day === 1) {
-    events.push({ name: 'Snow Moon', emoji: '❄️', energy: 'Inner Reflection', description: 'February\'s full moon', detail: 'Heavy snowfall season', priority: 8 });
-  }
-  if (month === 3 && day === 2) {
-    events.push({ name: 'Worm Moon', emoji: '🪱', energy: 'Earth Awakening', description: 'March\'s full moon', detail: 'Earthworms emerge from thaw', priority: 8 });
-  }
-  if (month === 4 && day === 1) {
-    events.push({ name: 'Pink Moon', emoji: '🌸', energy: 'Blooming Potential', description: 'April\'s full moon', detail: 'Pink phlox wildflowers', priority: 8 });
-  }
-  if (month === 5 && day === 1) {
-    events.push({ name: 'Flower Moon', emoji: '🌺', energy: 'Fertile Growth', description: 'May\'s full moon', detail: 'Abundant spring blooms', priority: 8 });
-  }
-  if (month === 6 && day === 2) {
-    events.push({ name: 'Strawberry Moon', emoji: '🍓', energy: 'Sweet Abundance', description: 'June\'s full moon', detail: 'Wild strawberry harvest', priority: 8 });
-  }
-  if (month === 7 && day === 1) {
-    events.push({ name: 'Buck Moon', emoji: '🦌', energy: 'Wild Freedom', description: 'July\'s full moon', detail: 'Male deer grow antlers', priority: 8 });
-  }
-  if (month === 8 && day === 1) {
-    events.push({ name: 'Sturgeon Moon', emoji: '🐟', energy: 'Ancient Wisdom', description: 'August\'s full moon', detail: 'Great Lakes sturgeon season', priority: 8 });
-  }
-  if (month === 9 && day === 1) {
-    events.push({ name: 'Harvest Moon', emoji: '🌾', energy: 'Abundance Gathering', description: 'September\'s full moon', detail: 'Extra light for harvest', priority: 8 });
-  }
-  if (month === 10 && day === 1) {
-    events.push({ name: 'Hunter Moon', emoji: '🏹', energy: 'Preparation Focus', description: 'October\'s full moon', detail: 'Time to hunt and store', priority: 8 });
-  }
-  if (month === 11 && day === 1) {
-    events.push({ name: 'Beaver Moon', emoji: '🦫', energy: 'Winter Preparation', description: 'November\'s full moon', detail: 'Beavers prepare lodges', priority: 8 });
-  }
-  if (month === 12 && day === 1) {
-    events.push({ name: 'Cold Moon', emoji: '❄️', energy: 'Inner Stillness', description: 'December\'s full moon', detail: 'Winter\'s longest nights', priority: 8 });
-  }
-
-  // STELLAR EVENTS (Priority 6-7) - 1 day each
-  if (month === 1 && day === 12) {
-    events.push({ name: 'Sirius Heliacal Rising', emoji: '⭐', energy: 'Dog Star Power', description: 'Brightest star returns', detail: 'Ancient flood predictor', priority: 7 });
-  }
-  if (month === 7 && day === 24) {
-    events.push({ name: 'Regulus Solar Conjunction', emoji: '🦁', energy: 'Heart of Lion', description: 'Royal star alignment', detail: 'Behind the Sun meeting', priority: 7 });
-  }
-  if (month === 9 && day === 7) {
-    events.push({ name: 'Spica Culmination', emoji: '🌾', energy: 'Harvest Star', description: 'Blue-white navigation star', detail: 'Evening peak position', priority: 6 });
-  }
-  if (month === 11 && day === 12) {
-    events.push({ name: 'Pleiades Opposition', emoji: '✨', energy: 'Seven Sisters', description: 'Star cluster showcase', detail: '1,000+ hot young stars', priority: 7 });
-  }
-  if (month === 12 && day === 7) {
-    events.push({ name: 'Aldebaran Maximum', emoji: '🔴', energy: 'Bull\'s Eye Focus', description: 'Red giant prominence', detail: 'Eye of Taurus peak', priority: 6 });
-  }
-
-  // GALACTIC EVENTS (Priority 6) - 1 day each
-  if (month === 4 && day === 12) {
-    events.push({ name: 'Virgo Galaxy Cluster', emoji: '🌌', energy: 'Cosmic Abundance', description: '1,300+ galaxies visible', detail: 'Nearest large cluster', priority: 6 });
-  }
-  if (month === 8 && day === 3) {
-    events.push({ name: 'Milky Way Center', emoji: '🌠', energy: 'Galactic Heart', description: 'Galaxy center prominent', detail: '26,000 light-years away', priority: 6 });
-  }
-  if (month === 10 && day === 17) {
-    events.push({ name: 'Andromeda Rising', emoji: '🌌', energy: 'Sister Galaxy', description: 'Nearest major galaxy', detail: '2.5 million light-years', priority: 6 });
-  }
-
-  // ZODIACAL PHENOMENA (Priority 6) - 1 day each
-  if (month === 2 && day === 25) {
-    events.push({ name: 'Zodiacal Light Dawn', emoji: '🌅', energy: 'Morning Pyramid', description: 'Pre-dawn dust glow', detail: 'Triangular interplanetary light', priority: 6 });
-  }
-  if (month === 9 && day === 25) {
-    events.push({ name: 'Zodiacal Light Dusk', emoji: '🌅', energy: 'Evening Pyramid', description: 'Post-sunset dust display', detail: 'Triangular cosmic glow', priority: 6 });
-  }
-  
-  // ADDITIONAL UNIQUE EVENTS (Priority 6-7) - 1 day each
-  if (month === 1 && day === 15) {
-    events.push({ name: 'Capella Transit', emoji: '⭐', energy: 'Charioteer\'s Guide', description: 'Sixth brightest star peak', detail: 'Northern navigation star', priority: 6 });
-  }
-  if (month === 2 && day === 15) {
-    events.push({ name: 'Canopus Culmination', emoji: '🌟', energy: 'Southern Navigator', description: 'Second brightest star', detail: 'Southern hemisphere guide', priority: 6 });
-  }
-  if (month === 3 && day === 15) {
-    events.push({ name: 'Vega Rising', emoji: '💫', energy: 'Future Pole Star', description: 'Next north star', detail: 'Will replace Polaris in 13,727 CE', priority: 6 });
-  }
-  if (month === 4 && day === 15) {
-    events.push({ name: 'Arcturus Peak', emoji: '🐻', energy: 'Bear Guardian', description: 'Fourth brightest star', detail: 'Fast-moving orange giant', priority: 6 });
-  }
-  if (month === 5 && day === 15) {
-    events.push({ name: 'Antares Opposition', emoji: '🔴', energy: 'Rival of Mars', description: 'Red supergiant showcase', detail: '700x Sun\'s diameter', priority: 7 });
-  }
-  if (month === 6 && day === 15) {
-    events.push({ name: 'Vernal Point Transit', emoji: '📍', energy: 'Cosmic Coordinates', description: 'Celestial origin point', detail: 'Astronomical reference system', priority: 6 });
-  }
-  if (month === 7 && day === 15) {
-    events.push({ name: 'Summer Triangle Peak', emoji: '🔺', energy: 'Stellar Navigation', description: 'Three-star asterism', detail: 'Vega, Altair, Deneb pattern', priority: 6 });
-  }
-  if (month === 8 && day === 15) {
-    events.push({ name: 'Altair Culmination', emoji: '🦅', energy: 'Eagle\'s Flight', description: 'Nearby eagle star', detail: '16.7 light-years distant', priority: 6 });
-  }
-  if (month === 9 && day === 15) {
-    events.push({ name: 'Fomalhaut Rising', emoji: '👁️', energy: 'Solitary Watcher', description: 'Southern autumn star', detail: 'Planet-forming debris disk', priority: 6 });
-  }
-  if (month === 10 && day === 15) {
-    events.push({ name: 'Deneb Maximum', emoji: '🦢', energy: 'Swan\'s Tail', description: 'Most distant visible star', detail: '2,600 light-years away', priority: 6 });
-  }
-  if (month === 11 && day === 15) {
-    events.push({ name: 'Polaris Alignment', emoji: '🧭', energy: 'True North Star', description: 'Current pole star', detail: 'Navigation reference point', priority: 6 });
-  }
-  if (month === 12 && day === 15) {
-    events.push({ name: 'Winter Hexagon', emoji: '❄️', energy: 'Stellar Crown', description: 'Six-star winter pattern', detail: 'Massive seasonal asterism', priority: 7 });
-  }
-  
   return events;
+}
+
+// Enhanced astrological aspects with glyphs - ALL 7 MAJOR ASPECTS
+function generateMainAstronomicalEvent(date: Date, planets: any): any {
+  const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
+  
+  // ALL 7 MAJOR ASTROLOGICAL ASPECTS with proper glyphs and meanings
+  const aspects = [
+    // GREAT CONJUNCTIONS - rarest and most powerful (priority 10)
+    {
+      name: 'Jupiter-Saturn Great Conjunction',
+      emoji: '♃☌♄',
+      glyph: '☌',
+      energy: 'Era-Defining Alignment',
+      description: 'The rarest of celestial meetings - reshaping society',
+      detail: 'Once every 20 years - new era begins',
+      priority: 10,
+      aspect: 'great-conjunction'
+    },
+    {
+      name: 'Jupiter-Uranus Great Conjunction',
+      emoji: '♃☌⛢',
+      glyph: '☌',
+      energy: 'Revolutionary Expansion',
+      description: 'Innovation meets abundance in rare alignment',
+      detail: 'Breakthrough discoveries and social progress',
+      priority: 10,
+      aspect: 'great-conjunction'
+    },
+    
+    // REGULAR CONJUNCTIONS - harmonious unity (priority 8)
+    {
+      name: 'Mercury-Venus conjunction',
+      emoji: '☿♀',
+      glyph: '☌',
+      energy: 'Mind & Heart Unite',
+      description: 'Communication flows with love and harmony',
+      detail: 'Perfect alignment for creative expression',
+      priority: 8,
+      aspect: 'conjunction'
+    },
+    {
+      name: 'Sun-Mercury conjunction',
+      emoji: '☉☿',
+      glyph: '☌',
+      energy: 'Clarity & Expression',
+      description: 'Identity and mind work in perfect harmony',
+      detail: 'Brilliant communication and self-expression',
+      priority: 8,
+      aspect: 'conjunction'
+    },
+    {
+      name: 'Venus-Mars conjunction',
+      emoji: '♀♂',
+      glyph: '☌',
+      energy: 'Love & Passion Unite',
+      description: 'Feminine and masculine energies merge powerfully',
+      detail: 'Perfect balance of love and desire',
+      priority: 8,
+      aspect: 'conjunction'
+    },
+    
+    // TRINES - harmonious flow (priority 7)
+    {
+      name: 'Mars-Jupiter trine',
+      emoji: '♂♃',
+      glyph: '△',
+      energy: 'Action & Growth Flow',
+      description: 'Warrior energy flows harmoniously with expansion',
+      detail: 'Effortless achievement and growth',
+      priority: 7,
+      aspect: 'trine'
+    },
+    {
+      name: 'Venus-Neptune trine',
+      emoji: '♀♆',
+      glyph: '△',
+      energy: 'Love & Dreams Flow',
+      description: 'Beauty meets spiritual vision in harmony',
+      detail: 'Artistic inspiration and romance',
+      priority: 7,
+      aspect: 'trine'
+    },
+    {
+      name: 'Sun-Jupiter trine',
+      emoji: '☉♃',
+      glyph: '△',
+      energy: 'Confidence & Luck Flow',
+      description: 'Self-expression supported by fortune',
+      detail: 'Natural leadership and optimism',
+      priority: 7,
+      aspect: 'trine'
+    },
+    
+    // SEXTILES - cooperative opportunity (priority 6)
+    {
+      name: 'Mercury-Mars sextile',
+      emoji: '☿♂',
+      glyph: '⚹',
+      energy: 'Mind & Action Cooperate',
+      description: 'Communication supports decisive action',
+      detail: 'Perfect timing for important decisions',
+      priority: 6,
+      aspect: 'sextile'
+    },
+    {
+      name: 'Venus-Jupiter sextile',
+      emoji: '♀♃',
+      glyph: '⚹',
+      energy: 'Beauty & Abundance Cooperate',
+      description: 'Love and prosperity work together',
+      detail: 'Opportunities for joy and growth',
+      priority: 6,
+      aspect: 'sextile'
+    },
+    
+    // SQUARES - dynamic tension (priority 5)
+    {
+      name: 'Mars-Saturn square',
+      emoji: '♂♄',
+      glyph: '□',
+      energy: 'Drive vs Discipline',
+      description: 'Action meets structure in creative tension',
+      detail: 'Breakthrough through challenge',
+      priority: 5,
+      aspect: 'square'
+    },
+    {
+      name: 'Mercury-Neptune square',
+      emoji: '☿♆',
+      glyph: '□',
+      energy: 'Logic vs Intuition',
+      description: 'Mind challenges dreams in productive tension',
+      detail: 'Creative problem-solving emerges',
+      priority: 5,
+      aspect: 'square'
+    },
+    
+    // OPPOSITIONS - balance and awareness (priority 5)
+    {
+      name: 'Jupiter-Saturn opposition',
+      emoji: '♃♄',
+      glyph: '☍',
+      energy: 'Growth vs Structure',
+      description: 'Expansion balances with discipline',
+      detail: 'Finding balance between dreams and reality',
+      priority: 5,
+      aspect: 'opposition'
+    },
+    {
+      name: 'Venus-Mars opposition',
+      emoji: '♀♂',
+      glyph: '☍',
+      energy: 'Love vs Desire',
+      description: 'Heart and passion seek perfect balance',
+      detail: 'Relationship dynamics highlighted',
+      priority: 5,
+      aspect: 'opposition'
+    },
+    
+    // QUINCUNX - adjustment and growth (priority 4)
+    {
+      name: 'Sun-Neptune quincunx',
+      emoji: '☉♆',
+      glyph: '⚼',
+      energy: 'Identity Adjusts to Vision',
+      description: 'Self adjusts to spiritual calling',
+      detail: 'Personal growth through adaptation',
+      priority: 4,
+      aspect: 'quincunx'
+    },
+    
+    // SEMI-SEXTILE - subtle opportunity (priority 3)
+    {
+      name: 'Mercury-Venus semi-sextile',
+      emoji: '☿♀',
+      glyph: '⚺',
+      energy: 'Mind & Heart Subtly Connect',
+      description: 'Gentle alignment of thought and feeling',
+      detail: 'Quiet opportunities for harmony',
+      priority: 3,
+      aspect: 'semi-sextile'
+    }
+  ];
+  
+  // Select aspect based on day for variety, but prioritize higher aspects
+  const sortedAspects = aspects.sort((a, b) => b.priority - a.priority);
+  return sortedAspects[dayOfYear % sortedAspects.length];
 }
 
 export async function GET(request: NextRequest) {
@@ -400,13 +429,75 @@ export async function GET(request: NextRequest) {
     moonPhase = { name: `Waning Crescent (Day ${dayPhase})`, emoji: '🌘', energy: 'Rest & Reflection', description: 'Approaching new moon', detail: `${Math.round(((lunarCycle - lunarDay) / lunarCycle) * 100)}% illuminated`, priority: 1 };
   }
 
-  // Determine primary event - unique astronomical events take priority
+  // Determine primary event - SYNC WITH POST BUT PRIORITIZE MOON VISUALS FOR IMAGES
   let allEvents = [...astronomicalEvents];
 
-  // NEVER add calculated moon phases as primary events - only as fallback
-  // The traditional moon names (Wolf Moon, Snow Moon, etc.) are already in astronomicalEvents with high priority
+  // Check for significant moon phases - if found, USE MOON FOR IMAGE (priority for visuals)
+  let isMoonSignificant = false;
+  if (lunarDay >= 0 && lunarDay < 0.5) {
+    allEvents.push({ name: 'New Moon', emoji: '🌑', energy: 'New Beginnings', description: 'Lunar reset cycle', detail: 'Moon invisible from Earth', priority: 5 });
+    isMoonSignificant = true;
+  } else if (lunarDay >= 7.3 && lunarDay < 7.8) {
+    allEvents.push({ name: 'First Quarter', emoji: '🌓', energy: 'Action & Decision', description: 'Half moon rising', detail: '50% illuminated', priority: 5 });
+    isMoonSignificant = true;
+  } else if (lunarDay >= 14.7 && lunarDay < 15.2) {
+    // Use traditional full moon names based on month
+    const month = targetDate.getMonth() + 1;
+    let moonName = 'Full Moon';
+    let moonEnergy = 'Peak Power';
+    
+    if (month === 1) {
+      moonName = 'Wolf Moon';
+      moonEnergy = 'Wild Instincts';
+    } else if (month === 2) {
+      moonName = 'Snow Moon';
+      moonEnergy = 'Purification';
+    } else if (month === 3) {
+      moonName = 'Worm Moon';
+      moonEnergy = 'Earth Awakening';
+    } else if (month === 4) {
+      moonName = 'Pink Moon';
+      moonEnergy = 'Spring Bloom';
+    } else if (month === 5) {
+      moonName = 'Flower Moon';
+      moonEnergy = 'Fertility & Growth';
+    } else if (month === 6) {
+      moonName = 'Strawberry Moon';
+      moonEnergy = 'Summer Abundance';
+    } else if (month === 7) {
+      moonName = 'Buck Moon';
+      moonEnergy = 'Wild Freedom';
+    } else if (month === 8) {
+      moonName = 'Sturgeon Moon';
+      moonEnergy = 'Ancient Wisdom';
+    } else if (month === 9) {
+      moonName = 'Harvest Moon';
+      moonEnergy = 'Abundance Gathering';
+    } else if (month === 10) {
+      moonName = 'Hunter Moon';
+      moonEnergy = 'Preparation Focus';
+    } else if (month === 11) {
+      moonName = 'Beaver Moon';
+      moonEnergy = 'Winter Preparation';
+    } else if (month === 12) {
+      moonName = 'Cold Moon';
+      moonEnergy = 'Inner Stillness';
+    }
+    
+    allEvents.push({ name: moonName, emoji: '🌕', energy: moonEnergy, description: 'Maximum lunar energy', detail: '100% illuminated', priority: 8 });
+    isMoonSignificant = true;
+  } else if (lunarDay >= 22.1 && lunarDay < 22.6) {
+    allEvents.push({ name: 'Third Quarter', emoji: '🌗', energy: 'Release & Letting Go', description: 'Half moon setting', detail: '50% illuminated', priority: 5 });
+    isMoonSignificant = true;
+  }
 
-  // Add planetary event for current day if no astronomical events exist
+  // If no astronomical events or significant moon phases, add main aspect to sync with post content
+  if (allEvents.length === 0) {
+    const mainAspect = generateMainAstronomicalEvent(targetDate, planets);
+    allEvents.push(mainAspect);
+  }
+
+  // Only add basic planetary events as absolute last resort
   if (allEvents.length === 0) {
     const dayOfWeek = targetDate.getDay();
     const planetaryEvents = [
@@ -424,7 +515,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Only use moon phase as absolute last resort
+  // If still no events, add regular moon phase as last resort
   if (allEvents.length === 0) {
     allEvents.push(moonPhase);
   }
@@ -447,12 +538,12 @@ export async function GET(request: NextRequest) {
   const getEventTheme = (event: any) => {
     // Clean, muted, minimal themes with darker backgrounds and pastel accents
     const dayVariation = daysSinceNew % 5;
-    const themes = [
-      { background: 'linear-gradient(135deg, #0a0a1a, #1a1a2e)', accentColor: '#b19cd9' }, // Pastel purple
-      { background: 'linear-gradient(135deg, #1a1a2e, #2d3561)', accentColor: '#87ceeb' }, // Pastel blue  
-      { background: 'linear-gradient(135deg, #2c3e50, #34495e)', accentColor: '#dda0dd' }, // Pastel plum
-      { background: 'linear-gradient(135deg, #1e2a3a, #2c3e50)', accentColor: '#87cefa' }, // Light sky blue
-      { background: 'linear-gradient(135deg, #1a2332, #1e3c72)', accentColor: '#f0a0a0' }  // Pastel coral
+        const themes = [
+      { background: 'linear-gradient(135deg, #0a0a1a, #1a1a2e)', accent: '#b19cd9' }, // Pastel purple
+      { background: 'linear-gradient(135deg, #1a1a2e, #2d3561)', accent: '#87ceeb' }, // Pastel blue
+      { background: 'linear-gradient(135deg, #2c3e50, #34495e)', accent: '#dda0dd' }, // Pastel plum
+      { background: 'linear-gradient(135deg, #1e2a3a, #2c3e50)', accent: '#87cefa' }, // Light sky blue
+      { background: 'linear-gradient(135deg, #1a2332, #1e3c72)', accent: '#f0a0a0' }  // Pastel coral
     ];
     
     return {
@@ -488,86 +579,206 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            textAlign: 'center',
-            maxWidth: '1000px',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+            padding: '80px',
+            background: theme.background,
+            fontFamily: 'system-ui, sans-serif',
+            position: 'relative',
           }}
         >
-          <div
-            style={{
-              display: 'flex',
+          {/* Decorative Stars */}
+          <div style={{ position: 'absolute', top: '60px', left: '100px', fontSize: '24px', color: theme.accent, opacity: 0.4 }}>✦</div>
+          <div style={{ position: 'absolute', top: '120px', right: '150px', fontSize: '18px', color: theme.accent, opacity: 0.3 }}>✧</div>
+          <div style={{ position: 'absolute', bottom: '180px', left: '120px', fontSize: '20px', color: theme.accent, opacity: 0.3 }}>⋆</div>
+          <div style={{ position: 'absolute', bottom: '100px', right: '100px', fontSize: '22px', color: theme.accent, opacity: 0.4 }}>✦</div>
+
+          {/* Corner Accents */}
+          <div style={{ position: 'absolute', top: '40px', left: '40px', width: '40px', height: '40px', border: `2px solid ${theme.accent}`, borderRight: 'none', borderBottom: 'none', opacity: 0.3 }}></div>
+          <div style={{ position: 'absolute', top: '40px', right: '40px', width: '40px', height: '40px', border: `2px solid ${theme.accent}`, borderLeft: 'none', borderBottom: 'none', opacity: 0.3 }}></div>
+          <div style={{ position: 'absolute', bottom: '40px', left: '40px', width: '40px', height: '40px', border: `2px solid ${theme.accent}`, borderRight: 'none', borderTop: 'none', opacity: 0.3 }}></div>
+          <div style={{ position: 'absolute', bottom: '40px', right: '40px', width: '40px', height: '40px', border: `2px solid ${theme.accent}`, borderLeft: 'none', borderTop: 'none', opacity: 0.3 }}></div>
+
+          {/* Header with Frame */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '30px 60px',
+            border: `2px solid ${theme.accent}`,
+            borderRadius: '20px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            marginBottom: '60px',
+          }}>
+            <div style={{
               fontSize: '32px',
-              color: theme.accentColor,
-              marginBottom: '40px',
-              letterSpacing: '3px',
               fontWeight: 'bold',
-              textShadow: theme.textShadow,
-            }}
-          >
-            LUNARY
+              color: 'white',
+              textShadow: `0 2px 10px ${theme.accent}`,
+              letterSpacing: '8px',
+              marginBottom: '8px',
+            }}>
+              L U N A R Y
+            </div>
+            <div style={{
+              fontSize: '16px',
+              color: theme.accent,
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+            }}>
+              COSMIC GUIDANCE
+            </div>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '24px',
-              color: 'rgba(255,255,255,0.9)',
-              marginBottom: '60px',
-              letterSpacing: '1px',
-            }}
-          >
+          {/* Date Pill */}
+          <div style={{
+            fontSize: '20px',
+            color: 'white',
+            backgroundColor: theme.accent,
+            padding: '12px 32px',
+            borderRadius: '30px',
+            border: `2px solid white`,
+            marginBottom: '40px',
+            fontWeight: '600',
+            letterSpacing: '1px',
+          }}>
             {dateStr}
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '200px',
-              marginBottom: '60px',
-              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
-              color: Object.values(planetSymbols).includes(primaryEvent.emoji) ? 'white' : 'inherit',
-            }}
-          >
+          {/* Main Event Emoji with Glow */}
+          <div style={{
+            fontSize: '220px',
+            marginBottom: '20px',
+            textShadow: `0 0 40px ${theme.accent}, 0 0 80px ${theme.accent}`,
+            filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.3))',
+            color: 'white',
+          }}>
             {primaryEvent.emoji}
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '64px',
-              color: 'white',
+          {/* Aspect Glyph (if this is an aspect event) */}
+          {primaryEvent.glyph && (
+            <div style={{
+              fontSize: '80px',
+              color: theme.accent,
+              marginBottom: '15px',
+              textShadow: `0 0 20px ${theme.accent}, 0 4px 8px rgba(0,0,0,0.3)`,
               fontWeight: 'bold',
-              marginBottom: '30px',
-              letterSpacing: '1px',
-              textShadow: theme.textShadow,
+            }}>
+              {primaryEvent.glyph}
+            </div>
+          )}
+
+          {/* Mini Astro Chart (for aspect events) */}
+          {primaryEvent.aspect && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '25px',
+              gap: '30px',
+            }}>
+              {/* Planet A */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
+              }}>
+                <div style={{ fontSize: '40px', color: 'white' }}>
+                  {primaryEvent.emoji.charAt(0)}
+                </div>
+                <div style={{ fontSize: '14px', color: theme.accent, textAlign: 'center' }}>
+                  {primaryEvent.signA || 'Cosmic'}
+                </div>
+              </div>
+
+              {/* Aspect Line with Glyph */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '5px',
+              }}>
+                <div style={{
+                  width: '100px',
+                  height: '3px',
+                  background: `linear-gradient(90deg, ${theme.accent}, white, ${theme.accent})`,
+                  borderRadius: '2px',
+                }}></div>
+                <div style={{ fontSize: '24px', color: theme.accent }}>
+                  {primaryEvent.glyph}
+                </div>
+              </div>
+
+              {/* Planet B */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
+              }}>
+                <div style={{ fontSize: '40px', color: 'white' }}>
+                  {primaryEvent.emoji.charAt(1) || primaryEvent.emoji.charAt(0)}
+                </div>
+                <div style={{ fontSize: '14px', color: theme.accent, textAlign: 'center' }}>
+                  {primaryEvent.signB || 'Cosmic'}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Event Name with Decorative Lines */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '30px',
+            marginBottom: '15px',
+          }}>
+            <div style={{ width: '80px', height: '2px', backgroundColor: theme.accent, opacity: 0.7 }}></div>
+            <div style={{
+              fontSize: '64px',
+              fontWeight: 'bold',
+              color: 'white',
+              textAlign: 'center',
+              textShadow: `0 4px 12px ${theme.accent}, 0 2px 4px rgba(0,0,0,0.5)`,
+              letterSpacing: '2px',
               lineHeight: '1.1',
-            }}
-          >
-            {primaryEvent.name}
+            }}>
+              {primaryEvent.name}
+            </div>
+            <div style={{ width: '80px', height: '2px', backgroundColor: theme.accent, opacity: 0.7 }}></div>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '32px',
-              color: theme.accentColor,
-              marginBottom: '30px',
-              letterSpacing: '1px',
-              fontWeight: '500',
-            }}
-          >
+          {/* Energy Text in Panel */}
+          <div style={{
+            fontSize: '32px',
+            color: 'white',
+            textAlign: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            padding: '20px 40px',
+            borderRadius: '15px',
+            border: `2px solid ${theme.accent}`,
+            marginBottom: '40px',
+            textShadow: `0 2px 8px ${theme.accent}`,
+            fontWeight: '500',
+            letterSpacing: '1px',
+          }}>
             {primaryEvent.energy}
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '20px',
-              color: 'rgba(255,255,255,0.8)',
-              letterSpacing: '0.5px',
-              fontStyle: 'italic',
-            }}
-          >
-            {primaryEvent.detail}
+          {/* Subtle Bottom Accent */}
+          <div style={{
+            position: 'absolute',
+            bottom: '60px',
+            display: 'flex',
+            gap: '15px',
+            opacity: 0.4,
+          }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: theme.accent }}></div>
+            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: theme.accent }}></div>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: theme.accent }}></div>
           </div>
         </div>
       </div>
