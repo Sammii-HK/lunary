@@ -17,7 +17,7 @@ export default function TestOGPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [postContent, setPostContent] = useState<PostContent | null>(null);
   const [loading, setLoading] = useState(false);
-  
+
   // Generate array of dates for the next 30 days
   const getNextMonthDates = () => {
     const dates = [];
@@ -46,7 +46,9 @@ export default function TestOGPage() {
     const fetchPostContent = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/og/cosmic-post?date=${formatDateForUrl(selectedDate)}`);
+        const response = await fetch(
+          `/api/og/cosmic-post?date=${formatDateForUrl(selectedDate)}`,
+        );
         const data = await response.json();
         setPostContent(data);
       } catch (error) {
@@ -64,7 +66,7 @@ export default function TestOGPage() {
   return (
     <div className='flex flex-col items-center gap-6 py-8 px-4'>
       <h1 className='text-3xl font-bold text-white mb-6'>Cosmic OG Preview</h1>
-      
+
       {/* Selected Date Image */}
       <div className='bg-zinc-800 rounded-lg p-6 max-w-2xl w-full'>
         <h2 className='text-xl font-semibold text-white mb-4 text-center'>
@@ -74,14 +76,19 @@ export default function TestOGPage() {
           <img
             src={`/api/og/cosmic?date=${formatDateForUrl(selectedDate)}`}
             alt={`Cosmic image for ${formatDateDisplay(selectedDate)}`}
-            style={{ 
-              width: '400px', 
-              height: '400px', 
+            style={{
+              width: '400px',
+              height: '400px',
               objectFit: 'cover',
               borderRadius: '12px',
-              border: '2px solid #8b5cf6'
+              border: '2px solid #8b5cf6',
             }}
-            onClick={() => window.open(`/api/og/cosmic?date=${formatDateForUrl(selectedDate)}`, '_blank')}
+            onClick={() =>
+              window.open(
+                `/api/og/cosmic?date=${formatDateForUrl(selectedDate)}`,
+                '_blank',
+              )
+            }
             className='cursor-pointer hover:opacity-90 transition-opacity'
           />
         </div>
@@ -92,7 +99,9 @@ export default function TestOGPage() {
 
       {/* Post Content */}
       <div className='bg-zinc-800 rounded-lg p-6 max-w-2xl w-full'>
-        <h2 className='text-xl font-semibold text-purple-400 mb-4'>Post Content</h2>
+        <h2 className='text-xl font-semibold text-purple-400 mb-4'>
+          Post Content
+        </h2>
         {loading ? (
           <div className='animate-pulse'>
             <div className='h-4 bg-zinc-700 rounded mb-2'></div>
@@ -107,7 +116,7 @@ export default function TestOGPage() {
               </h3>
               <p className='text-zinc-300 text-sm mb-4'>{postContent.date}</p>
             </div> */}
-            
+
             <div>
               {/* <h4 className='text-purple-300 font-medium mb-2'>🌟 Cosmic Highlights</h4> */}
               <ul className='space-y-1'>
@@ -136,17 +145,19 @@ export default function TestOGPage() {
           <p className='text-zinc-400'>Failed to load post content</p>
         )}
       </div>
-      
+
       {/* Monthly Preview Grid */}
       <div className='w-full max-w-6xl'>
-        <h2 className='text-2xl font-bold text-white mb-6 text-center'>30-Day Preview</h2>
+        <h2 className='text-2xl font-bold text-white mb-6 text-center'>
+          30-Day Preview
+        </h2>
         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'>
           {nextMonthDates.map((date, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className={`bg-zinc-800 rounded-lg p-2 text-center cursor-pointer transition-all hover:bg-zinc-700 ${
-                formatDateForUrl(date) === formatDateForUrl(selectedDate) 
-                  ? 'ring-2 ring-purple-500' 
+                formatDateForUrl(date) === formatDateForUrl(selectedDate)
+                  ? 'ring-2 ring-purple-500'
                   : ''
               }`}
               onClick={() => setSelectedDate(date)}
@@ -154,11 +165,11 @@ export default function TestOGPage() {
               <img
                 src={`/api/og/cosmic?date=${formatDateForUrl(date)}`}
                 alt={`Cosmic image for ${formatDateDisplay(date)}`}
-                style={{ 
-                  width: '100%', 
-                  aspectRatio: '1/1', 
+                style={{
+                  width: '100%',
+                  aspectRatio: '1/1',
                   objectFit: 'cover',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
                 }}
                 className='mb-2 hover:opacity-90 transition-opacity'
               />

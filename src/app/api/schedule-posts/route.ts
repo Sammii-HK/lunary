@@ -17,7 +17,7 @@ interface SucculentPostData {
   platforms: string[];
   scheduledDate: string;
   mediaItems: Array<{
-    type: "image";
+    type: 'image';
     url: string;
     altText: string;
   }>;
@@ -28,18 +28,21 @@ export async function POST(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const monthParam = searchParams.get('month'); // Format: 2024-02 for February 2024
     const testMode = searchParams.get('test') === 'true';
-    
+
     // Get environment variables
     const apiKey = process.env.SUCCULENT_SECRET_KEY;
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-    
+
     if (!apiKey || !accountGroupId) {
-      return NextResponse.json({
-        success: false,
-        error: 'Missing Succulent API configuration'
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Missing Succulent API configuration',
+        },
+        { status: 500 },
+      );
     }
-    
+
     // Parse target month or default to next month
     let targetMonth: Date;
     if (monthParam) {
@@ -50,76 +53,88 @@ export async function POST(request: NextRequest) {
       targetMonth.setMonth(targetMonth.getMonth() + 1);
       targetMonth.setDate(1);
     }
-    
+
     // Generate posts for the entire month
     const posts: SucculentPostData[] = [];
-    const daysInMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0).getDate();
-    
+    const daysInMonth = new Date(
+      targetMonth.getFullYear(),
+      targetMonth.getMonth() + 1,
+      0,
+    ).getDate();
+
     for (let day = 1; day <= daysInMonth; day++) {
-      const currentDate = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), day);
+      const currentDate = new Date(
+        targetMonth.getFullYear(),
+        targetMonth.getMonth(),
+        day,
+      );
       const dateStr = currentDate.toISOString().split('T')[0];
-      
+
       // Fetch cosmic content for this date
-      const cosmicResponse = await fetch(`${request.nextUrl.origin}/api/og/cosmic-post?date=${dateStr}`);
+      const cosmicResponse = await fetch(
+        `${request.nextUrl.origin}/api/og/cosmic-post?date=${dateStr}`,
+      );
       const cosmicContent: PostContent = await cosmicResponse.json();
-      
+
       // Format the social media post
       const socialContent = formatCosmicPost(cosmicContent);
-      
+
       // Schedule post for 9 AM local time on the target date
       const scheduledDateTime = new Date(currentDate);
       scheduledDateTime.setHours(9, 0, 0, 0);
-      
+
       const postData: SucculentPostData = {
         accountGroupId,
         content: socialContent,
         platforms: ['instagram', 'x', 'facebook', 'linkedin'],
         scheduledDate: scheduledDateTime.toISOString(),
-        mediaItems: [{
-          type: "image",
-          url: `${request.nextUrl.origin}/api/og/cosmic?date=${dateStr}`,
-          altText: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`
-        }]
+        mediaItems: [
+          {
+            type: 'image',
+            url: `${request.nextUrl.origin}/api/og/cosmic?date=${dateStr}`,
+            altText: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
+          },
+        ],
       };
-      
+
       posts.push(postData);
     }
-    
+
     // Send posts to Succulent API
-    const succulentApiUrl = testMode 
-      ? 'http://localhost:3001/api/posts' 
+    const succulentApiUrl = testMode
+      ? 'http://localhost:3001/api/posts'
       : 'https://app.succulent.social/api/posts';
-    
+
     const results = [];
     let successCount = 0;
     let errorCount = 0;
-    
+
     for (const post of posts) {
       try {
         const response = await fetch(succulentApiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-API-Key': apiKey
+            'X-API-Key': apiKey,
           },
-          body: JSON.stringify(post)
+          body: JSON.stringify(post),
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
           successCount++;
           results.push({
             date: post.scheduledDate.split('T')[0],
             status: 'success',
-            postId: result.data?.postId
+            postId: result.data?.postId,
           });
         } else {
           errorCount++;
           results.push({
             date: post.scheduledDate.split('T')[0],
             status: 'error',
-            error: result.error || 'Unknown error'
+            error: result.error || 'Unknown error',
           });
         }
       } catch (error) {
@@ -127,14 +142,14 @@ export async function POST(request: NextRequest) {
         results.push({
           date: post.scheduledDate.split('T')[0],
           status: 'error',
-          error: error instanceof Error ? error.message : 'Network error'
+          error: error instanceof Error ? error.message : 'Network error',
         });
       }
-      
+
       // Add small delay between requests to be respectful
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    
+
     return NextResponse.json({
       success: true,
       message: `Scheduled ${successCount} posts for ${targetMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
@@ -142,18 +157,23 @@ export async function POST(request: NextRequest) {
         totalPosts: posts.length,
         successful: successCount,
         failed: errorCount,
-        month: targetMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        month: targetMonth.toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        }),
       },
-      results
+      results,
     });
-    
   } catch (error) {
     console.error('Scheduler error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to schedule posts',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to schedule posts',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -163,14 +183,14 @@ function formatCosmicPost(content: PostContent): string {
     `🌟 ${content.primaryEvent.name} - ${content.primaryEvent.energy}`,
     '',
     `✨ Today's Cosmic Highlights:`,
-    ...content.highlights.slice(0, 3).map(highlight => `• ${highlight}`),
+    ...content.highlights.slice(0, 3).map((highlight) => `• ${highlight}`),
     '',
     `🔮 Guidance: ${content.horoscopeSnippet}`,
     '',
     `${content.callToAction}`,
     '',
-    '#astrology #cosmic #moonphases #astronomy #spirituality #dailyhoroscope #planets #celestial #universe #stargazing'
+    '#astrology #cosmic #moonphases #astronomy #spirituality #dailyhoroscope #planets #celestial #universe #stargazing',
   ].join('\n');
-  
+
   return post;
-} 
+}
