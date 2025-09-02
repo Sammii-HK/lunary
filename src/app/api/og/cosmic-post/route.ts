@@ -222,33 +222,33 @@ function checkSeasonalEvents(positions: any): Array<any> {
   const sunLongitude = positions.Sun.longitude;
   const events: Array<any> = [];
   
-  // Exact seasonal markers (within 1 degree)
+  // Exact seasonal markers (within 1 degree) - HIGH PRIORITY under moon phases
   if (Math.abs(sunLongitude - 0) < 1 || Math.abs(sunLongitude - 360) < 1) {
     events.push({
       name: 'Spring Equinox',
       energy: 'Balance & New Growth',
-      priority: 8,
+      priority: 9, // Higher priority - just under moon phases
       type: 'seasonal'
     });
   } else if (Math.abs(sunLongitude - 90) < 1) {
     events.push({
       name: 'Summer Solstice',
       energy: 'Maximum Solar Power',
-      priority: 8,
+      priority: 9, // Higher priority - just under moon phases
       type: 'seasonal'
     });
   } else if (Math.abs(sunLongitude - 180) < 1) {
     events.push({
       name: 'Autumn Equinox',
       energy: 'Harvest & Reflection',
-      priority: 8,
+      priority: 9, // Higher priority - just under moon phases
       type: 'seasonal'
     });
   } else if (Math.abs(sunLongitude - 270) < 1) {
     events.push({
       name: 'Winter Solstice',
       energy: 'Inner Light & Renewal',
-      priority: 8,
+      priority: 9, // Higher priority - just under moon phases
       type: 'seasonal'
     });
   }
@@ -297,7 +297,7 @@ function generateAstrologicalMeaning(primaryEvent: any, positions: any): string 
     };
     
     const aspectMeanings: { [key: string]: string } = {
-      'conjunction': 'unite energies',
+      'conjunction': 'unite',
       'sextile': 'create opportunities',
       'square': 'generate dynamic tension',
       'trine': 'flow harmoniously',
@@ -408,16 +408,16 @@ function generateAstronomicalFacts(primaryEvent: any, positions: any, moonPhase:
 function generatePracticalGuidance(primaryEvent: any, positions: any): string {
   const eventName = primaryEvent.name;
 
-  // MOON PHASE GUIDANCE
+  // SUCCINCT GUIDANCE SUMMARY
   if (primaryEvent.type === 'moon') {
     if (eventName.includes('New')) {
-      return `Plant seeds of intention for new beginnings. This New Moon supports fresh starts and goal-setting. Write down intentions, start new habits, begin creative projects, or initiate conversations that open new possibilities.`;
+      return `Plant seeds of intention for new beginnings. Write down goals, start fresh habits, or begin creative projects.`;
     }
     if (eventName.includes('Full')) {
-      return `Harness peak lunar energy for completion and manifestation. This Full Moon amplifies emotions and intuition. Finish important projects, celebrate achievements, practice gratitude, or release what no longer serves your highest good.`;
+      return `Harness peak lunar energy for completion and manifestation. Finish projects, celebrate achievements, or practice gratitude.`;
     }
     if (eventName.includes('Quarter')) {
-      return `Take decisive action and overcome obstacles. This Quarter Moon provides energy for important decisions. Address challenges directly, make necessary course corrections, or push through resistance with determined effort.`;
+      return `Take decisive action and overcome obstacles. Address challenges directly or make necessary course corrections.`;
     }
   }
 
@@ -429,32 +429,120 @@ function generatePracticalGuidance(primaryEvent: any, positions: any): string {
     
     if (aspect === 'conjunction') {
       if ((planetA === 'Venus' && planetB === 'Mars') || (planetA === 'Mars' && planetB === 'Venus')) {
-        return `Balance passion with purpose in relationships and creative endeavors. Take initiative in love, start artistic projects, or pursue goals that require both heart and courage.`;
+        return `Balance passion with purpose. Take initiative in love, start artistic projects, or pursue goals requiring both heart and courage.`;
       }
       if ((planetA === 'Mercury' && planetB === 'Venus') || (planetA === 'Venus' && planetB === 'Mercury')) {
-        return `Write, create, and communicate with grace today. Perfect timing for important emails, creative projects, or heart-to-heart discussions that require both logic and compassion.`;
+        return `Write, create, and communicate with grace. Perfect timing for important conversations or creative projects.`;
       }
-      return `Unite the energies of ${planetA} and ${planetB}. Focus on initiatives that combine their themes for integrated personal growth and manifestation.`;
+      if ((planetA === 'Jupiter' && planetB === 'Saturn') || (planetA === 'Saturn' && planetB === 'Jupiter')) {
+        return `Build lasting foundations for success. Set ambitious but realistic goals and commit to long-term growth.`;
+      }
+      return `Unite ${planetA} and ${planetB} energies. Focus on initiatives that combine their themes for integrated growth.`;
     }
     
     if (aspect === 'trine') {
-      return `Work with natural flow and effortless progress. This harmonious energy supports activities that align with your authentic self. Trust your instincts, collaborate with others, and allow opportunities to unfold organically.`;
+      return `Work with natural flow and effortless progress. Trust your instincts, collaborate with others, and allow opportunities to unfold.`;
     }
     
     if (aspect === 'square') {
-      return `Channel tension into breakthrough action. This dynamic energy motivates change through constructive challenge. Push through resistance, tackle difficult conversations, or use pressure as fuel for innovative solutions.`;
+      return `Channel tension into breakthrough action. Push through resistance or use pressure as fuel for innovative solutions.`;
     }
     
-    return `Navigate the ${aspect} energy between ${planetA} and ${planetB} with awareness and intention.`;
+    if (aspect === 'sextile') {
+      return `Seize cooperative opportunities. Network, collaborate, and start projects that benefit from diverse perspectives.`;
+    }
+    
+    return `Navigate ${planetA}-${planetB} ${aspect} energy with awareness and intention.`;
   }
 
   // SEASONAL GUIDANCE
   if (primaryEvent.type === 'seasonal') {
-    return `Embrace seasonal transformation and cosmic timing. This celestial turning point supports major life transitions and new chapters. Set intentions aligned with natural cycles, adjust your daily rhythms, or make commitments that honor seasonal energy.`;
+    return `Embrace seasonal transformation. Set intentions aligned with natural cycles and make commitments that honor seasonal energy.`;
   }
 
   // FALLBACK
-  return `Navigate today's cosmic energies with intention and awareness. Pay attention to synchronicities, trust your intuition, and take inspired action that aligns with your authentic path and highest purpose.`;
+  return `Navigate today's cosmic energies with intention. Trust your intuition and take inspired action aligned with your authentic path.`;
+}
+
+// Generate flowing horoscope-style guidance for ALL the day's events
+function generateDayGuidanceSummary(topEvents: any[], positions: any, moonPhase: any): string {
+  const primaryEvent = topEvents[0];
+  const secondaryEvents = topEvents.slice(1, 3);
+  
+  // Get current sun and moon signs for context
+  const sunSign = positions.Sun.sign;
+  const moonSign = positions.Moon.sign;
+  
+  // Start with the primary event's energy
+  let guidance = '';
+  
+  if (primaryEvent.type === 'moon') {
+    if (primaryEvent.name.includes('New')) {
+      guidance = `The New Moon in ${moonSign} opens a powerful portal for manifestation and fresh beginnings. This lunar reset invites you to plant seeds of intention that honor both your conscious goals and deeper emotional needs.`;
+    } else if (primaryEvent.name.includes('Full')) {
+      guidance = `The ${primaryEvent.name} in ${moonSign} brings peak lunar energy for completion and celebration. This illuminating phase reveals what has come to fruition while highlighting areas ready for release and gratitude.`;
+    } else if (primaryEvent.name.includes('Quarter')) {
+      guidance = `The ${primaryEvent.name} in ${moonSign} presents a cosmic crossroads requiring decisive action. This dynamic lunar energy supports breakthrough moments and courageous choices that align with your authentic path.`;
+    }
+  } else if (primaryEvent.aspect) {
+    if (primaryEvent.aspect === 'conjunction') {
+      if ((primaryEvent.planetA === 'Saturn' && primaryEvent.planetB === 'Neptune') || (primaryEvent.planetA === 'Neptune' && primaryEvent.planetB === 'Saturn')) {
+        guidance = `Saturn and Neptune unite in a rare cosmic dance, blending practical structure with mystical vision. This powerful alignment invites you to give form to your dreams while remaining open to spiritual guidance.`;
+      } else if ((primaryEvent.planetA === 'Venus' && primaryEvent.planetB === 'Mars') || (primaryEvent.planetA === 'Mars' && primaryEvent.planetB === 'Venus')) {
+        guidance = `Venus and Mars join forces, harmonizing the energies of love and action. This passionate alignment supports creative endeavors, romantic initiatives, and projects that require both heart and courage.`;
+      } else {
+        guidance = `${primaryEvent.planetA} and ${primaryEvent.planetB} unite their cosmic energies, creating opportunities for integrated growth and purposeful action in alignment with your highest values.`;
+      }
+    } else if (primaryEvent.aspect === 'trine') {
+      guidance = `A harmonious trine between ${primaryEvent.planetA} and ${primaryEvent.planetB} creates effortless flow and natural synchronicity. Trust your instincts and allow opportunities to unfold organically.`;
+    } else if (primaryEvent.aspect === 'square') {
+      guidance = `The dynamic square between ${primaryEvent.planetA} and ${primaryEvent.planetB} generates creative tension that can fuel breakthrough moments. Channel any resistance into constructive action and innovative solutions.`;
+    }
+  } else if (primaryEvent.type === 'seasonal') {
+    guidance = `The ${primaryEvent.name} marks a sacred turning point in the cosmic wheel, inviting you to align with nature's rhythms and embrace the transformative energy of seasonal change.`;
+  } else {
+    guidance = `Today's cosmic configuration supports spiritual growth and conscious evolution through natural celestial rhythms.`;
+  }
+  
+  // Add secondary events if present
+  if (secondaryEvents.length > 0) {
+    const secondaryGuidance: string[] = [];
+    
+         secondaryEvents.forEach((event, index) => {
+       if (event.aspect === 'trine') {
+         if (event.planetA === 'Sun' && event.planetB === 'Moon' || event.planetA === 'Moon' && event.planetB === 'Sun') {
+           secondaryGuidance.push('emotional alignment');
+         } else if (event.planetA === 'Moon' && event.planetB === 'Mercury' || event.planetA === 'Mercury' && event.planetB === 'Moon') {
+           secondaryGuidance.push('intuitive communication');
+         } else {
+           secondaryGuidance.push(index === 0 ? 'harmonious flow' : 'supportive energy');
+         }
+       } else if (event.aspect === 'sextile') {
+         secondaryGuidance.push('cooperative opportunities');
+       } else if (event.aspect === 'square') {
+         secondaryGuidance.push('dynamic growth');
+       } else if (event.type === 'ingress') {
+         secondaryGuidance.push('energetic shifts');
+       }
+     });
+    
+    if (secondaryGuidance.length > 0) {
+      guidance += ` Additional cosmic currents bring ${secondaryGuidance.join(' and ')}, creating a rich tapestry of possibilities for personal expansion.`;
+    }
+  }
+  
+  // Add moon phase context if not primary
+  if (primaryEvent.type !== 'moon') {
+    if (moonPhase.illumination > 80) {
+      guidance += ` The waxing lunar energy amplifies your intentions and supports bold action.`;
+    } else if (moonPhase.illumination < 20) {
+      guidance += ` The waning lunar energy favors reflection and release work.`;
+    } else {
+      guidance += ` The current lunar phase supports steady progress and mindful growth.`;
+    }
+  }
+  
+  return guidance;
 }
 
 export async function GET(request: NextRequest) {
@@ -523,7 +611,7 @@ export async function GET(request: NextRequest) {
   const highlights = [];
   
   // FIRST: Remove the astrological meaning point (as requested)
-  // SECOND: Astronomical facts with constellation info in brackets
+  // FIRST: Brief aspect description with constellation info
   if (primaryEvent.aspect) {
     const planetA = primaryEvent.planetA;
     const planetB = primaryEvent.planetB;
@@ -532,7 +620,18 @@ export async function GET(request: NextRequest) {
     const separation = primaryEvent.separation;
     const aspect = primaryEvent.aspect;
     
-    highlights.push(`${planetA} and ${planetB} form a ${aspect} aspect with ${separation}° separation (${planetA} in ${signA}, ${planetB} in ${signB}) - ${aspect === 'conjunction' ? 'uniting their energies' : aspect === 'trine' ? 'flowing harmoniously' : aspect === 'square' ? 'creating dynamic tension' : aspect === 'sextile' ? 'offering opportunities' : 'seeking balance'}.`);
+    // Use the same energy-based style as other points
+    const signAEnergy = getSignDescription(signA);
+    const signBEnergy = getSignDescription(signB);
+    const primaryEnergy = signAEnergy; // Use first sign's energy for consistency
+    
+    const aspectAction = aspect === 'conjunction' ? `unite through ${primaryEnergy} energy` : 
+                        aspect === 'trine' ? `flow harmoniously through ${primaryEnergy} energy` : 
+                        aspect === 'square' ? `create dynamic tension through ${primaryEnergy} energy` : 
+                        aspect === 'sextile' ? `offer opportunities through ${primaryEnergy} energy` : 
+                        `seek balance through ${primaryEnergy} energy`;
+    
+    highlights.push(`${planetA}-${planetB} ${aspect} in ${signA}-${signB} at ${separation}° - ${aspectAction}`);
   } else if (primaryEvent.type === 'moon') {
     highlights.push(`${primaryEvent.emoji} ${primaryEvent.name} in ${positions.Moon.sign}: ${primaryEvent.name.includes('New') ? 'Luna aligns between Earth and Sun' : primaryEvent.name.includes('Full') ? 'Earth sits between Sun and Luna' : 'Moon shows half illuminated'} - ${Math.round(moonPhase.illumination)}% illuminated, age ${Math.round(moonPhase.age)} days`);
   } else if (primaryEvent.type === 'seasonal') {
@@ -542,13 +641,25 @@ export async function GET(request: NextRequest) {
     highlights.push(`Current cosmic configuration in ${positions.Sun.sign} creates ${primaryEvent.energy.toLowerCase()} energy through natural celestial rhythms`);
   }
   
-  // THIRD & FOURTH: Secondary events with brief constellation info
+  // THIRD & FOURTH: Secondary events with brief constellation info and angular separations
   const secondaryEvents = allEvents.slice(1, 3);
   secondaryEvents.forEach(event => {
     if (event.type === 'ingress') {
       highlights.push(`${event.planet} enters ${event.sign} - planetary energy shifts to new themes`);
     } else if (event.aspect) {
-      highlights.push(`${event.planetA}-${event.planetB} ${event.aspect} in ${event.signA}-${event.signB} - ${event.planetA} and ${event.planetB} ${event.aspect === 'trine' ? 'flow harmoniously' : event.aspect === 'square' ? 'create tension' : event.aspect === 'sextile' ? 'offer opportunities' : 'interact'}`);
+      const aspectDescription = event.aspect === 'conjunction' ? 'unite energies' :
+                              event.aspect === 'trine' ? 'flow harmoniously through' :
+                              event.aspect === 'square' ? 'create dynamic tension between' :
+                              event.aspect === 'sextile' ? 'offer cooperative opportunities through' :
+                              event.aspect === 'opposition' ? 'seek balance between' : 'interact through';
+      
+      const signAEnergy = getSignDescription(event.signA);
+      const signBEnergy = getSignDescription(event.signB);
+      
+      // Use the primary energy (first sign's energy) for cleaner flow
+      const primaryEnergy = signAEnergy;
+      
+      highlights.push(`${event.planetA}-${event.planetB} ${event.aspect} in ${event.signA}-${event.signB} at ${event.separation}° - ${aspectDescription} ${primaryEnergy} energy`);
     }
   });
   
@@ -557,7 +668,8 @@ export async function GET(request: NextRequest) {
     highlights.push(`${moonPhase.emoji} ${moonPhase.name} in ${positions.Moon.sign} - ${Math.round(moonPhase.illumination)}% illuminated`);
   }
   
-  const horoscopeSnippet = generatePracticalGuidance(primaryEvent, positions);
+  // Generate guidance that summarizes ALL the day's events
+  const horoscopeSnippet = generateDayGuidanceSummary(allEvents.slice(0, 3), positions, moonPhase);
   
   const postContent = {
     date: targetDate.toLocaleDateString('en-US', { 
@@ -572,7 +684,7 @@ export async function GET(request: NextRequest) {
     },
     highlights,
     horoscopeSnippet,
-    callToAction: "Discover your personalized cosmic guidance at Lunary ✨",
+    callToAction: "Discover your personalized cosmic guidance at lunary",
     astronomicalData: {
       planets: Object.fromEntries(
         Object.entries(positions).map(([name, data]: [string, any]) => [

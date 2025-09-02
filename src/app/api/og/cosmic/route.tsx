@@ -212,7 +212,7 @@ function checkSeasonalEvents(positions: any): Array<any> {
     events.push({
       name: 'Spring Equinox',
       energy: 'Balance & New Growth',
-      priority: 8,
+      priority: 9, // Higher priority - just under moon phases
       type: 'seasonal',
       emoji: '🌸',
       description: 'Day and night in perfect balance',
@@ -222,7 +222,7 @@ function checkSeasonalEvents(positions: any): Array<any> {
     events.push({
       name: 'Summer Solstice',
       energy: 'Maximum Solar Power',
-      priority: 8,
+      priority: 9, // Higher priority - just under moon phases
       type: 'seasonal',
       emoji: '☀️',
       description: 'Longest day of the year',
@@ -232,7 +232,7 @@ function checkSeasonalEvents(positions: any): Array<any> {
     events.push({
       name: 'Autumn Equinox',
       energy: 'Harvest & Reflection',
-      priority: 8,
+      priority: 9, // Higher priority - just under moon phases
       type: 'seasonal',
       emoji: '🍂',
       description: 'Day and night in perfect balance',
@@ -242,7 +242,7 @@ function checkSeasonalEvents(positions: any): Array<any> {
     events.push({
       name: 'Winter Solstice',
       energy: 'Inner Light & Renewal',
-      priority: 8,
+      priority: 9, // Higher priority - just under moon phases
       type: 'seasonal',
       emoji: '❄️',
       description: 'Longest night of the year',
@@ -339,9 +339,31 @@ export async function GET(request: NextRequest) {
     });
   }
   
-  // Sort by priority and select primary event
+  // Sort by priority
   allEvents.sort((a, b) => b.priority - a.priority);
-  const primaryEvent = allEvents[0];
+  
+  // CYCLING LOGIC: Always prioritize moon phases and equinoxes, but cycle through other events
+  let primaryEvent;
+  
+  // Check for highest priority events (moon phases, equinoxes) - ALWAYS show these
+  const highPriorityEvents = allEvents.filter(e => e.priority >= 10);
+  if (highPriorityEvents.length > 0) {
+    primaryEvent = highPriorityEvents[0];
+  } else {
+    // For lower priority events, cycle through them for variety
+    const dayOfYear = Math.floor((targetDate.getTime() - new Date(targetDate.getFullYear(), 0, 0).getTime()) / 86400000);
+    const availableEvents = allEvents.length > 0 ? allEvents : [{
+      name: 'Cosmic Flow',
+      energy: 'Universal Harmony',
+      priority: 1,
+      type: 'general'
+    }];
+    
+    // Use day of year + hour to cycle through available events for more variety
+    const hour = targetDate.getHours();
+    const cycleIndex = (dayOfYear + hour) % availableEvents.length;
+    primaryEvent = availableEvents[cycleIndex];
+  }
 
   // Get dynamic visual theme
   const daysSinceEpoch = Math.floor(targetDate.getTime() / (1000 * 60 * 60 * 24));
@@ -463,24 +485,29 @@ export async function GET(request: NextRequest) {
         ) : isMoonPhaseEvent ? (
           // Moon Phase Layout
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '80px', justifyContent: 'center', flex: 1 }}>
-            <div style={{ fontSize: '200px', color: 'white', lineHeight: '1', fontFamily: 'Astronomicon' }}>
-              R
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '200px', color: 'white', lineHeight: '1' }}>
+              {primaryEvent.emoji || moonPhase.emoji}
             </div>
-            <div style={{ fontSize: '36px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono', maxWidth: '800px', lineHeight: '1.2' }}>
+            <div style={{ display: 'flex', fontSize: '36px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono', maxWidth: '800px', lineHeight: '1.2' }}>
               {primaryEvent.energy}
             </div>
-            <div style={{ fontSize: '24px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono', maxWidth: '900px', lineHeight: '1.3', opacity: '0.9' }}>
-              {moonPhase.emoji} {Math.round(moonPhase.illumination)}% illuminated
+            <div style={{ display: 'flex', fontSize: '24px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono', maxWidth: '900px', lineHeight: '1.3', opacity: '0.9' }}>
+              {Math.round(moonPhase.illumination)}% illuminated
             </div>
-            <div style={{ fontSize: '28px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono' }}>
+            <div style={{ display: 'flex', fontSize: '28px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono' }}>
               {formattedDate}
             </div>
           </div>
         ) : (
-          // Fallback Layout
+          // Fallback Layout - Cosmic Flow
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '80px', justifyContent: 'center', flex: 1 }}>
-            <div style={{ fontSize: '200px', color: 'white', lineHeight: '1', fontFamily: 'Astronomicon' }}>R</div>
-            <div style={{ fontSize: '32px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '200px', color: 'white', lineHeight: '1', fontFamily: 'Astronomicon' }}>
+              R
+            </div>
+            <div style={{ display: 'flex', fontSize: '36px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono' }}>
+              {primaryEvent.energy || 'Universal Harmony'}
+            </div>
+            <div style={{ display: 'flex', fontSize: '28px', fontWeight: '300', color: 'white', textAlign: 'center', fontFamily: 'Roboto Mono' }}>
               {formattedDate}
             </div>
           </div>

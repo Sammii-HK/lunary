@@ -120,7 +120,7 @@ export default function TestOGPage() {
             </div>
 
             <div>
-              <h4 className='text-purple-300 font-medium mb-2'>✨ Today's Guidance</h4>
+              {/* <h4 className='text-purple-300 font-medium mb-2'>✨ Today's Guidance</h4> */}
               <p className='text-zinc-300 text-sm leading-relaxed'>
                 {postContent.horoscopeSnippet}
               </p>
