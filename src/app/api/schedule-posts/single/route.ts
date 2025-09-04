@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure mediaItems URLs use the correct base URL
-    const updatedMediaItems = postData.mediaItems?.map((item: any) => ({
+    // Ensure media URLs use the correct base URL
+    const updatedMediaItems = postData.media?.map((item: any) => ({
       ...item,
       // Replace any localhost or relative URLs with the correct base URL
       url: item.url.startsWith('http') ? item.url : `${baseUrl}${item.url.startsWith('/') ? '' : '/'}${item.url}`
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const finalPostData = {
       ...postData,
       accountGroupId,
-      mediaItems: updatedMediaItems,
+      media: updatedMediaItems,
     };
 
     console.log('📤 Sending to Succulent:', succulentApiUrl);
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       content: finalPostData.content,
       platforms: finalPostData.platforms,
       scheduledDate: finalPostData.scheduledDate,
-      mediaItems: finalPostData.mediaItems,
+      media: finalPostData.media,
     });
 
     // Send to Succulent API - let Succulent handle the image URL
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
             status: 'success',
             postId: responseData.data?.postId || 'unknown',
             platforms: postData.platforms,
-            imageUrl: finalPostData.mediaItems?.[0]?.url,
+            imageUrl: finalPostData.media?.[0]?.url,
           },
         ],
         postContent: postData.content,

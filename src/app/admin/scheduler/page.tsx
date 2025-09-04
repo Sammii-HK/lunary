@@ -78,11 +78,11 @@ export default function SchedulerAdminPage() {
         content: socialContent,
         platforms: ['instagram', 'x'],
         scheduledDate: scheduledDateTime.toISOString(),
-        mediaItems: [
+        media: [
           {
             type: 'image',
             url: imageUrl,
-            altText: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
+            alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
           },
         ],
       };
@@ -91,7 +91,7 @@ export default function SchedulerAdminPage() {
         contentLength: postData.content.length,
         platforms: postData.platforms,
         scheduledDate: postData.scheduledDate,
-        mediaItems: postData.mediaItems,
+        media: postData.media,
       });
 
       // Send to Succulent API

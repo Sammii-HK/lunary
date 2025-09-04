@@ -16,10 +16,10 @@ interface SucculentPostData {
   content: string;
   platforms: string[];
   scheduledDate: string;
-  mediaItems: Array<{
+  media: Array<{
     type: 'image';
     url: string;
-    altText: string;
+    alt: string;
   }>;
 }
 
@@ -109,18 +109,18 @@ export async function POST(request: NextRequest) {
         content: socialContent,
         platforms: ['instagram', 'x', 'facebook', 'linkedin'],
         scheduledDate: scheduledDateTime.toISOString(),
-        mediaItems: [
+        media: [
           {
             type: 'image',
             url: imageUrl,
-            altText: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
+            alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
           },
         ],
       };
 
       console.log(`📅 Post prepared for ${dateStr}:`, {
         contentLength: postData.content.length,
-        imageUrl: postData.mediaItems[0].url,
+        imageUrl: postData.media[0].url,
         scheduledDate: postData.scheduledDate
       });
 
