@@ -32,6 +32,18 @@ export async function POST(request: NextRequest) {
     // Get environment variables
     const apiKey = process.env.SUCCULENT_SECRET_KEY;
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+    
+    // Get the base URL for the application (dev vs prod)
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://lunary.app' 
+      : 'http://localhost:3000';
+
+    console.log('🔑 Monthly scheduler environment check:', { 
+      hasApiKey: !!apiKey, 
+      hasAccountGroupId: !!accountGroupId,
+      baseUrl,
+      nodeEnv: process.env.NODE_ENV
+    });
 
     if (!apiKey || !accountGroupId) {
       return NextResponse.json(
@@ -72,8 +84,14 @@ export async function POST(request: NextRequest) {
 
       // Fetch cosmic content for this date
       const cosmicResponse = await fetch(
-        `${request.nextUrl.origin}/api/og/cosmic-post?date=${dateStr}`,
+        `${baseUrl}/api/og/cosmic-post?date=${dateStr}`,
       );
+      
+      if (!cosmicResponse.ok) {
+        console.error(`Failed to fetch cosmic content for ${dateStr}:`, cosmicResponse.status);
+        continue; // Skip this date if cosmic content fails
+      }
+      
       const cosmicContent: PostContent = await cosmicResponse.json();
 
       // Format the social media post
@@ -83,6 +101,9 @@ export async function POST(request: NextRequest) {
       const scheduledDateTime = new Date(currentDate);
       scheduledDateTime.setHours(9, 0, 0, 0);
 
+      // Ensure image URL uses the correct base URL
+      const imageUrl = `${baseUrl}/api/og/cosmic?date=${dateStr}`;
+
       const postData: SucculentPostData = {
         accountGroupId,
         content: socialContent,
@@ -91,11 +112,17 @@ export async function POST(request: NextRequest) {
         mediaItems: [
           {
             type: 'image',
-            url: `${request.nextUrl.origin}/api/og/cosmic?date=${dateStr}`,
+            url: imageUrl,
             altText: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
           },
         ],
       };
+
+      console.log(`📅 Post prepared for ${dateStr}:`, {
+        contentLength: postData.content.length,
+        imageUrl: postData.mediaItems[0].url,
+        scheduledDate: postData.scheduledDate
+      });
 
       posts.push(postData);
     }
@@ -178,6 +205,13 @@ export async function POST(request: NextRequest) {
 }
 
 function formatCosmicPost(content: PostContent): string {
+  console.log('📝 Formatting cosmic post with content:', {
+    primaryEvent: content.primaryEvent,
+    highlightsCount: content.highlights?.length || 0,
+    hasHoroscopeSnippet: !!content.horoscopeSnippet,
+    hasCallToAction: !!content.callToAction
+  });
+
   // Create engaging social media content
   const post = [
     `🌟 ${content.primaryEvent.name} - ${content.primaryEvent.energy}`,
@@ -192,5 +226,6 @@ function formatCosmicPost(content: PostContent): string {
     '#astrology #cosmic #moonphases #astronomy #spirituality #dailyhoroscope #planets #celestial #universe #stargazing',
   ].join('\n');
 
+  console.log('📝 Formatted post length:', post.length, 'characters');
   return post;
 }

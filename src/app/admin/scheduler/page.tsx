@@ -18,6 +18,10 @@ interface ScheduleResult {
     error?: string;
   }>;
   error?: string;
+  postContent?: string;
+  details?: any;
+  succulentResponse?: any;
+  timestamp?: string;
 }
 
 export default function SchedulerAdminPage() {
@@ -37,9 +41,15 @@ export default function SchedulerAdminPage() {
 
       // Fetch cosmic content for today
       const cosmicResponse = await fetch(`/api/og/cosmic-post?date=${dateStr}`);
+      
+      if (!cosmicResponse.ok) {
+        throw new Error(`Failed to fetch cosmic content: ${cosmicResponse.status} ${cosmicResponse.statusText}`);
+      }
+      
       const cosmicContent = await cosmicResponse.json();
+      console.log('🌟 Cosmic content received:', cosmicContent);
 
-      // Format the social media post
+      // Format the social media post using the actual cosmic content
       const socialContent = [
         `🌟 ${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}`,
         '',
@@ -55,9 +65,17 @@ export default function SchedulerAdminPage() {
         '#astrology #cosmic #moonphases #astronomy #spirituality #dailyhoroscope #planets #celestial #universe #stargazing',
       ].join('\n');
 
+      console.log('📝 Social content created:', socialContent);
+
       // Schedule for right now (or in 1 minute for testing)
       const scheduledDateTime = new Date();
       scheduledDateTime.setMinutes(scheduledDateTime.getMinutes() + 1);
+
+      // Get the correct base URL for the image
+      const baseUrl = window.location.origin;
+      const imageUrl = `${baseUrl}/api/og/cosmic?date=${dateStr}`;
+
+      console.log('🖼️ Image URL:', imageUrl);
 
       const postData = {
         accountGroupId:
@@ -68,11 +86,18 @@ export default function SchedulerAdminPage() {
         mediaItems: [
           {
             type: 'image',
-            url: `${window.location.origin}/api/og/cosmic?date=${dateStr}`,
+            url: imageUrl,
             altText: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
           },
         ],
       };
+
+      console.log('📤 Post data prepared:', {
+        contentLength: postData.content.length,
+        platforms: postData.platforms,
+        scheduledDate: postData.scheduledDate,
+        mediaItems: postData.mediaItems,
+      });
 
       // Send to Succulent API
       const succulentApiUrl = testMode
@@ -200,13 +225,44 @@ export default function SchedulerAdminPage() {
             <p className='text-sm text-zinc-400 mb-3'>
               Test with just today's cosmic post (scheduled 1 minute from now)
             </p>
-            <button
-              onClick={scheduleToday}
-              disabled={loading}
-              className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
-            >
-              {loading ? '⏳ Creating Post...' : "⚡ Test Today's Post"}
-            </button>
+            <div className='flex gap-2'>
+              <button
+                onClick={scheduleToday}
+                disabled={loading}
+                className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
+              >
+                {loading ? '⏳ Creating Post...' : "⚡ Test Today's Post"}
+              </button>
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const today = new Date();
+                    const dateStr = today.toISOString().split('T')[0];
+                    const response = await fetch(`/api/og/cosmic-post?date=${dateStr}`);
+                    const data = await response.json();
+                    setResult({
+                      success: response.ok,
+                      message: response.ok ? 'Cosmic API working correctly' : 'Cosmic API failed',
+                      error: response.ok ? undefined : 'Failed to fetch cosmic content',
+                      postContent: response.ok ? JSON.stringify(data, null, 2) : undefined,
+                    } as ScheduleResult);
+                  } catch (error) {
+                    setResult({
+                      success: false,
+                      message: 'Failed to test cosmic API',
+                      error: error instanceof Error ? error.message : 'Unknown error',
+                    });
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className='bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
+              >
+                {loading ? '⏳ Testing...' : '🔍 Test Cosmic API'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -225,7 +281,70 @@ export default function SchedulerAdminPage() {
               </span>
             </h3>
 
-            <p className='mb-4'>{result.message || result.error}</p>
+            <div className='mb-4'>
+              <p className='mb-2'>{result.message || result.error}</p>
+              
+              {/* Show detailed error information if available */}
+              {(result as any)?.details && (
+                <div className='mt-3 p-3 bg-black/30 rounded border border-zinc-700'>
+                  <h5 className='text-sm font-semibold mb-2 text-zinc-300'>
+                    🔍 Error Details:
+                  </h5>
+                  <div className='text-xs text-zinc-400 space-y-1'>
+                    {(result as any).details.type && (
+                      <div>
+                        <span className='font-medium'>Type:</span> {(result as any).details.type}
+                      </div>
+                    )}
+                    {(result as any).details.name && (
+                      <div>
+                        <span className='font-medium'>Error Name:</span> {(result as any).details.name}
+                      </div>
+                    )}
+                    {(result as any).details.status && (
+                      <div>
+                        <span className='font-medium'>HTTP Status:</span> {(result as any).details.status} {(result as any).details.statusText}
+                      </div>
+                    )}
+                    {(result as any).details.responseText && (
+                      <div>
+                        <span className='font-medium'>Response:</span>
+                        <pre className='mt-1 text-xs bg-black/50 p-2 rounded overflow-x-auto'>
+                          {(result as any).details.responseText}
+                        </pre>
+                      </div>
+                    )}
+                    {(result as any).details.stack && (
+                      <details className='mt-2'>
+                        <summary className='cursor-pointer text-zinc-300 hover:text-zinc-200'>
+                          Stack Trace
+                        </summary>
+                        <pre className='mt-1 text-xs bg-black/50 p-2 rounded overflow-x-auto whitespace-pre-wrap'>
+                          {(result as any).details.stack}
+                        </pre>
+                      </details>
+                    )}
+                    {(result as any).timestamp && (
+                      <div className='text-xs text-zinc-500 mt-2'>
+                        Time: {new Date((result as any).timestamp).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Show Succulent API response if available */}
+              {(result as any)?.succulentResponse && (
+                <div className='mt-3 p-3 bg-black/30 rounded border border-zinc-700'>
+                  <h5 className='text-sm font-semibold mb-2 text-zinc-300'>
+                    🔗 Succulent API Response:
+                  </h5>
+                  <pre className='text-xs text-zinc-400 overflow-x-auto whitespace-pre-wrap'>
+                    {JSON.stringify((result as any).succulentResponse, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
 
             {result.summary && (
               <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
@@ -319,6 +438,10 @@ export default function SchedulerAdminPage() {
                 {`SUCCULENT_SECRET_KEY=sk_live_your_api_key_here
 SUCCULENT_ACCOUNT_GROUP_ID=group_your_group_id_here`}
               </pre>
+              <p className='text-xs text-zinc-500 mt-2'>
+                💡 <strong>Debugging tip:</strong> The enhanced error logging will now show if these variables are missing or malformed.
+                Check the server logs or use the "Test Today's Post" button to see detailed error information.
+              </p>
             </div>
 
             <div>
