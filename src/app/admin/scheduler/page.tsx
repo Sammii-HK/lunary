@@ -51,18 +51,13 @@ export default function SchedulerAdminPage() {
 
       // Format the social media post using the actual cosmic content
       const socialContent = [
-        `🌟 ${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}`,
-        '',
-        `✨ Today's Cosmic Highlights:`,
         ...cosmicContent.highlights
           .slice(0, 3)
-          .map((highlight: string) => `• ${highlight}`),
+          .map((highlight: string) => highlight),
         '',
-        `🔮 Guidance: ${cosmicContent.horoscopeSnippet}`,
+        cosmicContent.horoscopeSnippet,
         '',
-        `${cosmicContent.callToAction}`,
-        '',
-        '#astrology #cosmic #moonphases #astronomy #spirituality #dailyhoroscope #planets #celestial #universe #stargazing',
+        cosmicContent.callToAction,
       ].join('\n');
 
       console.log('📝 Social content created:', socialContent);

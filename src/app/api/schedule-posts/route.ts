@@ -212,18 +212,13 @@ function formatCosmicPost(content: PostContent): string {
     hasCallToAction: !!content.callToAction
   });
 
-  // Create engaging social media content
+  // Create clean social media content without titles, emojis, or hashtags
   const post = [
-    `🌟 ${content.primaryEvent.name} - ${content.primaryEvent.energy}`,
+    ...content.highlights.slice(0, 3).map((highlight) => highlight),
     '',
-    `✨ Today's Cosmic Highlights:`,
-    ...content.highlights.slice(0, 3).map((highlight) => `• ${highlight}`),
+    content.horoscopeSnippet,
     '',
-    `🔮 Guidance: ${content.horoscopeSnippet}`,
-    '',
-    `${content.callToAction}`,
-    '',
-    '#astrology #cosmic #moonphases #astronomy #spirituality #dailyhoroscope #planets #celestial #universe #stargazing',
+    content.callToAction,
   ].join('\n');
 
   console.log('📝 Formatted post length:', post.length, 'characters');
