@@ -32,17 +32,18 @@ export async function POST(request: NextRequest) {
     // Get environment variables
     const apiKey = process.env.SUCCULENT_SECRET_KEY;
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-    
-    // Get the base URL for the application (dev vs prod)
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://lunary.app' 
-      : 'http://localhost:3000';
 
-    console.log('🔑 Monthly scheduler environment check:', { 
-      hasApiKey: !!apiKey, 
+    // Get the base URL for the application (dev vs prod)
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lunary.app'
+        : 'http://localhost:3000';
+
+    console.log('🔑 Monthly scheduler environment check:', {
+      hasApiKey: !!apiKey,
       hasAccountGroupId: !!accountGroupId,
       baseUrl,
-      nodeEnv: process.env.NODE_ENV
+      nodeEnv: process.env.NODE_ENV,
     });
 
     if (!apiKey || !accountGroupId) {
@@ -86,12 +87,15 @@ export async function POST(request: NextRequest) {
       const cosmicResponse = await fetch(
         `${baseUrl}/api/og/cosmic-post?date=${dateStr}`,
       );
-      
+
       if (!cosmicResponse.ok) {
-        console.error(`Failed to fetch cosmic content for ${dateStr}:`, cosmicResponse.status);
+        console.error(
+          `Failed to fetch cosmic content for ${dateStr}:`,
+          cosmicResponse.status,
+        );
         continue; // Skip this date if cosmic content fails
       }
-      
+
       const cosmicContent: PostContent = await cosmicResponse.json();
 
       // Format the social media post
@@ -121,7 +125,7 @@ export async function POST(request: NextRequest) {
       console.log(`📅 Post prepared for ${dateStr}:`, {
         contentLength: postData.content.length,
         imageUrl: postData.media[0].url,
-        scheduledDate: postData.scheduledDate
+        scheduledDate: postData.scheduledDate,
       });
 
       posts.push(postData);
@@ -209,7 +213,7 @@ function formatCosmicPost(content: PostContent): string {
     primaryEvent: content.primaryEvent,
     highlightsCount: content.highlights?.length || 0,
     hasHoroscopeSnippet: !!content.horoscopeSnippet,
-    hasCallToAction: !!content.callToAction
+    hasCallToAction: !!content.callToAction,
   });
 
   // Create clean social media content without titles, emojis, or hashtags

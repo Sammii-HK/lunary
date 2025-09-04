@@ -3,25 +3,30 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     console.log('🚀 Single post scheduler started');
-    
+
     const { postData, succulentApiUrl, testMode } = await request.json();
-    console.log('📥 Request data received:', { succulentApiUrl, testMode, hasPostData: !!postData });
+    console.log('📥 Request data received:', {
+      succulentApiUrl,
+      testMode,
+      hasPostData: !!postData,
+    });
 
     // Get environment variables
     const apiKey = process.env.SUCCULENT_SECRET_KEY;
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-    
-    // Get the base URL for the application (dev vs prod)
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://lunary.app' 
-      : 'http://localhost:3000';
 
-    console.log('🔑 Environment check:', { 
-      hasApiKey: !!apiKey, 
+    // Get the base URL for the application (dev vs prod)
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lunary.app'
+        : 'http://localhost:3000';
+
+    console.log('🔑 Environment check:', {
+      hasApiKey: !!apiKey,
       hasAccountGroupId: !!accountGroupId,
       apiKeyPrefix: apiKey ? `${apiKey.substring(0, 8)}...` : 'missing',
       baseUrl,
-      nodeEnv: process.env.NODE_ENV
+      nodeEnv: process.env.NODE_ENV,
     });
 
     if (!apiKey || !accountGroupId) {
@@ -38,11 +43,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure media URLs use the correct base URL
-    const updatedMediaItems = postData.media?.map((item: any) => ({
-      ...item,
-      // Replace any localhost or relative URLs with the correct base URL
-      url: item.url.startsWith('http') ? item.url : `${baseUrl}${item.url.startsWith('/') ? '' : '/'}${item.url}`
-    })) || [];
+    const updatedMediaItems =
+      postData.media?.map((item: any) => ({
+        ...item,
+        // Replace any localhost or relative URLs with the correct base URL
+        url: item.url.startsWith('http')
+          ? item.url
+          : `${baseUrl}${item.url.startsWith('/') ? '' : '/'}${item.url}`,
+      })) || [];
 
     console.log('🖼️ Media items:', updatedMediaItems);
 
@@ -74,16 +82,19 @@ export async function POST(request: NextRequest) {
     });
 
     console.log('📨 Succulent Response Status:', response.status);
-    
+
     let responseData;
     try {
       responseData = await response.json();
       console.log('📨 Succulent Response Data:', responseData);
     } catch (jsonError) {
-      console.error('❌ Failed to parse Succulent response as JSON:', jsonError);
+      console.error(
+        '❌ Failed to parse Succulent response as JSON:',
+        jsonError,
+      );
       const responseText = await response.text();
       console.error('📄 Raw response text:', responseText);
-      
+
       return NextResponse.json(
         {
           success: false,
@@ -92,8 +103,8 @@ export async function POST(request: NextRequest) {
           details: {
             status: response.status,
             statusText: response.statusText,
-            responseText: responseText.substring(0, 500)
-          }
+            responseText: responseText.substring(0, 500),
+          },
         },
         { status: 500 },
       );
@@ -123,12 +134,18 @@ export async function POST(request: NextRequest) {
         succulentResponse: responseData,
       });
     } else {
-      console.error('❌ Succulent API returned error:', response.status, responseData);
+      console.error(
+        '❌ Succulent API returned error:',
+        response.status,
+        responseData,
+      );
       return NextResponse.json(
         {
           success: false,
           message: 'Failed to schedule post to Succulent',
-          error: responseData.error || `HTTP ${response.status}: ${response.statusText}`,
+          error:
+            responseData.error ||
+            `HTTP ${response.status}: ${response.statusText}`,
           summary: {
             totalPosts: 1,
             successful: 0,
@@ -148,20 +165,23 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('💥 Single post scheduler error:', error);
-    console.error('📍 Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    
+    console.error(
+      '📍 Error stack:',
+      error instanceof Error ? error.stack : 'No stack trace',
+    );
+
     // Provide more specific error information
     let errorMessage = 'Unknown error occurred';
     let errorDetails = {};
-    
+
     if (error instanceof Error) {
       errorMessage = error.message;
       errorDetails = {
         name: error.name,
-        stack: error.stack?.substring(0, 1000) // Limit stack trace length
+        stack: error.stack?.substring(0, 1000), // Limit stack trace length
       };
     }
-    
+
     // Check for specific error types
     if (error instanceof TypeError && error.message.includes('fetch')) {
       errorMessage = 'Network error: Failed to connect to Succulent API';
@@ -170,14 +190,14 @@ export async function POST(request: NextRequest) {
       errorMessage = 'Data parsing error: Invalid request format';
       errorDetails = { ...errorDetails, type: 'parsing_error' };
     }
-    
+
     return NextResponse.json(
       {
         success: false,
         message: 'Failed to process single post',
         error: errorMessage,
         details: errorDetails,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       { status: 500 },
     );

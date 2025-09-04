@@ -41,11 +41,13 @@ export default function SchedulerAdminPage() {
 
       // Fetch cosmic content for today
       const cosmicResponse = await fetch(`/api/og/cosmic-post?date=${dateStr}`);
-      
+
       if (!cosmicResponse.ok) {
-        throw new Error(`Failed to fetch cosmic content: ${cosmicResponse.status} ${cosmicResponse.statusText}`);
+        throw new Error(
+          `Failed to fetch cosmic content: ${cosmicResponse.status} ${cosmicResponse.statusText}`,
+        );
       }
-      
+
       const cosmicContent = await cosmicResponse.json();
       console.log('🌟 Cosmic content received:', cosmicContent);
 
@@ -234,19 +236,30 @@ export default function SchedulerAdminPage() {
                   try {
                     const today = new Date();
                     const dateStr = today.toISOString().split('T')[0];
-                    const response = await fetch(`/api/og/cosmic-post?date=${dateStr}`);
+                    const response = await fetch(
+                      `/api/og/cosmic-post?date=${dateStr}`,
+                    );
                     const data = await response.json();
                     setResult({
                       success: response.ok,
-                      message: response.ok ? 'Cosmic API working correctly' : 'Cosmic API failed',
-                      error: response.ok ? undefined : 'Failed to fetch cosmic content',
-                      postContent: response.ok ? JSON.stringify(data, null, 2) : undefined,
+                      message: response.ok
+                        ? 'Cosmic API working correctly'
+                        : 'Cosmic API failed',
+                      error: response.ok
+                        ? undefined
+                        : 'Failed to fetch cosmic content',
+                      postContent: response.ok
+                        ? JSON.stringify(data, null, 2)
+                        : undefined,
                     } as ScheduleResult);
                   } catch (error) {
                     setResult({
                       success: false,
                       message: 'Failed to test cosmic API',
-                      error: error instanceof Error ? error.message : 'Unknown error',
+                      error:
+                        error instanceof Error
+                          ? error.message
+                          : 'Unknown error',
                     });
                   } finally {
                     setLoading(false);
@@ -278,7 +291,7 @@ export default function SchedulerAdminPage() {
 
             <div className='mb-4'>
               <p className='mb-2'>{result.message || result.error}</p>
-              
+
               {/* Show detailed error information if available */}
               {(result as any)?.details && (
                 <div className='mt-3 p-3 bg-black/30 rounded border border-zinc-700'>
@@ -288,17 +301,21 @@ export default function SchedulerAdminPage() {
                   <div className='text-xs text-zinc-400 space-y-1'>
                     {(result as any).details.type && (
                       <div>
-                        <span className='font-medium'>Type:</span> {(result as any).details.type}
+                        <span className='font-medium'>Type:</span>{' '}
+                        {(result as any).details.type}
                       </div>
                     )}
                     {(result as any).details.name && (
                       <div>
-                        <span className='font-medium'>Error Name:</span> {(result as any).details.name}
+                        <span className='font-medium'>Error Name:</span>{' '}
+                        {(result as any).details.name}
                       </div>
                     )}
                     {(result as any).details.status && (
                       <div>
-                        <span className='font-medium'>HTTP Status:</span> {(result as any).details.status} {(result as any).details.statusText}
+                        <span className='font-medium'>HTTP Status:</span>{' '}
+                        {(result as any).details.status}{' '}
+                        {(result as any).details.statusText}
                       </div>
                     )}
                     {(result as any).details.responseText && (
@@ -321,7 +338,8 @@ export default function SchedulerAdminPage() {
                     )}
                     {(result as any).timestamp && (
                       <div className='text-xs text-zinc-500 mt-2'>
-                        Time: {new Date((result as any).timestamp).toLocaleString()}
+                        Time:{' '}
+                        {new Date((result as any).timestamp).toLocaleString()}
                       </div>
                     )}
                   </div>
@@ -434,8 +452,10 @@ export default function SchedulerAdminPage() {
 SUCCULENT_ACCOUNT_GROUP_ID=group_your_group_id_here`}
               </pre>
               <p className='text-xs text-zinc-500 mt-2'>
-                💡 <strong>Debugging tip:</strong> The enhanced error logging will now show if these variables are missing or malformed.
-                Check the server logs or use the "Test Today's Post" button to see detailed error information.
+                💡 <strong>Debugging tip:</strong> The enhanced error logging
+                will now show if these variables are missing or malformed. Check
+                the server logs or use the "Test Today's Post" button to see
+                detailed error information.
               </p>
             </div>
 
