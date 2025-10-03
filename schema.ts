@@ -1,5 +1,5 @@
 
-import { co, z } from 'jazz-tools';
+import { co, z, Group } from 'jazz-tools';
 
 export const NoteItem = co.map({
   title: z.string(),
@@ -66,4 +66,46 @@ export const MyAppAccount = co.account({
     stripeCustomerId: z.string().optional(),
     location: UserLocation.optional(),
   }),
+}).withMigration(async (account, { createdAt, accountOrAgentSecret }) => {
+  // Initialize root data structure if it doesn't exist
+  if (!account.$jazz.has("root")) {
+    console.log("🌟 Initializing new user account root");
+    account.$jazz.set("root", {
+      notes: [],
+    });
+  }
+
+  // Initialize profile if it doesn't exist (fallback for edge cases)
+  if (!account.$jazz.has("profile")) {
+    console.log("🌟 Initializing new user profile");
+    // Create a group for the profile with public read permissions
+    const profileGroup = Group.create();
+    profileGroup.addMember("everyone", "reader");
+    
+    account.$jazz.set("profile", co.map({
+      name: z.string(),
+      birthday: z.string(),
+      birthChart: BirthChart.optional(),
+      personalCard: PersonalCard.optional(),
+      subscription: Subscription.optional(),
+      stripeCustomerId: z.string().optional(),
+      location: UserLocation.optional(),
+    }).create({
+      name: "New User", // Default name - will be updated by Better Auth
+      birthday: "", // Will be set by user later
+    }, profileGroup));
+  }
+
+  // Load the root to check for missing fields
+  const { root } = await account.$jazz.ensureLoaded({
+    resolve: { root: true }
+  });
+
+  // Add new fields to existing accounts (schema evolution)
+  if (root && !root.$jazz.has("notes")) {
+    console.log("🔄 Adding notes field to existing account");
+    root.$jazz.set("notes", []);
+  }
+
+  console.log("✅ Account migration completed for user:", account.profile?.name || "Unknown");
 });
