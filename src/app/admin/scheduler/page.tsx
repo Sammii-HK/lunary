@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { socialPrefillUrls, copyToClipboard, downloadAsTextFile, type PostData } from '../../../../utils/socialPrefill';
 
 interface ScheduleResult {
   success: boolean;
@@ -29,6 +30,7 @@ export default function SchedulerAdminPage() {
   const [result, setResult] = useState<ScheduleResult | null>(null);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [testMode, setTestMode] = useState(true);
+  const [currentPostData, setCurrentPostData] = useState<PostData | null>(null);
 
   const scheduleToday = async () => {
     setLoading(true);
@@ -113,6 +115,15 @@ export default function SchedulerAdminPage() {
 
       const data = await response.json();
       setResult(data);
+
+      // Store the post data for prefill buttons
+      setCurrentPostData({
+        content: socialContent,
+        imageUrl: imageUrl,
+        scheduledDate: postData.scheduledDate,
+        platforms: postData.platforms,
+        alt: postData.media[0]?.alt,
+      });
     } catch (error) {
       setResult({
         success: false,
@@ -431,6 +442,144 @@ export default function SchedulerAdminPage() {
                   <pre className='whitespace-pre-wrap text-sm text-zinc-300 leading-relaxed'>
                     {(result as any).postContent}
                   </pre>
+                </div>
+              </div>
+            )}
+
+            {/* Show prefill buttons for successful posts */}
+            {result.success && currentPostData && (
+              <div className='mt-6'>
+                <h4 className='font-medium mb-3 text-zinc-200'>
+                  🚀 Open in Applications:
+                </h4>
+                <div className='bg-black/30 p-4 rounded border border-zinc-700'>
+                  <p className='text-sm text-zinc-400 mb-4'>
+                    Click any button to open the corresponding app with your content prefilled:
+                  </p>
+                  
+                  {/* Social Media Platforms */}
+                  <div className='mb-6'>
+                    <h5 className='text-sm font-semibold text-zinc-300 mb-3'>Social Media</h5>
+                    <div className='grid grid-cols-2 md:grid-cols-4 gap-2'>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.twitter(currentPostData), '_blank')}
+                        className='bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        𝕏 Twitter
+                      </button>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.facebook(currentPostData), '_blank')}
+                        className='bg-blue-800 hover:bg-blue-900 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        📘 Facebook
+                      </button>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.linkedin(currentPostData), '_blank')}
+                        className='bg-blue-700 hover:bg-blue-800 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        💼 LinkedIn
+                      </button>
+                      <button
+                        onClick={() => socialPrefillUrls.instagram(currentPostData)}
+                        className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        📸 Instagram
+                      </button>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.pinterest(currentPostData), '_blank')}
+                        className='bg-red-600 hover:bg-red-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        📌 Pinterest
+                      </button>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.reddit(currentPostData), '_blank')}
+                        className='bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        🤖 Reddit
+                      </button>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.tumblr(currentPostData), '_blank')}
+                        className='bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        🌀 Tumblr
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Messaging Apps */}
+                  <div className='mb-6'>
+                    <h5 className='text-sm font-semibold text-zinc-300 mb-3'>Messaging</h5>
+                    <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.whatsapp(currentPostData), '_blank')}
+                        className='bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        💬 WhatsApp
+                      </button>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.telegram(currentPostData), '_blank')}
+                        className='bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        ✈️ Telegram
+                      </button>
+                      <button
+                        onClick={() => window.open(socialPrefillUrls.email(currentPostData), '_blank')}
+                        className='bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        ✉️ Email
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Utility Actions */}
+                  <div>
+                    <h5 className='text-sm font-semibold text-zinc-300 mb-3'>Utilities</h5>
+                    <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
+                      <button
+                        onClick={async () => {
+                          const success = await copyToClipboard(currentPostData.content);
+                          if (success) {
+                            alert('📋 Content copied to clipboard!');
+                          } else {
+                            alert('❌ Failed to copy content. Please try again.');
+                          }
+                        }}
+                        className='bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        📋 Copy Text
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const fullData = `${currentPostData.content}\n\nImage: ${currentPostData.imageUrl}`;
+                          const success = await copyToClipboard(fullData);
+                          if (success) {
+                            alert('📋 Content and image URL copied to clipboard!');
+                          } else {
+                            alert('❌ Failed to copy content. Please try again.');
+                          }
+                        }}
+                        className='bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        📋 Copy All
+                      </button>
+                      <button
+                        onClick={() => {
+                          const today = new Date().toISOString().split('T')[0];
+                          downloadAsTextFile(currentPostData, `cosmic-post-${today}.txt`);
+                        }}
+                        className='bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                      >
+                        📥 Download
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className='mt-4 pt-4 border-t border-zinc-600'>
+                    <p className='text-xs text-zinc-500'>
+                      💡 <strong>Tip:</strong> Instagram doesn't support URL prefilling, so the content will be copied to your clipboard instead. 
+                      For best results with images, save or screenshot the generated cosmic image first.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
