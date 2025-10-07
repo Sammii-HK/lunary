@@ -43,13 +43,12 @@ const generatePersonalizedHoroscope = (
   // Generate comprehensive horoscope
   const horoscopeElements = [];
 
-  // Opening - Daily energy overview with numerology
+  // Opening - Daily energy overview
   const dayOfWeek = today.format('dddd');
   const numerologyInfluence = getDailyNumerology(today);
-  const dayOfWeekEnergy = getDayOfWeekEnergy(dayOfWeek);
 
   horoscopeElements.push(
-    `${dayOfWeek} carries the energy of ${dayOfWeekEnergy}, while today's numerological vibration of ${numerologyInfluence.number} brings ${numerologyInfluence.meaning} to your ${sunSign} Sun nature.`,
+    `${dayOfWeek} brings ${numerologyInfluence.meaning} to your ${sunSign} nature.`,
   );
 
   // Sun transit influence - Core energy
@@ -116,32 +115,20 @@ const generatePersonalizedHoroscope = (
     }
   }
 
-  // Venus influence - Relationships/values
-  if (transitVenus) {
-    const venusAspect = aspects.find((a) => a.transitPlanet === 'Venus');
-    if (venusAspect) {
-      const birthPlanetSign = getBirthPlanetSign(
-        venusAspect.natalPlanet,
-        birthChart,
-      );
-      horoscopeElements.push(
-        `Venus in ${transitVenus.sign} forms a ${venusAspect.type} aspect with your birth ${venusAspect.natalPlanet} in ${birthPlanetSign}, bringing focus to ${getVenusGuidance(transitVenus.sign)}. This alignment highlights ${getPlanetTheme(venusAspect.natalPlanet)} through the lens of love, beauty, and values.`,
-      );
-    }
+  // Venus influence - Only if aspecting (avoid redundancy)
+  const venusAspect = aspects.find((a) => a.transitPlanet === 'Venus');
+  if (venusAspect && transitVenus) {
+    horoscopeElements.push(
+      `Venus in ${transitVenus.sign} highlights ${getVenusGuidance(transitVenus.sign)} in ${getPlanetTheme(venusAspect.natalPlanet)}.`,
+    );
   }
 
-  // Mars influence - Action/motivation
-  if (transitMars) {
-    const marsAspect = aspects.find((a) => a.transitPlanet === 'Mars');
-    if (marsAspect) {
-      const birthPlanetSign = getBirthPlanetSign(
-        marsAspect.natalPlanet,
-        birthChart,
-      );
-      horoscopeElements.push(
-        `Mars in ${transitMars.sign} ${getAspectDescription(marsAspect)} your birth ${marsAspect.natalPlanet} in ${birthPlanetSign}, igniting ${getMarsGuidance(transitMars.sign)}. This dynamic aspect brings focused energy to ${getPlanetTheme(marsAspect.natalPlanet)} matters. Channel this drive constructively while maintaining your authentic ${sunSign} approach.`,
-      );
-    }
+  // Mars influence - Only if aspecting (avoid redundancy)
+  const marsAspect = aspects.find((a) => a.transitPlanet === 'Mars');
+  if (marsAspect && transitMars) {
+    horoscopeElements.push(
+      `Mars in ${transitMars.sign} energizes ${getPlanetTheme(marsAspect.natalPlanet)}. Channel this drive constructively.`,
+    );
   }
 
   // Retrograde influences - Major impact on daily energy
@@ -153,26 +140,26 @@ const generatePersonalizedHoroscope = (
     horoscopeElements.push(retrogradeInfluences.join(' '));
   }
 
-  // Jupiter influence - Growth/expansion (if aspecting)
-  if (transitJupiter) {
-    const jupiterAspect = aspects.find((a) => a.transitPlanet === 'Jupiter');
-    if (jupiterAspect) {
+  // Jupiter influence - Only if aspecting
+  const jupiterAspect = aspects.find((a) => a.transitPlanet === 'Jupiter');
+  if (jupiterAspect) {
+    horoscopeElements.push(
+      `Jupiter opens doorways for growth and broader perspectives.`,
+    );
+  }
+
+  // Personal Numerology Guidance - Only if different from universal day
+  if (userBirthday) {
+    const personalDay = getPersonalDayNumber(userBirthday, today);
+    if (personalDay.number !== numerologyInfluence.number) {
       horoscopeElements.push(
-        `Jupiter's expansive influence touches your chart today, opening doorways for philosophical growth and broader perspectives. This benefic energy supports your journey toward greater wisdom and understanding.`,
+        `Personal day ${personalDay.number} brings ${personalDay.meaning}.`,
       );
     }
   }
 
-  // Personal Numerology Guidance
-  if (userBirthday) {
-    const personalDay = getPersonalDayNumber(userBirthday, today);
-    horoscopeElements.push(
-      `On a personal numerological level, you're experiencing a ${personalDay.number} day, making this ${personalDay.meaning}. This combines powerfully with your ${sunSign} solar energy.`,
-    );
-  }
-
-  // Practical guidance based on aspects
-  if (aspects.length > 0) {
+  // Practical guidance - Only if there are significant aspects
+  if (aspects.length > 1) {
     const hasChallengingAspects = aspects.some(
       (a) => a.type === 'square' || a.type === 'opposition',
     );
@@ -182,25 +169,27 @@ const generatePersonalizedHoroscope = (
 
     if (hasChallengingAspects && hasHarmoniousAspects) {
       horoscopeElements.push(
-        `Today presents a balanced mix of supportive and challenging energies. Navigate any tensions with patience while embracing opportunities that align with your values. Your ${sunSign} nature provides the wisdom to discern between necessary action and patient observation.`,
+        `Today mixes supportive and challenging energies - navigate with patience.`,
       );
     } else if (hasChallengingAspects) {
       horoscopeElements.push(
-        `While today's aspects may present some resistance or require extra effort, remember that growth often emerges from constructive challenges. Your ${sunSign} strength will guide you through any obstacles toward meaningful progress.`,
+        `Growth emerges from today's constructive challenges.`,
       );
     } else if (hasHarmoniousAspects) {
-      horoscopeElements.push(
-        `The harmonious flow of today's planetary energies creates favorable conditions for advancement in personal and professional spheres. This supportive cosmic climate enhances your natural ${sunSign} abilities.`,
-      );
+      horoscopeElements.push(`Harmonious energies support advancement today.`);
     }
   }
 
-  // Closing guidance
-  const personalizedEnding = userName
-    ? `Trust your ${sunSign} instincts and honor your ${moonSign} emotional wisdom as you navigate today's cosmic currents, ${userName}. The universe supports your authentic expression and continued growth.`
-    : `Trust your ${sunSign} instincts and honor your ${moonSign} emotional wisdom as you navigate today's cosmic currents. The universe supports your authentic expression and continued growth.`;
+  // Concise closing guidance - rotate based on day to avoid repetition
+  const closingOptions = [
+    `Trust your ${sunSign} instincts today.`,
+    `Honor your ${moonSign} emotional wisdom.`,
+    `The cosmic currents support your growth.`,
+    `Navigate with your authentic ${sunSign} nature.`,
+  ];
 
-  horoscopeElements.push(personalizedEnding);
+  const closingIndex = today.dayOfYear() % closingOptions.length;
+  horoscopeElements.push(closingOptions[closingIndex]);
 
   // Combine all elements
   return horoscopeElements.join(' ');

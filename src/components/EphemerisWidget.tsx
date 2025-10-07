@@ -543,7 +543,7 @@ export default function EphemerisWidget() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAllPlanets, setShowAllPlanets] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   useEffect(() => {
     if (!location) return;

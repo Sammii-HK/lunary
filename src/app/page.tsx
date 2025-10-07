@@ -48,8 +48,8 @@ export default function Home() {
         <DateWidget />
         <AstronomyWidget />
         <MoonWidget />
-        <EphemerisWidget />
         <HoroscopeWidget />
+        <EphemerisWidget />
         {/* <LuckyElements /> */}
         <CrystalWidget />
         <TarotWidget />
