@@ -72,7 +72,7 @@ export const saveBirthChartToProfile = async (
         profile._owner || profile,
       );
 
-      birthChartCoValue.push(planetCoValue);
+      (birthChartCoValue as any).push(planetCoValue);
     }
 
     // Save to profile

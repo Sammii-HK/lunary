@@ -31,7 +31,16 @@ export function AuthButtons({
   const checkAuthStatus = async () => {
     try {
       const session = await betterAuthClient.getSession();
-      setAuthUser(session?.user || null);
+      if ('user' in session && session.user) {
+        const user = session.user as any;
+        setAuthUser({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        });
+      } else {
+        setAuthUser(null);
+      }
     } catch (error) {
       console.error('Failed to check auth status:', error);
       setAuthUser(null);

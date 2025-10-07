@@ -43,7 +43,7 @@ export default function ProfilePage() {
     const checkAuth = async () => {
       try {
         const session = await betterAuthClient.getSession();
-        setAuthUser(session?.user || null);
+        setAuthUser(session && 'user' in session ? session.user : null);
       } catch (error) {
         setAuthUser(null);
       } finally {

@@ -16,7 +16,7 @@ export default function TestBetterAuthPage() {
   const checkSession = async () => {
     try {
       const session = await betterAuthClient.getSession();
-      setCurrentUser(session?.user || null);
+      setCurrentUser(session && 'user' in session ? session.user : null);
     } catch (error) {
       setCurrentUser(null);
     }

@@ -5,11 +5,12 @@ import Database from 'better-sqlite3';
 // Better Auth server configuration with Jazz plugin
 export const auth = betterAuth({
   database: new Database('./data/auth.db'),
+  secret: process.env.BETTER_AUTH_SECRET,
 
   // Email and password authentication
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // Set to true in production
+    requireEmailVerification: true,
   },
 
   // Session configuration
