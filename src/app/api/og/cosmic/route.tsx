@@ -7,6 +7,7 @@ import {
   GeoVector,
   Ecliptic,
   Illumination,
+  MoonPhase,
 } from 'astronomy-engine';
 
 // Default observer location (London, UK)
@@ -204,7 +205,7 @@ function getAspectGlyph(aspect: string): string {
   return glyphs[aspect] || '!';
 }
 
-// Calculate accurate moon phase (SAME AS POST ROUTE)
+// Calculate accurate moon phase using proper astronomy-engine functions
 function getAccurateMoonPhase(date: Date): {
   name: string;
   energy: string;
@@ -216,12 +217,17 @@ function getAccurateMoonPhase(date: Date): {
 } {
   const astroTime = new AstroTime(date);
   const moonIllumination = Illumination(Body.Moon, astroTime);
+  const moonPhaseAngle = MoonPhase(date); // This gives us the phase angle in degrees
 
-  const moonAge = (moonIllumination.phase_angle / 360) * 29.530588853;
   const illuminationPercent = moonIllumination.phase_fraction * 100;
+  
+  // Convert phase angle to moon age (0-29.53 days)
+  // 0° = New Moon, 90° = First Quarter, 180° = Full Moon, 270° = Third Quarter
+  const moonAge = (moonPhaseAngle / 360) * 29.530588853;
 
-  // Determine moon phase with tight tolerances for major phases
-  if (moonAge < 0.5) {
+  // Determine moon phase based on angle with proper tolerances
+  if (moonPhaseAngle >= 355 || moonPhaseAngle <= 5) {
+    // New Moon: 355° - 5° (around 0°)
     return {
       name: 'New Moon',
       energy: 'New Beginnings',
@@ -231,7 +237,8 @@ function getAccurateMoonPhase(date: Date): {
       age: moonAge,
       isSignificant: true,
     };
-  } else if (moonAge >= 7.2 && moonAge <= 7.6) {
+  } else if (moonPhaseAngle >= 85 && moonPhaseAngle <= 95) {
+    // First Quarter: 85° - 95° (around 90°)
     return {
       name: 'First Quarter',
       energy: 'Action & Decision',
@@ -241,7 +248,8 @@ function getAccurateMoonPhase(date: Date): {
       age: moonAge,
       isSignificant: true,
     };
-  } else if (moonAge >= 14.5 && moonAge <= 15.5) {
+  } else if (moonPhaseAngle >= 175 && moonPhaseAngle <= 185) {
+    // Full Moon: 175° - 185° (around 180°)
     const month = date.getMonth() + 1;
     const moonNames: { [key: number]: string } = {
       1: 'Wolf Moon',
@@ -267,7 +275,8 @@ function getAccurateMoonPhase(date: Date): {
       age: moonAge,
       isSignificant: true,
     };
-  } else if (moonAge >= 22.0 && moonAge <= 22.4) {
+  } else if (moonPhaseAngle >= 265 && moonPhaseAngle <= 275) {
+    // Third Quarter: 265° - 275° (around 270°)
     return {
       name: 'Third Quarter',
       energy: 'Release & Letting Go',
@@ -278,8 +287,8 @@ function getAccurateMoonPhase(date: Date): {
       isSignificant: true,
     };
   } else {
-    // Non-significant phases
-    if (moonAge < 7.2) {
+    // Non-significant phases based on angle ranges
+    if (moonPhaseAngle > 5 && moonPhaseAngle < 85) {
       return {
         name: 'Waxing Crescent',
         energy: 'Growing Energy',
@@ -289,7 +298,7 @@ function getAccurateMoonPhase(date: Date): {
         age: moonAge,
         isSignificant: false,
       };
-    } else if (moonAge < 14.5) {
+    } else if (moonPhaseAngle > 95 && moonPhaseAngle < 175) {
       return {
         name: 'Waxing Gibbous',
         energy: 'Building Power',
@@ -299,7 +308,7 @@ function getAccurateMoonPhase(date: Date): {
         age: moonAge,
         isSignificant: false,
       };
-    } else if (moonAge < 22.0) {
+    } else if (moonPhaseAngle > 185 && moonPhaseAngle < 265) {
       return {
         name: 'Waning Gibbous',
         energy: 'Gratitude & Wisdom',
@@ -913,21 +922,7 @@ export async function GET(request: NextRequest) {
             >
               {primaryEvent.energy}
             </div>
-            <div
-              style={{
-                display: 'flex',
-                fontSize: '24px',
-                fontWeight: '300',
-                color: 'white',
-                textAlign: 'center',
-                fontFamily: 'Roboto Mono',
-                maxWidth: '900px',
-                lineHeight: '1.3',
-                opacity: '0.9',
-              }}
-            >
-              {Math.round(moonPhase.illumination)}% illuminated
-            </div>
+            {/* Removed illumination percentage display per user request */}
             <div
               style={{
                 display: 'flex',
