@@ -1,7 +1,7 @@
 'use client';
 
 import { JazzReactProvider } from 'jazz-tools/react';
-import { AuthProvider } from "jazz-tools/better-auth/auth/react";
+import { AuthProvider } from 'jazz-tools/better-auth/auth/react';
 import { MyAppAccount } from '../../schema';
 import { betterAuthClient } from '@/lib/auth-client';
 

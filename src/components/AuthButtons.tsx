@@ -16,7 +16,10 @@ interface AuthButtonsProps {
   className?: string;
 }
 
-export function AuthButtons({ variant = 'primary', className = '' }: AuthButtonsProps) {
+export function AuthButtons({
+  variant = 'primary',
+  className = '',
+}: AuthButtonsProps) {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const account = useAccount();
@@ -57,8 +60,8 @@ export function AuthButtons({ variant = 'primary', className = '' }: AuthButtons
   if (loading) {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
-        <div className="animate-pulse bg-zinc-700 h-10 w-20 rounded-full"></div>
-        <div className="animate-pulse bg-zinc-700 h-10 w-20 rounded-full"></div>
+        <div className='animate-pulse bg-zinc-700 h-10 w-20 rounded-full'></div>
+        <div className='animate-pulse bg-zinc-700 h-10 w-20 rounded-full'></div>
       </div>
     );
   }
@@ -66,16 +69,14 @@ export function AuthButtons({ variant = 'primary', className = '' }: AuthButtons
   // Only show as authenticated if BOTH Jazz account exists AND Better Auth session exists
   if (authUser && account?.me) {
     const displayName = authUser?.name || account?.me?.profile?.name || 'User';
-    
+
     if (variant === 'navbar') {
       return (
         <div className={`flex items-center gap-3 ${className}`}>
-          <span className="text-sm text-zinc-300">
-            👋 {displayName}
-          </span>
+          <span className='text-sm text-zinc-300'>👋 {displayName}</span>
           <Link
-            href="/profile"
-            className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+            href='/profile'
+            className='text-xs text-purple-400 hover:text-purple-300 transition-colors'
           >
             Profile
           </Link>
@@ -84,25 +85,28 @@ export function AuthButtons({ variant = 'primary', className = '' }: AuthButtons
     }
 
     return (
-      <div className={`flex flex-col sm:flex-row items-center gap-4 ${className}`}>
-        <div className="text-center">
-          <p className="text-zinc-300 mb-2">
-            Welcome back, <span className="text-purple-400 font-medium">{displayName}</span>!
+      <div
+        className={`flex flex-col sm:flex-row items-center gap-4 ${className}`}
+      >
+        <div className='text-center'>
+          <p className='text-zinc-300 mb-2'>
+            Welcome back,{' '}
+            <span className='text-purple-400 font-medium'>{displayName}</span>!
           </p>
-          <p className="text-sm text-zinc-500">
+          <p className='text-sm text-zinc-500'>
             Your cosmic profile is synced and ready
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className='flex gap-3'>
           <Link
-            href="/profile"
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-medium transition-colors"
+            href='/profile'
+            className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-medium transition-colors'
           >
             View Profile
           </Link>
           <button
             onClick={handleSignOut}
-            className="text-red-400 hover:text-red-300 px-4 py-2 font-medium transition-colors"
+            className='text-red-400 hover:text-red-300 px-4 py-2 font-medium transition-colors'
           >
             Sign Out
           </button>
@@ -112,13 +116,14 @@ export function AuthButtons({ variant = 'primary', className = '' }: AuthButtons
   }
 
   // If not authenticated, show single profile creation button
-  const baseButtonClasses = "font-medium transition-all duration-300 rounded-full";
-  
+  const baseButtonClasses =
+    'font-medium transition-all duration-300 rounded-full';
+
   if (variant === 'primary') {
     return (
       <div className={`flex justify-center items-center ${className}`}>
         <Link
-          href="/profile"
+          href='/profile'
           className={`${baseButtonClasses} bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-105`}
         >
           Create Your Cosmic Profile
@@ -131,7 +136,7 @@ export function AuthButtons({ variant = 'primary', className = '' }: AuthButtons
     return (
       <div className={`flex justify-center ${className}`}>
         <Link
-          href="/profile"
+          href='/profile'
           className={`${baseButtonClasses} bg-purple-600 hover:bg-purple-700 text-white px-6 py-3`}
         >
           Create Profile
@@ -144,8 +149,8 @@ export function AuthButtons({ variant = 'primary', className = '' }: AuthButtons
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         <Link
-          href="/profile"
-          className="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-full transition-colors"
+          href='/profile'
+          className='text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-full transition-colors'
         >
           Profile
         </Link>

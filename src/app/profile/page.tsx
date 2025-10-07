@@ -128,17 +128,22 @@ export default function ProfilePage() {
     );
   }
 
-
   return (
     <div className='flex flex-col items-center gap-6 py-8'>
-      <h1 className='text-2xl font-bold text-white text-center'>Your Profile</h1>
+      <h1 className='text-2xl font-bold text-white text-center'>
+        Your Profile
+      </h1>
 
       <div className='bg-zinc-800 rounded-lg p-6 w-full max-w-md'>
         <div className='space-y-4'>
           <div>
             <label className='block text-sm font-medium text-zinc-300 mb-2'>
               Name
-              {canCollectBirthdayData && <span className='text-purple-400 text-xs ml-2'>✨ Premium Feature</span>}
+              {canCollectBirthdayData && (
+                <span className='text-purple-400 text-xs ml-2'>
+                  ✨ Premium Feature
+                </span>
+              )}
             </label>
             {isEditing && authUser && canCollectBirthdayData ? (
               <input
@@ -150,7 +155,9 @@ export default function ProfilePage() {
               />
             ) : (
               <div className='w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white min-h-[2.5rem] flex items-center'>
-                {canCollectBirthdayData ? (name || 'Your name will appear here') : 'Premium feature - upgrade to customize'}
+                {canCollectBirthdayData
+                  ? name || 'Your name will appear here'
+                  : 'Premium feature - upgrade to customize'}
               </div>
             )}
           </div>
@@ -172,7 +179,9 @@ export default function ProfilePage() {
                 />
               ) : (
                 <div className='w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white min-h-[2.5rem] flex items-center'>
-                  {birthday ? new Date(birthday).toLocaleDateString() : 'Your birthday will appear here'}
+                  {birthday
+                    ? new Date(birthday).toLocaleDateString()
+                    : 'Your birthday will appear here'}
                 </div>
               )}
               {isEditing && authUser && (
@@ -192,12 +201,12 @@ export default function ProfilePage() {
                 your birth chart, personalized horoscopes, and cosmic insights
                 tailored specifically to you.
               </p>
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300'
-                >
-                  Start Free Trial
-                </button>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300'
+              >
+                Start Free Trial
+              </button>
             </div>
           )}
 
@@ -469,17 +478,18 @@ export default function ProfilePage() {
             >
               ✕
             </button>
-            
+
             <div className='text-center mb-6'>
               <h3 className='text-xl font-bold text-white mb-2'>
                 Create Your Account
               </h3>
               <p className='text-zinc-300 text-sm'>
-                Sign up to save your profile. Upgrade to premium after creating your account.
+                Sign up to save your profile. Upgrade to premium after creating
+                your account.
               </p>
             </div>
 
-            <AuthComponent 
+            <AuthComponent
               onSuccess={() => {
                 setShowAuthModal(false);
                 window.location.reload();

@@ -66,12 +66,14 @@ export async function POST(request: NextRequest) {
       const today = new Date();
       const daysUntilMonday = (1 + 7 - today.getDay()) % 7;
       startDate = new Date(today);
-      startDate.setDate(today.getDate() + (daysUntilMonday === 0 ? 7 : daysUntilMonday));
+      startDate.setDate(
+        today.getDate() + (daysUntilMonday === 0 ? 7 : daysUntilMonday),
+      );
     }
 
     // Generate posts for 7 days (one week)
     const posts: SucculentPostData[] = [];
-    
+
     for (let day = 0; day < 7; day++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + day);
@@ -176,16 +178,16 @@ export async function POST(request: NextRequest) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    const weekStart = startDate.toLocaleDateString('en-US', { 
-      month: 'short', 
+    const weekStart = startDate.toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
     const weekEnd = new Date(startDate);
     weekEnd.setDate(startDate.getDate() + 6);
-    const weekEndStr = weekEnd.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
+    const weekEndStr = weekEnd.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
     });
 
     return NextResponse.json({

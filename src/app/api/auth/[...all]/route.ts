@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth } from '@/lib/auth';
 
 // Handle all HTTP methods for Better Auth
 export async function GET(request: Request) {

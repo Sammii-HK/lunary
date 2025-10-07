@@ -1,11 +1,11 @@
-import { betterAuth } from "better-auth";
-import { jazzPlugin } from "jazz-tools/better-auth/auth/server";
-import Database from "better-sqlite3";
+import { betterAuth } from 'better-auth';
+import { jazzPlugin } from 'jazz-tools/better-auth/auth/server';
+import Database from 'better-sqlite3';
 
 // Better Auth server configuration with Jazz plugin
 export const auth = betterAuth({
-  database: new Database("./data/auth.db"),
-  
+  database: new Database('./data/auth.db'),
+
   // Email and password authentication
   emailAndPassword: {
     enabled: true,
@@ -24,23 +24,24 @@ export const auth = betterAuth({
 
   // CORS and security settings
   trustedOrigins: [
-    "http://localhost:3000",
-    "http://localhost:3001", 
-    "https://lunary.app",
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://lunary.app',
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   ],
 
   // Add the Jazz plugin for integration
-  plugins: [
-    jazzPlugin(),
-  ],
+  plugins: [jazzPlugin()],
 
   // Database hooks for custom logic
   databaseHooks: {
     user: {
       create: {
         async after(user) {
-          console.log("✨ New user created with Jazz Account ID:", user.accountID);
+          console.log(
+            '✨ New user created with Jazz Account ID:',
+            user.accountID,
+          );
         },
       },
     },

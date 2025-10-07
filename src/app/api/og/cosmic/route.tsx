@@ -220,7 +220,7 @@ function getAccurateMoonPhase(date: Date): {
   const moonPhaseAngle = MoonPhase(date); // This gives us the phase angle in degrees
 
   const illuminationPercent = moonIllumination.phase_fraction * 100;
-  
+
   // Convert phase angle to moon age (0-29.53 days)
   // 0° = New Moon, 90° = First Quarter, 180° = Full Moon, 270° = Third Quarter
   const moonAge = (moonPhaseAngle / 360) * 29.530588853;

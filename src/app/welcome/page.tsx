@@ -103,7 +103,7 @@ export default function WelcomePage() {
 
             <div className='pt-8'>
               <AuthButtons variant='primary' />
-              
+
               {/* Explore link for existing users */}
               <div className='mt-4 text-center'>
                 <Link
@@ -419,7 +419,7 @@ export default function WelcomePage() {
 
           <div className='pt-8'>
             <AuthButtons variant='primary' />
-            
+
             {/* Explore link for existing users */}
             <div className='mt-6 text-center'>
               <Link
