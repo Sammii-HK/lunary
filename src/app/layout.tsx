@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -26,6 +27,7 @@ export default function RootLayout({
         <LunaryJazzProvider>
           <main className='flex flex-col h-full max-w-md w-full items-center justify-between font-mono text-sm gap-4 overflow-auto px-4 align-self-middle justify-self-center'>
             {children}
+            <Analytics />
           </main>
           <Navbar />
         </LunaryJazzProvider>
