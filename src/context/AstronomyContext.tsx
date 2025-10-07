@@ -60,8 +60,9 @@ export const AstronomyContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { me } = useAccount();
-  const userName = (me?.profile as any)?.name;
+  // Get account info if available
+  const account = useAccount();
+  const userName = account?.me?.profile?.name;
 
   const [currentDateTime, setCurrentDateTime] = useState(dayjs().toDate());
   const [currentDate, setCurrentDate] = useState(

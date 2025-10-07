@@ -11,14 +11,14 @@ export function LunaryJazzProvider({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider betterAuthClient={betterAuthClient}>
-      <JazzReactProvider
-        sync={{ peer: 'wss://cloud.jazz.tools/?key=sam@lunary.com' }}
-        AccountSchema={MyAppAccount}
-      >
+    <JazzReactProvider
+      sync={{ peer: 'wss://cloud.jazz.tools/?key=sam@lunary.com' }}
+      AccountSchema={MyAppAccount}
+    >
+      <AuthProvider betterAuthClient={betterAuthClient}>
         {children}
-      </JazzReactProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </JazzReactProvider>
   );
 }
 

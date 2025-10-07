@@ -10,10 +10,16 @@ interface AuthFormData {
   name?: string;
 }
 
-export function AuthComponent() {
+interface AuthComponentProps {
+  onSuccess?: () => void;
+  compact?: boolean;
+}
+
+export function AuthComponent({ onSuccess, compact = false }: AuthComponentProps = {}) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState<AuthFormData>({
     email: '',
     password: '',
@@ -26,33 +32,63 @@ export function AuthComponent() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       if (isSignUp) {
-        await betterAuthClient.signUp.email(
-          {
-            email: formData.email,
-            password: formData.password,
-            name: formData.name || 'User',
-          },
-          {
-            onSuccess: async () => {
-              // Update the profile's name after successful signup
-              if (account?.me?.profile && formData.name) {
-                account.me.profile.name = formData.name;
-              }
-            },
-          }
-        );
+        const result = await betterAuthClient.signUp.email({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name || 'User',
+        });
+        
+        console.log('✅ Sign up successful:', result);
+        setSuccess('Account created successfully! You are now signed in.');
+        setFormData({ email: '', password: '', name: '' });
+        
+        // Call onSuccess callback or redirect
+        if (onSuccess) {
+          setTimeout(() => onSuccess(), 1500);
+        } else {
+          setTimeout(() => {
+            window.location.href = '/profile';
+          }, 1500);
+        }
       } else {
-        await betterAuthClient.signIn.email({
+        const result = await betterAuthClient.signIn.email({
           email: formData.email,
           password: formData.password,
         });
+        
+        console.log('✅ Sign in successful:', result);
+        setSuccess('Signed in successfully!');
+        setFormData({ email: '', password: '', name: '' });
+        
+        // Call onSuccess callback or redirect
+        if (onSuccess) {
+          setTimeout(() => onSuccess(), 1500);
+        } else {
+          setTimeout(() => {
+            window.location.href = '/profile';
+          }, 1500);
+        }
       }
     } catch (err: any) {
       console.error('Authentication error:', err);
-      setError(err.message || 'Authentication failed. Please try again.');
+      
+      // Better error messages
+      let errorMessage = 'Authentication failed. Please try again.';
+      if (err.message?.includes('Invalid credentials')) {
+        errorMessage = 'Invalid email or password. Please check your credentials.';
+      } else if (err.message?.includes('User already exists')) {
+        errorMessage = 'An account with this email already exists. Try signing in instead.';
+      } else if (err.message?.includes('User not found')) {
+        errorMessage = 'No account found with this email. Try signing up instead.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,19 +130,33 @@ export function AuthComponent() {
     );
   }
 
+  const containerClasses = compact 
+    ? "bg-transparent" 
+    : "w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6";
+
   return (
-    <div className="w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-white mb-2">
-          {isSignUp ? 'Create Account' : 'Sign In'}
-        </h2>
-        <p className="text-zinc-400">
-          {isSignUp 
-            ? 'Join Lunary to sync your cosmic journey' 
-            : 'Welcome back to your cosmic journey'
-          }
-        </p>
-      </div>
+    <div className={containerClasses}>
+      {!compact && (
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {isSignUp ? 'Create Account' : 'Sign In'}
+          </h2>
+          <p className="text-zinc-400">
+            {isSignUp 
+              ? 'Join Lunary to sync your cosmic journey' 
+              : 'Welcome back to your cosmic journey'
+            }
+          </p>
+        </div>
+      )}
+
+      {compact && (
+        <div className="text-center mb-4">
+          <p className="text-sm text-zinc-300">
+            {isSignUp ? 'Create account to save' : 'Sign in to save'}
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {isSignUp && (
@@ -121,7 +171,7 @@ export function AuthComponent() {
               required={isSignUp}
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className={`w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2 text-sm' : 'px-4 py-3'}`}
               placeholder="Enter your name"
             />
           </div>
@@ -166,10 +216,16 @@ export function AuthComponent() {
           </div>
         )}
 
+        {success && (
+          <div className="bg-green-900/30 border border-green-700 text-green-300 px-4 py-3 rounded-lg text-sm">
+            {success}
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+          className={`w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:opacity-50 text-white font-medium rounded-lg transition-colors ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
         >
           {loading ? (
             <>
@@ -187,6 +243,7 @@ export function AuthComponent() {
           onClick={() => {
             setIsSignUp(!isSignUp);
             setError(null);
+            setSuccess(null);
             setFormData({ email: '', password: '', name: '' });
           }}
           className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"

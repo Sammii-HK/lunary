@@ -66,7 +66,7 @@ export const MyAppAccount = co.account({
     stripeCustomerId: z.string().optional(),
     location: UserLocation.optional(),
   }),
-}).withMigration(async (account, { createdAt, accountOrAgentSecret }) => {
+}).withMigration(async (account, migrationInfo) => {
   // Initialize root data structure if it doesn't exist
   if (!account.$jazz.has("root")) {
     console.log("🌟 Initializing new user account root");

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { AuthButtons } from '@/components/AuthButtons';
 
 export default function WelcomePage() {
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -100,19 +101,18 @@ export default function WelcomePage() {
               </div>
             </div>
 
-            <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-8'>
-              <Link
-                href='/profile'
-                className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
-              >
-                Begin Your Journey
-              </Link>
-              <Link
-                href='/'
-                className='text-purple-300 hover:text-purple-200 px-8 py-4 font-medium text-lg transition-colors border border-purple-400/30 rounded-full hover:border-purple-300/50'
-              >
-                Explore Daily Insights
-              </Link>
+            <div className='pt-8'>
+              <AuthButtons variant='primary' />
+              
+              {/* Explore link for existing users */}
+              <div className='mt-4 text-center'>
+                <Link
+                  href='/'
+                  className='text-purple-300 hover:text-purple-200 px-8 py-4 font-medium text-lg transition-colors border border-purple-400/30 rounded-full hover:border-purple-300/50 inline-block'
+                >
+                  Explore Daily Insights
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -190,12 +190,7 @@ export default function WelcomePage() {
                 Your cosmic blueprint is waiting to be decoded. Get insights
                 that are actually about you, not everyone born in your month.
               </p>
-              <Link
-                href='/profile'
-                className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
-              >
-                Start Your Personal Journey
-              </Link>
+              <AuthButtons variant='secondary' className='justify-center' />
             </div>
           </div>
         </div>
@@ -422,19 +417,18 @@ export default function WelcomePage() {
             begins here.
           </p>
 
-          <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-8'>
-            <Link
-              href='/profile'
-              className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-10 py-4 rounded-full font-medium text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
-            >
-              Create Your Cosmic Profile
-            </Link>
-            <Link
-              href='/'
-              className='text-purple-300 hover:text-purple-200 px-8 py-4 font-medium text-lg transition-colors'
-            >
-              Explore daily insights
-            </Link>
+          <div className='pt-8'>
+            <AuthButtons variant='primary' />
+            
+            {/* Explore link for existing users */}
+            <div className='mt-6 text-center'>
+              <Link
+                href='/'
+                className='text-purple-300 hover:text-purple-200 px-8 py-4 font-medium text-lg transition-colors inline-block'
+              >
+                Explore daily insights
+              </Link>
+            </div>
           </div>
 
           <p className='text-sm text-zinc-500 pt-8'>
