@@ -212,7 +212,6 @@ export function useSubscription(): SubscriptionStatus {
     defaultState,
     getCustomerId,
     fetchFromStripe,
-    me?.profile,
   ]);
 
   if (!hasJazzProvider) {
