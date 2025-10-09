@@ -125,7 +125,7 @@ export default function ProfilePage() {
       try {
         // Actually save to Jazz profile using correct API
         me.profile.$jazz.set('name', name);
-        me.profile.$jazz.set('birthday', birthday);
+        me.profile.$jazz.set('birthday' as any, birthday);
 
         // Generate and save cosmic data if birthday is provided
         if (birthday) {

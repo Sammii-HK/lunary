@@ -66,7 +66,7 @@ export default function SuccessPage() {
           // Use the production-ready sync that connects Better Auth to Jazz
           const syncResult = await syncSubscriptionAfterCheckout(
             profile,
-            sessionId,
+            sessionId || '',
           );
 
           if (syncResult.success) {
@@ -110,7 +110,7 @@ export default function SuccessPage() {
     if (session && !trialCreated) {
       createTrial();
     }
-  }, [session, profile, trialCreated]);
+  }, [session, profile, trialCreated, sessionId]);
 
   // Create a mock sync result for the UI
   const syncResult = {
