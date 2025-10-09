@@ -1,6 +1,7 @@
 'use client';
 
 import { useAccount } from 'jazz-tools/react';
+import { SmartTrialButton } from './SmartTrialButton';
 import {
   getBirthChartFromProfile,
   hasBirthChart,
@@ -43,12 +44,13 @@ export const BirthChartWidget = () => {
               <li>• Cosmic aspects and their meanings</li>
               <li>• Detailed personality insights</li>
             </ul>
-            <Link
-              href='/pricing'
-              className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300'
+            <SmartTrialButton 
+              size="sm" 
+              variant="primary"
+              className="inline-block"
             >
               Start Free Trial
-            </Link>
+            </SmartTrialButton>
           </div>
         </div>
       </div>
@@ -81,7 +83,7 @@ export const BirthChartWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Birth Chart</h3>
-          <span className='text-xs text-purple-400'>✨ Premium</span>
+          <span className='text-xs text-purple-400'>Personalised</span>
           <p className='text-zinc-400 text-xs'>Generating chart...</p>
         </div>
       </div>

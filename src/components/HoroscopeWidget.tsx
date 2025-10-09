@@ -1,6 +1,7 @@
 'use client';
 
 import { useAccount } from 'jazz-tools/react';
+import { SmartTrialButton } from './SmartTrialButton';
 import {
   getBirthChartFromProfile,
   hasBirthChart,
@@ -677,12 +678,13 @@ export const HoroscopeWidget = () => {
               Unlock horoscopes tailored to YOUR birth chart. Experience the
               difference personalized astrology makes!
             </p>
-            <Link
-              href='/pricing'
-              className='text-xs text-purple-400 underline font-medium'
+            <SmartTrialButton 
+              size="sm" 
+              variant="primary"
+              className="text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1"
             >
               Start Your Free Trial
-            </Link>
+            </SmartTrialButton>
           </div>
         </div>
       </div>
@@ -695,7 +697,7 @@ export const HoroscopeWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
-          <span className='text-xs text-purple-400'>✨ Premium</span>
+          <span className='text-xs text-purple-400'>Personalised</span>
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday for personalized cosmic insights
           </p>
@@ -717,7 +719,7 @@ export const HoroscopeWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
-          <span className='text-xs text-purple-400'>✨ Premium</span>
+          <span className='text-xs text-purple-400'>Personalised</span>
           <p className='text-zinc-400 text-xs'>
             Calculating your cosmic influences...
           </p>
@@ -744,7 +746,7 @@ export const HoroscopeWidget = () => {
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
           <h3 className='font-bold'>Personal Horoscope</h3>
-          <span className='text-xs text-purple-400'>✨ Premium</span>
+          <span className='text-xs text-purple-400'>Personalised</span>
         </div>
         <div className='text-center text-sm text-zinc-300 leading-relaxed max-h-48 overflow-y-auto'>
           {horoscope}

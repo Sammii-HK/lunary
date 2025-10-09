@@ -14,56 +14,65 @@ export async function POST(request: NextRequest) {
     if (!customerId) {
       return NextResponse.json(
         { error: 'Customer ID is required' },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
+    console.log('Fetching subscription for customer:', customerId);
+
+    // Get all subscriptions for this customer
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: 'all', // Include all statuses
       limit: 10,
     });
 
+    console.log(`Found ${subscriptions.data.length} subscriptions for customer ${customerId}`);
+
     if (subscriptions.data.length === 0) {
       return NextResponse.json({
-        hasSubscription: false,
+        success: false,
+        message: 'No subscriptions found for this customer',
         subscription: null,
       });
     }
 
-    const subscription = subscriptions.data[0];
+    // Get the most recent subscription (active or trial first, then most recent)
+    const activeSubscription = subscriptions.data.find(sub => 
+      ['active', 'trialing'].includes(sub.status)
+    );
+    
+    const subscription = activeSubscription || subscriptions.data[0];
 
-    const priceId = subscription.items.data[0]?.price?.id;
-    const price = await stripe.prices.retrieve(priceId!, {
-      expand: ['product'],
+    console.log('Selected subscription:', {
+      id: subscription.id,
+      status: subscription.status,
+      customerId: subscription.customer,
     });
-
-    const product = price.product as any;
-    const planType =
-      price.recurring?.interval === 'month' ? 'monthly' : 'yearly';
-    const productName = product.name || 'Unknown Plan';
-
-    const status = subscription.status;
 
     return NextResponse.json({
-      hasSubscription: true,
+      success: true,
       subscription: {
         id: subscription.id,
-        status: status,
-        plan: planType,
-        planName: productName,
-        customerId: customerId,
-        trialEnd: subscription.trial_end,
-        currentPeriodEnd: (subscription as any).current_period_end,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        status: subscription.status,
+        customer: subscription.customer,
+        current_period_end: subscription.current_period_end,
+        trial_end: subscription.trial_end,
+        items: subscription.items,
         created: subscription.created,
       },
+      message: `Found ${subscription.status} subscription`,
     });
+
   } catch (error) {
     console.error('Error fetching subscription:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch subscription data' },
-      { status: 500 },
+      { 
+        success: false,
+        error: 'Failed to fetch subscription',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
     );
   }
 }

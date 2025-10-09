@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAccount } from 'jazz-tools/react';
 import { useSubscriptionSync } from '../../hooks/useSubscriptionSync';
 import { createTrialSubscriptionInProfile } from '../../../utils/subscription';
+import { syncSubscriptionAfterCheckout } from '../../../utils/productionSubscriptionSync';
 
 interface CheckoutSession {
   id: string;
@@ -60,25 +61,46 @@ export default function SuccessPage() {
         !(profile as any).subscription
       ) {
         try {
-          if (session.customer_id) {
-            (profile as any).stripeCustomerId = session.customer_id;
-          }
-          const result = await createTrialSubscriptionInProfile(profile);
-          console.log('Trial creation result:', result);
-          if (result.success) {
+          console.log('🔄 Processing subscription for session:', sessionId);
+          
+          // Use the production-ready sync that connects Better Auth to Jazz
+          const syncResult = await syncSubscriptionAfterCheckout(profile, sessionId);
+          
+          if (syncResult.success) {
             setTrialCreated(true);
+            console.log('✅ Subscription synced successfully after checkout');
           } else {
-            console.error('Trial creation failed:', result);
+            console.error('Subscription sync failed:', syncResult.message);
+            // Try the old method as fallback
+            if (session.customer_id) {
+              profile.$jazz.set('stripeCustomerId', session.customer_id);
+              console.log('✅ Customer ID saved to profile (fallback):', session.customer_id);
+            }
+            setTrialCreated(true); // Don't block the success page
           }
         } catch (error) {
-          console.error('Error creating trial subscription:', error);
+          console.error('Error syncing subscription:', error);
+          // Fallback: at least save the customer ID
+          try {
+            if (session.customer_id) {
+              profile.$jazz.set('stripeCustomerId', session.customer_id);
+              console.log('✅ Customer ID saved (error fallback):', session.customer_id);
+            }
+          } catch (fallbackError) {
+            console.error('Even fallback failed:', fallbackError);
+          }
+          setTrialCreated(true); // Don't block the success page
         }
       } else {
-        console.log('Skipping trial creation - conditions not met');
+        console.log('Skipping subscription sync - conditions not met');
+        setTrialCreated(true); // Mark as processed if not needed
       }
     }
 
-    createTrial();
+    // Only run if we have session data and haven't tried yet
+    if (session && !trialCreated) {
+      createTrial();
+    }
   }, [session, profile, trialCreated]);
 
   // Create a mock sync result for the UI

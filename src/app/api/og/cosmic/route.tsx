@@ -885,13 +885,13 @@ export async function GET(request: NextRequest) {
             </div>
           </div>
         ) : isMoonPhaseEvent ? (
-          // Moon Phase Layout
+          // Moon Phase Layout with Constellation
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '80px',
+              gap: '60px',
               justifyContent: 'center',
               flex: 1,
             }}
@@ -922,7 +922,37 @@ export async function GET(request: NextRequest) {
             >
               {primaryEvent.energy}
             </div>
-            {/* Removed illumination percentage display per user request */}
+            {/* Moon Constellation Display */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '20px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '32px',
+                  fontWeight: '300',
+                  color: 'white',
+                  fontFamily: 'Roboto Mono',
+                  textAlign: 'center',
+                }}
+              >
+                Moon in {positions.Moon.sign}
+              </div>
+              <div
+                style={{
+                  fontSize: '80px',
+                  color: 'white',
+                  fontFamily: 'Astronomicon',
+                  lineHeight: '1',
+                }}
+              >
+                {getZodiacSymbol(positions.Moon.sign)}
+              </div>
+            </div>
             <div
               style={{
                 display: 'flex',

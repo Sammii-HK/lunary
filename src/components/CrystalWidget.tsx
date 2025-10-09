@@ -1,6 +1,7 @@
 'use client';
 
 import { useAccount } from 'jazz-tools/react';
+import { SmartTrialButton } from './SmartTrialButton';
 import {
   getBirthChartFromProfile,
   hasBirthChart,
@@ -897,12 +898,13 @@ export const CrystalWidget = () => {
               Get crystals chosen specifically for YOUR birth chart. See what
               the universe has selected for you!
             </p>
-            <Link
-              href='/pricing'
-              className='text-xs text-purple-400 underline font-medium'
+            <SmartTrialButton 
+              size="sm" 
+              variant="primary"
+              className="text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1"
             >
               Start Your Free Trial
-            </Link>
+            </SmartTrialButton>
           </div>
         </div>
       </div>
@@ -915,7 +917,7 @@ export const CrystalWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>✨ Premium</span>
+          <span className='text-xs text-purple-400'>Personalised</span>
           <div className='text-4xl mb-2'>💎</div>
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday for personalized crystal guidance
@@ -938,7 +940,7 @@ export const CrystalWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>✨ Premium</span>
+          <span className='text-xs text-purple-400'>Personalised</span>
           <div className='text-4xl mb-2'>🔮</div>
           <p className='text-zinc-400 text-xs'>
             Calculating your crystal alignment...
@@ -973,7 +975,7 @@ export const CrystalWidget = () => {
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
           <h3 className='font-bold'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>✨ Premium</span>
+          <span className='text-xs text-purple-400'>Personalised</span>
         </div>
 
         <div className='text-center mb-3'>

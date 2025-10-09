@@ -1,6 +1,7 @@
 'use client';
 
 import { useAccount } from 'jazz-tools/react';
+import { SmartTrialButton } from '@/components/SmartTrialButton';
 import {
   getBirthChartFromProfile,
   hasBirthChart,
@@ -828,12 +829,13 @@ const BirthChartPage = () => {
               <li>🎯 Personality insights and guidance</li>
             </ul>
           </div>
-          <Link
-            href='/pricing'
-            className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-8 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl'
+          <SmartTrialButton 
+            size="lg" 
+            variant="primary"
+            className="inline-block shadow-lg hover:shadow-xl"
           >
             Start Free Trial
-          </Link>
+          </SmartTrialButton>
         </div>
       </div>
     );

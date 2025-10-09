@@ -1,5 +1,6 @@
 'use client';
 import { useAccount } from 'jazz-tools/react';
+import { SmartTrialButton } from './SmartTrialButton';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../utils/pricing';
@@ -49,12 +50,13 @@ export const TarotWidget = () => {
               Get tarot readings based on YOUR name and birthday. Discover what
               the cards reveal about you!
             </p>
-            <Link
-              href='/pricing'
-              className='text-xs text-purple-400 underline font-medium'
+            <SmartTrialButton 
+              size="sm" 
+              variant="primary"
+              className="text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1"
             >
               Start Your Free Trial
-            </Link>
+            </SmartTrialButton>
           </div>
         </div>
       </div>
@@ -67,7 +69,7 @@ export const TarotWidget = () => {
       <div className='space-y-3'>
         <div className='flex items-center justify-between'>
           <h3 className='font-bold'>Personal Tarot Card</h3>
-          <span className='text-xs text-purple-400'>✨ Premium</span>
+          <span className='text-xs text-purple-400'>Personalised</span>
         </div>
 
         <div className='text-center'>

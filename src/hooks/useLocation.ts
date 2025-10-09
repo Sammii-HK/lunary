@@ -68,14 +68,14 @@ export const useLocation = () => {
     (location: LocationData) => {
       if (me?.profile) {
         try {
-          (me.profile as any).location = {
+          me.profile.$jazz.set('location', {
             latitude: location.latitude,
             longitude: location.longitude,
             city: location.city || undefined,
             country: location.country || undefined,
             timezone: location.timezone || undefined,
             lastUpdated: new Date().toISOString(),
-          };
+          });
         } catch (error) {
           console.warn('Failed to save location to profile:', error);
         }

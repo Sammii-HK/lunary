@@ -1,6 +1,7 @@
 'use client';
 
 import { useAccount } from 'jazz-tools/react';
+import { SmartTrialButton } from '@/components/SmartTrialButton';
 import Link from 'next/link';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
@@ -66,14 +67,14 @@ export default function HoroscopePage() {
           </p>
         </div>
 
-        {/* Preview of Personal Insight - Premium Feature */}
+        {/* Preview of Personal Insight - Personalised Feature */}
         <div>
           <div className='flex justify-between items-center mb-3'>
             <h2 className='text-lg font-semibold text-green-400'>
               Personal Insight
             </h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
-              Premium Feature
+              Personalised Feature
             </div>
           </div>
           <div className='relative'>
@@ -99,12 +100,13 @@ export default function HoroscopePage() {
                   Get insights specifically tailored to your birth chart and
                   cosmic profile
                 </p>
-                <Link
-                  href='/pricing'
-                  className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md font-medium transition-all duration-300'
+                <SmartTrialButton 
+                  size="sm" 
+                  variant="primary"
+                  className="inline-block"
                 >
                   Start Free Trial
-                </Link>
+                </SmartTrialButton>
               </div>
             </div>
           </div>
@@ -121,14 +123,14 @@ export default function HoroscopePage() {
           </p>
         </div>
 
-        {/* Preview of Personalized Lucky Elements - Premium Feature */}
+        {/* Preview of Personalized Lucky Elements - Personalised Feature */}
         <div>
           <div className='flex justify-between items-center mb-3'>
             <h2 className='text-lg font-semibold text-pink-400'>
               Your Lucky Elements
             </h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
-              Premium Feature
+              Personalised Feature
             </div>
           </div>
           <div className='relative'>
@@ -161,12 +163,13 @@ export default function HoroscopePage() {
                   Get colors, crystals, and timing based on your unique birth
                   chart
                 </p>
-                <Link
-                  href='/pricing'
-                  className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md font-medium transition-all duration-300'
+                <SmartTrialButton 
+                  size="sm" 
+                  variant="primary"
+                  className="inline-block"
                 >
                   Start Free Trial
-                </Link>
+                </SmartTrialButton>
               </div>
             </div>
           </div>
@@ -198,14 +201,14 @@ export default function HoroscopePage() {
           </div>
         </div>
 
-        {/* Preview of Solar Return - Premium Feature */}
+        {/* Preview of Solar Return - Personalised Feature */}
         <div>
           <div className='flex justify-between items-center mb-3'>
             <h2 className='text-lg font-semibold text-orange-300'>
               🌅 Solar Return Insights
             </h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
-              Premium Feature
+              Personalised Feature
             </div>
           </div>
           <div className='relative'>
@@ -243,12 +246,13 @@ export default function HoroscopePage() {
                 <p className='text-zinc-300 text-sm mb-4'>
                   Discover your personal year themes and birthday insights
                 </p>
-                <Link
-                  href='/pricing'
-                  className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md font-medium transition-all duration-300'
+                <SmartTrialButton 
+                  size="sm" 
+                  variant="primary"
+                  className="inline-block"
                 >
                   Start Free Trial
-                </Link>
+                </SmartTrialButton>
               </div>
             </div>
           </div>
@@ -305,14 +309,14 @@ export default function HoroscopePage() {
           </div>
         </div>
 
-        {/* Preview of Personal Transit Impact - Premium Feature */}
+        {/* Preview of Personal Transit Impact - Personalised Feature */}
         <div>
           <div className='flex justify-between items-center mb-3'>
             <h2 className='text-lg font-semibold text-indigo-400'>
               🌟 Personal Transit Impact
             </h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
-              Premium Feature
+              Personalised Feature
             </div>
           </div>
           <div className='relative'>
@@ -362,12 +366,13 @@ export default function HoroscopePage() {
                   See how planetary transits specifically affect your birth
                   chart
                 </p>
-                <Link
-                  href='/pricing'
-                  className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md font-medium transition-all duration-300'
+                <SmartTrialButton 
+                  size="sm" 
+                  variant="primary"
+                  className="inline-block"
                 >
                   Start Free Trial
-                </Link>
+                </SmartTrialButton>
               </div>
             </div>
           </div>

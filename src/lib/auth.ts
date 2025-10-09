@@ -1,17 +1,31 @@
 import { betterAuth } from 'better-auth';
 import { jazzPlugin } from 'jazz-tools/better-auth/auth/server';
-import Database from 'better-sqlite3';
+import { JazzBetterAuthDatabaseAdapter } from 'jazz-tools/better-auth/database-adapter';
+import { sendEmail, generateVerificationEmailHTML, generateVerificationEmailText } from './email';
 
-// Better Auth server configuration with Jazz plugin
+// Better Auth server configuration with Jazz database adapter
 export const auth = betterAuth({
-  database: new Database('./data/auth.db'),
+  database: JazzBetterAuthDatabaseAdapter({
+    syncServer: `wss://cloud.jazz.tools/?key=sam@lunary.com`,
+    accountID: process.env.JAZZ_WORKER_ACCOUNT || "co_zQcie5b9JeVB3go2xcpitCuPPUK",
+    accountSecret: process.env.JAZZ_WORKER_SECRET || "sealerSecret_z6j9dtYQev5cMjaKKncXQRMxpa23ppGDencCFwH2Bf4Jm/signerSecret_z3t4A4AbNMp3GSf7YP7Mc2nmuB3yJfYNLEUWDTqE1r6cV",
+  }),
   secret: process.env.BETTER_AUTH_SECRET,
 
   // Email and password authentication
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false, // Disabled for testing - can re-enable later
   },
+
+  // Email verification disabled for testing
+  // emailVerification: {
+  //   sendOnSignUp: true,
+  //   autoSignInAfterVerification: true,
+  //   async sendVerificationEmail({ user, url, token }, request) {
+  //     // Email verification code here when needed
+  //   },
+  // },
 
   // Session configuration
   session: {

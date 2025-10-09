@@ -4,6 +4,8 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSubscription } from '../hooks/useSubscription';
 import { FEATURE_ACCESS } from '../../utils/pricing';
+import { useAuthStatus } from './AuthStatus';
+import { SmartTrialButton } from './SmartTrialButton';
 
 interface PaywallProps {
   feature: keyof typeof FEATURE_ACCESS;
@@ -14,6 +16,7 @@ interface PaywallProps {
 export function Paywall({ feature, children, fallback }: PaywallProps) {
   const { hasAccess, isTrialActive, trialDaysRemaining, showUpgradePrompt } =
     useSubscription();
+  const authState = useAuthStatus();
 
   if (hasAccess(feature)) {
     return <>{children}</>;
@@ -42,7 +45,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
           </svg>
         </div>
 
-        <h3 className='text-2xl font-light mb-4'>Premium Feature</h3>
+        <h3 className='text-2xl font-light mb-4'>Personalised Feature</h3>
 
         <p className='text-gray-400 mb-6'>{getFeatureDescription(feature)}</p>
 
@@ -65,18 +68,19 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
         )}
 
         <div className='space-y-3'>
-          <Link
-            href='/pricing'
-            className='block w-full bg-white text-black py-3 px-6 rounded-full font-medium hover:bg-gray-100 transition-colors'
+          <SmartTrialButton 
+            className='block w-full'
+            variant='secondary'
+            size='md'
           >
-            {isTrialActive ? 'Start Your Trial' : 'Upgrade Now'}
-          </Link>
+            {isTrialActive ? 'Continue Trial' : 'Start Free Trial'}
+          </SmartTrialButton>
 
           <Link
             href='/welcome'
             className='block text-sm text-gray-400 hover:text-white transition-colors'
           >
-            Learn more about premium features
+            Learn more about Personalised Features
           </Link>
         </div>
       </div>
@@ -95,7 +99,7 @@ function getFeatureDescription(feature: string): string {
     case 'crystal_recommendations':
       return 'Receive daily crystal recommendations perfectly aligned with your birth chart and current cosmic energies.';
     default:
-      return 'This premium feature provides deeper insights into your cosmic profile and personalized guidance.';
+      return 'This Personalised Feature provides deeper insights into your cosmic profile and personalized guidance.';
   }
 }
 
@@ -108,6 +112,7 @@ export function UpgradePrompt() {
     isSubscribed,
     status,
   } = useSubscription();
+  const authState = useAuthStatus();
 
   console.log('UpgradePrompt render:', {
     showUpgradePrompt,
@@ -134,7 +139,7 @@ export function UpgradePrompt() {
         ) : (
           <>
             <p className='text-white font-medium mb-2'>
-              Unlock Premium Features
+              Unlock Personalised Features
             </p>
             <p className='text-gray-400 mb-3'>
               Get personalized birth charts and daily cosmic guidance
@@ -143,10 +148,13 @@ export function UpgradePrompt() {
         )}
 
         <Link
-          href='/pricing'
+          href={authState.isAuthenticated ? '/pricing' : '/auth'}
           className='block w-full bg-white text-black text-center py-2 px-4 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors'
         >
-          {isTrialActive ? 'Continue Trial' : 'Start Free Trial'}
+          {authState.isAuthenticated 
+            ? (isTrialActive ? 'Continue Trial' : 'Start Free Trial')
+            : 'Sign In to Continue'
+          }
         </Link>
       </div>
     </div>

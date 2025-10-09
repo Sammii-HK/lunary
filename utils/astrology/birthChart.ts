@@ -72,11 +72,11 @@ export const saveBirthChartToProfile = async (
         profile._owner || profile,
       );
 
-      (birthChartCoValue as any).push(planetCoValue);
+      birthChartCoValue.$jazz.push(planetCoValue);
     }
 
-    // Save to profile
-    profile.birthChart = birthChartCoValue;
+    // Save to profile using correct Jazz API
+    profile.$jazz.set('birthChart', birthChartCoValue);
 
     console.log('Birth chart saved as CoValue');
   } catch (error) {

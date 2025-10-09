@@ -22,12 +22,14 @@ import SubscriptionManagement from '../../components/SubscriptionManagement';
 import LocationRefresh from '../../components/LocationRefresh';
 import { AuthComponent } from '@/components/Auth';
 import { betterAuthClient } from '@/lib/auth-client';
+import { useAuthStatus } from '@/components/AuthStatus';
+import { SignOutButton } from '@/components/SignOutButton';
+import { SmartTrialButton } from '@/components/SmartTrialButton';
 
 export default function ProfilePage() {
   const { me } = useAccount();
   const subscription = useSubscription();
-  const [authUser, setAuthUser] = useState<any>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const authState = useAuthStatus();
   const [name, setName] = useState('');
   const [birthday, setBirthday] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -38,27 +40,71 @@ export default function ProfilePage() {
   const canCollectBirthdayData = canCollectBirthday(subscription.status);
   const hasBirthChartAccessData = hasBirthChartAccess(subscription.status);
 
-  // Check Better Auth session
+  // Simplified authentication check
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const session = await betterAuthClient.getSession();
-        setAuthUser(session && 'user' in session ? session.user : null);
-      } catch (error) {
-        setAuthUser(null);
-      } finally {
-        setAuthLoading(false);
-      }
-    };
-    checkAuth();
-  }, []);
+    // The authState hook handles all authentication logic
+    if (!authState.loading) {
+      setIsLoading(false);
+    }
+  }, [authState.loading]);
 
   // Load existing profile data when component mounts
   useEffect(() => {
     if (me?.profile) {
       try {
-        const profileName = (me.profile as any).name || '';
+        let profileName = (me.profile as any).name || '';
         const profileBirthday = (me.profile as any).birthday || '';
+
+        // // Check if we have migrated profile data to restore
+        // if (typeof window !== 'undefined') {
+        //   const migrationDataStr = localStorage.getItem('migration_profile_data');
+        //   if (migrationDataStr && (!profileName || profileName === 'New User')) {
+        //     try {
+        //       const migrationData = JSON.parse(migrationDataStr);
+        //       console.log('Restoring complete migrated profile data:', migrationData);
+              
+        //       // Restore all profile fields using correct Jazz API
+        //       if (migrationData.name) {
+        //         profileName = migrationData.name;
+        //         me.profile.$jazz.set('name', migrationData.name);
+        //       }
+              
+        //       if (migrationData.birthday) {
+        //         me.profile.$jazz.set('birthday', migrationData.birthday);
+        //         setBirthday(migrationData.birthday);
+        //       }
+              
+        //       if (migrationData.birthChart) {
+        //         me.profile.$jazz.set('birthChart', migrationData.birthChart);
+        //       }
+              
+        //       if (migrationData.personalCard) {
+        //         me.profile.$jazz.set('personalCard', migrationData.personalCard);
+        //       }
+              
+        //       if (migrationData.location) {
+        //         me.profile.$jazz.set('location', migrationData.location);
+        //       }
+              
+        //       if (migrationData.subscriptionData) {
+        //         me.profile.$jazz.set('subscription', migrationData.subscriptionData);
+        //       }
+              
+        //       if (migrationData.stripeCustomerId) {
+        //         me.profile.$jazz.set('stripeCustomerId', migrationData.stripeCustomerId);
+        //       }
+              
+        //       console.log('✅ Profile data fully restored from migration');
+              
+        //       // Clean up the temporary storage
+        //       localStorage.removeItem('migration_profile_data');
+        //       localStorage.removeItem('migration_data'); // Clean up old format too
+              
+        //     } catch (error) {
+        //       console.error('Error restoring migration data:', error);
+        //     }
+        //   }
+        // }
 
         setName(profileName);
         setBirthday(profileBirthday);
@@ -77,9 +123,9 @@ export default function ProfilePage() {
   const handleSave = async () => {
     if (me?.profile) {
       try {
-        // Actually save to Jazz profile
-        (me.profile as any).name = name;
-        (me.profile as any).birthday = birthday;
+        // Actually save to Jazz profile using correct API
+        me.profile.$jazz.set('name', name);
+        me.profile.$jazz.set('birthday', birthday);
 
         // Generate and save cosmic data if birthday is provided
         if (birthday) {
@@ -119,7 +165,7 @@ export default function ProfilePage() {
   };
 
   // Show loading state while checking auth
-  if (authLoading) {
+  if (authState.loading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
         <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400'></div>
@@ -130,9 +176,11 @@ export default function ProfilePage() {
 
   return (
     <div className='flex flex-col items-center gap-6 py-8'>
-      <h1 className='text-2xl font-bold text-white text-center'>
-        Your Profile
-      </h1>
+      <div className="flex items-center justify-between w-full max-w-md">
+        <h1 className='text-2xl font-bold text-white text-center'>
+          Your Profile
+        </h1>
+      </div>
 
       <div className='bg-zinc-800 rounded-lg p-6 w-full max-w-md'>
         <div className='space-y-4'>
@@ -141,11 +189,11 @@ export default function ProfilePage() {
               Name
               {canCollectBirthdayData && (
                 <span className='text-purple-400 text-xs ml-2'>
-                  ✨ Premium Feature
+                  ✨ Personalised Feature
                 </span>
               )}
             </label>
-            {isEditing && authUser && canCollectBirthdayData ? (
+            {isEditing && authState.isAuthenticated && canCollectBirthdayData ? (
               <input
                 type='text'
                 value={name}
@@ -157,7 +205,7 @@ export default function ProfilePage() {
               <div className='w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white min-h-[2.5rem] flex items-center'>
                 {canCollectBirthdayData
                   ? name || 'Your name will appear here'
-                  : 'Premium feature - upgrade to customize'}
+                  : 'Personalised Feature - upgrade to customize'}
               </div>
             )}
           </div>
@@ -167,10 +215,10 @@ export default function ProfilePage() {
               <label className='block text-sm font-medium text-zinc-300 mb-2'>
                 Birthday
                 <span className='text-purple-400 text-xs ml-2'>
-                  ✨ Premium Feature
+                  ✨ Personalised Feature
                 </span>
               </label>
-              {isEditing && authUser ? (
+              {isEditing && authState.isAuthenticated ? (
                 <input
                   type='date'
                   value={birthday}
@@ -184,7 +232,7 @@ export default function ProfilePage() {
                     : 'Your birthday will appear here'}
                 </div>
               )}
-              {isEditing && authUser && (
+              {isEditing && authState.isAuthenticated && (
                 <p className='text-xs text-zinc-400 mt-1'>
                   Your birthday enables personalized birth chart analysis,
                   horoscopes, and cosmic insights.
@@ -201,17 +249,18 @@ export default function ProfilePage() {
                 your birth chart, personalized horoscopes, and cosmic insights
                 tailored specifically to you.
               </p>
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300'
+              <SmartTrialButton 
+                size="sm"
+                variant="primary"
+                className="inline-block"
               >
                 Start Free Trial
-              </button>
+              </SmartTrialButton>
             </div>
           )}
 
           {/* Show edit/save button only when authenticated */}
-          {authUser && (
+          {authState.isAuthenticated && (
             <>
               {isEditing ? (
                 <button
@@ -233,7 +282,7 @@ export default function ProfilePage() {
           )}
 
           {/* Authentication and Subscription Controls */}
-          {!authUser ? (
+          {!authState.isAuthenticated ? (
             /* Not authenticated - show sign in */
             <div className='text-center py-4 border-2 border-dashed border-zinc-600 rounded-md space-y-3'>
               <p className='text-zinc-400 text-sm'>
@@ -250,7 +299,7 @@ export default function ProfilePage() {
             /* Authenticated but no premium - show upgrade */
             <div className='text-center py-4 border-2 border-dashed border-purple-500/30 rounded-md space-y-3 bg-gradient-to-r from-purple-900/20 to-pink-900/20'>
               <p className='text-zinc-300 text-sm'>
-                👋 Welcome {authUser.name}! Upgrade to unlock premium features
+                👋 Welcome {authState.user?.name || authState.profile?.name || 'User'}! Upgrade to unlock Personalised Features
               </p>
               <div className='flex gap-2 justify-center'>
                 <a
@@ -277,22 +326,7 @@ export default function ProfilePage() {
           ) : (
             /* Authenticated with premium - show edit controls */
             <>
-              {isEditing ? (
-                <button
-                  onClick={handleSave}
-                  disabled={!name || (!canCollectBirthdayData && !birthday)}
-                  className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-4 rounded-md transition-colors'
-                >
-                  Save Profile
-                </button>
-              ) : (
                 <div className='flex gap-2'>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className='flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors'
-                  >
-                    Edit Profile
-                  </button>
                   <button
                     onClick={async () => {
                       try {
@@ -307,14 +341,13 @@ export default function ProfilePage() {
                     Sign Out
                   </button>
                 </div>
-              )}
             </>
           )}
         </div>
       </div>
 
       {/* Cosmic Data Sections - only show for authenticated users */}
-      {authUser && !isEditing && birthday && hasBirthChartAccessData && (
+      {authState.isAuthenticated && !isEditing && birthday && hasBirthChartAccessData && (
         <>
           {/* Personal Card Section */}
           <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
@@ -441,10 +474,11 @@ export default function ProfilePage() {
       )}
 
       {/* Location Setup - only for authenticated users */}
-      {authUser && !isEditing && <LocationRefresh />}
+      {authState.isAuthenticated && !isEditing && <LocationRefresh />}
+
 
       {/* Subscription Management Section - only for authenticated users */}
-      {authUser && !isEditing && (
+      {authState.isAuthenticated && !isEditing && (
         <SubscriptionManagement
           customerId={
             (me?.profile as any)?.stripeCustomerId ||
@@ -456,7 +490,6 @@ export default function ProfilePage() {
         />
       )}
 
-      {/* Debug Info */}
       <div className='w-full max-w-md'>
         <div className='text-sm text-zinc-400 text-center max-w-md'>
           <p>
@@ -491,8 +524,10 @@ export default function ProfilePage() {
 
             <AuthComponent
               onSuccess={() => {
+                console.log('🎉 Auth success callback triggered');
                 setShowAuthModal(false);
-                window.location.reload();
+                // Don't redirect - let React state handle the change
+                // The AuthStatus hook should automatically detect the new session
               }}
             />
           </div>

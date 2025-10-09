@@ -102,7 +102,7 @@ export const savePersonalCardToProfile = async (
     );
 
     // Save to profile
-    profile.personalCard = personalCardCoValue;
+    profile.$jazz.set('personalCard', personalCardCoValue);
 
     console.log('Personal card saved to profile as CoValue');
   } catch (error) {

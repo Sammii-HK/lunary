@@ -197,14 +197,78 @@ export function getStoredSubscriptionData(customerId: string) {
   return subscriptionRegistry.get(customerId);
 }
 
-// Sync subscription data to Jazz profile
+// Fetch subscription data directly from Stripe (production-ready fallback)
+export async function fetchSubscriptionFromStripe(customerId: string) {
+  try {
+    const response = await fetch('/api/stripe/get-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customerId }),
+    });
+
+    if (!response.ok) {
+      console.log('No subscription found in Stripe for customer:', customerId);
+      return null;
+    }
+
+    const result = await response.json();
+    
+    if (result.success && result.subscription) {
+      const sub = result.subscription;
+      
+      console.log('🔍 Processing subscription data:', {
+        id: sub.id,
+        status: sub.status,
+        trial_end: sub.trial_end,
+        current_period_end: sub.current_period_end,
+      });
+      
+      // Format to match our internal structure with safe timestamp handling
+      const safeTimestamp = (timestamp: number | null | undefined): string | null => {
+        if (!timestamp || timestamp <= 0) return null;
+        try {
+          return new Date(timestamp * 1000).toISOString();
+        } catch (error) {
+          console.warn('Invalid timestamp:', timestamp);
+          return null;
+        }
+      };
+
+      return {
+        customerId,
+        stripeSubscriptionId: sub.id,
+        status: mapStripeStatus(sub.status),
+        plan: sub.items.data[0]?.price?.recurring?.interval === 'month' ? 'monthly' : 'yearly',
+        trialEndsAt: safeTimestamp(sub.trial_end),
+        currentPeriodEnd: safeTimestamp(sub.current_period_end) || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        stripeCustomerId: customerId,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error fetching subscription from Stripe:', error);
+    return null;
+  }
+}
+
+// Sync subscription data to Jazz profile - fetch directly from Stripe for reliability
 export async function syncSubscriptionToProfile(
   profile: any,
   customerId: string,
 ) {
   try {
-    const storedData = getStoredSubscriptionData(customerId);
-    if (!storedData) {
+    // First try stored data (from webhooks)
+    let subscriptionData = getStoredSubscriptionData(customerId);
+    
+    // If no stored data, fetch directly from Stripe (more reliable)
+    if (!subscriptionData) {
+      console.log('No stored data, fetching directly from Stripe for customer:', customerId);
+      subscriptionData = await fetchSubscriptionFromStripe(customerId);
+    }
+    
+    if (!subscriptionData) {
       console.log('No subscription data found for customer:', customerId);
       return { success: false, message: 'No subscription data found' };
     }
@@ -225,7 +289,7 @@ export async function syncSubscriptionToProfile(
       profile._owner || profile,
     );
 
-    (profile as any).subscription = subscriptionCoValue;
+    profile.$jazz.set('subscription', subscriptionCoValue);
 
     console.log('Subscription synced to Jazz profile:', {
       customerId,
@@ -272,7 +336,7 @@ export async function createTrialSubscriptionInProfile(profile: any) {
       profile._owner || profile,
     );
 
-    (profile as any).subscription = subscriptionCoValue;
+    profile.$jazz.set('subscription', subscriptionCoValue);
 
     return { success: true };
   } catch (error) {

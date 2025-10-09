@@ -3,6 +3,7 @@
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useAccount } from 'jazz-tools/react';
+import { SmartTrialButton } from '@/components/SmartTrialButton';
 import Link from 'next/link';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
@@ -129,12 +130,13 @@ const TarotReadings = () => {
               <li>• Personal card frequency tracking</li>
               <li>• Suit and number pattern insights</li>
             </ul>
-            <Link
-              href='/pricing'
-              className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-md font-medium transition-all duration-300'
+            <SmartTrialButton 
+              size="md" 
+              variant="primary"
+              className="inline-block"
             >
               Start Free Trial
-            </Link>
+            </SmartTrialButton>
           </div>
         </div>
 
@@ -143,7 +145,7 @@ const TarotReadings = () => {
           <div className='flex justify-between items-center mb-3'>
             <h2 className='text-lg font-semibold'>Recent Daily Cards</h2>
             <div className='bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-medium'>
-              Premium Feature
+              Personalised Feature
             </div>
           </div>
           <div className='space-y-2 relative'>
@@ -172,12 +174,13 @@ const TarotReadings = () => {
                 <p className='text-zinc-300 text-sm mb-4'>
                   Track your personal tarot journey with 7+ days of card history
                 </p>
-                <Link
-                  href='/pricing'
-                  className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md font-medium transition-all duration-300'
+                <SmartTrialButton 
+                  size="sm" 
+                  variant="primary"
+                  className="inline-block"
                 >
                   Start Free Trial
-                </Link>
+                </SmartTrialButton>
               </div>
             </div>
           </div>

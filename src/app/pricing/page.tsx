@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'jazz-tools/react';
+import { SmartTrialButton } from '@/components/SmartTrialButton';
 import {
   PRICING_PLANS,
   getPricingPlansWithStripeData,
@@ -13,10 +14,12 @@ import {
 import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
 import { Check, Star, Zap } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
+import { useAuthStatus } from '@/components/AuthStatus';
 
 export default function PricingPage() {
   const { me } = useAccount();
   const subscription = useSubscription();
+  const authState = useAuthStatus();
   const [loading, setLoading] = useState<string | null>(null);
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
@@ -62,6 +65,7 @@ export default function PricingPage() {
       setLoading(null);
     }
   };
+
 
   return (
     // <div className='min-h-screen bg-gradient-to-br from-zinc-900 via-purple-900/20 to-zinc-900'>
@@ -239,7 +243,7 @@ export default function PricingPage() {
               What's included in the free trial?
             </h3>
             <p className='text-zinc-300 text-sm'>
-              Get full access to all premium features including your complete
+              Get full access to all Personalised Features including your complete
               birth chart analysis, personalized daily horoscopes, tarot
               patterns, and cosmic insights. No credit card required to start.
             </p>
@@ -290,12 +294,13 @@ export default function PricingPage() {
             See how personalized astrology transforms your understanding. Try
             free with no commitment required.
           </p>
-          <Link
-            href='/profile'
-            className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl text-sm'
+          <SmartTrialButton 
+            size="md"
+            variant="primary"
+            className="inline-block text-sm"
           >
             Start Free Trial
-          </Link>
+          </SmartTrialButton>
         </div>
       </div>
     </div>
