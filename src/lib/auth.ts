@@ -49,6 +49,7 @@ export const auth = betterAuth({
     'http://localhost:3000',
     'http://localhost:3001',
     'https://lunary.app',
+    'https://www.lunary.app',
     process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   ],
 
