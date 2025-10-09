@@ -71,9 +71,10 @@ export default function SchedulerAdminPage() {
 
       console.log('📝 Social content created:', socialContent);
 
-      // Schedule for right now (or in 1 minute for testing)
-      const scheduledDateTime = new Date();
-      scheduledDateTime.setMinutes(scheduledDateTime.getMinutes() + 1);
+      // Schedule for 1 PM on the date from the cosmic content
+      const scheduledDateTime = new Date(cosmicContent.date + 'T13:00:00.000Z');
+      // Convert to local time zone for proper scheduling
+      const localScheduledDateTime = new Date(scheduledDateTime.getTime() - scheduledDateTime.getTimezoneOffset() * 60000);
 
       // Get the correct base URL for the image
       const baseUrl = window.location.origin;
@@ -86,7 +87,7 @@ export default function SchedulerAdminPage() {
           process.env.NEXT_PUBLIC_SUCCULENT_ACCOUNT_GROUP_ID || 'test_group_id',
         content: socialContent,
         platforms: ['instagram', 'x'],
-        scheduledDate: scheduledDateTime.toISOString(),
+        scheduledDate: localScheduledDateTime.toISOString(),
         media: [
           {
             type: 'image',

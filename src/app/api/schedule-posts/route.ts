@@ -101,9 +101,9 @@ export async function POST(request: NextRequest) {
       // Format the social media post
       const socialContent = formatCosmicPost(cosmicContent);
 
-      // Schedule post for 9 AM local time on the target date
+      // Schedule post for 1 PM local time on the target date
       const scheduledDateTime = new Date(currentDate);
-      scheduledDateTime.setHours(9, 0, 0, 0);
+      scheduledDateTime.setHours(13, 0, 0, 0);
 
       // Ensure image URL uses the correct base URL
       const imageUrl = `${baseUrl}/api/og/cosmic?date=${dateStr}`;
