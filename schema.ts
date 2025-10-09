@@ -55,17 +55,20 @@ export const UserLocation = co.map({
   lastUpdated: z.string(),
 });
 
+// Define custom profile schema
+export const CustomProfile = co.map({
+  name: z.string(),
+  birthday: z.string(),
+  birthChart: BirthChart.optional(),
+  personalCard: PersonalCard.optional(),
+  subscription: Subscription.optional(),
+  stripeCustomerId: z.string().optional(),
+  location: UserLocation.optional(),
+});
+
 export const MyAppAccount = co.account({
   root: AccountRoot,
-  profile: co.map({
-    name: z.string(),
-    birthday: z.string(),
-    birthChart: BirthChart.optional(),
-    personalCard: PersonalCard.optional(),
-    subscription: Subscription.optional(),
-    stripeCustomerId: z.string().optional(),
-    location: UserLocation.optional(),
-  }),
+  profile: CustomProfile,
 }).withMigration(async (account, migrationInfo) => {
   // Initialize root data structure if it doesn't exist
   if (!account.$jazz.has("root")) {
@@ -82,15 +85,7 @@ export const MyAppAccount = co.account({
     const profileGroup = Group.create();
     profileGroup.addMember("everyone", "reader");
     
-    account.$jazz.set("profile", co.map({
-      name: z.string(),
-      birthday: z.string(),
-      birthChart: BirthChart.optional(),
-      personalCard: PersonalCard.optional(),
-      subscription: Subscription.optional(),
-      stripeCustomerId: z.string().optional(),
-      location: UserLocation.optional(),
-    }).create({
+    account.$jazz.set("profile", CustomProfile.create({
       name: "New User", // Default name - will be updated by Better Auth
       birthday: "", // Will be set by user later
     }, profileGroup));

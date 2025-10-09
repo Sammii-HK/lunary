@@ -125,7 +125,7 @@ export default function ProfilePage() {
       try {
         // Actually save to Jazz profile using correct API
         me.profile.$jazz.set('name', name);
-        me.profile.$jazz.set('birthday' as any, birthday);
+        (me.profile as any).$jazz.set('birthday', birthday);
 
         // Generate and save cosmic data if birthday is provided
         if (birthday) {
@@ -316,7 +316,6 @@ export default function ProfilePage() {
                   onClick={async () => {
                     try {
                       await betterAuthClient.signOut();
-                      window.location.reload();
                     } catch (error) {
                       console.error('Sign out failed:', error);
                     }
@@ -335,7 +334,7 @@ export default function ProfilePage() {
                   onClick={async () => {
                     try {
                       await betterAuthClient.signOut();
-                      window.location.reload();
+                      // Auth state will update automatically via useAuthStatus
                     } catch (error) {
                       console.error('Sign out failed:', error);
                     }

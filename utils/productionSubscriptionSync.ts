@@ -68,13 +68,13 @@ export async function robustSubscriptionSync(
     const { Subscription } = await import('../schema');
     
     const subscriptionCoValue = Subscription.create({
-      status: subscriptionData.status,
-      plan: subscriptionData.plan,
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionData.stripeSubscriptionId,
-      currentPeriodEnd: subscriptionData.currentPeriodEnd,
-      trialEndsAt: subscriptionData.trialEndsAt,
-      createdAt: subscriptionData.updatedAt,
+      status: subscriptionData.status as "free" | "trial" | "active" | "cancelled" | "past_due",
+      plan: subscriptionData.plan as "free" | "monthly" | "yearly",
+      stripeCustomerId: customerId || undefined,
+      stripeSubscriptionId: subscriptionData.stripeSubscriptionId || undefined,
+      currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
+      trialEndsAt: subscriptionData.trialEndsAt || undefined,
+      createdAt: subscriptionData.updatedAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }, profile._owner || profile);
 
@@ -137,13 +137,13 @@ export async function syncSubscriptionAfterCheckout(
         const { Subscription } = await import('../schema');
         
         const subscriptionCoValue = Subscription.create({
-          status: subscriptionData.status,
-          plan: subscriptionData.plan,
-          stripeCustomerId: sessionData.customer_id,
-          stripeSubscriptionId: subscriptionData.stripeSubscriptionId,
-          currentPeriodEnd: subscriptionData.currentPeriodEnd,
-          trialEndsAt: subscriptionData.trialEndsAt,
-          createdAt: subscriptionData.updatedAt,
+          status: subscriptionData.status as "free" | "trial" | "active" | "cancelled" | "past_due",
+          plan: subscriptionData.plan as "free" | "monthly" | "yearly",
+          stripeCustomerId: sessionData.customer_id || undefined,
+          stripeSubscriptionId: subscriptionData.stripeSubscriptionId || undefined,
+          currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
+          trialEndsAt: subscriptionData.trialEndsAt || undefined,
+          createdAt: subscriptionData.updatedAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }, profile._owner || profile);
 

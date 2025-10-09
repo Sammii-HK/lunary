@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface PostContent {
   date: string;
@@ -73,12 +74,12 @@ export default function TestOGPage() {
           Selected Date: {formatDateDisplay(selectedDate)}
         </h2>
         <div className='flex justify-center mb-4'>
-          <img
+          <Image
             src={`/api/og/cosmic?date=${formatDateForUrl(selectedDate)}`}
             alt={`Cosmic image for ${formatDateDisplay(selectedDate)}`}
+            width={400}
+            height={400}
             style={{
-              width: '400px',
-              height: '400px',
               objectFit: 'cover',
               borderRadius: '12px',
               border: '2px solid #8b5cf6',
@@ -162,9 +163,11 @@ export default function TestOGPage() {
               }`}
               onClick={() => setSelectedDate(date)}
             >
-              <img
+              <Image
                 src={`/api/og/cosmic?date=${formatDateForUrl(date)}`}
                 alt={`Cosmic image for ${formatDateDisplay(date)}`}
+                width={200}
+                height={200}
                 style={{
                   width: '100%',
                   aspectRatio: '1/1',

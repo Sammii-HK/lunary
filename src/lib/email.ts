@@ -20,13 +20,15 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions) {
   }
 
   try {
+    // Use the legacy HTML/text approach since we don't have React components
+    const emailContent = html || text || 'No content provided';
+
     const { data, error } = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>',
       to,
       subject,
-      html: html || text,
-      text,
-    });
+      html: emailContent,
+    } as any); // Type assertion for legacy API compatibility
 
     if (error) {
       console.error('Resend error:', error);

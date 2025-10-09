@@ -2,7 +2,7 @@
 
 import { JazzReactProvider } from 'jazz-tools/react';
 import { AuthProvider } from 'jazz-tools/better-auth/auth/react';
-import { MyAppAccount } from '../../schema';
+import { MyAppAccount, CustomProfile } from '../../schema';
 import { betterAuthClient } from '@/lib/auth-client';
 
 export function LunaryJazzProvider({
@@ -26,5 +26,6 @@ export function LunaryJazzProvider({
 declare module 'jazz-tools/react' {
   interface Register {
     Account: typeof MyAppAccount;
+    Profile: typeof CustomProfile;
   }
 }

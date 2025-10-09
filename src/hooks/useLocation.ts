@@ -68,7 +68,7 @@ export const useLocation = () => {
     (location: LocationData) => {
       if (me?.profile) {
         try {
-          me.profile.$jazz.set('location', {
+          (me.profile as any).$jazz.set('location', {
             latitude: location.latitude,
             longitude: location.longitude,
             city: location.city || undefined,

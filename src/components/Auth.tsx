@@ -135,12 +135,9 @@ export function AuthComponent({
       await betterAuthClient.signOut();
       console.log('✅ Signed out successfully');
 
-      // Trigger auth state refresh instead of redirecting
-      triggerGlobalAuthRefresh();
+      console.log('✅ Auth state will refresh automatically');
     } catch (err) {
       console.error('Sign out error:', err);
-      // Trigger refresh anyway
-      triggerGlobalAuthRefresh();
     }
   };
 

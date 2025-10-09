@@ -277,14 +277,14 @@ export async function syncSubscriptionToProfile(
 
     const subscriptionCoValue = Subscription.create(
       {
-        status: storedData.status,
-        plan: storedData.plan,
-        stripeCustomerId: storedData.stripeCustomerId,
-        stripeSubscriptionId: storedData.stripeSubscriptionId,
-        currentPeriodEnd: storedData.currentPeriodEnd,
-        trialEndsAt: storedData.trialEndsAt,
-        createdAt: storedData.updatedAt,
-        updatedAt: storedData.updatedAt,
+        status: subscriptionData.status as "free" | "trial" | "active" | "cancelled" | "past_due",
+        plan: subscriptionData.plan as "free" | "monthly" | "yearly",
+        stripeCustomerId: subscriptionData.stripeCustomerId || undefined,
+        stripeSubscriptionId: subscriptionData.stripeSubscriptionId || undefined,
+        currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
+        trialEndsAt: subscriptionData.trialEndsAt || undefined,
+        createdAt: subscriptionData.updatedAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       profile._owner || profile,
     );
@@ -293,11 +293,11 @@ export async function syncSubscriptionToProfile(
 
     console.log('Subscription synced to Jazz profile:', {
       customerId,
-      status: storedData.status,
-      plan: storedData.plan,
+      status: subscriptionData.status,
+      plan: subscriptionData.plan,
     });
 
-    return { success: true, data: storedData };
+    return { success: true, data: subscriptionData };
   } catch (error) {
     console.error('Error syncing subscription to profile:', error);
     return {

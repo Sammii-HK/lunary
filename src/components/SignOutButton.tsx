@@ -74,8 +74,6 @@ export function SignOutButton() {
       console.log('✅ Sign out completed');
     } catch (error) {
       console.error('❌ Sign out error:', error);
-      // Force reload anyway
-      window.location.reload();
     } finally {
       setLoading(false);
     }

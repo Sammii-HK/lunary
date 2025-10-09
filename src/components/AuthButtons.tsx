@@ -54,8 +54,6 @@ export function AuthButtons({
       setLoading(true);
       await betterAuthClient.signOut();
       setAuthUser(null);
-      // Refresh the page to clear any cached state
-      window.location.reload();
     } catch (error) {
       console.error('Sign out failed:', error);
       // Even if sign out fails, clear local state
