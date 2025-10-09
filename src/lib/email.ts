@@ -1,7 +1,17 @@
 import { Resend } from 'resend';
 
-// Initialize Resend with API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization of Resend to avoid build-time env var issues
+let resend: Resend | null = null;
+
+function getResendClient() {
+  if (!resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 export interface EmailOptions {
   to: string;
@@ -14,16 +24,14 @@ export interface EmailOptions {
  * Send email using Resend
  */
 export async function sendEmail({ to, subject, html, text }: EmailOptions) {
-  if (!process.env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY is not configured');
-    throw new Error('Email service not configured');
-  }
-
   try {
+    // Get Resend client (will throw if API key missing)
+    const resendClient = getResendClient();
+
     // Use the legacy HTML/text approach since we don't have React components
     const emailContent = html || text || 'No content provided';
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await resendClient.emails.send({
       from: process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>',
       to,
       subject,
