@@ -26,7 +26,7 @@ export function useAuthStatus(): AuthState {
       try {
         const session = await betterAuthClient.getSession();
         const user = session?.data?.user || null;
-        
+
         setAuthState({
           isAuthenticated: !!user,
           user,
@@ -48,4 +48,3 @@ export function useAuthStatus(): AuthState {
 
   return authState;
 }
-

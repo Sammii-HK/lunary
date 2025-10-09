@@ -42,7 +42,6 @@ export function useSubscription(): SubscriptionStatus {
     useState<SubscriptionStatus>(defaultState);
   const [hasCheckedStripe, setHasCheckedStripe] = useState(false);
 
-
   let me: any;
   let hasJazzProvider = true;
   try {

@@ -100,10 +100,10 @@ export default function HoroscopePage() {
                   Get insights specifically tailored to your birth chart and
                   cosmic profile
                 </p>
-                <SmartTrialButton 
-                  size="sm" 
-                  variant="primary"
-                  className="inline-block"
+                <SmartTrialButton
+                  size='sm'
+                  variant='primary'
+                  className='inline-block'
                 >
                   Start Free Trial
                 </SmartTrialButton>
@@ -163,10 +163,10 @@ export default function HoroscopePage() {
                   Get colors, crystals, and timing based on your unique birth
                   chart
                 </p>
-                <SmartTrialButton 
-                  size="sm" 
-                  variant="primary"
-                  className="inline-block"
+                <SmartTrialButton
+                  size='sm'
+                  variant='primary'
+                  className='inline-block'
                 >
                   Start Free Trial
                 </SmartTrialButton>
@@ -246,10 +246,10 @@ export default function HoroscopePage() {
                 <p className='text-zinc-300 text-sm mb-4'>
                   Discover your personal year themes and birthday insights
                 </p>
-                <SmartTrialButton 
-                  size="sm" 
-                  variant="primary"
-                  className="inline-block"
+                <SmartTrialButton
+                  size='sm'
+                  variant='primary'
+                  className='inline-block'
                 >
                   Start Free Trial
                 </SmartTrialButton>
@@ -366,10 +366,10 @@ export default function HoroscopePage() {
                   See how planetary transits specifically affect your birth
                   chart
                 </p>
-                <SmartTrialButton 
-                  size="sm" 
-                  variant="primary"
-                  className="inline-block"
+                <SmartTrialButton
+                  size='sm'
+                  variant='primary'
+                  className='inline-block'
                 >
                   Start Free Trial
                 </SmartTrialButton>

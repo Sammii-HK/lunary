@@ -898,10 +898,10 @@ export const CrystalWidget = () => {
               Get crystals chosen specifically for YOUR birth chart. See what
               the universe has selected for you!
             </p>
-            <SmartTrialButton 
-              size="sm" 
-              variant="primary"
-              className="text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1"
+            <SmartTrialButton
+              size='sm'
+              variant='primary'
+              className='text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1'
             >
               Start Your Free Trial
             </SmartTrialButton>

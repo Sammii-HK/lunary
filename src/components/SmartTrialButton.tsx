@@ -13,11 +13,11 @@ interface SmartTrialButtonProps {
   children?: React.ReactNode;
 }
 
-export function SmartTrialButton({ 
-  className = '', 
+export function SmartTrialButton({
+  className = '',
   variant = 'primary',
   size = 'md',
-  children 
+  children,
 }: SmartTrialButtonProps) {
   const authState = useAuthStatus();
   const { isSubscribed, isTrialActive } = useSubscription();
@@ -29,7 +29,7 @@ export function SmartTrialButton({
       return {
         text: 'Manage Subscription',
         href: '/profile',
-        action: 'link'
+        action: 'link',
       };
     }
 
@@ -39,7 +39,7 @@ export function SmartTrialButton({
       return {
         text: isTrialActive ? 'Continue Trial' : 'Start Free Trial',
         href: '/pricing',
-        action: 'link'
+        action: 'link',
       };
     }
 
@@ -47,7 +47,7 @@ export function SmartTrialButton({
     return {
       text: 'Sign In to Start Trial',
       href: null,
-      action: 'modal'
+      action: 'modal',
     };
   };
 
@@ -57,13 +57,14 @@ export function SmartTrialButton({
   const sizeClasses = {
     sm: 'px-4 py-2 text-sm',
     md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg'
+    lg: 'px-8 py-4 text-lg',
   };
 
   // Variant classes
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white',
-    secondary: 'bg-white text-black hover:bg-gray-100'
+    primary:
+      'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white',
+    secondary: 'bg-white text-black hover:bg-gray-100',
   };
 
   const buttonClasses = `
@@ -89,10 +90,7 @@ export function SmartTrialButton({
 
   return (
     <>
-      <button
-        onClick={handleClick}
-        className={buttonClasses}
-      >
+      <button onClick={handleClick} className={buttonClasses}>
         {children || config.text}
       </button>
 
@@ -112,7 +110,8 @@ export function SmartTrialButton({
                 Start Your Free Trial
               </h3>
               <p className='text-zinc-300 text-sm'>
-                Create an account to begin your cosmic journey with a free trial.
+                Create an account to begin your cosmic journey with a free
+                trial.
               </p>
             </div>
 
@@ -129,7 +128,6 @@ export function SmartTrialButton({
           </div>
         </div>
       )}
-
     </>
   );
 }

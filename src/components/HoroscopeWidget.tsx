@@ -678,10 +678,10 @@ export const HoroscopeWidget = () => {
               Unlock horoscopes tailored to YOUR birth chart. Experience the
               difference personalized astrology makes!
             </p>
-            <SmartTrialButton 
-              size="sm" 
-              variant="primary"
-              className="text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1"
+            <SmartTrialButton
+              size='sm'
+              variant='primary'
+              className='text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1'
             >
               Start Your Free Trial
             </SmartTrialButton>

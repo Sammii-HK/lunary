@@ -130,10 +130,10 @@ const TarotReadings = () => {
               <li>• Personal card frequency tracking</li>
               <li>• Suit and number pattern insights</li>
             </ul>
-            <SmartTrialButton 
-              size="md" 
-              variant="primary"
-              className="inline-block"
+            <SmartTrialButton
+              size='md'
+              variant='primary'
+              className='inline-block'
             >
               Start Free Trial
             </SmartTrialButton>
@@ -174,10 +174,10 @@ const TarotReadings = () => {
                 <p className='text-zinc-300 text-sm mb-4'>
                   Track your personal tarot journey with 7+ days of card history
                 </p>
-                <SmartTrialButton 
-                  size="sm" 
-                  variant="primary"
-                  className="inline-block"
+                <SmartTrialButton
+                  size='sm'
+                  variant='primary'
+                  className='inline-block'
                 >
                   Start Free Trial
                 </SmartTrialButton>

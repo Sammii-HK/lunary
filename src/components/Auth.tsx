@@ -57,21 +57,20 @@ export function AuthComponent({
                 console.log('✅ Updated Jazz profile name:', formData.name);
               }
             },
-          }
+          },
         );
 
         console.log('✅ Sign up result:', result);
-        
+
         if (result.error) {
           throw new Error(result.error.message || 'Signup failed');
         }
-        
+
         setSuccess('Account created successfully! You are now signed in.');
         setFormData({ email: '', password: '', name: '' });
 
         // Wait for session to be established, then trigger React state update
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Call onSuccess callback to trigger React re-render (no redirect needed)
         if (onSuccess) {
@@ -87,17 +86,16 @@ export function AuthComponent({
         });
 
         console.log('✅ Sign in result:', result);
-        
+
         if (result.error) {
           throw new Error(result.error.message || 'Sign in failed');
         }
-        
+
         setSuccess('Signed in successfully!');
         setFormData({ email: '', password: '', name: '' });
 
         // Wait for session, then trigger React state update (no redirect)
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Call onSuccess callback to trigger React re-render
         if (onSuccess) {
@@ -136,7 +134,7 @@ export function AuthComponent({
       // Use Better Auth's sign out method - Jazz will automatically sync
       await betterAuthClient.signOut();
       console.log('✅ Signed out successfully');
-      
+
       // Trigger auth state refresh instead of redirecting
       triggerGlobalAuthRefresh();
     } catch (err) {

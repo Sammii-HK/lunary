@@ -1,14 +1,21 @@
 import { betterAuth } from 'better-auth';
 import { jazzPlugin } from 'jazz-tools/better-auth/auth/server';
 import { JazzBetterAuthDatabaseAdapter } from 'jazz-tools/better-auth/database-adapter';
-import { sendEmail, generateVerificationEmailHTML, generateVerificationEmailText } from './email';
+import {
+  sendEmail,
+  generateVerificationEmailHTML,
+  generateVerificationEmailText,
+} from './email';
 
 // Better Auth server configuration with Jazz database adapter
 export const auth = betterAuth({
   database: JazzBetterAuthDatabaseAdapter({
     syncServer: `wss://cloud.jazz.tools/?key=sam@lunary.com`,
-    accountID: process.env.JAZZ_WORKER_ACCOUNT || "co_zQcie5b9JeVB3go2xcpitCuPPUK",
-    accountSecret: process.env.JAZZ_WORKER_SECRET || "sealerSecret_z6j9dtYQev5cMjaKKncXQRMxpa23ppGDencCFwH2Bf4Jm/signerSecret_z3t4A4AbNMp3GSf7YP7Mc2nmuB3yJfYNLEUWDTqE1r6cV",
+    accountID:
+      process.env.JAZZ_WORKER_ACCOUNT || 'co_zQcie5b9JeVB3go2xcpitCuPPUK',
+    accountSecret:
+      process.env.JAZZ_WORKER_SECRET ||
+      'sealerSecret_z6j9dtYQev5cMjaKKncXQRMxpa23ppGDencCFwH2Bf4Jm/signerSecret_z3t4A4AbNMp3GSf7YP7Mc2nmuB3yJfYNLEUWDTqE1r6cV',
   }),
   secret: process.env.BETTER_AUTH_SECRET,
 

@@ -62,44 +62,44 @@ export default function ProfilePage() {
         //     try {
         //       const migrationData = JSON.parse(migrationDataStr);
         //       console.log('Restoring complete migrated profile data:', migrationData);
-              
+
         //       // Restore all profile fields using correct Jazz API
         //       if (migrationData.name) {
         //         profileName = migrationData.name;
         //         me.profile.$jazz.set('name', migrationData.name);
         //       }
-              
+
         //       if (migrationData.birthday) {
         //         me.profile.$jazz.set('birthday', migrationData.birthday);
         //         setBirthday(migrationData.birthday);
         //       }
-              
+
         //       if (migrationData.birthChart) {
         //         me.profile.$jazz.set('birthChart', migrationData.birthChart);
         //       }
-              
+
         //       if (migrationData.personalCard) {
         //         me.profile.$jazz.set('personalCard', migrationData.personalCard);
         //       }
-              
+
         //       if (migrationData.location) {
         //         me.profile.$jazz.set('location', migrationData.location);
         //       }
-              
+
         //       if (migrationData.subscriptionData) {
         //         me.profile.$jazz.set('subscription', migrationData.subscriptionData);
         //       }
-              
+
         //       if (migrationData.stripeCustomerId) {
         //         me.profile.$jazz.set('stripeCustomerId', migrationData.stripeCustomerId);
         //       }
-              
+
         //       console.log('✅ Profile data fully restored from migration');
-              
+
         //       // Clean up the temporary storage
         //       localStorage.removeItem('migration_profile_data');
         //       localStorage.removeItem('migration_data'); // Clean up old format too
-              
+
         //     } catch (error) {
         //       console.error('Error restoring migration data:', error);
         //     }
@@ -176,7 +176,7 @@ export default function ProfilePage() {
 
   return (
     <div className='flex flex-col items-center gap-6 py-8'>
-      <div className="flex items-center justify-between w-full max-w-md">
+      <div className='flex items-center justify-between w-full max-w-md'>
         <h1 className='text-2xl font-bold text-white text-center'>
           Your Profile
         </h1>
@@ -193,7 +193,9 @@ export default function ProfilePage() {
                 </span>
               )}
             </label>
-            {isEditing && authState.isAuthenticated && canCollectBirthdayData ? (
+            {isEditing &&
+            authState.isAuthenticated &&
+            canCollectBirthdayData ? (
               <input
                 type='text'
                 value={name}
@@ -249,10 +251,10 @@ export default function ProfilePage() {
                 your birth chart, personalized horoscopes, and cosmic insights
                 tailored specifically to you.
               </p>
-              <SmartTrialButton 
-                size="sm"
-                variant="primary"
-                className="inline-block"
+              <SmartTrialButton
+                size='sm'
+                variant='primary'
+                className='inline-block'
               >
                 Start Free Trial
               </SmartTrialButton>
@@ -299,7 +301,9 @@ export default function ProfilePage() {
             /* Authenticated but no premium - show upgrade */
             <div className='text-center py-4 border-2 border-dashed border-purple-500/30 rounded-md space-y-3 bg-gradient-to-r from-purple-900/20 to-pink-900/20'>
               <p className='text-zinc-300 text-sm'>
-                👋 Welcome {authState.user?.name || authState.profile?.name || 'User'}! Upgrade to unlock Personalised Features
+                👋 Welcome{' '}
+                {authState.user?.name || authState.profile?.name || 'User'}!
+                Upgrade to unlock Personalised Features
               </p>
               <div className='flex gap-2 justify-center'>
                 <a
@@ -326,156 +330,160 @@ export default function ProfilePage() {
           ) : (
             /* Authenticated with premium - show edit controls */
             <>
-                <div className='flex gap-2'>
-                  <button
-                    onClick={async () => {
-                      try {
-                        await betterAuthClient.signOut();
-                        window.location.reload();
-                      } catch (error) {
-                        console.error('Sign out failed:', error);
-                      }
-                    }}
-                    className='text-red-400 hover:text-red-300 px-4 py-2 text-sm transition-colors'
-                  >
-                    Sign Out
-                  </button>
-                </div>
+              <div className='flex gap-2'>
+                <button
+                  onClick={async () => {
+                    try {
+                      await betterAuthClient.signOut();
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Sign out failed:', error);
+                    }
+                  }}
+                  className='text-red-400 hover:text-red-300 px-4 py-2 text-sm transition-colors'
+                >
+                  Sign Out
+                </button>
+              </div>
             </>
           )}
         </div>
       </div>
 
       {/* Cosmic Data Sections - only show for authenticated users */}
-      {authState.isAuthenticated && !isEditing && birthday && hasBirthChartAccessData && (
-        <>
-          {/* Personal Card Section */}
-          <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
-            <h3 className='text-lg font-semibold text-purple-400 mb-3'>
-              Your Personal Card
-            </h3>
-            {(() => {
-              console.log('Checking personal card in profile render...');
-              const personalCard = getPersonalCardFromProfile(me?.profile);
-              console.log('Personal card retrieved:', personalCard);
-              if (personalCard) {
-                return (
-                  <div className='space-y-3'>
-                    <div className='text-center'>
-                      <h4 className='font-bold text-white text-lg'>
-                        {personalCard.name}
-                      </h4>
-                      <p className='text-sm text-purple-300'>
-                        {personalCard.keywords.slice(0, 3).join(' • ')}
+      {authState.isAuthenticated &&
+        !isEditing &&
+        birthday &&
+        hasBirthChartAccessData && (
+          <>
+            {/* Personal Card Section */}
+            <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+              <h3 className='text-lg font-semibold text-purple-400 mb-3'>
+                Your Personal Card
+              </h3>
+              {(() => {
+                console.log('Checking personal card in profile render...');
+                const personalCard = getPersonalCardFromProfile(me?.profile);
+                console.log('Personal card retrieved:', personalCard);
+                if (personalCard) {
+                  return (
+                    <div className='space-y-3'>
+                      <div className='text-center'>
+                        <h4 className='font-bold text-white text-lg'>
+                          {personalCard.name}
+                        </h4>
+                        <p className='text-sm text-purple-300'>
+                          {personalCard.keywords.slice(0, 3).join(' • ')}
+                        </p>
+                      </div>
+                      <p className='text-sm text-zinc-300'>
+                        {personalCard.information}
+                      </p>
+                      <p className='text-xs text-zinc-500 italic'>
+                        {personalCard.reason}
                       </p>
                     </div>
-                    <p className='text-sm text-zinc-300'>
-                      {personalCard.information}
-                    </p>
-                    <p className='text-xs text-zinc-500 italic'>
-                      {personalCard.reason}
-                    </p>
-                  </div>
-                );
-              } else {
-                console.log('No personal card found, rendering link...');
-                return (
-                  <div className='text-center text-zinc-400'>
-                    <p className='text-sm mb-3'>
-                      Generate your personalized tarot card based on your
-                      birthday and name.
-                    </p>
-                    <button
-                      onClick={handleSave}
-                      className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm transition-colors'
-                    >
-                      Generate Personal Card
-                    </button>
-                  </div>
-                );
-              }
-            })()}
-          </div>
-
-          {/* Birth Chart Section */}
-          <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
-            <h3 className='text-lg font-semibold text-purple-400 mb-3'>
-              Your Birth Chart
-            </h3>
-            {(() => {
-              const hasBirthChartData = hasBirthChart(me?.profile);
-              const birthChartData = hasBirthChartData
-                ? getBirthChartFromProfile(me?.profile)
-                : null;
-
-              if (birthChartData && birthChartData.length > 0) {
-                // Display birth chart placements
-                const keyPlacements = [
-                  'Sun',
-                  'Moon',
-                  'Mercury',
-                  'Venus',
-                  'Mars',
-                ]
-                  .map((bodyName) =>
-                    birthChartData.find((planet) => planet.body === bodyName),
-                  )
-                  .filter((planet): planet is NonNullable<typeof planet> =>
-                    Boolean(planet),
                   );
-
-                return (
-                  <div className='space-y-3'>
-                    <div className='grid grid-cols-1 gap-2'>
-                      {keyPlacements.map((planet) => (
-                        <div
-                          key={planet.body}
-                          className='flex justify-between items-center p-2 bg-zinc-700 rounded'
-                        >
-                          <span className='text-white font-medium'>
-                            {planet.body}
-                          </span>
-                          <span className='text-purple-300'>{planet.sign}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className='text-center'>
-                      <a
-                        href='/birth-chart'
-                        className='text-blue-400 text-sm hover:underline'
+                } else {
+                  console.log('No personal card found, rendering link...');
+                  return (
+                    <div className='text-center text-zinc-400'>
+                      <p className='text-sm mb-3'>
+                        Generate your personalized tarot card based on your
+                        birthday and name.
+                      </p>
+                      <button
+                        onClick={handleSave}
+                        className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm transition-colors'
                       >
-                        View Full Birth Chart
-                      </a>
+                        Generate Personal Card
+                      </button>
                     </div>
-                  </div>
-                );
-              } else {
-                console.log(
-                  'No birth chart found, rendering generation link...',
-                );
-                return (
-                  <div className='text-center text-zinc-400'>
-                    <p className='text-sm mb-3'>
-                      Generate your complete birth chart with planetary
-                      positions and cosmic insights.
-                    </p>
-                    <button
-                      onClick={handleSave}
-                      className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm transition-colors'
-                    >
-                      Generate Birth Chart
-                    </button>
-                  </div>
-                );
-              }
-            })()}
-          </div>
-        </>
-      )}
+                  );
+                }
+              })()}
+            </div>
+
+            {/* Birth Chart Section */}
+            <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+              <h3 className='text-lg font-semibold text-purple-400 mb-3'>
+                Your Birth Chart
+              </h3>
+              {(() => {
+                const hasBirthChartData = hasBirthChart(me?.profile);
+                const birthChartData = hasBirthChartData
+                  ? getBirthChartFromProfile(me?.profile)
+                  : null;
+
+                if (birthChartData && birthChartData.length > 0) {
+                  // Display birth chart placements
+                  const keyPlacements = [
+                    'Sun',
+                    'Moon',
+                    'Mercury',
+                    'Venus',
+                    'Mars',
+                  ]
+                    .map((bodyName) =>
+                      birthChartData.find((planet) => planet.body === bodyName),
+                    )
+                    .filter((planet): planet is NonNullable<typeof planet> =>
+                      Boolean(planet),
+                    );
+
+                  return (
+                    <div className='space-y-3'>
+                      <div className='grid grid-cols-1 gap-2'>
+                        {keyPlacements.map((planet) => (
+                          <div
+                            key={planet.body}
+                            className='flex justify-between items-center p-2 bg-zinc-700 rounded'
+                          >
+                            <span className='text-white font-medium'>
+                              {planet.body}
+                            </span>
+                            <span className='text-purple-300'>
+                              {planet.sign}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className='text-center'>
+                        <a
+                          href='/birth-chart'
+                          className='text-blue-400 text-sm hover:underline'
+                        >
+                          View Full Birth Chart
+                        </a>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  console.log(
+                    'No birth chart found, rendering generation link...',
+                  );
+                  return (
+                    <div className='text-center text-zinc-400'>
+                      <p className='text-sm mb-3'>
+                        Generate your complete birth chart with planetary
+                        positions and cosmic insights.
+                      </p>
+                      <button
+                        onClick={handleSave}
+                        className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm transition-colors'
+                      >
+                        Generate Birth Chart
+                      </button>
+                    </div>
+                  );
+                }
+              })()}
+            </div>
+          </>
+        )}
 
       {/* Location Setup - only for authenticated users */}
       {authState.isAuthenticated && !isEditing && <LocationRefresh />}
-
 
       {/* Subscription Management Section - only for authenticated users */}
       {authState.isAuthenticated && !isEditing && (

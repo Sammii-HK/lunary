@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     if (!customerId) {
       return NextResponse.json(
         { error: 'Customer ID is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,7 +27,9 @@ export async function POST(request: NextRequest) {
       limit: 10,
     });
 
-    console.log(`Found ${subscriptions.data.length} subscriptions for customer ${customerId}`);
+    console.log(
+      `Found ${subscriptions.data.length} subscriptions for customer ${customerId}`,
+    );
 
     if (subscriptions.data.length === 0) {
       return NextResponse.json({
@@ -38,10 +40,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the most recent subscription (active or trial first, then most recent)
-    const activeSubscription = subscriptions.data.find(sub => 
-      ['active', 'trialing'].includes(sub.status)
+    const activeSubscription = subscriptions.data.find((sub) =>
+      ['active', 'trialing'].includes(sub.status),
     );
-    
+
     const subscription = activeSubscription || subscriptions.data[0];
 
     console.log('Selected subscription:', {
@@ -63,16 +65,15 @@ export async function POST(request: NextRequest) {
       },
       message: `Found ${subscription.status} subscription`,
     });
-
   } catch (error) {
     console.error('Error fetching subscription:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Failed to fetch subscription',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

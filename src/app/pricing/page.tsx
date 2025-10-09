@@ -66,7 +66,6 @@ export default function PricingPage() {
     }
   };
 
-
   return (
     // <div className='min-h-screen bg-gradient-to-br from-zinc-900 via-purple-900/20 to-zinc-900'>
     <div className='min-h-screen from-zinc-900 via-purple-900/20 to-zinc-900'>
@@ -243,9 +242,10 @@ export default function PricingPage() {
               What's included in the free trial?
             </h3>
             <p className='text-zinc-300 text-sm'>
-              Get full access to all Personalised Features including your complete
-              birth chart analysis, personalized daily horoscopes, tarot
-              patterns, and cosmic insights. No credit card required to start.
+              Get full access to all Personalised Features including your
+              complete birth chart analysis, personalized daily horoscopes,
+              tarot patterns, and cosmic insights. No credit card required to
+              start.
             </p>
           </div>
 
@@ -294,10 +294,10 @@ export default function PricingPage() {
             See how personalized astrology transforms your understanding. Try
             free with no commitment required.
           </p>
-          <SmartTrialButton 
-            size="md"
-            variant="primary"
-            className="inline-block text-sm"
+          <SmartTrialButton
+            size='md'
+            variant='primary'
+            className='inline-block text-sm'
           >
             Start Free Trial
           </SmartTrialButton>

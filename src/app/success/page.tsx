@@ -62,10 +62,13 @@ export default function SuccessPage() {
       ) {
         try {
           console.log('🔄 Processing subscription for session:', sessionId);
-          
+
           // Use the production-ready sync that connects Better Auth to Jazz
-          const syncResult = await syncSubscriptionAfterCheckout(profile, sessionId);
-          
+          const syncResult = await syncSubscriptionAfterCheckout(
+            profile,
+            sessionId,
+          );
+
           if (syncResult.success) {
             setTrialCreated(true);
             console.log('✅ Subscription synced successfully after checkout');
@@ -74,7 +77,10 @@ export default function SuccessPage() {
             // Try the old method as fallback
             if (session.customer_id) {
               profile.$jazz.set('stripeCustomerId', session.customer_id);
-              console.log('✅ Customer ID saved to profile (fallback):', session.customer_id);
+              console.log(
+                '✅ Customer ID saved to profile (fallback):',
+                session.customer_id,
+              );
             }
             setTrialCreated(true); // Don't block the success page
           }
@@ -84,7 +90,10 @@ export default function SuccessPage() {
           try {
             if (session.customer_id) {
               profile.$jazz.set('stripeCustomerId', session.customer_id);
-              console.log('✅ Customer ID saved (error fallback):', session.customer_id);
+              console.log(
+                '✅ Customer ID saved (error fallback):',
+                session.customer_id,
+              );
             }
           } catch (fallbackError) {
             console.error('Even fallback failed:', fallbackError);

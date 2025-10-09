@@ -44,7 +44,10 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions) {
 /**
  * Generate email verification HTML template
  */
-export function generateVerificationEmailHTML(verificationUrl: string, userEmail: string): string {
+export function generateVerificationEmailHTML(
+  verificationUrl: string,
+  userEmail: string,
+): string {
   return `
     <!DOCTYPE html>
     <html>
@@ -170,7 +173,10 @@ export function generateVerificationEmailHTML(verificationUrl: string, userEmail
 /**
  * Generate plain text version of verification email
  */
-export function generateVerificationEmailText(verificationUrl: string, userEmail: string): string {
+export function generateVerificationEmailText(
+  verificationUrl: string,
+  userEmail: string,
+): string {
   return `
 Welcome to Lunary! 🌙
 

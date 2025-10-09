@@ -74,7 +74,10 @@ export default function SchedulerAdminPage() {
       // Schedule for 1 PM on the date from the cosmic content
       const scheduledDateTime = new Date(cosmicContent.date + 'T13:00:00.000Z');
       // Convert to local time zone for proper scheduling
-      const localScheduledDateTime = new Date(scheduledDateTime.getTime() - scheduledDateTime.getTimezoneOffset() * 60000);
+      const localScheduledDateTime = new Date(
+        scheduledDateTime.getTime() -
+          scheduledDateTime.getTimezoneOffset() * 60000,
+      );
 
       // Get the correct base URL for the image
       const baseUrl = window.location.origin;

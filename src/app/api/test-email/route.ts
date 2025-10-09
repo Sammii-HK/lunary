@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendEmail, generateVerificationEmailHTML, generateVerificationEmailText } from '@/lib/email';
+import {
+  sendEmail,
+  generateVerificationEmailHTML,
+  generateVerificationEmailText,
+} from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,7 +12,7 @@ export async function POST(request: NextRequest) {
     if (!email) {
       return NextResponse.json(
         { success: false, error: 'Email is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -18,7 +22,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: 'Email service not configured',
         details: 'RESEND_API_KEY environment variable is missing',
-        setup: 'Visit /email-setup for configuration instructions'
+        setup: 'Visit /email-setup for configuration instructions',
       });
     }
 
@@ -45,24 +49,26 @@ export async function POST(request: NextRequest) {
         to: email,
         from: process.env.EMAIL_FROM || 'Default sender',
         timestamp: new Date().toISOString(),
-      }
+      },
     });
-
   } catch (error) {
     console.error('Test email error:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      details: 'Check server logs for more information',
-      troubleshooting: {
-        commonIssues: [
-          'Invalid RESEND_API_KEY',
-          'Rate limit exceeded',
-          'Invalid email address',
-          'Resend service unavailable'
-        ]
-      }
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: 'Check server logs for more information',
+        troubleshooting: {
+          commonIssues: [
+            'Invalid RESEND_API_KEY',
+            'Rate limit exceeded',
+            'Invalid email address',
+            'Resend service unavailable',
+          ],
+        },
+      },
+      { status: 500 },
+    );
   }
 }

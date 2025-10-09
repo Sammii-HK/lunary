@@ -68,7 +68,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
         )}
 
         <div className='space-y-3'>
-          <SmartTrialButton 
+          <SmartTrialButton
             className='block w-full'
             variant='secondary'
             size='md'
@@ -151,10 +151,11 @@ export function UpgradePrompt() {
           href={authState.isAuthenticated ? '/pricing' : '/auth'}
           className='block w-full bg-white text-black text-center py-2 px-4 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors'
         >
-          {authState.isAuthenticated 
-            ? (isTrialActive ? 'Continue Trial' : 'Start Free Trial')
-            : 'Sign In to Continue'
-          }
+          {authState.isAuthenticated
+            ? isTrialActive
+              ? 'Continue Trial'
+              : 'Start Free Trial'
+            : 'Sign In to Continue'}
         </Link>
       </div>
     </div>

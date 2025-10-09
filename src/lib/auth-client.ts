@@ -6,8 +6,11 @@ import { jazzPluginClient } from 'jazz-tools/better-auth/auth/client';
 // Better Auth client configuration with Jazz plugin
 export const betterAuthClient = createAuthClient({
   // Use environment-appropriate base URL
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL || 
-    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'),
+  baseURL:
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (typeof window !== 'undefined'
+      ? window.location.origin
+      : 'http://localhost:3000'),
   fetchOptions: {
     credentials: 'include', // Include cookies in requests
   },
