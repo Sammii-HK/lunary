@@ -60,7 +60,7 @@ const generatePersonalizedHoroscope = (
       );
     } else {
       horoscopeElements.push(
-        `The Sun's journey through ${transitSun.sign} casts a spotlight on ${getSunTransitMeaning(transitSun.sign, sunSign)}, inviting you to expand beyond your usual ${sunSign} approach. This transit encourages growth in areas that may feel unfamiliar but ultimately strengthen your character.`,
+        `Sun in ${transitSun.sign} highlights ${getSunTransitMeaning(transitSun.sign, sunSign)}.`,
       );
     }
   }
@@ -73,7 +73,7 @@ const generatePersonalizedHoroscope = (
       );
     } else {
       horoscopeElements.push(
-        `Today's ${transitMoon.sign} Moon ${getMoonInfluence(transitMoon.sign)}, offering a complementary energy to your natal ${moonSign} Moon. This creates an opportunity to experience emotions through a different lens, potentially revealing new facets of your inner world.`,
+        `Moon in ${transitMoon.sign} ${getMoonInfluence(transitMoon.sign)}.`,
       );
     }
   }
@@ -154,7 +154,7 @@ const generatePersonalizedHoroscope = (
     const personalDay = getPersonalDayNumber(userBirthday, today);
     if (personalDay.number !== numerologyInfluence.number) {
       horoscopeElements.push(
-        `Personal day ${personalDay.number} brings ${personalDay.meaning}.`,
+        `Personal day ${personalDay.number} (${personalDay.meaning}).`,
       );
     }
   }
@@ -169,9 +169,7 @@ const generatePersonalizedHoroscope = (
     );
 
     if (hasChallengingAspects && hasHarmoniousAspects) {
-      horoscopeElements.push(
-        `Today mixes supportive and challenging energies - navigate with patience.`,
-      );
+      horoscopeElements.push(`Mixed energies today.`);
     } else if (hasChallengingAspects) {
       horoscopeElements.push(
         `Growth emerges from today's constructive challenges.`,
@@ -186,7 +184,7 @@ const generatePersonalizedHoroscope = (
     `Trust your ${sunSign} instincts today.`,
     `Honor your ${moonSign} emotional wisdom.`,
     `The cosmic currents support your growth.`,
-    `Navigate with your authentic ${sunSign} nature.`,
+    `Trust your ${sunSign} nature.`,
   ];
 
   const closingIndex = today.dayOfYear() % closingOptions.length;
@@ -394,8 +392,7 @@ const getDetailedAspectMeaning = (aspect: any): string => {
   const meanings: Record<string, string> = {
     conjunction:
       'When planets are in the same area of the sky, their energies blend and amplify each other.',
-    opposition:
-      'When planets are across the sky from each other, they create tension that requires balance.',
+    opposition: 'Opposition creates tension requiring balance.',
     trine:
       'When planets are 120° apart, they create easy, flowing energy that supports natural talents.',
     square:
@@ -583,15 +580,15 @@ const getPersonalDayNumber = (
   }
 
   const personalDayMeanings: Record<number, string> = {
-    1: 'a powerful day for starting new projects and taking initiative',
-    2: 'ideal for cooperation, partnerships, and diplomatic approaches',
-    3: 'perfect for creative expression, social activities, and communication',
-    4: 'excellent for organization, practical tasks, and building foundations',
-    5: 'great for embracing change, travel, and seeking new experiences',
-    6: 'wonderful for family matters, healing, and acts of service',
-    7: 'perfect for meditation, study, and spiritual pursuits',
-    8: 'ideal for business matters, financial decisions, and leadership',
-    9: 'excellent for completion, letting go, and humanitarian efforts',
+    1: 'new beginnings',
+    2: 'cooperation',
+    3: 'creativity',
+    4: 'organization',
+    5: 'change',
+    6: 'service',
+    7: 'reflection',
+    8: 'leadership',
+    9: 'completion',
   };
 
   return {

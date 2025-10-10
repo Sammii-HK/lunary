@@ -49,12 +49,12 @@ export default function Home() {
         <AstronomyWidget />
         <MoonWidget />
         <HoroscopeWidget />
-        <EphemerisWidget />
         {/* <LuckyElements /> */}
         <CrystalWidget />
         <TarotWidget />
         <WheelOfTheYearWidget />
         <MoonSpellsWidget />
+        <EphemerisWidget />
       </AstronomyContextProvider>
     </div>
   );
