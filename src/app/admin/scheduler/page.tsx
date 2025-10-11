@@ -86,7 +86,7 @@ export default function SchedulerAdminPage() {
           process.env.NEXT_PUBLIC_SUCCULENT_ACCOUNT_GROUP_ID || 'test_group_id',
         content: socialContent,
         platforms: ['instagram', 'x'],
-        scheduledDate: localScheduledDateTime.toISOString(),
+        scheduledDate: scheduledDateTime.toISOString(),
         media: [
           {
             type: 'image',
