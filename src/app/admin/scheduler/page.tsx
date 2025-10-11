@@ -71,13 +71,9 @@ export default function SchedulerAdminPage() {
 
       console.log('📝 Social content created:', socialContent);
 
-      // Schedule for 1 PM on the target date (use dateStr which is ISO format)
-      const scheduledDateTime = new Date(dateStr + 'T013:00:00.000Z');
-      // Convert to local time zone for proper scheduling
-      const localScheduledDateTime = new Date(
-        scheduledDateTime.getTime() -
-          scheduledDateTime.getTimezoneOffset() * 60000,
-      );
+      // Schedule for 15 minutes from now for testing
+      const scheduledDateTime = new Date();
+      scheduledDateTime.setMinutes(scheduledDateTime.getMinutes() + 15);
 
       // Get the correct base URL for the image
       const baseUrl = window.location.origin;
