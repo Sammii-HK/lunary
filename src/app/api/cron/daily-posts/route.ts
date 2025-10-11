@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     const postData = {
       accountGroupId: process.env.SUCCULENT_ACCOUNT_GROUP_ID,
       content: socialContent,
-      platforms: ['instagram', 'x', 'threads',],
+      platforms: ['instagram', 'x', 'threads'],
       scheduledDate: new Date().toISOString(), // Publish now
       media: [
         {
