@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const dateStr = today.toISOString().split('T')[0];
 
     // Use internal URL for server-to-server communication
-    const baseUrl = process.env.VERCEL_URL 
+    const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : 'http://localhost:3000';
 
@@ -27,11 +27,11 @@ export async function GET(request: NextRequest) {
     // Fetch cosmic content with proper headers
     const cosmicUrl = `${baseUrl}/api/og/cosmic-post?date=${dateStr}`;
     console.log('🔗 Fetching cosmic content from:', cosmicUrl);
-    
+
     const cosmicResponse = await fetch(cosmicUrl, {
       headers: {
         'User-Agent': 'Lunary-Cron/1.0',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
 
@@ -47,10 +47,12 @@ export async function GET(request: NextRequest) {
       try {
         const errorText = await cosmicResponse.text();
         console.error('❌ Cosmic API Error Body:', errorText.substring(0, 500));
-        
+
         // Check if it's an HTML error page
         if (errorText.includes('<!doctype') || errorText.includes('<html')) {
-          console.error('❌ Received HTML instead of JSON - likely a routing or auth issue');
+          console.error(
+            '❌ Received HTML instead of JSON - likely a routing or auth issue',
+          );
         }
       } catch (e) {
         console.error('❌ Could not read error response');
