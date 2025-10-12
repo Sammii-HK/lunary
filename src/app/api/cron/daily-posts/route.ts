@@ -18,11 +18,16 @@ export async function GET(request: NextRequest) {
 
     console.log('📅 Publishing post for date:', dateStr);
 
-    // Fetch your unique daily cosmic content
-    const cosmicUrl = `https://lunary.app/api/og/cosmic-post?date=${dateStr}`;
-    console.log('🔗 Fetching cosmic content from:', cosmicUrl);
+    // Always use production URL - avoid preview deployment issues
+    const productionUrl = 'https://lunary.app';
+    const cosmicUrl = `${productionUrl}/api/og/cosmic-post?date=${dateStr}`;
+    console.log('🔗 Fetching cosmic content from production:', cosmicUrl);
 
-    const cosmicResponse = await fetch(cosmicUrl);
+    const cosmicResponse = await fetch(cosmicUrl, {
+      headers: {
+        'User-Agent': 'Lunary-Cron/1.0',
+      },
+    });
 
     console.log('🌟 Cosmic API response:', {
       status: cosmicResponse.status,
@@ -83,7 +88,7 @@ export async function GET(request: NextRequest) {
       media: [
         {
           type: 'image',
-          url: `https://lunary.app/api/og/cosmic?date=${dateStr}`,
+          url: `${productionUrl}/api/og/cosmic?date=${dateStr}`,
           alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance.`,
         },
       ],
