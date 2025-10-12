@@ -7,12 +7,12 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Cron Status Check at:', new Date().toISOString());
-    
+
     // Check environment variables
     const cronSecret = process.env.CRON_SECRET;
     const succulentKey = process.env.SUCCULENT_SECRET_KEY;
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-    
+
     console.log('🔍 Environment check:', {
       hasCronSecret: !!cronSecret,
       hasSucculentKey: !!succulentKey,
@@ -20,25 +20,27 @@ export async function GET(request: NextRequest) {
       nodeEnv: process.env.NODE_ENV,
       vercelEnv: process.env.VERCEL_ENV,
     });
-    
+
     // Test if we can reach the cosmic content API
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
       : 'https://lunary.app';
-      
+
     console.log('🌐 Testing cosmic content API...');
-    const cosmicResponse = await fetch(`${baseUrl}/api/og/cosmic-post?date=${dateStr}`);
-    
+    const cosmicResponse = await fetch(
+      `${baseUrl}/api/og/cosmic-post?date=${dateStr}`,
+    );
+
     const cosmicTest = {
       url: `${baseUrl}/api/og/cosmic-post?date=${dateStr}`,
       status: cosmicResponse.status,
       ok: cosmicResponse.ok,
     };
-    
+
     console.log('🌟 Cosmic API test:', cosmicTest);
-    
+
     // Return status info
     return NextResponse.json({
       success: true,
@@ -60,7 +62,6 @@ export async function GET(request: NextRequest) {
         '4. Ensure cron job is enabled in vercel.json',
       ],
     });
-    
   } catch (error) {
     console.error('❌ Cron status check failed:', error);
     return NextResponse.json(
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
         error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

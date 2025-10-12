@@ -16,20 +16,36 @@ export async function GET(request: NextRequest) {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
 
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'https://lunary.app';
+    // Use the correct base URL - avoid VERCEL_URL as it can cause issues
+    const baseUrl = 'https://lunary.app';
 
     console.log('📅 Publishing post for date:', dateStr);
+    console.log('🌐 Using base URL:', baseUrl);
 
     // Fetch cosmic content
-    const cosmicResponse = await fetch(
-      `${baseUrl}/api/og/cosmic-post?date=${dateStr}`,
-    );
+    const cosmicUrl = `${baseUrl}/api/og/cosmic-post?date=${dateStr}`;
+    console.log('🔗 Fetching cosmic content from:', cosmicUrl);
+
+    const cosmicResponse = await fetch(cosmicUrl);
 
     if (!cosmicResponse.ok) {
+      console.error('❌ Cosmic API Error:', {
+        status: cosmicResponse.status,
+        statusText: cosmicResponse.statusText,
+        url: cosmicUrl,
+        headers: Object.fromEntries(cosmicResponse.headers.entries()),
+      });
+
+      // Try to get error response
+      try {
+        const errorText = await cosmicResponse.text();
+        console.error('❌ Cosmic API Error Body:', errorText);
+      } catch (e) {
+        console.error('❌ Could not read error response');
+      }
+
       throw new Error(
-        `Failed to fetch cosmic content: ${cosmicResponse.status}`,
+        `Failed to fetch cosmic content: ${cosmicResponse.status} ${cosmicResponse.statusText}`,
       );
     }
 
