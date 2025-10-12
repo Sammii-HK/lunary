@@ -16,54 +16,40 @@ export async function GET(request: NextRequest) {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
 
-    // Use internal URL for server-to-server communication
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000';
-
     console.log('📅 Publishing post for date:', dateStr);
-    console.log('🌐 Using base URL:', baseUrl);
 
-    // Fetch cosmic content with proper headers
-    const cosmicUrl = `${baseUrl}/api/og/cosmic-post?date=${dateStr}`;
+    // Fetch your unique daily cosmic content
+    const cosmicUrl = `https://lunary.app/api/og/cosmic-post?date=${dateStr}`;
     console.log('🔗 Fetching cosmic content from:', cosmicUrl);
 
-    const cosmicResponse = await fetch(cosmicUrl, {
-      headers: {
-        'User-Agent': 'Lunary-Cron/1.0',
-        Accept: 'application/json',
-      },
+    const cosmicResponse = await fetch(cosmicUrl);
+
+    console.log('🌟 Cosmic API response:', {
+      status: cosmicResponse.status,
+      ok: cosmicResponse.ok,
+      contentType: cosmicResponse.headers.get('content-type'),
     });
 
     if (!cosmicResponse.ok) {
-      console.error('❌ Cosmic API Error:', {
+      console.error('❌ Cosmic API failed:', {
         status: cosmicResponse.status,
         statusText: cosmicResponse.statusText,
         url: cosmicUrl,
-        headers: Object.fromEntries(cosmicResponse.headers.entries()),
       });
 
-      // Try to get error response
-      try {
-        const errorText = await cosmicResponse.text();
-        console.error('❌ Cosmic API Error Body:', errorText.substring(0, 500));
-
-        // Check if it's an HTML error page
-        if (errorText.includes('<!doctype') || errorText.includes('<html')) {
-          console.error(
-            '❌ Received HTML instead of JSON - likely a routing or auth issue',
-          );
-        }
-      } catch (e) {
-        console.error('❌ Could not read error response');
-      }
+      const errorText = await cosmicResponse.text();
+      console.error('❌ Error response:', errorText.substring(0, 200));
 
       throw new Error(
-        `Failed to fetch cosmic content: ${cosmicResponse.status} ${cosmicResponse.statusText}`,
+        `Failed to fetch cosmic content: ${cosmicResponse.status}`,
       );
     }
 
     const cosmicContent = await cosmicResponse.json();
+    console.log('✅ Cosmic content loaded:', {
+      primaryEvent: cosmicContent.primaryEvent,
+      highlightsCount: cosmicContent.highlights?.length,
+    });
 
     // Simple hashtag selection
     const themes = [
@@ -97,7 +83,7 @@ export async function GET(request: NextRequest) {
       media: [
         {
           type: 'image',
-          url: `${baseUrl}/api/og/cosmic?date=${dateStr}`,
+          url: `https://lunary.app/api/og/cosmic?date=${dateStr}`,
           alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance.`,
         },
       ],
