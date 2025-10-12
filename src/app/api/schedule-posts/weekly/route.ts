@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       const cosmicContent: PostContent = await cosmicResponse.json();
 
       // Format the social media post
-      const socialContent = formatCosmicPost(cosmicContent);
+      const socialContent = formatCosmicPost(cosmicContent, dateStr);
 
       // Schedule post for 1 PM local time on the target date
       const scheduledDateTime = new Date(currentDate);
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         contentLength: postData.content.length,
         imageUrl: postData.media[0].url,
         scheduledDate: postData.scheduledDate,
-        scheduledTime: '1:00 PM',
+        scheduledTime: '7:00 AM',
       });
 
       posts.push(postData);
@@ -192,13 +192,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Scheduled ${successCount} posts for week of ${weekStart} - ${weekEndStr} at 1:00 PM daily`,
+      message: `Scheduled ${successCount} posts for week of ${weekStart} - ${weekEndStr} at 7:00 AM daily`,
       summary: {
         totalPosts: posts.length,
         successful: successCount,
         failed: errorCount,
         period: `${weekStart} - ${weekEndStr}`,
-        scheduleTime: '1:00 PM',
+        scheduleTime: '7:00 AM',
       },
       results,
     });
@@ -215,7 +215,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function formatCosmicPost(content: PostContent): string {
+function getDailyHashtags(date: string): string {
+  const themes = [
+    ['#tarot', '#dailytarot', '#tarotreading', '#divination'],
+    ['#horoscope', '#astrology', '#zodiac', '#planetary'],
+    ['#mooncycles', '#moonphases', '#lunar', '#celestial'],
+  ];
+
+  const seed = new Date(date).getDate();
+  return themes.map((theme, i) => theme[(seed + i) % theme.length]).join(' ');
+}
+
+function formatCosmicPost(content: PostContent, date: string): string {
   console.log('📝 Formatting cosmic post with content:', {
     primaryEvent: content.primaryEvent,
     highlightsCount: content.highlights?.length || 0,
@@ -223,15 +234,24 @@ function formatCosmicPost(content: PostContent): string {
     hasCallToAction: !!content.callToAction,
   });
 
-  // Create clean social media content without titles, emojis, or hashtags
+  // Get daily hashtags
+  const hashtags = getDailyHashtags(date);
+
+  // Create concise social media content for Twitter's 280 char limit
   const post = [
-    ...content.highlights.slice(0, 3).map((highlight) => highlight),
+    content.highlights.slice(0, 1)[0], // Just the first highlight point
     '',
-    content.horoscopeSnippet,
+    'Daily cosmic guidance at lunary.app',
     '',
-    content.callToAction,
+    hashtags,
   ].join('\n');
 
   console.log('📝 Formatted post length:', post.length, 'characters');
+  
+  // Warn if over Twitter limit
+  if (post.length > 280) {
+    console.warn('⚠️ Post exceeds Twitter character limit:', post.length, 'chars');
+  }
+  
   return post;
 }

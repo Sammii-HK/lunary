@@ -58,15 +58,25 @@ export default function SchedulerAdminPage() {
       const cosmicContent = await cosmicResponse.json();
       console.log('🌟 Cosmic content received:', cosmicContent);
 
-      // Format the social media post using the actual cosmic content
+      // Get daily hashtags using simple thematic selection
+      const themes = [
+        ['#tarot', '#dailytarot', '#tarotreading', '#divination'],
+        ['#horoscope', '#astrology', '#zodiac', '#planetary'],
+        ['#mooncycles', '#moonphases', '#lunar', '#celestial'],
+      ];
+
+      const seed = new Date(dateStr).getDate();
+      const hashtags = themes
+        .map((theme, i) => theme[(seed + i) % theme.length])
+        .join(' ');
+
+      // Format the social media post (Twitter-friendly)
       const socialContent = [
-        ...cosmicContent.highlights
-          .slice(0, 3)
-          .map((highlight: string) => highlight),
+        cosmicContent.highlights.slice(0, 1)[0], // Just the first highlight point
         '',
-        cosmicContent.horoscopeSnippet,
+        'Daily cosmic guidance at lunary.app',
         '',
-        cosmicContent.callToAction,
+        hashtags,
       ].join('\n');
 
       console.log('📝 Social content created:', socialContent);
