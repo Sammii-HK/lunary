@@ -16,17 +16,24 @@ export async function GET(request: NextRequest) {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
 
-    // Use the correct base URL - avoid VERCEL_URL as it can cause issues
-    const baseUrl = 'https://lunary.app';
+    // Use internal URL for server-to-server communication
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
 
     console.log('📅 Publishing post for date:', dateStr);
     console.log('🌐 Using base URL:', baseUrl);
 
-    // Fetch cosmic content
+    // Fetch cosmic content with proper headers
     const cosmicUrl = `${baseUrl}/api/og/cosmic-post?date=${dateStr}`;
     console.log('🔗 Fetching cosmic content from:', cosmicUrl);
-
-    const cosmicResponse = await fetch(cosmicUrl);
+    
+    const cosmicResponse = await fetch(cosmicUrl, {
+      headers: {
+        'User-Agent': 'Lunary-Cron/1.0',
+        'Accept': 'application/json',
+      },
+    });
 
     if (!cosmicResponse.ok) {
       console.error('❌ Cosmic API Error:', {
@@ -39,7 +46,12 @@ export async function GET(request: NextRequest) {
       // Try to get error response
       try {
         const errorText = await cosmicResponse.text();
-        console.error('❌ Cosmic API Error Body:', errorText);
+        console.error('❌ Cosmic API Error Body:', errorText.substring(0, 500));
+        
+        // Check if it's an HTML error page
+        if (errorText.includes('<!doctype') || errorText.includes('<html')) {
+          console.error('❌ Received HTML instead of JSON - likely a routing or auth issue');
+        }
       } catch (e) {
         console.error('❌ Could not read error response');
       }

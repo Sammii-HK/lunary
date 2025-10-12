@@ -11,11 +11,7 @@ export async function GET(request: NextRequest) {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
 
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : typeof window !== 'undefined'
-        ? window.location.origin
-        : 'https://lunary.app';
+    const baseUrl = 'https://lunary.app';
 
     console.log('📅 Testing post for date:', dateStr);
 
