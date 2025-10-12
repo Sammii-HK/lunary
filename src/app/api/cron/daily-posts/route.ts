@@ -68,16 +68,19 @@ export async function GET(request: NextRequest) {
       (theme, i) => theme[(seed + i) % theme.length],
     );
 
-    // Format post content with hashtags
+    // Format post content with hashtags (Twitter-friendly)
     const socialContent = [
-      ...cosmicContent.highlights.slice(0, 3),
+      cosmicContent.highlights.slice(0, 1)[0], // Just the first highlight point
       '',
-      cosmicContent.horoscopeSnippet,
-      '',
-      cosmicContent.callToAction,
+      'Daily cosmic guidance at lunary.app',
       '',
       selectedHashtags.join(' '),
     ].join('\n');
+    
+    console.log('📝 Post length:', socialContent.length, 'characters');
+    if (socialContent.length > 280) {
+      console.warn('⚠️ Post exceeds Twitter limit:', socialContent.length);
+    }
 
     // Publish immediately (no scheduling delay)
     const postData = {
