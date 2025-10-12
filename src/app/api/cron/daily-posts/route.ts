@@ -106,9 +106,9 @@ export async function GET(request: NextRequest) {
     // Send directly to Succulent API (bypass internal scheduler)
     const succulentApiUrl = 'https://app.succulent.social/api/posts';
     const apiKey = process.env.SUCCULENT_SECRET_KEY;
-    
+
     console.log('🚀 Sending directly to Succulent API...');
-    
+
     const response = await fetch(succulentApiUrl, {
       method: 'POST',
       headers: {
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
     });
 
     const result = await response.json();
-    
+
     console.log('📨 Direct Succulent response:', {
       status: response.status,
       ok: response.ok,
@@ -138,7 +138,9 @@ export async function GET(request: NextRequest) {
       });
     } else {
       console.error('❌ Succulent API failed:', result);
-      throw new Error(`Succulent API failed: ${response.status} ${result.error || result.message}`);
+      throw new Error(
+        `Succulent API failed: ${response.status} ${result.error || result.message}`,
+      );
     }
   } catch (error) {
     console.error('❌ Daily cron job failed:', error);
