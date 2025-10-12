@@ -103,21 +103,30 @@ export async function GET(request: NextRequest) {
       ],
     };
 
-    // Send to existing single post scheduler
-    const schedulerUrl = `${baseUrl}/api/schedule-posts/single`;
-    const response = await fetch(schedulerUrl, {
+    // Send directly to Succulent API (bypass internal scheduler)
+    const succulentApiUrl = 'https://app.succulent.social/api/posts';
+    const apiKey = process.env.SUCCULENT_SECRET_KEY;
+    
+    console.log('🚀 Sending directly to Succulent API...');
+    
+    const response = await fetch(succulentApiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        postData,
-        succulentApiUrl: 'https://app.succulent.social/api/posts',
-        testMode: false,
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': apiKey || '',
+      },
+      body: JSON.stringify(postData),
     });
 
     const result = await response.json();
+    
+    console.log('📨 Direct Succulent response:', {
+      status: response.status,
+      ok: response.ok,
+      result: result,
+    });
 
-    if (result.success) {
+    if (response.ok) {
       console.log('✅ Daily cron job completed successfully');
       return NextResponse.json({
         success: true,
@@ -125,9 +134,11 @@ export async function GET(request: NextRequest) {
         date: dateStr,
         hashtags: selectedHashtags.join(' '),
         publishedAt: new Date().toISOString(),
+        succulentResult: result,
       });
     } else {
-      throw new Error(result.error || 'Scheduler failed');
+      console.error('❌ Succulent API failed:', result);
+      throw new Error(`Succulent API failed: ${response.status} ${result.error || result.message}`);
     }
   } catch (error) {
     console.error('❌ Daily cron job failed:', error);
