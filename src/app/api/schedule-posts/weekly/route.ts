@@ -247,11 +247,15 @@ function formatCosmicPost(content: PostContent, date: string): string {
   ].join('\n');
 
   console.log('📝 Formatted post length:', post.length, 'characters');
-  
+
   // Warn if over Twitter limit
   if (post.length > 280) {
-    console.warn('⚠️ Post exceeds Twitter character limit:', post.length, 'chars');
+    console.warn(
+      '⚠️ Post exceeds Twitter character limit:',
+      post.length,
+      'chars',
+    );
   }
-  
+
   return post;
 }

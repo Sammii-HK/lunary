@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       '',
       selectedHashtags.join(' '),
     ].join('\n');
-    
+
     console.log('📝 Post length:', socialContent.length, 'characters');
     if (socialContent.length > 280) {
       console.warn('⚠️ Post exceeds Twitter limit:', socialContent.length);
