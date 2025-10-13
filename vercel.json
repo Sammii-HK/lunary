@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/daily-posts",
       "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/schedule/publish",
+      "schedule": "0 * * * *"
     }
   ]
 }

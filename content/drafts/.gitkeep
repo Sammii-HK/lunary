@@ -1,0 +1,5 @@
+# Drafts Directory
+
+This directory contains scheduled blog posts that will be automatically published by the Vercel cron job when their date is reached.
+
+Posts in this directory should have frontmatter with a `date` field in YYYY-MM-DD format.
