@@ -4,19 +4,54 @@ import { NextRequest } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 const crystals = [
-  { name: 'Amethyst', color: '#9333EA', chakra: 'Crown Chakra', keywords: ['Intuition', 'Clarity', 'Protection'] },
-  { name: 'Rose Quartz', color: '#F472B6', chakra: 'Heart Chakra', keywords: ['Love', 'Compassion', 'Peace'] },
-  { name: 'Citrine', color: '#F59E0B', chakra: 'Solar Plexus', keywords: ['Abundance', 'Confidence', 'Joy'] },
-  { name: 'Black Tourmaline', color: '#1F2937', chakra: 'Root Chakra', keywords: ['Protection', 'Grounding', 'Strength'] },
-  { name: 'Clear Quartz', color: '#F3F4F6', chakra: 'All Chakras', keywords: ['Amplification', 'Clarity', 'Healing'] },
-  { name: 'Moonstone', color: '#E5E7EB', chakra: 'Sacral Chakra', keywords: ['Intuition', 'Cycles', 'Feminine'] },
-  { name: 'Carnelian', color: '#EA580C', chakra: 'Sacral Chakra', keywords: ['Creativity', 'Courage', 'Passion'] },
+  {
+    name: 'Amethyst',
+    color: '#9333EA',
+    chakra: 'Crown Chakra',
+    keywords: ['Intuition', 'Clarity', 'Protection'],
+  },
+  {
+    name: 'Rose Quartz',
+    color: '#F472B6',
+    chakra: 'Heart Chakra',
+    keywords: ['Love', 'Compassion', 'Peace'],
+  },
+  {
+    name: 'Citrine',
+    color: '#F59E0B',
+    chakra: 'Solar Plexus',
+    keywords: ['Abundance', 'Confidence', 'Joy'],
+  },
+  {
+    name: 'Black Tourmaline',
+    color: '#1F2937',
+    chakra: 'Root Chakra',
+    keywords: ['Protection', 'Grounding', 'Strength'],
+  },
+  {
+    name: 'Clear Quartz',
+    color: '#F3F4F6',
+    chakra: 'All Chakras',
+    keywords: ['Amplification', 'Clarity', 'Healing'],
+  },
+  {
+    name: 'Moonstone',
+    color: '#E5E7EB',
+    chakra: 'Sacral Chakra',
+    keywords: ['Intuition', 'Cycles', 'Feminine'],
+  },
+  {
+    name: 'Carnelian',
+    color: '#EA580C',
+    chakra: 'Sacral Chakra',
+    keywords: ['Creativity', 'Courage', 'Passion'],
+  },
 ];
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
-  
+
   let targetDate: Date;
   if (dateParam) {
     targetDate = new Date(dateParam + 'T12:00:00Z');
@@ -26,10 +61,13 @@ export async function GET(request: NextRequest) {
 
   // Fetch real horoscope snippet from cosmic content
   const dateStr = targetDate.toISOString().split('T')[0];
-  let horoscopeSnippet = 'Trust your inner wisdom and embrace today\'s cosmic possibilities';
-  
+  let horoscopeSnippet =
+    "Trust your inner wisdom and embrace today's cosmic possibilities";
+
   try {
-    const cosmicResponse = await fetch(`https://lunary.app/api/og/cosmic-post?date=${dateStr}`);
+    const cosmicResponse = await fetch(
+      `https://lunary.app/api/og/cosmic-post?date=${dateStr}`,
+    );
     if (cosmicResponse.ok) {
       const cosmicContent = await cosmicResponse.json();
       horoscopeSnippet = cosmicContent.horoscopeSnippet || horoscopeSnippet;
@@ -37,9 +75,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.log('Using fallback horoscope snippet');
   }
-  
+
   // Use cosmic-style backgrounds
-  const dayVariation = Math.floor(targetDate.getTime() / (1000 * 60 * 60 * 24)) % 5;
+  const dayVariation =
+    Math.floor(targetDate.getTime() / (1000 * 60 * 60 * 24)) % 5;
   const themes = [
     'linear-gradient(135deg, #0a0a1a, #1a1a2e)',
     'linear-gradient(135deg, #1a1a2e, #2d3561)',
@@ -119,8 +158,7 @@ export async function GET(request: NextRequest) {
               opacity: 0.7,
               letterSpacing: '0.1em',
             }}
-          >
-          </div>
+          ></div>
         </div>
 
         {/* Footer - exactly same as cosmic */}
@@ -137,6 +175,6 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
     ),
-    { width: 1200, height: 1200 }
+    { width: 1200, height: 1200 },
   );
 }

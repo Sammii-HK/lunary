@@ -66,9 +66,54 @@ export const CustomProfile = co.map({
   location: UserLocation.optional(),
 });
 
+// Digital Product Schemas
+export const DigitalPack = co.map({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  category: z.enum(['moon_phases', 'crystals', 'spells', 'tarot', 'astrology', 'seasonal']),
+  subcategory: z.string().optional(), // e.g., "2025", "december", "q4"
+  price: z.number(), // in cents
+  stripeProductId: z.string().optional(),
+  stripePriceId: z.string().optional(),
+  imageUrl: z.string().optional(),
+  downloadUrl: z.string().optional(), // Vercel Blob URL
+  fileSize: z.number().optional(), // in bytes
+  isActive: z.boolean().default(true),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  metadata: co.map({
+    dateRange: z.string().optional(), // e.g., "2025-01-01 to 2025-12-31"
+    format: z.string().optional(), // e.g., "PDF", "PNG", "ZIP"
+    itemCount: z.number().optional(), // number of items in pack
+  }).optional(),
+});
+
+export const Purchase = co.map({
+  id: z.string(),
+  userId: z.string(),
+  packId: z.string(),
+  stripeSessionId: z.string(),
+  stripePaymentIntentId: z.string().optional(),
+  status: z.enum(['pending', 'completed', 'failed', 'refunded']),
+  amount: z.number(), // in cents
+  downloadToken: z.string(), // secure download token
+  downloadCount: z.number().default(0),
+  maxDownloads: z.number().default(5),
+  expiresAt: z.string().optional(), // download expiry
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const ShopRoot = co.map({
+  packs: co.list(DigitalPack),
+  purchases: co.list(Purchase),
+});
+
 export const MyAppAccount = co.account({
   root: AccountRoot,
   profile: CustomProfile,
+  shop: ShopRoot.optional(),
 }).withMigration(async (account, migrationInfo) => {
   // Initialize root data structure if it doesn't exist
   if (!account.$jazz.has("root")) {
@@ -101,6 +146,9 @@ export const MyAppAccount = co.account({
     console.log("🔄 Adding notes field to existing account");
     root.$jazz.set("notes", []);
   }
+
+  // Shop initialization will be handled separately when needed
+  // The shop field is optional and will be created when first accessed
 
   console.log("✅ Account migration completed for user:", account.profile?.name || "Unknown");
 });

@@ -105,7 +105,9 @@ export async function GET(request: NextRequest) {
         platforms: ['instagram', 'pinterest', 'reddit'],
         imageUrl: `https://lunary.app/api/og/crystal?date=${dateStr}`,
         alt: 'Daily crystal recommendation for spiritual guidance and healing.',
-        scheduledDate: new Date(now.getTime() + 3 * 60 * 60 * 1000).toISOString(), // 3 hours later (4 PM)
+        scheduledDate: new Date(
+          now.getTime() + 3 * 60 * 60 * 1000,
+        ).toISOString(), // 3 hours later (4 PM)
       },
       {
         name: 'Daily Tarot',
@@ -113,7 +115,9 @@ export async function GET(request: NextRequest) {
         platforms: ['x', 'bluesky', 'reddit'],
         imageUrl: `https://lunary.app/api/og/tarot?date=${dateStr}`,
         alt: 'Daily tarot card reading with guidance and meaning.',
-        scheduledDate: new Date(now.getTime() + 6 * 60 * 60 * 1000).toISOString(), // 6 hours later (7 PM)
+        scheduledDate: new Date(
+          now.getTime() + 6 * 60 * 60 * 1000,
+        ).toISOString(), // 6 hours later (7 PM)
       },
       {
         name: 'Moon Phase',
@@ -121,7 +125,9 @@ export async function GET(request: NextRequest) {
         platforms: ['instagram', 'pinterest'],
         imageUrl: `https://lunary.app/api/og/moon?date=${dateStr}`,
         alt: 'Current moon phase energy and guidance for today.',
-        scheduledDate: new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString(), // 9 hours later (10 PM)
+        scheduledDate: new Date(
+          now.getTime() + 9 * 60 * 60 * 1000,
+        ).toISOString(), // 9 hours later (10 PM)
       },
       {
         name: 'Daily Horoscope',
@@ -129,7 +135,9 @@ export async function GET(request: NextRequest) {
         platforms: ['x', 'bluesky'],
         imageUrl: `https://lunary.app/api/og/horoscope?date=${dateStr}`,
         alt: 'Daily zodiac horoscope with wisdom and guidance.',
-        scheduledDate: new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString(), // 12 hours later (1 AM next day)
+        scheduledDate: new Date(
+          now.getTime() + 12 * 60 * 60 * 1000,
+        ).toISOString(), // 12 hours later (1 AM next day)
       },
     ];
 
@@ -140,13 +148,18 @@ export async function GET(request: NextRequest) {
     console.log(`🚀 Publishing ${posts.length} different posts...`);
     console.log('📋 Post schedule overview:');
     posts.forEach((post, index) => {
-      const scheduledTime = new Date(post.scheduledDate).toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        timeZone: 'UTC',
-        timeZoneName: 'short'
-      });
-      console.log(`  ${index + 1}. ${post.name} → ${post.platforms.join(', ')} at ${scheduledTime}`);
+      const scheduledTime = new Date(post.scheduledDate).toLocaleTimeString(
+        'en-US',
+        {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'UTC',
+          timeZoneName: 'short',
+        },
+      );
+      console.log(
+        `  ${index + 1}. ${post.name} → ${post.platforms.join(', ')} at ${scheduledTime}`,
+      );
     });
 
     // Send each post to Succulent - continue even if one fails
@@ -154,15 +167,24 @@ export async function GET(request: NextRequest) {
       try {
         // First test if the image URL works
         console.log(`🔍 Testing image URL for ${post.name}:`, post.imageUrl);
-        
+
         try {
           const imageTest = await fetch(post.imageUrl, { method: 'HEAD' });
           if (!imageTest.ok) {
-            console.warn(`⚠️ Image URL failed for ${post.name}, but continuing with post`);
+            console.warn(
+              `⚠️ Image URL failed for ${post.name}, but continuing with post`,
+            );
           }
         } catch (imageError) {
-          console.warn(`⚠️ Image test failed for ${post.name}:`, imageError.message);
-          console.log(`📤 Continuing with post anyway - platform may handle image fetch`);
+          console.warn(
+            `⚠️ Image test failed for ${post.name}:`,
+            imageError instanceof Error
+              ? imageError.message
+              : String(imageError),
+          );
+          console.log(
+            `📤 Continuing with post anyway - platform may handle image fetch`,
+          );
         }
 
         const postData = {
@@ -179,7 +201,10 @@ export async function GET(request: NextRequest) {
           ],
         };
 
-        console.log(`📤 Sending ${post.name} post to platforms:`, post.platforms);
+        console.log(
+          `📤 Sending ${post.name} post to platforms:`,
+          post.platforms,
+        );
 
         const response = await fetch(succulentApiUrl, {
           method: 'POST',
@@ -211,41 +236,50 @@ export async function GET(request: NextRequest) {
         }
 
         // Small delay between posts
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         console.error(`❌ ${post.name} post error:`, error);
-        console.log(`📤 Continuing with remaining posts despite ${post.name} failure`);
+        console.log(
+          `📤 Continuing with remaining posts despite ${post.name} failure`,
+        );
         results.push({
           name: post.name,
           platforms: post.platforms,
           status: 'error',
           error: error instanceof Error ? error.message : 'Unknown error',
         });
-        
+
         // Continue with next post even if this one failed
         continue;
       }
     }
 
-    const successCount = results.filter(r => r.status === 'success').length;
-    const errorCount = results.filter(r => r.status === 'error').length;
+    const successCount = results.filter((r) => r.status === 'success').length;
+    const errorCount = results.filter((r) => r.status === 'error').length;
 
-    console.log(`✅ Daily cron completed: ${successCount} success, ${errorCount} errors`);
+    console.log(
+      `✅ Daily cron completed: ${successCount} success, ${errorCount} errors`,
+    );
     console.log('📊 Final summary:', {
       totalPosts: posts.length,
       successful: successCount,
       failed: errorCount,
       successRate: `${Math.round((successCount / posts.length) * 100)}%`,
-      failedPosts: results.filter(r => r.status === 'error').map(r => r.name),
+      failedPosts: results
+        .filter((r) => r.status === 'error')
+        .map((r) => r.name),
     });
 
     // Log each post result for debugging
-    results.forEach(result => {
+    results.forEach((result) => {
       if (result.status === 'success') {
-        console.log(`✅ ${result.name}: Posted to ${result.platforms.join(', ')} - ID: ${result.postId}`);
+        console.log(
+          `✅ ${result.name}: Posted to ${result.platforms.join(', ')} - ID: ${result.postId}`,
+        );
       } else {
-        console.error(`❌ ${result.name}: Failed on ${result.platforms.join(', ')} - Error: ${result.error}`);
+        console.error(
+          `❌ ${result.name}: Failed on ${result.platforms.join(', ')} - Error: ${result.error}`,
+        );
       }
     });
 

@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-// @ts-ignore - MDX runtime doesn't have perfect types
-import MDX from '@mdx-js/runtime';
-import remarkGfm from 'remark-gfm';
+// Temporarily disabled MDX runtime due to build issues
+// Will re-enable when working on blog functionality
 
 const components = {
   h1: (props: any) => <h1 className='text-3xl font-bold mb-4' {...props} />,
@@ -62,9 +61,17 @@ export function MdxLivePreview({ source }: { source: string }) {
   return (
     <div className='p-5 border-l border-gray-200 overflow-auto bg-white min-h-full'>
       <div className='prose max-w-none'>
-        <MDX components={components} remarkPlugins={[remarkGfm]}>
+        <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4'>
+          <h3 className='text-yellow-800 font-medium mb-2'>
+            MDX Preview Temporarily Disabled
+          </h3>
+          <p className='text-yellow-700 text-sm'>
+            Live MDX preview is currently disabled. Raw content is shown below.
+          </p>
+        </div>
+        <pre className='whitespace-pre-wrap text-sm bg-gray-100 p-4 rounded border overflow-auto max-h-96'>
           {mdxSource}
-        </MDX>
+        </pre>
       </div>
     </div>
   );

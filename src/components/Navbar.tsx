@@ -5,6 +5,7 @@ import {
   Sparkles,
   User,
   Circle,
+  ShoppingBag,
 } from 'lucide-react';
 import Link from 'next/link';
 export const Navbar = () => {
@@ -50,6 +51,14 @@ export const Navbar = () => {
               className='flex items-center columns-1 cursor-pointer p-2'
             >
               <Notebook />
+            </Link>
+          </li>
+          <li>
+            <Link
+              href='/shop'
+              className='flex items-center columns-1 cursor-pointer p-2'
+            >
+              <ShoppingBag />
             </Link>
           </li>
           <li>
