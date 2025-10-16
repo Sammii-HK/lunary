@@ -383,16 +383,22 @@ function generateDayGuidanceSummary(
   // Get current sun and moon signs for context
   const moonSign = positions.Moon.sign;
 
-  // Start with the primary event's energy
+  // Start with more conversational, engaging guidance
   let guidance = '';
 
   if (primaryEvent.type === 'moon') {
     if (primaryEvent.name.includes('New')) {
-      guidance = `The New Moon in ${moonSign} opens a powerful portal for manifestation and fresh beginnings. This lunar reset invites you to plant seeds of intention that honor both your conscious goals and deeper emotional needs.`;
-    } else if (primaryEvent.name.includes('Full')) {
-      guidance = `The ${primaryEvent.name} in ${moonSign} brings peak lunar energy for completion and celebration. This illuminating phase reveals what has come to fruition while highlighting areas ready for release and gratitude.`;
+      guidance = `The New Moon in ${moonSign} marks a powerful reset point for manifestation and new beginnings. This lunar phase offers optimal conditions for setting intentions and initiating projects aligned with your deeper purpose.`;
+    } else if (
+      primaryEvent.name.includes('Full') ||
+      (primaryEvent.name.includes('Moon') &&
+        !primaryEvent.name.includes('New') &&
+        !primaryEvent.name.includes('Quarter'))
+    ) {
+      // This covers "Full Moon", "Hunter Moon", "Blood Moon", etc.
+      guidance = `The ${primaryEvent.name} in ${moonSign} reaches peak illumination, highlighting completion and culmination. This phase brings clarity to what has been accomplished while revealing areas ready for release and transformation.`;
     } else if (primaryEvent.name.includes('Quarter')) {
-      guidance = `The ${primaryEvent.name} in ${moonSign} presents a cosmic crossroads requiring decisive action. This dynamic lunar energy supports breakthrough moments and courageous choices that align with your authentic path.`;
+      guidance = `The ${primaryEvent.name} in ${moonSign} presents a critical decision point in the lunar cycle. This dynamic phase supports decisive action and breakthrough moments that align with your authentic path.`;
     }
   } else if (primaryEvent.aspect) {
     if (primaryEvent.aspect === 'conjunction') {
@@ -402,27 +408,27 @@ function generateDayGuidanceSummary(
         (primaryEvent.planetA === 'Neptune' &&
           primaryEvent.planetB === 'Saturn')
       ) {
-        guidance = `Saturn and Neptune unite in a rare cosmic dance, blending practical structure with mystical vision. This powerful alignment invites you to give form to your dreams while remaining open to spiritual guidance.`;
+        guidance = `Saturn and Neptune form a rare conjunction, merging practical structure with mystical vision. This alignment supports giving tangible form to dreams while remaining receptive to spiritual guidance.`;
       } else if (
         (primaryEvent.planetA === 'Venus' && primaryEvent.planetB === 'Mars') ||
         (primaryEvent.planetA === 'Mars' && primaryEvent.planetB === 'Venus')
       ) {
-        guidance = `Venus and Mars join forces, harmonizing the energies of love and action. This passionate alignment supports creative endeavors, romantic initiatives, and projects that require both heart and courage.`;
+        guidance = `Venus and Mars unite in conjunction, harmonizing the principles of love and action. This passionate alignment favors creative endeavors, romantic initiatives, and projects requiring both heart and courage.`;
       } else {
-        guidance = `${primaryEvent.planetA} and ${primaryEvent.planetB} unite their cosmic energies, creating opportunities for integrated growth and purposeful action in alignment with your highest values.`;
+        guidance = `${primaryEvent.planetA} and ${primaryEvent.planetB} unite in conjunction, creating integrated opportunities for purposeful growth and aligned action.`;
       }
     } else if (primaryEvent.aspect === 'trine') {
-      guidance = `A harmonious trine between ${primaryEvent.planetA} and ${primaryEvent.planetB} creates effortless flow and natural synchronicity. Trust your instincts and allow opportunities to unfold organically.`;
+      guidance = `${primaryEvent.planetA} forms a harmonious trine with ${primaryEvent.planetB}, creating effortless flow and natural synchronicity. This supportive aspect encourages trusting instincts and allowing opportunities to unfold organically.`;
     } else if (primaryEvent.aspect === 'square') {
-      guidance = `The dynamic square between ${primaryEvent.planetA} and ${primaryEvent.planetB} generates creative tension that can fuel breakthrough moments. Channel any resistance into constructive action and innovative solutions.`;
+      guidance = `${primaryEvent.planetA} forms a dynamic square with ${primaryEvent.planetB}, generating creative tension that can fuel breakthrough moments. This challenging aspect supports channeling resistance into constructive action and innovative solutions.`;
     }
   } else if (primaryEvent.type === 'seasonal') {
-    guidance = `The ${primaryEvent.name} marks a sacred turning point in the cosmic wheel, inviting you to align with nature's rhythms and embrace the transformative energy of seasonal change.`;
+    guidance = `The ${primaryEvent.name} marks a significant turning point in the seasonal cycle. This celestial milestone invites alignment with natural rhythms and conscious engagement with transformative seasonal energies.`;
   } else {
-    guidance = `Today's cosmic configuration supports spiritual growth and conscious evolution through natural celestial rhythms.`;
+    guidance = `Today's planetary configuration supports conscious evolution and spiritual growth through natural celestial rhythms.`;
   }
 
-  // Add secondary events if present
+  // Add secondary events with informed perspective
   if (secondaryEvents.length > 0) {
     const secondaryGuidance: string[] = [];
 
@@ -432,39 +438,37 @@ function generateDayGuidanceSummary(
           (event.planetA === 'Sun' && event.planetB === 'Moon') ||
           (event.planetA === 'Moon' && event.planetB === 'Sun')
         ) {
-          secondaryGuidance.push('emotional alignment');
+          secondaryGuidance.push('emotional and conscious alignment');
         } else if (
           (event.planetA === 'Moon' && event.planetB === 'Mercury') ||
           (event.planetA === 'Mercury' && event.planetB === 'Moon')
         ) {
-          secondaryGuidance.push('intuitive communication');
+          secondaryGuidance.push('enhanced intuitive communication');
         } else {
-          secondaryGuidance.push(
-            index === 0 ? 'harmonious flow' : 'supportive energy',
-          );
+          secondaryGuidance.push('harmonious planetary flow');
         }
       } else if (event.aspect === 'sextile') {
-        secondaryGuidance.push('cooperative opportunities');
+        secondaryGuidance.push('cooperative planetary opportunities');
       } else if (event.aspect === 'square') {
-        secondaryGuidance.push('dynamic growth');
+        secondaryGuidance.push('dynamic growth-oriented tension');
       } else if (event.type === 'ingress') {
-        secondaryGuidance.push('energetic shifts');
+        secondaryGuidance.push('significant planetary transitions');
       }
     });
 
     if (secondaryGuidance.length > 0) {
-      guidance += ` Additional cosmic currents bring ${secondaryGuidance.join(' and ')}, creating a rich tapestry of possibilities for personal expansion.`;
+      guidance += ` Additional cosmic currents include ${secondaryGuidance.join(' and ')}, creating a rich tapestry of astrological influences.`;
     }
   }
 
   // Add moon phase context if not primary
   if (primaryEvent.type !== 'moon') {
     if (moonPhase.illumination > 80) {
-      guidance += ` The waxing lunar energy amplifies your intentions and supports bold action.`;
+      guidance += ` The waxing lunar energy amplifies intentions and supports decisive action.`;
     } else if (moonPhase.illumination < 20) {
-      guidance += ` The waning lunar energy favors reflection and release work.`;
+      guidance += ` The waning lunar phase encourages reflection and conscious release.`;
     } else {
-      guidance += ` The current lunar phase supports steady progress and mindful growth.`;
+      guidance += ` The current lunar phase supports steady progress and mindful development.`;
     }
   }
 
