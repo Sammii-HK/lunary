@@ -51,6 +51,7 @@ const crystals = [
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
+  const sizeParam = searchParams.get('size') || 'square';
 
   let targetDate: Date;
   if (dateParam) {
@@ -58,6 +59,24 @@ export async function GET(request: NextRequest) {
   } else {
     targetDate = new Date();
   }
+
+  // Format date for display
+  const formattedDate = targetDate
+    .toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    .replace(/\//g, '/');
+
+  // Define responsive sizes and styles
+  const sizes = {
+    square: { width: 1200, height: 1200, padding: '60px 40px', titleSize: 24, contentSize: 36, dateSize: 28, footerSize: 28 },
+    portrait: { width: 1080, height: 1920, padding: '80px 60px', titleSize: 32, contentSize: 44, dateSize: 36, footerSize: 36 },
+    landscape: { width: 1920, height: 1080, padding: '40px 80px', titleSize: 20, contentSize: 28, dateSize: 24, footerSize: 24 }
+  };
+
+  const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
 
   // Fetch real horoscope snippet from cosmic content
   const dateStr = targetDate.toISOString().split('T')[0];
@@ -159,6 +178,20 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.1em',
             }}
           ></div>
+        </div>
+
+        {/* Date */}
+        <div
+          style={{
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'white',
+            textAlign: 'center',
+            fontFamily: 'Roboto Mono',
+            marginBottom: '20px',
+          }}
+        >
+          {formattedDate}
         </div>
 
         {/* Footer - exactly same as cosmic */}

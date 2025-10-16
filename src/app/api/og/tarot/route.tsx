@@ -157,6 +157,15 @@ export async function GET(request: NextRequest) {
     dateObj.getDate() + dateObj.getMonth() * 31 + dateObj.getFullYear() * 7;
   const card = tarotCards[seed % tarotCards.length];
 
+  // Format date for display
+  const formattedDate = dateObj
+    .toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    .replace(/\//g, '/');
+
   // Same theme system as cosmic
   const dayVariation = dateObj.getDate() % 5;
   const themes = [
@@ -241,6 +250,20 @@ export async function GET(request: NextRequest) {
           >
             {card.archetype}
           </div>
+        </div>
+
+        {/* Date */}
+        <div
+          style={{
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'white',
+            textAlign: 'center',
+            fontFamily: 'Roboto Mono',
+            marginBottom: '20px',
+          }}
+        >
+          {formattedDate}
         </div>
 
         {/* Footer - exactly same as cosmic */}

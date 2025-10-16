@@ -51,11 +51,30 @@ const crystals = [
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
+  const sizeParam = searchParams.get('size') || 'square';
 
   const targetDate = dateParam || new Date().toISOString().split('T')[0];
   const dateObj = new Date(targetDate);
   const seed = dateObj.getDate() + dateObj.getMonth() * 31;
   const crystal = crystals[seed % crystals.length];
+
+  // Format date for display
+  const formattedDate = dateObj
+    .toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    .replace(/\//g, '/');
+
+  // Define responsive sizes and styles
+  const sizes = {
+    square: { width: 1200, height: 1200, padding: '60px 40px', titleSize: 24, crystalNameSize: 64, keywordSize: 24, dateSize: 28, footerSize: 28 },
+    portrait: { width: 1080, height: 1920, padding: '80px 60px', titleSize: 32, crystalNameSize: 80, keywordSize: 28, dateSize: 36, footerSize: 36 },
+    landscape: { width: 1920, height: 1080, padding: '40px 80px', titleSize: 20, crystalNameSize: 52, keywordSize: 20, dateSize: 24, footerSize: 24 }
+  };
+
+  const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
 
   // Subtle crystal color background like cosmic
   const dayVariation = dateObj.getDate() % 5;
@@ -79,7 +98,7 @@ export async function GET(request: NextRequest) {
           background: themes[dayVariation],
           fontFamily: 'Roboto Mono',
           color: 'white',
-          padding: '60px 40px',
+          padding: currentSize.padding,
           justifyContent: 'space-between',
         }}
       >
@@ -95,7 +114,7 @@ export async function GET(request: NextRequest) {
         >
           <div
             style={{
-              fontSize: '24px',
+              fontSize: `${currentSize.titleSize}px`,
               fontWeight: '400',
               color: 'white',
               textAlign: 'center',
@@ -120,7 +139,7 @@ export async function GET(request: NextRequest) {
         >
           <div
             style={{
-              fontSize: '64px',
+              fontSize: `${currentSize.crystalNameSize}px`,
               fontWeight: '400',
               color: 'white',
               textAlign: 'center',
@@ -132,7 +151,7 @@ export async function GET(request: NextRequest) {
           </div>
           <div
             style={{
-              fontSize: '24px',
+              fontSize: `${currentSize.keywordSize}px`,
               color: 'white',
               textAlign: 'center',
               opacity: 0.7,
@@ -143,10 +162,24 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
+        {/* Date */}
+        <div
+          style={{
+            fontSize: `${currentSize.dateSize}px`,
+            fontWeight: '300',
+            color: 'white',
+            textAlign: 'center',
+            fontFamily: 'Roboto Mono',
+            marginBottom: '20px',
+          }}
+        >
+          {formattedDate}
+        </div>
+
         {/* Footer - exactly same as cosmic */}
         <div
           style={{
-            fontSize: '28px',
+            fontSize: `${currentSize.footerSize}px`,
             fontWeight: '300',
             color: 'white',
             letterSpacing: '1px',
@@ -157,6 +190,6 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
     ),
-    { width: 1200, height: 1200 },
+    { width: currentSize.width, height: currentSize.height },
   );
 }

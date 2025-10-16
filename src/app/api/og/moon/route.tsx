@@ -57,6 +57,15 @@ export async function GET(request: NextRequest) {
   const seed = dateObj.getDate() + dateObj.getMonth() * 31;
   const crystal = crystals[seed % crystals.length];
 
+  // Format date for display
+  const formattedDate = dateObj
+    .toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    .replace(/\//g, '/');
+
   // Blue lunar backgrounds (not crystal colors)
   const dayVariation = dateObj.getDate() % 5;
   const themes = [
@@ -142,6 +151,20 @@ export async function GET(request: NextRequest) {
           >
             Refinement
           </div>
+        </div>
+
+        {/* Date */}
+        <div
+          style={{
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'white',
+            textAlign: 'center',
+            fontFamily: 'Roboto Mono',
+            marginBottom: '20px',
+          }}
+        >
+          {formattedDate}
         </div>
 
         {/* Footer - exactly same as cosmic */}

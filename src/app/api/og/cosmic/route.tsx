@@ -427,6 +427,7 @@ async function loadGoogleFont(font: string, text: string) {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
+  const sizeParam = searchParams.get('size') || 'square';
 
   let targetDate: Date;
   if (dateParam) {
@@ -434,6 +435,60 @@ export async function GET(request: NextRequest) {
   } else {
     targetDate = new Date();
   }
+
+  // Define image dimensions and responsive styles
+  const sizes = {
+    square: { width: 1200, height: 1200, padding: '60px 40px' },
+    portrait: { width: 1080, height: 1920, padding: '80px 60px' },
+    landscape: { width: 1920, height: 1080, padding: '40px 80px' }
+  };
+
+  const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
+
+  // Responsive typography and spacing
+  const responsive = {
+    square: {
+      titleSize: 32,
+      planetNameSize: 42,
+      symbolSize: 222,
+      aspectSize: 42,
+      constellationSize: 28,
+      zodiacSymbolSize: 72,
+      energySize: 36,
+      dateSize: 28,
+      footerSize: 28,
+      titlePadding: '100px',
+      itemSpacing: '200px',
+    },
+    portrait: {
+      titleSize: 48,
+      planetNameSize: 52,
+      symbolSize: 280,
+      aspectSize: 52,
+      constellationSize: 36,
+      zodiacSymbolSize: 88,
+      energySize: 44,
+      dateSize: 36,
+      footerSize: 36,
+      titlePadding: '120px',
+      itemSpacing: '160px',
+    },
+    landscape: {
+      titleSize: 28,
+      planetNameSize: 36,
+      symbolSize: 180,
+      aspectSize: 36,
+      constellationSize: 24,
+      zodiacSymbolSize: 60,
+      energySize: 32,
+      dateSize: 24,
+      footerSize: 24,
+      titlePadding: '60px',
+      itemSpacing: '120px',
+    }
+  };
+
+  const style = responsive[sizeParam as keyof typeof responsive] || responsive.square;
 
   // Get REAL astronomical data (SAME AS POST ROUTE)
   const positions = getRealPlanetaryPositions(targetDate);
@@ -575,7 +630,7 @@ export async function GET(request: NextRequest) {
           background: theme.background,
           fontFamily: 'Roboto Mono',
           color: 'white',
-          padding: '60px 40px',
+          padding: currentSize.padding,
           justifyContent: 'space-between',
         }}
       >
@@ -586,12 +641,12 @@ export async function GET(request: NextRequest) {
             justifyContent: 'center',
             alignItems: 'center',
             paddingBottom: '40px',
-            paddingTop: '100px',
+            paddingTop: style.titlePadding,
           }}
         >
           <div
             style={{
-              fontSize: '32px',
+              fontSize: `${style.titleSize}px`,
               fontWeight: '400',
               color: 'white',
               textAlign: 'center',
@@ -620,7 +675,7 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '200px',
+                gap: style.itemSpacing,
                 width: '100%',
                 height: '90%',
               }}
@@ -637,7 +692,7 @@ export async function GET(request: NextRequest) {
               >
                 <div
                   style={{
-                    fontSize: '42px',
+                    fontSize: `${style.planetNameSize}px`,
                     fontWeight: '300',
                     color: 'white',
                     textAlign: 'center',
@@ -659,7 +714,7 @@ export async function GET(request: NextRequest) {
                 >
                   <div
                     style={{
-                      fontSize: '222px',
+                      fontSize: `${style.symbolSize}px`,
                       color: 'white',
                       lineHeight: '1',
                       fontFamily: 'Astronomicon',
@@ -678,7 +733,7 @@ export async function GET(request: NextRequest) {
                 >
                   <div
                     style={{
-                      fontSize: '28px',
+                      fontSize: `${style.constellationSize}px`,
                       fontWeight: '300',
                       color: 'white',
                       fontFamily: 'Roboto Mono',
@@ -689,7 +744,7 @@ export async function GET(request: NextRequest) {
                   </div>
                   <div
                     style={{
-                      fontSize: '72px',
+                      fontSize: `${style.zodiacSymbolSize}px`,
                       color: 'white',
                       fontFamily: 'Astronomicon',
                     }}
@@ -713,7 +768,7 @@ export async function GET(request: NextRequest) {
               >
                 <div
                   style={{
-                    fontSize: '42px',
+                    fontSize: `${style.aspectSize}px`,
                     fontWeight: '300',
                     color: 'white',
                     textAlign: 'center',
@@ -726,7 +781,7 @@ export async function GET(request: NextRequest) {
                 </div>
                 <div
                   style={{
-                    fontSize: '222px',
+                    fontSize: `${style.symbolSize}px`,
                     color: 'white',
                     lineHeight: '1',
                     width: '180px',
@@ -742,17 +797,6 @@ export async function GET(request: NextRequest) {
                 >
                   {(primaryEvent as any).glyph || '!'}
                 </div>
-                <div
-                  style={{
-                    fontSize: '28px',
-                    fontWeight: '300',
-                    color: 'white',
-                    textAlign: 'center',
-                    fontFamily: 'Roboto Mono',
-                  }}
-                >
-                  {formattedDate}
-                </div>
               </div>
 
               {/* Planet B Column */}
@@ -767,7 +811,7 @@ export async function GET(request: NextRequest) {
               >
                 <div
                   style={{
-                    fontSize: '42px',
+                    fontSize: `${style.planetNameSize}px`,
                     fontWeight: '300',
                     color: 'white',
                     textAlign: 'center',
@@ -789,7 +833,7 @@ export async function GET(request: NextRequest) {
                 >
                   <div
                     style={{
-                      fontSize: '222px',
+                      fontSize: `${style.symbolSize}px`,
                       color: 'white',
                       lineHeight: '1',
                       fontFamily: 'Astronomicon',
@@ -808,7 +852,7 @@ export async function GET(request: NextRequest) {
                 >
                   <div
                     style={{
-                      fontSize: '28px',
+                      fontSize: `${style.constellationSize}px`,
                       fontWeight: '300',
                       color: 'white',
                       fontFamily: 'Roboto Mono',
@@ -819,7 +863,7 @@ export async function GET(request: NextRequest) {
                   </div>
                   <div
                     style={{
-                      fontSize: '72px',
+                      fontSize: `${style.zodiacSymbolSize}px`,
                       color: 'white',
                       fontFamily: 'Astronomicon',
                     }}
@@ -871,17 +915,6 @@ export async function GET(request: NextRequest) {
               }}
             >
               {primaryEvent.description}
-            </div>
-            <div
-              style={{
-                fontSize: '28px',
-                fontWeight: '300',
-                color: 'white',
-                textAlign: 'center',
-                fontFamily: 'Roboto Mono',
-              }}
-            >
-              {formattedDate}
             </div>
           </div>
         ) : isMoonPhaseEvent ? (
@@ -953,18 +986,6 @@ export async function GET(request: NextRequest) {
                 {getZodiacSymbol(positions.Moon.sign)}
               </div>
             </div>
-            <div
-              style={{
-                display: 'flex',
-                fontSize: '28px',
-                fontWeight: '300',
-                color: 'white',
-                textAlign: 'center',
-                fontFamily: 'Roboto Mono',
-              }}
-            >
-              {formattedDate}
-            </div>
           </div>
         ) : (
           // Fallback Layout - Cosmic Flow
@@ -994,7 +1015,7 @@ export async function GET(request: NextRequest) {
             <div
               style={{
                 display: 'flex',
-                fontSize: '36px',
+                fontSize: `${style.energySize}px`,
                 fontWeight: '300',
                 color: 'white',
                 textAlign: 'center',
@@ -1003,25 +1024,27 @@ export async function GET(request: NextRequest) {
             >
               {primaryEvent.energy || 'Universal Harmony'}
             </div>
-            <div
-              style={{
-                display: 'flex',
-                fontSize: '28px',
-                fontWeight: '300',
-                color: 'white',
-                textAlign: 'center',
-                fontFamily: 'Roboto Mono',
-              }}
-            >
-              {formattedDate}
-            </div>
           </div>
         )}
+
+        {/* Date */}
+        <div
+          style={{
+            fontSize: `${style.dateSize}px`,
+            fontWeight: '300',
+            color: 'white',
+            textAlign: 'center',
+            fontFamily: 'Roboto Mono',
+            marginBottom: '20px',
+          }}
+        >
+          {formattedDate}
+        </div>
 
         {/* Footer */}
         <div
           style={{
-            fontSize: '28px',
+            fontSize: `${style.footerSize}px`,
             fontWeight: '300',
             color: 'white',
             letterSpacing: '1px',
@@ -1033,23 +1056,42 @@ export async function GET(request: NextRequest) {
       </div>
     ),
     {
-      width: 1200,
-      height: 1200,
-      fonts: [
-        {
-          name: 'Astronomicon',
-          data: (await loadAstronomiconFont()) || new ArrayBuffer(0),
-          style: 'normal',
-        },
-        {
-          name: 'Roboto Mono',
-          data: await loadGoogleFont(
+      width: currentSize.width,
+      height: currentSize.height,
+      fonts: await (async () => {
+        const fonts = [];
+        
+        try {
+          const astronomiconFont = await loadAstronomiconFont();
+          if (astronomiconFont) {
+            fonts.push({
+              name: 'Astronomicon',
+              data: astronomiconFont,
+              style: 'normal' as const,
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load Astronomicon font:', error);
+        }
+
+        try {
+          const robotoFont = await loadGoogleFont(
             'Roboto+Mono:wght@300;400;700',
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 /.:',
-          ),
-          style: 'normal',
-        },
-      ],
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 /.:'
+          );
+          if (robotoFont) {
+            fonts.push({
+              name: 'Roboto Mono',
+              data: robotoFont,
+              style: 'normal' as const,
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load Roboto Mono font:', error);
+        }
+
+        return fonts;
+      })(),
     },
   );
 }
