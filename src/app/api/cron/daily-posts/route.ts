@@ -12,11 +12,17 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('🕐 Daily cron job started at:', new Date().toISOString());
+    console.log('🔐 Auth check passed - proceeding with cron execution');
 
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
 
-    console.log('📅 Publishing post for date:', dateStr);
+    console.log('📅 Publishing posts for date:', dateStr);
+    console.log('🌐 Environment check:', {
+      hasSucculentKey: !!process.env.SUCCULENT_SECRET_KEY,
+      hasAccountGroupId: !!process.env.SUCCULENT_ACCOUNT_GROUP_ID,
+      nodeEnv: process.env.NODE_ENV,
+    });
 
     // Always use production URL - avoid preview deployment issues
     const productionUrl = 'https://lunary.app';
@@ -132,6 +138,16 @@ export async function GET(request: NextRequest) {
     const results = [];
 
     console.log(`🚀 Publishing ${posts.length} different posts...`);
+    console.log('📋 Post schedule overview:');
+    posts.forEach((post, index) => {
+      const scheduledTime = new Date(post.scheduledDate).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        timeZone: 'UTC',
+        timeZoneName: 'short'
+      });
+      console.log(`  ${index + 1}. ${post.name} → ${post.platforms.join(', ')} at ${scheduledTime}`);
+    });
 
     // Send each post to Succulent - continue even if one fails
     for (const post of posts) {
@@ -216,15 +232,32 @@ export async function GET(request: NextRequest) {
     const errorCount = results.filter(r => r.status === 'error').length;
 
     console.log(`✅ Daily cron completed: ${successCount} success, ${errorCount} errors`);
+    console.log('📊 Final summary:', {
+      totalPosts: posts.length,
+      successful: successCount,
+      failed: errorCount,
+      successRate: `${Math.round((successCount / posts.length) * 100)}%`,
+      failedPosts: results.filter(r => r.status === 'error').map(r => r.name),
+    });
+
+    // Log each post result for debugging
+    results.forEach(result => {
+      if (result.status === 'success') {
+        console.log(`✅ ${result.name}: Posted to ${result.platforms.join(', ')} - ID: ${result.postId}`);
+      } else {
+        console.error(`❌ ${result.name}: Failed on ${result.platforms.join(', ')} - Error: ${result.error}`);
+      }
+    });
 
     return NextResponse.json({
-      success: true,
-      message: `Published ${successCount} posts across 5 platforms throughout the day`,
+      success: successCount > 0, // Success if at least one post worked
+      message: `Published ${successCount}/${posts.length} posts across 5 platforms throughout the day`,
       date: dateStr,
       summary: {
         total: posts.length,
         successful: successCount,
         failed: errorCount,
+        successRate: `${Math.round((successCount / posts.length) * 100)}%`,
       },
       results: results,
       publishedAt: new Date().toISOString(),
