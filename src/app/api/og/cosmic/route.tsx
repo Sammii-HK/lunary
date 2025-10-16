@@ -163,35 +163,35 @@ function calculateRealAspects(positions: any): Array<any> {
 // Helper functions for image display
 function getPlanetSymbol(planetName: string): string {
   const symbols: { [key: string]: string } = {
-    Sun: 'S',
-    Moon: 'R',
-    Mercury: 'T',
-    Venus: 'Q',
-    Mars: 'U',
-    Jupiter: 'V',
-    Saturn: 'W',
-    Uranus: 'X',
-    Neptune: 'Y',
+    Sun: '☉',
+    Moon: '☽',
+    Mercury: '☿',
+    Venus: '♀',
+    Mars: '♂',
+    Jupiter: '♃',
+    Saturn: '♄',
+    Uranus: '♅',
+    Neptune: '♆',
   };
-  return symbols[planetName] || 'S';
+  return symbols[planetName] || '☉';
 }
 
 function getZodiacSymbol(sign: string): string {
   const symbols: { [key: string]: string } = {
-    Aries: 'A',
-    Taurus: 'B',
-    Gemini: 'C',
-    Cancer: 'D',
-    Leo: 'E',
-    Virgo: 'F',
-    Libra: 'G',
-    Scorpio: 'H',
-    Sagittarius: 'I',
-    Capricorn: 'J',
-    Aquarius: 'K',
-    Pisces: 'L',
+    Aries: '♈',
+    Taurus: '♉',
+    Gemini: '♊',
+    Cancer: '♋',
+    Leo: '♌',
+    Virgo: '♍',
+    Libra: '♎',
+    Scorpio: '♏',
+    Sagittarius: '♐',
+    Capricorn: '♑',
+    Aquarius: '♒',
+    Pisces: '♓',
   };
-  return symbols[sign] || 'A';
+  return symbols[sign] || '♈';
 }
 
 function getAspectGlyph(aspect: string): string {
