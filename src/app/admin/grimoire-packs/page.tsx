@@ -37,16 +37,39 @@ interface PackPreview {
   correspondences: any;
   timing: any;
   herbs: any[];
+  stripeProductId?: string;
+  stripePriceId?: string;
+  isActive?: boolean;
+}
+
+interface StripeProduct {
+  stripeProductId: string;
+  stripePriceId: string;
+  title: string;
+  description: string;
+  category: string;
+  spellCount: number;
+  crystalCount: number;
+  herbCount: number;
+  metadata: {
+    price: number;
+    difficulty: string;
+    estimatedTime: string;
+  };
+  isActive: boolean;
+  createdAt: string;
 }
 
 export default function GrimoirePacksAdmin() {
   const [grimoireData, setGrimoireData] = useState<GrimoireData | null>(null);
+  const [stripeProducts, setStripeProducts] = useState<StripeProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedIntention, setSelectedIntention] = useState('');
   const [packPreview, setPackPreview] = useState<PackPreview | null>(null);
   const [customDescription, setCustomDescription] = useState('');
   const [packTitle, setPackTitle] = useState('');
+  const [syncLoading, setSyncLoading] = useState(false);
 
   const categories = [
     'protection',
@@ -64,9 +87,10 @@ export default function GrimoirePacksAdmin() {
     'grounding', 'spiritual growth', 'courage', 'wisdom', 'peace', 'transformation'
   ];
 
-  // Fetch grimoire data on component mount
+  // Fetch grimoire data and Stripe products on component mount
   useEffect(() => {
     fetchGrimoireData();
+    fetchStripeProducts();
   }, []);
 
   const fetchGrimoireData = async () => {
@@ -89,6 +113,20 @@ export default function GrimoirePacksAdmin() {
       console.error('Error fetching grimoire data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStripeProducts = async () => {
+    try {
+      const response = await fetch('/api/grimoire/sync-stripe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get-products' })
+      });
+      const data = await response.json();
+      setStripeProducts(data.products || []);
+    } catch (error) {
+      console.error('Error fetching Stripe products:', error);
     }
   };
 
@@ -118,6 +156,68 @@ export default function GrimoirePacksAdmin() {
       console.error('Error generating pack preview:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncToStripe = async () => {
+    if (!packPreview) return;
+
+    setSyncLoading(true);
+    try {
+      const response = await fetch('/api/grimoire/sync-stripe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          pack: packPreview
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update pack preview with Stripe IDs
+        setPackPreview(prev => prev ? {
+          ...prev,
+          stripeProductId: result.stripeProductId,
+          stripePriceId: result.stripePriceId
+        } : null);
+        
+        // Refresh Stripe products list
+        await fetchStripeProducts();
+        
+        alert('✅ Pack synced to Stripe successfully!');
+      } else {
+        alert('❌ Failed to sync to Stripe: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error syncing to Stripe:', error);
+      alert('❌ Error syncing to Stripe');
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
+  const syncAllFromStripe = async () => {
+    setSyncLoading(true);
+    try {
+      const response = await fetch('/api/grimoire/sync-stripe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sync-all' })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        await fetchStripeProducts();
+        alert(`✅ Synced ${result.totalProducts} products from Stripe!`);
+      }
+    } catch (error) {
+      console.error('Error syncing from Stripe:', error);
+      alert('❌ Error syncing from Stripe');
+    } finally {
+      setSyncLoading(false);
     }
   };
 
@@ -166,7 +266,7 @@ export default function GrimoirePacksAdmin() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-2">
@@ -202,11 +302,24 @@ export default function GrimoirePacksAdmin() {
             </div>
           </CardContent>
         </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-blue-500" />
+              <div>
+                <p className="text-2xl font-bold">{stripeProducts.length}</p>
+                <p className="text-sm text-muted-foreground">Stripe Products</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="generator" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="generator">Pack Generator</TabsTrigger>
+          <TabsTrigger value="stripe">Stripe Products</TabsTrigger>
           <TabsTrigger value="browse">Browse Grimoire</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>

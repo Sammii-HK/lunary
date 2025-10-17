@@ -3,6 +3,7 @@ import { crystalDatabase, getCrystalsByCategory, getCrystalsByIntention } from '
 import { spellDatabase, getSpellsByCategory } from '../../../../constants/grimoire/spells';
 import { wiccanWeek } from '../../../../constants/weekDays';
 import { wheelOfTheYearSabbats } from '../../../../constants/sabbats';
+import { generatePackNaming, generatePricing, PackMetadata, PACK_SERIES } from '../../../../../utils/grimoire/packNaming';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,14 +89,44 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
   const timing = getOptimalTiming(category);
   
   // Generate herbs list
-  const herbs = correspondences.herbs.map(herb => ({
+  const herbs = correspondences.herbs.map((herb: string) => ({
     name: herb,
     properties: getHerbProperties(herb, category),
     uses: getHerbUses(herb, category)
   }));
 
+  // Generate proper naming and metadata
+  const packMetadata: PackMetadata = {
+    category,
+    difficulty: 'intermediate',
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+    contentCount: {
+      spells: categorySpells.length,
+      crystals: allCrystals.length,
+      herbs: herbs.length,
+      rituals: includeRituals ? 1 : 0
+    }
+  };
+
+  const naming = generatePackNaming(packMetadata);
+  const seriesKey = determineSeriesKey(category);
+  const pricing = generatePricing(seriesKey, naming.edition);
+
   return {
-    title: `${category.charAt(0).toUpperCase() + category.slice(1)} Grimoire Pack`,
+    // Proper naming system
+    id: `pack-${naming.sku.toLowerCase()}`,
+    title: naming.title,
+    subtitle: naming.subtitle,
+    fullName: naming.fullName,
+    shortName: naming.shortName,
+    series: naming.series,
+    volume: naming.volume,
+    edition: naming.edition,
+    sku: naming.sku,
+    slug: naming.slug,
+    
+    // Legacy fields for compatibility
     category: category,
     description: getCategoryDescription(category),
     
@@ -145,7 +176,37 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
       'Work with focused intention and clear purpose',
       'Record your experiences and results in your grimoire',
       'Practice regularly to build your magical skills'
-    ]
+    ],
+    
+    // Pricing and shop metadata
+    pricing: {
+      amount: pricing,
+      currency: 'USD',
+      compareAtPrice: Math.round(pricing * 1.3) // Show original higher price
+    },
+    
+    // Shop categorization
+    shopMetadata: {
+      category: 'Digital Grimoire Packs',
+      subcategory: naming.series,
+      tags: [
+        category,
+        naming.series.toLowerCase().replace(/\s+/g, '-'),
+        naming.volume.toLowerCase().replace(/\s+/g, '-'),
+        `${categorySpells.length}-spells`,
+        `${allCrystals.length}-crystals`
+      ],
+      searchKeywords: [
+        category,
+        'grimoire',
+        'spells',
+        'crystals',
+        'magic',
+        'witchcraft',
+        naming.series.toLowerCase(),
+        ...correspondences.intentions
+      ]
+    }
   };
 }
 
@@ -309,4 +370,22 @@ function generateRituals(category: string) {
       ]
     }
   ];
+}
+
+function determineSeriesKey(category: string): keyof typeof PACK_SERIES {
+  const seriesMapping: { [key: string]: keyof typeof PACK_SERIES } = {
+    'protection': 'essential-grimoire',
+    'love': 'essential-grimoire',
+    'prosperity': 'essential-grimoire',
+    'healing': 'essential-grimoire',
+    'cleansing': 'daily-practice',
+    'divination': 'advanced-workings',
+    'manifestation': 'essential-grimoire',
+    'banishing': 'advanced-workings',
+    'moon': 'lunar-wisdom',
+    'crystals': 'crystal-mastery',
+    'seasonal': 'seasonal-magic'
+  };
+  
+  return seriesMapping[category] || 'essential-grimoire';
 }
