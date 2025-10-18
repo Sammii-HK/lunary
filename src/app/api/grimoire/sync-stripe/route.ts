@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     console.error('Stripe sync error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -46,21 +46,21 @@ async function createStripeProduct(pack: any) {
       packId: pack.id || generatePackId(pack.category, pack.title),
       category: pack.category,
       grimoireType: 'grimoire-pack',
-      
+
       // Content metadata
       spellCount: pack.spells?.length?.toString() || '0',
       crystalCount: pack.crystals?.length?.toString() || '0',
       herbCount: pack.herbs?.length?.toString() || '0',
-      
+
       // Timing metadata
       bestDays: JSON.stringify(pack.timing?.bestDays || []),
       moonPhase: pack.timing?.moonPhase || '',
       planetaryHour: pack.timing?.planetaryHour || '',
-      
+
       // Generation metadata
       createdFrom: 'grimoire-generator',
       generatedAt: new Date().toISOString(),
-      
+
       // Content hash for change detection
       contentHash: generateContentHash(pack),
     },
@@ -76,7 +76,8 @@ async function createStripeProduct(pack: any) {
       packId: product.metadata.packId,
       category: pack.category,
       difficulty: pack.difficulty || 'beginner-intermediate',
-      estimatedTime: pack.metadata?.estimatedTime || '15-45 minutes per practice',
+      estimatedTime:
+        pack.metadata?.estimatedTime || '15-45 minutes per practice',
     },
   });
 
@@ -147,7 +148,7 @@ async function syncAllProducts() {
   });
 
   const grimoireProducts = products.data.filter(
-    product => product.metadata?.grimoireType === 'grimoire-pack'
+    (product) => product.metadata?.grimoireType === 'grimoire-pack',
   );
 
   console.log(`Found ${grimoireProducts.length} grimoire products in Stripe`);
@@ -158,15 +159,17 @@ async function syncAllProducts() {
     limit: 100,
   });
 
-  const productDetails = grimoireProducts.map(product => {
-    const productPrices = prices.data.filter(price => price.product === product.id);
-    
+  const productDetails = grimoireProducts.map((product) => {
+    const productPrices = prices.data.filter(
+      (price) => price.product === product.id,
+    );
+
     return {
       id: product.id,
       name: product.name,
       description: product.description,
       metadata: product.metadata,
-      prices: productPrices.map(price => ({
+      prices: productPrices.map((price) => ({
         id: price.id,
         amount: price.unit_amount,
         currency: price.currency,
@@ -200,40 +203,49 @@ async function getStripeProducts() {
   });
 
   const grimoireProducts = products.data
-    .filter(product => product.metadata?.grimoireType === 'grimoire-pack')
-    .map(product => {
-      const productPrices = prices.data.filter(price => price.product === product.id);
-      
+    .filter((product) => product.metadata?.grimoireType === 'grimoire-pack')
+    .map((product) => {
+      const productPrices = prices.data.filter(
+        (price) => price.product === product.id,
+      );
+
       return {
         stripeProductId: product.id,
         stripePriceId: productPrices[0]?.id,
         title: product.name,
         description: product.description,
         category: product.metadata?.category,
-        
+
         // Reconstruct grimoire data from metadata
         spellCount: parseInt(product.metadata?.spellCount || '0'),
         crystalCount: parseInt(product.metadata?.crystalCount || '0'),
         herbCount: parseInt(product.metadata?.herbCount || '0'),
-        
+
         timing: {
-          bestDays: product.metadata?.bestDays ? JSON.parse(product.metadata.bestDays) : [],
+          bestDays: product.metadata?.bestDays
+            ? JSON.parse(product.metadata.bestDays)
+            : [],
           moonPhase: product.metadata?.moonPhase,
           planetaryHour: product.metadata?.planetaryHour,
         },
-        
+
         metadata: {
           price: productPrices[0]?.unit_amount || 249,
-          difficulty: productPrices[0]?.metadata?.difficulty || 'beginner-intermediate',
-          estimatedTime: productPrices[0]?.metadata?.estimatedTime || '15-45 minutes per practice',
+          difficulty:
+            productPrices[0]?.metadata?.difficulty || 'beginner-intermediate',
+          estimatedTime:
+            productPrices[0]?.metadata?.estimatedTime ||
+            '15-45 minutes per practice',
         },
-        
+
         isActive: product.active,
         createdAt: new Date(product.created * 1000).toISOString(),
-        updatedAt: product.updated ? new Date(product.updated * 1000).toISOString() : null,
-        
+        updatedAt: product.updated
+          ? new Date(product.updated * 1000).toISOString()
+          : null,
+
         // Stripe-specific data
-        prices: productPrices.map(price => ({
+        prices: productPrices.map((price) => ({
           id: price.id,
           amount: price.unit_amount,
           currency: price.currency,
@@ -251,7 +263,10 @@ async function getStripeProducts() {
 // Helper functions
 function generatePackId(category: string, title: string): string {
   const timestamp = Date.now();
-  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
   return `${category}-${slug}-${timestamp}`;
 }
 
@@ -263,14 +278,14 @@ function generateContentHash(pack: any): string {
     herbs: pack.herbs?.map((h: any) => h.name),
     correspondences: pack.correspondences,
   });
-  
+
   // Simple hash function (in production, use crypto.createHash)
   let hash = 0;
   for (let i = 0; i < contentString.length; i++) {
     const char = contentString.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
-  
+
   return Math.abs(hash).toString(36);
 }

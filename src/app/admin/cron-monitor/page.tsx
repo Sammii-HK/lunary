@@ -2,18 +2,24 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Clock, 
-  Play, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Clock,
+  Play,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   Calendar,
   Zap,
-  Activity
+  Activity,
 } from 'lucide-react';
 
 interface CronResult {
@@ -43,19 +49,25 @@ export default function CronMonitorPage() {
   const triggerDailyCron = async () => {
     setLoading(true);
     setLogs('🚀 Triggering daily cron job manually...\n');
-    
+
     try {
       const response = await fetch('/api/cron/test-daily-posts', {
-        method: 'GET'
+        method: 'GET',
       });
-      
+
       const result = await response.json();
       setLastResult(result.cronResult);
-      
-      setLogs(prev => prev + `\n✅ Cron job completed\n${JSON.stringify(result, null, 2)}`);
-      
+
+      setLogs(
+        (prev) =>
+          prev + `\n✅ Cron job completed\n${JSON.stringify(result, null, 2)}`,
+      );
     } catch (error) {
-      setLogs(prev => prev + `\n❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setLogs(
+        (prev) =>
+          prev +
+          `\n❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     } finally {
       setLoading(false);
     }
@@ -66,155 +78,191 @@ export default function CronMonitorPage() {
     try {
       // Check Vercel cron status (if available)
       setLogs('📊 Checking cron job status...\n');
-      
-      // For now, just show the schedule
+
+      // Show the consolidated schedule
       const cronSchedule = {
-        'daily-posts': '0 13 * * * (1 PM UTC daily)',
-        'moon-packs-monthly': '0 2 15 * * (2 AM UTC on 15th of each month)',
-        'moon-packs-quarterly': '0 3 15 1,4,7,10 * (3 AM UTC on 15th of Jan, Apr, Jul, Oct)',
-        'moon-packs-yearly': '0 4 1 7 * (4 AM UTC on July 1st)'
+        'master-cron': '0 13 * * * (1 PM UTC daily)',
+        'daily-posts': 'Every day - 5 posts across all platforms',
+        'weekly-blog': 'Sundays - Generate blog content and newsletter',
+        'monthly-moon-packs':
+          '15th of each month - Generate monthly moon packs',
+        'quarterly-moon-packs':
+          '15th of Jan/Apr/Jul/Oct - Generate quarterly packs',
+        'yearly-moon-packs': 'July 1st - Generate yearly packs',
       };
-      
-      setLogs(prev => prev + `\n📅 Cron Schedule:\n${Object.entries(cronSchedule).map(([name, schedule]) => `${name}: ${schedule}`).join('\n')}`);
-      
+
+      setLogs(
+        (prev) =>
+          prev +
+          `\n📅 Cron Schedule:\n${Object.entries(cronSchedule)
+            .map(([name, schedule]) => `${name}: ${schedule}`)
+            .join('\n')}`,
+      );
     } catch (error) {
-      setLogs(prev => prev + `\n❌ Error checking status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setLogs(
+        (prev) =>
+          prev +
+          `\n❌ Error checking status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <Activity className="h-8 w-8" />
+    <div className='container mx-auto py-8 px-4'>
+      <div className='mb-8'>
+        <h1 className='text-3xl font-bold mb-2 flex items-center gap-2'>
+          <Activity className='h-8 w-8' />
           Cron Job Monitor
         </h1>
-        <p className="text-muted-foreground">
+        <p className='text-muted-foreground'>
           Monitor and manually trigger scheduled tasks
         </p>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'>
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Zap className="h-5 w-5" />
+          <CardHeader className='pb-3'>
+            <CardTitle className='text-lg flex items-center gap-2'>
+              <Zap className='h-5 w-5' />
               Daily Posts
             </CardTitle>
             <CardDescription>Trigger daily social media posts</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={triggerDailyCron} 
+            <Button
+              onClick={triggerDailyCron}
               disabled={loading}
-              className="w-full"
+              className='w-full'
             >
-              <Play className="h-4 w-4 mr-2" />
+              <Play className='h-4 w-4 mr-2' />
               {loading ? 'Running...' : 'Trigger Now'}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+          <CardHeader className='pb-3'>
+            <CardTitle className='text-lg flex items-center gap-2'>
+              <Clock className='h-5 w-5' />
               Schedule Status
             </CardTitle>
             <CardDescription>Check cron job schedules</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={checkCronStatus} 
+            <Button
+              onClick={checkCronStatus}
               disabled={loading}
-              variant="outline"
-              className="w-full"
+              variant='outline'
+              className='w-full'
             >
-              <Calendar className="h-4 w-4 mr-2" />
+              <Calendar className='h-4 w-4 mr-2' />
               Check Status
             </Button>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Next Run</CardTitle>
-            <CardDescription>Daily posts cron schedule</CardDescription>
+          <CardHeader className='pb-3'>
+            <CardTitle className='text-lg'>Master Cron</CardTitle>
+            <CardDescription>Consolidated schedule</CardDescription>
           </CardHeader>
           <CardContent>
-            <Badge variant="secondary" className="w-full justify-center">
-              1 PM UTC Daily
-            </Badge>
+            <div className='space-y-2'>
+              <Badge variant='secondary' className='w-full justify-center'>
+                1 PM UTC Daily
+              </Badge>
+              <div className='text-xs text-muted-foreground text-center'>
+                + Weekly/Monthly tasks as needed
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Last Result */}
       {lastResult && (
-        <Card className="mb-6">
+        <Card className='mb-6'>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className='flex items-center gap-2'>
               {lastResult.success ? (
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className='h-5 w-5 text-green-500' />
               ) : (
-                <XCircle className="h-5 w-5 text-red-500" />
+                <XCircle className='h-5 w-5 text-red-500' />
               )}
               Last Execution Result
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-4">{lastResult.message}</p>
-            
+            <p className='mb-4'>{lastResult.message}</p>
+
             {lastResult.summary && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{lastResult.summary.total}</div>
-                  <div className="text-sm text-muted-foreground">Total Posts</div>
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
+                <div className='text-center'>
+                  <div className='text-2xl font-bold'>
+                    {lastResult.summary.total}
+                  </div>
+                  <div className='text-sm text-muted-foreground'>
+                    Total Posts
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{lastResult.summary.successful}</div>
-                  <div className="text-sm text-muted-foreground">Successful</div>
+                <div className='text-center'>
+                  <div className='text-2xl font-bold text-green-600'>
+                    {lastResult.summary.successful}
+                  </div>
+                  <div className='text-sm text-muted-foreground'>
+                    Successful
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">{lastResult.summary.failed}</div>
-                  <div className="text-sm text-muted-foreground">Failed</div>
+                <div className='text-center'>
+                  <div className='text-2xl font-bold text-red-600'>
+                    {lastResult.summary.failed}
+                  </div>
+                  <div className='text-sm text-muted-foreground'>Failed</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{lastResult.summary.successRate}</div>
-                  <div className="text-sm text-muted-foreground">Success Rate</div>
+                <div className='text-center'>
+                  <div className='text-2xl font-bold'>
+                    {lastResult.summary.successRate}
+                  </div>
+                  <div className='text-sm text-muted-foreground'>
+                    Success Rate
+                  </div>
                 </div>
               </div>
             )}
 
             {lastResult.results && (
-              <div className="space-y-2">
-                <h4 className="font-semibold">Post Results:</h4>
+              <div className='space-y-2'>
+                <h4 className='font-semibold'>Post Results:</h4>
                 {lastResult.results.map((result, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={index}
+                    className='flex items-center justify-between p-3 border rounded-lg'
+                  >
                     <div>
-                      <div className="font-medium">{result.name}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className='font-medium'>{result.name}</div>
+                      <div className='text-sm text-muted-foreground'>
                         {result.platforms.join(', ')}
                       </div>
                       {result.scheduledDate && (
-                        <div className="text-xs text-muted-foreground">
-                          Scheduled: {new Date(result.scheduledDate).toLocaleString()}
+                        <div className='text-xs text-muted-foreground'>
+                          Scheduled:{' '}
+                          {new Date(result.scheduledDate).toLocaleString()}
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className='flex items-center gap-2'>
                       {result.status === 'success' ? (
                         <>
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          <Badge variant="secondary">Success</Badge>
+                          <CheckCircle className='h-4 w-4 text-green-500' />
+                          <Badge variant='secondary'>Success</Badge>
                         </>
                       ) : (
                         <>
-                          <XCircle className="h-4 w-4 text-red-500" />
-                          <Badge variant="destructive">Failed</Badge>
+                          <XCircle className='h-4 w-4 text-red-500' />
+                          <Badge variant='destructive'>Failed</Badge>
                         </>
                       )}
                     </div>
@@ -229,8 +277,8 @@ export default function CronMonitorPage() {
       {/* Logs */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5" />
+          <CardTitle className='flex items-center gap-2'>
+            <AlertCircle className='h-5 w-5' />
             Execution Logs
           </CardTitle>
         </CardHeader>
@@ -238,14 +286,14 @@ export default function CronMonitorPage() {
           <Textarea
             value={logs}
             readOnly
-            placeholder="Logs will appear here when you trigger cron jobs..."
-            className="min-h-[300px] font-mono text-sm"
+            placeholder='Logs will appear here when you trigger cron jobs...'
+            className='min-h-[300px] font-mono text-sm'
           />
           {logs && (
             <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
+              variant='outline'
+              size='sm'
+              className='mt-2'
               onClick={() => setLogs('')}
             >
               Clear Logs
@@ -255,15 +303,36 @@ export default function CronMonitorPage() {
       </Card>
 
       {/* Troubleshooting Tips */}
-      <Card className="mt-6">
+      <Card className='mt-6'>
         <CardHeader>
           <CardTitle>Troubleshooting Tips</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <p><strong>Only getting 1 post?</strong> Check that all 5 posts are being sent to Succulent with proper scheduled times.</p>
-          <p><strong>Posts not appearing?</strong> Verify your SUCCULENT_SECRET_KEY and SUCCULENT_ACCOUNT_GROUP_ID environment variables.</p>
-          <p><strong>Image errors?</strong> Check that your OG image endpoints are working: /api/og/cosmic, /api/og/crystal, etc.</p>
-          <p><strong>Timing issues?</strong> The cron runs at 1 PM UTC and schedules posts for 2 PM, 5 PM, 8 PM, 11 PM, and 2 AM UTC.</p>
+        <CardContent className='space-y-2 text-sm'>
+          <p>
+            <strong>Only getting 1 post?</strong> Check that all 5 posts are
+            being sent to Succulent with proper scheduled times.
+          </p>
+          <p>
+            <strong>Posts not appearing?</strong> Verify your
+            SUCCULENT_SECRET_KEY and SUCCULENT_ACCOUNT_GROUP_ID environment
+            variables.
+          </p>
+          <p>
+            <strong>Image errors?</strong> Check that your OG image endpoints
+            are working: /api/og/cosmic, /api/og/crystal, etc.
+          </p>
+          <p>
+            <strong>Timing issues?</strong> The master cron runs at 1 PM UTC
+            daily and handles multiple tasks based on the date.
+          </p>
+          <p>
+            <strong>Weekly content?</strong> Blog posts and newsletters are
+            generated every Sunday automatically.
+          </p>
+          <p>
+            <strong>Moon packs?</strong> Generated on the 15th of each month,
+            with quarterly and yearly variants.
+          </p>
         </CardContent>
       </Card>
     </div>

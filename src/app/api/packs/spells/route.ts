@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { crystalDatabase, getCrystalsByCategory, getCrystalsByIntention } from '../../../../constants/grimoire/crystals';
-import { spellDatabase, getSpellsByCategory } from '../../../../constants/grimoire/spells';
+import {
+  crystalDatabase,
+  getCrystalsByCategory,
+  getCrystalsByIntention,
+} from '../../../../constants/grimoire/crystals';
+import {
+  spellDatabase,
+  getSpellsByCategory,
+} from '../../../../constants/grimoire/spells';
 import { wiccanWeek } from '../../../../constants/weekDays';
 import { wheelOfTheYearSabbats } from '../../../../constants/sabbats';
-import { generatePackNaming, generatePricing, PackMetadata, PACK_SERIES } from '../../../../../utils/grimoire/packNaming';
+import {
+  generatePackNaming,
+  generatePricing,
+  PackMetadata,
+  PACK_SERIES,
+} from '../../../../../utils/grimoire/packNaming';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,17 +28,29 @@ export async function GET(request: NextRequest) {
     const includeRituals = searchParams.get('rituals') === 'true';
 
     // Validate category
-    const validCategories = ['protection', 'love', 'prosperity', 'healing', 'courage', 'moon', 'banishing', 'cleansing'];
+    const validCategories = [
+      'protection',
+      'love',
+      'prosperity',
+      'healing',
+      'courage',
+      'moon',
+      'banishing',
+      'cleansing',
+    ];
     if (!validCategories.includes(category)) {
       return NextResponse.json(
-        { error: 'Invalid category. Valid options: ' + validCategories.join(', ') },
-        { status: 400 }
+        {
+          error:
+            'Invalid category. Valid options: ' + validCategories.join(', '),
+        },
+        { status: 400 },
       );
     }
 
     // Generate spell pack content using grimoire database
     const spellPack = generateGrimoirePack(category, includeRituals);
-    
+
     // Add metadata for shop
     const packWithMetadata = {
       ...spellPack,
@@ -37,8 +61,8 @@ export async function GET(request: NextRequest) {
         bundleGroup: 'Grimoire Series',
         subscriptionEligible: true,
         difficulty: 'beginner-intermediate',
-        estimatedTime: '15-45 minutes per practice'
-      }
+        estimatedTime: '15-45 minutes per practice',
+      },
     };
 
     if (format === 'pdf') {
@@ -47,52 +71,55 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...packWithMetadata,
         downloadFormat: 'pdf',
-        note: 'PDF generation coming soon - this is structured data ready for PDF conversion'
+        note: 'PDF generation coming soon - this is structured data ready for PDF conversion',
       });
     }
 
     return NextResponse.json(packWithMetadata);
-
   } catch (error) {
     console.error('Spell pack generation error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate spell pack',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // Generate comprehensive pack using grimoire database
-async function generateGrimoirePack(category: string, includeRituals: boolean = false) {
+async function generateGrimoirePack(
+  category: string,
+  includeRituals: boolean = false,
+) {
   // Get spells from grimoire database
   const categorySpells = getSpellsByCategory(category);
-  
+
   // Get crystals from grimoire database
   const crystalCategory = getCrystalCategoryName(category);
   const categoryCrystals = getCrystalsByCategory(crystalCategory);
   const intentionCrystals = getCrystalsByIntention(category);
-  
+
   // Combine and deduplicate crystals
   const allCrystals = [...categoryCrystals, ...intentionCrystals]
-    .filter((crystal, index, self) => 
-      index === self.findIndex(c => c.id === crystal.id)
+    .filter(
+      (crystal, index, self) =>
+        index === self.findIndex((c) => c.id === crystal.id),
     )
     .slice(0, 8);
 
   // Generate correspondences
   const correspondences = getGrimoireCorrespondences(category);
-  
+
   // Generate timing recommendations
   const timing = getOptimalTiming(category);
-  
+
   // Generate herbs list
   const herbs = correspondences.herbs.map((herb: string) => ({
     name: herb,
     properties: getHerbProperties(herb, category),
-    uses: getHerbUses(herb, category)
+    uses: getHerbUses(herb, category),
   }));
 
   // Generate proper naming and metadata
@@ -105,8 +132,8 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
       spells: categorySpells.length,
       crystals: allCrystals.length,
       herbs: herbs.length,
-      rituals: includeRituals ? 1 : 0
-    }
+      rituals: includeRituals ? 1 : 0,
+    },
   };
 
   const naming = generatePackNaming(packMetadata);
@@ -125,13 +152,13 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
     edition: naming.edition,
     sku: naming.sku,
     slug: naming.slug,
-    
+
     // Legacy fields for compatibility
     category: category,
     description: getCategoryDescription(category),
-    
+
     // Core content from grimoire
-    spells: categorySpells.map(spell => ({
+    spells: categorySpells.map((spell) => ({
       id: spell.id,
       title: spell.title,
       purpose: spell.purpose,
@@ -140,10 +167,10 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
       materials: spell.materials,
       steps: spell.steps,
       correspondences: spell.correspondences,
-      timing: spell.timing
+      timing: spell.timing,
     })),
-    
-    crystals: allCrystals.map(crystal => ({
+
+    crystals: allCrystals.map((crystal) => ({
       name: crystal.name,
       properties: crystal.properties.join(', '),
       chakra: crystal.chakras.join(', '),
@@ -151,23 +178,23 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
       intentions: crystal.intentions,
       colors: crystal.colors,
       usage: `Use during ${category} work or place on altar for enhanced energy`,
-      workingWith: crystal.workingWith
+      workingWith: crystal.workingWith,
     })),
-    
+
     correspondences: correspondences,
     timing: timing,
     herbs: herbs,
-    
+
     ...(includeRituals && { rituals: generateRituals(category) }),
-    
+
     ethics: [
       'Always consider the ethical implications of your magical work',
       'Respect free will - avoid manipulative magic',
       'Work for the highest good of all involved',
       'Take responsibility for your magical actions',
-      'Practice with respect for nature and all beings'
+      'Practice with respect for nature and all beings',
     ],
-    
+
     howToUse: [
       'Study the correspondences to understand the energy patterns',
       'Choose spells and crystals that resonate with your specific need',
@@ -175,16 +202,16 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
       'Prepare your space and materials mindfully',
       'Work with focused intention and clear purpose',
       'Record your experiences and results in your grimoire',
-      'Practice regularly to build your magical skills'
+      'Practice regularly to build your magical skills',
     ],
-    
+
     // Pricing and shop metadata
     pricing: {
       amount: pricing,
       currency: 'USD',
-      compareAtPrice: Math.round(pricing * 1.3) // Show original higher price
+      compareAtPrice: Math.round(pricing * 1.3), // Show original higher price
     },
-    
+
     // Shop categorization
     shopMetadata: {
       category: 'Digital Grimoire Packs',
@@ -194,7 +221,7 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
         naming.series.toLowerCase().replace(/\s+/g, '-'),
         naming.volume.toLowerCase().replace(/\s+/g, '-'),
         `${categorySpells.length}-spells`,
-        `${allCrystals.length}-crystals`
+        `${allCrystals.length}-crystals`,
       ],
       searchKeywords: [
         category,
@@ -204,22 +231,22 @@ async function generateGrimoirePack(category: string, includeRituals: boolean = 
         'magic',
         'witchcraft',
         naming.series.toLowerCase(),
-        ...correspondences.intentions
-      ]
-    }
+        ...correspondences.intentions,
+      ],
+    },
   };
 }
 
 function getCrystalCategoryName(category: string): string {
   const categoryMap: { [key: string]: string } = {
-    'protection': 'Protection & Grounding',
-    'love': 'Love & Heart Healing',
-    'prosperity': 'Manifestation & Abundance',
-    'healing': 'Healing & Wellness',
-    'cleansing': 'Healing & Wellness',
-    'divination': 'Spiritual & Intuitive',
-    'manifestation': 'Manifestation & Abundance',
-    'banishing': 'Protection & Grounding'
+    protection: 'Protection & Grounding',
+    love: 'Love & Heart Healing',
+    prosperity: 'Manifestation & Abundance',
+    healing: 'Healing & Wellness',
+    cleansing: 'Healing & Wellness',
+    divination: 'Spiritual & Intuitive',
+    manifestation: 'Manifestation & Abundance',
+    banishing: 'Protection & Grounding',
   };
   return categoryMap[category] || 'Protection & Grounding';
 }
@@ -234,7 +261,7 @@ function getGrimoireCorrespondences(category: string) {
       days: ['Tuesday', 'Saturday', 'Sunday'],
       moonPhases: ['Waning Moon', 'New Moon'],
       numbers: [1, 3, 7, 9],
-      intentions: ['protection', 'banishing', 'shielding', 'warding']
+      intentions: ['protection', 'banishing', 'shielding', 'warding'],
     },
     love: {
       colors: ['Pink', 'Red', 'Green', 'Rose', 'Copper'],
@@ -244,7 +271,7 @@ function getGrimoireCorrespondences(category: string) {
       days: ['Friday', 'Monday'],
       moonPhases: ['Waxing Moon', 'Full Moon'],
       numbers: [2, 6, 7],
-      intentions: ['love', 'romance', 'self-love', 'relationships']
+      intentions: ['love', 'romance', 'self-love', 'relationships'],
     },
     prosperity: {
       colors: ['Green', 'Gold', 'Silver', 'Brown', 'Yellow'],
@@ -254,7 +281,7 @@ function getGrimoireCorrespondences(category: string) {
       days: ['Thursday', 'Sunday', 'Friday'],
       moonPhases: ['New Moon', 'Waxing Moon'],
       numbers: [3, 8, 9],
-      intentions: ['abundance', 'wealth', 'success', 'manifestation']
+      intentions: ['abundance', 'wealth', 'success', 'manifestation'],
     },
     healing: {
       colors: ['Blue', 'Green', 'White', 'Light Blue', 'Violet'],
@@ -264,74 +291,101 @@ function getGrimoireCorrespondences(category: string) {
       days: ['Sunday', 'Monday', 'Wednesday'],
       moonPhases: ['Full Moon', 'Waxing Moon'],
       numbers: [4, 6, 9],
-      intentions: ['healing', 'wellness', 'restoration', 'balance']
-    }
+      intentions: ['healing', 'wellness', 'restoration', 'balance'],
+    },
   };
-  
+
   return correspondences[category] || correspondences.protection;
 }
 
 function getCategoryDescription(category: string): string {
   const descriptions = {
-    protection: 'Essential practices for creating energetic shields, cleansing spaces, and maintaining spiritual boundaries using time-honored grimoire wisdom.',
+    protection:
+      'Essential practices for creating energetic shields, cleansing spaces, and maintaining spiritual boundaries using time-honored grimoire wisdom.',
     love: 'Heart-opening practices for self-love, relationships, and attracting loving connections, drawn from traditional love magic.',
-    prosperity: 'Abundance magic to attract wealth, opportunities, and material success through focused intention and natural correspondences.',
-    healing: 'Restorative practices for physical, emotional, and spiritual healing using crystal and herbal wisdom.',
-    cleansing: 'Purification rituals for clearing negative energy from spaces, objects, and self using traditional methods.',
-    divination: 'Practices for enhancing psychic abilities and gaining insight through crystal and herbal allies.',
-    manifestation: 'Powerful techniques for bringing desires and goals into reality using natural magical correspondences.',
-    banishing: 'Traditional methods for removing negative influences, breaking bad habits, and clearing obstacles.'
+    prosperity:
+      'Abundance magic to attract wealth, opportunities, and material success through focused intention and natural correspondences.',
+    healing:
+      'Restorative practices for physical, emotional, and spiritual healing using crystal and herbal wisdom.',
+    cleansing:
+      'Purification rituals for clearing negative energy from spaces, objects, and self using traditional methods.',
+    divination:
+      'Practices for enhancing psychic abilities and gaining insight through crystal and herbal allies.',
+    manifestation:
+      'Powerful techniques for bringing desires and goals into reality using natural magical correspondences.',
+    banishing:
+      'Traditional methods for removing negative influences, breaking bad habits, and clearing obstacles.',
   };
-  
-  return descriptions[category as keyof typeof descriptions] || 'A collection of focused magical practices from grimoire traditions.';
+
+  return (
+    descriptions[category as keyof typeof descriptions] ||
+    'A collection of focused magical practices from grimoire traditions.'
+  );
 }
 
 function getOptimalTiming(category: string) {
   const correspondences = getGrimoireCorrespondences(category);
-  
+
   return {
     bestDays: correspondences.days,
     planetaryHour: `${correspondences.planets[0]} hour for enhanced power`,
-    moonPhase: correspondences.moonPhases[0] || 'Any phase with clear intention',
-    seasonalNote: getSeasonalRecommendation(category)
+    moonPhase:
+      correspondences.moonPhases[0] || 'Any phase with clear intention',
+    seasonalNote: getSeasonalRecommendation(category),
   };
 }
 
 function getSeasonalRecommendation(category: string): string {
   const currentMonth = new Date().getMonth();
-  const seasons = ['Winter', 'Winter', 'Spring', 'Spring', 'Spring', 'Summer', 'Summer', 'Summer', 'Autumn', 'Autumn', 'Autumn', 'Winter'];
+  const seasons = [
+    'Winter',
+    'Winter',
+    'Spring',
+    'Spring',
+    'Spring',
+    'Summer',
+    'Summer',
+    'Summer',
+    'Autumn',
+    'Autumn',
+    'Autumn',
+    'Winter',
+  ];
   const currentSeason = seasons[currentMonth];
-  
+
   const seasonalNotes: { [key: string]: { [key: string]: string } } = {
     protection: {
-      'Spring': 'Spring energy supports new protective barriers and fresh starts',
-      'Summer': 'Solar energy enhances protective shields and strength',
-      'Autumn': 'Harvest season perfect for banishing and clearing',
-      'Winter': 'Introspective energy ideal for deep protection work'
+      Spring: 'Spring energy supports new protective barriers and fresh starts',
+      Summer: 'Solar energy enhances protective shields and strength',
+      Autumn: 'Harvest season perfect for banishing and clearing',
+      Winter: 'Introspective energy ideal for deep protection work',
     },
     love: {
-      'Spring': 'New growth energy perfect for attracting new love',
-      'Summer': 'Passionate solar energy enhances romantic connections',
-      'Autumn': 'Harvest energy brings relationships to fruition',
-      'Winter': 'Reflective time for self-love and inner healing'
-    }
+      Spring: 'New growth energy perfect for attracting new love',
+      Summer: 'Passionate solar energy enhances romantic connections',
+      Autumn: 'Harvest energy brings relationships to fruition',
+      Winter: 'Reflective time for self-love and inner healing',
+    },
   };
-  
-  return seasonalNotes[category]?.[currentSeason] || `${currentSeason} energy supports this work naturally`;
+
+  return (
+    seasonalNotes[category]?.[currentSeason] ||
+    `${currentSeason} energy supports this work naturally`
+  );
 }
 
 function getHerbProperties(herb: string, category: string): string {
   const herbProperties: { [key: string]: string } = {
-    'Sage': 'Purification, wisdom, protection, cleansing negative energy',
-    'Rosemary': 'Memory, protection, love, mental clarity, remembrance',
-    'Basil': 'Prosperity, love, protection, happiness, abundance',
+    Sage: 'Purification, wisdom, protection, cleansing negative energy',
+    Rosemary: 'Memory, protection, love, mental clarity, remembrance',
+    Basil: 'Prosperity, love, protection, happiness, abundance',
     'Bay Leaves': 'Success, protection, psychic powers, wishes, divination',
-    'Cinnamon': 'Success, healing, power, love, prosperity, protection',
-    'Lavender': 'Love, protection, sleep, peace, happiness, purification',
-    'Rose': 'Love, psychic powers, healing, love divination, luck, protection',
-    'Jasmine': 'Love, money, prophetic dreams, spiritual love'
+    Cinnamon: 'Success, healing, power, love, prosperity, protection',
+    Lavender: 'Love, protection, sleep, peace, happiness, purification',
+    Rose: 'Love, psychic powers, healing, love divination, luck, protection',
+    Jasmine: 'Love, money, prophetic dreams, spiritual love',
   };
-  
+
   return herbProperties[herb] || `Powerful herb for ${category} work`;
 }
 
@@ -341,7 +395,7 @@ function getHerbUses(herb: string, category: string): string[] {
     'Burn as incense during rituals',
     'Use in ritual baths',
     'Sprinkle around sacred space',
-    'Infuse in oils for anointing'
+    'Infuse in oils for anointing',
   ];
 }
 
@@ -352,12 +406,19 @@ function generateRituals(category: string) {
       description: `A complete ceremonial approach to ${category} work using grimoire traditions`,
       duration: '45-60 minutes',
       participants: '1 or group',
-      materials: ['Altar setup', 'Candles', 'Incense', 'Ritual tools', 'Crystals', 'Herbs'],
+      materials: [
+        'Altar setup',
+        'Candles',
+        'Incense',
+        'Ritual tools',
+        'Crystals',
+        'Herbs',
+      ],
       preparation: [
         'Cleanse and consecrate your space',
         'Set up altar with appropriate correspondences',
         'Gather all materials mindfully',
-        'Center yourself through meditation'
+        'Center yourself through meditation',
       ],
       steps: [
         'Cast protective circle using traditional methods',
@@ -366,26 +427,26 @@ function generateRituals(category: string) {
         'Work with chosen spells, crystals, and herbs',
         'Raise and direct energy toward your goal',
         'Thank all energies and entities involved',
-        'Close circle and ground excess energy'
-      ]
-    }
+        'Close circle and ground excess energy',
+      ],
+    },
   ];
 }
 
 function determineSeriesKey(category: string): keyof typeof PACK_SERIES {
   const seriesMapping: { [key: string]: keyof typeof PACK_SERIES } = {
-    'protection': 'essential-grimoire',
-    'love': 'essential-grimoire',
-    'prosperity': 'essential-grimoire',
-    'healing': 'essential-grimoire',
-    'cleansing': 'daily-practice',
-    'divination': 'advanced-workings',
-    'manifestation': 'essential-grimoire',
-    'banishing': 'advanced-workings',
-    'moon': 'lunar-wisdom',
-    'crystals': 'crystal-mastery',
-    'seasonal': 'seasonal-magic'
+    protection: 'essential-grimoire',
+    love: 'essential-grimoire',
+    prosperity: 'essential-grimoire',
+    healing: 'essential-grimoire',
+    cleansing: 'daily-practice',
+    divination: 'advanced-workings',
+    manifestation: 'essential-grimoire',
+    banishing: 'advanced-workings',
+    moon: 'lunar-wisdom',
+    crystals: 'crystal-mastery',
+    seasonal: 'seasonal-magic',
   };
-  
+
   return seriesMapping[category] || 'essential-grimoire';
 }

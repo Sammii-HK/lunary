@@ -71,9 +71,33 @@ export async function GET(request: NextRequest) {
 
   // Define responsive sizes and styles
   const sizes = {
-    square: { width: 1200, height: 1200, padding: '60px 40px', titleSize: 24, contentSize: 36, dateSize: 28, footerSize: 28 },
-    portrait: { width: 1080, height: 1920, padding: '80px 60px', titleSize: 32, contentSize: 44, dateSize: 36, footerSize: 36 },
-    landscape: { width: 1920, height: 1080, padding: '40px 80px', titleSize: 20, contentSize: 28, dateSize: 24, footerSize: 24 }
+    square: {
+      width: 1200,
+      height: 1200,
+      padding: '60px 40px',
+      titleSize: 24,
+      contentSize: 36,
+      dateSize: 28,
+      footerSize: 28,
+    },
+    portrait: {
+      width: 1080,
+      height: 1920,
+      padding: '80px 60px',
+      titleSize: 32,
+      contentSize: 44,
+      dateSize: 36,
+      footerSize: 36,
+    },
+    landscape: {
+      width: 1920,
+      height: 1080,
+      padding: '40px 80px',
+      titleSize: 20,
+      contentSize: 28,
+      dateSize: 24,
+      footerSize: 24,
+    },
   };
 
   const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;

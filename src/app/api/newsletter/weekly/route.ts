@@ -1,28 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateWeeklyContent, WeeklyCosmicData } from '../../../../../utils/blog/weeklyContentGenerator';
+import {
+  generateWeeklyContent,
+  WeeklyCosmicData,
+} from '../../../../../utils/blog/weeklyContentGenerator';
 
 export const dynamic = 'force-dynamic';
 
 // Weekly newsletter generation and distribution
 export async function POST(request: NextRequest) {
   try {
-    const { 
-      send = false, 
+    const {
+      send = false,
       testEmail = null,
       customSubject = null,
-      weekOffset = 0 // 0 = this week, 1 = next week, -1 = last week
+      weekOffset = 0, // 0 = this week, 1 = next week, -1 = last week
     } = await request.json();
 
-    console.log(`📧 Generating weekly newsletter (weekOffset: ${weekOffset}, send: ${send})`);
+    console.log(
+      `📧 Generating weekly newsletter (weekOffset: ${weekOffset}, send: ${send})`,
+    );
 
     // Calculate target week
     const today = new Date();
-    const targetDate = new Date(today.getTime() + (weekOffset * 7 * 24 * 60 * 60 * 1000));
-    
+    const targetDate = new Date(
+      today.getTime() + weekOffset * 7 * 24 * 60 * 60 * 1000,
+    );
+
     // Get start of week (Monday)
     const dayOfWeek = targetDate.getDay();
     const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const weekStart = new Date(targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000);
+    const weekStart = new Date(
+      targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+    );
 
     // Generate weekly cosmic content
     const weeklyData = await generateWeeklyContent(weekStart);
@@ -33,12 +42,12 @@ export async function POST(request: NextRequest) {
     if (send) {
       // Send newsletter (implement with your preferred email service)
       const emailResult = await sendNewsletter(newsletter, testEmail);
-      
+
       return NextResponse.json({
         success: true,
-        message: testEmail ? 
-          `Test newsletter sent to ${testEmail}` : 
-          `Newsletter sent to subscriber list`,
+        message: testEmail
+          ? `Test newsletter sent to ${testEmail}`
+          : `Newsletter sent to subscriber list`,
         data: {
           subject: newsletter.subject,
           recipients: emailResult.recipients,
@@ -46,9 +55,11 @@ export async function POST(request: NextRequest) {
             title: weeklyData.title,
             weekNumber: weeklyData.weekNumber,
             year: weeklyData.year,
-            majorEvents: weeklyData.planetaryHighlights.length + weeklyData.retrogradeChanges.length
-          }
-        }
+            majorEvents:
+              weeklyData.planetaryHighlights.length +
+              weeklyData.retrogradeChanges.length,
+          },
+        },
       });
     }
 
@@ -69,20 +80,19 @@ export async function POST(request: NextRequest) {
             planetaryHighlights: weeklyData.planetaryHighlights.length,
             retrogradeChanges: weeklyData.retrogradeChanges.length,
             majorAspects: weeklyData.majorAspects.length,
-            moonPhases: weeklyData.moonPhases.length
-          }
-        }
-      }
+            moonPhases: weeklyData.moonPhases.length,
+          },
+        },
+      },
     });
-
   } catch (error) {
     console.error('Newsletter generation error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate newsletter',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -92,23 +102,29 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const weekOffset = parseInt(searchParams.get('week') || '0');
-    
+
     // Generate preview without sending
     const response = await fetch(request.url.replace('/GET', '/POST'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ send: false, weekOffset })
+      body: JSON.stringify({ send: false, weekOffset }),
     });
 
     return response;
   } catch (error) {
-    return NextResponse.json({ error: 'Preview generation failed' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Preview generation failed' },
+      { status: 500 },
+    );
   }
 }
 
-function generateNewsletterHTML(data: WeeklyCosmicData, customSubject?: string): { subject: string; html: string; text: string } {
+function generateNewsletterHTML(
+  data: WeeklyCosmicData,
+  customSubject?: string,
+): { subject: string; html: string; text: string } {
   const weekRange = `${data.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${data.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
-  
+
   const subject = customSubject || `${data.title} | ${weekRange}`;
 
   const html = `
@@ -249,21 +265,33 @@ function generateNewsletterHTML(data: WeeklyCosmicData, customSubject?: string):
             ${data.summary}
         </div>
 
-        ${data.planetaryHighlights.length > 0 ? `
+        ${
+          data.planetaryHighlights.length > 0
+            ? `
         <h2><span class="emoji">🌟</span>Major Planetary Movements</h2>
-        ${data.planetaryHighlights.map((highlight: any) => `
+        ${data.planetaryHighlights
+          .map(
+            (highlight: any) => `
         <div class="event">
             <div class="date">${highlight.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
             <h3>${highlight.planet} ${highlight.event.replace('-', ' ')}</h3>
             <div class="significance">${highlight.significance} significance</div>
             <p>${highlight.description}</p>
         </div>
-        `).join('')}
-        ` : ''}
+        `,
+          )
+          .join('')}
+        `
+            : ''
+        }
 
-        ${data.retrogradeChanges.length > 0 ? `
+        ${
+          data.retrogradeChanges.length > 0
+            ? `
         <h2><span class="emoji">♻️</span>Retrograde Activity</h2>
-        ${data.retrogradeChanges.map((change: any) => `
+        ${data.retrogradeChanges
+          .map(
+            (change: any) => `
         <div class="event">
             <div class="date">${change.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
             <h3>${change.planet} ${change.action === 'begins' ? 'Stations Retrograde' : 'Stations Direct'}</h3>
@@ -272,46 +300,70 @@ function generateNewsletterHTML(data: WeeklyCosmicData, customSubject?: string):
                 <strong>Guidance:</strong> ${change.guidance}
             </div>
         </div>
-        `).join('')}
-        ` : ''}
+        `,
+          )
+          .join('')}
+        `
+            : ''
+        }
 
-        ${data.moonPhases.length > 0 ? `
+        ${
+          data.moonPhases.length > 0
+            ? `
         <h2><span class="emoji">🌙</span>Lunar Phases</h2>
-        ${data.moonPhases.map((phase: any) => `
+        ${data.moonPhases
+          .map(
+            (phase: any) => `
         <div class="event">
             <div class="date">${phase.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${phase.time}</div>
             <h3>${phase.phase} in ${phase.sign}</h3>
             <p><strong>Energy:</strong> ${phase.energy}</p>
             <div class="guidance">${phase.guidance}</div>
-            ${phase.ritualSuggestions.length > 0 ? `
+            ${
+              phase.ritualSuggestions.length > 0
+                ? `
             <div style="margin-top: 10px;">
                 <strong>Ritual Ideas:</strong>
                 <ul>${phase.ritualSuggestions.map((suggestion: string) => `<li>${suggestion}</li>`).join('')}</ul>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
-        `).join('')}
-        ` : ''}
+        `,
+          )
+          .join('')}
+        `
+            : ''
+        }
 
         <h2><span class="emoji">💎</span>Weekly Crystal Companions</h2>
         <div>
-            ${data.crystalRecommendations.map((crystal: any) => `
+            ${data.crystalRecommendations
+              .map(
+                (crystal: any) => `
             <div class="crystal-day">
                 <span class="crystal-name">${crystal.crystal}</span>
                 <span>${crystal.date.toLocaleDateString('en-US', { weekday: 'long' })}: ${crystal.reason}</span>
             </div>
-            `).join('')}
+            `,
+              )
+              .join('')}
         </div>
 
         <h2><span class="emoji">📅</span>Best Days For...</h2>
         <div>
-            ${Object.entries(data.bestDaysFor).map(([activity, guidance]: [string, any]) => `
+            ${Object.entries(data.bestDaysFor)
+              .map(
+                ([activity, guidance]: [string, any]) => `
             <div style="margin: 10px 0;">
                 <strong>${activity.charAt(0).toUpperCase() + activity.slice(1)}:</strong> 
                 ${(guidance as any).dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')} 
                 <br><em>${(guidance as any).reason}</em>
             </div>
-            `).join('')}
+            `,
+              )
+              .join('')}
         </div>
 
         <div class="cta">
@@ -345,42 +397,62 @@ ${data.summary}
 
 MAJOR PLANETARY MOVEMENTS
 ========================
-${data.planetaryHighlights.map((highlight: any) => 
-  `${highlight.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${highlight.planet} ${highlight.event.replace('-', ' ')}
+${data.planetaryHighlights
+  .map(
+    (highlight: any) =>
+      `${highlight.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${highlight.planet} ${highlight.event.replace('-', ' ')}
 ${highlight.description}
 Significance: ${highlight.significance}
-`).join('\n')}
+`,
+  )
+  .join('\n')}
 
 RETROGRADE ACTIVITY
 ==================
-${data.retrogradeChanges.map((change: any) =>
-  `${change.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${change.planet} ${change.action === 'begins' ? 'stations retrograde' : 'stations direct'} in ${change.sign}
+${data.retrogradeChanges
+  .map(
+    (change: any) =>
+      `${change.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${change.planet} ${change.action === 'begins' ? 'stations retrograde' : 'stations direct'} in ${change.sign}
 ${change.significance}
 Guidance: ${change.guidance}
-`).join('\n')}
+`,
+  )
+  .join('\n')}
 
 LUNAR PHASES
 ============
-${data.moonPhases.map((phase: any) =>
-  `${phase.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${phase.time}: ${phase.phase} in ${phase.sign}
+${data.moonPhases
+  .map(
+    (phase: any) =>
+      `${phase.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${phase.time}: ${phase.phase} in ${phase.sign}
 Energy: ${phase.energy}
 Guidance: ${phase.guidance}
-`).join('\n')}
+`,
+  )
+  .join('\n')}
 
 WEEKLY CRYSTAL COMPANIONS
 ========================
-${data.crystalRecommendations.map((crystal: any) =>
-  `${crystal.date.toLocaleDateString('en-US', { weekday: 'long' })}: ${crystal.crystal}
+${data.crystalRecommendations
+  .map(
+    (crystal: any) =>
+      `${crystal.date.toLocaleDateString('en-US', { weekday: 'long' })}: ${crystal.crystal}
 ${crystal.reason}
 Usage: ${crystal.usage}
-`).join('\n')}
+`,
+  )
+  .join('\n')}
 
 BEST DAYS FOR...
 ===============
-${Object.entries(data.bestDaysFor).map(([activity, guidance]: [string, any]) =>
-  `${activity.toUpperCase()}: ${(guidance as any).dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')}
+${Object.entries(data.bestDaysFor)
+  .map(
+    ([activity, guidance]: [string, any]) =>
+      `${activity.toUpperCase()}: ${(guidance as any).dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')}
 ${(guidance as any).reason}
-`).join('\n')}
+`,
+  )
+  .join('\n')}
 
 ---
 Generated with cosmic intelligence by Lunary
@@ -388,14 +460,17 @@ Visit lunary.app for daily updates and personalized guidance
 `.trim();
 }
 
-async function sendNewsletter(newsletter: { subject: string; html: string; text: string }, testEmail?: string) {
+async function sendNewsletter(
+  newsletter: { subject: string; html: string; text: string },
+  testEmail?: string,
+) {
   // Placeholder for email service integration
   // You could integrate with SendGrid, Mailchimp, Resend, etc.
-  
+
   console.log(`📧 Sending newsletter: "${newsletter.subject}"`);
   console.log(`📊 HTML length: ${newsletter.html.length} chars`);
   console.log(`📊 Text length: ${newsletter.text.length} chars`);
-  
+
   if (testEmail) {
     console.log(`🧪 Test mode: would send to ${testEmail}`);
     return { recipients: 1, testMode: true, email: testEmail };
@@ -414,5 +489,9 @@ async function sendNewsletter(newsletter: { subject: string; html: string; text:
   */
 
   console.log(`📬 Would send to subscriber list`);
-  return { recipients: 0, testMode: false, note: 'Email service not configured' };
+  return {
+    recipients: 0,
+    testMode: false,
+    note: 'Email service not configured',
+  };
 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateWeeklyContent, WeeklyCosmicData } from '../../../../../utils/blog/weeklyContentGenerator';
+import {
+  generateWeeklyContent,
+  WeeklyCosmicData,
+} from '../../../../../utils/blog/weeklyContentGenerator';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,10 +21,14 @@ export async function GET(request: NextRequest) {
       const today = new Date();
       const dayOfWeek = today.getDay();
       const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday is 0, Monday is 1
-      startDate = new Date(today.getTime() - daysToMonday * 24 * 60 * 60 * 1000);
+      startDate = new Date(
+        today.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+      );
     }
 
-    console.log(`📝 Generating weekly blog content starting ${startDate.toDateString()}`);
+    console.log(
+      `📝 Generating weekly blog content starting ${startDate.toDateString()}`,
+    );
 
     // Generate comprehensive weekly content
     const weeklyData = await generateWeeklyContent(startDate);
@@ -29,14 +36,14 @@ export async function GET(request: NextRequest) {
     if (format === 'markdown') {
       const markdown = generateMarkdownContent(weeklyData);
       return new Response(markdown, {
-        headers: { 'Content-Type': 'text/markdown' }
+        headers: { 'Content-Type': 'text/markdown' },
       });
     }
 
     if (format === 'html') {
       const html = generateHTMLContent(weeklyData);
       return new Response(html, {
-        headers: { 'Content-Type': 'text/html' }
+        headers: { 'Content-Type': 'text/html' },
       });
     }
 
@@ -53,19 +60,18 @@ export async function GET(request: NextRequest) {
           retrogradeChanges: weeklyData.retrogradeChanges.length,
           majorAspects: weeklyData.majorAspects.length,
           moonPhases: weeklyData.moonPhases.length,
-          dailyForecasts: weeklyData.dailyForecasts.length
-        }
-      }
+          dailyForecasts: weeklyData.dailyForecasts.length,
+        },
+      },
     });
-
   } catch (error) {
     console.error('Weekly content generation error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate weekly content',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -96,41 +102,56 @@ ${data.summary}
 
 ## 🌟 Major Planetary Highlights
 
-${data.planetaryHighlights.length > 0 ? 
-  data.planetaryHighlights.map(highlight => 
-    `### ${highlight.planet} ${highlight.event.replace('-', ' ')}
+${
+  data.planetaryHighlights.length > 0
+    ? data.planetaryHighlights
+        .map(
+          (highlight) =>
+            `### ${highlight.planet} ${highlight.event.replace('-', ' ')}
 **${highlight.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}**
 
 ${highlight.description}
 
 *Significance: ${highlight.significance}*
 
-${highlight.details.fromSign && highlight.details.toSign ? 
-  `This transition from ${highlight.details.fromSign} to ${highlight.details.toSign} brings ${getSignTransitionMeaning(highlight.details.fromSign, highlight.details.toSign)}.` : ''
+${
+  highlight.details.fromSign && highlight.details.toSign
+    ? `This transition from ${highlight.details.fromSign} to ${highlight.details.toSign} brings ${getSignTransitionMeaning(highlight.details.fromSign, highlight.details.toSign)}.`
+    : ''
 }
-`).join('\n') : 
-  'No major planetary movements this week - a time for steady cosmic flow.'
+`,
+        )
+        .join('\n')
+    : 'No major planetary movements this week - a time for steady cosmic flow.'
 }
 
 ## ♻️ Retrograde Activity
 
-${data.retrogradeChanges.length > 0 ?
-  data.retrogradeChanges.map(change =>
-    `### ${change.planet} ${change.action === 'begins' ? 'Stations Retrograde' : 'Stations Direct'}
+${
+  data.retrogradeChanges.length > 0
+    ? data.retrogradeChanges
+        .map(
+          (change) =>
+            `### ${change.planet} ${change.action === 'begins' ? 'Stations Retrograde' : 'Stations Direct'}
 **${change.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} in ${change.sign}**
 
 ${change.significance}
 
 **Guidance:** ${change.guidance}
-`).join('\n') :
-  'No retrograde changes this week - all planets maintain their current direction.'
+`,
+        )
+        .join('\n')
+    : 'No retrograde changes this week - all planets maintain their current direction.'
 }
 
 ## 🌙 Lunar Phases
 
-${data.moonPhases.length > 0 ?
-  data.moonPhases.map(phase =>
-    `### ${phase.phase}
+${
+  data.moonPhases.length > 0
+    ? data.moonPhases
+        .map(
+          (phase) =>
+            `### ${phase.phase}
 **${phase.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${phase.time} in ${phase.sign}**
 
 ${phase.energy}
@@ -138,44 +159,59 @@ ${phase.energy}
 ${phase.guidance}
 
 **Ritual Suggestions:**
-${phase.ritualSuggestions.map(suggestion => `- ${suggestion}`).join('\n')}
-`).join('\n') :
-  'No major moon phases this week.'
+${phase.ritualSuggestions.map((suggestion) => `- ${suggestion}`).join('\n')}
+`,
+        )
+        .join('\n')
+    : 'No major moon phases this week.'
 }
 
 ## 📅 Best Days For...
 
-${Object.entries(data.bestDaysFor).map(([activity, guidance]) =>
-  `**${activity.charAt(0).toUpperCase() + activity.slice(1)}:** ${(guidance as any).dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')} - ${(guidance as any).reason}`
-).join('\n\n')}
+${Object.entries(data.bestDaysFor)
+  .map(
+    ([activity, guidance]) =>
+      `**${activity.charAt(0).toUpperCase() + activity.slice(1)}:** ${(guidance as any).dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')} - ${(guidance as any).reason}`,
+  )
+  .join('\n\n')}
 
 ## 💎 Weekly Crystal Companions
 
-${data.crystalRecommendations.map(crystal =>
-  `**${crystal.date.toLocaleDateString('en-US', { weekday: 'long' })}:** ${crystal.crystal}
+${data.crystalRecommendations
+  .map(
+    (crystal) =>
+      `**${crystal.date.toLocaleDateString('en-US', { weekday: 'long' })}:** ${crystal.crystal}
 *${crystal.reason}*
-Work with ${crystal.crystal} for ${crystal.intention}. ${crystal.usage}`
-).join('\n\n')}
+Work with ${crystal.crystal} for ${crystal.intention}. ${crystal.usage}`,
+  )
+  .join('\n\n')}
 
 ## ⏰ Magical Timing
 
-${data.magicalTiming.powerDays.length > 0 ? 
-  `**Power Days:** ${data.magicalTiming.powerDays.map(d => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')}` : 
-  ''
+${
+  data.magicalTiming.powerDays.length > 0
+    ? `**Power Days:** ${data.magicalTiming.powerDays.map((d) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')}`
+    : ''
 }
 
-${data.magicalTiming.voidOfCourseMoon.length > 0 ?
-  `**Void of Course Moon:** Avoid major decisions during these times:
-${data.magicalTiming.voidOfCourseMoon.map((voidPeriod) => 
-  `- ${voidPeriod.start.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })} to ${voidPeriod.end.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`
-).join('\n')}` : 
-  ''
+${
+  data.magicalTiming.voidOfCourseMoon.length > 0
+    ? `**Void of Course Moon:** Avoid major decisions during these times:
+${data.magicalTiming.voidOfCourseMoon
+  .map(
+    (voidPeriod) =>
+      `- ${voidPeriod.start.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })} to ${voidPeriod.end.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`,
+  )
+  .join('\n')}`
+    : ''
 }
 
 ## 🌊 Daily Flow
 
-${data.dailyForecasts.map(day =>
-  `### ${day.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+${data.dailyForecasts
+  .map(
+    (day) =>
+      `### ${day.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
 *${day.planetaryRuler}'s Day - Moon in ${day.moonSign}*
 
 ${day.energy}
@@ -184,8 +220,9 @@ ${day.energy}
 ${day.avoid.length > 0 ? `**Avoid:** ${day.avoid.join(', ')}` : ''}
 
 ${day.guidance}
-`).join('\n')
-}
+`,
+  )
+  .join('\n')}
 
 ---
 
@@ -196,7 +233,7 @@ ${day.guidance}
 function generateHTMLContent(data: WeeklyCosmicData): string {
   // Convert markdown to HTML (simplified version)
   const markdown = generateMarkdownContent(data);
-  
+
   // Basic markdown to HTML conversion (in production, use a proper markdown parser)
   return `<!DOCTYPE html>
 <html>
@@ -228,13 +265,21 @@ function getSignTransitionMeaning(fromSign: string, toSign: string): string {
     'Cancer-Leo': 'evolution from nurturing to creative self-expression',
     'Leo-Virgo': 'refinement from bold expression to practical service',
     'Virgo-Libra': 'balance between perfectionism and harmony',
-    'Libra-Scorpio': 'deepening from surface harmony to transformative intensity',
-    'Scorpio-Sagittarius': 'expansion from deep transformation to philosophical exploration',
-    'Sagittarius-Capricorn': 'grounding from expansive vision to practical achievement',
-    'Capricorn-Aquarius': 'liberation from traditional structure to innovative freedom',
-    'Aquarius-Pisces': 'flow from intellectual detachment to intuitive connection',
-    'Pisces-Aries': 'renewal from spiritual dissolution to fresh initiative'
+    'Libra-Scorpio':
+      'deepening from surface harmony to transformative intensity',
+    'Scorpio-Sagittarius':
+      'expansion from deep transformation to philosophical exploration',
+    'Sagittarius-Capricorn':
+      'grounding from expansive vision to practical achievement',
+    'Capricorn-Aquarius':
+      'liberation from traditional structure to innovative freedom',
+    'Aquarius-Pisces':
+      'flow from intellectual detachment to intuitive connection',
+    'Pisces-Aries': 'renewal from spiritual dissolution to fresh initiative',
   };
 
-  return transitionMeanings[`${fromSign}-${toSign}`] || `a significant shift in cosmic energy from ${fromSign} to ${toSign}`;
+  return (
+    transitionMeanings[`${fromSign}-${toSign}`] ||
+    `a significant shift in cosmic energy from ${fromSign} to ${toSign}`
+  );
 }

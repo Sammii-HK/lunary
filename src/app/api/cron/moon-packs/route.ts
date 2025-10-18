@@ -5,17 +5,17 @@ export const runtime = 'nodejs';
 
 /**
  * Automated Moon Pack Generation Endpoint
- * 
+ *
  * This endpoint is designed to be called by cron jobs to automatically
  * generate moon phase packs on a schedule.
- * 
+ *
  * Query parameters:
  * - type: monthly|quarterly|yearly|all (default: all)
  * - dry-run: true|false (default: false)
- * 
+ *
  * Expected to be called:
  * - Weekly for monthly packs
- * - Monthly for quarterly packs  
+ * - Monthly for quarterly packs
  * - Monthly (July+) for yearly packs
  */
 export async function POST(request: NextRequest) {
@@ -23,23 +23,27 @@ export async function POST(request: NextRequest) {
     // Verify this is being called by an authorized source
     const authHeader = request.headers.get('authorization');
     const expectedToken = process.env.CRON_SECRET_TOKEN;
-    
+
     if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
       console.log('🔒 Unauthorized cron request blocked');
-      return NextResponse.json(
-        { error: 'Unauthorized' }, 
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') as 'monthly' | 'quarterly' | 'yearly' | 'all' || 'all';
+    const type =
+      (searchParams.get('type') as
+        | 'monthly'
+        | 'quarterly'
+        | 'yearly'
+        | 'all') || 'all';
     const dryRun = searchParams.get('dry-run') === 'true';
 
-    console.log(`🌙 Cron job triggered: Moon pack generation (${type})${dryRun ? ' [DRY RUN]' : ''}`);
+    console.log(
+      `🌙 Cron job triggered: Moon pack generation (${type})${dryRun ? ' [DRY RUN]' : ''}`,
+    );
 
     const generator = new MoonPackGenerator(dryRun);
-    
+
     // Run the generation
     await generator.generatePacks(type);
     await generator.cleanup();
@@ -52,15 +56,17 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       dryRun,
     });
-
   } catch (error: any) {
     console.error('❌ Cron job failed:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Moon pack generation failed',
-      timestamp: new Date().toISOString(),
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || 'Moon pack generation failed',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -71,12 +77,9 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const authHeader = request.headers.get('authorization');
   const expectedToken = process.env.CRON_SECRET_TOKEN;
-  
+
   if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
-    return NextResponse.json(
-      { error: 'Unauthorized' }, 
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   return NextResponse.json({

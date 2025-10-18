@@ -440,7 +440,7 @@ export async function GET(request: NextRequest) {
   const sizes = {
     square: { width: 1200, height: 1200, padding: '60px 40px' },
     portrait: { width: 1080, height: 1920, padding: '80px 60px' },
-    landscape: { width: 1920, height: 1080, padding: '40px 80px' }
+    landscape: { width: 1920, height: 1080, padding: '40px 80px' },
   };
 
   const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
@@ -485,10 +485,11 @@ export async function GET(request: NextRequest) {
       footerSize: 24,
       titlePadding: '60px',
       itemSpacing: '120px',
-    }
+    },
   };
 
-  const style = responsive[sizeParam as keyof typeof responsive] || responsive.square;
+  const style =
+    responsive[sizeParam as keyof typeof responsive] || responsive.square;
 
   // Get REAL astronomical data (SAME AS POST ROUTE)
   const positions = getRealPlanetaryPositions(targetDate);
@@ -1060,7 +1061,7 @@ export async function GET(request: NextRequest) {
       height: currentSize.height,
       fonts: await (async () => {
         const fonts = [];
-        
+
         try {
           const astronomiconFont = await loadAstronomiconFont();
           if (astronomiconFont) {
@@ -1077,7 +1078,7 @@ export async function GET(request: NextRequest) {
         try {
           const robotoFont = await loadGoogleFont(
             'Roboto+Mono:wght@300;400;700',
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 /.:'
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 /.:',
           );
           if (robotoFont) {
             fonts.push({

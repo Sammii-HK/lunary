@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { crystalDatabase, getCrystalById, getCrystalsByCategory, getCrystalsByIntention, searchCrystals } from '../../../constants/grimoire/crystals';
-import { spellDatabase, getSpellById, getSpellsByCategory, searchSpells } from '../../../constants/grimoire/spells';
+import {
+  crystalDatabase,
+  getCrystalById,
+  getCrystalsByCategory,
+  getCrystalsByIntention,
+  searchCrystals,
+} from '../../../constants/grimoire/crystals';
+import {
+  spellDatabase,
+  getSpellById,
+  getSpellsByCategory,
+  searchSpells,
+} from '../../../constants/grimoire/spells';
 import { runesList } from '../../../constants/runes';
 import { wiccanWeek } from '../../../constants/weekDays';
 import { wheelOfTheYearSabbats } from '../../../constants/sabbats';
@@ -23,40 +34,60 @@ export async function GET(request: NextRequest) {
     // If no type specified, return API overview
     if (!type) {
       return NextResponse.json({
-        message: 'Lunary Grimoire API - Your comprehensive magical knowledge base',
+        message:
+          'Lunary Grimoire API - Your comprehensive magical knowledge base',
         version: '1.0.0',
         endpoints: {
           crystals: {
-            description: 'Complete crystal database with metaphysical properties',
+            description:
+              'Complete crystal database with metaphysical properties',
             actions: ['get', 'search', 'filter'],
-            filters: ['category', 'intention', 'moonPhase', 'zodiacSign', 'chakra', 'element']
+            filters: [
+              'category',
+              'intention',
+              'moonPhase',
+              'zodiacSign',
+              'chakra',
+              'element',
+            ],
           },
           spells: {
             description: 'Comprehensive spell and ritual database',
             actions: ['get', 'search', 'filter'],
-            filters: ['category', 'difficulty', 'moonPhase', 'tradition', 'type']
+            filters: [
+              'category',
+              'difficulty',
+              'moonPhase',
+              'tradition',
+              'type',
+            ],
           },
           runes: {
             description: 'Elder Futhark rune meanings and properties',
-            actions: ['get', 'search']
+            actions: ['get', 'search'],
           },
           correspondences: {
             description: 'Magical correspondences and associations',
-            includes: ['planets', 'elements', 'colors', 'herbs', 'numbers']
+            includes: ['planets', 'elements', 'colors', 'herbs', 'numbers'],
           },
           calendar: {
             description: 'Magical timing and astronomical data',
-            includes: ['moonPhases', 'sabbats', 'planetaryDays', 'planetaryHours']
-          }
+            includes: [
+              'moonPhases',
+              'sabbats',
+              'planetaryDays',
+              'planetaryHours',
+            ],
+          },
         },
         usage: {
           examples: [
             '/api/grimoire?type=crystals&action=search&query=protection',
             '/api/grimoire?type=crystals&action=filter&category=Love & Heart Healing',
             '/api/grimoire?type=spells&action=get&id=daily-protection-shield',
-            '/api/grimoire?type=crystals&action=filter&intention=abundance&moonPhase=New Moon'
-          ]
-        }
+            '/api/grimoire?type=crystals&action=filter&intention=abundance&moonPhase=New Moon',
+          ],
+        },
       });
     }
 
@@ -65,17 +96,20 @@ export async function GET(request: NextRequest) {
       if (action === 'get' && id) {
         const crystal = getCrystalById(id);
         if (!crystal) {
-          return NextResponse.json({ error: 'Crystal not found' }, { status: 404 });
+          return NextResponse.json(
+            { error: 'Crystal not found' },
+            { status: 404 },
+          );
         }
         return NextResponse.json({ crystal });
       }
 
       if (action === 'search' && query) {
         const results = searchCrystals(query);
-        return NextResponse.json({ 
+        return NextResponse.json({
           query,
           count: results.length,
-          crystals: results 
+          crystals: results,
         });
       }
 
@@ -86,36 +120,38 @@ export async function GET(request: NextRequest) {
           results = getCrystalsByCategory(category);
         }
         if (intention) {
-          results = results.filter(crystal => 
-            crystal.intentions.some(intent => 
-              intent.toLowerCase().includes(intention.toLowerCase())
-            )
+          results = results.filter((crystal) =>
+            crystal.intentions.some((intent) =>
+              intent.toLowerCase().includes(intention.toLowerCase()),
+            ),
           );
         }
         if (moonPhase) {
-          results = results.filter(crystal => 
-            crystal.moonPhases.includes(moonPhase) || 
-            crystal.moonPhases.includes('All Moon Phases')
+          results = results.filter(
+            (crystal) =>
+              crystal.moonPhases.includes(moonPhase) ||
+              crystal.moonPhases.includes('All Moon Phases'),
           );
         }
         if (zodiacSign) {
-          results = results.filter(crystal => 
-            crystal.zodiacSigns.includes(zodiacSign) || 
-            crystal.zodiacSigns.includes('All Signs')
+          results = results.filter(
+            (crystal) =>
+              crystal.zodiacSigns.includes(zodiacSign) ||
+              crystal.zodiacSigns.includes('All Signs'),
           );
         }
 
         return NextResponse.json({
           filters: { category, intention, moonPhase, zodiacSign },
           count: results.length,
-          crystals: results
+          crystals: results,
         });
       }
 
       // Default: return all crystals
       return NextResponse.json({
         count: crystalDatabase.length,
-        crystals: crystalDatabase
+        crystals: crystalDatabase,
       });
     }
 
@@ -124,17 +160,20 @@ export async function GET(request: NextRequest) {
       if (action === 'get' && id) {
         const spell = getSpellById(id);
         if (!spell) {
-          return NextResponse.json({ error: 'Spell not found' }, { status: 404 });
+          return NextResponse.json(
+            { error: 'Spell not found' },
+            { status: 404 },
+          );
         }
         return NextResponse.json({ spell });
       }
 
       if (action === 'search' && query) {
         const results = searchSpells(query);
-        return NextResponse.json({ 
+        return NextResponse.json({
           query,
           count: results.length,
-          spells: results 
+          spells: results,
         });
       }
 
@@ -148,14 +187,14 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           filters: { category },
           count: results.length,
-          spells: results
+          spells: results,
         });
       }
 
       // Default: return all spells
       return NextResponse.json({
         count: spellDatabase.length,
-        spells: spellDatabase
+        spells: spellDatabase,
       });
     }
 
@@ -164,29 +203,33 @@ export async function GET(request: NextRequest) {
       if (action === 'get' && id) {
         const rune = runesList[id as keyof typeof runesList];
         if (!rune) {
-          return NextResponse.json({ error: 'Rune not found' }, { status: 404 });
+          return NextResponse.json(
+            { error: 'Rune not found' },
+            { status: 404 },
+          );
         }
         return NextResponse.json({ rune });
       }
 
       if (action === 'search' && query) {
-        const results = Object.entries(runesList).filter(([key, rune]) =>
-          rune.name.toLowerCase().includes(query.toLowerCase()) ||
-          rune.meaning.toLowerCase().includes(query.toLowerCase()) ||
-          rune.magicalProperties.toLowerCase().includes(query.toLowerCase())
+        const results = Object.entries(runesList).filter(
+          ([key, rune]) =>
+            rune.name.toLowerCase().includes(query.toLowerCase()) ||
+            rune.meaning.toLowerCase().includes(query.toLowerCase()) ||
+            rune.magicalProperties.toLowerCase().includes(query.toLowerCase()),
         );
-        
-        return NextResponse.json({ 
+
+        return NextResponse.json({
           query,
           count: results.length,
-          runes: Object.fromEntries(results)
+          runes: Object.fromEntries(results),
         });
       }
 
       // Default: return all runes
       return NextResponse.json({
         count: Object.keys(runesList).length,
-        runes: runesList
+        runes: runesList,
       });
     }
 
@@ -194,26 +237,82 @@ export async function GET(request: NextRequest) {
     if (type === 'correspondences') {
       const correspondences = {
         planets: {
-          Sun: { day: 'Sunday', colors: ['Gold', 'Yellow', 'Orange'], crystals: ['Citrine', 'Sunstone', 'Amber'] },
-          Moon: { day: 'Monday', colors: ['Silver', 'White', 'Blue'], crystals: ['Moonstone', 'Selenite', 'Pearl'] },
-          Mars: { day: 'Tuesday', colors: ['Red', 'Orange'], crystals: ['Carnelian', 'Red Jasper', 'Garnet'] },
-          Mercury: { day: 'Wednesday', colors: ['Yellow', 'Orange'], crystals: ['Citrine', 'Agate', 'Clear Quartz'] },
-          Jupiter: { day: 'Thursday', colors: ['Blue', 'Purple'], crystals: ['Lapis Lazuli', 'Sodalite', 'Amethyst'] },
-          Venus: { day: 'Friday', colors: ['Green', 'Pink'], crystals: ['Rose Quartz', 'Emerald', 'Green Aventurine'] },
-          Saturn: { day: 'Saturday', colors: ['Black', 'Dark Blue'], crystals: ['Black Tourmaline', 'Hematite', 'Obsidian'] }
+          Sun: {
+            day: 'Sunday',
+            colors: ['Gold', 'Yellow', 'Orange'],
+            crystals: ['Citrine', 'Sunstone', 'Amber'],
+          },
+          Moon: {
+            day: 'Monday',
+            colors: ['Silver', 'White', 'Blue'],
+            crystals: ['Moonstone', 'Selenite', 'Pearl'],
+          },
+          Mars: {
+            day: 'Tuesday',
+            colors: ['Red', 'Orange'],
+            crystals: ['Carnelian', 'Red Jasper', 'Garnet'],
+          },
+          Mercury: {
+            day: 'Wednesday',
+            colors: ['Yellow', 'Orange'],
+            crystals: ['Citrine', 'Agate', 'Clear Quartz'],
+          },
+          Jupiter: {
+            day: 'Thursday',
+            colors: ['Blue', 'Purple'],
+            crystals: ['Lapis Lazuli', 'Sodalite', 'Amethyst'],
+          },
+          Venus: {
+            day: 'Friday',
+            colors: ['Green', 'Pink'],
+            crystals: ['Rose Quartz', 'Emerald', 'Green Aventurine'],
+          },
+          Saturn: {
+            day: 'Saturday',
+            colors: ['Black', 'Dark Blue'],
+            crystals: ['Black Tourmaline', 'Hematite', 'Obsidian'],
+          },
         },
         elements: {
-          Fire: { colors: ['Red', 'Orange', 'Gold'], crystals: ['Carnelian', 'Red Jasper', 'Citrine'], herbs: ['Cinnamon', 'Ginger', 'Basil'] },
-          Water: { colors: ['Blue', 'Silver', 'Sea Green'], crystals: ['Moonstone', 'Aquamarine', 'Rose Quartz'], herbs: ['Jasmine', 'Rose', 'Chamomile'] },
-          Air: { colors: ['Yellow', 'White', 'Pale Blue'], crystals: ['Clear Quartz', 'Fluorite', 'Lapis Lazuli'], herbs: ['Lavender', 'Mint', 'Frankincense'] },
-          Earth: { colors: ['Green', 'Brown', 'Black'], crystals: ['Hematite', 'Green Aventurine', 'Black Tourmaline'], herbs: ['Sage', 'Cedar', 'Patchouli'] }
+          Fire: {
+            colors: ['Red', 'Orange', 'Gold'],
+            crystals: ['Carnelian', 'Red Jasper', 'Citrine'],
+            herbs: ['Cinnamon', 'Ginger', 'Basil'],
+          },
+          Water: {
+            colors: ['Blue', 'Silver', 'Sea Green'],
+            crystals: ['Moonstone', 'Aquamarine', 'Rose Quartz'],
+            herbs: ['Jasmine', 'Rose', 'Chamomile'],
+          },
+          Air: {
+            colors: ['Yellow', 'White', 'Pale Blue'],
+            crystals: ['Clear Quartz', 'Fluorite', 'Lapis Lazuli'],
+            herbs: ['Lavender', 'Mint', 'Frankincense'],
+          },
+          Earth: {
+            colors: ['Green', 'Brown', 'Black'],
+            crystals: ['Hematite', 'Green Aventurine', 'Black Tourmaline'],
+            herbs: ['Sage', 'Cedar', 'Patchouli'],
+          },
         },
         moonPhases: {
-          'New Moon': { intentions: ['new beginnings', 'setting intentions', 'planning'], crystals: ['Moonstone', 'Clear Quartz', 'Selenite'] },
-          'Waxing Moon': { intentions: ['growth', 'building', 'attracting'], crystals: ['Citrine', 'Green Aventurine', 'Carnelian'] },
-          'Full Moon': { intentions: ['manifestation', 'completion', 'power'], crystals: ['Moonstone', 'Labradorite', 'Selenite'] },
-          'Waning Moon': { intentions: ['release', 'banishing', 'cleansing'], crystals: ['Black Tourmaline', 'Obsidian', 'Smoky Quartz'] }
-        }
+          'New Moon': {
+            intentions: ['new beginnings', 'setting intentions', 'planning'],
+            crystals: ['Moonstone', 'Clear Quartz', 'Selenite'],
+          },
+          'Waxing Moon': {
+            intentions: ['growth', 'building', 'attracting'],
+            crystals: ['Citrine', 'Green Aventurine', 'Carnelian'],
+          },
+          'Full Moon': {
+            intentions: ['manifestation', 'completion', 'power'],
+            crystals: ['Moonstone', 'Labradorite', 'Selenite'],
+          },
+          'Waning Moon': {
+            intentions: ['release', 'banishing', 'cleansing'],
+            crystals: ['Black Tourmaline', 'Obsidian', 'Smoky Quartz'],
+          },
+        },
       };
 
       return NextResponse.json({ correspondences });
@@ -226,24 +325,26 @@ export async function GET(request: NextRequest) {
         sabbats: wheelOfTheYearSabbats,
         currentInfo: {
           date: new Date().toISOString(),
-          dayOfWeek: wiccanWeek[new Date().getDay()]
-        }
+          dayOfWeek: wiccanWeek[new Date().getDay()],
+        },
       });
     }
 
     return NextResponse.json(
-      { error: 'Invalid type. Available types: crystals, spells, runes, correspondences, calendar' },
-      { status: 400 }
+      {
+        error:
+          'Invalid type. Available types: crystals, spells, runes, correspondences, calendar',
+      },
+      { status: 400 },
     );
-
   } catch (error) {
     console.error('Grimoire API error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -252,19 +353,18 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { type, data } = await request.json();
-    
+
     // This would typically require authentication/authorization
     // For now, return a placeholder response
     return NextResponse.json({
       message: 'Content creation endpoint - requires admin authentication',
       type,
-      status: 'pending_implementation'
+      status: 'pending_implementation',
     });
-
   } catch (error) {
     return NextResponse.json(
       { error: 'Invalid request format' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }
