@@ -337,16 +337,30 @@ async function runDailyPosts(dateStr: string) {
     successRate: `${Math.round((successCount / posts.length) * 100)}%`,
   };
 
-  // Send push notification with preview link
+  // Send rich push notifications with cosmic data and images
   try {
+    const failedPosts = postResults.filter((r: any) => r.status === 'error');
+
     if (successCount > 0) {
+      // Send preview notification with today's cosmic event and main image
       await sendAdminNotification(
-        NotificationTemplates.dailyPreview(dateStr, posts.length),
+        NotificationTemplates.dailyPreview(
+          dateStr,
+          posts.length,
+          cosmicContent?.primaryEvent,
+        ),
       );
-      await sendAdminNotification(NotificationTemplates.cronSuccess(summary));
+
+      // Send success summary
+      await sendAdminNotification(
+        NotificationTemplates.cronSuccess(summary, posts),
+      );
     } else {
       await sendAdminNotification(
-        NotificationTemplates.cronFailure('All daily posts failed to schedule'),
+        NotificationTemplates.cronFailure(
+          'All daily posts failed to schedule',
+          failedPosts,
+        ),
       );
     }
   } catch (notificationError) {
@@ -401,6 +415,7 @@ async function runWeeklyTasks(request: NextRequest) {
         NotificationTemplates.weeklyContentGenerated(
           blogData.data?.title || 'Weekly Content',
           blogData.data?.weekNumber || 0,
+          blogData.data?.planetaryHighlights || [],
         ),
       );
     } catch (notificationError) {

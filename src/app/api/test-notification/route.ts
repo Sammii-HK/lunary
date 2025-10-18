@@ -10,11 +10,26 @@ export async function GET(request: NextRequest) {
 
     const testNotification = {
       title: '🧪 Lunary Test Notification',
-      message:
-        'Push notifications are working! Your cron jobs will now send alerts to your phone.',
+      message: `<b>Push notifications are working!</b>
+
+📱 <b>What you'll get:</b>
+• Daily post previews with images
+• Cron success/failure alerts  
+• Weekly blog generation notices
+• Retrograde alerts
+
+🎯 <b>Rich content:</b>
+• HTML formatting
+• Cosmic event details
+• Direct preview links
+• Attached images
+
+<i>Your cron jobs will now send rich alerts to your phone!</i>`,
       url: 'https://lunary.app/admin',
       priority: 'normal' as const,
       sound: 'cosmic',
+      html: true,
+      image: 'https://lunary.app/api/og/cosmic',
     };
 
     const result = await sendAdminNotification(testNotification);

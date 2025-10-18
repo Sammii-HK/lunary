@@ -323,8 +323,8 @@ export default function CronMonitorPage() {
             are working: /api/og/cosmic, /api/og/crystal, etc.
           </p>
           <p>
-            <strong>Timing issues?</strong> The master cron runs at 1 PM UTC
-            daily and handles multiple tasks based on the date.
+            <strong>Timing issues?</strong> The master cron runs at 8 AM UTC
+            daily with 4-hour buffer before first post.
           </p>
           <p>
             <strong>Weekly content?</strong> Blog posts and newsletters are

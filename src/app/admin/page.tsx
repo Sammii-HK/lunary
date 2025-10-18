@@ -43,6 +43,7 @@ interface AdminTool {
 
 export default function AdminDashboard() {
   const [testingNotification, setTestingNotification] = useState(false);
+  const [testingDaily, setTestingDaily] = useState(false);
 
   const testPushNotification = async () => {
     setTestingNotification(true);
@@ -61,6 +62,31 @@ export default function AdminDashboard() {
       alert('❌ Error testing notification');
     } finally {
       setTestingNotification(false);
+    }
+  };
+
+  const testDailyNotification = async () => {
+    setTestingDaily(true);
+    try {
+      const response = await fetch('/api/test-daily-notification');
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`✅ Daily overview test sent! Check your phone for 2 rich notifications:
+
+1. 👀 Daily Preview (with cosmic image)
+2. ✅ Cron Success (with schedule details)
+
+Today's cosmic event: ${result.cosmicEvent?.name || 'Cosmic Flow'}
+
+This is exactly what you'll get every day at 8 AM UTC!`);
+      } else {
+        alert(`❌ Daily test failed: ${result.error}`);
+      }
+    } catch (error) {
+      alert('❌ Error testing daily notification');
+    } finally {
+      setTestingDaily(false);
     }
   };
 
@@ -301,7 +327,7 @@ export default function AdminDashboard() {
           <CardDescription>Common admin tasks and shortcuts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4'>
             <Button asChild variant='outline' className='h-auto p-4'>
               <Link
                 href='/admin/cron-monitor'
@@ -364,7 +390,22 @@ export default function AdminDashboard() {
                 <Smartphone className='h-6 w-6' />
                 <span>{testingNotification ? 'Sending...' : 'Test Push'}</span>
                 <span className='text-xs text-muted-foreground'>
-                  Phone notification
+                  Basic test
+                </span>
+              </div>
+            </Button>
+
+            <Button
+              onClick={testDailyNotification}
+              disabled={testingDaily}
+              variant='outline'
+              className='h-auto p-4'
+            >
+              <div className='flex flex-col items-center gap-2'>
+                <Calendar className='h-6 w-6' />
+                <span>{testingDaily ? 'Sending...' : 'Test Daily'}</span>
+                <span className='text-xs text-muted-foreground'>
+                  Rich preview
                 </span>
               </div>
             </Button>
