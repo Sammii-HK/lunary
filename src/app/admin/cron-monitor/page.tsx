@@ -81,8 +81,9 @@ export default function CronMonitorPage() {
 
       // Show the consolidated schedule
       const cronSchedule = {
-        'master-cron': '0 13 * * * (1 PM UTC daily)',
-        'daily-posts': 'Every day - 5 posts across all platforms',
+        'master-cron': '0 8 * * * (8 AM UTC daily)',
+        'daily-posts':
+          'Every day - 5 posts across all platforms (12PM, 3PM, 6PM, 9PM, 12AM UTC)',
         'weekly-blog': 'Sundays - Generate blog content and newsletter',
         'monthly-moon-packs':
           '15th of each month - Generate monthly moon packs',
@@ -172,7 +173,7 @@ export default function CronMonitorPage() {
           <CardContent>
             <div className='space-y-2'>
               <Badge variant='secondary' className='w-full justify-center'>
-                1 PM UTC Daily
+                8 AM UTC Daily
               </Badge>
               <div className='text-xs text-muted-foreground text-center'>
                 + Weekly/Monthly tasks as needed

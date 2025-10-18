@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -27,6 +28,7 @@ import {
   Users,
   FileText,
   Zap,
+  Smartphone,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -40,6 +42,28 @@ interface AdminTool {
 }
 
 export default function AdminDashboard() {
+  const [testingNotification, setTestingNotification] = useState(false);
+
+  const testPushNotification = async () => {
+    setTestingNotification(true);
+    try {
+      const response = await fetch('/api/test-notification');
+      const result = await response.json();
+
+      if (result.success) {
+        alert('✅ Test notification sent! Check your phone.');
+      } else {
+        alert(
+          `❌ Notification failed: ${result.error}\n\nTroubleshooting:\n${result.troubleshooting?.join('\n')}`,
+        );
+      }
+    } catch (error) {
+      alert('❌ Error testing notification');
+    } finally {
+      setTestingNotification(false);
+    }
+  };
+
   const adminTools: AdminTool[] = [
     // Content Management
     {
@@ -277,7 +301,7 @@ export default function AdminDashboard() {
           <CardDescription>Common admin tasks and shortcuts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
             <Button asChild variant='outline' className='h-auto p-4'>
               <Link
                 href='/admin/cron-monitor'
@@ -328,6 +352,21 @@ export default function AdminDashboard() {
                   Stripe sync
                 </span>
               </Link>
+            </Button>
+
+            <Button
+              onClick={testPushNotification}
+              disabled={testingNotification}
+              variant='outline'
+              className='h-auto p-4'
+            >
+              <div className='flex flex-col items-center gap-2'>
+                <Smartphone className='h-6 w-6' />
+                <span>{testingNotification ? 'Sending...' : 'Test Push'}</span>
+                <span className='text-xs text-muted-foreground'>
+                  Phone notification
+                </span>
+              </div>
             </Button>
           </div>
         </CardContent>

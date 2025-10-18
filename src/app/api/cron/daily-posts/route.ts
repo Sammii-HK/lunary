@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  sendAdminNotification,
+  NotificationTemplates,
+} from '../../../../../utils/notifications/pushNotifications';
 
 export async function GET(request: NextRequest) {
   try {
@@ -195,9 +199,10 @@ async function runDailyPosts(dateStr: string) {
   ];
   const seed = new Date().getDate();
 
-  // Calculate proper scheduling times
+  // Calculate proper scheduling times with buffer for Vercel cron delays
+  // Cron runs at 8 AM UTC, schedule posts starting at 12 PM UTC (4 hour buffer)
   const scheduleBase = new Date();
-  scheduleBase.setHours(14, 0, 0, 0); // Start at 2 PM UTC
+  scheduleBase.setHours(12, 0, 0, 0); // Start at 12 PM UTC
 
   // All platforms for every post
   const allPlatforms = ['x', 'bluesky', 'instagram', 'reddit', 'pinterest'];
@@ -325,15 +330,33 @@ async function runDailyPosts(dateStr: string) {
     (r: any) => r.status === 'error',
   ).length;
 
+  const summary = {
+    total: posts.length,
+    successful: successCount,
+    failed: errorCount,
+    successRate: `${Math.round((successCount / posts.length) * 100)}%`,
+  };
+
+  // Send push notification with preview link
+  try {
+    if (successCount > 0) {
+      await sendAdminNotification(
+        NotificationTemplates.dailyPreview(dateStr, posts.length),
+      );
+      await sendAdminNotification(NotificationTemplates.cronSuccess(summary));
+    } else {
+      await sendAdminNotification(
+        NotificationTemplates.cronFailure('All daily posts failed to schedule'),
+      );
+    }
+  } catch (notificationError) {
+    console.warn('📱 Push notification failed:', notificationError);
+  }
+
   return {
     success: successCount > 0,
     message: `Published ${successCount}/${posts.length} posts across all platforms`,
-    summary: {
-      total: posts.length,
-      successful: successCount,
-      failed: errorCount,
-      successRate: `${Math.round((successCount / posts.length) * 100)}%`,
-    },
+    summary,
     results: postResults,
   };
 }
@@ -371,6 +394,18 @@ async function runWeeklyTasks(request: NextRequest) {
 
     const newsletterData = await newsletterResponse.json();
     console.log('📧 Weekly newsletter result:', newsletterData.message);
+
+    // Send push notification for weekly content
+    try {
+      await sendAdminNotification(
+        NotificationTemplates.weeklyContentGenerated(
+          blogData.data?.title || 'Weekly Content',
+          blogData.data?.weekNumber || 0,
+        ),
+      );
+    } catch (notificationError) {
+      console.warn('📱 Weekly notification failed:', notificationError);
+    }
 
     return {
       success: true,
