@@ -2,24 +2,37 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BookOpen, 
-  Package, 
-  Sparkles, 
-  Download, 
-  Eye, 
+import {
+  BookOpen,
+  Package,
+  Sparkles,
+  Download,
+  Eye,
   Plus,
   Wand2,
   Gem,
   Search,
-  Filter
+  Filter,
+  CheckCircle,
 } from 'lucide-react';
 
 interface GrimoireData {
@@ -73,18 +86,28 @@ export default function GrimoirePacksAdmin() {
 
   const categories = [
     'protection',
-    'love', 
+    'love',
     'prosperity',
     'healing',
     'cleansing',
     'divination',
     'manifestation',
-    'banishing'
+    'banishing',
   ];
 
   const intentions = [
-    'abundance', 'protection', 'love', 'healing', 'clarity', 'manifestation',
-    'grounding', 'spiritual growth', 'courage', 'wisdom', 'peace', 'transformation'
+    'abundance',
+    'protection',
+    'love',
+    'healing',
+    'clarity',
+    'manifestation',
+    'grounding',
+    'spiritual growth',
+    'courage',
+    'wisdom',
+    'peace',
+    'transformation',
   ];
 
   // Fetch grimoire data and Stripe products on component mount
@@ -98,7 +121,7 @@ export default function GrimoirePacksAdmin() {
     try {
       const [crystalsRes, spellsRes] = await Promise.all([
         fetch('/api/grimoire?type=crystals'),
-        fetch('/api/grimoire?type=spells')
+        fetch('/api/grimoire?type=spells'),
       ]);
 
       const crystalsData = await crystalsRes.json();
@@ -107,7 +130,7 @@ export default function GrimoirePacksAdmin() {
       setGrimoireData({
         crystals: crystalsData.crystals || [],
         spells: spellsData.spells || [],
-        count: (crystalsData.count || 0) + (spellsData.count || 0)
+        count: (crystalsData.count || 0) + (spellsData.count || 0),
       });
     } catch (error) {
       console.error('Error fetching grimoire data:', error);
@@ -121,7 +144,7 @@ export default function GrimoirePacksAdmin() {
       const response = await fetch('/api/grimoire/sync-stripe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get-products' })
+        body: JSON.stringify({ action: 'get-products' }),
       });
       const data = await response.json();
       setStripeProducts(data.products || []);
@@ -137,20 +160,20 @@ export default function GrimoirePacksAdmin() {
     try {
       // Generate pack using existing API
       const response = await fetch(
-        `/api/packs/spells?category=${selectedCategory}&rituals=true`
+        `/api/packs/spells?category=${selectedCategory}&rituals=true`,
       );
       const packData = await response.json();
-      
+
       // Get relevant crystals from grimoire
       const crystalResponse = await fetch(
-        `/api/grimoire?type=crystals&action=filter&category=${getCrystalCategory(selectedCategory)}&intention=${selectedIntention || selectedCategory}`
+        `/api/grimoire?type=crystals&action=filter&category=${getCrystalCategory(selectedCategory)}&intention=${selectedIntention || selectedCategory}`,
       );
       const crystalData = await crystalResponse.json();
 
       setPackPreview({
         ...packData,
         crystals: crystalData.crystals?.slice(0, 8) || [],
-        title: packTitle || packData.title
+        title: packTitle || packData.title,
       });
     } catch (error) {
       console.error('Error generating pack preview:', error);
@@ -169,23 +192,27 @@ export default function GrimoirePacksAdmin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'create',
-          pack: packPreview
-        })
+          pack: packPreview,
+        }),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         // Update pack preview with Stripe IDs
-        setPackPreview(prev => prev ? {
-          ...prev,
-          stripeProductId: result.stripeProductId,
-          stripePriceId: result.stripePriceId
-        } : null);
-        
+        setPackPreview((prev) =>
+          prev
+            ? {
+                ...prev,
+                stripeProductId: result.stripeProductId,
+                stripePriceId: result.stripePriceId,
+              }
+            : null,
+        );
+
         // Refresh Stripe products list
         await fetchStripeProducts();
-        
+
         alert('✅ Pack synced to Stripe successfully!');
       } else {
         alert('❌ Failed to sync to Stripe: ' + result.error);
@@ -204,11 +231,11 @@ export default function GrimoirePacksAdmin() {
       const response = await fetch('/api/grimoire/sync-stripe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'sync-all' })
+        body: JSON.stringify({ action: 'sync-all' }),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         await fetchStripeProducts();
         alert(`✅ Synced ${result.totalProducts} products from Stripe!`);
@@ -223,14 +250,14 @@ export default function GrimoirePacksAdmin() {
 
   const getCrystalCategory = (spellCategory: string): string => {
     const categoryMap: { [key: string]: string } = {
-      'protection': 'Protection & Grounding',
-      'love': 'Love & Heart Healing',
-      'prosperity': 'Manifestation & Abundance',
-      'healing': 'Healing & Wellness',
-      'cleansing': 'Healing & Wellness',
-      'divination': 'Spiritual & Intuitive',
-      'manifestation': 'Manifestation & Abundance',
-      'banishing': 'Protection & Grounding'
+      protection: 'Protection & Grounding',
+      love: 'Love & Heart Healing',
+      prosperity: 'Manifestation & Abundance',
+      healing: 'Healing & Wellness',
+      cleansing: 'Healing & Wellness',
+      divination: 'Spiritual & Intuitive',
+      manifestation: 'Manifestation & Abundance',
+      banishing: 'Protection & Grounding',
     };
     return categoryMap[spellCategory] || 'Protection & Grounding';
   };
@@ -254,105 +281,112 @@ export default function GrimoirePacksAdmin() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <BookOpen className="h-8 w-8" />
+    <div className='container mx-auto py-8 px-4'>
+      <div className='mb-8'>
+        <h1 className='text-3xl font-bold mb-2 flex items-center gap-2'>
+          <BookOpen className='h-8 w-8' />
           Grimoire Pack Generator
         </h1>
-        <p className="text-muted-foreground">
+        <p className='text-muted-foreground'>
           Create comprehensive magical packs using your grimoire database
         </p>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-8'>
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Gem className="h-5 w-5 text-purple-500" />
+          <CardContent className='p-6'>
+            <div className='flex items-center gap-2'>
+              <Gem className='h-5 w-5 text-purple-500' />
               <div>
-                <p className="text-2xl font-bold">{grimoireData?.crystals.length || 0}</p>
-                <p className="text-sm text-muted-foreground">Crystals</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Wand2 className="h-5 w-5 text-blue-500" />
-              <div>
-                <p className="text-2xl font-bold">{grimoireData?.spells.length || 0}</p>
-                <p className="text-sm text-muted-foreground">Spells</p>
+                <p className='text-2xl font-bold'>
+                  {grimoireData?.crystals.length || 0}
+                </p>
+                <p className='text-sm text-muted-foreground'>Crystals</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-green-500" />
+          <CardContent className='p-6'>
+            <div className='flex items-center gap-2'>
+              <Wand2 className='h-5 w-5 text-blue-500' />
               <div>
-                <p className="text-2xl font-bold">{grimoireData?.count || 0}</p>
-                <p className="text-sm text-muted-foreground">Total Items</p>
+                <p className='text-2xl font-bold'>
+                  {grimoireData?.spells.length || 0}
+                </p>
+                <p className='text-sm text-muted-foreground'>Spells</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-blue-500" />
+          <CardContent className='p-6'>
+            <div className='flex items-center gap-2'>
+              <Package className='h-5 w-5 text-green-500' />
               <div>
-                <p className="text-2xl font-bold">{stripeProducts.length}</p>
-                <p className="text-sm text-muted-foreground">Stripe Products</p>
+                <p className='text-2xl font-bold'>{grimoireData?.count || 0}</p>
+                <p className='text-sm text-muted-foreground'>Total Items</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className='p-6'>
+            <div className='flex items-center gap-2'>
+              <CheckCircle className='h-5 w-5 text-blue-500' />
+              <div>
+                <p className='text-2xl font-bold'>{stripeProducts.length}</p>
+                <p className='text-sm text-muted-foreground'>Stripe Products</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="generator" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="generator">Pack Generator</TabsTrigger>
-          <TabsTrigger value="stripe">Stripe Products</TabsTrigger>
-          <TabsTrigger value="browse">Browse Grimoire</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+      <Tabs defaultValue='generator' className='space-y-6'>
+        <TabsList className='grid w-full grid-cols-4'>
+          <TabsTrigger value='generator'>Pack Generator</TabsTrigger>
+          <TabsTrigger value='stripe'>Stripe Products</TabsTrigger>
+          <TabsTrigger value='browse'>Browse Grimoire</TabsTrigger>
+          <TabsTrigger value='analytics'>Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="generator" className="space-y-6">
+        <TabsContent value='generator' className='space-y-6'>
           {/* Pack Generator */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
+              <CardTitle className='flex items-center gap-2'>
+                <Sparkles className='h-5 w-5' />
                 Generate New Pack
               </CardTitle>
               <CardDescription>
                 Create a comprehensive magical pack using your grimoire database
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pack-title">Pack Title (Optional)</Label>
+            <CardContent className='space-y-4'>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='pack-title'>Pack Title (Optional)</Label>
                   <Input
-                    id="pack-title"
-                    placeholder="Custom pack title..."
+                    id='pack-title'
+                    placeholder='Custom pack title...'
                     value={packTitle}
                     onChange={(e) => setPackTitle(e.target.value)}
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="category">Primary Category</Label>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <div className='space-y-2'>
+                  <Label htmlFor='category'>Primary Category</Label>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder='Select category' />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((category) => (
@@ -364,27 +398,35 @@ export default function GrimoirePacksAdmin() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="intention">Secondary Intention (Optional)</Label>
-                  <Select value={selectedIntention} onValueChange={setSelectedIntention}>
+                <div className='space-y-2'>
+                  <Label htmlFor='intention'>
+                    Secondary Intention (Optional)
+                  </Label>
+                  <Select
+                    value={selectedIntention}
+                    onValueChange={setSelectedIntention}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select intention" />
+                      <SelectValue placeholder='Select intention' />
                     </SelectTrigger>
                     <SelectContent>
                       {intentions.map((intention) => (
                         <SelectItem key={intention} value={intention}>
-                          {intention.charAt(0).toUpperCase() + intention.slice(1)}
+                          {intention.charAt(0).toUpperCase() +
+                            intention.slice(1)}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Custom Description (Optional)</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='description'>
+                    Custom Description (Optional)
+                  </Label>
                   <Textarea
-                    id="description"
-                    placeholder="Override default pack description..."
+                    id='description'
+                    placeholder='Override default pack description...'
                     value={customDescription}
                     onChange={(e) => setCustomDescription(e.target.value)}
                     rows={3}
@@ -392,10 +434,10 @@ export default function GrimoirePacksAdmin() {
                 </div>
               </div>
 
-              <Button 
-                onClick={generatePackPreview} 
+              <Button
+                onClick={generatePackPreview}
                 disabled={!selectedCategory || loading}
-                className="w-full"
+                className='w-full'
               >
                 {loading ? 'Generating...' : 'Generate Pack Preview'}
               </Button>
@@ -406,50 +448,58 @@ export default function GrimoirePacksAdmin() {
           {packPreview && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Eye className="h-5 w-5" />
+                <CardTitle className='flex items-center justify-between'>
+                  <span className='flex items-center gap-2'>
+                    <Eye className='h-5 w-5' />
                     Pack Preview: {packPreview.title}
                   </span>
-                  <div className="flex gap-2">
+                  <div className='flex gap-2'>
                     <Button
-                      variant="outline"
-                      size="sm"
+                      variant='outline'
+                      size='sm'
                       onClick={() => exportPack('json')}
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className='h-4 w-4 mr-2' />
                       Export JSON
                     </Button>
                     <Button
-                      variant="outline"
-                      size="sm"
+                      variant='outline'
+                      size='sm'
                       onClick={() => exportPack('pdf')}
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className='h-4 w-4 mr-2' />
                       Export PDF
                     </Button>
                   </div>
                 </CardTitle>
                 <CardDescription>{packPreview.description}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className='space-y-6'>
                 {/* Crystals Section */}
                 <div>
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Gem className="h-4 w-4" />
+                  <h4 className='font-semibold mb-3 flex items-center gap-2'>
+                    <Gem className='h-4 w-4' />
                     Crystals ({packPreview.crystals?.length || 0})
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                     {packPreview.crystals?.slice(0, 6).map((crystal, index) => (
-                      <div key={index} className="p-3 border rounded-lg">
-                        <h5 className="font-medium">{crystal.name}</h5>
-                        <p className="text-sm text-muted-foreground">{crystal.properties}</p>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {crystal.intentions?.slice(0, 3).map((intention: string, i: number) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
-                              {intention}
-                            </Badge>
-                          ))}
+                      <div key={index} className='p-3 border rounded-lg'>
+                        <h5 className='font-medium'>{crystal.name}</h5>
+                        <p className='text-sm text-muted-foreground'>
+                          {crystal.properties}
+                        </p>
+                        <div className='flex flex-wrap gap-1 mt-2'>
+                          {crystal.intentions
+                            ?.slice(0, 3)
+                            .map((intention: string, i: number) => (
+                              <Badge
+                                key={i}
+                                variant='secondary'
+                                className='text-xs'
+                              >
+                                {intention}
+                              </Badge>
+                            ))}
                         </div>
                       </div>
                     ))}
@@ -458,16 +508,20 @@ export default function GrimoirePacksAdmin() {
 
                 {/* Spells Section */}
                 <div>
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Wand2 className="h-4 w-4" />
+                  <h4 className='font-semibold mb-3 flex items-center gap-2'>
+                    <Wand2 className='h-4 w-4' />
                     Spells ({packPreview.spells?.length || 0})
                   </h4>
-                  <div className="space-y-3">
+                  <div className='space-y-3'>
                     {packPreview.spells?.slice(0, 3).map((spell, index) => (
-                      <div key={index} className="p-3 border rounded-lg">
-                        <h5 className="font-medium">{spell.title || spell.name}</h5>
-                        <p className="text-sm text-muted-foreground">{spell.purpose}</p>
-                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                      <div key={index} className='p-3 border rounded-lg'>
+                        <h5 className='font-medium'>
+                          {spell.title || spell.name}
+                        </h5>
+                        <p className='text-sm text-muted-foreground'>
+                          {spell.purpose}
+                        </p>
+                        <div className='flex items-center gap-4 mt-2 text-xs text-muted-foreground'>
                           <span>Duration: {spell.duration}</span>
                           <span>Difficulty: {spell.difficulty}</span>
                         </div>
@@ -479,20 +533,30 @@ export default function GrimoirePacksAdmin() {
                 {/* Correspondences */}
                 {packPreview.correspondences && (
                   <div>
-                    <h4 className="font-semibold mb-3">Correspondences</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {Object.entries(packPreview.correspondences).map(([key, values]) => (
-                        <div key={key} className="space-y-2">
-                          <h5 className="text-sm font-medium capitalize">{key}</h5>
-                          <div className="flex flex-wrap gap-1">
-                            {(values as string[])?.slice(0, 3).map((value, i) => (
-                              <Badge key={i} variant="outline" className="text-xs">
-                                {value}
-                              </Badge>
-                            ))}
+                    <h4 className='font-semibold mb-3'>Correspondences</h4>
+                    <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                      {Object.entries(packPreview.correspondences).map(
+                        ([key, values]) => (
+                          <div key={key} className='space-y-2'>
+                            <h5 className='text-sm font-medium capitalize'>
+                              {key}
+                            </h5>
+                            <div className='flex flex-wrap gap-1'>
+                              {(values as string[])
+                                ?.slice(0, 3)
+                                .map((value, i) => (
+                                  <Badge
+                                    key={i}
+                                    variant='outline'
+                                    className='text-xs'
+                                  >
+                                    {value}
+                                  </Badge>
+                                ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
@@ -501,11 +565,11 @@ export default function GrimoirePacksAdmin() {
           )}
         </TabsContent>
 
-        <TabsContent value="browse" className="space-y-6">
+        <TabsContent value='browse' className='space-y-6'>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5" />
+              <CardTitle className='flex items-center gap-2'>
+                <Search className='h-5 w-5' />
                 Browse Grimoire Database
               </CardTitle>
               <CardDescription>
@@ -513,20 +577,20 @@ export default function GrimoirePacksAdmin() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <div className='text-center py-8 text-muted-foreground'>
+                <BookOpen className='h-12 w-12 mx-auto mb-4 opacity-50' />
                 <p>Grimoire browser coming soon!</p>
-                <p className="text-sm">Use the API directly: /api/grimoire</p>
+                <p className='text-sm'>Use the API directly: /api/grimoire</p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
+        <TabsContent value='analytics' className='space-y-6'>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
+              <CardTitle className='flex items-center gap-2'>
+                <Filter className='h-5 w-5' />
                 Usage Analytics
               </CardTitle>
               <CardDescription>
@@ -534,8 +598,8 @@ export default function GrimoirePacksAdmin() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <div className='text-center py-8 text-muted-foreground'>
+                <Package className='h-12 w-12 mx-auto mb-4 opacity-50' />
                 <p>Analytics dashboard coming soon!</p>
               </div>
             </CardContent>
