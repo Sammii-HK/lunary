@@ -1,5 +1,3 @@
-'use client';
-import { useEffect, useMemo, useState } from 'react';
 import {
   Body,
   GeoVector,
@@ -183,6 +181,12 @@ export function getAstrologicalChart(
   date: Date,
   observer: Observer,
 ): AstroChartInformation[] {
+  if (!date) {
+    date = new Date();
+  }
+  if (!observer) {
+    observer = new Observer(51.4769, 0.0005, 0);
+  }
   const positions = planetaryPositions(date, observer);
   return calculateAstrologicalChart(positions);
 }
