@@ -15,6 +15,7 @@ const nextConfig = {
     config.module.rules.push({
       test: /\.wasm$/,
       type: 'webassembly/async',
+      resourceQuery: { not: [/module/] },
     });
 
     // Client-side polyfills for Jazz
