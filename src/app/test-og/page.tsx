@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 
 interface PostContent {
+  snippet: string;
   date: string;
   primaryEvent: {
     name: string;
@@ -15,20 +16,13 @@ interface PostContent {
 }
 
 export default function TestOGPage() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [postContent, setPostContent] = useState<PostContent | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [postContent, setPostContent] = useState<PostContent | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  // Generate array of dates for the next 30 days
-  const getNextMonthDates = () => {
-    const dates = [];
-    for (let i = 0; i < 30; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  };
+  useEffect(() => {
+    setSelectedDate(new Date())
+  }, [])
 
   const formatDateForUrl = (date: Date) => {
     return date.toISOString().split('T')[0];
@@ -39,16 +33,47 @@ export default function TestOGPage() {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
+      timeZone: 'UTC',
     });
   };
+
+  const nextMonthDates = useMemo(() => {
+    if (!selectedDate) return []
+    const dates: Date[] = []
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(Date.UTC(
+        selectedDate.getUTCFullYear(),
+        selectedDate.getUTCMonth(),
+        selectedDate.getUTCDate() + i
+      ))
+      dates.push(d)
+    }
+    return dates
+  }, [selectedDate])
+
+  // 4) Fetch after selectedDate exists
+  useEffect(() => {
+    if (!selectedDate) return
+    ;(async () => {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/og/cosmic-post/${formatDateForUrl(selectedDate)}`)
+        const data = await res.json()
+        setPostContent(data)
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [selectedDate])
 
   // Fetch post content when selected date changes
   useEffect(() => {
     const fetchPostContent = async () => {
       setLoading(true);
       try {
+        if (!selectedDate) return 
         const response = await fetch(
-          `/api/og/cosmic-post?date=${formatDateForUrl(selectedDate)}`,
+          `/api/og/cosmic-post/${formatDateForUrl(selectedDate)}`,
         );
         const data = await response.json();
         setPostContent(data);
@@ -58,11 +83,17 @@ export default function TestOGPage() {
         setLoading(false);
       }
     };
-
+    
     fetchPostContent();
   }, [selectedDate]);
 
-  const nextMonthDates = getNextMonthDates();
+  if (!selectedDate) {
+    // avoid rendering anything that depends on date until mounted
+    return <div className="p-6 text-zinc-400">Loading…</div>
+  }
+
+
+  // const nextMonthDates = getNextMonthDates();
 
   return (
     <div className='flex flex-col items-center gap-6 py-8 px-4'>
@@ -75,7 +106,7 @@ export default function TestOGPage() {
         </h2>
         <div className='flex justify-center mb-4'>
           <Image
-            src={`/api/og/cosmic?date=${formatDateForUrl(selectedDate)}`}
+            src={`/api/og/cosmic/${formatDateForUrl(selectedDate)}`}
             alt={`Cosmic image for ${formatDateDisplay(selectedDate)}`}
             width={400}
             height={400}
@@ -86,7 +117,7 @@ export default function TestOGPage() {
             }}
             onClick={() =>
               window.open(
-                `/api/og/cosmic?date=${formatDateForUrl(selectedDate)}`,
+                `/api/og/cosmic/${formatDateForUrl(selectedDate)}`,
                 '_blank',
               )
             }
@@ -118,8 +149,8 @@ export default function TestOGPage() {
               <p className='text-zinc-300 text-sm mb-4'>{postContent.date}</p>
             </div> */}
 
-            <div>
-              {/* <h4 className='text-purple-300 font-medium mb-2'>🌟 Cosmic Highlights</h4> */}
+            {/* <div>
+              <h4 className='text-purple-300 font-medium mb-2'>🌟 Cosmic Highlights</h4>
               <ul className='space-y-1'>
                 {postContent.highlights?.map((highlight, index) => (
                   <li key={index} className='text-zinc-300 text-sm'>
@@ -130,7 +161,7 @@ export default function TestOGPage() {
             </div>
 
             <div>
-              {/* <h4 className='text-purple-300 font-medium mb-2'>✨ Today's Guidance</h4> */}
+              <h4 className='text-purple-300 font-medium mb-2'>✨ Today's Guidance</h4>
               <p className='text-zinc-300 text-sm leading-relaxed'>
                 {postContent.horoscopeSnippet}
               </p>
@@ -140,7 +171,13 @@ export default function TestOGPage() {
               <p className='text-purple-400 text-sm font-medium'>
                 {postContent.callToAction}
               </p>
+            </div> */}
+            <div className="pt-2 border-t border-zinc-700">
+              <p className="text-purple-400 text-sm font-medium whitespace-pre-line leading-relaxed">
+                {postContent.snippet}
+              </p>
             </div>
+
           </div>
         ) : (
           <p className='text-zinc-400'>Failed to load post content</p>
@@ -164,7 +201,7 @@ export default function TestOGPage() {
               onClick={() => setSelectedDate(date)}
             >
               <Image
-                src={`/api/og/cosmic?date=${formatDateForUrl(date)}`}
+                src={`/api/og/cosmic/${formatDateForUrl(date)}`}
                 alt={`Cosmic image for ${formatDateDisplay(date)}`}
                 width={200}
                 height={200}
