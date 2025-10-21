@@ -16,13 +16,13 @@ interface PostContent {
 }
 
 export default function TestOGPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [postContent, setPostContent] = useState<PostContent | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [postContent, setPostContent] = useState<PostContent | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setSelectedDate(new Date())
-  }, [])
+    setSelectedDate(new Date());
+  }, []);
 
   const formatDateForUrl = (date: Date) => {
     return date.toISOString().split('T')[0];
@@ -38,40 +38,44 @@ export default function TestOGPage() {
   };
 
   const nextMonthDates = useMemo(() => {
-    if (!selectedDate) return []
-    const dates: Date[] = []
+    if (!selectedDate) return [];
+    const dates: Date[] = [];
     for (let i = 0; i < 30; i++) {
-      const d = new Date(Date.UTC(
-        selectedDate.getUTCFullYear(),
-        selectedDate.getUTCMonth(),
-        selectedDate.getUTCDate() + i
-      ))
-      dates.push(d)
+      const d = new Date(
+        Date.UTC(
+          selectedDate.getUTCFullYear(),
+          selectedDate.getUTCMonth(),
+          selectedDate.getUTCDate() + i,
+        ),
+      );
+      dates.push(d);
     }
-    return dates
-  }, [selectedDate])
+    return dates;
+  }, [selectedDate]);
 
   // 4) Fetch after selectedDate exists
   useEffect(() => {
-    if (!selectedDate) return
-    ;(async () => {
-      setLoading(true)
+    if (!selectedDate) return;
+    (async () => {
+      setLoading(true);
       try {
-        const res = await fetch(`/api/og/cosmic-post/${formatDateForUrl(selectedDate)}`)
-        const data = await res.json()
-        setPostContent(data)
+        const res = await fetch(
+          `/api/og/cosmic-post/${formatDateForUrl(selectedDate)}`,
+        );
+        const data = await res.json();
+        setPostContent(data);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    })()
-  }, [selectedDate])
+    })();
+  }, [selectedDate]);
 
   // Fetch post content when selected date changes
   useEffect(() => {
     const fetchPostContent = async () => {
       setLoading(true);
       try {
-        if (!selectedDate) return 
+        if (!selectedDate) return;
         const response = await fetch(
           `/api/og/cosmic-post/${formatDateForUrl(selectedDate)}`,
         );
@@ -83,15 +87,14 @@ export default function TestOGPage() {
         setLoading(false);
       }
     };
-    
+
     fetchPostContent();
   }, [selectedDate]);
 
   if (!selectedDate) {
     // avoid rendering anything that depends on date until mounted
-    return <div className="p-6 text-zinc-400">Loading…</div>
+    return <div className='p-6 text-zinc-400'>Loading…</div>;
   }
-
 
   // const nextMonthDates = getNextMonthDates();
 
@@ -172,12 +175,11 @@ export default function TestOGPage() {
                 {postContent.callToAction}
               </p>
             </div> */}
-            <div className="pt-2 border-t border-zinc-700">
-              <p className="text-purple-400 text-sm font-medium whitespace-pre-line leading-relaxed">
+            <div className='pt-2 border-t border-zinc-700'>
+              <p className='text-purple-400 text-sm font-medium whitespace-pre-line leading-relaxed'>
                 {postContent.snippet}
               </p>
             </div>
-
           </div>
         ) : (
           <p className='text-zinc-400'>Failed to load post content</p>

@@ -7,7 +7,7 @@ const selectedDate = new Date().toISOString().split('T')[0];
 
 const postContent = await fetch(`/api/og/cosmic-post/${selectedDate}`);
 const postContentData = await postContent.json();
-console.log('postContentData', postContentData)
+console.log('postContentData', postContentData);
 
 export default function DailyPostsPreviewPage() {
   const [selectedDate, setSelectedDate] = useState(() => {

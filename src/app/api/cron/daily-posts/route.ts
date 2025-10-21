@@ -152,28 +152,10 @@ async function runDailyPosts(dateStr: string) {
   const productionUrl = 'https://lunary.app';
 
   // Fetch dynamic content for all post types
-  const [
-    cosmicResponse,
-    crystalResponse,
-    tarotResponse,
-    moonResponse,
-    horoscopeResponse,
-  ] = await Promise.all([
-    fetch(`${productionUrl}/api/og/cosmic-post?date=${dateStr}`, {
+  const [cosmicResponse] = await Promise.all([
+    fetch(`${productionUrl}/api/og/cosmic/cosmic-post/${dateStr}`, {
       headers: { 'User-Agent': 'Lunary-Cron/1.0' },
     }),
-    fetch(`${productionUrl}/api/crystal-recommendation?date=${dateStr}`, {
-      headers: { 'User-Agent': 'Lunary-Cron/1.0' },
-    }).catch(() => null),
-    fetch(`${productionUrl}/api/tarot-daily?date=${dateStr}`, {
-      headers: { 'User-Agent': 'Lunary-Cron/1.0' },
-    }).catch(() => null),
-    fetch(`${productionUrl}/api/moon-phase?date=${dateStr}`, {
-      headers: { 'User-Agent': 'Lunary-Cron/1.0' },
-    }).catch(() => null),
-    fetch(`${productionUrl}/api/horoscope-daily?date=${dateStr}`, {
-      headers: { 'User-Agent': 'Lunary-Cron/1.0' },
-    }).catch(() => null),
   ]);
 
   if (!cosmicResponse.ok) {
@@ -181,23 +163,6 @@ async function runDailyPosts(dateStr: string) {
   }
 
   const cosmicContent = await cosmicResponse.json();
-  const crystalContent = crystalResponse?.ok
-    ? await crystalResponse.json()
-    : null;
-  const tarotContent = tarotResponse?.ok ? await tarotResponse.json() : null;
-  const moonContent = moonResponse?.ok ? await moonResponse.json() : null;
-  const horoscopeContent = horoscopeResponse?.ok
-    ? await horoscopeResponse.json()
-    : null;
-
-  // Generate dynamic hashtags
-  const themes = [
-    ['#tarot', '#dailytarot', '#tarotreading', '#divination'],
-    ['#horoscope', '#astrology', '#zodiac', '#planetary'],
-    ['#mooncycles', '#moonphases', '#lunar', '#celestial'],
-    ['#crystals', '#healing', '#spirituality', '#gems'],
-  ];
-  const seed = new Date().getDate();
 
   // Calculate proper scheduling times with buffer for Vercel cron delays
   // Cron runs at 8 AM UTC, schedule posts starting at 12 PM UTC (4 hour buffer)
@@ -211,51 +176,11 @@ async function runDailyPosts(dateStr: string) {
   const posts = [
     {
       name: 'Main Cosmic',
-      content: generateCosmicPost(cosmicContent, themes[1], seed),
+      content: generateCosmicPost(cosmicContent),
       platforms: allPlatforms,
-      imageUrl: `${productionUrl}/api/og/cosmic?date=${dateStr}`,
-      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance.`,
+      imageUrl: `${productionUrl}/api/og/cosmic/${dateStr}`,
+      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
-    },
-    {
-      name: 'Daily Crystal',
-      content: generateCrystalPost(crystalContent, themes[3], seed),
-      platforms: allPlatforms,
-      imageUrl: `${productionUrl}/api/og/crystal?date=${dateStr}`,
-      alt: 'Daily crystal recommendation for spiritual guidance and healing.',
-      scheduledDate: new Date(
-        scheduleBase.getTime() + 3 * 60 * 60 * 1000,
-      ).toISOString(),
-    },
-    {
-      name: 'Daily Tarot',
-      content: generateTarotPost(tarotContent, themes[0], seed),
-      platforms: allPlatforms,
-      imageUrl: `${productionUrl}/api/og/tarot?date=${dateStr}`,
-      alt: 'Daily tarot card reading with guidance and meaning.',
-      scheduledDate: new Date(
-        scheduleBase.getTime() + 6 * 60 * 60 * 1000,
-      ).toISOString(),
-    },
-    {
-      name: 'Moon Phase',
-      content: generateMoonPost(moonContent, themes[2], seed),
-      platforms: allPlatforms,
-      imageUrl: `${productionUrl}/api/og/moon?date=${dateStr}`,
-      alt: 'Current moon phase energy and guidance for today.',
-      scheduledDate: new Date(
-        scheduleBase.getTime() + 9 * 60 * 60 * 1000,
-      ).toISOString(),
-    },
-    {
-      name: 'Daily Horoscope',
-      content: generateHoroscopePost(horoscopeContent, themes[1], seed),
-      platforms: allPlatforms,
-      imageUrl: `${productionUrl}/api/og/horoscope?date=${dateStr}`,
-      alt: 'Daily zodiac horoscope with wisdom and guidance.',
-      scheduledDate: new Date(
-        scheduleBase.getTime() + 12 * 60 * 60 * 1000,
-      ).toISOString(),
     },
   ];
 
@@ -533,143 +458,8 @@ function getBaseUrl(request: NextRequest): string {
 // Dynamic content generators
 function generateCosmicPost(
   cosmicContent: any,
-  hashtagTheme: string[],
-  seed: number,
+  // crystalContent: any,
+  // tarotContent: any,
 ): string {
-  const hashtags = hashtagTheme.slice(0, 2).join(' ');
-
-  return [
-    cosmicContent.highlights?.[0] ||
-      `${cosmicContent.primaryEvent.name}: ${cosmicContent.primaryEvent.energy}`,
-    '',
-    'Daily cosmic guidance at lunary.app',
-    '',
-    hashtags,
-  ].join('\n');
-}
-
-function generateCrystalPost(
-  crystalContent: any,
-  hashtagTheme: string[],
-  seed: number,
-): string {
-  const hashtags = hashtagTheme.slice(0, 3).join(' ');
-
-  if (crystalContent?.crystal) {
-    return [
-      `Today's crystal: ${crystalContent.crystal.name}`,
-      '',
-      crystalContent.crystal.guidance ||
-        'Powerful healing energy to support your spiritual journey.',
-      '',
-      'Discover personalized crystal guidance at lunary.app',
-      '',
-      hashtags,
-    ].join('\n');
-  }
-
-  // Fallback content
-  return [
-    "Today's crystal ally brings powerful healing energy to support your spiritual journey.",
-    '',
-    'Each crystal carries unique vibrations that enhance meditation and amplify intuition.',
-    '',
-    'Discover personalized crystal guidance at lunary.app',
-    '',
-    hashtags,
-  ].join('\n');
-}
-
-function generateTarotPost(
-  tarotContent: any,
-  hashtagTheme: string[],
-  seed: number,
-): string {
-  const hashtags = hashtagTheme.slice(0, 3).join(' ');
-
-  if (tarotContent?.card) {
-    return [
-      `Today's card: ${tarotContent.card.name}`,
-      '',
-      tarotContent.card.guidance || 'Ancient wisdom speaks to your path today.',
-      '',
-      'Explore personalized tarot readings at lunary.app',
-      '',
-      hashtags,
-    ].join('\n');
-  }
-
-  // Fallback content
-  return [
-    'The cards reveal profound insights about your path today.',
-    '',
-    'Each archetype carries ancient wisdom from new beginnings to inner strength.',
-    '',
-    'Explore personalized tarot readings at lunary.app',
-    '',
-    hashtags,
-  ].join('\n');
-}
-
-function generateMoonPost(
-  moonContent: any,
-  hashtagTheme: string[],
-  seed: number,
-): string {
-  const hashtags = hashtagTheme.slice(0, 3).join(' ');
-
-  if (moonContent?.phase) {
-    return [
-      `${moonContent.phase.name}: ${moonContent.phase.energy}`,
-      '',
-      moonContent.phase.guidance ||
-        'The lunar cycle influences our emotional and spiritual rhythms.',
-      '',
-      'Track lunar phases and cosmic timing at lunary.app',
-      '',
-      hashtags,
-    ].join('\n');
-  }
-
-  // Fallback content
-  return [
-    'The lunar cycle profoundly influences our emotional and spiritual rhythms.',
-    '',
-    'Each phase offers unique opportunities for growth, release, and manifestation.',
-    '',
-    'Track lunar phases and cosmic timing at lunary.app',
-    '',
-    hashtags,
-  ].join('\n');
-}
-
-function generateHoroscopePost(
-  horoscopeContent: any,
-  hashtagTheme: string[],
-  seed: number,
-): string {
-  const hashtags = hashtagTheme.slice(0, 3).join(' ');
-
-  if (horoscopeContent?.guidance) {
-    return [
-      "Today's zodiac wisdom offers profound insights into your cosmic nature.",
-      '',
-      horoscopeContent.guidance.slice(0, 120) + '...', // Truncate for social media
-      '',
-      'Explore personalized horoscopes at lunary.app',
-      '',
-      hashtags,
-    ].join('\n');
-  }
-
-  // Fallback content
-  return [
-    "Today's zodiac wisdom offers profound insights into your cosmic nature.",
-    '',
-    'Each sign carries unique gifts that can guide your daily journey.',
-    '',
-    'Explore personalized horoscopes at lunary.app',
-    '',
-    hashtags,
-  ].join('\n');
+  return cosmicContent.snippet;
 }

@@ -387,7 +387,6 @@ function checkSeasonalEvents(positions: any): Array<any> {
   return events;
 }
 
-
 // module-scope cache to avoid refetching
 let astroFontP: Promise<ArrayBuffer> | null = null;
 let robotoFontP: Promise<ArrayBuffer> | null = null;
@@ -396,7 +395,7 @@ let robotoFontP: Promise<ArrayBuffer> | null = null;
 async function loadAstronomiconFont(request: Request) {
   if (!astroFontP) {
     const url = new URL('/fonts/Astronomicon.ttf', request.url); // resolves to same-origin /fonts/...
-    astroFontP = fetch(url, { cache: 'force-cache' }).then(r => {
+    astroFontP = fetch(url, { cache: 'force-cache' }).then((r) => {
       if (!r.ok) throw new Error(`Astronomicon fetch ${r.status}`);
       return r.arrayBuffer();
     });
@@ -404,12 +403,11 @@ async function loadAstronomiconFont(request: Request) {
   return astroFontP;
 }
 
-
 async function loadGoogleFont(request: Request) {
   if (!robotoFontP) {
-  // const url = new URL(`https://fonts.googleapis.com/css2?family=${font}&text=${encodeURIComponent(text)}`, request.url);
+    // const url = new URL(`https://fonts.googleapis.com/css2?family=${font}&text=${encodeURIComponent(text)}`, request.url);
     const url = new URL(`/fonts/RobotoMono-Regular.ttf`, request.url);
-    robotoFontP = fetch(url, { cache: 'force-cache' }).then(r => {
+    robotoFontP = fetch(url, { cache: 'force-cache' }).then((r) => {
       if (!r.ok) throw new Error(`Roboto Mono font fetch ${r.status}`);
       return r.arrayBuffer();
     });
@@ -417,9 +415,7 @@ async function loadGoogleFont(request: Request) {
   return robotoFontP;
 }
 
-export async function GET(
-  req: NextRequest, ctx: Ctx
-) {
+export async function GET(req: NextRequest, ctx: Ctx) {
   const { date } = await ctx.params;
   const fontData = await loadAstronomiconFont(req);
   if (!fontData) throw new Error('Font load returned null');
@@ -483,7 +479,7 @@ export async function GET(
   };
 
   const style = responsive.square;
-    // responsive[sizeParam as keyof typeof responsive] || responsive.square;
+  // responsive[sizeParam as keyof typeof responsive] || responsive.square;
 
   // Get REAL astronomical data (SAME AS POST ROUTE)
   const positions = getRealPlanetaryPositions(targetDate);
@@ -1088,5 +1084,5 @@ export async function GET(
         return fonts;
       })(),
     },
-  );  
+  );
 }
