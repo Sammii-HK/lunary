@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
+const selectedDate = new Date().toISOString().split('T')[0];
+
+const postContent = await fetch(`/api/og/cosmic-post/${selectedDate}`);
+const postContentData = await postContent.json();
+console.log('postContentData', postContentData)
+
 export default function DailyPostsPreviewPage() {
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date().toISOString().split('T')[0];
@@ -15,43 +21,43 @@ export default function DailyPostsPreviewPage() {
     {
       name: 'Main Cosmic',
       description: 'Daily cosmic content with astronomical insights',
-      imageUrl: `/api/og/cosmic?date=${selectedDate}&t=${cacheBuster}`,
+      imageUrl: `/api/og/cosmic/${selectedDate}`,
       platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
       time: '12:00 PM UTC',
       hashtags: '#cosmic #astrology #daily',
     },
-    {
-      name: 'Daily Crystal',
-      description: 'Crystal recommendations for spiritual guidance',
-      imageUrl: `/api/og/crystal?date=${selectedDate}&t=${cacheBuster}`,
-      platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
-      time: '3:00 PM UTC',
-      hashtags: '#crystals #healing #spirituality',
-    },
-    {
-      name: 'Daily Tarot',
-      description: 'Tarot wisdom and card meanings',
-      imageUrl: `/api/og/tarot?date=${selectedDate}&t=${cacheBuster}`,
-      platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
-      time: '6:00 PM UTC',
-      hashtags: '#tarot #dailytarot #divination',
-    },
-    {
-      name: 'Moon Phase',
-      description: 'Lunar energy and moon phase guidance',
-      imageUrl: `/api/og/moon?date=${selectedDate}&t=${cacheBuster}`,
-      platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
-      time: '9:00 PM UTC',
-      hashtags: '#moonphases #lunar #celestial',
-    },
-    {
-      name: 'Daily Horoscope',
-      description: 'Zodiac wisdom and daily guidance',
-      imageUrl: `/api/og/horoscope?date=${selectedDate}&t=${cacheBuster}`,
-      platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
-      time: '12:00 AM UTC (next day)',
-      hashtags: '#horoscope #zodiac #astrology',
-    },
+    // {
+    //   name: 'Daily Crystal',
+    //   description: 'Crystal recommendations for spiritual guidance',
+    //   imageUrl: `/api/og/crystal/${selectedDate}&t=${cacheBuster}`,
+    //   platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
+    //   time: '3:00 PM UTC',
+    //   hashtags: '#crystals #healing #spirituality',
+    // },
+    // {
+    //   name: 'Daily Tarot',
+    //   description: 'Tarot wisdom and card meanings',
+    //   imageUrl: `/api/og/tarot/${selectedDate}&t=${cacheBuster}`,
+    //   platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
+    //   time: '6:00 PM UTC',
+    //   hashtags: '#tarot #dailytarot #divination',
+    // },
+    // {
+    //   name: 'Moon Phase',
+    //   description: 'Lunar energy and moon phase guidance',
+    //   imageUrl: `/api/og/moon/${selectedDate}&t=${cacheBuster}`,
+    //   platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
+    //   time: '9:00 PM UTC',
+    //   hashtags: '#moonphases #lunar #celestial',
+    // },
+    // {
+    //   name: 'Daily Horoscope',
+    //   description: 'Zodiac wisdom and daily guidance',
+    //   imageUrl: `/api/og/horoscope/${selectedDate}&t=${cacheBuster}`,
+    //   platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
+    //   time: '12:00 AM UTC (next day)',
+    //   hashtags: '#horoscope #zodiac #astrology',
+    // },
   ];
 
   const formatDateDisplay = (dateStr: string) => {
@@ -118,7 +124,7 @@ export default function DailyPostsPreviewPage() {
                 </div>
 
                 {/* Hashtags */}
-                <div className='text-xs text-blue-400'>{post.hashtags}</div>
+                {/* <div className='text-xs text-blue-400'>{post.hashtags}</div> */}
               </div>
 
               {/* Image Preview */}
@@ -136,6 +142,13 @@ export default function DailyPostsPreviewPage() {
                 {/* Image URL for testing */}
                 <div className='mt-3 text-xs text-zinc-500 break-all'>
                   {post.imageUrl}
+                </div>
+
+                <div className='mb-8'>
+                  <h3 className='text-xl font-bold mb-4'>Post Content</h3>
+                  <div className='text-zinc-400 text-sm mb-3 whitespace-pre-line leading-relaxed'>
+                    {postContentData.snippet}
+                  </div>
                 </div>
               </div>
             </div>
