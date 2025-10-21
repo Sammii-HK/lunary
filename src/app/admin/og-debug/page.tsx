@@ -17,27 +17,27 @@ export default function OGDebugPage() {
   const ogTypes = [
     {
       name: 'Cosmic',
-      url: `/api/og/cosmic?date=${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/cosmic/${selectedDate}&t=${cacheKey}`,
       description: 'Daily cosmic content with astronomical insights',
     },
     {
       name: 'Crystal',
-      url: `/api/og/crystal?date=${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/crystal/${selectedDate}&t=${cacheKey}`,
       description: 'Crystal recommendations with chakra info',
     },
     {
       name: 'Tarot',
-      url: `/api/og/tarot?date=${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/tarot/${selectedDate}&t=${cacheKey}`,
       description: 'Tarot cards with suit color variations',
     },
     {
       name: 'Moon',
-      url: `/api/og/moon?date=${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/moon/${selectedDate}&t=${cacheKey}`,
       description: 'Real moon phases with astronomical data',
     },
     {
       name: 'Horoscope',
-      url: `/api/og/horoscope?date=${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/horoscope/${selectedDate}&t=${cacheKey}`,
       description: 'Zodiac signs with daily wisdom',
     },
   ];

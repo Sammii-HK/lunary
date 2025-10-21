@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     const fileName = `${body.category}_${body.subcategory || 'general'}_${packId}.pdf`;
     const blobKey = `shop/packs/${body.category}/${fileName}`;
 
-    const { url: downloadUrl } = await put(blobKey, pdfBuffer, {
+    const { url: downloadUrl } = await put(blobKey, Buffer.from(pdfBuffer), {
       access: 'public', // Will implement secure access via our download API
       addRandomSuffix: false,
     });
@@ -218,7 +218,7 @@ async function generateMoonPhasePack(
             date: dateStr,
             title: cosmicData.primaryEvent.name,
             content: `${cosmicData.primaryEvent.energy}\n\n${cosmicData.highlights?.join('\n\n') || ''}`,
-            imageUrl: `${baseUrl}/api/og/cosmic?date=${dateStr}`,
+            imageUrl: `${baseUrl}/api/og/cosmic/${dateStr}`,
             metadata: {
               moonPhase: cosmicData.primaryEvent.name,
               energy: cosmicData.primaryEvent.energy,

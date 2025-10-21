@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       scheduledDateTime.setHours(13, 0, 0, 0); // 1 PM
 
       // Ensure image URL uses the correct base URL
-      const imageUrl = `${baseUrl}/api/og/cosmic?date=${dateStr}`;
+      const imageUrl = `${baseUrl}/api/og/cosmic/${dateStr}`;
 
       const postData: SucculentPostData = {
         accountGroupId,
