@@ -160,6 +160,7 @@ export const NotificationTemplates = {
 
 🌟 <b>Today's Cosmic Event:</b> ${cosmicEvent?.name || 'Cosmic Flow'}
 ✨ <b>Energy:</b> ${cosmicEvent?.energy || 'Universal Harmony'}
+🔮 <b>Post content:</b> ${cosmicEvent?.content || ''}
 
 📱 <b>All platforms:</b> X, Bluesky, Instagram, Reddit, Pinterest
 
@@ -168,7 +169,7 @@ export const NotificationTemplates = {
 <i>Tap to preview all images and content</i>`,
     url: `https://lunary.app/admin/daily-posts-preview?date=${date}`,
     priority: 'low' as const,
-    image: `https://lunary.app/api/og/cosmic?date=${date}`,
+    image: `https://lunary.app/api/og/cosmic/${date}`,
     html: true
   }),
 
