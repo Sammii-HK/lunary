@@ -8,6 +8,9 @@ import {
   Illumination,
   MoonPhase,
 } from 'astronomy-engine';
+import { getGeneralCrystalRecommendation } from '../../../../../utils/crystals/generalCrystals';
+import { getGeneralTarotReading } from '../../../../../utils/tarot/generalTarot';
+import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 
 // Default observer location (London, UK)
 const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
@@ -658,6 +661,18 @@ export async function GET(request: NextRequest) {
     },
     highlights,
     horoscopeSnippet,
+    crystalRecommendation: {
+      name: getGeneralCrystalRecommendation().name,
+      reason: getGeneralCrystalRecommendation().reason,
+      properties: getGeneralCrystalRecommendation().properties,
+      guidance: getGeneralCrystalRecommendation().guidance,
+      moonPhaseAlignment: getGeneralCrystalRecommendation().moonPhaseAlignment,
+    },
+    tarotReading: {
+      name: getGeneralTarotReading().daily.name,
+      keywords: getGeneralTarotReading().daily.keywords,
+      guidance: getGeneralTarotReading().guidance.dailyMessage,
+    },
     callToAction: 'Discover your personalized cosmic guidance at lunary',
     astronomicalData: {
       planets: Object.fromEntries(
