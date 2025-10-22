@@ -153,10 +153,12 @@ async function runDailyPosts(dateStr: string) {
 
   // Fetch dynamic content for all post types
   const [cosmicResponse] = await Promise.all([
-    fetch(`${productionUrl}/api/og/cosmic/cosmic-post/${dateStr}`, {
+    fetch(`${productionUrl}/api/og/cosmic-post/${dateStr}`, {
       headers: { 'User-Agent': 'Lunary-Cron/1.0' },
     }),
   ]);
+
+  console.log('cosmicResponse', cosmicResponse);
 
   if (!cosmicResponse.ok) {
     throw new Error(`Failed to fetch cosmic content: ${cosmicResponse.status}`);
@@ -177,8 +179,23 @@ async function runDailyPosts(dateStr: string) {
     {
       name: 'Main Cosmic',
       content: generateCosmicPost(cosmicContent),
-      platforms: allPlatforms,
-      imageUrl: `${productionUrl}/api/og/cosmic/${dateStr}`,
+      platforms: ['x', 'bluesky', 'reddit', 'pinterest'],
+      imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
+      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
+      scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
+    },
+    {
+      name: 'Main Cosmic Carousel',
+      content: generateCosmicPost(cosmicContent),
+      platforms: ['instagram'],
+      // imageUrl: `${productionUrl}/api/og/cosmic/${dateStr}`,
+      imageUrls: [
+        `${productionUrl}/api/og/cosmic/${dateStr}`,
+        `${productionUrl}/api/og/crystal/${dateStr}`,
+        `${productionUrl}/api/og/tarot/${dateStr}`,
+        `${productionUrl}/api/og/moon/${dateStr}`,
+        `${productionUrl}/api/og/horoscope/${dateStr}`,
+      ],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
     },
@@ -196,13 +213,11 @@ async function runDailyPosts(dateStr: string) {
         content: post.content,
         platforms: post.platforms,
         scheduledDate: post.scheduledDate,
-        media: [
-          {
-            type: 'image',
-            url: post.imageUrl,
-            alt: post.alt,
-          },
-        ],
+        media: post.imageUrls.map((imageUrl: string) => ({
+          type: 'image',
+          url: imageUrl,
+          alt: post.alt,
+        })),
       };
 
       const response = await fetch(succulentApiUrl, {
