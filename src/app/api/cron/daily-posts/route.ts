@@ -194,7 +194,7 @@ async function runDailyPosts(dateStr: string) {
     },
     {
       name: 'Main Cosmic Carousel',
-      content: generateCosmicPost(cosmicContent),
+      content: generateCosmicPost(cosmicContent).snippet,
       platforms: ['instagram'],
       // imageUrl: `${productionUrl}/api/og/cosmic/${dateStr}`,
       imageUrls: [
