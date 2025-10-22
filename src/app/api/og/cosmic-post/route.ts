@@ -685,7 +685,35 @@ export async function GET(request: NextRequest) {
         }),
       },
     },
+    horoscope: {
+      date: getGeneralHoroscope().date,
+      moonPhase: getGeneralHoroscope().moonPhase,
+      reading: getGeneralHoroscope().reading,
+      generalAdvice: getGeneralHoroscope().generalAdvice,
+    },
+    snippet: [
+      `Daily cosmic highlights: ${highlights?.[0] || ''}`,
+      ' ',
+      `Crystal: ${getGeneralCrystalRecommendation().name}, ${getGeneralCrystalRecommendation().guidance}`,
+      ' ',
+      `Tarot: ${getGeneralTarotReading().daily.name}, ${getGeneralTarotReading().guidance.dailyMessage}`,
+      ' ',
+      `Horoscope: ${getGeneralHoroscope().reading.slice(0, 150)}...`,
+      ' ',
+      'Get personalised daily cosmic guidance at lunary.app.',
+    ].join('\n'),
+    snippetShort: [
+      `Daily cosmic highlights: ${highlights?.[0] || ''}`,
+      ' ',
+      `Crystal: ${getGeneralCrystalRecommendation().name}, ${getGeneralCrystalRecommendation().guidance}`,
+      ' ',
+      `Tarot: ${getGeneralTarotReading().daily.name}, ${getGeneralTarotReading().guidance.dailyMessage}`,
+      ' ',
+      'Get personalised daily cosmic guidance at lunary.app',
+    ].join('\n'),
   };
+
+  console.log('postContent.snippet', postContent.snippet);
 
   return NextResponse.json(postContent);
 }
