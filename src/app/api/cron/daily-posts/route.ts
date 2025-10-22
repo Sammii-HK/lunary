@@ -177,9 +177,17 @@ async function runDailyPosts(dateStr: string) {
   // Generate posts with dynamic content
   const posts = [
     {
+      name: 'Main Cosmic X',
+      content: generateCosmicPost(cosmicContent).snippet,
+      platforms: ['x'],
+      imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}/landscape`],
+      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
+      scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
+    },
+    {
       name: 'Main Cosmic',
       content: generateCosmicPost(cosmicContent).snippet,
-      platforms: ['x', 'reddit', 'pinterest'],
+      platforms: ['reddit', 'pinterest'],
       imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),

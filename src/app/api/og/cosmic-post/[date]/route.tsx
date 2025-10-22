@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRealPlanetaryPositions, getAccurateMoonPhase, checkSeasonalEvents, calculateRealAspects, checkSignIngress, getSignDescription, generateDayGuidanceSummary } from '../../../../../../utils/astrology/cosmic-og';
+import {
+  getRealPlanetaryPositions,
+  getAccurateMoonPhase,
+  checkSeasonalEvents,
+  calculateRealAspects,
+  checkSignIngress,
+  getSignDescription,
+  generateDayGuidanceSummary,
+} from '../../../../../../utils/astrology/cosmic-og';
 import { getGeneralCrystalRecommendation } from '../../../../../../utils/crystals/generalCrystals';
 import { getGeneralTarotReading } from '../../../../../../utils/tarot/generalTarot';
 import { getGeneralHoroscope } from '../../../../../../utils/astrology/generalHoroscope';
-
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

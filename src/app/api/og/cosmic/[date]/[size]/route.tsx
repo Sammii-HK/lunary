@@ -1,11 +1,18 @@
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
-import { loadAstronomiconFont, loadGoogleFont, getRealPlanetaryPositions, getAccurateMoonPhase, checkSeasonalEvents, calculateRealAspects, getZodiacSymbol } from '../../../../../../../utils/astrology/cosmic-og';
+import {
+  loadAstronomiconFont,
+  loadGoogleFont,
+  getRealPlanetaryPositions,
+  getAccurateMoonPhase,
+  checkSeasonalEvents,
+  calculateRealAspects,
+  getZodiacSymbol,
+} from '../../../../../../../utils/astrology/cosmic-og';
 
 export const runtime = 'edge';
 
-type Ctx = { params: Promise<{ date: string, size: string }> };
-
+type Ctx = { params: Promise<{ date: string; size: string }> };
 
 export async function GET(req: NextRequest, ctx: Ctx) {
   const { date, size } = await ctx.params;
@@ -66,7 +73,8 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     },
   };
 
-  const style = responsive[size as keyof typeof responsive] || responsive.square;
+  const style =
+    responsive[size as keyof typeof responsive] || responsive.square;
   console.log('style', style);
   // responsive[sizeParam as keyof typeof responsive] || responsive.square;
 
