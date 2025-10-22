@@ -483,6 +483,9 @@ function generateCosmicPost(
   cosmicContent: any,
   // crystalContent: any,
   // tarotContent: any,
-): string {
-  return cosmicContent.snippet;
+): { snippet: string; snippetShort: string } {
+  return {
+    snippet: cosmicContent.snippet,
+    snippetShort: cosmicContent.snippetShort,
+  } as { snippet: string; snippetShort: string };
 }
