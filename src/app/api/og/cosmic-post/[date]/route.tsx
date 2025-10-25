@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
   if (primaryEvent.aspect) {
     const planetA = primaryEvent.planetA;
     const planetB = primaryEvent.planetB;
-    const signA = primaryEvent.signA;
-    const signB = primaryEvent.signB;
+    const signA = primaryEvent.planetA.constellation;
+    const signB = primaryEvent.planetB.constellation;
     const separation = primaryEvent.separation;
     const aspect = primaryEvent.aspect;
 
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
               : `seek balance through ${primaryEnergy} energy`;
 
     highlights.push(
-      `${planetA}-${planetB} ${aspect} in ${signA}-${signB} at ${separation}° - ${aspectAction}`,
+      `${planetA.name}-${planetB.name} ${aspect} in ${signA}-${signB} at ${separation}° - ${aspectAction}`,
     );
   } else if (primaryEvent.type === 'moon') {
     // Determine moon phase description based on illumination percentage, not name
