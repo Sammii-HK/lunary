@@ -3,51 +3,6 @@ import { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const crystals = [
-  {
-    name: 'Amethyst',
-    color: '#9333EA',
-    chakra: 'Crown Chakra',
-    keywords: ['Intuition', 'Clarity', 'Protection'],
-  },
-  {
-    name: 'Rose Quartz',
-    color: '#F472B6',
-    chakra: 'Heart Chakra',
-    keywords: ['Love', 'Compassion', 'Peace'],
-  },
-  {
-    name: 'Citrine',
-    color: '#F59E0B',
-    chakra: 'Solar Plexus',
-    keywords: ['Abundance', 'Confidence', 'Joy'],
-  },
-  {
-    name: 'Black Tourmaline',
-    color: '#1F2937',
-    chakra: 'Root Chakra',
-    keywords: ['Protection', 'Grounding', 'Strength'],
-  },
-  {
-    name: 'Clear Quartz',
-    color: '#F3F4F6',
-    chakra: 'All Chakras',
-    keywords: ['Amplification', 'Clarity', 'Healing'],
-  },
-  {
-    name: 'Moonstone',
-    color: '#E5E7EB',
-    chakra: 'Sacral Chakra',
-    keywords: ['Intuition', 'Cycles', 'Feminine'],
-  },
-  {
-    name: 'Carnelian',
-    color: '#EA580C',
-    chakra: 'Sacral Chakra',
-    keywords: ['Creativity', 'Courage', 'Passion'],
-  },
-];
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
@@ -100,7 +55,6 @@ export async function GET(request: NextRequest) {
     },
   };
 
-  const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
 
   // Fetch real horoscope snippet from cosmic content
   const dateStr = targetDate.toISOString().split('T')[0];

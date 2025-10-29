@@ -164,7 +164,7 @@ export const NotificationTemplates = {
 
 📱 <b>All platforms:</b> X, Bluesky, Instagram, Reddit, Pinterest
 
-⏰ <b>Times:</b> 12PM, 3PM, 6PM, 9PM, 12AM UTC
+⏰ <b>Times:</b> 12PM, UTC
 
 <i>Tap to preview all images and content</i>`,
     url: `https://lunary.app/admin/daily-posts-preview?date=${date}`,
