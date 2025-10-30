@@ -4,6 +4,10 @@ import {
   NotificationTemplates,
 } from '../../../../../utils/notifications/pushNotifications';
 
+// Track if cron is already running to prevent duplicate execution
+// Using a Map to track by date for better serverless resilience
+const executionTracker = new Map<string, boolean>();
+
 export async function GET(request: NextRequest) {
   try {
     // Verify cron request
@@ -15,14 +19,42 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const today = new Date().toISOString().split('T')[0];
+
+    // Atomic check-and-set: Prevent duplicate execution on the same day
+    // This works better in serverless than separate checks
+    if (executionTracker.has(today)) {
+      console.log(
+        `⚠️ Cron already executed today (${today}), skipping duplicate execution`,
+      );
+      return NextResponse.json({
+        success: false,
+        message: `Already executed today (${today})`,
+        skipped: true,
+      });
+    }
+
+    // Immediately mark as executing for this date (atomic operation)
+    executionTracker.set(today, true);
+
+    // Clean up old entries (keep only last 7 days to prevent memory leak)
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 7);
+    const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+    for (const [date] of executionTracker) {
+      if (date < cutoffDateStr) {
+        executionTracker.delete(date);
+      }
+    }
+
     console.log('🕐 Master cron job started at:', new Date().toISOString());
     console.log('🔐 Auth check passed - proceeding with cron execution');
 
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    const dayOfMonth = today.getDate();
-    const month = today.getMonth() + 1;
-    const dateStr = today.toISOString().split('T')[0];
+    const todayDate = new Date();
+    const dayOfWeek = todayDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const dayOfMonth = todayDate.getDate();
+    const month = todayDate.getMonth() + 1;
+    const dateStr = todayDate.toISOString().split('T')[0];
 
     console.log('📅 Cron execution context:', {
       date: dateStr,
@@ -119,6 +151,9 @@ export async function GET(request: NextRequest) {
       `✅ Master cron completed: ${successfulTasks}/${totalTasks} task groups successful`,
     );
 
+    // Clear the execution flag for today on success (but keep it to prevent retries)
+    // We don't delete it so if there's a retry, it's still blocked
+
     return NextResponse.json({
       success: successfulTasks > 0,
       message: `Master cron completed - ${successfulTasks}/${totalTasks} task groups successful`,
@@ -133,6 +168,9 @@ export async function GET(request: NextRequest) {
       executedAt: new Date().toISOString(),
     });
   } catch (error) {
+    // On error, we could optionally remove the flag to allow retry
+    // But keeping it prevents duplicate posts if there are network issues
+    // executionTracker.delete(today); // Uncomment if you want retries on error
     console.error('❌ Master cron job failed:', error);
     return NextResponse.json(
       {
@@ -171,15 +209,12 @@ async function runDailyPosts(dateStr: string) {
   const scheduleBase = new Date();
   scheduleBase.setHours(12, 0, 0, 0); // Start at 12 PM UTC
 
-  // All platforms for every post
-  const allPlatforms = ['x', 'bluesky', 'instagram', 'reddit', 'pinterest'];
-
-  // Generate posts with dynamic content
+  // Generate posts with dynamic content - ONE Twitter post only
   const posts = [
     {
       name: 'Main Cosmic X',
       content: generateCosmicPost(cosmicContent).snippet,
-      platforms: ['x'],
+      platforms: ['x'], // Only Twitter/X - single post per day
       imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}/landscape`],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
@@ -193,7 +228,7 @@ async function runDailyPosts(dateStr: string) {
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
     },
     {
-      name: 'Main Cosmic',
+      name: 'Main Cosmic Bluesky',
       content: generateCosmicPost(cosmicContent).snippetShort,
       platforms: ['bluesky'],
       imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
@@ -204,7 +239,6 @@ async function runDailyPosts(dateStr: string) {
       name: 'Main Cosmic Carousel',
       content: generateCosmicPost(cosmicContent).snippet,
       platforms: ['instagram'],
-      // imageUrl: `${productionUrl}/api/og/cosmic/${dateStr}`,
       imageUrls: [
         `${productionUrl}/api/og/cosmic/${dateStr}`,
         `${productionUrl}/api/og/crystal?date=${dateStr}`,
