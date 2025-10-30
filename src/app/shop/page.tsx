@@ -45,64 +45,38 @@ export default function ShopPage() {
     try {
       setLoading(true);
 
-      // In a real implementation, this would fetch from your database
-      // For now, we'll use mock data
-      const mockPacks: DigitalPack[] = [
-        {
-          id: 'pack_moon_2025',
-          name: 'Moon Phases 2025',
-          description:
-            'Complete guide to all moon phases throughout 2025, with detailed insights and spiritual guidance for each lunar cycle.',
-          category: 'moon_phases',
-          subcategory: '2025',
-          price: 1999, // $19.99
-          imageUrl:
-            '/api/shop/og?category=moon_phases&name=Moon%20Phases%202025&items=13',
-          stripePriceId: 'price_mock_moon_2025',
-          isActive: true,
-          metadata: {
-            dateRange: '2025-01-01 to 2025-12-31',
-            format: 'PDF',
-            itemCount: 13,
-          },
-        },
-        {
-          id: 'pack_crystals_healing',
-          name: 'Crystal Healing Guide',
-          description:
-            'Discover the power of crystals with this comprehensive guide featuring properties, uses, and healing techniques.',
-          category: 'crystals',
-          price: 1499, // $14.99
-          imageUrl:
-            '/api/shop/og?category=crystals&name=Crystal%20Healing%20Guide&items=8',
-          stripePriceId: 'price_mock_crystals',
-          isActive: true,
-          metadata: {
-            format: 'PDF',
-            itemCount: 8,
-          },
-        },
-        {
-          id: 'pack_spells_protection',
-          name: 'Protection Spells Collection',
-          description:
-            'Sacred rituals and spells for protection, cleansing, and spiritual defense.',
-          category: 'spells',
-          price: 1299, // $12.99
-          imageUrl:
-            '/api/shop/og?category=spells&name=Protection%20Spells%20Collection&items=5',
-          stripePriceId: 'price_mock_spells',
-          isActive: true,
-          metadata: {
-            format: 'PDF',
-            itemCount: 5,
-          },
-        },
-      ];
+      // Fetch products from Stripe (SSOT)
+      const response = await fetch('/api/shop/products');
+      const data = await response.json();
 
-      setPacks(mockPacks);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load products');
+      }
+
+      // Transform to DigitalPack format
+      const fetchedPacks: DigitalPack[] = data.packs.map((pack: any) => ({
+        id: pack.id,
+        name: pack.name,
+        description: pack.description,
+        category: pack.category,
+        subcategory: pack.subcategory,
+        price: pack.price,
+        imageUrl: pack.imageUrl,
+        stripePriceId: pack.stripePriceId, // For checkout
+        isActive: pack.isActive,
+        metadata: {
+          dateRange: pack.metadata?.dateRange,
+          format: pack.metadata?.format || 'PDF',
+          itemCount: pack.metadata?.itemCount,
+        },
+      }));
+
+      setPacks(fetchedPacks);
+      console.log(`✅ Loaded ${fetchedPacks.length} products from Stripe (SSOT)`);
     } catch (error) {
       console.error('Failed to load packs:', error);
+      // Fallback to empty array on error
+      setPacks([]);
     } finally {
       setLoading(false);
     }
