@@ -58,6 +58,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip authentication and API routes - always use network
+  const url = new URL(event.request.url);
+  if (
+    url.pathname.startsWith('/api/auth') ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.includes('auth') ||
+    url.pathname.includes('sign-in') ||
+    url.pathname.includes('sign-out')
+  ) {
+    return; // Let the request go to network, don't cache or intercept
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

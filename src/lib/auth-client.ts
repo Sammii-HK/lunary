@@ -13,6 +13,7 @@ export const betterAuthClient = createAuthClient({
       : 'http://localhost:3000'),
   fetchOptions: {
     credentials: 'include', // Include cookies in requests
+    cache: 'no-store', // Never cache auth requests (important for iOS)
   },
   plugins: [jazzPluginClient()],
 });
