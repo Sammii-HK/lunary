@@ -45,9 +45,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <LunaryJazzProvider>
             <main className='flex flex-col h-full max-w-md w-full items-center justify-between font-mono text-sm gap-4 overflow-auto px-4 align-self-middle justify-self-center'>
-              <ErrorBoundary>
-                {children}
-              </ErrorBoundary>
+              <ErrorBoundary>{children}</ErrorBoundary>
               <Analytics />
             </main>
             <Navbar />
