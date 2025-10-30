@@ -1,127 +1,164 @@
 # Lunary
 
-[Live site](https://lunary.app/)
+Spiritual technology platform combining real-time astronomical data with personalized guidance, digital products, and automated content creation.
 
-## Details
+[Live Site](https://lunary.app)
 
-### Time Frame
+## Overview
 
-3 days
+Full-stack Next.js 15 application delivering personalized cosmic insights, digital products, and automated content based on real-time astronomical calculations.
 
-### Technologies
+**Key Capabilities:**
 
-- Next
-- Typescript
-- Material UI
-- Astronomy Engine
-- Dayjs
+- Real-time astronomical calculations using Astronomy Engine
+- Personalized birth chart analysis and horoscopes
+- Automated content generation (blog, newsletter, social posts)
+- E-commerce with Stripe integration
+- PWA with push notifications
 
-### App Overview
+## Technology Stack
 
-Lunary is a lunar diary which displays planetary positions based on date and current time. The main feature of the app is the current moon phase and relevant information about it such as the constellation the moon is in and what this means. It also displays a daily tarot reading.
+**Frontend & Framework**
 
-#### Development Process
+- Next.js 15 (App Router, Server Components)
+- React 18, TypeScript
+- Tailwind CSS, Radix UI
+- PWA with Service Workers
 
-This app relies on a lot of information being displayed which is based on moon phases, constellations and planetary positions.
-I started by creating all of these constant as objects of data which I could retrieve with keys based on the moons current position.
+**Backend & Services**
 
-All information displayed is based solely off of planetary position data retrieved with the astronomy engine package, which I then use to calculate moon phase constellation position and qualities.
+- Better Auth (authentication)
+- Database adapter for user data
+- Vercel Postgres (subscriptions, newsletter)
+- Vercel Blob (digital products)
+- Stripe (payments, SSOT)
+- Resend (email delivery)
+- Web Push API (notifications)
 
-Constellations contain information eg:
+**Calculations & Automation**
 
-```JS
-export const constellations = {
-  aries: {
-    name: "Aries",
-    element: "Fire",
-    quality: "Cardinal",
-    rulingPlanet: "Mars",
-    symbol: "Ram",
-    keywords: ["Courage", "Initiative", "Leadership"],
-    information: "Aries is known for its courage, initiative, and leadership. This is a time to take bold actions, start new projects, and assert yourself confidently. Focus on channeling your pioneering spirit and embracing your inner leader.",
-    crystals: ["Carnelian", "Red Jasper"]
-  },
+- Astronomy Engine (planetary positions, moon phases)
+- Automated blog generation
+- PDF generation (pdf-lib)
+- OG image generation
+
+**Infrastructure**
+
+- Vercel (hosting, edge functions, cron)
+- Cloudflare Workers (notification cron)
+- PostgreSQL (Vercel Postgres)
+
+## Features
+
+### User Features
+
+- Real-time moon phases with constellation positions
+- Planetary ephemeris and retrograde tracking
+- Birth chart analysis with interpretations
+- Personalized horoscopes based on transits
+- Tarot readings with personalization
+- Grimoire reference library (crystals, spells, numerology, chakras, runes)
+- Digital product shop with secure downloads
+- PWA with push notifications for cosmic events
+
+### Admin Features
+
+- Blog manager with automated weekly generation
+- Newsletter manager with subscriber management
+- Shop manager for digital pack generation and Stripe sync
+- Automated cron jobs (daily posts, moon packs, notifications)
+- Social media scheduler (Instagram, X, Bluesky, Reddit, Pinterest)
+- Content generation tools
+
+## Architecture
+
+```
+Client (PWA)
+  ↓
+Better Auth + Database
+  ↓
+Next.js API Layer (Astro, Shop, Blog APIs)
+  ↓
+External Services (Stripe, Resend, Blob, PostgreSQL)
 ```
 
-Each Zodiac Constellation then has information specific to each moon phase which may occur within in, this information was created by merging the constellation qualities with the moon phase qualities to get details about the two corresponding:
+## Automated Systems
 
-```JS
-  capricorn: {
-    newMoon: {
-      details: "New Moon in Capricorn is a time to set ambitious goals and focus on long-term achievements. It’s perfect for laying the foundation for future success.",
-      crystals: ["Garnet", "Onyx"]
-    },
-    waxingCrescent: {
-      details: "..."
-      crystals: ["..."]
-    },
-    firstQuarter: {...},
-    waxingGibbous: {...},
-    fullMoon: {...},
-    waningGibbous: {...},
-    lastQuarter: {...},
-    waningCrescent: {...},
+- **Daily Posts**: Cron job runs at 8 AM UTC (Vercel)
+- **Weekly Blog**: Automated generation with planetary highlights
+- **Newsletter**: Weekly distribution via Resend bulk API
+- **Moon Packs**: Scheduled generation (monthly, quarterly, yearly)
+- **Notifications**: 4-hourly checks for cosmic events (Cloudflare Worker)
+- **Stripe Sync**: Automated product sync as Single Source of Truth
+
+## E-Commerce Flow
+
+1. Pack generation creates PDF content
+2. Uploads to Vercel Blob storage
+3. Syncs product details to Stripe (SSOT)
+4. Token-based secure downloads after purchase
+5. Download limits and expiry enforced
+
+## Deployment
+
+**Vercel**
+
+- Framework auto-detection
+- Cron jobs in `vercel.json`
+- Environment variables in dashboard
+
+**Cloudflare Worker**
+
+- Handles notification checks every 4 hours
+- Free tier sufficient for usage
+
+## Development
+
+```bash
+git clone https://github.com/sammi-hk/lunary.git
+cd lunary
+yarn install
+yarn dev
 ```
 
-I work out the planetary constellations from a calculation made from the longitude of the planetary body.
+**Code Quality**
 
-```JS
-function getZodiacSign(longitude: number): string {
-  const index = Math.floor((longitude < 0 ? longitude + 360 : longitude) / 30) % 12;
-  return ZODIAC_SIGNS[index];
-}
+- TypeScript strict mode
+- ESLint + Prettier
+- Pre-commit hooks (Husky)
+
+**Project Structure**
+
+```
+src/app/          # Next.js App Router
+src/components/   # React components
+src/lib/          # Shared libraries
+utils/            # Utility functions
+scripts/          # Automation scripts
+sql/              # Database schemas
 ```
 
-##### Noteworthy Items
+## License
 
-The planetary position ephemeris is created entirely by my own script, which parses geo vector data to ecliptic longitude.
+Proprietary - All Rights Reserved. Copyright (c) 2024 Lunary.
 
-Longitude is formatted into degrees and minutes as on astrology charts which is translated to this format with a simple function
+Contributions welcome. By contributing, you agree that your contributions will be licensed under the same proprietary license.
 
-```JS
-function formatDegree(longitude: number): FormattedDegree {
-  const degreesInSign = longitude % 30;
-  const degree = Math.floor(degreesInSign);
-  const minute = Math.floor((degreesInSign - degree) * 60);
-  return { degree, minute };
-}
-```
+## Support
 
-I also wanted to work out if a planetary body was in retrograde, so created this script to work out if the current ecliptic longitude is less than the ecliptic longitude 24 hours ago.
+- GitHub: [Issues](https://github.com/Sammii-HK/lunary)
+- Email: help@lunary.app
 
-```JS
-const astroTime = new AstroTime(date);
-const astroTimePast = new AstroTime(new Date(date.getTime() - 24 * 60 * 60 * 1000));
+## Roadmap
 
-const vectorNow = GeoVector(body, astroTime, true);
-const vectorPast = GeoVector(body, astroTimePast, true);
+### Planned Features
 
-const eclipticLongitudeNow = Ecliptic(vectorNow).elon;
-const eclipticLongitudePast = Ecliptic(vectorPast).elon;
+- [ ] Enhanced birth chart interpretations
+- [ ] Community features (user-generated content)
+- [ ] Mobile app (React Native)
+- [ ] Social sharing for personalised readings
+- [ ] API for third-party integrations
+- [ ] Multi-language support
+- [ ] Advanced analytics dashboard
 
-const retrograde = eclipticLongitudeNow < eclipticLongitudePast;
-```
-
-#### Functionality
-
-##### UX Journeys
-
-The app has a minimail steamlined design with only 4 pages:
-
-1.  The main dashboard with planetary positions and moon phase information
-2.  Tarot card reading review, to display readings from the past few days
-3.  A Grimoire, a reference guide for all information displayed on the app
-4.  A Book of Shadows - this is a work in progress but will be place for diary like entries
-
-### Challenges & Achievements
-
-My main achievement was utilising Chat GPT to help create all of the objects of enum data about moon phases, constellations, zodiacs and tarot cards.
-Not having to create all of this information by hand sped up the development process and allowed me to concentrate on the creation of the app, instead of merely populating it with data.
-All of this information also serves a second purpose as a grimoire of reference material so you can learn about phases, constellations and other items which are not on the current date.
-
-## Future Enhancements
-
-- Add login/profiles to create personalised Tarot readings
-- Add a personalised horoscope, as everything is currently seeded with my name.
-- Complete the Grimoire
-- Add functionality for the Book of Shadows diary entries
+Built by the Lunary team
