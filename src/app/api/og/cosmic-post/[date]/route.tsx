@@ -33,6 +33,8 @@ export async function GET(request: NextRequest) {
   const seasonalEvents = checkSeasonalEvents(positions);
   const aspects = calculateRealAspects(positions);
   const ingresses = checkSignIngress(positions, targetDate);
+  const retrogradeEvents = checkRetrogradeEvents(positions);
+  const retrogradeIngress = checkRetrogradeIngress(positions);
 
   // Combine events with priority order: moon phases > extraordinary planetary events > sign ingress > daily aspects > seasonal > cosmic flow
   let allEvents: Array<any> = [];
@@ -208,8 +210,8 @@ export async function GET(request: NextRequest) {
     aspectEvents: aspects,
     seasonalEvents: seasonalEvents,
     dailyAspects: dailyAspects,
-    retrogradeEvents: checkRetrogradeEvents(positions),
-    retrogradeIngress: checkRetrogradeIngress(positions),
+    retrogradeEvents: retrogradeEvents,
+    retrogradeIngress: retrogradeIngress,
     tarotReading: {
       name: getGeneralTarotReading().daily.name,
       keywords: getGeneralTarotReading().daily.keywords,
