@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount } from 'jazz-react';
 
 interface DigitalPack {
   id: string;
@@ -21,10 +20,6 @@ interface DigitalPack {
 }
 
 export default function ShopPage() {
-  // Get account - will be null if Jazz not initialized or user not logged in
-  const account = useAccount();
-  const me = account?.me || null;
-
   const [packs, setPacks] = useState<DigitalPack[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
@@ -118,7 +113,7 @@ export default function ShopPage() {
         body: JSON.stringify({
           packId: pack.id,
           stripePriceId: pack.stripePriceId,
-          userId: me?.id,
+          // userId is optional - Stripe tracks purchases by email
         }),
       });
 
