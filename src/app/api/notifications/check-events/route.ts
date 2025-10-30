@@ -252,25 +252,42 @@ function getPlanetEmoji(event: any): string {
   return '⭐';
 }
 
+// Map event types to preference keys
+function getPreferenceKey(eventType: string): string | null {
+  const mapping: Record<string, string> = {
+    moon: 'moonPhases',
+    aspect: 'majorAspects',
+    ingress: 'planetaryTransits',
+    retrograde: 'retrogrades',
+    seasonal: 'sabbats',
+    eclipse: 'eclipses',
+    moon_phase: 'moonPhases',
+    planetary_transit: 'planetaryTransits',
+    sabbat: 'sabbats',
+  };
+  return mapping[eventType] || null;
+}
+
 async function sendNotificationToSubscribers(notification: any) {
   try {
     console.log('📤 Sending notification:', notification.title);
 
     // Get the event type to filter subscriptions by preferences
     const eventType = notification.data?.eventType;
+    const preferenceKey = eventType ? getPreferenceKey(eventType) : null;
 
     // Fetch active subscriptions from PostgreSQL based on preferences
     let subscriptions;
-    if (eventType) {
+    if (preferenceKey) {
       // Filter by event type preference
       subscriptions = await sql`
         SELECT endpoint, p256dh, auth, user_id, preferences
         FROM push_subscriptions 
         WHERE is_active = true 
-        AND preferences->>${eventType} = 'true'
+        AND preferences->>${preferenceKey} = 'true'
       `;
     } else {
-      // Get all active subscriptions
+      // Get all active subscriptions (fallback if no mapping found)
       subscriptions = await sql`
         SELECT endpoint, p256dh, auth, user_id, preferences
         FROM push_subscriptions 
@@ -282,6 +299,8 @@ async function sendNotificationToSubscribers(notification: any) {
       console.log(
         '📭 No active push subscriptions found for event type:',
         eventType,
+        'preference key:',
+        preferenceKey,
       );
       return {
         success: true,

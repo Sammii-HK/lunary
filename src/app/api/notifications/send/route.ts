@@ -87,19 +87,36 @@ export async function POST(request: NextRequest) {
     // Get active subscriptions from PostgreSQL
     const { sql } = await import('@vercel/postgres');
 
+    // Map event types to preference keys
+    const getPreferenceKey = (eventType: string): string | null => {
+      const mapping: Record<string, string> = {
+        moon: 'moonPhases',
+        moon_phase: 'moonPhases',
+        aspect: 'majorAspects',
+        ingress: 'planetaryTransits',
+        planetary_transit: 'planetaryTransits',
+        retrograde: 'retrogrades',
+        seasonal: 'sabbats',
+        sabbat: 'sabbats',
+        eclipse: 'eclipses',
+      };
+      return mapping[eventType] || null;
+    };
+
     let subscriptions;
     const eventType = payload.data?.eventType || payload.type;
+    const preferenceKey = eventType ? getPreferenceKey(eventType) : null;
 
-    if (eventType) {
+    if (preferenceKey) {
       // Filter by event type preference
       subscriptions = await sql`
         SELECT endpoint, p256dh, auth, user_id, preferences
         FROM push_subscriptions 
         WHERE is_active = true 
-        AND preferences->>${eventType} = 'true'
+        AND preferences->>${preferenceKey} = 'true'
       `;
     } else {
-      // Get all active subscriptions
+      // Get all active subscriptions (fallback if no mapping found)
       subscriptions = await sql`
         SELECT endpoint, p256dh, auth, user_id, preferences
         FROM push_subscriptions 
@@ -111,6 +128,8 @@ export async function POST(request: NextRequest) {
       console.log(
         '📭 No active push subscriptions found for event type:',
         eventType,
+        'preference key:',
+        preferenceKey,
       );
       return NextResponse.json({
         success: true,
