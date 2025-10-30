@@ -48,15 +48,25 @@ export function PWAHandler() {
 
     checkInstalled();
 
+    // Debug: Check PWA criteria
+    console.log('🔍 PWA Debug Info:', {
+      isSecureContext: window.isSecureContext,
+      hasServiceWorker: 'serviceWorker' in navigator,
+      standalone: window.matchMedia('(display-mode: standalone)').matches,
+      userAgent: navigator.userAgent,
+    });
+
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      console.log('🎯 beforeinstallprompt event fired!', e);
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstallPrompt(true);
     };
 
     // Listen for app installed event
-    const handleAppInstalled = () => {
+    const handleAppInstalled = (e: Event) => {
+      console.log('🎯 appinstalled event fired!', e);
       setIsInstalled(true);
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
