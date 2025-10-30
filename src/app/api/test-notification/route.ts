@@ -1,103 +1,121 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendAdminNotification } from '../../../../utils/notifications/pushNotifications';
 
-export const dynamic = 'force-dynamic';
-
-// Test push notification endpoint
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    console.log('🧪 Testing push notification...');
+    // Verify authorization
+    const authHeader = request.headers.get('authorization');
+    if (
+      process.env.CRON_SECRET &&
+      authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    const testNotification = {
-      title: '🧪 Lunary Test Notification',
-      message: `<b>Push notifications are working!</b>
+    console.log('🧪 Testing push notifications...');
 
-📱 <b>What you'll get:</b>
-• Daily post previews with images
-• Cron success/failure alerts  
-• Weekly blog generation notices
-• Retrograde alerts
+    // Get test notification type from request
+    const { testType = 'moon' } = await request.json().catch(() => ({}));
 
-🎯 <b>Rich content:</b>
-• HTML formatting
-• Cosmic event details
-• Direct preview links
-• Attached images
+    let testNotification;
 
-<i>Your cron jobs will now send rich alerts to your phone!</i>`,
-      url: 'https://lunary.app/admin',
-      priority: 'normal' as const,
-      sound: 'cosmic',
-      html: true,
-      image: 'https://lunary.app/api/og/cosmic',
-    };
+    switch (testType) {
+      case 'moon':
+        testNotification = {
+          type: 'moon',
+          title: '🌓 First Quarter Moon (TEST)',
+          body: 'Take action on your intentions and push forward - This is a test notification',
+          data: {
+            date: new Date().toISOString().split('T')[0],
+            eventName: 'First Quarter Moon Test',
+            priority: 10,
+            eventType: 'moon',
+            isTest: true,
+          },
+        };
+        break;
 
-    const result = await sendAdminNotification(testNotification);
+      case 'retrograde':
+        testNotification = {
+          type: 'retrograde',
+          title: '☿ Mercury Retrograde (TEST)',
+          body: 'Time for reflection and review - This is a test notification',
+          data: {
+            date: new Date().toISOString().split('T')[0],
+            eventName: 'Mercury Retrograde Test',
+            priority: 9,
+            eventType: 'retrograde',
+            isTest: true,
+          },
+        };
+        break;
+
+      case 'eclipse':
+        testNotification = {
+          type: 'eclipse',
+          title: '🌙 Lunar Eclipse (TEST)',
+          body: 'Major transformation portal opens - This is a test notification',
+          data: {
+            date: new Date().toISOString().split('T')[0],
+            eventName: 'Lunar Eclipse Test',
+            priority: 10,
+            eventType: 'eclipse',
+            isTest: true,
+          },
+        };
+        break;
+
+      default:
+        testNotification = {
+          type: 'moon',
+          title: '✨ Cosmic Event (TEST)',
+          body: 'Test notification from Lunary - Check if push notifications are working',
+          data: {
+            date: new Date().toISOString().split('T')[0],
+            eventName: 'Test Event',
+            priority: 10,
+            eventType: 'moon',
+            isTest: true,
+          },
+        };
+    }
+
+    // Send test notification via the notifications API
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://www.lunary.app'
+        : 'http://localhost:3000';
+
+    const response = await fetch(`${baseUrl}/api/notifications/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.CRON_SECRET}`,
+      },
+      body: JSON.stringify({
+        payload: testNotification,
+      }),
+    });
+
+    const result = await response.json();
+
+    console.log('🧪 Test notification result:', result);
 
     return NextResponse.json({
-      success: result.success,
-      message: result.success
-        ? 'Test notification sent via Pushover'
-        : 'Notification failed',
-      result: {
-        service: result.service,
-        success: result.success,
-        messageId: result.messageId,
-        error: result.error,
-      },
-      nextSteps: result.success
-        ? [
-            'Check your phone for the test notification',
-            'Tap the notification to open the admin dashboard',
-            'Your cron jobs will now send alerts automatically',
-          ]
-        : [
-            'Check your environment variables are set correctly',
-            'Verify PUSHOVER_API_TOKEN and PUSHOVER_USER_KEY',
-            'Make sure you created an application in Pushover dashboard',
-          ],
+      success: true,
+      message: 'Test notification sent',
+      testType,
+      notificationsSent: result.recipientCount || 0,
+      result,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Test notification error:', error);
+    console.error('❌ Test notification failed:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        troubleshooting: [
-          'Check environment variables are set',
-          'Verify Pushover account is active',
-          'Ensure API token has correct permissions',
-        ],
+        timestamp: new Date().toISOString(),
       },
-      { status: 500 },
-    );
-  }
-}
-
-// POST endpoint for custom test notifications
-export async function POST(request: NextRequest) {
-  try {
-    const { title, message, url, priority } = await request.json();
-
-    const customNotification = {
-      title: title || '🧪 Custom Test',
-      message: message || 'Custom test notification from Lunary admin',
-      url: url || 'https://lunary.app/admin',
-      priority: priority || 'normal',
-    };
-
-    const result = await sendAdminNotification(customNotification);
-
-    return NextResponse.json({
-      success: result.success,
-      message: result.success
-        ? 'Custom notification sent'
-        : 'Notification failed',
-      result,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to send custom notification' },
       { status: 500 },
     );
   }
