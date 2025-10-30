@@ -3,7 +3,6 @@ import Stripe from 'stripe';
 import { put } from '@vercel/blob';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import crypto from 'crypto';
-import { generatePackNaming } from '../../../../../../utils/grimoire/packNaming';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not set');
@@ -21,16 +20,96 @@ export async function POST(request: NextRequest) {
       includeRituals = false,
       customNaming = {},
       autoPublish = false,
+      year,
+      month,
+      quarter,
+      dateRange,
     } = await request.json();
 
     console.log(`🏭 Generating and syncing ${category} pack to Stripe...`);
 
     // 1. Generate the grimoire pack with proper naming
-    const packData = await generateGrimoirePackWithNaming(
-      category,
-      includeRituals,
-      customNaming,
-    );
+    // For moon_phases, we need to use the generate endpoint that supports month/year
+    let packData;
+    if (category === 'moon_phases' && (month || quarter || year || dateRange)) {
+      // Use the moon phase specific generation
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+      // Determine pack name and price based on pricing strategy
+      const packYear = year || new Date().getFullYear();
+      let packName: string;
+      let packPrice: number;
+
+      if (month) {
+        // Monthly Moon Phases Pack: $2.49 (from pricing-strategy.csv)
+        const monthName = new Date(packYear, month - 1).toLocaleString(
+          'default',
+          { month: 'long' },
+        );
+        packName =
+          customNaming.title ||
+          `Monthly Moon Phases Pack - ${monthName} ${packYear}`;
+        packPrice = 249; // $2.49 for monthly (from pricing strategy)
+      } else if (quarter) {
+        // Quarterly: Not in CSV, but "Lunar Month Kit" bundle is $4.99
+        // For quarterly (3 months), use $4.99 as base or calculate from monthly
+        const quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
+        packName =
+          customNaming.title ||
+          `Moon Phases - ${quarterNames[quarter - 1]} ${packYear}`;
+        packPrice = 499; // $4.99 for quarterly (bundle pricing)
+      } else {
+        // Yearly: Not directly in CSV, "Annual All-Access Vault" is $24.99 but that's different
+        // Calculate yearly as monthly price * 12 with discount, or use reasonable pricing
+        packName =
+          customNaming.title || `Moon Phases - Complete ${packYear} Guide`;
+        packPrice = 1999; // $19.99 for yearly (12 months at $2.49 = $29.88, discounted to $19.99)
+      }
+
+      const generateResponse = await fetch(
+        `${baseUrl}/api/shop/packs/generate`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            category: 'moon_phases',
+            name: packName,
+            description:
+              customNaming.subtitle ||
+              `Complete moon phase guide with lunar calendar and spiritual guidance`,
+            price: packPrice,
+            year: packYear,
+            month,
+            quarter,
+            dateRange,
+          }),
+        },
+      );
+
+      if (!generateResponse.ok) {
+        const errorText = await generateResponse.text();
+        throw new Error(
+          `Failed to generate moon pack: ${generateResponse.statusText} - ${errorText}`,
+        );
+      }
+
+      const generatedPack = await generateResponse.json();
+      packData = generatedPack.pack || generatedPack;
+
+      // Ensure price is set correctly
+      packData = {
+        ...packData,
+        price: packPrice, // Ensure price is set from pricing strategy
+      };
+    } else {
+      // Use standard grimoire pack generation
+      packData = await generateGrimoirePackWithNaming(
+        category,
+        includeRituals,
+        customNaming,
+      );
+    }
 
     // 2. Generate PDF from pack content
     console.log('📄 Generating PDF from pack content...');
@@ -124,8 +203,10 @@ async function generateGrimoirePackWithNaming(
       },
     };
 
-    // Static import instead of dynamic import
-    // const { generatePackNaming } = await import('../../../../../utils/grimoire/packNaming');
+    // Import pack naming utility
+    const { generatePackNaming } = await import(
+      '../../../../../../utils/grimoire/packNaming'
+    );
     const newNaming = generatePackNaming(metadata);
 
     Object.assign(basePack, {

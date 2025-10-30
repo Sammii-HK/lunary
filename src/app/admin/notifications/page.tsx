@@ -22,6 +22,7 @@ export default function NotificationAdminPage() {
 
   useEffect(() => {
     loadNotificationPreview(selectedDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   const loadNotificationPreview = async (date: string) => {
