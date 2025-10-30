@@ -18,13 +18,23 @@ export async function GET(request: NextRequest) {
       expand: ['data.default_price'],
     });
 
-    // Filter products that are shop packs (have grimoireType metadata or packId)
+    // Filter products that are shop packs (have grimoireType metadata or packId or category)
+    // Also include products without metadata if they have a price (for debugging)
     const shopProducts = products.data.filter((product) => {
-      return (
+      const hasMetadata =
         product.metadata?.grimoireType === 'grimoire-pack' ||
         product.metadata?.packId ||
-        product.metadata?.category
-      );
+        product.metadata?.category;
+
+      // Log products for debugging
+      console.log(`Product: ${product.name}`, {
+        id: product.id,
+        hasMetadata,
+        metadata: product.metadata,
+        hasPrice: !!product.default_price,
+      });
+
+      return hasMetadata || (product.active && product.default_price);
     });
 
     // Transform Stripe products to shop format

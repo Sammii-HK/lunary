@@ -21,7 +21,10 @@ interface DigitalPack {
 }
 
 export default function ShopPage() {
-  const { me } = useAccount();
+  // Get account - will be null if Jazz not initialized or user not logged in
+  const account = useAccount();
+  const me = account?.me || null;
+
   const [packs, setPacks] = useState<DigitalPack[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
@@ -47,38 +50,52 @@ export default function ShopPage() {
 
       // Fetch products from Stripe (SSOT)
       const response = await fetch('/api/shop/products');
-      const data = await response.json();
 
       if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
         throw new Error(data.error || 'Failed to load products');
       }
 
       // Transform to DigitalPack format
-      const fetchedPacks: DigitalPack[] = data.packs.map((pack: any) => ({
-        id: pack.id,
-        name: pack.name,
-        description: pack.description,
-        category: pack.category,
-        subcategory: pack.subcategory,
-        price: pack.price,
-        imageUrl: pack.imageUrl,
-        stripePriceId: pack.stripePriceId, // For checkout
-        isActive: pack.isActive,
-        metadata: {
-          dateRange: pack.metadata?.dateRange,
-          format: pack.metadata?.format || 'PDF',
-          itemCount: pack.metadata?.itemCount,
-        },
-      }));
+      const fetchedPacks: DigitalPack[] = (data.packs || []).map(
+        (pack: any) => ({
+          id: pack.id || 'unknown',
+          name: pack.name || 'Unnamed Product',
+          description: pack.description || '',
+          category: pack.category || 'spells',
+          subcategory: pack.subcategory,
+          price: pack.price || 0,
+          imageUrl: pack.imageUrl,
+          stripePriceId: pack.stripePriceId, // For checkout
+          isActive: pack.isActive !== false,
+          metadata: {
+            dateRange: pack.metadata?.dateRange,
+            format: pack.metadata?.format || 'PDF',
+            itemCount: pack.metadata?.itemCount,
+          },
+        }),
+      );
 
       setPacks(fetchedPacks);
       console.log(
         `✅ Loaded ${fetchedPacks.length} products from Stripe (SSOT)`,
       );
-    } catch (error) {
+
+      if (fetchedPacks.length === 0) {
+        console.warn(
+          '⚠️ No products found in Stripe. Make sure products have metadata: category, packId, or grimoireType',
+        );
+      }
+    } catch (error: any) {
       console.error('Failed to load packs:', error);
       // Fallback to empty array on error
       setPacks([]);
+      // Don't throw - just show empty state
     } finally {
       setLoading(false);
     }
