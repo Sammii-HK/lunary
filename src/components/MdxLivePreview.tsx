@@ -47,7 +47,11 @@ const components = {
     />
   ),
   img: (props: any) => (
-    <img className='max-w-full h-auto rounded-lg mb-4' alt={props.alt || ''} {...props} />
+    <img
+      className='max-w-full h-auto rounded-lg mb-4'
+      alt={props.alt || ''}
+      {...props}
+    />
   ),
   hr: (props: any) => <hr className='my-8 border-gray-300' {...props} />,
 };
