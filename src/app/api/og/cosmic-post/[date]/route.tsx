@@ -7,6 +7,8 @@ import {
   checkSignIngress,
   getSignDescription,
   generateDayGuidanceSummary,
+  checkRetrogradeEvents,
+  checkRetrogradeIngress,
 } from '../../../../../../utils/astrology/cosmic-og';
 import { getGeneralCrystalRecommendation } from '../../../../../../utils/crystals/generalCrystals';
 import { getGeneralTarotReading } from '../../../../../../utils/tarot/generalTarot';
@@ -202,6 +204,12 @@ export async function GET(request: NextRequest) {
       guidance: getGeneralCrystalRecommendation().guidance,
       moonPhaseAlignment: getGeneralCrystalRecommendation().moonPhaseAlignment,
     },
+    ingressEvents: ingresses,
+    aspectEvents: aspects,
+    seasonalEvents: seasonalEvents,
+    dailyAspects: dailyAspects,
+    retrogradeEvents: checkRetrogradeEvents(positions),
+    retrogradeIngress: checkRetrogradeIngress(positions),
     tarotReading: {
       name: getGeneralTarotReading().daily.name,
       keywords: getGeneralTarotReading().daily.keywords,
@@ -234,7 +242,6 @@ export async function GET(request: NextRequest) {
         }),
       },
     },
-    allEvents: allEvents,
     horoscope: {
       date: getGeneralHoroscope().date,
       moonPhase: getGeneralHoroscope().moonPhase,
@@ -244,7 +251,7 @@ export async function GET(request: NextRequest) {
     snippet: [
       `Daily cosmic highlights: ${highlights?.[0] || ''}`,
       ' ',
-      `Crystal: ${getGeneralCrystalRecommendation().name}, ${getGeneralCrystalRecommendation().guidance}`,
+      `Crystal: ${getGeneralCrystalRecommendation().guidance}`,
       ' ',
       `Tarot: ${getGeneralTarotReading().guidance.dailyMessage}`,
       ' ',
@@ -255,7 +262,7 @@ export async function GET(request: NextRequest) {
     snippetShort: [
       `Daily cosmic highlights: ${highlights?.[0] || ''}`,
       ' ',
-      `Crystal: ${getGeneralCrystalRecommendation().name}, ${getGeneralCrystalRecommendation().guidance}`,
+      `Crystal: ${getGeneralCrystalRecommendation().guidance}`,
       ' ',
       `Tarot: ${getGeneralTarotReading().guidance.dailyMessage}`,
       ' ',

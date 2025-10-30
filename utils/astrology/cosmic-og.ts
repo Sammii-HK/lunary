@@ -31,6 +31,9 @@ export function getRealPlanetaryPositions(
   const astroTimePast = new AstroTime(
     new Date(date.getTime() - 24 * 60 * 60 * 1000),
   );
+  const astroTimePastPast = new AstroTime(
+    new Date(date.getTime() - 24 * 60 * 60 * 1000 * 2),
+  );
 
   const planets = [
     { body: Body.Sun, name: 'Sun' },
@@ -49,25 +52,32 @@ export function getRealPlanetaryPositions(
   planets.forEach(({ body, name }) => {
     const vectorNow = GeoVector(body, astroTime, true);
     const vectorPast = GeoVector(body, astroTimePast, true);
+    const vectorPastPast = GeoVector(body, astroTimePastPast, true);
 
     const eclipticNow = Ecliptic(vectorNow);
     const eclipticPast = Ecliptic(vectorPast);
+    const eclipticPastPast = Ecliptic(vectorPastPast);
 
     const longitude = eclipticNow.elon;
     const longitudePast = eclipticPast.elon;
+    const longitudePastPast = eclipticPastPast.elon;
 
     // Check for retrograde motion (accounting for 0°/360° wraparound)
     let retrograde = false;
+    let newRetrograde = false;
     if (Math.abs(longitude - longitudePast) < 180) {
       retrograde = longitude < longitudePast;
+      newRetrograde = longitude < longitudePast && longitudePast > longitudePastPast;
     } else {
       retrograde = longitude > longitudePast;
+      newRetrograde = longitude > longitudePast && longitudePast < longitudePastPast;
     }
 
     positions[name] = {
       longitude,
       sign: getZodiacSign(longitude),
       retrograde,
+      newRetrograde,
     };
   });
 
@@ -414,7 +424,7 @@ export function checkSignIngress(positions: any, date: Date): Array<any> {
       ingresses.push({
         name: `${planet} enters ${data.sign}`,
         energy: `${planet} energy shifts`,
-        priority: 4,
+        priority: 8,
         type: 'ingress',
         planet,
         sign: data.sign,
@@ -423,6 +433,44 @@ export function checkSignIngress(positions: any, date: Date): Array<any> {
   });
 
   return ingresses.sort((a, b) => b.priority - a.priority);
+}
+
+export function checkRetrogradeEvents(positions: any): Array<any> {
+  const retrogradeEvents: Array<any> = [];
+  Object.entries(positions).forEach(([planet, data]: [string, any]) => {
+    if (data.newRetrograde) {
+      retrogradeEvents.push({
+        name: `${planet} is newly retrograde`,
+        energy: `${planet} is newly retrograde`,
+        priority: 8,
+        type: 'retrograde',
+        planet,
+        sign: data.sign,
+      });
+    }
+  });
+  return retrogradeEvents.sort((a, b) => b.priority - a.priority);
+}
+
+export function checkRetrogradeIngress(positions: any): Array<any> {
+  const retrogradeIngress: Array<any> = [];
+  Object.entries(positions).forEach(([planet, data]: [string, any]) => {
+    const longitude = data.longitude;
+    const degreeInSign = longitude % 30;
+
+    // Planet entering new sign if within first 2 degrees
+    if (data.retrograde && degreeInSign < 1) {
+      retrogradeIngress.push({
+        name: `${planet} is retrograde`,
+        energy: `${planet} is retrograde`,
+        priority: 8,
+        type: 'retrograde',
+        planet,
+        sign: data.sign,
+      });
+    }
+  });
+  return retrogradeIngress.sort((a, b) => b.priority - a.priority);
 }
 
 
