@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     const cronResults: any = {};
 
-    // DAILY TASKS (Every day) - Social Media Posts & Notifications
+    // DAILY TASKS (Every day) - Social Media Posts
     console.log('📱 Running daily social media tasks...');
     try {
       const dailyResult = await runDailyPosts(dateStr);
@@ -45,19 +45,6 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error('❌ Daily posts failed:', error);
       cronResults.dailyPosts = {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
-    }
-
-    // Check for notification-worthy astronomical events
-    console.log('🔔 Checking astronomical events for notifications...');
-    try {
-      const notificationResult = await runNotificationCheck(dateStr);
-      cronResults.notifications = notificationResult;
-    } catch (error) {
-      console.error('❌ Notification check failed:', error);
-      cronResults.notifications = {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };

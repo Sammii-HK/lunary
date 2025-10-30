@@ -1,0 +1,11 @@
+name = "lunary-notifications"
+main = "simple-notification.js"
+compatibility_date = "2024-10-30"
+
+# Cron trigger - every 4 hours
+[triggers]
+crons = ["0 */4 * * *"]
+
+# Environment variables (set these in Cloudflare dashboard)
+[vars]
+# CRON_SECRET
