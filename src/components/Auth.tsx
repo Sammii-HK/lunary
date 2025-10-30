@@ -94,14 +94,13 @@ export function AuthComponent({
         setSuccess('Signed in successfully!');
         setFormData({ email: '', password: '', name: '' });
 
-        // Wait for session, then trigger React state update (no redirect)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Brief delay for UI feedback, then proceed
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-        // Call onSuccess callback to trigger React re-render
+        // Call onSuccess callback to close modal and trigger re-render
         if (onSuccess) {
           onSuccess();
         } else {
-          // Let React handle the state change instead of redirecting
           setSuccess('Welcome back! You are now signed in.');
         }
       }
