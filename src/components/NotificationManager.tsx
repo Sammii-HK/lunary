@@ -117,15 +117,15 @@ export function NotificationManager() {
       }
 
       // Ensure pushSubscriptions array exists
-      if (!me.root.pushSubscriptions) {
-        me.root.pushSubscriptions = [];
+      if (!(me.root as any).pushSubscriptions) {
+        (me.root as any).pushSubscriptions = [];
       }
 
-      // Create Jazz PushSubscription object
-      const jazzSubscription = PushSubscription.create({
+      // Create client storage subscription object
+      const clientSubscription = PushSubscription.create({
         endpoint: subscription.endpoint,
-        p256dh: subscription.keys.p256dh,
-        auth: subscription.keys.auth,
+        p256dh: (subscription as any).keys.p256dh,
+        auth: (subscription as any).keys.auth,
         userAgent: navigator.userAgent,
         createdAt: new Date().toISOString(),
         preferences: {
@@ -138,17 +138,21 @@ export function NotificationManager() {
         },
       });
 
-      // Check if subscription already exists
-      const existingIndex = me.root.pushSubscriptions.findIndex(
-        (sub: any) => sub?.endpoint === subscription.endpoint,
-      );
+      // Get the pushSubscriptions list safely
+      const pushSubscriptions = (me.root as any).pushSubscriptions;
+      if (pushSubscriptions) {
+        // Check if subscription already exists
+        const existingIndex = pushSubscriptions.findIndex(
+          (sub: any) => sub?.endpoint === subscription.endpoint,
+        );
 
-      if (existingIndex >= 0) {
-        // Update existing subscription
-        me.root.pushSubscriptions[existingIndex] = jazzSubscription;
-      } else {
-        // Add new subscription
-        me.root.pushSubscriptions.push(jazzSubscription);
+        if (existingIndex >= 0) {
+          // Update existing subscription
+          pushSubscriptions[existingIndex] = clientSubscription;
+        } else {
+          // Add new subscription
+          pushSubscriptions.push(clientSubscription);
+        }
       }
 
       console.log('✅ Push subscription saved to client storage');
@@ -170,7 +174,7 @@ export function NotificationManager() {
               eclipses: true,
               majorAspects: true,
             },
-            userId: me.id,
+            userId: (me as any).id || 'unknown',
             userEmail: me.profile?.name || null, // Better Auth might store email in profile
           }),
         });
@@ -187,19 +191,22 @@ export function NotificationManager() {
   };
 
   const unsubscribe = async () => {
-    if (subscription && me?.root?.pushSubscriptions) {
+    if (subscription && me?.root) {
       try {
         await subscription.unsubscribe();
         setSubscription(null);
 
         // Remove from client storage
-        const subscriptionIndex = me.root.pushSubscriptions.findIndex(
-          (sub: any) => sub?.endpoint === subscription.endpoint,
-        );
+        const pushSubscriptions = (me.root as any).pushSubscriptions;
+        if (pushSubscriptions) {
+          const subscriptionIndex = pushSubscriptions.findIndex(
+            (sub: any) => sub?.endpoint === subscription.endpoint,
+          );
 
-        if (subscriptionIndex >= 0) {
-          me.root.pushSubscriptions.splice(subscriptionIndex, 1);
-          console.log('✅ Push subscription removed from client storage');
+          if (subscriptionIndex >= 0) {
+            pushSubscriptions.splice(subscriptionIndex, 1);
+            console.log('✅ Push subscription removed from client storage');
+          }
         }
       } catch (error) {
         console.error('Error unsubscribing:', error);
