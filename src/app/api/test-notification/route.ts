@@ -1,8 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// GET endpoint for easy browser testing (no auth required)
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const testType = searchParams.get('type') || 'moon';
+
+    // Call the handler with the test type
+    const result = await handleTestNotification(testType);
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('❌ Test notification failed:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 },
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Verify authorization
+    // Verify authorization for POST requests (production use)
     const authHeader = request.headers.get('authorization');
     if (
       process.env.CRON_SECRET &&
@@ -11,10 +33,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('🧪 Testing push notifications...');
-
-    // Get test notification type from request
     const { testType = 'moon' } = await request.json().catch(() => ({}));
+    const result = await handleTestNotification(testType);
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('❌ Test notification failed:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 },
+    );
+  }
+}
+
+async function handleTestNotification(testType: string) {
+  try {
+    console.log('🧪 Testing push notifications...');
 
     let testNotification;
 
@@ -85,12 +122,18 @@ export async function POST(request: NextRequest) {
         ? 'https://www.lunary.app'
         : 'http://localhost:3000';
 
+    // Send notification - use CRON_SECRET if available, otherwise skip auth (for local testing)
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (process.env.CRON_SECRET) {
+      headers.Authorization = `Bearer ${process.env.CRON_SECRET}`;
+    }
+
     const response = await fetch(`${baseUrl}/api/notifications/send`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.CRON_SECRET}`,
-      },
+      headers,
       body: JSON.stringify({
         payload: testNotification,
       }),
@@ -100,23 +143,16 @@ export async function POST(request: NextRequest) {
 
     console.log('🧪 Test notification result:', result);
 
-    return NextResponse.json({
+    return {
       success: true,
       message: 'Test notification sent',
       testType,
       notificationsSent: result.recipientCount || 0,
       result,
       timestamp: new Date().toISOString(),
-    });
+    };
   } catch (error) {
     console.error('❌ Test notification failed:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 },
-    );
+    throw error;
   }
 }
