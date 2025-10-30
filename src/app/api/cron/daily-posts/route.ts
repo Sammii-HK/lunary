@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     const cronResults: any = {};
 
-    // DAILY TASKS (Every day) - Social Media Posts
+    // DAILY TASKS (Every day) - Social Media Posts & Notifications
     console.log('📱 Running daily social media tasks...');
     try {
       const dailyResult = await runDailyPosts(dateStr);
@@ -45,6 +45,19 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error('❌ Daily posts failed:', error);
       cronResults.dailyPosts = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+
+    // Check for notification-worthy astronomical events
+    console.log('🔔 Checking astronomical events for notifications...');
+    try {
+      const notificationResult = await runNotificationCheck(dateStr);
+      cronResults.notifications = notificationResult;
+    } catch (error) {
+      console.error('❌ Notification check failed:', error);
+      cronResults.notifications = {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
@@ -478,6 +491,229 @@ async function runYearlyTasks(request: NextRequest) {
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
+}
+
+// NOTIFICATION CHECK using PostgreSQL
+async function runNotificationCheck(dateStr: string) {
+  console.log('🔔 Checking for significant astronomical events via PostgreSQL...');
+
+  const baseUrl = process.env.NODE_ENV === 'production'
+    ? 'https://lunary.app'
+    : 'http://localhost:3000';
+
+  try {
+    // First, get the cosmic data to determine what notifications to send
+    const cosmicResponse = await fetch(`${baseUrl}/api/og/cosmic-post/${dateStr}`, {
+      headers: { 'User-Agent': 'Lunary-Notification-Service/1.0' },
+    });
+
+    if (!cosmicResponse.ok) {
+      throw new Error(`Failed to fetch cosmic data: ${cosmicResponse.status}`);
+    }
+
+    const cosmicData = await cosmicResponse.json();
+    
+    // Check if there are notification-worthy events
+    const notificationEvents = getNotificationWorthyEvents(cosmicData);
+    
+    if (notificationEvents.length === 0) {
+      console.log('📭 No notification-worthy events today');
+      return {
+        success: true,
+        notificationsSent: 0,
+        primaryEvent: cosmicData.primaryEvent?.name,
+        message: 'No significant events to notify about'
+      };
+    }
+
+    // Send each significant event via Jazz worker
+    const results = [];
+    let totalSent = 0;
+
+    for (const event of notificationEvents) {
+      try {
+        const pgResponse = await fetch(`${baseUrl}/api/notifications/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.CRON_SECRET}`,
+          },
+          body: JSON.stringify({
+            payload: {
+              type: event.type,
+              title: event.title,
+              body: event.body,
+              data: {
+                date: dateStr,
+                eventName: event.name,
+                priority: event.priority,
+                eventType: event.type
+              }
+            }
+          }),
+        });
+
+        const pgResult = await pgResponse.json();
+        totalSent += pgResult.recipientCount || 0;
+        results.push(pgResult);
+
+      } catch (eventError) {
+        console.error(`Failed to send notification for event ${event.name}:`, eventError);
+        results.push({
+          success: false,
+          error: eventError instanceof Error ? eventError.message : 'Unknown error',
+          eventName: event.name
+        });
+      }
+    }
+
+    console.log(`✅ PostgreSQL notification check completed: ${totalSent} notifications sent`);
+
+    return {
+      success: totalSent > 0,
+      notificationsSent: totalSent,
+      primaryEvent: cosmicData.primaryEvent?.name,
+      results,
+    };
+  } catch (error) {
+    console.error('❌ PostgreSQL notification check failed:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// Helper function to identify notification-worthy events
+function getNotificationWorthyEvents(cosmicData: any) {
+  const events = [];
+  
+  // Check primary event
+  if (cosmicData.primaryEvent && isEventNotificationWorthy(cosmicData.primaryEvent)) {
+    events.push(createNotificationFromEvent(cosmicData.primaryEvent));
+  }
+  
+  // Check secondary high-priority events
+  if (cosmicData.allEvents) {
+    const significantEvents = cosmicData.allEvents
+      .filter((event: any) => event.priority >= 8 && event !== cosmicData.primaryEvent)
+      .slice(0, 2); // Limit to 2 additional notifications per day
+
+    for (const event of significantEvents) {
+      if (isEventNotificationWorthy(event)) {
+        events.push(createNotificationFromEvent(event));
+      }
+    }
+  }
+  
+  return events;
+}
+
+function isEventNotificationWorthy(event: any): boolean {
+  // Only send notifications for significant events
+  if (event.priority >= 9) return true; // Extraordinary planetary events
+  
+  // Moon phases (but not every day - only exact phases)
+  if (event.type === 'moon' && event.priority === 10) {
+    const significantPhases = ['New Moon', 'Full Moon', 'First Quarter', 'Last Quarter'];
+    return significantPhases.some(phase => event.name.includes(phase));
+  }
+  
+  // Seasonal events (equinoxes, solstices, sabbats)
+  if (event.priority === 8) return true;
+  
+  // Major aspects involving outer planets
+  if (event.type === 'aspect' && event.priority >= 7) {
+    const outerPlanets = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+    return outerPlanets.some(planet => 
+      event.name?.includes(planet) || event.description?.includes(planet)
+    );
+  }
+
+  return false;
+}
+
+function createNotificationFromEvent(event: any) {
+  const baseEvent = {
+    name: event.name,
+    type: event.type,
+    priority: event.priority
+  };
+
+  // Customize based on event type
+  switch (event.type) {
+    case 'moon':
+      return {
+        ...baseEvent,
+        title: `${event.emoji || '🌙'} ${event.name}`,
+        body: `${event.energy} - ${getPhaseGuidance(event.name)}`,
+      };
+
+    case 'aspect':
+      return {
+        ...baseEvent,
+        title: `${getPlanetEmoji(event)} ${event.name}`,
+        body: `${event.energy} - Powerful cosmic alignment forming`,
+      };
+
+    case 'seasonal':
+      return {
+        ...baseEvent,
+        title: `🌿 ${event.name}`,
+        body: `${event.energy} - Seasonal energy shift begins`,
+      };
+
+    case 'ingress':
+      return {
+        ...baseEvent,
+        title: `${getPlanetEmoji(event)} ${event.name}`,
+        body: `${event.energy} - New cosmic energy emerges`,
+      };
+
+    default:
+      return {
+        ...baseEvent,
+        title: `✨ ${event.name}`,
+        body: event.energy || 'Significant cosmic event occurring',
+      };
+  }
+}
+
+function getPhaseGuidance(phaseName: string): string {
+  const guidance: Record<string, string> = {
+    'New Moon': 'Perfect time for new beginnings and intention setting',
+    'Full Moon': 'Time for release, gratitude, and manifestation',
+    'First Quarter': 'Take action on your intentions and push forward',
+    'Last Quarter': 'Release what no longer serves and reflect',
+  };
+  
+  for (const [phase, message] of Object.entries(guidance)) {
+    if (phaseName.includes(phase)) return message;
+  }
+  
+  return 'Lunar energy shift occurring';
+}
+
+function getPlanetEmoji(event: any): string {
+  const text = event.name || event.description || '';
+  const emojis: Record<string, string> = {
+    'Mercury': '☿',
+    'Venus': '♀',
+    'Mars': '♂',
+    'Jupiter': '♃',
+    'Saturn': '♄',
+    'Uranus': '♅',
+    'Neptune': '♆',
+    'Pluto': '♇',
+    'Sun': '☉',
+    'Moon': '☽'
+  };
+  
+  for (const [planet, emoji] of Object.entries(emojis)) {
+    if (text.includes(planet)) return emoji;
+  }
+  
+  return '⭐';
 }
 
 function getBaseUrl(request: NextRequest): string {

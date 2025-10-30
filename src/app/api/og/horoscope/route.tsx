@@ -55,7 +55,6 @@ export async function GET(request: NextRequest) {
     },
   };
 
-
   // Fetch real horoscope snippet from cosmic content
   const dateStr = targetDate.toISOString().split('T')[0];
   let horoscopeSnippet =

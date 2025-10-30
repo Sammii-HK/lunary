@@ -8,6 +8,22 @@ export const NoteItem = co.map({
   updatedAt: z.string(),
 });
 
+export const PushSubscription = co.map({
+  endpoint: z.string(),
+  p256dh: z.string(),
+  auth: z.string(),
+  userAgent: z.string().optional(),
+  createdAt: z.string(),
+  preferences: co.map({
+    moonPhases: z.boolean(),
+    planetaryTransits: z.boolean(),
+    retrogrades: z.boolean(),
+    sabbats: z.boolean(),
+    eclipses: z.boolean(),
+    majorAspects: z.boolean(),
+  }),
+});
+
 
 export const BirthChartPlanet = co.map({
   body: z.string(),
@@ -44,6 +60,7 @@ export const Subscription = co.map({
 
 export const AccountRoot = co.map({
   notes: co.list(NoteItem),
+  pushSubscriptions: co.list(PushSubscription).optional(),
 });
 
 export const UserLocation = co.map({
@@ -145,6 +162,11 @@ export const MyAppAccount = co.account({
   if (root && !root.$jazz.has("notes")) {
     console.log("🔄 Adding notes field to existing account");
     root.$jazz.set("notes", []);
+  }
+
+  if (root && !root.$jazz.has("pushSubscriptions")) {
+    console.log("🔄 Adding pushSubscriptions field to existing account");
+    root.$jazz.set("pushSubscriptions", []);
   }
 
   // Shop initialization will be handled separately when needed

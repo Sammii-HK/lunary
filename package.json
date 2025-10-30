@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --fix",
+    "setup-db": "tsx scripts/setup-database.ts",
     "generate-moon-packs": "tsx scripts/generate-moon-packs.ts",
     "generate-moon-packs:dry": "tsx scripts/generate-moon-packs.ts --dry-run",
     "generate-moon-packs:monthly": "tsx scripts/generate-moon-packs.ts --type=monthly",
@@ -29,6 +30,7 @@
     "@stripe/stripe-js": "^7.8.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/pg": "^8.15.5",
+    "@types/web-push": "^3.6.4",
     "@vercel/analytics": "^1.5.0",
     "@vercel/blob": "^2.0.0",
     "@vercel/postgres": "^0.10.0",
@@ -53,7 +55,8 @@
     "resend": "^6.1.2",
     "seed-random": "^2.2.0",
     "stripe": "^18.4.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^2.10.1",

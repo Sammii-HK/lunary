@@ -10,7 +10,8 @@ const STATIC_CACHE_URLS = [
 self.addEventListener('install', (event) => {
   console.log('Service worker installing...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches
+      .open(CACHE_NAME)
       .then((cache) => {
         console.log('Caching static assets');
         return cache.addAll(STATIC_CACHE_URLS);
@@ -18,7 +19,7 @@ self.addEventListener('install', (event) => {
       .then(() => {
         console.log('Service worker installed');
         return self.skipWaiting();
-      })
+      }),
   );
 });
 
@@ -26,19 +27,22 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   console.log('Service worker activating...');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      console.log('Service worker activated');
-      return self.clients.claim();
-    })
+    caches
+      .keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          }),
+        );
+      })
+      .then(() => {
+        console.log('Service worker activated');
+        return self.clients.claim();
+      }),
   );
 });
 
@@ -55,36 +59,38 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
 
-        return fetch(event.request)
-          .then((response) => {
-            // Don't cache non-successful responses
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
+      return fetch(event.request)
+        .then((response) => {
+          // Don't cache non-successful responses
+          if (
+            !response ||
+            response.status !== 200 ||
+            response.type !== 'basic'
+          ) {
             return response;
-          })
-          .catch(() => {
-            // Return offline fallback for navigation requests
-            if (event.request.mode === 'navigate') {
-              return caches.match('/');
-            }
+          }
+
+          // Clone the response
+          const responseToCache = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
           });
-      })
+
+          return response;
+        })
+        .catch(() => {
+          // Return offline fallback for navigation requests
+          if (event.request.mode === 'navigate') {
+            return caches.match('/');
+          }
+        });
+    }),
   );
 });
 
@@ -96,7 +102,7 @@ self.addEventListener('sync', (event) => {
 // Push notifications for astronomical events
 self.addEventListener('push', (event) => {
   console.log('Push message received');
-  
+
   let notificationData;
   try {
     notificationData = event.data ? event.data.json() : null;
@@ -104,7 +110,7 @@ self.addEventListener('push', (event) => {
     console.error('Error parsing push data:', e);
     notificationData = null;
   }
-  
+
   const options = {
     body: notificationData?.body || 'New cosmic update available',
     icon: notificationData?.icon || '/icons/icon-192x192.png',
@@ -116,8 +122,8 @@ self.addEventListener('push', (event) => {
       {
         action: 'view',
         title: 'View in Lunary',
-        icon: '/icons/icon-72x72.png'
-      }
+        icon: '/icons/icon-72x72.png',
+      },
     ],
     requireInteraction: false,
     silent: false,
@@ -126,8 +132,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(
       notificationData?.title || 'Lunary',
-      options
-    )
+      options,
+    ),
   );
 });
 
@@ -136,8 +142,6 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   if (event.action === 'open' || !event.action) {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+    event.waitUntil(clients.openWindow('/'));
   }
 });
