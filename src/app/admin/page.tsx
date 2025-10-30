@@ -129,17 +129,9 @@ This is exactly what you'll get every day at 8 AM UTC!`);
     {
       title: 'Shop Manager',
       description:
-        'Manage grimoire packs with Stripe sync and professional naming',
+        'Manage grimoire packs - auto-generates PDFs, uploads to Blob, and syncs to Stripe (SSOT)',
       href: '/admin/shop-manager',
       icon: <Store className='h-5 w-5' />,
-      category: 'shop',
-      status: 'new',
-    },
-    {
-      title: 'Shop (Legacy)',
-      description: 'Original shop management interface',
-      href: '/admin/shop',
-      icon: <Package className='h-5 w-5' />,
       category: 'shop',
     },
     {
