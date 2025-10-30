@@ -339,50 +339,37 @@ This is exactly what you'll get every day at 8 AM UTC!`);
           </Card>
         </div>
 
-        {/* Quick Actions - Responsive */}
+        {/* PWA Notification Testing */}
         <Card className='mb-6 md:mb-8 bg-zinc-900 border-zinc-800'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-xl md:text-2xl'>
-              <Zap className='h-5 w-5' />
-              Quick Actions
+              <Bell className='h-5 w-5' />
+              PWA Notification Testing
             </CardTitle>
             <CardDescription className='text-zinc-400'>
-              Common admin tasks and notification testing
+              Test push notifications on your device
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
               <Button
                 onClick={testRealNotification}
                 disabled={testingRealNotification}
                 variant='outline'
-                className='h-auto p-4 bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-purple-500/50 text-white transition-all'
               >
-                <div className='flex flex-col items-center gap-2'>
-                  <Bell className='h-5 w-5 md:h-6 md:w-6' />
-                  <span className='text-xs md:text-sm'>
-                    {testingRealNotification ? 'Sending...' : 'Test Real'}
-                  </span>
-                  <span className='text-[10px] md:text-xs text-zinc-400'>
-                    Real cosmic event
-                  </span>
-                </div>
-              </Button>
-
-              <Button
-                onClick={testPushNotification}
-                disabled={testingNotification}
-                variant='outline'
-                className='h-auto p-4 bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white'
-              >
-                <div className='flex flex-col items-center gap-2'>
-                  <Smartphone className='h-5 w-5 md:h-6 md:w-6' />
-                  <span className='text-xs md:text-sm'>
-                    {testingNotification ? 'Sending...' : 'Test Basic'}
-                  </span>
-                  <span className='text-[10px] md:text-xs text-zinc-400'>
-                    Simple test
-                  </span>
+                <div className='flex flex-col items-center gap-3 w-full'>
+                  <Bell className='h-8 w-8 text-purple-400' />
+                  <div className='text-center'>
+                    <div className='font-semibold text-base mb-1'>
+                      {testingRealNotification
+                        ? 'Sending...'
+                        : 'Test Real Event'}
+                    </div>
+                    <div className='text-xs text-zinc-400'>
+                      Uses today's actual cosmic events
+                    </div>
+                  </div>
                 </div>
               </Button>
 
@@ -390,67 +377,109 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                 onClick={testDailyNotification}
                 disabled={testingDaily}
                 variant='outline'
-                className='h-auto p-4 bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 text-white transition-all'
               >
-                <div className='flex flex-col items-center gap-2'>
-                  <Calendar className='h-5 w-5 md:h-6 md:w-6' />
-                  <span className='text-xs md:text-sm'>
-                    {testingDaily ? 'Sending...' : 'Test Daily'}
-                  </span>
-                  <span className='text-[10px] md:text-xs text-zinc-400'>
-                    Rich preview
-                  </span>
+                <div className='flex flex-col items-center gap-3 w-full'>
+                  <Calendar className='h-8 w-8 text-blue-400' />
+                  <div className='text-center'>
+                    <div className='font-semibold text-base mb-1'>
+                      {testingDaily ? 'Sending...' : 'Test Daily Preview'}
+                    </div>
+                    <div className='text-xs text-zinc-400'>
+                      Rich notifications with images
+                    </div>
+                  </div>
                 </div>
               </Button>
 
               <Button
+                onClick={testPushNotification}
+                disabled={testingNotification}
+                variant='outline'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-green-500/50 text-white transition-all'
+              >
+                <div className='flex flex-col items-center gap-3 w-full'>
+                  <Smartphone className='h-8 w-8 text-green-400' />
+                  <div className='text-center'>
+                    <div className='font-semibold text-base mb-1'>
+                      {testingNotification ? 'Sending...' : 'Test Basic'}
+                    </div>
+                    <div className='text-xs text-zinc-400'>
+                      Simple notification test
+                    </div>
+                  </div>
+                </div>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card className='mb-6 md:mb-8 bg-zinc-900 border-zinc-800'>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl'>
+              <Zap className='h-5 w-5' />
+              Quick Actions
+            </CardTitle>
+            <CardDescription className='text-zinc-400'>
+              Common admin tasks and shortcuts
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+              <Button
                 asChild
                 variant='outline'
-                className='h-auto p-4 bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white'
+                className='h-auto p-4 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600 text-white'
               >
                 <Link
                   href='/admin/cron-monitor'
                   className='flex flex-col items-center gap-2'
                 >
-                  <Activity className='h-5 w-5 md:h-6 md:w-6' />
-                  <span className='text-xs md:text-sm'>Trigger Cron</span>
-                  <span className='text-[10px] md:text-xs text-zinc-400'>
-                    Test automation
-                  </span>
+                  <Activity className='h-6 w-6' />
+                  <span className='text-sm font-medium'>Trigger Cron</span>
                 </Link>
               </Button>
 
               <Button
                 asChild
                 variant='outline'
-                className='h-auto p-4 bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white'
+                className='h-auto p-4 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600 text-white'
               >
                 <Link
                   href='/admin/blog-manager'
                   className='flex flex-col items-center gap-2'
                 >
-                  <BookOpen className='h-5 w-5 md:h-6 md:w-6' />
-                  <span className='text-xs md:text-sm'>Generate Blog</span>
-                  <span className='text-[10px] md:text-xs text-zinc-400'>
-                    Weekly content
-                  </span>
+                  <BookOpen className='h-6 w-6' />
+                  <span className='text-sm font-medium'>Generate Blog</span>
                 </Link>
               </Button>
 
               <Button
                 asChild
                 variant='outline'
-                className='h-auto p-4 bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white'
+                className='h-auto p-4 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600 text-white'
+              >
+                <Link
+                  href='/admin/grimoire-packs'
+                  className='flex flex-col items-center gap-2'
+                >
+                  <Sparkles className='h-6 w-6' />
+                  <span className='text-sm font-medium'>Create Pack</span>
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                variant='outline'
+                className='h-auto p-4 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600 text-white'
               >
                 <Link
                   href='/admin/shop-manager'
                   className='flex flex-col items-center gap-2'
                 >
-                  <Store className='h-5 w-5 md:h-6 md:w-6' />
-                  <span className='text-xs md:text-sm'>Manage Shop</span>
-                  <span className='text-[10px] md:text-xs text-zinc-400'>
-                    Stripe sync
-                  </span>
+                  <Store className='h-6 w-6' />
+                  <span className='text-sm font-medium'>Manage Shop</span>
                 </Link>
               </Button>
             </div>
