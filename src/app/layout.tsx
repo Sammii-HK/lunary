@@ -10,14 +10,12 @@ import { Navbar } from '@/components/Navbar';
 import { LunaryJazzProvider } from '@/components/JazzProvider';
 import { PWAHandler } from '@/components/PWAHandler';
 import { NotificationManager } from '@/components/NotificationManager';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export const metadata: Metadata = {
   title: `${getMoonSymbol()} Lunary`,
   description: 'Your Lunar Diary',
   manifest: '/manifest.json',
-  themeColor: '#18181b',
-  viewport:
-    'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -44,15 +42,21 @@ export default function RootLayout({
       <body
         className={`${inter.className} w-full h-screen flex flex-col align-middle items-center bg-zinc-950 text-white`}
       >
-        <LunaryJazzProvider>
-          <main className='flex flex-col h-full max-w-md w-full items-center justify-between font-mono text-sm gap-4 overflow-auto px-4 align-self-middle justify-self-center'>
-            {children}
-            <Analytics />
-          </main>
-          <Navbar />
-          <PWAHandler />
-          <NotificationManager />
-        </LunaryJazzProvider>
+        <ErrorBoundary>
+          <LunaryJazzProvider>
+            <main className='flex flex-col h-full max-w-md w-full items-center justify-between font-mono text-sm gap-4 overflow-auto px-4 align-self-middle justify-self-center'>
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+              <Analytics />
+            </main>
+            <Navbar />
+            <ErrorBoundary>
+              <PWAHandler />
+              <NotificationManager />
+            </ErrorBoundary>
+          </LunaryJazzProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
