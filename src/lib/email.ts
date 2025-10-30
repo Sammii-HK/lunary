@@ -14,41 +14,157 @@ function getResendClient() {
 }
 
 export interface EmailOptions {
-  to: string;
+  to: string | string[];
   subject: string;
   html?: string;
   text?: string;
 }
 
+export interface BatchEmailResult {
+  success: number;
+  failed: number;
+  total: number;
+  errors: Array<{ email: string; error: string }>;
+}
+
 /**
- * Send email using Resend
+ * Send email using Resend (single or multiple recipients)
  */
-export async function sendEmail({ to, subject, html, text }: EmailOptions) {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  text,
+}: EmailOptions) {
   try {
-    // Get Resend client (will throw if API key missing)
     const resendClient = getResendClient();
 
-    // Use the legacy HTML/text approach since we don't have React components
-    const emailContent = html || text || 'No content provided';
+    // Handle single email or array of emails
+    const recipients = Array.isArray(to) ? to : [to];
 
-    const { data, error } = await resendClient.emails.send({
-      from: process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>',
-      to,
-      subject,
-      html: emailContent,
-    } as any); // Type assertion for legacy API compatibility
+    // If single recipient, use regular send
+    if (recipients.length === 1) {
+      const { data, error } = await resendClient.emails.send({
+        from: process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>',
+        to: recipients[0],
+        subject,
+        html: html || text || 'No content provided',
+        text,
+      });
 
-    if (error) {
-      console.error('Resend error:', error);
-      throw new Error(`Failed to send email: ${error.message}`);
+      if (error) {
+        console.error('Resend error:', error);
+        throw new Error(`Failed to send email: ${error.message}`);
+      }
+
+      console.log('✅ Email sent successfully:', data?.id);
+      return data;
     }
 
-    console.log('✅ Email sent successfully:', data?.id);
-    return data;
+    // Multiple recipients - use batch API (100 per request)
+    return await sendBatchEmails(resendClient, {
+      to: recipients,
+      subject,
+      html: html || text || 'No content provided',
+      text,
+    });
   } catch (error) {
     console.error('Email sending failed:', error);
     throw error;
   }
+}
+
+/**
+ * Send emails in batches using Resend batch API
+ * Resend allows up to 100 recipients per batch request
+ * This prevents exposing all emails in TO/CC/BCC fields
+ */
+async function sendBatchEmails(
+  resendClient: Resend,
+  {
+    to,
+    subject,
+    html,
+    text,
+  }: {
+    to: string[];
+    subject: string;
+    html: string;
+    text?: string;
+  },
+): Promise<BatchEmailResult> {
+  const BATCH_SIZE = 100;
+  const from = process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>';
+  const results: BatchEmailResult = {
+    success: 0,
+    failed: 0,
+    total: to.length,
+    errors: [],
+  };
+
+  // Process in batches of 100
+  for (let i = 0; i < to.length; i += BATCH_SIZE) {
+    const batch = to.slice(i, i + BATCH_SIZE);
+    const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(to.length / BATCH_SIZE);
+
+    console.log(
+      `📧 Sending batch ${batchNumber}/${totalBatches} (${batch.length} recipients)`,
+    );
+
+    try {
+      // Use Resend batch API - sends individually to each recipient
+      // This prevents exposing all emails in TO field
+      const batchPromises = batch.map((email) =>
+        resendClient.emails.send({
+          from,
+          to: email,
+          subject,
+          html,
+          text,
+        }),
+      );
+
+      const batchResults = await Promise.allSettled(batchPromises);
+
+      batchResults.forEach((result, idx) => {
+        const email = batch[idx];
+        if (result.status === 'fulfilled' && result.value.data) {
+          results.success++;
+          console.log(`✅ Sent to ${email}`);
+        } else {
+          results.failed++;
+          const error =
+            result.status === 'rejected'
+              ? result.reason?.message || 'Unknown error'
+              : result.value?.error?.message || 'Unknown error';
+          results.errors.push({ email, error });
+          console.error(`❌ Failed to send to ${email}:`, error);
+        }
+      });
+
+      // Rate limiting: small delay between batches to avoid hitting limits
+      if (i + BATCH_SIZE < to.length) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    } catch (error) {
+      console.error(`❌ Batch ${batchNumber} failed:`, error);
+      batch.forEach((email) => {
+        results.failed++;
+        results.errors.push({
+          email,
+          error:
+            error instanceof Error ? error.message : 'Batch processing error',
+        });
+      });
+    }
+  }
+
+  console.log(
+    `📊 Batch email summary: ${results.success} sent, ${results.failed} failed out of ${results.total} total`,
+  );
+
+  return results;
 }
 
 /**

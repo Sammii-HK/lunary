@@ -102,6 +102,15 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       status: 'new',
     },
     {
+      title: 'Newsletter Manager',
+      description:
+        'Manage email subscribers and send weekly newsletters with Resend bulk API',
+      href: '/admin/newsletter-manager',
+      icon: <Mail className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
       title: 'Grimoire Packs',
       description:
         'Create magical packs using grimoire database with proper naming',

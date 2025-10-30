@@ -464,34 +464,118 @@ async function sendNewsletter(
   newsletter: { subject: string; html: string; text: string },
   testEmail?: string,
 ) {
-  // Placeholder for email service integration
-  // You could integrate with SendGrid, Mailchimp, Resend, etc.
+  const { sendEmail } = await import('@/lib/email');
+  const { sql } = await import('@vercel/postgres');
+  
+  type BatchEmailResult = {
+    success: number;
+    failed: number;
+    total: number;
+    errors: Array<{ email: string; error: string }>;
+  };
 
   console.log(`📧 Sending newsletter: "${newsletter.subject}"`);
   console.log(`📊 HTML length: ${newsletter.html.length} chars`);
   console.log(`📊 Text length: ${newsletter.text.length} chars`);
 
+  // Test email - send to single recipient
   if (testEmail) {
-    console.log(`🧪 Test mode: would send to ${testEmail}`);
-    return { recipients: 1, testMode: true, email: testEmail };
+    console.log(`🧪 Test mode: sending to ${testEmail}`);
+    try {
+      await sendEmail({
+        to: testEmail,
+        subject: newsletter.subject,
+        html: newsletter.html,
+        text: newsletter.text,
+      });
+      return {
+        recipients: 1,
+        success: 1,
+        failed: 0,
+        testMode: true,
+        email: testEmail,
+      };
+    } catch (error) {
+      console.error('Test email failed:', error);
+      return {
+        recipients: 1,
+        success: 0,
+        failed: 1,
+        testMode: true,
+        email: testEmail,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
 
-  // In production, integrate with your email service:
-  /*
-  const emailService = new SendGridAPI(process.env.SENDGRID_API_KEY);
-  const result = await emailService.send({
-    to: subscriberList,
-    from: 'cosmic@lunary.app',
-    subject: newsletter.subject,
-    html: newsletter.html,
-    text: newsletter.text
-  });
-  */
+  // Production: Get active verified subscribers
+  try {
+    const subscribers = await sql`
+      SELECT email 
+      FROM newsletter_subscribers 
+      WHERE is_active = true 
+      AND is_verified = true
+      AND preferences->>'weeklyNewsletter' = 'true'
+      ORDER BY created_at ASC
+    `;
 
-  console.log(`📬 Would send to subscriber list`);
-  return {
-    recipients: 0,
-    testMode: false,
-    note: 'Email service not configured',
-  };
+    const emailList = subscribers.rows.map((row) => row.email);
+
+    if (emailList.length === 0) {
+      console.log('📭 No active subscribers found');
+      return {
+        recipients: 0,
+        success: 0,
+        failed: 0,
+        testMode: false,
+        note: 'No active subscribers',
+      };
+    }
+
+    console.log(`📬 Sending to ${emailList.length} subscribers`);
+
+    // Use batch email function (handles 100 per batch automatically)
+    const result = await sendEmail({
+      to: emailList,
+      subject: newsletter.subject,
+      html: newsletter.html,
+      text: newsletter.text,
+    });
+
+    // Update last_email_sent and increment email_count for successful sends
+    if (typeof result === 'object' && 'success' in result) {
+      const batchResult = result as BatchEmailResult;
+      
+      // Update subscriber records
+      const updatePromises = emailList.map((email) =>
+        sql`
+          UPDATE newsletter_subscribers 
+          SET 
+            last_email_sent = NOW(),
+            email_count = email_count + 1
+          WHERE email = ${email}
+        `,
+      );
+      
+      await Promise.allSettled(updatePromises);
+
+      return {
+        recipients: emailList.length,
+        success: batchResult.success,
+        failed: batchResult.failed,
+        errors: batchResult.errors,
+        testMode: false,
+      };
+    }
+
+    return {
+      recipients: emailList.length,
+      success: emailList.length,
+      failed: 0,
+      testMode: false,
+    };
+  } catch (error) {
+    console.error('Newsletter sending failed:', error);
+    throw error;
+  }
 }
