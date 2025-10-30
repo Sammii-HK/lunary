@@ -188,13 +188,23 @@ class MoonPackGenerator {
         return;
       }
 
-      // Generate the pack content and PDF
+      // Step 1: Generate pack and upload to Blob
       const generateResponse = await fetch(`${BASE_URL}/api/shop/packs/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(config),
+        body: JSON.stringify({
+          category: config.category,
+          subcategory: config.subcategory,
+          name: config.name,
+          description: config.description,
+          price: config.price,
+          dateRange: config.dateRange,
+          year: config.year,
+          month: config.month,
+          quarter: config.quarter,
+        }),
       });
 
       if (!generateResponse.ok) {
@@ -203,15 +213,22 @@ class MoonPackGenerator {
       }
 
       const { pack } = await generateResponse.json();
-      console.log(`   📦 Pack generated: ${pack.id}`);
+      console.log(`   📦 Pack generated and uploaded to Blob: ${pack.id}`);
 
-      // Create Stripe product
+      // Step 2: Create Stripe product as SSOT (with Blob URL from pack)
       const stripeResponse = await fetch(`${BASE_URL}/api/shop/stripe/create-product`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ pack }),
+        body: JSON.stringify({
+          pack: {
+            ...pack,
+            // Ensure Blob URL is passed to Stripe metadata
+            blobUrl: pack.downloadUrl,
+            blobKey: pack.downloadUrl?.split('/').pop(),
+          },
+        }),
       });
 
       if (!stripeResponse.ok) {
@@ -220,8 +237,8 @@ class MoonPackGenerator {
       }
 
       const { stripeProductId, stripePriceId } = await stripeResponse.json();
-      console.log(`   💳 Stripe product created: ${stripeProductId}`);
-      console.log(`   ✅ Pack creation completed successfully`);
+      console.log(`   💳 Stripe product created (SSOT): ${stripeProductId}`);
+      console.log(`   ✅ Complete automation finished successfully`);
 
       // TODO: Save pack data to database when database is implemented
       // For now, we're relying on Stripe as the source of truth

@@ -98,6 +98,33 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   try {
+    // Get product from Stripe to retrieve Blob URL (SSOT)
+    let blobUrl: string | undefined;
+    let packName = 'Digital Pack';
+    
+    if (session.line_items) {
+      const lineItems = await stripe.checkout.sessions.listLineItems(
+        session.id,
+        { expand: ['data.price.product'] },
+      );
+      
+      if (lineItems.data.length > 0) {
+        const price = lineItems.data[0].price;
+        if (price && typeof price.product !== 'string') {
+          const product = price.product as Stripe.Product;
+          packName = product.name;
+          // Get Blob URL from product metadata (SSOT)
+          blobUrl = product.metadata?.blobUrl;
+          
+          console.log('📦 Retrieved pack info from Stripe (SSOT):', {
+            productId: product.id,
+            packName,
+            hasBlobUrl: !!blobUrl,
+          });
+        }
+      }
+    }
+
     // Create purchase record in database
     const purchase = {
       id: generateRandomId(),
@@ -113,6 +140,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      pack: {
+        id: packId,
+        name: packName,
+        downloadUrl: blobUrl, // From Stripe metadata (SSOT)
+      },
     };
 
     // In production, save to database

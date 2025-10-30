@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-// Import types instead of the function to avoid circular dependency
 import Stripe from 'stripe';
+import { put } from '@vercel/blob';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import crypto from 'crypto';
 import { generatePackNaming } from '../../../../../../utils/grimoire/packNaming';
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -30,15 +32,43 @@ export async function POST(request: NextRequest) {
       customNaming,
     );
 
-    // 2. Create Stripe product as SSOT
-    const stripeProduct = await createStripeProduct(packData);
+    // 2. Generate PDF from pack content
+    console.log('📄 Generating PDF from pack content...');
+    const pdfBuffer = await generatePDFFromPack(packData);
 
-    // 3. Update pack with Stripe IDs
-    const finalPack = {
+    // 3. Upload PDF to Vercel Blob (private access)
+    console.log('☁️ Uploading PDF to Vercel Blob...');
+    const packId = packData.id || crypto.randomBytes(16).toString('hex');
+    const fileName = `${packData.sku || packData.slug || category}_${packId}.pdf`;
+    const blobKey = `shop/packs/${category}/${fileName}`;
+
+    const { url: blobUrl } = await put(blobKey, Buffer.from(pdfBuffer), {
+      access: 'public', // Public but accessed via secure download tokens
+      addRandomSuffix: false,
+      contentType: 'application/pdf',
+    });
+
+    const fileSize = pdfBuffer.byteLength;
+
+    // 4. Update pack with Blob URL and file info
+    const packWithBlob = {
       ...packData,
+      downloadUrl: blobUrl,
+      blobKey,
+      fileSize,
+      fileFormat: 'PDF',
+    };
+
+    // 5. Create Stripe product as SSOT (with Blob URL in metadata)
+    console.log('💳 Creating Stripe product as SSOT...');
+    const stripeProduct = await createStripeProduct(packWithBlob);
+
+    // 6. Update pack with Stripe IDs
+    const finalPack = {
+      ...packWithBlob,
       stripeProductId: stripeProduct.product.id,
       stripePriceId: stripeProduct.price.id,
-      stripeUrl: `https://buy.stripe.com/test_${stripeProduct.price.id}`, // Generate buy link
+      stripeUrl: stripeProduct.url,
       isPublished: autoPublish,
       syncedAt: new Date().toISOString(),
     };
@@ -122,11 +152,17 @@ async function createStripeProduct(packData: any) {
     name: packData.fullName,
     description: packData.description,
     images: [], // Could add pack preview images
-    metadata: {
+      metadata: {
       // Pack identification
       packId: packData.id,
       sku: packData.sku,
       slug: packData.slug,
+      
+      // Blob storage (SSOT for file location)
+      blobUrl: packData.downloadUrl,
+      blobKey: packData.blobKey,
+      fileSize: packData.fileSize?.toString() || '0',
+      fileFormat: packData.fileFormat || 'PDF',
 
       // Series and volume info
       series: packData.series,
@@ -235,4 +271,152 @@ async function generateGrimoirePack(category: string, includeRituals: boolean) {
   }
 
   return await response.json();
+}
+
+// Generate PDF from pack data
+async function generatePDFFromPack(packData: any): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create();
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  // Add title page
+  let page = pdfDoc.addPage([612, 792]); // Standard letter size
+  const { width, height } = page.getSize();
+
+  // Title
+  const title = packData.fullName || packData.title || 'Grimoire Pack';
+  page.drawText(title, {
+    x: 50,
+    y: height - 100,
+    size: 24,
+    font: boldFont,
+    color: rgb(0.2, 0.2, 0.2),
+  });
+
+  // Subtitle
+  if (packData.subtitle) {
+    page.drawText(packData.subtitle, {
+      x: 50,
+      y: height - 140,
+      size: 16,
+      font: font,
+      color: rgb(0.4, 0.4, 0.4),
+    });
+  }
+
+  // Description
+  if (packData.description) {
+    const descLines = packData.description.split('\n');
+    let yPos = height - 180;
+    for (const line of descLines.slice(0, 5)) {
+      // Limit to 5 lines on title page
+      page.drawText(line, {
+        x: 50,
+        y: yPos,
+        size: 12,
+        font: font,
+        color: rgb(0.3, 0.3, 0.3),
+        maxWidth: width - 100,
+      });
+      yPos -= 18;
+    }
+  }
+
+  // Add spells
+  let yPosition = height - 300;
+  if (packData.spells && packData.spells.length > 0) {
+    for (const spell of packData.spells) {
+      if (yPosition < 100) {
+        page = pdfDoc.addPage([612, 792]);
+        yPosition = height - 50;
+      }
+
+      page.drawText(spell.title || spell.name, {
+        x: 50,
+        y: yPosition,
+        size: 14,
+        font: boldFont,
+        color: rgb(0.2, 0.2, 0.2),
+      });
+      yPosition -= 25;
+
+      if (spell.description || spell.information) {
+        const content = spell.description || spell.information || '';
+        const lines = content.split('\n');
+        for (const line of lines.slice(0, 10)) {
+          // Limit lines per spell
+          if (yPosition < 50) {
+            page = pdfDoc.addPage([612, 792]);
+            yPosition = height - 50;
+          }
+          page.drawText(line, {
+            x: 50,
+            y: yPosition,
+            size: 11,
+            font: font,
+            color: rgb(0.3, 0.3, 0.3),
+            maxWidth: width - 100,
+          });
+          yPosition -= 18;
+        }
+      }
+      yPosition -= 20;
+    }
+  }
+
+  // Add crystals
+  if (packData.crystals && packData.crystals.length > 0) {
+    if (yPosition < 150) {
+      page = pdfDoc.addPage([612, 792]);
+      yPosition = height - 50;
+    }
+
+    page.drawText('Crystals', {
+      x: 50,
+      y: yPosition,
+      size: 18,
+      font: boldFont,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    yPosition -= 30;
+
+    for (const crystal of packData.crystals) {
+      if (yPosition < 100) {
+        page = pdfDoc.addPage([612, 792]);
+        yPosition = height - 50;
+      }
+
+      page.drawText(crystal.name, {
+        x: 50,
+        y: yPosition,
+        size: 12,
+        font: boldFont,
+        color: rgb(0.2, 0.2, 0.2),
+      });
+      yPosition -= 20;
+
+      if (crystal.properties || crystal.information) {
+        const content = crystal.properties || crystal.information || '';
+        const lines = content.split('\n');
+        for (const line of lines.slice(0, 5)) {
+          if (yPosition < 50) {
+            page = pdfDoc.addPage([612, 792]);
+            yPosition = height - 50;
+          }
+          page.drawText(line, {
+            x: 50,
+            y: yPosition,
+            size: 10,
+            font: font,
+            color: rgb(0.3, 0.3, 0.3),
+            maxWidth: width - 100,
+          });
+          yPosition -= 16;
+        }
+      }
+      yPosition -= 15;
+    }
+  }
+
+  return pdfDoc.save();
 }

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`🛍️ Creating Stripe product for: ${pack.name}`);
 
-    // Create Stripe product
+    // Create Stripe product (SSOT - stores Blob URL)
     const product = await stripe.products.create({
       name: pack.name,
       description: pack.description,
@@ -33,6 +33,10 @@ export async function POST(request: NextRequest) {
         itemCount: pack.metadata?.itemCount?.toString() || '0',
         format: pack.metadata?.format || 'PDF',
         dateRange: pack.metadata?.dateRange || '',
+        // Blob storage (SSOT - this is the source of truth for file location)
+        blobUrl: pack.blobUrl || pack.downloadUrl || '',
+        blobKey: pack.blobKey || pack.downloadUrl?.split('/').pop() || '',
+        fileSize: pack.fileSize?.toString() || '0',
       },
     });
 
