@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const html = generateVerificationEmailHTML(testVerificationUrl, email);
     const text = generateVerificationEmailText(testVerificationUrl, email);
 
-    // Send test email
+    // Send test email (single recipient, so will return Resend response with id)
     const result = await sendEmail({
       to: email,
       subject: '🧪 Lunary Email Test - Verification Setup Working!',
@@ -41,14 +41,25 @@ export async function POST(request: NextRequest) {
       text,
     });
 
+    // Check if result is a batch result or single email response
+    const emailId = result && 'id' in result ? result.id : null;
+    const isBatchResult = result && 'success' in result;
+
     return NextResponse.json({
       success: true,
       message: 'Test email sent successfully!',
       details: {
-        emailId: result?.id,
+        emailId,
         to: email,
         from: process.env.EMAIL_FROM || 'Default sender',
         timestamp: new Date().toISOString(),
+        ...(isBatchResult && {
+          batchResult: {
+            success: (result as any).success,
+            failed: (result as any).failed,
+            total: (result as any).total,
+          },
+        }),
       },
     });
   } catch (error) {

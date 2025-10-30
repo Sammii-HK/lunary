@@ -29,8 +29,14 @@ export interface BatchEmailResult {
 
 /**
  * Send email using Resend (single or multiple recipients)
+ * Returns Resend response (with id) for single emails, or BatchEmailResult for multiple
  */
-export async function sendEmail({ to, subject, html, text }: EmailOptions) {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  text,
+}: EmailOptions): Promise<{ id: string } | BatchEmailResult> {
   try {
     const resendClient = getResendClient();
 
@@ -53,7 +59,8 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions) {
       }
 
       console.log('✅ Email sent successfully:', data?.id);
-      return data;
+      // Return Resend response with id (matches { id: string })
+      return data as { id: string };
     }
 
     // Multiple recipients - use batch API (100 per request)
