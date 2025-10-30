@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
               : `seek balance through ${primaryEnergy} energy`;
 
     highlights.push(
-      `${planetA.name}-${planetB.name} ${aspect} in ${signA}-${signB} at ${separation}° - ${aspectAction}`,
+      `${planetA?.name || planetA}-${planetB?.name || planetB} ${aspect} in ${signA}-${signB} at ${separation}° - ${aspectAction}`,
     );
   } else if (primaryEvent.type === 'moon') {
     // Determine moon phase description based on illumination percentage, not name
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
       const primaryEnergy = signAEnergy;
 
       highlights.push(
-        `${event.planetA}-${event.planetB} ${event.aspect} in ${event.signA}-${event.signB} at ${event.separation}° - ${aspectDescription} ${primaryEnergy} energy`,
+        `${event.planetA?.name || event.planetA}-${event.planetB?.name || event.planetB} ${event.aspect} in ${event.signA}-${event.signB} at ${event.separation}° - ${aspectDescription} ${primaryEnergy} energy`,
       );
     }
   });
@@ -234,6 +234,7 @@ export async function GET(request: NextRequest) {
         }),
       },
     },
+    allEvents: allEvents,
     horoscope: {
       date: getGeneralHoroscope().date,
       moonPhase: getGeneralHoroscope().moonPhase,
