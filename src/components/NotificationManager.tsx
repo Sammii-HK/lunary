@@ -17,7 +17,8 @@ export function NotificationManager() {
     denied: false,
     default: true,
   });
-  const [subscription, setSubscription] = useState<globalThis.PushSubscription | null>(null);
+  const [subscription, setSubscription] =
+    useState<globalThis.PushSubscription | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
@@ -84,30 +85,31 @@ export function NotificationManager() {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      
+
       // Get VAPID public key from environment (exposed to client via NEXT_PUBLIC_)
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-      
+
       if (!vapidPublicKey) {
         throw new Error('VAPID public key not configured');
       }
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
       setSubscription(subscription);
-      
+
       // Send subscription to both client storage and PostgreSQL
       await sendSubscriptionToServer(subscription);
-      
     } catch (error) {
       console.error('Error subscribing to push:', error);
     }
   };
 
-  const sendSubscriptionToServer = async (subscription: globalThis.PushSubscription) => {
+  const sendSubscriptionToServer = async (
+    subscription: globalThis.PushSubscription,
+  ) => {
     try {
       if (!me?.root) {
         console.error('No user account available');
@@ -133,12 +135,12 @@ export function NotificationManager() {
           sabbats: true,
           eclipses: true,
           majorAspects: true,
-        }
+        },
       });
 
       // Check if subscription already exists
       const existingIndex = me.root.pushSubscriptions.findIndex(
-        (sub: any) => sub?.endpoint === subscription.endpoint
+        (sub: any) => sub?.endpoint === subscription.endpoint,
       );
 
       if (existingIndex >= 0) {
@@ -174,9 +176,11 @@ export function NotificationManager() {
         });
         console.log('✅ Push subscription also saved to PostgreSQL');
       } catch (pgError) {
-        console.error('⚠️ Failed to save to PostgreSQL (client storage still works):', pgError);
+        console.error(
+          '⚠️ Failed to save to PostgreSQL (client storage still works):',
+          pgError,
+        );
       }
-
     } catch (error) {
       console.error('Error saving subscription to client storage:', error);
     }
@@ -187,12 +191,12 @@ export function NotificationManager() {
       try {
         await subscription.unsubscribe();
         setSubscription(null);
-        
+
         // Remove from client storage
         const subscriptionIndex = me.root.pushSubscriptions.findIndex(
-          (sub: any) => sub?.endpoint === subscription.endpoint
+          (sub: any) => sub?.endpoint === subscription.endpoint,
         );
-        
+
         if (subscriptionIndex >= 0) {
           me.root.pushSubscriptions.splice(subscriptionIndex, 1);
           console.log('✅ Push subscription removed from client storage');
@@ -209,7 +213,7 @@ export function NotificationManager() {
 
   // Helper function to convert VAPID key
   const urlBase64ToUint8Array = (base64String: string) => {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
       .replace(/-/g, '+')
       .replace(/_/g, '/');
@@ -229,11 +233,11 @@ export function NotificationManager() {
 
   if (permission.granted && subscription) {
     return (
-      <div className="text-xs text-zinc-400 text-center py-2">
+      <div className='text-xs text-zinc-400 text-center py-2'>
         🔔 Cosmic notifications enabled
-        <button 
+        <button
           onClick={unsubscribe}
-          className="ml-2 text-zinc-500 hover:text-zinc-300 underline"
+          className='ml-2 text-zinc-500 hover:text-zinc-300 underline'
         >
           disable
         </button>
@@ -246,42 +250,45 @@ export function NotificationManager() {
   }
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50">
-      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 shadow-lg">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-sm font-medium text-white flex items-center gap-2">
+    <div className='fixed bottom-20 left-4 right-4 z-50'>
+      <div className='bg-zinc-800 border border-zinc-700 rounded-lg p-4 shadow-lg'>
+        <div className='flex items-start justify-between'>
+          <div className='flex-1'>
+            <h3 className='text-sm font-medium text-white flex items-center gap-2'>
               🌙 Cosmic Notifications
             </h3>
-            <p className="text-xs text-zinc-400 mt-1">
-              Get notified about moon phases, planetary transits, retrogrades, sabbats, and eclipses
+            <p className='text-xs text-zinc-400 mt-1'>
+              Get notified about moon phases, planetary transits, retrogrades,
+              sabbats, and eclipses
             </p>
-            <div className="text-xs text-zinc-500 mt-2">
-              • New & Full Moons<br/>
-              • Planetary ingresses & retrogrades<br/>
-              • Sabbats & seasonal shifts<br/>
-              • Eclipses & major aspects
+            <div className='text-xs text-zinc-500 mt-2'>
+              • New & Full Moons
+              <br />
+              • Planetary ingresses & retrogrades
+              <br />
+              • Sabbats & seasonal shifts
+              <br />• Eclipses & major aspects
             </div>
           </div>
-          <div className="flex flex-col gap-2 ml-4">
+          <div className='flex flex-col gap-2 ml-4'>
             <button
               onClick={dismissPrompt}
-              className="px-3 py-1 text-xs text-zinc-400 hover:text-white transition-colors"
+              className='px-3 py-1 text-xs text-zinc-400 hover:text-white transition-colors'
             >
               ✕
             </button>
           </div>
         </div>
-        <div className="flex gap-2 mt-3">
+        <div className='flex gap-2 mt-3'>
           <button
             onClick={dismissPrompt}
-            className="flex-1 px-3 py-2 text-xs text-zinc-400 hover:text-white transition-colors"
+            className='flex-1 px-3 py-2 text-xs text-zinc-400 hover:text-white transition-colors'
           >
             Maybe Later
           </button>
           <button
             onClick={requestPermission}
-            className="flex-1 px-3 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-xs rounded transition-colors"
+            className='flex-1 px-3 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-xs rounded transition-colors'
           >
             Enable Notifications
           </button>

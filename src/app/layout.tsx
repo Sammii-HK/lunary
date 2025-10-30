@@ -16,7 +16,8 @@ export const metadata: Metadata = {
   description: 'Your Lunar Diary',
   manifest: '/manifest.json',
   themeColor: '#18181b',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
+  viewport:
+    'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

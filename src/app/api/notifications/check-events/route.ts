@@ -6,7 +6,7 @@ import webpush from 'web-push';
 webpush.setVapidDetails(
   'mailto:info@lunary.app',
   process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  process.env.VAPID_PRIVATE_KEY!,
 );
 
 // This endpoint checks for significant astronomical events and sends notifications
@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
 
     // Fetch cosmic data using your existing API
     const cosmicData = await checkAstronomicalEvents(today);
-    
+
     if (!cosmicData) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Failed to fetch cosmic data' 
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to fetch cosmic data',
       });
     }
 
@@ -39,7 +39,10 @@ export async function GET(request: NextRequest) {
     // Check if primary event is notification-worthy
     const primaryEvent = cosmicData.primaryEvent;
     if (primaryEvent && isNotificationWorthy(primaryEvent)) {
-      const notification = createNotificationFromEvent(primaryEvent, cosmicData);
+      const notification = createNotificationFromEvent(
+        primaryEvent,
+        cosmicData,
+      );
       notifications.push(notification);
     }
 
@@ -65,10 +68,10 @@ export async function GET(request: NextRequest) {
         results.push(sendResult);
       } catch (error) {
         console.error('Failed to send notification:', error);
-        results.push({ 
-          success: false, 
+        results.push({
+          success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-          notification: notification.title 
+          notification: notification.title,
         });
       }
     }
@@ -80,25 +83,25 @@ export async function GET(request: NextRequest) {
       notificationsSent: notifications.length,
       results,
     });
-
   } catch (error) {
     console.error('Error checking astronomical events:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 async function checkAstronomicalEvents(date: string) {
   try {
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://lunary.app' 
-      : 'http://localhost:3000';
-      
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lunary.app'
+        : 'http://localhost:3000';
+
     const response = await fetch(`${baseUrl}/api/og/cosmic-post/${date}`, {
       headers: { 'User-Agent': 'Lunary-Notification-Service/1.0' },
     });
@@ -117,21 +120,27 @@ async function checkAstronomicalEvents(date: string) {
 function isNotificationWorthy(event: any): boolean {
   // Only send notifications for significant events
   if (event.priority >= 9) return true; // Extraordinary planetary events
-  
+
   // Moon phases (but not every day - only exact phases)
   if (event.type === 'moon' && event.priority === 10) {
-    const significantPhases = ['New Moon', 'Full Moon', 'First Quarter', 'Last Quarter'];
-    return significantPhases.some(phase => event.name.includes(phase));
+    const significantPhases = [
+      'New Moon',
+      'Full Moon',
+      'First Quarter',
+      'Last Quarter',
+    ];
+    return significantPhases.some((phase) => event.name.includes(phase));
   }
-  
+
   // Seasonal events (equinoxes, solstices, sabbats)
   if (event.priority === 8) return true;
-  
+
   // Major aspects involving outer planets
   if (event.type === 'aspect' && event.priority >= 7) {
     const outerPlanets = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
-    return outerPlanets.some(planet => 
-      event.name?.includes(planet) || event.description?.includes(planet)
+    return outerPlanets.some(
+      (planet) =>
+        event.name?.includes(planet) || event.description?.includes(planet),
     );
   }
 
@@ -153,9 +162,9 @@ function createNotificationFromEvent(event: any, cosmicData: any) {
       {
         action: 'view',
         title: 'View in Lunary',
-        icon: '/icons/icon-72x72.png'
-      }
-    ]
+        icon: '/icons/icon-72x72.png',
+      },
+    ],
   };
 
   // Customize based on event type
@@ -166,7 +175,7 @@ function createNotificationFromEvent(event: any, cosmicData: any) {
         title: `${event.emoji || '🌙'} ${event.name}`,
         body: `${event.energy} - ${getPhaseGuidance(event.name)}`,
         tag: 'lunary-moon-phase',
-        data: { ...baseNotification.data, phase: event.name }
+        data: { ...baseNotification.data, phase: event.name },
       };
 
     case 'aspect':
@@ -175,7 +184,7 @@ function createNotificationFromEvent(event: any, cosmicData: any) {
         title: `${getPlanetEmoji(event)} ${event.name}`,
         body: `${event.energy} - Powerful cosmic alignment forming`,
         tag: 'lunary-planetary-aspect',
-        data: { ...baseNotification.data, aspect: event.name }
+        data: { ...baseNotification.data, aspect: event.name },
       };
 
     case 'seasonal':
@@ -184,7 +193,7 @@ function createNotificationFromEvent(event: any, cosmicData: any) {
         title: `🌿 ${event.name}`,
         body: `${event.energy} - Seasonal energy shift begins`,
         tag: 'lunary-seasonal',
-        data: { ...baseNotification.data, season: event.name }
+        data: { ...baseNotification.data, season: event.name },
       };
 
     case 'ingress':
@@ -193,7 +202,7 @@ function createNotificationFromEvent(event: any, cosmicData: any) {
         title: `${getPlanetEmoji(event)} ${event.name}`,
         body: `${event.energy} - New cosmic energy emerges`,
         tag: 'lunary-planetary-ingress',
-        data: { ...baseNotification.data, ingress: event.name }
+        data: { ...baseNotification.data, ingress: event.name },
       };
 
     default:
@@ -213,43 +222,43 @@ function getPhaseGuidance(phaseName: string): string {
     'First Quarter': 'Take action on your intentions and push forward',
     'Last Quarter': 'Release what no longer serves and reflect',
   };
-  
+
   for (const [phase, message] of Object.entries(guidance)) {
     if (phaseName.includes(phase)) return message;
   }
-  
+
   return 'Lunar energy shift occurring';
 }
 
 function getPlanetEmoji(event: any): string {
   const text = event.name || event.description || '';
   const emojis: Record<string, string> = {
-    'Mercury': '☿',
-    'Venus': '♀',
-    'Mars': '♂',
-    'Jupiter': '♃',
-    'Saturn': '♄',
-    'Uranus': '♅',
-    'Neptune': '♆',
-    'Pluto': '♇',
-    'Sun': '☉',
-    'Moon': '☽'
+    Mercury: '☿',
+    Venus: '♀',
+    Mars: '♂',
+    Jupiter: '♃',
+    Saturn: '♄',
+    Uranus: '♅',
+    Neptune: '♆',
+    Pluto: '♇',
+    Sun: '☉',
+    Moon: '☽',
   };
-  
+
   for (const [planet, emoji] of Object.entries(emojis)) {
     if (text.includes(planet)) return emoji;
   }
-  
+
   return '⭐';
 }
 
 async function sendNotificationToSubscribers(notification: any) {
   try {
     console.log('📤 Sending notification:', notification.title);
-    
+
     // Get the event type to filter subscriptions by preferences
     const eventType = notification.data?.eventType;
-    
+
     // Fetch active subscriptions from PostgreSQL based on preferences
     let subscriptions;
     if (eventType) {
@@ -268,14 +277,17 @@ async function sendNotificationToSubscribers(notification: any) {
         WHERE is_active = true
       `;
     }
-    
+
     if (subscriptions.rows.length === 0) {
-      console.log('📭 No active push subscriptions found for event type:', eventType);
+      console.log(
+        '📭 No active push subscriptions found for event type:',
+        eventType,
+      );
       return {
         success: true,
         notification: notification.title,
         recipientCount: 0,
-        message: 'No subscribers for this event type'
+        message: 'No subscribers for this event type',
       };
     }
 
@@ -287,63 +299,78 @@ async function sendNotificationToSubscribers(notification: any) {
         await webpush.sendNotification(
           {
             endpoint: sub.endpoint,
-            keys: { 
-              p256dh: sub.p256dh, 
-              auth: sub.auth 
-            }
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth,
+            },
           },
-          JSON.stringify(notification)
+          JSON.stringify(notification),
         );
-        
+
         // Update last notification sent timestamp
         await sql`
           UPDATE push_subscriptions 
           SET last_notification_sent = NOW() 
           WHERE endpoint = ${sub.endpoint}
         `;
-        
+
         return { success: true, endpoint: sub.endpoint };
       } catch (error) {
-        console.error(`Failed to send to ${sub.endpoint.substring(0, 50)}...`, error);
-        
+        console.error(
+          `Failed to send to ${sub.endpoint.substring(0, 50)}...`,
+          error,
+        );
+
         // If subscription is invalid, mark as inactive
-        if (error instanceof Error && (
-          error.message.includes('410') || 
-          error.message.includes('invalid') ||
-          error.message.includes('expired')
-        )) {
+        if (
+          error instanceof Error &&
+          (error.message.includes('410') ||
+            error.message.includes('invalid') ||
+            error.message.includes('expired'))
+        ) {
           await sql`
             UPDATE push_subscriptions 
             SET is_active = false 
             WHERE endpoint = ${sub.endpoint}
           `;
         }
-        
-        return { success: false, endpoint: sub.endpoint, error: error instanceof Error ? error.message : 'Unknown error' };
+
+        return {
+          success: false,
+          endpoint: sub.endpoint,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
       }
     });
 
     const results = await Promise.allSettled(sendPromises);
-    const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
+    const successful = results.filter(
+      (r) => r.status === 'fulfilled' && r.value.success,
+    ).length;
     const failed = results.length - successful;
-    
-    console.log(`✅ Notification sent: ${successful} successful, ${failed} failed`);
-    
+
+    console.log(
+      `✅ Notification sent: ${successful} successful, ${failed} failed`,
+    );
+
     return {
       success: successful > 0,
       notification: notification.title,
       recipientCount: subscriptions.rows.length,
       successful,
       failed,
-      results: results.map(r => r.status === 'fulfilled' ? r.value : { success: false, error: 'Promise rejected' })
+      results: results.map((r) =>
+        r.status === 'fulfilled'
+          ? r.value
+          : { success: false, error: 'Promise rejected' },
+      ),
     };
-    
   } catch (error) {
     console.error('Error sending notification:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      notification: notification.title
+      notification: notification.title,
     };
   }
 }

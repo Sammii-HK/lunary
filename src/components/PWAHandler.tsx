@@ -18,7 +18,8 @@ declare global {
 }
 
 export function PWAHandler() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
@@ -37,12 +38,14 @@ export function PWAHandler() {
 
     // Check if app is already installed
     const checkInstalled = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches || 
-          (window.navigator as any).standalone === true) {
+      if (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true
+      ) {
         setIsInstalled(true);
       }
     };
-    
+
     checkInstalled();
 
     // Listen for beforeinstallprompt event
@@ -63,7 +66,10 @@ export function PWAHandler() {
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt,
+      );
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
@@ -73,13 +79,13 @@ export function PWAHandler() {
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
       console.log('User accepted the install prompt');
     } else {
       console.log('User dismissed the install prompt');
     }
-    
+
     setDeferredPrompt(null);
     setShowInstallPrompt(false);
   };
@@ -93,25 +99,25 @@ export function PWAHandler() {
   }
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50">
-      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 shadow-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h3 className="text-sm font-medium text-white">Install Lunary</h3>
-            <p className="text-xs text-zinc-400 mt-1">
+    <div className='fixed bottom-20 left-4 right-4 z-50'>
+      <div className='bg-zinc-800 border border-zinc-700 rounded-lg p-4 shadow-lg'>
+        <div className='flex items-center justify-between'>
+          <div className='flex-1'>
+            <h3 className='text-sm font-medium text-white'>Install Lunary</h3>
+            <p className='text-xs text-zinc-400 mt-1'>
               Add to your home screen for quick access
             </p>
           </div>
-          <div className="flex gap-2 ml-4">
+          <div className='flex gap-2 ml-4'>
             <button
               onClick={handleDismiss}
-              className="px-3 py-1 text-xs text-zinc-400 hover:text-white transition-colors"
+              className='px-3 py-1 text-xs text-zinc-400 hover:text-white transition-colors'
             >
               Later
             </button>
             <button
               onClick={handleInstallClick}
-              className="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-white text-xs rounded transition-colors"
+              className='px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-white text-xs rounded transition-colors'
             >
               Install
             </button>

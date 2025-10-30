@@ -495,34 +495,40 @@ async function runYearlyTasks(request: NextRequest) {
 
 // NOTIFICATION CHECK using PostgreSQL
 async function runNotificationCheck(dateStr: string) {
-  console.log('🔔 Checking for significant astronomical events via PostgreSQL...');
+  console.log(
+    '🔔 Checking for significant astronomical events via PostgreSQL...',
+  );
 
-  const baseUrl = process.env.NODE_ENV === 'production'
-    ? 'https://lunary.app'
-    : 'http://localhost:3000';
+  const baseUrl =
+    process.env.NODE_ENV === 'production'
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
 
   try {
     // First, get the cosmic data to determine what notifications to send
-    const cosmicResponse = await fetch(`${baseUrl}/api/og/cosmic-post/${dateStr}`, {
-      headers: { 'User-Agent': 'Lunary-Notification-Service/1.0' },
-    });
+    const cosmicResponse = await fetch(
+      `${baseUrl}/api/og/cosmic-post/${dateStr}`,
+      {
+        headers: { 'User-Agent': 'Lunary-Notification-Service/1.0' },
+      },
+    );
 
     if (!cosmicResponse.ok) {
       throw new Error(`Failed to fetch cosmic data: ${cosmicResponse.status}`);
     }
 
     const cosmicData = await cosmicResponse.json();
-    
+
     // Check if there are notification-worthy events
     const notificationEvents = getNotificationWorthyEvents(cosmicData);
-    
+
     if (notificationEvents.length === 0) {
       console.log('📭 No notification-worthy events today');
       return {
         success: true,
         notificationsSent: 0,
         primaryEvent: cosmicData.primaryEvent?.name,
-        message: 'No significant events to notify about'
+        message: 'No significant events to notify about',
       };
     }
 
@@ -536,7 +542,7 @@ async function runNotificationCheck(dateStr: string) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.CRON_SECRET}`,
+            Authorization: `Bearer ${process.env.CRON_SECRET}`,
           },
           body: JSON.stringify({
             payload: {
@@ -547,27 +553,32 @@ async function runNotificationCheck(dateStr: string) {
                 date: dateStr,
                 eventName: event.name,
                 priority: event.priority,
-                eventType: event.type
-              }
-            }
+                eventType: event.type,
+              },
+            },
           }),
         });
 
         const pgResult = await pgResponse.json();
         totalSent += pgResult.recipientCount || 0;
         results.push(pgResult);
-
       } catch (eventError) {
-        console.error(`Failed to send notification for event ${event.name}:`, eventError);
+        console.error(
+          `Failed to send notification for event ${event.name}:`,
+          eventError,
+        );
         results.push({
           success: false,
-          error: eventError instanceof Error ? eventError.message : 'Unknown error',
-          eventName: event.name
+          error:
+            eventError instanceof Error ? eventError.message : 'Unknown error',
+          eventName: event.name,
         });
       }
     }
 
-    console.log(`✅ PostgreSQL notification check completed: ${totalSent} notifications sent`);
+    console.log(
+      `✅ PostgreSQL notification check completed: ${totalSent} notifications sent`,
+    );
 
     return {
       success: totalSent > 0,
@@ -587,16 +598,22 @@ async function runNotificationCheck(dateStr: string) {
 // Helper function to identify notification-worthy events
 function getNotificationWorthyEvents(cosmicData: any) {
   const events = [];
-  
+
   // Check primary event
-  if (cosmicData.primaryEvent && isEventNotificationWorthy(cosmicData.primaryEvent)) {
+  if (
+    cosmicData.primaryEvent &&
+    isEventNotificationWorthy(cosmicData.primaryEvent)
+  ) {
     events.push(createNotificationFromEvent(cosmicData.primaryEvent));
   }
-  
+
   // Check secondary high-priority events
   if (cosmicData.allEvents) {
     const significantEvents = cosmicData.allEvents
-      .filter((event: any) => event.priority >= 8 && event !== cosmicData.primaryEvent)
+      .filter(
+        (event: any) =>
+          event.priority >= 8 && event !== cosmicData.primaryEvent,
+      )
       .slice(0, 2); // Limit to 2 additional notifications per day
 
     for (const event of significantEvents) {
@@ -605,28 +622,34 @@ function getNotificationWorthyEvents(cosmicData: any) {
       }
     }
   }
-  
+
   return events;
 }
 
 function isEventNotificationWorthy(event: any): boolean {
   // Only send notifications for significant events
   if (event.priority >= 9) return true; // Extraordinary planetary events
-  
+
   // Moon phases (but not every day - only exact phases)
   if (event.type === 'moon' && event.priority === 10) {
-    const significantPhases = ['New Moon', 'Full Moon', 'First Quarter', 'Last Quarter'];
-    return significantPhases.some(phase => event.name.includes(phase));
+    const significantPhases = [
+      'New Moon',
+      'Full Moon',
+      'First Quarter',
+      'Last Quarter',
+    ];
+    return significantPhases.some((phase) => event.name.includes(phase));
   }
-  
+
   // Seasonal events (equinoxes, solstices, sabbats)
   if (event.priority === 8) return true;
-  
+
   // Major aspects involving outer planets
   if (event.type === 'aspect' && event.priority >= 7) {
     const outerPlanets = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
-    return outerPlanets.some(planet => 
-      event.name?.includes(planet) || event.description?.includes(planet)
+    return outerPlanets.some(
+      (planet) =>
+        event.name?.includes(planet) || event.description?.includes(planet),
     );
   }
 
@@ -637,7 +660,7 @@ function createNotificationFromEvent(event: any) {
   const baseEvent = {
     name: event.name,
     type: event.type,
-    priority: event.priority
+    priority: event.priority,
   };
 
   // Customize based on event type
@@ -686,33 +709,33 @@ function getPhaseGuidance(phaseName: string): string {
     'First Quarter': 'Take action on your intentions and push forward',
     'Last Quarter': 'Release what no longer serves and reflect',
   };
-  
+
   for (const [phase, message] of Object.entries(guidance)) {
     if (phaseName.includes(phase)) return message;
   }
-  
+
   return 'Lunar energy shift occurring';
 }
 
 function getPlanetEmoji(event: any): string {
   const text = event.name || event.description || '';
   const emojis: Record<string, string> = {
-    'Mercury': '☿',
-    'Venus': '♀',
-    'Mars': '♂',
-    'Jupiter': '♃',
-    'Saturn': '♄',
-    'Uranus': '♅',
-    'Neptune': '♆',
-    'Pluto': '♇',
-    'Sun': '☉',
-    'Moon': '☽'
+    Mercury: '☿',
+    Venus: '♀',
+    Mars: '♂',
+    Jupiter: '♃',
+    Saturn: '♄',
+    Uranus: '♅',
+    Neptune: '♆',
+    Pluto: '♇',
+    Sun: '☉',
+    Moon: '☽',
   };
-  
+
   for (const [planet, emoji] of Object.entries(emojis)) {
     if (text.includes(planet)) return emoji;
   }
-  
+
   return '⭐';
 }
 

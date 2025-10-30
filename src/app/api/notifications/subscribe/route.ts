@@ -3,12 +3,13 @@ import { sql } from '@vercel/postgres';
 
 export async function POST(request: NextRequest) {
   try {
-    const { subscription, preferences, userId, userEmail } = await request.json();
-    
+    const { subscription, preferences, userId, userEmail } =
+      await request.json();
+
     if (!subscription?.endpoint || !subscription?.keys) {
       return NextResponse.json(
         { error: 'Invalid subscription data' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,18 +52,18 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Push subscription saved to PostgreSQL');
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Subscription saved successfully'
+      message: 'Subscription saved successfully',
     });
   } catch (error) {
     console.error('❌ Error saving subscription:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to save subscription',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
