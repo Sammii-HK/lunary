@@ -1,6 +1,6 @@
 /**
  * Cloudflare Worker for Lunary Push Notifications
- * Runs every 4 hours to check for astronomical events and send notifications
+ * Uses your cosmic API's allEvents array
  */
 
 export default {
