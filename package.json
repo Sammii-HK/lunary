@@ -7,12 +7,23 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --fix",
+    "lint:check": "next lint",
     "setup-db": "tsx scripts/setup-database.ts",
     "generate-moon-packs": "tsx scripts/generate-moon-packs.ts",
     "generate-moon-packs:dry": "tsx scripts/generate-moon-packs.ts --dry-run",
     "generate-moon-packs:monthly": "tsx scripts/generate-moon-packs.ts --type=monthly",
     "generate-moon-packs:quarterly": "tsx scripts/generate-moon-packs.ts --type=quarterly",
-    "generate-moon-packs:yearly": "tsx scripts/generate-moon-packs.ts --type=yearly"
+    "generate-moon-packs:yearly": "tsx scripts/generate-moon-packs.ts --type=yearly",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@astrodraw/astrochart": "^3.0.2",
@@ -68,6 +79,8 @@
     "eslint-config-next": "14.2.3",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "postcss": "^8",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.1",
