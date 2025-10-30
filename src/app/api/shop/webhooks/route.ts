@@ -101,13 +101,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     // Get product from Stripe to retrieve Blob URL (SSOT)
     let blobUrl: string | undefined;
     let packName = 'Digital Pack';
-    
+
     if (session.line_items) {
       const lineItems = await stripe.checkout.sessions.listLineItems(
         session.id,
         { expand: ['data.price.product'] },
       );
-      
+
       if (lineItems.data.length > 0) {
         const price = lineItems.data[0].price;
         if (price && typeof price.product !== 'string') {
@@ -115,7 +115,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           packName = product.name;
           // Get Blob URL from product metadata (SSOT)
           blobUrl = product.metadata?.blobUrl;
-          
+
           console.log('📦 Retrieved pack info from Stripe (SSOT):', {
             productId: product.id,
             packName,

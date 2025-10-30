@@ -126,7 +126,7 @@ async function handleTestNotification(testType: string) {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    
+
     if (process.env.CRON_SECRET) {
       headers.Authorization = `Bearer ${process.env.CRON_SECRET}`;
     }

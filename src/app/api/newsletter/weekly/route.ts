@@ -466,7 +466,7 @@ async function sendNewsletter(
 ) {
   const { sendEmail } = await import('@/lib/email');
   const { sql } = await import('@vercel/postgres');
-  
+
   type BatchEmailResult = {
     success: number;
     failed: number;
@@ -545,10 +545,11 @@ async function sendNewsletter(
     // Update last_email_sent and increment email_count for successful sends
     if (typeof result === 'object' && 'success' in result) {
       const batchResult = result as BatchEmailResult;
-      
+
       // Update subscriber records
-      const updatePromises = emailList.map((email) =>
-        sql`
+      const updatePromises = emailList.map(
+        (email) =>
+          sql`
           UPDATE newsletter_subscribers 
           SET 
             last_email_sent = NOW(),
@@ -556,7 +557,7 @@ async function sendNewsletter(
           WHERE email = ${email}
         `,
       );
-      
+
       await Promise.allSettled(updatePromises);
 
       return {

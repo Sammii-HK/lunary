@@ -30,12 +30,7 @@ export interface BatchEmailResult {
 /**
  * Send email using Resend (single or multiple recipients)
  */
-export async function sendEmail({
-  to,
-  subject,
-  html,
-  text,
-}: EmailOptions) {
+export async function sendEmail({ to, subject, html, text }: EmailOptions) {
   try {
     const resendClient = getResendClient();
 

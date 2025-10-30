@@ -117,11 +117,11 @@ export async function GET(request: NextRequest) {
     // Get product from Stripe to retrieve Blob URL (SSOT)
     let blobUrl: string | undefined;
     let packName = 'Digital Pack';
-    
+
     const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, {
       expand: ['data.price.product'],
     });
-    
+
     if (lineItems.data.length > 0) {
       const price = lineItems.data[0].price;
       if (price && typeof price.product !== 'string') {

@@ -78,11 +78,13 @@ export default function NewsletterManagerPage() {
 
   const loadStats = async () => {
     try {
-      const [allResponse, activeResponse, verifiedResponse] = await Promise.all([
-        fetch('/api/newsletter/subscribers'),
-        fetch('/api/newsletter/subscribers?active=true'),
-        fetch('/api/newsletter/subscribers?active=true&verified=true'),
-      ]);
+      const [allResponse, activeResponse, verifiedResponse] = await Promise.all(
+        [
+          fetch('/api/newsletter/subscribers'),
+          fetch('/api/newsletter/subscribers?active=true'),
+          fetch('/api/newsletter/subscribers?active=true&verified=true'),
+        ],
+      );
 
       const all = await allResponse.json();
       const active = await activeResponse.json();
@@ -135,11 +137,14 @@ export default function NewsletterManagerPage() {
 
   const toggleActive = async (email: string, currentActive: boolean) => {
     try {
-      const response = await fetch(`/api/newsletter/subscribers/${encodeURIComponent(email)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !currentActive }),
-      });
+      const response = await fetch(
+        `/api/newsletter/subscribers/${encodeURIComponent(email)}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isActive: !currentActive }),
+        },
+      );
 
       const data = await response.json();
 
@@ -213,7 +218,9 @@ export default function NewsletterManagerPage() {
                 <Users className='h-5 w-5 text-blue-500' />
                 <div>
                   <p className='text-2xl font-bold'>{stats.total}</p>
-                  <p className='text-sm text-muted-foreground'>Total Subscribers</p>
+                  <p className='text-sm text-muted-foreground'>
+                    Total Subscribers
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -248,8 +255,12 @@ export default function NewsletterManagerPage() {
               <div className='flex items-center gap-2'>
                 <Send className='h-5 w-5 text-orange-500' />
                 <div>
-                  <p className='text-2xl font-bold'>{stats.withNewsletterEnabled}</p>
-                  <p className='text-sm text-muted-foreground'>Newsletter Enabled</p>
+                  <p className='text-2xl font-bold'>
+                    {stats.withNewsletterEnabled}
+                  </p>
+                  <p className='text-sm text-muted-foreground'>
+                    Newsletter Enabled
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -314,7 +325,9 @@ export default function NewsletterManagerPage() {
                     >
                       <div className='flex-1'>
                         <div className='flex items-center gap-2'>
-                          <span className='font-medium'>{subscriber.email}</span>
+                          <span className='font-medium'>
+                            {subscriber.email}
+                          </span>
                           {subscriber.is_verified ? (
                             <Badge variant='default' className='bg-green-600'>
                               Verified
@@ -338,7 +351,9 @@ export default function NewsletterManagerPage() {
                       <Button
                         variant='ghost'
                         size='sm'
-                        onClick={() => toggleActive(subscriber.email, subscriber.is_active)}
+                        onClick={() =>
+                          toggleActive(subscriber.email, subscriber.is_active)
+                        }
                       >
                         {subscriber.is_active ? (
                           <XCircle className='h-4 w-4 text-red-500' />
@@ -359,7 +374,8 @@ export default function NewsletterManagerPage() {
             <CardHeader>
               <CardTitle>Send Weekly Newsletter</CardTitle>
               <CardDescription>
-                Send the current week's newsletter to all active verified subscribers
+                Send the current week's newsletter to all active verified
+                subscribers
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -368,9 +384,13 @@ export default function NewsletterManagerPage() {
                   <h3 className='font-semibold mb-2'>Send Results:</h3>
                   <div className='space-y-1 text-sm'>
                     <div>Recipients: {sendResult.recipients}</div>
-                    <div className='text-green-500'>Success: {sendResult.success}</div>
+                    <div className='text-green-500'>
+                      Success: {sendResult.success}
+                    </div>
                     {sendResult.failed > 0 && (
-                      <div className='text-red-500'>Failed: {sendResult.failed}</div>
+                      <div className='text-red-500'>
+                        Failed: {sendResult.failed}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -396,8 +416,8 @@ export default function NewsletterManagerPage() {
               </Button>
 
               <p className='text-sm text-muted-foreground'>
-                Emails are sent in batches of 100 to ensure privacy and avoid exposing
-                recipient addresses.
+                Emails are sent in batches of 100 to ensure privacy and avoid
+                exposing recipient addresses.
               </p>
             </CardContent>
           </Card>
@@ -406,4 +426,3 @@ export default function NewsletterManagerPage() {
     </div>
   );
 }
-

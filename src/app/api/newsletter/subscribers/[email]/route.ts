@@ -65,7 +65,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (isActive !== undefined) {
       updates.push('is_active = $' + (values.length + 1));
       values.push(isActive);
-      
+
       if (!isActive) {
         updates.push('unsubscribed_at = NOW()');
       }
@@ -79,7 +79,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (isVerified !== undefined) {
       updates.push('is_verified = $' + (values.length + 1));
       values.push(isVerified);
-      
+
       if (isVerified) {
         updates.push('verified_at = NOW()');
         updates.push('verification_token = NULL');
@@ -167,4 +167,3 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     );
   }
 }
-

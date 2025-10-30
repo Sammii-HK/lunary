@@ -72,7 +72,9 @@ export default function ShopPage() {
       }));
 
       setPacks(fetchedPacks);
-      console.log(`✅ Loaded ${fetchedPacks.length} products from Stripe (SSOT)`);
+      console.log(
+        `✅ Loaded ${fetchedPacks.length} products from Stripe (SSOT)`,
+      );
     } catch (error) {
       console.error('Failed to load packs:', error);
       // Fallback to empty array on error

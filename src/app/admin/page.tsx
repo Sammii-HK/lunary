@@ -287,8 +287,12 @@ This is exactly what you'll get every day at 8 AM UTC!`);
               <div className='flex items-center gap-2'>
                 <Zap className='h-4 w-4 md:h-5 md:w-5 text-yellow-500' />
                 <div>
-                  <p className='text-xl md:text-2xl font-bold'>{adminTools.length}</p>
-                  <p className='text-xs md:text-sm text-zinc-400'>Admin Tools</p>
+                  <p className='text-xl md:text-2xl font-bold'>
+                    {adminTools.length}
+                  </p>
+                  <p className='text-xs md:text-sm text-zinc-400'>
+                    Admin Tools
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -300,7 +304,9 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                 <Activity className='h-4 w-4 md:h-5 md:w-5 text-green-500' />
                 <div>
                   <p className='text-xl md:text-2xl font-bold'>1</p>
-                  <p className='text-xs md:text-sm text-zinc-400'>Active Cron</p>
+                  <p className='text-xs md:text-sm text-zinc-400'>
+                    Active Cron
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -312,7 +318,9 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                 <Package className='h-4 w-4 md:h-5 md:w-5 text-blue-500' />
                 <div>
                   <p className='text-xl md:text-2xl font-bold'>5</p>
-                  <p className='text-xs md:text-sm text-zinc-400'>Content Types</p>
+                  <p className='text-xs md:text-sm text-zinc-400'>
+                    Content Types
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -460,7 +468,9 @@ This is exactly what you'll get every day at 8 AM UTC!`);
           return (
             <div key={categoryKey} className='mb-6 md:mb-8'>
               <div className='flex items-center gap-2 mb-4'>
-                <h2 className='text-xl md:text-2xl font-bold'>{categoryInfo.name}</h2>
+                <h2 className='text-xl md:text-2xl font-bold'>
+                  {categoryInfo.name}
+                </h2>
                 <Badge className={categoryInfo.color}>
                   {categoryTools.length}
                 </Badge>
@@ -523,7 +533,9 @@ This is exactly what you'll get every day at 8 AM UTC!`);
               </div>
               <div className='flex items-center gap-2'>
                 <div className='w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full'></div>
-                <span className='text-sm md:text-base'>Grimoire API: Ready</span>
+                <span className='text-sm md:text-base'>
+                  Grimoire API: Ready
+                </span>
               </div>
               <div className='flex items-center gap-2'>
                 <div className='w-2 h-2 md:w-3 md:h-3 bg-purple-500 rounded-full'></div>
@@ -549,7 +561,9 @@ This is exactly what you'll get every day at 8 AM UTC!`);
           <CardContent>
             <div className='text-center py-6 md:py-8 text-zinc-400'>
               <Users className='h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50' />
-              <p className='text-sm md:text-base'>Activity tracking coming soon!</p>
+              <p className='text-sm md:text-base'>
+                Activity tracking coming soon!
+              </p>
               <p className='text-xs md:text-sm mt-2'>
                 Monitor cron jobs, pack generation, and content creation
               </p>

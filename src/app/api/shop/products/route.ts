@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
           category,
           subcategory: product.metadata?.subcategory,
           price: priceData.unit_amount || 0,
-          imageUrl: product.images?.[0] || generateOGImageUrl(product, category),
+          imageUrl:
+            product.images?.[0] || generateOGImageUrl(product, category),
           stripeProductId: product.id,
           stripePriceId: priceData.id,
           isActive: product.active,
@@ -111,4 +112,3 @@ function generateOGImageUrl(product: Stripe.Product, category: string): string {
   const itemCount = product.metadata?.itemCount || '0';
   return `/api/shop/og?category=${category}&name=${name}&items=${itemCount}`;
 }
-

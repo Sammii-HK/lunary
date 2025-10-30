@@ -152,12 +152,12 @@ async function createStripeProduct(packData: any) {
     name: packData.fullName,
     description: packData.description,
     images: [], // Could add pack preview images
-      metadata: {
+    metadata: {
       // Pack identification
       packId: packData.id,
       sku: packData.sku,
       slug: packData.slug,
-      
+
       // Blob storage (SSOT for file location)
       blobUrl: packData.downloadUrl,
       blobKey: packData.blobKey,

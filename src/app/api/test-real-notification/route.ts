@@ -7,7 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+    const date =
+      searchParams.get('date') || new Date().toISOString().split('T')[0];
 
     console.log(`🧪 Testing REAL notification for date: ${date}`);
 
@@ -30,7 +31,9 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to check events: ${response.status} - ${errorText}`);
+      throw new Error(
+        `Failed to check events: ${response.status} - ${errorText}`,
+      );
     }
 
     const result = await response.json();
@@ -82,7 +85,9 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to check events: ${response.status} - ${errorText}`);
+      throw new Error(
+        `Failed to check events: ${response.status} - ${errorText}`,
+      );
     }
 
     const result = await response.json();
@@ -108,4 +113,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
