@@ -1,38 +1,124 @@
 # Lunary
 
-Next.js 15 application combining real-time astronomical data with personalized guidance, digital products, and automated content generation.
+Next.js 15 full-stack application delivering personalized astrological insights, automated content generation, and digital product commerce using real-time astronomical calculations.
 
 [Live Site](https://lunary.app)
 
-## Stack
+<img width="1708" height="980" alt="Screenshot 2025-10-31 at 13 33 06" src="https://github.com/user-attachments/assets/de39dcf4-92b6-41dc-90dd-5d6deeb1e8c5" />
 
-- **Frontend**: Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS, Radix UI
-- **Backend**: Better Auth, Vercel Postgres, Vercel Blob, Stripe, Resend
-- **Calculations**: Astronomy Engine (planetary positions, moon phases)
-- **Infrastructure**: Vercel (hosting, cron), Cloudflare Workers (notifications)
-- **Automation**: PDF generation (pdf-lib), OG images, automated content generation
+## Tech Stack
+
+**Framework**: Next.js 15, React 18, TypeScript, Node.js
+
+**Frontend**: Tailwind CSS, Radix UI, Service Workers, Web Push API, Satori
+
+**Backend**: Better Auth, PostgreSQL, Vercel Blob Storage
+
+**Payments**: Stripe
+
+**Services**: Resend, Astronomy Engine, pdf-lib
+
+**Infrastructure**: Vercel, Cloudflare Workers
+
+**Tooling**: ESLint, Prettier, Husky
 
 ## Features
 
-**User**: Birth charts, horoscopes, tarot readings, moon phases, planetary ephemeris, grimoire library, digital product shop, PWA with push notifications
+### User Features
 
-**Admin**: Blog/newsletter management, shop manager with Stripe sync, social media scheduler, automated cron jobs
+**Astronomical Data**: Real-time moon phases with constellation positions, planetary ephemeris, retrograde tracking, birth chart analysis with house calculations, transit-based horoscopes, personalized tarot readings
 
-## Architecture
+**Content**: Comprehensive grimoire library (crystals, spells, numerology, chakras, runes), weekly blog with planetary highlights, newsletter subscriptions
 
-```
-PWA → Better Auth → Next.js API → Stripe/Resend/Blob/Postgres
-```
+**Commerce**: Digital product shop with secure token-based downloads, PWA with offline support, push notifications for cosmic events (retrogrades, ingresses, moon phases)
 
-## Automation
+### Admin Features
 
-- **Cron**: Daily posts (8 AM UTC), weekly blog/newsletter, moon pack generation
-- **Workers**: 4-hourly cosmic event notifications (Cloudflare)
-- **Stripe**: Automated product sync as SSOT
+**Content Management**: Automated weekly blog generation with planetary highlights, newsletter manager with subscriber segmentation, social media scheduler (Instagram, X, Bluesky, Reddit, Pinterest)
 
-## E-Commerce
+**Shop Management**: Programmatic pack generation (PDF + OG images), automatic Stripe product creation and sync, scheduled moon pack generation (monthly/quarterly/yearly)
 
-PDF generation → Vercel Blob upload → Stripe sync → Token-based downloads with limits/expiry
+**Automation**: Multi-frequency cron jobs with execution deduplication, cosmic event detection and notification dispatch
+
+## Technical Implementation
+
+### Astronomical Calculations
+
+Real-time planetary position calculations using Astronomy Engine with ecliptic coordinate transformations. Detects retrogrades through velocity analysis (comparing current vs. historical positions), calculates major/minor aspects (conjunctions, oppositions, trines, squares), tracks sign ingresses and moon phase transitions.
+
+**Performance**: Calculations run server-side to minimize client load, cached where appropriate for frequently accessed data.
+
+### Automated Content Generation
+
+**Weekly Content**: Generates blog posts and newsletters with planetary highlights, retrograde changes, daily forecasts, and crystal recommendations based on current transits.
+
+**Social Posts**: Daily automated posts with dynamic OG images showing real-time cosmic data, scheduled across multiple platforms via API integrations.
+
+**Moon Packs**: Automated PDF generation for monthly/quarterly/yearly packs with real astronomical data, generated months in advance (3 months for monthly, 1 quarter ahead for quarterly, 6 months before year starts for yearly).
+
+### E-Commerce System
+
+**Pack Generation Flow**:
+
+1. Content generation based on category (moon phases, crystals, spells)
+2. PDF creation using pdf-lib with professional formatting
+3. Upload to Vercel Blob with private access
+4. Stripe product creation with blob URL in metadata (SSOT)
+5. OG image generation for social previews
+
+**Purchase Flow**:
+
+1. User initiates checkout → Secure token generation
+2. Stripe Checkout Session creation with metadata
+3. Webhook processing on payment completion
+4. Purchase record creation with download limits (5 attempts, 30-day expiry)
+5. Token-based download endpoint with signed URL generation
+
+**Security**: Tokens are cryptographically random, validated on each download attempt, signed URLs expire after use.
+
+### Notification System
+
+**Push Notifications**: Web Push API with VAPID keys, service worker registration, subscription management in PostgreSQL.
+
+**Event Detection**: 4-hourly Cloudflare Worker cron checks for cosmic events (retrograde starts/ends, sign ingresses, significant moon phases), automatic subscription cleanup for invalid endpoints (410, expired tokens).
+
+**Delivery**: Parallel notification dispatch with Promise.allSettled for error handling, tracks delivery success/failure, marks inactive subscriptions.
+
+### Automation & Cron Jobs
+
+**Daily Posts** (8 AM UTC - Vercel Cron):
+
+- Generates daily social media posts with dynamic cosmic data
+- Creates OG images via internal API calls
+- Schedules posts across platforms with proper timing buffers
+
+**Weekly Content** (Sundays):
+
+- Blog post generation with planetary highlights
+- Newsletter content creation and bulk email dispatch
+
+**Moon Packs** (Scheduled - Vercel Cron):
+
+- Monthly: 15th of month, generates 3 months ahead
+- Quarterly: 15th of Jan/Apr/Jul/Oct, generates next quarter
+- Yearly: July 1st, generates next year's pack
+- Automatic deactivation of packs older than 2 years
+
+**Notifications** (Every 4 hours - Cloudflare Worker):
+
+- Checks for cosmic events requiring notifications
+- Filters subscribers by event preferences
+- Sends batch notifications with retry logic
+
+**Execution Safety**: Atomic check-and-set operations prevent duplicate cron execution, in-memory tracking with automatic cleanup (7-day retention).
+
+## Security
+
+- **Authentication**: Better Auth with session management
+- **Download Tokens**: Cryptographically random tokens, validated server-side
+- **Cron Protection**: Bearer token authentication for all cron endpoints
+- **Blob Access**: Private storage with signed URLs, time-limited access
+- **Stripe Webhooks**: Signature verification for all webhook events
 
 ## Development
 
@@ -41,10 +127,14 @@ yarn install
 yarn dev
 ```
 
-**Structure**: `src/app/`, `src/components/`, `src/lib/`, `utils/`, `scripts/`, `sql/`
+**Code Quality**: TypeScript strict mode, ESLint + Prettier, Husky pre-commit hooks
 
-**Quality**: TypeScript strict, ESLint + Prettier, Husky pre-commit hooks
+## Deployment
+
+**Vercel**: Framework auto-detection, cron jobs configured in `vercel.json`, environment variables via dashboard
+
+**Cloudflare Worker**: Handles notification checks independently from main application, free tier sufficient for usage patterns
 
 ## License
 
-Proprietary - All Rights Reserved. Copyright (c) 2024 Lunary.
+Proprietary - All Rights Reserved. Copyright (c) 2025 Lunary.
