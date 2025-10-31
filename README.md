@@ -4,6 +4,8 @@ Next.js 15 application combining real-time astronomical data with personalized g
 
 [Live Site](https://lunary.app)
 
+<img width="1708" height="980" alt="Screenshot 2025-10-31 at 13 33 06" src="https://github.com/user-attachments/assets/de39dcf4-92b6-41dc-90dd-5d6deeb1e8c5" />
+
 ## Stack
 
 - **Frontend**: Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS, Radix UI
