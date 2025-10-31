@@ -131,9 +131,9 @@ export function AuthButtons({
       <div className={`flex justify-center items-center ${className}`}>
         <Link
           href='/profile'
-          className={`${baseButtonClasses} bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-105`}
+          className={`${baseButtonClasses} bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 px-8 py-4 text-lg transition-all`}
         >
-          Create Your Cosmic Profile
+          Start Free Trial
         </Link>
       </div>
     );
@@ -144,9 +144,9 @@ export function AuthButtons({
       <div className={`flex justify-center ${className}`}>
         <Link
           href='/profile'
-          className={`${baseButtonClasses} bg-purple-600 hover:bg-purple-700 text-white px-6 py-3`}
+          className={`${baseButtonClasses} bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 px-6 py-3`}
         >
-          Create Profile
+          Start Free Trial
         </Link>
       </div>
     );

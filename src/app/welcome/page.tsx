@@ -1,441 +1,362 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { AuthButtons } from '@/components/AuthButtons';
+import {
+  Sparkles,
+  BarChart3,
+  Calendar,
+  BookOpen,
+  Moon,
+  Telescope,
+  Heart,
+  Sparkle,
+} from 'lucide-react';
 
 export default function WelcomePage() {
-  const [currentFeature, setCurrentFeature] = useState(0);
-
   const features = [
     {
-      title: 'Your Personal Cosmic Profile',
+      icon: BarChart3,
+      title: 'Complete Birth Chart Analysis',
       description:
-        "A complete birth chart analysis revealing the planetary positions at your exact moment of birth, creating a unique cosmic fingerprint that's yours alone.",
-      details:
-        'Every planet, every degree, every aspect calculated to show how celestial energies shape your personality, relationships, and life path.',
+        'Your exact planetary positions calculated from your precise birth time, date, and location. Every aspect, every degree matters.',
     },
     {
-      title: 'Daily Insights That Actually Matter',
+      icon: Sparkles,
+      title: 'Personalized Daily Insights',
       description:
-        'Thoughtful guidance based on current planetary transits to your personal chart, day-of-week energies, and numerological influences.',
-      details:
-        'No generic predictions. Every insight considers your unique birth chart, creating truly personalized daily wisdom.',
+        'Daily guidance based on current planetary transits to your personal chart. No generic predictions—every insight is yours alone.',
     },
     {
-      title: 'Meaningful Patterns & Trends',
+      icon: BookOpen,
+      title: 'Intelligent Tarot Patterns',
       description:
-        'Discover recurring themes in your tarot readings, understand your cosmic cycles, and recognize the subtle patterns that guide your journey.',
-      details:
-        'Track your spiritual growth through intelligent analysis of your choices, reactions, and cosmic timing.',
+        'Discover recurring themes in your readings and understand how cosmic cycles influence your spiritual journey.',
     },
     {
-      title: 'Ancient Wisdom, Modern Understanding',
+      icon: Calendar,
+      title: 'Transit Calendar',
       description:
-        'Access centuries of astrological knowledge, tarot symbolism, crystal healing, and lunar wisdom presented with clarity and respect.',
-      details:
-        'Deep, authentic spiritual guidance without the superficial prescriptions or oversimplified advice found elsewhere.',
+        'Track significant planetary movements and understand how they interact with your natal chart over time.',
+    },
+    {
+      icon: Moon,
+      title: 'Lunar Wisdom',
+      description:
+        'Real-time moon phases, lunar calendars, and guidance based on the moon’s current position in your chart.',
+    },
+    {
+      icon: Telescope,
+      title: 'Astronomical Precision',
+      description:
+        'Built on accurate astronomical calculations using proven algorithms for planetary positions and celestial events.',
+    },
+    {
+      icon: Heart,
+      title: 'Crystal & Healing Guidance',
+      description:
+        'Personalized crystal recommendations aligned with your birth chart and current transits.',
+    },
+    {
+      icon: Sparkle,
+      title: 'Solar Returns & Cosmic Cycles',
+      description:
+        'Understand your annual solar return and discover patterns in your personal cosmic timeline.',
     },
   ];
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-zinc-900 via-purple-900/20 to-zinc-900'>
-      {/* Navigation Header */}
-      <nav className='relative z-10 flex justify-between items-center max-w-6xl mx-auto px-6 py-6'>
-        <Link href='/' className='text-2xl font-light text-white tracking-wide'>
-          Lunary
-        </Link>
-        <div className='flex space-x-6'>
-          <Link
-            href='/pricing'
-            className='text-zinc-300 hover:text-white transition-colors'
-          >
-            Pricing
-          </Link>
-          <Link
-            href='/'
-            className='text-zinc-300 hover:text-white transition-colors'
-          >
-            Daily Insights
-          </Link>
-          <Link
-            href='/profile'
-            className='text-zinc-300 hover:text-white transition-colors'
-          >
-            Get Started
-          </Link>
+    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {/* Navigation */}
+      <nav className='relative z-10 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='flex justify-between items-center h-16'>
+            <Link
+              href='/'
+              className='text-xl font-medium text-zinc-100 tracking-tight'
+            >
+              Lunary
+            </Link>
+            <div className='hidden sm:flex items-center gap-6'>
+              <Link
+                href='/pricing'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Pricing
+              </Link>
+              <Link
+                href='/'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Daily Insights
+              </Link>
+            </div>
+          </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className='relative overflow-hidden'>
-        <div className='absolute inset-0 bg-gradient-to-r from-purple-900/20 to-blue-900/20 opacity-50'></div>
-        <div className='relative max-w-6xl mx-auto px-6 py-20'>
-          <div className='text-center space-y-8'>
-            <h1 className='text-5xl md:text-7xl font-light text-white leading-tight tracking-wide'>
-              Your Universe,
+      <section className='relative overflow-hidden border-b border-zinc-800/50'>
+        <div className='absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-transparent'></div>
+        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32'>
+          <div className='text-center max-w-4xl mx-auto space-y-8'>
+            <h1 className='text-4xl sm:text-5xl lg:text-6xl font-light text-zinc-100 leading-tight tracking-tight'>
+              Astrology based on{' '}
+              <span className='font-normal text-purple-300/80'>real data</span>,
               <br />
-              <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-normal'>
-                Decoded
-              </span>
+              not generic predictions
             </h1>
 
-            <p className='text-xl md:text-2xl text-zinc-300 max-w-3xl mx-auto leading-relaxed font-light'>
-              The only astrology app that truly knows you. Get personalized
-              insights calculated from your complete birth chart, not generic
-              horoscopes.
+            <p className='text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
+              Your complete birth chart, calculated with astronomical precision.
+              Daily insights that consider your unique cosmic signature. Real
+              guidance, thoughtfully presented.
             </p>
 
-            <div className='flex flex-wrap justify-center gap-8 text-sm text-zinc-400 max-w-2xl mx-auto'>
-              <div className='flex items-center gap-2'>
-                <span className='w-2 h-2 bg-purple-400 rounded-full'></span>
-                Personal Birth Chart Analysis
-              </div>
-              <div className='flex items-center gap-2'>
-                <span className='w-2 h-2 bg-pink-400 rounded-full'></span>
-                Daily Transit Calculations
-              </div>
-              <div className='flex items-center gap-2'>
-                <span className='w-2 h-2 bg-blue-400 rounded-full'></span>
-                Intelligent Tarot Patterns
-              </div>
-            </div>
-
-            <div className='pt-8'>
+            <div className='pt-4'>
               <AuthButtons variant='primary' />
+            </div>
 
-              {/* Explore link for existing users */}
-              <div className='mt-4 text-center'>
-                <Link
-                  href='/'
-                  className='text-purple-300 hover:text-purple-200 px-8 py-4 font-medium text-lg transition-colors border border-purple-400/30 rounded-full hover:border-purple-300/50 inline-block'
-                >
-                  Explore Daily Insights
-                </Link>
+            <div className='pt-8 flex flex-wrap justify-center gap-6 text-sm text-zinc-500'>
+              <div className='flex items-center gap-2'>
+                <div className='w-1 h-1 rounded-full bg-zinc-600'></div>
+                <span>No credit card required</span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <div className='w-1 h-1 rounded-full bg-zinc-600'></div>
+                <span>7-day free trial</span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <div className='w-1 h-1 rounded-full bg-zinc-600'></div>
+                <span>Cancel anytime</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Social Proof & Benefits Section */}
-      <div className='max-w-5xl mx-auto px-6 py-20'>
-        <div className='text-center space-y-12'>
-          <div className='space-y-4'>
-            <h2 className='text-3xl md:text-4xl font-light text-white'>
-              Astrology as it should be
+      {/* What Makes Us Different */}
+      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center max-w-3xl mx-auto mb-16 space-y-4'>
+            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+              What makes us different
             </h2>
-            <p className='text-lg text-zinc-300 max-w-2xl mx-auto'>
-              Stop settling for generic horoscopes. Start your journey with
-              personalized insights that actually understand who you are.
+            <p className='text-lg text-zinc-400 leading-relaxed'>
+              While others offer generic horoscopes, we provide insights
+              calculated from your complete birth chart. Every planet, every
+              aspect, every transit matters.
             </p>
           </div>
 
-          <div className='grid md:grid-cols-3 gap-8 text-center'>
-            <div className='space-y-4 p-6 bg-zinc-900/50 rounded-xl border border-zinc-800'>
-              <div className='w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center'>
-                <span className='text-2xl'>🔍</span>
-              </div>
-              <h3 className='text-xl font-medium text-white'>
-                Precision Astrology
-              </h3>
-              <p className='text-zinc-400 leading-relaxed'>
-                Every insight calculated from your exact birth time, date, and
-                location. No more generic sun sign predictions.
-              </p>
-              <div className='text-sm text-purple-300 font-medium'>
-                Complete birth chart analysis
-              </div>
-            </div>
+          <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8'>
+            {features.slice(0, 4).map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={index}
+                  className='p-6 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
+                >
+                  <div className='w-10 h-10 mb-4 flex items-center justify-center'>
+                    <Icon className='w-6 h-6 text-zinc-400' strokeWidth={1.5} />
+                  </div>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    {feature.title}
+                  </h3>
+                  <p className='text-sm text-zinc-400 leading-relaxed'>
+                    {feature.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-            <div className='space-y-4 p-6 bg-zinc-900/50 rounded-xl border border-zinc-800'>
-              <div className='w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center'>
-                <span className='text-2xl'>🧠</span>
-              </div>
-              <h3 className='text-xl font-medium text-white'>
-                Intelligent Insights
-              </h3>
-              <p className='text-zinc-400 leading-relaxed'>
-                Smart pattern recognition in your tarot readings and planetary
-                transits that reveal meaningful trends.
-              </p>
-              <div className='text-sm text-pink-300 font-medium'>
-                AI-powered pattern analysis
-              </div>
-            </div>
-
-            <div className='space-y-4 p-6 bg-zinc-900/50 rounded-xl border border-zinc-800'>
-              <div className='w-16 h-16 mx-auto bg-gradient-to-br from-pink-500 to-orange-600 rounded-full flex items-center justify-center'>
-                <span className='text-2xl'>🌟</span>
-              </div>
-              <h3 className='text-xl font-medium text-white'>
-                Daily Evolution
-              </h3>
-              <p className='text-zinc-400 leading-relaxed'>
-                Fresh insights every day based on current planetary positions,
-                moon phases, and your personal cycles.
-              </p>
-              <div className='text-sm text-orange-300 font-medium'>
-                Never the same twice
-              </div>
-            </div>
+      {/* Core Features */}
+      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50 bg-zinc-900/20'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center max-w-3xl mx-auto mb-16 space-y-4'>
+            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+              Everything you need for meaningful cosmic guidance
+            </h2>
+            <p className='text-lg text-zinc-400 leading-relaxed'>
+              Built on real astronomical data. Calculated with precision.
+              Presented with clarity and respect.
+            </p>
           </div>
 
-          <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-2xl p-8 border border-purple-700/30'>
+          <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8'>
+            {features.slice(4).map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={index}
+                  className='p-6 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
+                >
+                  <div className='w-10 h-10 mb-4 flex items-center justify-center'>
+                    <Icon className='w-6 h-6 text-zinc-400' strokeWidth={1.5} />
+                  </div>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    {feature.title}
+                  </h3>
+                  <p className='text-sm text-zinc-400 leading-relaxed'>
+                    {feature.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center max-w-3xl mx-auto mb-16 space-y-4'>
+            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+              How it works
+            </h2>
+            <p className='text-lg text-zinc-400 leading-relaxed'>
+              Simple, straightforward, built on real data.
+            </p>
+          </div>
+
+          <div className='grid sm:grid-cols-3 gap-8 lg:gap-12 max-w-5xl mx-auto'>
             <div className='text-center space-y-4'>
-              <h3 className='text-xl font-medium text-white'>
-                Ready to discover what makes you unique?
+              <div className='w-12 h-12 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
+                <span className='text-xl font-light text-zinc-400'>1</span>
+              </div>
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Enter your birth details
               </h3>
-              <p className='text-zinc-300 max-w-2xl mx-auto'>
-                Your cosmic blueprint is waiting to be decoded. Get insights
-                that are actually about you, not everyone born in your month.
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Your exact birth time, date, and location. This creates your
+                unique cosmic fingerprint.
               </p>
-              <AuthButtons variant='secondary' className='justify-center' />
+            </div>
+
+            <div className='text-center space-y-4'>
+              <div className='w-12 h-12 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
+                <span className='text-xl font-light text-zinc-400'>2</span>
+              </div>
+              <h3 className='text-lg font-medium text-zinc-100'>
+                We calculate your chart
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Using professional-grade astronomical algorithms, we map every
+                planet, aspect, and house in your natal chart.
+              </p>
+            </div>
+
+            <div className='text-center space-y-4'>
+              <div className='w-12 h-12 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
+                <span className='text-xl font-light text-zinc-400'>3</span>
+              </div>
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Receive personalized insights
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Daily guidance that considers your unique chart, current
+                transits, and cosmic cycles.
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Features Showcase */}
-      <div className='max-w-6xl mx-auto px-6 py-20'>
-        <div className='text-center mb-16'>
-          <h2 className='text-3xl md:text-4xl font-light text-white mb-6'>
-            What makes us different
-          </h2>
-          <p className='text-xl text-zinc-300 max-w-3xl mx-auto leading-relaxed'>
-            While others offer generic horoscopes and prescriptive advice, we
-            provide sophisticated insights tailored to your unique cosmic
-            signature.
-          </p>
-        </div>
+      {/* Philosophy */}
+      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50 bg-zinc-900/20'>
+        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center space-y-8'>
+            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+              Our approach
+            </h2>
 
-        <div className='grid lg:grid-cols-2 gap-12 items-center'>
-          <div className='space-y-8'>
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className={`p-6 rounded-xl cursor-pointer transition-all duration-300 ${
-                  currentFeature === index
-                    ? 'bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30'
-                    : 'bg-zinc-800/30 hover:bg-zinc-800/50 border border-transparent hover:border-zinc-700'
-                }`}
-                onClick={() => setCurrentFeature(index)}
-              >
-                <h3 className='text-xl font-medium text-white mb-3'>
-                  {feature.title}
+            <div className='space-y-6 text-left max-w-2xl mx-auto'>
+              <div className='space-y-3'>
+                <h3 className='text-lg font-medium text-zinc-200'>
+                  We don't tell you what to do
                 </h3>
-                <p className='text-zinc-300 leading-relaxed'>
-                  {feature.description}
+                <p className='text-zinc-400 leading-relaxed'>
+                  Astrology isn't about prescriptive advice or simplistic
+                  predictions. We honor your intelligence and free will by
+                  providing meaningful insights for reflection, not directives.
                 </p>
               </div>
-            ))}
-          </div>
 
-          <div className='bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-2xl p-8 border border-zinc-700'>
-            <h4 className='text-2xl font-light text-purple-300 mb-4'>
-              {features[currentFeature].title}
-            </h4>
-            <p className='text-zinc-200 leading-relaxed text-lg'>
-              {features[currentFeature].details}
-            </p>
-          </div>
-        </div>
-      </div>
+              <div className='space-y-3'>
+                <h3 className='text-lg font-medium text-zinc-200'>
+                  Real data, not generalizations
+                </h3>
+                <p className='text-zinc-400 leading-relaxed'>
+                  Every calculation uses your exact birth chart. We don't rely
+                  on sun sign predictions or generic horoscopes. If you were
+                  born at 2:47 PM instead of 2:48 PM, your chart is different.
+                  We respect that.
+                </p>
+              </div>
 
-      {/* Sample Insights */}
-      <div className='max-w-5xl mx-auto px-6 py-20'>
-        <div className='text-center mb-16'>
-          <h2 className='text-3xl md:text-4xl font-light text-white mb-6'>
-            Experience the depth
-          </h2>
-          <p className='text-xl text-zinc-300 max-w-3xl mx-auto leading-relaxed'>
-            See how our insights go beyond surface-level predictions to offer
-            meaningful guidance rooted in your personal cosmic blueprint.
-          </p>
-        </div>
-
-        <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8'>
-          <div className='bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-6 border border-zinc-700'>
-            <h4 className='text-lg font-medium text-blue-300 mb-3'>
-              Daily Guidance
-            </h4>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
-              "With your natal Moon in Cancer receiving supportive energy from
-              today's Moon in Pisces, this Tuesday's Martian fire energizes
-              action and courage. Today's vibration (5) brings freedom and
-              adventure to the forefront."
-            </p>
-            <span className='text-xs text-zinc-500'>
-              Based on your birth chart + current transits + numerology
-            </span>
-          </div>
-
-          <div className='bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-6 border border-zinc-700'>
-            <h4 className='text-lg font-medium text-green-300 mb-3'>
-              Birth Chart Analysis
-            </h4>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
-              "Your Pluto in Scorpio forms a powerful trine to your natal
-              Neptune in Pisces, creating deep transformative abilities through
-              spiritual and artistic expression. This aspect suggests profound
-              intuitive gifts."
-            </p>
-            <span className='text-xs text-zinc-500'>
-              Calculated from exact birth time and location
-            </span>
-          </div>
-
-          <div className='bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-6 border border-zinc-700'>
-            <h4 className='text-lg font-medium text-purple-300 mb-3'>
-              Tarot Insights
-            </h4>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
-              "The Hermit appears as your guide today, reflecting your current
-              Saturn transit. This card's emphasis on inner wisdom aligns with
-              your birth chart's emphasis on Capricorn energy, suggesting a time
-              for patient self-reflection."
-            </p>
-            <span className='text-xs text-zinc-500'>
-              Readings influenced by your astrological transits
-            </span>
-          </div>
-
-          <div className='bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-6 border border-zinc-700'>
-            <h4 className='text-lg font-medium text-orange-300 mb-3'>
-              Transit Calendar
-            </h4>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
-              "Your Solar Return approaches in 23 days! This is your year of
-              creative expression and communication. Mars enters your 7th house
-              next week, bringing new energy to partnerships and
-              collaborations."
-            </p>
-            <span className='text-xs text-zinc-500'>
-              Personalized planetary timing for your chart
-            </span>
-          </div>
-
-          <div className='bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-6 border border-zinc-700'>
-            <h4 className='text-lg font-medium text-pink-300 mb-3'>
-              Tarot Patterns
-            </h4>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
-              "Over the past 90 days, you've drawn 73% Cups cards, indicating a
-              focus on emotional growth. The Ace of Pentacles appeared 3 times,
-              suggesting recurring opportunities for new beginnings in material
-              matters."
-            </p>
-            <span className='text-xs text-zinc-500'>
-              Statistical analysis of your personal tarot history
-            </span>
-          </div>
-
-          <div className='bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-6 border border-zinc-700'>
-            <h4 className='text-lg font-medium text-cyan-300 mb-3'>
-              Cosmic Synchronicities
-            </h4>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
-              "Your Venus return aligns with drawing The Lovers card three times
-              this month. This synchronicity between your personal planets and
-              tarot guidance suggests a significant relationship theme
-              emerging."
-            </p>
-            <span className='text-xs text-zinc-500'>
-              Connections between astronomical events and tarot patterns
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Comparison Section (Subtle) */}
-      <div className='max-w-4xl mx-auto px-6 py-20'>
-        <div className='bg-gradient-to-r from-zinc-800/50 to-zinc-900/50 rounded-2xl p-8 border border-zinc-700'>
-          <h3 className='text-2xl font-light text-white text-center mb-8'>
-            A different approach to cosmic guidance
-          </h3>
-
-          <div className='grid md:grid-cols-2 gap-8'>
-            <div className='space-y-6'>
-              <h4 className='text-lg font-medium text-red-300'>
-                What we don't do
-              </h4>
-              <ul className='space-y-3 text-zinc-400'>
-                <li className='flex items-start'>
-                  <span className='text-red-400 mr-3'>✗</span>
-                  Tell you when to cut your hair or exercise
-                </li>
-                <li className='flex items-start'>
-                  <span className='text-red-400 mr-3'>✗</span>
-                  Make prescriptive life decisions for you
-                </li>
-                <li className='flex items-start'>
-                  <span className='text-red-400 mr-3'>✗</span>
-                  Rely on generic sun sign predictions
-                </li>
-                <li className='flex items-start'>
-                  <span className='text-red-400 mr-3'>✗</span>
-                  Oversimplify complex cosmic influences
-                </li>
-              </ul>
-            </div>
-
-            <div className='space-y-6'>
-              <h4 className='text-lg font-medium text-green-300'>What we do</h4>
-              <ul className='space-y-3 text-zinc-300'>
-                <li className='flex items-start'>
-                  <span className='text-green-400 mr-3'>✓</span>
-                  Honor your intelligence and free will
-                </li>
-                <li className='flex items-start'>
-                  <span className='text-green-400 mr-3'>✓</span>
-                  Provide meaningful insights for reflection
-                </li>
-                <li className='flex items-start'>
-                  <span className='text-green-400 mr-3'>✓</span>
-                  Calculate from your complete birth chart
-                </li>
-                <li className='flex items-start'>
-                  <span className='text-green-400 mr-3'>✓</span>
-                  Respect the depth of astrological wisdom
-                </li>
-              </ul>
+              <div className='space-y-3'>
+                <h3 className='text-lg font-medium text-zinc-200'>
+                  Ancient wisdom, modern precision
+                </h3>
+                <p className='text-zinc-400 leading-relaxed'>
+                  We combine centuries of astrological knowledge with accurate
+                  astronomical calculations. The depth of traditional astrology
+                  meets the precision of modern astronomy.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Call to Action */}
-      <div className='max-w-4xl mx-auto px-6 py-20 text-center'>
-        <div className='space-y-8'>
-          <h2 className='text-3xl md:text-4xl font-light text-white'>
-            Ready to discover your cosmic blueprint?
+      {/* Final CTA */}
+      <section className='py-20 sm:py-24 lg:py-28'>
+        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8'>
+          <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+            Start your free trial
           </h2>
-
-          <p className='text-xl text-zinc-300 max-w-2xl mx-auto leading-relaxed'>
-            Join those who seek authentic astrological wisdom over superficial
-            predictions. Your journey into meaningful cosmic understanding
-            begins here.
+          <p className='text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
+            Experience astrology that's actually about you. No credit card
+            required. Cancel anytime.
           </p>
+
+          <div className='pt-4'>
+            <AuthButtons variant='primary' />
+          </div>
 
           <div className='pt-8'>
-            <AuthButtons variant='primary' />
+            <Link
+              href='/'
+              className='text-sm text-zinc-500 hover:text-zinc-400 transition-colors inline-block'
+            >
+              Explore daily insights →
+            </Link>
+          </div>
+        </div>
+      </section>
 
-            {/* Explore link for existing users */}
-            <div className='mt-6 text-center'>
+      {/* Footer */}
+      <footer className='border-t border-zinc-800/50 py-12'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-zinc-500'>
+            <div>© {new Date().getFullYear()} Lunary</div>
+            <div className='flex gap-6'>
               <Link
-                href='/'
-                className='text-purple-300 hover:text-purple-200 px-8 py-4 font-medium text-lg transition-colors inline-block'
+                href='/pricing'
+                className='hover:text-zinc-400 transition-colors'
               >
-                Explore daily insights
+                Pricing
+              </Link>
+              <Link href='/' className='hover:text-zinc-400 transition-colors'>
+                Daily Insights
               </Link>
             </div>
           </div>
-
-          <p className='text-sm text-zinc-500 pt-8'>
-            Free to start • Personalized insights • Respectful guidance
-          </p>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
