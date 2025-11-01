@@ -99,18 +99,19 @@ export default function PricingPage() {
       {/* Header */}
       <section className='relative overflow-hidden border-b border-zinc-800/50'>
         <div className='absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-transparent'></div>
-        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32'>
-          <div className='text-center max-w-4xl mx-auto space-y-8'>
-            <h1 className='text-4xl sm:text-5xl lg:text-6xl font-light text-zinc-100 leading-tight tracking-tight'>
+        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-28 lg:py-32'>
+          <div className='text-center max-w-4xl mx-auto space-y-6 sm:space-y-8'>
+            <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-zinc-100 leading-tight tracking-tight'>
               Simple,{' '}
               <span className='font-normal text-purple-300/80'>
                 transparent
               </span>
-              <br />
+              <br className='hidden sm:block' />
+              <span className='sm:hidden'> </span>
               pricing
             </h1>
 
-            <p className='text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
+            <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
               Start your free trial. No credit card required. Cancel anytime.
             </p>
 
@@ -127,7 +128,7 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50'>
+      <section className='py-16 sm:py-20 md:py-24 lg:py-28 border-b border-zinc-800/50'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           {loadingPlans ? (
             <div className='flex justify-center items-center py-20'>
@@ -139,13 +140,13 @@ export default function PricingPage() {
               </div>
             </div>
           ) : (
-            <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-8 max-w-6xl mx-auto'>
               {pricingPlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className={`relative rounded-lg p-6 border transition-colors ${
+                  className={`relative rounded-lg p-6 md:p-8 border transition-colors ${
                     plan.popular
-                      ? 'border-purple-500/30 bg-zinc-900/50 hover:bg-zinc-900/70'
+                      ? 'border-purple-500/30 bg-zinc-900/50 hover:bg-zinc-900/70 md:scale-105 md:-mt-2'
                       : 'border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50'
                   }`}
                 >
@@ -176,10 +177,10 @@ export default function PricingPage() {
                   <div className='space-y-6'>
                     {/* Plan Header */}
                     <div className='space-y-2'>
-                      <h3 className='text-xl font-medium text-zinc-100'>
+                      <h3 className='text-xl md:text-2xl font-medium text-zinc-100'>
                         {plan.name}
                       </h3>
-                      <p className='text-sm text-zinc-400 leading-relaxed'>
+                      <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
                         {plan.description}
                       </p>
                     </div>
@@ -187,19 +188,19 @@ export default function PricingPage() {
                     {/* Price */}
                     <div className='pb-2'>
                       {plan.price === 0 ? (
-                        <div className='text-3xl font-light text-zinc-100'>
+                        <div className='text-3xl md:text-4xl font-light text-zinc-100'>
                           Free
                         </div>
                       ) : (
                         <div className='space-y-1'>
-                          <div className='text-4xl font-light text-zinc-100'>
+                          <div className='text-4xl md:text-5xl font-light text-zinc-100'>
                             ${plan.price}
-                            <span className='text-base font-normal text-zinc-400 ml-1'>
+                            <span className='text-base md:text-lg font-normal text-zinc-400 ml-1'>
                               /{plan.interval}
                             </span>
                           </div>
                           {plan.interval === 'year' && (
-                            <div className='text-xs text-zinc-500'>
+                            <div className='text-xs md:text-sm text-zinc-500'>
                               Just $3.33/month billed annually
                             </div>
                           )}
@@ -215,7 +216,7 @@ export default function PricingPage() {
                             className='w-4 h-4 text-zinc-500 mt-0.5 flex-shrink-0'
                             strokeWidth={1.5}
                           />
-                          <span className='text-sm text-zinc-400 leading-relaxed'>
+                          <span className='text-sm md:text-base text-zinc-400 leading-relaxed'>
                             {feature}
                           </span>
                         </div>
@@ -277,23 +278,23 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50 bg-zinc-900/20'>
-        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center mb-16 space-y-4'>
-            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+      <section className='py-16 sm:py-20 md:py-24 lg:py-28 border-b border-zinc-800/50 bg-zinc-900/20'>
+        <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center mb-12 md:mb-16 space-y-4'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
               Frequently Asked Questions
             </h2>
-            <p className='text-lg text-zinc-400 leading-relaxed'>
+            <p className='text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
               Everything you need to know about getting started.
             </p>
           </div>
 
-          <div className='grid sm:grid-cols-2 gap-6'>
-            <div className='p-6 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'>
+            <div className='p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
+              <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
                 What's included in the free trial?
               </h3>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
+              <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
                 Get full access to all personalized features including your
                 complete birth chart analysis, personalized daily horoscopes,
                 tarot patterns, and cosmic insights. No credit card required to
@@ -301,33 +302,33 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className='p-6 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+            <div className='p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
+              <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
                 Can I cancel anytime?
               </h3>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
+              <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
                 Absolutely. Cancel your subscription at any time through your
                 account settings. You'll continue to have access to premium
                 features until the end of your billing period.
               </p>
             </div>
 
-            <div className='p-6 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+            <div className='p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
+              <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
                 How accurate are the birth chart calculations?
               </h3>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
+              <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
                 We use accurate astronomical algorithms to calculate planetary
                 positions precise to your exact birth time, date, and location.
                 Every calculation considers your unique cosmic signature.
               </p>
             </div>
 
-            <div className='p-6 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+            <div className='p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
+              <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
                 What makes this different from other astrology apps?
               </h3>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
+              <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
                 Unlike apps that give generic horoscopes, every insight is
                 calculated from your exact birth chart. We respect your
                 intelligence with thoughtful guidance, never prescriptive
@@ -339,12 +340,12 @@ export default function PricingPage() {
       </section>
 
       {/* Footer CTA */}
-      <section className='py-20 sm:py-24 lg:py-28'>
+      <section className='py-16 sm:py-20 md:py-24 lg:py-28'>
         <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8'>
-          <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+          <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
             Ready to discover your cosmic blueprint?
           </h2>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
+          <p className='text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
             Experience astrology that's actually about you. No credit card
             required. Cancel anytime.
           </p>
@@ -371,11 +372,11 @@ export default function PricingPage() {
       </section>
 
       {/* Footer */}
-      <footer className='border-t border-zinc-800/50 py-12'>
+      <footer className='border-t border-zinc-800/50 py-8 sm:py-12'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-zinc-500'>
+          <div className='flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-zinc-500'>
             <div>© {new Date().getFullYear()} Lunary</div>
-            <div className='flex gap-6'>
+            <div className='flex gap-4 sm:gap-6'>
               <Link
                 href='/welcome'
                 className='hover:text-zinc-400 transition-colors'
