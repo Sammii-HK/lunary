@@ -43,7 +43,7 @@ export default function WelcomePage() {
       icon: Moon,
       title: 'Lunar Wisdom',
       description:
-        'Real-time moon phases, lunar calendars, and guidance based on the moon’s current position in your chart.',
+        "Real-time moon phases, lunar calendars, and guidance based on the moon's current position in your chart.",
     },
     {
       icon: Telescope,
@@ -68,7 +68,7 @@ export default function WelcomePage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {/* Navigation */}
-      <nav className='relative z-10 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm'>
+      <nav className='z-10 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm sticky top-0'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='flex justify-between items-center h-16'>
             <Link
@@ -98,26 +98,27 @@ export default function WelcomePage() {
       {/* Hero Section */}
       <section className='relative overflow-hidden border-b border-zinc-800/50'>
         <div className='absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-transparent'></div>
-        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32'>
-          <div className='text-center max-w-4xl mx-auto space-y-8'>
-            <h1 className='text-4xl sm:text-5xl lg:text-6xl font-light text-zinc-100 leading-tight tracking-tight'>
+        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32'>
+          <div className='text-center max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-8'>
+            <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-light text-zinc-100 leading-[1.1] tracking-tight px-2'>
               Astrology based on{' '}
               <span className='font-normal text-purple-300/80'>real data</span>,
-              <br />
+              <br className='hidden sm:block' />
+              <span className='sm:hidden'> </span>
               not generic predictions
             </h1>
 
-            <p className='text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed font-light px-4'>
               Your complete birth chart, calculated with astronomical precision.
               Daily insights that consider your unique cosmic signature. Real
               guidance, thoughtfully presented.
             </p>
 
-            <div className='pt-4'>
+            <div className='pt-2 sm:pt-4'>
               <AuthButtons variant='primary' />
             </div>
 
-            <div className='pt-8 flex flex-wrap justify-center gap-6 text-sm text-zinc-500'>
+            <div className='pt-6 sm:pt-8 flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-zinc-500'>
               <div className='flex items-center gap-2'>
                 <div className='w-1 h-1 rounded-full bg-zinc-600'></div>
                 <span>No credit card required</span>
@@ -136,34 +137,37 @@ export default function WelcomePage() {
       </section>
 
       {/* What Makes Us Different */}
-      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50'>
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center max-w-3xl mx-auto mb-16 space-y-4'>
-            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
               What makes us different
             </h2>
-            <p className='text-lg text-zinc-400 leading-relaxed'>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
               While others offer generic horoscopes, we provide insights
               calculated from your complete birth chart. Every planet, every
               aspect, every transit matters.
             </p>
           </div>
 
-          <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8'>
             {features.slice(0, 4).map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <div
                   key={index}
-                  className='p-6 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
+                  className='p-5 sm:p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
                 >
-                  <div className='w-10 h-10 mb-4 flex items-center justify-center'>
-                    <Icon className='w-6 h-6 text-zinc-400' strokeWidth={1.5} />
+                  <div className='w-10 h-10 sm:w-12 sm:h-12 mb-4 sm:mb-6 flex items-center justify-center'>
+                    <Icon
+                      className='w-6 h-6 sm:w-7 sm:h-7 text-zinc-400'
+                      strokeWidth={1.5}
+                    />
                   </div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100 mb-2 sm:mb-3'>
                     {feature.title}
                   </h3>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
+                  <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed'>
                     {feature.description}
                   </p>
                 </div>
@@ -174,33 +178,36 @@ export default function WelcomePage() {
       </section>
 
       {/* Core Features */}
-      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50 bg-zinc-900/20'>
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50 bg-zinc-900/20'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center max-w-3xl mx-auto mb-16 space-y-4'>
-            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
               Everything you need for meaningful cosmic guidance
             </h2>
-            <p className='text-lg text-zinc-400 leading-relaxed'>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
               Built on real astronomical data. Calculated with precision.
               Presented with clarity and respect.
             </p>
           </div>
 
-          <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8'>
             {features.slice(4).map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <div
                   key={index}
-                  className='p-6 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
+                  className='p-5 sm:p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
                 >
-                  <div className='w-10 h-10 mb-4 flex items-center justify-center'>
-                    <Icon className='w-6 h-6 text-zinc-400' strokeWidth={1.5} />
+                  <div className='w-10 h-10 sm:w-12 sm:h-12 mb-4 sm:mb-6 flex items-center justify-center'>
+                    <Icon
+                      className='w-6 h-6 sm:w-7 sm:h-7 text-zinc-400'
+                      strokeWidth={1.5}
+                    />
                   </div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100 mb-2 sm:mb-3'>
                     {feature.title}
                   </h3>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
+                  <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed'>
                     {feature.description}
                   </p>
                 </div>
@@ -211,52 +218,58 @@ export default function WelcomePage() {
       </section>
 
       {/* How It Works */}
-      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50'>
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center max-w-3xl mx-auto mb-16 space-y-4'>
-            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
               How it works
             </h2>
-            <p className='text-lg text-zinc-400 leading-relaxed'>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
               Simple, straightforward, built on real data.
             </p>
           </div>
 
-          <div className='grid sm:grid-cols-3 gap-8 lg:gap-12 max-w-5xl mx-auto'>
-            <div className='text-center space-y-4'>
-              <div className='w-12 h-12 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
-                <span className='text-xl font-light text-zinc-400'>1</span>
+          <div className='grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 max-w-6xl mx-auto'>
+            <div className='text-center space-y-3 sm:space-y-4'>
+              <div className='w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
+                <span className='text-xl sm:text-2xl md:text-3xl font-light text-zinc-400'>
+                  1
+                </span>
               </div>
-              <h3 className='text-lg font-medium text-zinc-100'>
+              <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100'>
                 Enter your birth details
               </h3>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
+              <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed px-2'>
                 Your exact birth time, date, and location. This creates your
                 unique cosmic fingerprint.
               </p>
             </div>
 
-            <div className='text-center space-y-4'>
-              <div className='w-12 h-12 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
-                <span className='text-xl font-light text-zinc-400'>2</span>
+            <div className='text-center space-y-3 sm:space-y-4'>
+              <div className='w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
+                <span className='text-xl sm:text-2xl md:text-3xl font-light text-zinc-400'>
+                  2
+                </span>
               </div>
-              <h3 className='text-lg font-medium text-zinc-100'>
+              <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100'>
                 We calculate your chart
               </h3>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
+              <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed px-2'>
                 Using professional-grade astronomical algorithms, we map every
                 planet, aspect, and house in your natal chart.
               </p>
             </div>
 
-            <div className='text-center space-y-4'>
-              <div className='w-12 h-12 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
-                <span className='text-xl font-light text-zinc-400'>3</span>
+            <div className='text-center space-y-3 sm:space-y-4'>
+              <div className='w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
+                <span className='text-xl sm:text-2xl md:text-3xl font-light text-zinc-400'>
+                  3
+                </span>
               </div>
-              <h3 className='text-lg font-medium text-zinc-100'>
+              <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100'>
                 Receive personalized insights
               </h3>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
+              <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed px-2'>
                 Daily guidance that considers your unique chart, current
                 transits, and cosmic cycles.
               </p>
@@ -266,30 +279,30 @@ export default function WelcomePage() {
       </section>
 
       {/* Philosophy */}
-      <section className='py-20 sm:py-24 lg:py-28 border-b border-zinc-800/50 bg-zinc-900/20'>
-        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center space-y-8'>
-            <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50 bg-zinc-900/20'>
+        <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center space-y-6 sm:space-y-8'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
               Our approach
             </h2>
 
-            <div className='space-y-6 text-left max-w-2xl mx-auto'>
-              <div className='space-y-3'>
-                <h3 className='text-lg font-medium text-zinc-200'>
+            <div className='space-y-6 sm:space-y-8 text-left max-w-3xl mx-auto'>
+              <div className='space-y-2 sm:space-y-3'>
+                <h3 className='text-lg sm:text-xl md:text-2xl font-medium text-zinc-200'>
                   We don't tell you what to do
                 </h3>
-                <p className='text-zinc-400 leading-relaxed'>
+                <p className='text-sm sm:text-base md:text-lg text-zinc-400 leading-relaxed'>
                   Astrology isn't about prescriptive advice or simplistic
                   predictions. We honor your intelligence and free will by
                   providing meaningful insights for reflection, not directives.
                 </p>
               </div>
 
-              <div className='space-y-3'>
-                <h3 className='text-lg font-medium text-zinc-200'>
+              <div className='space-y-2 sm:space-y-3'>
+                <h3 className='text-lg sm:text-xl md:text-2xl font-medium text-zinc-200'>
                   Real data, not generalizations
                 </h3>
-                <p className='text-zinc-400 leading-relaxed'>
+                <p className='text-sm sm:text-base md:text-lg text-zinc-400 leading-relaxed'>
                   Every calculation uses your exact birth chart. We don't rely
                   on sun sign predictions or generic horoscopes. If you were
                   born at 2:47 PM instead of 2:48 PM, your chart is different.
@@ -297,11 +310,11 @@ export default function WelcomePage() {
                 </p>
               </div>
 
-              <div className='space-y-3'>
-                <h3 className='text-lg font-medium text-zinc-200'>
+              <div className='space-y-2 sm:space-y-3'>
+                <h3 className='text-lg sm:text-xl md:text-2xl font-medium text-zinc-200'>
                   Ancient wisdom, modern precision
                 </h3>
-                <p className='text-zinc-400 leading-relaxed'>
+                <p className='text-sm sm:text-base md:text-lg text-zinc-400 leading-relaxed'>
                   We combine centuries of astrological knowledge with accurate
                   astronomical calculations. The depth of traditional astrology
                   meets the precision of modern astronomy.
@@ -313,24 +326,24 @@ export default function WelcomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className='py-20 sm:py-24 lg:py-28'>
-        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8'>
-          <h2 className='text-3xl sm:text-4xl font-light text-zinc-100'>
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32'>
+        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8'>
+          <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
             Start your free trial
           </h2>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
+          <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed px-4'>
             Experience astrology that's actually about you. No credit card
             required. Cancel anytime.
           </p>
 
-          <div className='pt-4'>
+          <div className='pt-2 sm:pt-4'>
             <AuthButtons variant='primary' />
           </div>
 
-          <div className='pt-8'>
+          <div className='pt-6 sm:pt-8'>
             <Link
               href='/'
-              className='text-sm text-zinc-500 hover:text-zinc-400 transition-colors inline-block'
+              className='text-xs sm:text-sm md:text-base text-zinc-500 hover:text-zinc-400 transition-colors inline-block'
             >
               Explore daily insights →
             </Link>
@@ -339,11 +352,11 @@ export default function WelcomePage() {
       </section>
 
       {/* Footer */}
-      <footer className='border-t border-zinc-800/50 py-12'>
+      <footer className='border-t border-zinc-800/50 py-8 sm:py-10 md:py-12'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-zinc-500'>
+          <div className='flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm md:text-base text-zinc-500'>
             <div>© {new Date().getFullYear()} Lunary</div>
-            <div className='flex gap-6'>
+            <div className='flex gap-4 sm:gap-6 md:gap-8'>
               <Link
                 href='/pricing'
                 className='hover:text-zinc-400 transition-colors'

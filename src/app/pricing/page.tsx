@@ -69,7 +69,7 @@ export default function PricingPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {/* Navigation */}
-      <nav className='relative z-10 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm'>
+      <nav className='relative z-10 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm sticky top-0'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='flex justify-between items-center h-16'>
             <Link
@@ -99,9 +99,9 @@ export default function PricingPage() {
       {/* Header */}
       <section className='relative overflow-hidden border-b border-zinc-800/50'>
         <div className='absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-transparent'></div>
-        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-28 lg:py-32'>
-          <div className='text-center max-w-4xl mx-auto space-y-6 sm:space-y-8'>
-            <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-zinc-100 leading-tight tracking-tight'>
+        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-24'>
+          <div className='text-center max-w-4xl mx-auto space-y-4 sm:space-y-6'>
+            <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-zinc-100 leading-[1.1] tracking-tight'>
               Simple,{' '}
               <span className='font-normal text-purple-300/80'>
                 transparent
@@ -116,9 +116,9 @@ export default function PricingPage() {
             </p>
 
             {subscriptionStatus === 'trial' && (
-              <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10'>
-                <Zap className='w-4 h-4 text-purple-300/80' strokeWidth={1.5} />
-                <span className='text-sm text-purple-300/80 font-medium'>
+              <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 bg-purple-500/10 backdrop-blur-sm mt-2'>
+                <Zap className='w-4 h-4 text-purple-300/90' strokeWidth={2} />
+                <span className='text-sm font-medium text-purple-300/90'>
                   {trialDaysRemaining} days left in your free trial
                 </span>
               </div>
@@ -128,7 +128,7 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className='py-16 sm:py-20 md:py-24 lg:py-28 border-b border-zinc-800/50'>
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 border-b border-zinc-800/50'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           {loadingPlans ? (
             <div className='flex justify-center items-center py-20'>
@@ -140,24 +140,25 @@ export default function PricingPage() {
               </div>
             </div>
           ) : (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-8 max-w-6xl mx-auto'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-6 xl:gap-8 max-w-6xl mx-auto'>
               {pricingPlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className={`relative rounded-lg p-6 md:p-8 border transition-colors ${
+                  className={`relative rounded-xl p-6 md:p-6 lg:p-7 border transition-all duration-300 flex flex-col ${
                     plan.popular
-                      ? 'border-purple-500/30 bg-zinc-900/50 hover:bg-zinc-900/70 md:scale-105 md:-mt-2'
-                      : 'border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50'
+                      ? 'border-purple-500/40 bg-zinc-900/60 hover:bg-zinc-900/80 shadow-lg shadow-purple-500/10'
+                      : 'border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-zinc-700/50'
                   }`}
                 >
                   {plan.popular && (
-                    <div className='absolute -top-3 left-1/2 transform -translate-x-1/2'>
-                      <div className='flex items-center gap-1 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10'>
+                    <div className='absolute -top-3 left-1/2 transform -translate-x-1/2 z-20'>
+                      <div className='flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-500/40 bg-purple-500/15 backdrop-blur-sm'>
                         <Star
-                          className='w-3 h-3 text-purple-300/80'
-                          strokeWidth={1.5}
+                          className='w-3 h-3 text-purple-300/90'
+                          strokeWidth={2}
+                          fill='currentColor'
                         />
-                        <span className='text-xs font-medium text-purple-300/80'>
+                        <span className='text-xs font-semibold text-purple-300/90'>
                           Most Popular
                         </span>
                       </div>
@@ -165,16 +166,16 @@ export default function PricingPage() {
                   )}
 
                   {plan.savings && (
-                    <div className='absolute -top-3 right-3'>
-                      <div className='px-2 py-1 rounded-full border border-zinc-700 bg-zinc-800/50'>
-                        <span className='text-xs font-medium text-zinc-400'>
+                    <div className='absolute -top-3 right-3 z-20'>
+                      <div className='px-2.5 py-1 rounded-full border border-zinc-700/50 bg-zinc-800/80 backdrop-blur-sm'>
+                        <span className='text-xs font-semibold text-zinc-300'>
                           {plan.savings}
                         </span>
                       </div>
                     </div>
                   )}
 
-                  <div className='space-y-6'>
+                  <div className='space-y-5 flex-1 flex flex-col'>
                     {/* Plan Header */}
                     <div className='space-y-2'>
                       <h3 className='text-xl md:text-2xl font-medium text-zinc-100'>
@@ -186,21 +187,21 @@ export default function PricingPage() {
                     </div>
 
                     {/* Price */}
-                    <div className='pb-2'>
+                    <div className='pb-3'>
                       {plan.price === 0 ? (
-                        <div className='text-3xl md:text-4xl font-light text-zinc-100'>
+                        <div className='text-4xl md:text-5xl font-light text-zinc-100'>
                           Free
                         </div>
                       ) : (
                         <div className='space-y-1'>
-                          <div className='text-4xl md:text-5xl font-light text-zinc-100'>
+                          <div className='text-5xl md:text-6xl font-light text-zinc-100 leading-none'>
                             ${plan.price}
-                            <span className='text-base md:text-lg font-normal text-zinc-400 ml-1'>
+                            <span className='text-xl md:text-2xl font-normal text-zinc-400 ml-2'>
                               /{plan.interval}
                             </span>
                           </div>
                           {plan.interval === 'year' && (
-                            <div className='text-xs md:text-sm text-zinc-500'>
+                            <div className='text-sm text-zinc-500'>
                               Just $3.33/month billed annually
                             </div>
                           )}
@@ -209,12 +210,12 @@ export default function PricingPage() {
                     </div>
 
                     {/* Features */}
-                    <div className='space-y-3 pt-4 border-t border-zinc-800/50'>
+                    <div className='space-y-2.5 pt-4 border-t border-zinc-800/50 flex-1'>
                       {plan.features.map((feature, index) => (
                         <div key={index} className='flex items-start gap-3'>
                           <Check
                             className='w-4 h-4 text-zinc-500 mt-0.5 flex-shrink-0'
-                            strokeWidth={1.5}
+                            strokeWidth={2}
                           />
                           <span className='text-sm md:text-base text-zinc-400 leading-relaxed'>
                             {feature}
@@ -224,11 +225,11 @@ export default function PricingPage() {
                     </div>
 
                     {/* CTA Button */}
-                    <div className='pt-4'>
+                    <div className='pt-4 mt-auto'>
                       {plan.id === 'free' && subscriptionStatus === 'free' ? (
                         <Link
                           href='/'
-                          className='w-full block text-center py-3 px-4 rounded-lg border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 text-sm font-medium transition-colors'
+                          className='w-full block text-center py-3 px-4 rounded-lg border border-zinc-700/50 bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 text-sm font-medium transition-colors'
                         >
                           Current Plan
                         </Link>
@@ -237,7 +238,7 @@ export default function PricingPage() {
                         subscription.plan === plan.id ? (
                         <Link
                           href='/profile'
-                          className='w-full block text-center py-3 px-4 rounded-lg border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 text-sm font-medium transition-colors'
+                          className='w-full block text-center py-3 px-4 rounded-lg border border-purple-500/40 bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 text-sm font-medium transition-colors'
                         >
                           Current Plan
                           {subscriptionStatus === 'trial'
@@ -250,10 +251,10 @@ export default function PricingPage() {
                             handleSubscribe(plan.stripePriceId, plan.id)
                           }
                           disabled={loading === plan.id || !plan.stripePriceId}
-                          className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+                          className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
                             plan.popular
-                              ? 'bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30'
-                              : 'bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 border border-zinc-700'
+                              ? 'bg-purple-500/15 hover:bg-purple-500/20 text-purple-300/90 border-2 border-purple-500/30 hover:border-purple-500/40'
+                              : 'bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 border border-zinc-700/50 hover:border-zinc-600/50'
                           } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                           {loading === plan.id ? (
@@ -278,19 +279,19 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className='py-16 sm:py-20 md:py-24 lg:py-28 border-b border-zinc-800/50 bg-zinc-900/20'>
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 border-b border-zinc-800/50 bg-zinc-900/20'>
         <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center mb-12 md:mb-16 space-y-4'>
+          <div className='text-center mb-10 md:mb-16 space-y-3 sm:space-y-4'>
             <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
               Frequently Asked Questions
             </h2>
-            <p className='text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+            <p className='text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
               Everything you need to know about getting started.
             </p>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'>
-            <div className='p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
+            <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
               <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
                 What's included in the free trial?
               </h3>
@@ -302,7 +303,7 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className='p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
+            <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
               <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
                 Can I cancel anytime?
               </h3>
@@ -313,7 +314,7 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className='p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
+            <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
               <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
                 How accurate are the birth chart calculations?
               </h3>
@@ -324,7 +325,7 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className='p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30'>
+            <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
               <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
                 What makes this different from other astrology apps?
               </h3>
@@ -340,12 +341,12 @@ export default function PricingPage() {
       </section>
 
       {/* Footer CTA */}
-      <section className='py-16 sm:py-20 md:py-24 lg:py-28'>
-        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8'>
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24'>
+        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8'>
           <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
             Ready to discover your cosmic blueprint?
           </h2>
-          <p className='text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
+          <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
             Experience astrology that's actually about you. No credit card
             required. Cancel anytime.
           </p>
@@ -372,11 +373,11 @@ export default function PricingPage() {
       </section>
 
       {/* Footer */}
-      <footer className='border-t border-zinc-800/50 py-8 sm:py-12'>
+      <footer className='border-t border-zinc-800/50 py-8 sm:py-10 md:py-12'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-zinc-500'>
+          <div className='flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm md:text-base text-zinc-500'>
             <div>© {new Date().getFullYear()} Lunary</div>
-            <div className='flex gap-4 sm:gap-6'>
+            <div className='flex gap-4 sm:gap-6 md:gap-8'>
               <Link
                 href='/welcome'
                 className='hover:text-zinc-400 transition-colors'
