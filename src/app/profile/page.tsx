@@ -20,6 +20,7 @@ import {
 } from '../../../utils/pricing';
 import SubscriptionManagement from '../../components/SubscriptionManagement';
 import LocationRefresh from '../../components/LocationRefresh';
+import { NotificationSettings } from '../../components/NotificationSettings';
 import { AuthComponent } from '@/components/Auth';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -483,6 +484,9 @@ export default function ProfilePage() {
 
       {/* Location Setup - only for authenticated users */}
       {authState.isAuthenticated && !isEditing && <LocationRefresh />}
+
+      {/* Notification Settings - only for authenticated users */}
+      {authState.isAuthenticated && !isEditing && <NotificationSettings />}
 
       {/* Subscription Management Section - only for authenticated users */}
       {authState.isAuthenticated && !isEditing && (

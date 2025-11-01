@@ -10,7 +10,7 @@ interface NotificationPermission {
   default: boolean;
 }
 
-export function NotificationManager() {
+export function NotificationSettings() {
   const { me } = useAccount();
   const [permission, setPermission] = useState<NotificationPermission>({
     granted: false,
@@ -19,10 +19,13 @@ export function NotificationManager() {
   });
   const [subscription, setSubscription] =
     useState<globalThis.PushSubscription | null>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check current permission status
+    checkNotificationStatus();
+  }, []);
+
+  const checkNotificationStatus = async () => {
     if ('Notification' in window) {
       const currentPermission = Notification.permission;
       setPermission({
@@ -31,26 +34,37 @@ export function NotificationManager() {
         default: currentPermission === 'default',
       });
 
-      // Show prompt if permission is default (not asked yet)
-      if (currentPermission === 'default') {
-        // Delay showing prompt to avoid overwhelming user on first visit
-        setTimeout(() => setShowPrompt(true), 5000);
+      // If permission is granted, check for existing subscription
+      if (currentPermission === 'granted' && 'serviceWorker' in navigator) {
+        await getExistingSubscription();
+      } else {
+        setIsLoading(false);
       }
+    } else {
+      setIsLoading(false);
     }
-
-    // Get existing subscription if permission is granted
-    if (permission.granted && 'serviceWorker' in navigator) {
-      getExistingSubscription();
-    }
-  }, [permission.granted]);
+  };
 
   const getExistingSubscription = async () => {
     try {
+      if (!('serviceWorker' in navigator)) {
+        setIsLoading(false);
+        return;
+      }
+
       const registration = await navigator.serviceWorker.ready;
       const existingSub = await registration.pushManager.getSubscription();
-      setSubscription(existingSub);
+
+      if (existingSub) {
+        setSubscription(existingSub);
+        console.log('✅ Found existing push subscription');
+      } else {
+        console.log('ℹ️ No existing push subscription found');
+      }
     } catch (error) {
       console.error('Error getting existing subscription:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -70,7 +84,6 @@ export function NotificationManager() {
 
       if (permission === 'granted') {
         await subscribeToPush();
-        setShowPrompt(false);
       }
     } catch (error) {
       console.error('Error requesting permission:', error);
@@ -86,7 +99,6 @@ export function NotificationManager() {
     try {
       const registration = await navigator.serviceWorker.ready;
 
-      // Get VAPID public key from environment (exposed to client via NEXT_PUBLIC_)
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
       if (!vapidPublicKey) {
@@ -100,10 +112,10 @@ export function NotificationManager() {
 
       setSubscription(subscription);
 
-      // Send subscription to both client storage and PostgreSQL
       await sendSubscriptionToServer(subscription);
     } catch (error) {
       console.error('Error subscribing to push:', error);
+      alert('Failed to enable notifications. Please try again.');
     }
   };
 
@@ -116,12 +128,10 @@ export function NotificationManager() {
         return;
       }
 
-      // Ensure pushSubscriptions array exists
       if (!(me.root as any).pushSubscriptions) {
         (me.root as any).pushSubscriptions = [];
       }
 
-      // Create client storage subscription object
       const clientSubscription = PushSubscription.create({
         endpoint: subscription.endpoint,
         p256dh: (subscription as any).keys.p256dh,
@@ -138,34 +148,37 @@ export function NotificationManager() {
         },
       });
 
-      // Get the pushSubscriptions list safely
       const pushSubscriptions = (me.root as any).pushSubscriptions;
       if (pushSubscriptions) {
-        // Check if subscription already exists
         const existingIndex = pushSubscriptions.findIndex(
           (sub: any) => sub?.endpoint === subscription.endpoint,
         );
 
         if (existingIndex >= 0) {
-          // Update existing subscription
           pushSubscriptions[existingIndex] = clientSubscription;
         } else {
-          // Add new subscription
           pushSubscriptions.push(clientSubscription);
         }
       }
 
       console.log('✅ Push subscription saved to client storage');
 
-      // Also send to PostgreSQL via API for server-side notifications
       try {
-        await fetch('/api/notifications/subscribe', {
+        // Serialize subscription properly for API
+        const subscriptionJson = subscription.toJSON();
+        const response = await fetch('/api/notifications/subscribe', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            subscription,
+            subscription: {
+              endpoint: subscriptionJson.endpoint,
+              keys: {
+                p256dh: subscriptionJson.keys?.p256dh,
+                auth: subscriptionJson.keys?.auth,
+              },
+            },
             preferences: {
               moonPhases: true,
               planetaryTransits: true,
@@ -175,14 +188,23 @@ export function NotificationManager() {
               majorAspects: true,
             },
             userId: (me as any).id || 'unknown',
-            userEmail: me.profile?.name || null, // Better Auth might store email in profile
+            userEmail: (me.profile as any)?.name || null,
           }),
         });
-        console.log('✅ Push subscription also saved to PostgreSQL');
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to save subscription');
+        }
+
+        console.log('✅ Push subscription saved to PostgreSQL');
       } catch (pgError) {
         console.error(
           '⚠️ Failed to save to PostgreSQL (client storage still works):',
           pgError,
+        );
+        alert(
+          'Failed to save subscription to server. Notifications may not work properly.',
         );
       }
     } catch (error) {
@@ -227,16 +249,18 @@ export function NotificationManager() {
       } catch (pgError) {
         console.error('⚠️ Failed to remove from PostgreSQL:', pgError);
       }
+
+      setPermission({
+        granted: false,
+        denied: false,
+        default: true,
+      });
     } catch (error) {
       console.error('Error unsubscribing:', error);
+      alert('Failed to disable notifications. Please try again.');
     }
   };
 
-  const dismissPrompt = () => {
-    setShowPrompt(false);
-  };
-
-  // Helper function to convert VAPID key
   const urlBase64ToUint8Array = (base64String: string) => {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
@@ -252,6 +276,81 @@ export function NotificationManager() {
     return outputArray;
   };
 
-  // Don't show the bottom notification prompt anymore - settings are in profile page
-  return null;
+  if (isLoading) {
+    return (
+      <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+        <div className='flex items-center justify-center py-4'>
+          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400'></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!('Notification' in window)) {
+    return (
+      <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+        <h3 className='text-lg font-semibold text-white mb-3'>
+          Push Notifications
+        </h3>
+        <p className='text-sm text-zinc-400'>
+          Your browser does not support push notifications.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+      <h3 className='text-lg font-semibold text-white mb-3'>
+        Push Notifications
+      </h3>
+      <p className='text-xs text-zinc-400 mb-4'>
+        Get notified about moon phases, planetary transits, retrogrades,
+        sabbats, and eclipses
+      </p>
+
+      {permission.denied ? (
+        <div className='space-y-3'>
+          <p className='text-sm text-red-400'>
+            Notifications are blocked. Please enable them in your browser
+            settings.
+          </p>
+        </div>
+      ) : subscription && permission.granted ? (
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <p className='text-sm text-green-400 font-medium'>
+                🔔 Notifications Enabled
+              </p>
+              <p className='text-xs text-zinc-400 mt-1'>
+                You'll receive notifications for cosmic events
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={unsubscribe}
+            className='w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors text-sm font-medium'
+          >
+            Disable Notifications
+          </button>
+        </div>
+      ) : (
+        <div className='space-y-3'>
+          <div className='text-xs text-zinc-500 space-y-1'>
+            <p>• New & Full Moons</p>
+            <p>• Planetary ingresses & retrogrades</p>
+            <p>• Sabbats & seasonal shifts</p>
+            <p>• Eclipses & major aspects</p>
+          </div>
+          <button
+            onClick={requestPermission}
+            className='w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition-colors text-sm font-medium'
+          >
+            Enable Notifications
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
