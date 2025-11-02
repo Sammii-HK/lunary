@@ -23,18 +23,6 @@ export function NotificationSettings() {
 
   useEffect(() => {
     checkNotificationStatus();
-
-    // Make debug functions available in console
-    if (typeof window !== 'undefined') {
-      import('@/utils/notifications/debug')
-        .then(({ debugPushNotifications }) => {
-          (window as any).debugPushNotifications = debugPushNotifications;
-        })
-        .catch(() => {
-          // Debug utilities not critical - fail silently
-          console.warn('Debug utilities not available');
-        });
-    }
   }, []);
 
   const checkNotificationStatus = async () => {
