@@ -1,5 +1,4 @@
-const CACHE_VERSION = 'v2.0.0';
-const CACHE_NAME = `lunary-${CACHE_VERSION}`;
+const CACHE_NAME = 'lunary-v1';
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -15,19 +14,10 @@ self.addEventListener('install', (event) => {
       .open(CACHE_NAME)
       .then((cache) => {
         console.log('Caching static assets');
-        // Use addAll but catch errors for individual files
-        return cache.addAll(STATIC_CACHE_URLS).catch((error) => {
-          console.warn('Some assets failed to cache:', error);
-          // Continue even if some assets fail to cache
-        });
+        return cache.addAll(STATIC_CACHE_URLS);
       })
       .then(() => {
         console.log('Service worker installed');
-        return self.skipWaiting();
-      })
-      .catch((error) => {
-        console.error('Service worker installation failed:', error);
-        // Still try to activate even if caching fails
         return self.skipWaiting();
       }),
   );
@@ -46,17 +36,11 @@ self.addEventListener('activate', (event) => {
               console.log('Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
-            return Promise.resolve();
           }),
         );
       })
       .then(() => {
         console.log('Service worker activated');
-        return self.clients.claim();
-      })
-      .catch((error) => {
-        console.error('Service worker activation failed:', error);
-        // Still try to claim clients even if cache cleanup fails
         return self.clients.claim();
       }),
   );
@@ -66,10 +50,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // CRITICAL: Never intercept service worker or manifest - always use network
+  // CRITICAL: Skip ALL API routes and authentication - always use network, don't intercept
   if (
-    url.pathname === '/sw.js' ||
-    url.pathname === '/manifest.json' ||
     url.pathname.startsWith('/api/') ||
     url.pathname.includes('/auth/') ||
     url.pathname.includes('sign-in') ||
