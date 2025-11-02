@@ -10,7 +10,7 @@ export const betterAuthClient = createAuthClient({
     process.env.NEXT_PUBLIC_BASE_URL ||
     (typeof window !== 'undefined'
       ? window.location.origin
-      : 'http://localhost:3000'),
+      : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   fetchOptions: {
     credentials: 'include', // Include cookies in requests
     cache: 'no-store', // Never cache auth requests (important for iOS)

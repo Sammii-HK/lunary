@@ -22,28 +22,55 @@ export function useAuthStatus(): AuthState {
   const { me } = useAccount();
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let isMounted = true;
+
     const checkAuth = async () => {
       try {
-        const session = await betterAuthClient.getSession();
+        // Add timeout to prevent hanging in local dev
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => {
+            reject(new Error('Auth check timeout'));
+          }, 5000); // 5 second timeout
+        });
+
+        const sessionPromise = betterAuthClient.getSession();
+        const session = await Promise.race([sessionPromise, timeoutPromise]);
         const user = session?.data?.user || null;
 
-        setAuthState({
-          isAuthenticated: !!user,
-          user,
-          profile: me?.profile || null,
-          loading: false,
-        });
+        if (isMounted) {
+          setAuthState({
+            isAuthenticated: !!user,
+            user,
+            profile: me?.profile || null,
+            loading: false,
+          });
+        }
       } catch (error) {
-        setAuthState({
-          isAuthenticated: false,
-          user: null,
-          profile: null,
-          loading: false,
-        });
+        // In local dev, gracefully handle auth failures
+        if (isMounted) {
+          console.warn(
+            'Auth check failed or timed out (local dev safe):',
+            error,
+          );
+          setAuthState({
+            isAuthenticated: false,
+            user: null,
+            profile: me?.profile || null, // Still show profile if available
+            loading: false,
+          });
+        }
+      } finally {
+        clearTimeout(timeoutId);
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [me]);
 
   return authState;

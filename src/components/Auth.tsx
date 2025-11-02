@@ -42,8 +42,23 @@ export function AuthComponent({
     setSuccess(null);
 
     try {
+      // Create a timeout promise for auth requests (10 seconds for login)
+      const createTimeout = (ms: number) => {
+        return new Promise<never>((_, reject) => {
+          setTimeout(
+            () =>
+              reject(
+                new Error(
+                  'Request timed out. Please check your connection or try again later.',
+                ),
+              ),
+            ms,
+          );
+        });
+      };
+
       if (isSignUp) {
-        const result = await betterAuthClient.signUp.email(
+        const signUpPromise = betterAuthClient.signUp.email(
           {
             email: formData.email,
             password: formData.password,
@@ -59,6 +74,11 @@ export function AuthComponent({
             },
           },
         );
+
+        const result = await Promise.race([
+          signUpPromise,
+          createTimeout(15000),
+        ]);
 
         console.log('✅ Sign up result:', result);
 
@@ -80,10 +100,15 @@ export function AuthComponent({
           setSuccess('Account created successfully! Welcome to Lunary.');
         }
       } else {
-        const result = await betterAuthClient.signIn.email({
+        const signInPromise = betterAuthClient.signIn.email({
           email: formData.email,
           password: formData.password,
         });
+
+        const result = await Promise.race([
+          signInPromise,
+          createTimeout(10000),
+        ]);
 
         console.log('✅ Sign in result:', result);
 
@@ -109,7 +134,14 @@ export function AuthComponent({
 
       // Better error messages
       let errorMessage = 'Authentication failed. Please try again.';
-      if (err.message?.includes('Invalid credentials')) {
+
+      if (err.message?.includes('timed out')) {
+        errorMessage =
+          'Request timed out. The authentication server may not be responding. Please check your connection and try again.';
+      } else if (
+        err.message?.includes('Invalid credentials') ||
+        err.message?.includes('invalid')
+      ) {
         errorMessage =
           'Invalid email or password. Please check your credentials.';
       } else if (err.message?.includes('User already exists')) {
