@@ -24,6 +24,8 @@ export function PWAHandler() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileInstructions, setShowMobileInstructions] = useState(false);
+  const [swStatus, setSwStatus] = useState<string>('Checking...');
+  const [manifestStatus, setManifestStatus] = useState<string>('Checking...');
 
   useEffect(() => {
     // Register service worker - KEEP IT REGISTERED once working
@@ -46,10 +48,12 @@ export function PWAHandler() {
               // Ensure service worker is controlling the page
               if (navigator.serviceWorker.controller) {
                 console.log('✅ Service Worker is controlling the page');
+                setSwStatus('✅ Active & Controlling');
               } else {
                 console.warn(
                   '⚠️ Service Worker registered but not controlling - refresh may be needed',
                 );
+                setSwStatus('⚠️ Registered (refresh needed)');
               }
             });
           } else {
@@ -72,8 +76,10 @@ export function PWAHandler() {
                   // Check if it's controlling
                   if (navigator.serviceWorker.controller) {
                     console.log('✅ Service Worker is controlling the page');
+                    setSwStatus('✅ Active & Controlling');
                   } else {
                     console.log('⚠️ Service Worker will control after reload');
+                    setSwStatus('⚠️ Registered (reload page)');
                   }
                 });
               });
@@ -81,6 +87,7 @@ export function PWAHandler() {
         })
         .catch((error) => {
           console.error('❌ Service Worker registration failed:', error);
+          setSwStatus('❌ Registration failed');
           if (error instanceof Error) {
             console.error('Error details:', {
               message: error.message,
@@ -113,12 +120,13 @@ export function PWAHandler() {
       );
     setIsMobile(isMobileDevice);
 
-    // On mobile, show instructions after a delay if not installed
+    // On mobile, show instructions after a short delay if not installed
     let mobileTimer: NodeJS.Timeout;
     if (isMobileDevice && !isInstalled) {
+      // Show immediately but allow time for status to populate
       mobileTimer = setTimeout(() => {
         setShowMobileInstructions(true);
-      }, 3000); // Show after 3 seconds
+      }, 1500); // 1.5 seconds - enough time for SW and manifest to check
     }
 
     // Debug: Check PWA criteria
@@ -146,9 +154,11 @@ export function PWAHandler() {
           scope: manifest.scope,
           icons: manifest.icons?.length,
         });
+        setManifestStatus(`✅ Valid (${manifest.display})`);
       })
       .catch((err) => {
         console.error('❌ Manifest fetch failed:', err);
+        setManifestStatus('❌ Failed to load');
       });
 
     // Listen for beforeinstallprompt event
@@ -211,22 +221,53 @@ export function PWAHandler() {
           <h3 className='text-lg font-semibold text-white mb-3'>
             Install Lunary
           </h3>
-          <div className='space-y-3 text-sm text-zinc-300'>
-            <p className='font-medium'>Follow these steps:</p>
-            <ol className='list-decimal list-inside space-y-2 ml-2'>
-              <li>
-                Tap the <strong className='text-white'>menu</strong> button (⋮)
-                in Chrome
-              </li>
-              <li>
-                Select <strong className='text-white'>"Install app"</strong> or{' '}
-                <strong className='text-white'>"Add to Home Screen"</strong>
-              </li>
-              <li>
-                Tap <strong className='text-white'>"Install"</strong> when
-                prompted
-              </li>
-            </ol>
+          <div className='space-y-4 text-sm'>
+            <div className='bg-zinc-900 rounded p-3 space-y-2'>
+              <div className='text-zinc-300'>
+                <span className='font-medium'>Service Worker:</span>{' '}
+                <span
+                  className={
+                    swStatus.includes('✅')
+                      ? 'text-green-400'
+                      : swStatus.includes('⚠️')
+                        ? 'text-yellow-400'
+                        : 'text-red-400'
+                  }
+                >
+                  {swStatus}
+                </span>
+              </div>
+              <div className='text-zinc-300'>
+                <span className='font-medium'>Manifest:</span>{' '}
+                <span
+                  className={
+                    manifestStatus.includes('✅')
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                  }
+                >
+                  {manifestStatus}
+                </span>
+              </div>
+            </div>
+            <div className='space-y-2 text-zinc-300'>
+              <p className='font-medium'>Follow these steps:</p>
+              <ol className='list-decimal list-inside space-y-2 ml-2'>
+                <li>
+                  Tap the <strong className='text-white'>menu</strong> button
+                  (⋮) in Chrome
+                </li>
+                <li>
+                  Select <strong className='text-white'>"Install app"</strong>{' '}
+                  or{' '}
+                  <strong className='text-white'>"Add to Home Screen"</strong>
+                </li>
+                <li>
+                  Tap <strong className='text-white'>"Install"</strong> when
+                  prompted
+                </li>
+              </ol>
+            </div>
             <p className='text-xs text-zinc-400 mt-4'>
               Installing the app gives you faster access and works offline
             </p>
