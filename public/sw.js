@@ -90,25 +90,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CRITICAL for PWA: Navigation requests MUST be served from cache
-  // Chrome iOS checks this - if start_url isn't served from cache, opens in tab
+  // CRITICAL for PWA: Navigation requests (like opening from homescreen) MUST be served from cache
+  // This is REQUIRED for mobile Chrome to recognize it as a PWA
   if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match('/').then((cachedResponse) => {
-        // CRITICAL: Must return cached response immediately for PWA
+        // ALWAYS return cached home page for navigation - this makes it a PWA
         if (cachedResponse) {
           return cachedResponse;
         }
-        // Fallback: fetch and cache
-        return fetch(event.request).then((response) => {
-          if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put('/', responseToCache);
-            });
-          }
-          return response;
-        });
+        // If somehow not cached, fetch and immediately cache
+        return fetch(event.request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              return caches.open(CACHE_NAME).then((cache) => {
+                cache.put('/', responseToCache);
+                return response;
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // If fetch fails and no cache, return a basic HTML fallback
+            return new Response('Offline', { status: 503 });
+          });
       }),
     );
     return;
