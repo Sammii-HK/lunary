@@ -60,17 +60,17 @@ export function SmartTrialButton({
     lg: 'px-8 py-4 text-lg',
   };
 
-  // Variant classes
   const variantClasses = {
     primary:
-      'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white',
-    secondary: 'bg-white text-black hover:bg-gray-100',
+      'bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30',
+    secondary:
+      'bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 border border-zinc-700/50',
   };
 
   const buttonClasses = `
     ${sizeClasses[size]} 
     ${variantClasses[variant]} 
-    rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl
+    rounded-lg font-medium transition-all duration-200
     ${className}
   `.trim();
 
