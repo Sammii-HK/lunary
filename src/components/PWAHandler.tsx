@@ -24,52 +24,60 @@ export function PWAHandler() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Register service worker
+    // Register service worker with aggressive cleanup
     if ('serviceWorker' in navigator) {
-      // Always check for updates first, then register if needed
+      // FORCE UNREGISTER ALL service workers first to clear any stale ones
       navigator.serviceWorker
         .getRegistrations()
         .then((registrations) => {
-          // Unregister any old service workers with wrong scope
-          const promises = registrations.map((reg) => {
-            if (reg.scope !== window.location.origin + '/') {
-              console.log('Unregistering old service worker:', reg.scope);
-              return reg.unregister();
-            }
-            return Promise.resolve();
+          console.log(
+            `Found ${registrations.length} service worker registrations`,
+          );
+          // Unregister ALL service workers
+          const unregisterPromises = registrations.map((reg) => {
+            console.log('Unregistering service worker:', reg.scope);
+            return reg.unregister().then((success) => {
+              console.log(`Unregistered ${reg.scope}: ${success}`);
+              return success;
+            });
           });
-          return Promise.all(promises);
+          return Promise.all(unregisterPromises);
         })
         .then(() => {
-          // Check if service worker is already registered
-          return navigator.serviceWorker.getRegistration();
+          // Wait a moment for unregistration to complete
+          return new Promise((resolve) => setTimeout(resolve, 500));
         })
-        .then((existingRegistration) => {
-          if (existingRegistration) {
-            console.log(
-              '✅ Service Worker already registered:',
-              existingRegistration.scope,
-            );
-            // Check for updates
-            existingRegistration.update();
-            return navigator.serviceWorker.ready;
-          } else {
-            // Register new service worker
-            return navigator.serviceWorker
-              .register('/sw.js', {
-                scope: '/',
-              })
-              .then((registration) => {
-                console.log(
-                  '✅ Service Worker registered:',
-                  registration.scope,
-                );
-                return navigator.serviceWorker.ready;
+        .then(() => {
+          // Register fresh service worker
+          console.log('Registering fresh service worker...');
+          return navigator.serviceWorker
+            .register('/sw.js?v=' + Date.now(), {
+              scope: '/',
+              updateViaCache: 'none',
+            })
+            .then((registration) => {
+              console.log('✅ Service Worker registered:', registration.scope);
+
+              // Force immediate update
+              registration.update();
+
+              // Wait for ready
+              return navigator.serviceWorker.ready.then(() => {
+                console.log('✅ Service Worker is ready and controlling');
+
+                // Additional diagnostic
+                navigator.serviceWorker.getRegistration().then((reg) => {
+                  if (reg) {
+                    console.log('✅ Registration confirmed:', {
+                      scope: reg.scope,
+                      active: reg.active?.scriptURL,
+                      waiting: reg.waiting?.scriptURL,
+                      installing: reg.installing?.scriptURL,
+                    });
+                  }
+                });
               });
-          }
-        })
-        .then(() => {
-          console.log('✅ Service Worker is ready');
+            });
         })
         .catch((error) => {
           console.error('❌ Service Worker registration failed:', error);
@@ -81,6 +89,8 @@ export function PWAHandler() {
             });
           }
         });
+    } else {
+      console.error('❌ Service Worker not supported');
     }
 
     // Check if app is already installed
@@ -96,12 +106,34 @@ export function PWAHandler() {
     checkInstalled();
 
     // Debug: Check PWA criteria
-    console.log('🔍 PWA Debug Info:', {
+    const debugInfo = {
       isSecureContext: window.isSecureContext,
       hasServiceWorker: 'serviceWorker' in navigator,
       standalone: window.matchMedia('(display-mode: standalone)').matches,
       userAgent: navigator.userAgent,
-    });
+      location: window.location.href,
+      protocol: window.location.protocol,
+    };
+    console.log('🔍 PWA Debug Info:', debugInfo);
+
+    // Check manifest
+    fetch('/manifest.json')
+      .then((res) => {
+        console.log('Manifest fetch:', res.status, res.statusText);
+        return res.json();
+      })
+      .then((manifest) => {
+        console.log('✅ Manifest loaded:', {
+          name: manifest.name,
+          display: manifest.display,
+          start_url: manifest.start_url,
+          scope: manifest.scope,
+          icons: manifest.icons?.length,
+        });
+      })
+      .catch((err) => {
+        console.error('❌ Manifest fetch failed:', err);
+      });
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
