@@ -24,60 +24,43 @@ export function PWAHandler() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Register service worker with aggressive cleanup
+    // Register service worker - KEEP IT REGISTERED once working
     if ('serviceWorker' in navigator) {
-      // FORCE UNREGISTER ALL service workers first to clear any stale ones
       navigator.serviceWorker
-        .getRegistrations()
-        .then((registrations) => {
-          console.log(
-            `Found ${registrations.length} service worker registrations`,
-          );
-          // Unregister ALL service workers
-          const unregisterPromises = registrations.map((reg) => {
-            console.log('Unregistering service worker:', reg.scope);
-            return reg.unregister().then((success) => {
-              console.log(`Unregistered ${reg.scope}: ${success}`);
-              return success;
+        .getRegistration()
+        .then((existingRegistration) => {
+          if (existingRegistration) {
+            // Service worker already registered - just check for updates
+            console.log(
+              '✅ Service Worker already registered:',
+              existingRegistration.scope,
+            );
+
+            // Check for updates in background (don't block)
+            existingRegistration.update();
+
+            return navigator.serviceWorker.ready.then(() => {
+              console.log('✅ Service Worker is ready');
             });
-          });
-          return Promise.all(unregisterPromises);
-        })
-        .then(() => {
-          // Wait a moment for unregistration to complete
-          return new Promise((resolve) => setTimeout(resolve, 500));
-        })
-        .then(() => {
-          // Register fresh service worker
-          console.log('Registering fresh service worker...');
-          return navigator.serviceWorker
-            .register('/sw.js?v=' + Date.now(), {
-              scope: '/',
-              updateViaCache: 'none',
-            })
-            .then((registration) => {
-              console.log('✅ Service Worker registered:', registration.scope);
+          } else {
+            // Register new service worker
+            console.log('Registering service worker...');
+            return navigator.serviceWorker
+              .register('/sw.js', {
+                scope: '/',
+              })
+              .then((registration) => {
+                console.log(
+                  '✅ Service Worker registered:',
+                  registration.scope,
+                );
 
-              // Force immediate update
-              registration.update();
-
-              // Wait for ready
-              return navigator.serviceWorker.ready.then(() => {
-                console.log('✅ Service Worker is ready and controlling');
-
-                // Additional diagnostic
-                navigator.serviceWorker.getRegistration().then((reg) => {
-                  if (reg) {
-                    console.log('✅ Registration confirmed:', {
-                      scope: reg.scope,
-                      active: reg.active?.scriptURL,
-                      waiting: reg.waiting?.scriptURL,
-                      installing: reg.installing?.scriptURL,
-                    });
-                  }
+                // Wait for ready
+                return navigator.serviceWorker.ready.then(() => {
+                  console.log('✅ Service Worker is ready and controlling');
                 });
               });
-            });
+          }
         })
         .catch((error) => {
           console.error('❌ Service Worker registration failed:', error);
