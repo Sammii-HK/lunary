@@ -70,6 +70,10 @@ export const grimoire: {
       'Banishing',
     ],
   },
+  birthChart: {
+    title: 'Birth Chart',
+    contents: ['Planets', 'Houses'],
+  },
 };
 
 export const grimoireItems = Object.keys(grimoire);
