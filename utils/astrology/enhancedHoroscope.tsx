@@ -75,7 +75,6 @@ const getDetailedMoonPhase = (date: Date): string => {
 const generateEnhancedDailyGuidance = (
   currentChart: AstroChartInformation[],
   birthChart: any,
-  sunSign: string,
   userName?: string,
   today: dayjs.Dayjs = dayjs(),
 ): string => {
@@ -87,18 +86,16 @@ const generateEnhancedDailyGuidance = (
   // Get current planetary positions
   const currentSun = currentChart.find((p) => p.body === 'Sun');
   const currentMoon = currentChart.find((p) => p.body === 'Moon');
-  const currentMercury = currentChart.find((p) => p.body === 'Mercury');
 
   // Get birth chart planets if available
   const birthSun = birthChart?.find((p: any) => p.body === 'Sun');
-  const birthMoon = birthChart?.find((p: any) => p.body === 'Moon');
 
   // Create dynamic guidance based on multiple factors
   const dayInfluence = getDayOfWeekInfluence(dayOfWeek, dayRuler);
   const numerologyInsight = getNumerologyInsight(universalDay);
   const planetaryAspect = getPlanetaryAspect(currentSun, currentMoon, birthSun);
 
-  return `${name}, ${dayInfluence} ${planetaryAspect} ${numerologyInsight} The cosmic currents favor ${getActionGuidance(dayRuler, currentMoon?.sign || 'transition')} today.`;
+  return `${dayInfluence} ${planetaryAspect} ${numerologyInsight} The cosmic currents favor ${getActionGuidance(dayRuler, currentMoon?.sign || 'transition')} today.`;
 };
 
 const getDayOfWeekInfluence = (dayOfWeek: number, ruler: string): string => {
@@ -620,11 +617,9 @@ const generateEnhancedPersonalInsight = (
   userName?: string,
   today: dayjs.Dayjs = dayjs(),
 ): string => {
-  const name = userName || 'seeker';
-
   if (!natalChart || natalChart.length === 0) {
     const seasonalInsight = getSeasonalInsight(today);
-    return `${name}, while your birth chart isn't available, ${seasonalInsight} Trust in the natural cycles and your inner wisdom.`;
+    return `While your birth chart isn't available, ${seasonalInsight} Trust in the natural cycles and your inner wisdom.`;
   }
 
   const transits: any[] = [];
@@ -677,9 +672,9 @@ const generateEnhancedPersonalInsight = (
   // Format insights into natural, flowing prose
   if (transits.length > 0) {
     if (transits.length === 1) {
-      return `${name}, ${formatTransitInsight(transits[0], true)}.`;
+      return formatTransitInsight(transits[0], true);
     } else {
-      return `${name}, ${formatTransitInsight(transits[0], true)}. ${formatTransitInsight(transits[1], false)}.`;
+      return `${formatTransitInsight(transits[0], true)} ${formatTransitInsight(transits[1], false)}`;
     }
   }
 
@@ -692,7 +687,7 @@ const generateEnhancedPersonalInsight = (
   const moonConnection = getMoonConnection(natalMoon, currentMoon);
   const venusInfluence = getVenusInfluence(currentVenus, natalSun);
 
-  return `${name}, ${moonConnection} ${venusInfluence} This is an excellent time for ${getPersonalFocus(natalSun?.sign, today)}.`;
+  return `${moonConnection} ${venusInfluence} This is an excellent time for ${getPersonalFocus(natalSun?.sign, today)}.`;
 };
 
 const getMoonConnection = (natalMoon: any, currentMoon: any): string => {
@@ -987,7 +982,6 @@ export const getEnhancedPersonalizedHoroscope = (
   const dailyGuidance = generateEnhancedDailyGuidance(
     currentChart,
     birthChart,
-    sunSign,
     userName,
     today,
   );
