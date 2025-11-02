@@ -176,7 +176,444 @@ const getActionGuidance = (dayRuler: string, moonSign: string): string => {
   );
 };
 
-// Enhanced personal insight with more birth chart integration
+// Calculate which house a planet is in (simplified equal house system)
+const calculateHouse = (
+  planetLongitude: number,
+  ascendantLongitude: number,
+): number => {
+  let diff = planetLongitude - ascendantLongitude;
+  if (diff < 0) diff += 360;
+
+  // Each house is 30 degrees in equal house system
+  const house = Math.floor(diff / 30) + 1;
+  return house > 12 ? house - 12 : house;
+};
+
+// Get house meaning (full description for context)
+const getHouseMeaning = (house: number): string => {
+  const meanings: Record<number, string> = {
+    1: 'identity, confidence, how you present yourself',
+    2: 'finances, self-worth, possessions',
+    3: 'communication, learning, siblings',
+    4: 'home, family, inner foundation',
+    5: 'creativity, joy, romance, children',
+    6: 'health, habits, work environment',
+    7: 'partnerships, marriage, collaboration',
+    8: 'intimacy, shared money, transformation',
+    9: 'travel, philosophy, beliefs, education',
+    10: 'career, reputation, leadership',
+    11: 'community, friends, social causes',
+    12: 'subconscious, solitude, healing',
+  };
+  return meanings[house] || 'personal growth';
+};
+
+// Get sign tone modifier
+const getSignTone = (planet: string, sign: string): string => {
+  const signModifiers: Record<string, Record<string, string>> = {
+    Mars: {
+      Aries: 'bold and impatient',
+      Taurus: 'steady and determined',
+      Gemini: 'quick and versatile',
+      Cancer: 'protective and emotional',
+      Leo: 'dramatic and proud',
+      Virgo: 'precise and methodical',
+      Libra: 'diplomatic but indecisive',
+      Scorpio: 'intense and strategic',
+      Sagittarius: 'adventurous and direct',
+      Capricorn: 'disciplined and strategic',
+      Aquarius: 'unconventional and detached',
+      Pisces: 'subtle and emotionally-driven',
+    },
+    Venus: {
+      Aries: 'passionate and direct',
+      Taurus: 'sensual and stable',
+      Gemini: 'playful and communicative',
+      Cancer: 'nurturing and emotional',
+      Leo: 'dramatic and generous',
+      Virgo: 'practical and refined',
+      Libra: 'harmonious and beautiful',
+      Scorpio: 'intense and transformative',
+      Sagittarius: 'optimistic and adventurous',
+      Capricorn: 'serious and traditional',
+      Aquarius: 'unconventional and friendly',
+      Pisces: 'romantic and idealistic',
+    },
+    Jupiter: {
+      Aries: 'boldly optimistic',
+      Taurus: 'steadily abundant',
+      Gemini: 'expansively curious',
+      Cancer: 'nurturingly generous',
+      Leo: 'confidently generous',
+      Virgo: 'practically wise',
+      Libra: 'harmoniously abundant',
+      Scorpio: 'deeply transformative',
+      Sagittarius: 'philosophically expansive',
+      Capricorn: 'strategically ambitious',
+      Aquarius: 'innovatively forward-thinking',
+      Pisces: 'compassionately spiritual',
+    },
+    Mercury: {
+      Aries: 'direct and assertive',
+      Taurus: 'steady and practical',
+      Gemini: 'quick and versatile',
+      Cancer: 'emotional and intuitive',
+      Leo: 'dramatic and expressive',
+      Virgo: 'analytical and precise',
+      Libra: 'diplomatic and balanced',
+      Scorpio: 'deep and probing',
+      Sagittarius: 'philosophical and broad',
+      Capricorn: 'strategic and serious',
+      Aquarius: 'innovative and detached',
+      Pisces: 'intuitive and dreamy',
+    },
+    Sun: {
+      Aries: 'boldly confident',
+      Taurus: 'steadily grounded',
+      Gemini: 'curiously versatile',
+      Cancer: 'emotionally nurturing',
+      Leo: 'dramatically expressive',
+      Virgo: 'practically refined',
+      Libra: 'harmoniously balanced',
+      Scorpio: 'intensely transformative',
+      Sagittarius: 'optimistically adventurous',
+      Capricorn: 'ambitiously disciplined',
+      Aquarius: 'innovatively independent',
+      Pisces: 'compassionately intuitive',
+    },
+    Moon: {
+      Aries: 'impulsively emotional',
+      Taurus: 'steadily comfort-seeking',
+      Gemini: 'restlessly curious',
+      Cancer: 'deeply nurturing',
+      Leo: 'dramatically expressive',
+      Virgo: 'anxiously practical',
+      Libra: 'harmoniously balanced',
+      Scorpio: 'intensely emotional',
+      Sagittarius: 'optimistically restless',
+      Capricorn: 'emotionally reserved',
+      Aquarius: 'detachedly intuitive',
+      Pisces: 'deeply compassionate',
+    },
+    Saturn: {
+      Aries: 'disciplined and assertive',
+      Taurus: 'patiently building',
+      Gemini: 'seriously focused',
+      Cancer: 'emotionally structured',
+      Leo: 'responsibly confident',
+      Virgo: 'meticulously organized',
+      Libra: 'diplomatically balanced',
+      Scorpio: 'intensely transformative',
+      Sagittarius: 'philosophically disciplined',
+      Capricorn: 'authoritatively structured',
+      Aquarius: 'systematically innovative',
+      Pisces: 'spiritually bounded',
+    },
+    Uranus: {
+      Aries: 'suddenly revolutionary',
+      Taurus: 'unexpectedly stable',
+      Gemini: 'rapidly innovative',
+      Cancer: 'unconventionally emotional',
+      Leo: 'dramatically independent',
+      Virgo: 'systematically rebellious',
+      Libra: 'uniquely balanced',
+      Scorpio: 'deeply transformative',
+      Sagittarius: 'philosophically radical',
+      Capricorn: 'traditionally disruptive',
+      Aquarius: 'uniquely innovative',
+      Pisces: 'intuitively awakened',
+    },
+    Neptune: {
+      Aries: 'idealistically bold',
+      Taurus: 'dreamily stable',
+      Gemini: 'illusions of communication',
+      Cancer: 'compassionately nurturing',
+      Leo: 'creatively inspired',
+      Virgo: 'practically confused',
+      Libra: 'harmoniously idealistic',
+      Scorpio: 'deeply mystical',
+      Sagittarius: 'spiritually expansive',
+      Capricorn: 'dreamily ambitious',
+      Aquarius: 'visionarily innovative',
+      Pisces: 'deeply spiritual',
+    },
+    Pluto: {
+      Aries: 'powerfully transformative',
+      Taurus: 'deeply material changes',
+      Gemini: 'communication transformation',
+      Cancer: 'emotional rebirth',
+      Leo: 'creative power shifts',
+      Virgo: 'practical regeneration',
+      Libra: 'relationship transformation',
+      Scorpio: 'intensely regenerative',
+      Sagittarius: 'philosophical rebirth',
+      Capricorn: 'structural transformation',
+      Aquarius: 'revolutionary change',
+      Pisces: 'spiritual transformation',
+    },
+  };
+
+  return signModifiers[planet]?.[sign] || '';
+};
+
+// Comprehensive planet-house transit meanings (based on astrological framework)
+const getPlanetHouseInsight = (planet: string, house: number): string => {
+  const planetHouseMap: Record<string, Record<number, string>> = {
+    Mars: {
+      1: 'your personal drive and confidence are heightened',
+      2: 'you feel motivated to earn more and prove your self-worth',
+      3: 'your mind is busy and your communication becomes more assertive',
+      4: 'there may be tension or initiative needed at home or with family',
+      5: 'passion and creativity rise while romance heats up',
+      6: 'you focus strongly on work and health routines',
+      7: 'you may experience conflict or passion in relationships',
+      8: 'deep sexual energy activates and shared finances come into focus',
+      9: 'you feel driven to explore, travel, or study',
+      10: 'your ambition drives you toward visible career achievements',
+      11: 'your social life becomes active and you may take leadership in groups',
+      12: 'hidden effort may lead to burnout if you push too hard',
+    },
+    Venus: {
+      1: 'your charm and personal appeal are enhanced',
+      2: 'you experience abundance in finances or self-worth',
+      3: 'communication and learning flow with harmony',
+      4: 'beauty and harmony find their way into your home',
+      5: 'romance, creativity, and joy flourish',
+      6: 'you find pleasure in work and daily routines',
+      7: 'harmony and attraction flow in your partnerships',
+      8: 'your intimate connections deepen',
+      9: 'you feel drawn to travel, philosophy, and learning',
+      10: 'you receive recognition and harmony in your career',
+      11: 'your social connections and friendships flourish',
+      12: 'you may find yourself in compassionate service or experiencing hidden love',
+    },
+    Jupiter: {
+      1: 'your personal growth and opportunities expand',
+      2: 'you experience growth in income or self-confidence, but watch for overspending',
+      3: 'your learning and communication expand',
+      4: 'your home expands and your family grows',
+      5: 'you enjoy creative abundance and joyful experiences',
+      6: 'opportunities arise in work and wellness',
+      7: 'you experience positive partnerships and collaborations',
+      8: 'your shared resources and transformation grow',
+      9: 'you expand through learning, travel, and philosophy',
+      10: 'your career advances and you receive recognition',
+      11: 'your community involvement and aspirations grow',
+      12: 'your spiritual growth and compassion deepen',
+    },
+    Mercury: {
+      1: 'your mind is active and your self-expression is clear',
+      2: 'you focus on financial communication and values',
+      3: 'your communication and learning are heightened',
+      4: 'important conversations arise about home and family',
+      5: 'you express yourself creatively and playfully',
+      6: 'your thinking focuses on work and health',
+      7: 'important conversations emerge in partnerships',
+      8: 'you gain deep insights about shared resources',
+      9: 'you experience philosophical insights and plan travel',
+      10: 'career-related communications and strategy come to the forefront',
+      11: 'you engage in social networking and group communication',
+      12: 'intuitive insights arise through inner reflection',
+    },
+    Sun: {
+      1: 'this is your personal new year with fresh starts and vitality',
+      2: 'you focus on values, finances, and self-worth',
+      3: 'ideas and communication are illuminated',
+      4: 'emphasis is placed on home, family, and foundation',
+      5: 'creative expression and joyful confidence shine',
+      6: 'you receive recognition for work and health routines',
+      7: 'partnerships and balance come into focus',
+      8: 'transformation and shared resources are highlighted',
+      9: 'philosophical exploration and travel call to you',
+      10: 'your career is in the spotlight and you receive public recognition',
+      11: 'social goals and community involvement take center stage',
+      12: 'spiritual reflection and inner work deepen',
+    },
+    Moon: {
+      1: 'your emotional awareness and sensitivity are heightened',
+      2: 'emotional needs arise around security and values',
+      3: 'emotional communication and learning flow',
+      4: 'your emotional focus turns to home and security',
+      5: 'emotional creativity and romantic feelings emerge',
+      6: 'daily routines and health needs are emphasized',
+      7: 'emotional needs surface in relationships',
+      8: 'you experience deep emotional transformation',
+      9: 'you explore your beliefs emotionally',
+      10: 'public emotional expression becomes important',
+      11: 'emotional connections deepen with friends',
+      12: 'deep inner reflection and healing unfold',
+    },
+    Saturn: {
+      1: 'discipline and responsibility shape your personal expression',
+      2: 'lessons arise about finances and self-worth',
+      3: 'you focus seriously on communication and learning',
+      4: 'responsibilities or lessons emerge around home and family',
+      5: 'structure is needed in creativity and romance',
+      6: 'discipline is required in work and health',
+      7: 'commitment and responsibility deepen in partnerships',
+      8: 'deep transformation unfolds through shared resources',
+      9: 'philosophical discipline and structured beliefs take hold',
+      10: 'career responsibilities and long-term goals demand attention',
+      11: 'structure is needed in friendships and goals',
+      12: 'karmic lessons and spiritual discipline emerge',
+    },
+    Uranus: {
+      1: 'sudden changes arise in your identity and self-expression',
+      2: 'unexpected shifts occur in finances and values',
+      3: 'revolutionary ideas transform your communication',
+      4: 'sudden changes emerge at home or with family',
+      5: 'innovative creativity and unexpected romance surprise you',
+      6: 'sudden changes occur in work routines or health habits',
+      7: 'unexpected shifts arise in partnerships',
+      8: 'radical transformation of shared resources unfolds',
+      9: 'you experience breakthroughs in philosophy or travel',
+      10: 'sudden career changes or recognition appear',
+      11: 'innovative social connections and goals emerge',
+      12: 'spiritual awakening and liberation unfold',
+    },
+    Neptune: {
+      1: 'idealism colors your identity and self-expression',
+      2: 'confusion or idealism surrounds finances',
+      3: 'illusions or inspiration flow through communication',
+      4: 'idealistic or confusing situations arise at home',
+      5: 'romantic idealization and creative inspiration emerge',
+      6: 'confusion surrounds work and health routines',
+      7: 'idealistic or confusing situations arise in partnerships',
+      8: 'mystical transformation of shared resources unfolds',
+      9: 'spiritual exploration brings confusion or clarity about beliefs',
+      10: 'idealized career goals or confusion emerges',
+      11: 'idealistic friendships and social causes call to you',
+      12: 'deep spiritual connection and compassion deepen',
+    },
+    Pluto: {
+      1: 'profound transformation of your identity and personal power unfolds',
+      2: 'deep transformation of finances and self-worth occurs',
+      3: 'powerful transformation flows through communication',
+      4: 'deep emotional transformation happens at home',
+      5: 'transformative creativity and romance emerge',
+      6: 'deep changes occur in work and health',
+      7: 'powerful transformation unfolds in partnerships',
+      8: 'intense regeneration of shared resources takes place',
+      9: 'profound transformation of beliefs and philosophy occurs',
+      10: 'deep career transformation and power shifts emerge',
+      11: 'transformative social connections and goals unfold',
+      12: 'spiritual transformation and karmic release occur',
+    },
+  };
+
+  return (
+    planetHouseMap[planet]?.[house] || 'bringing focus to this area of life'
+  );
+};
+
+// Get transit-to-house insight
+const getTransitToHouseInsight = (
+  transitPlanet: AstroChartInformation,
+  natalChart: any,
+): {
+  planet: string;
+  house: number;
+  houseMeaning: string;
+  insight: string;
+  sign: string;
+} | null => {
+  const ascendant = natalChart.find((p: any) => p.body === 'Ascendant');
+
+  // If no ascendant, use simplified approach based on Sun sign
+  if (!ascendant) {
+    const natalSun = natalChart.find((p: any) => p.body === 'Sun');
+    if (!natalSun) return null;
+
+    // Calculate approximate house using Sun as reference (simplified)
+    const sunLongitude = natalSun.eclipticLongitude;
+    let diff = transitPlanet.eclipticLongitude - sunLongitude;
+    if (diff < 0) diff += 360;
+
+    const approximateHouse = Math.floor(diff / 30) + 1;
+    const house =
+      approximateHouse > 12 ? approximateHouse - 12 : approximateHouse;
+    const houseMeaning = getHouseMeaning(house);
+    const sign = transitPlanet.sign;
+
+    const insight = getPlanetHouseInsight(transitPlanet.body, house);
+
+    return {
+      planet: transitPlanet.body,
+      house,
+      houseMeaning,
+      insight,
+      sign,
+    };
+  }
+
+  // Use actual ascendant if available
+  const house = calculateHouse(
+    transitPlanet.eclipticLongitude,
+    ascendant.eclipticLongitude,
+  );
+  const houseMeaning = getHouseMeaning(house);
+  const sign = transitPlanet.sign;
+
+  const insight = getPlanetHouseInsight(transitPlanet.body, house);
+
+  return {
+    planet: transitPlanet.body,
+    house,
+    houseMeaning,
+    insight,
+    sign,
+  };
+};
+
+const getOrdinalSuffix = (n: number): string => {
+  if (n >= 11 && n <= 13) return 'th';
+  switch (n % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
+};
+
+// Format transit insight into natural, flowing language
+const formatTransitInsight = (transit: any, isFirst: boolean): string => {
+  const houseOrdinal = `${transit.house}${getOrdinalSuffix(transit.house)}`;
+  const signTone = getSignTone(transit.planet, transit.sign);
+
+  // Build natural sentence - make sure insights flow as complete thoughts
+  let sentence = '';
+
+  // Capitalize the planet name for better readability
+  const planetName = transit.planet;
+
+  if (isFirst) {
+    if (signTone) {
+      sentence = `${planetName} in ${transit.sign} brings ${signTone} energy to your ${houseOrdinal} house, ${transit.insight}`;
+    } else {
+      sentence = `${planetName} in ${transit.sign} activates your ${houseOrdinal} house, ${transit.insight}`;
+    }
+  } else {
+    if (signTone) {
+      sentence = `Meanwhile, ${planetName} in ${transit.sign} brings ${signTone} focus to your ${houseOrdinal} house, ${transit.insight}`;
+    } else {
+      sentence = `Meanwhile, ${planetName} in ${transit.sign} focuses on your ${houseOrdinal} house, ${transit.insight}`;
+    }
+  }
+
+  // Ensure sentence starts with capital and ends with period
+  sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+  if (!sentence.endsWith('.')) {
+    sentence += '.';
+  }
+
+  return sentence;
+};
+
+// Enhanced personal insight with transit-to-house information
 const generateEnhancedPersonalInsight = (
   natalChart: any,
   currentChart: AstroChartInformation[],
@@ -190,12 +627,68 @@ const generateEnhancedPersonalInsight = (
     return `${name}, while your birth chart isn't available, ${seasonalInsight} Trust in the natural cycles and your inner wisdom.`;
   }
 
+  const transits: any[] = [];
+
+  // Get key transiting planets (prioritize personal planets, then social, then outer)
+  const transitMars = currentChart.find((planet) => planet.body === 'Mars');
+  const transitVenus = currentChart.find((planet) => planet.body === 'Venus');
+  const transitMercury = currentChart.find(
+    (planet) => planet.body === 'Mercury',
+  );
+  const transitJupiter = currentChart.find(
+    (planet) => planet.body === 'Jupiter',
+  );
+  const transitSaturn = currentChart.find((planet) => planet.body === 'Saturn');
+  const transitUranus = currentChart.find((planet) => planet.body === 'Uranus');
+  const transitNeptune = currentChart.find(
+    (planet) => planet.body === 'Neptune',
+  );
+  const transitPluto = currentChart.find((planet) => planet.body === 'Pluto');
+
+  // Prioritize Mars and Venus for most relevant daily insights
+  if (transitMars) {
+    const marsTransit = getTransitToHouseInsight(transitMars, natalChart);
+    if (marsTransit) transits.push(marsTransit);
+  }
+
+  if (transitVenus && transits.length < 2) {
+    const venusTransit = getTransitToHouseInsight(transitVenus, natalChart);
+    if (venusTransit) transits.push(venusTransit);
+  }
+
+  // Add Mercury for communication focus
+  if (transitMercury && transits.length < 2) {
+    const mercuryTransit = getTransitToHouseInsight(transitMercury, natalChart);
+    if (mercuryTransit) transits.push(mercuryTransit);
+  }
+
+  // Add Jupiter for expansion opportunities
+  if (transitJupiter && transits.length < 2) {
+    const jupiterTransit = getTransitToHouseInsight(transitJupiter, natalChart);
+    if (jupiterTransit) transits.push(jupiterTransit);
+  }
+
+  // Fallback to Saturn if needed (slower moving but significant)
+  if (transits.length === 0 && transitSaturn) {
+    const saturnTransit = getTransitToHouseInsight(transitSaturn, natalChart);
+    if (saturnTransit) transits.push(saturnTransit);
+  }
+
+  // Format insights into natural, flowing prose
+  if (transits.length > 0) {
+    if (transits.length === 1) {
+      return `${name}, ${formatTransitInsight(transits[0], true)}.`;
+    } else {
+      return `${name}, ${formatTransitInsight(transits[0], true)}. ${formatTransitInsight(transits[1], false)}.`;
+    }
+  }
+
+  // Fallback to original logic if no house transits found
   const natalSun = natalChart.find((planet: any) => planet.body === 'Sun');
   const natalMoon = natalChart.find((planet: any) => planet.body === 'Moon');
   const currentMoon = currentChart.find((planet) => planet.body === 'Moon');
   const currentVenus = currentChart.find((planet) => planet.body === 'Venus');
 
-  // Find meaningful aspects
   const moonConnection = getMoonConnection(natalMoon, currentMoon);
   const venusInfluence = getVenusInfluence(currentVenus, natalSun);
 

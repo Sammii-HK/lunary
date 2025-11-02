@@ -14,7 +14,7 @@ import {
 } from '../../../utils/astrology/transitCalendar';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
-import { Sparkles, Calendar, Gem, TrendingUp } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function HoroscopePage() {
   const { me } = useAccount();
@@ -51,11 +51,7 @@ export default function HoroscopePage() {
 
         <div className='space-y-6'>
           <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
-            <h2 className='text-lg font-medium text-zinc-100 mb-3 flex items-center gap-2'>
-              <Sparkles
-                className='w-5 h-5 text-purple-300/80'
-                strokeWidth={1.5}
-              />
+            <h2 className='text-lg font-medium text-zinc-100 mb-3'>
               Cosmic Highlight
             </h2>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -63,7 +59,7 @@ export default function HoroscopePage() {
             </p>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
+          <div className='rounded-lg border border-blue-500/20 bg-blue-500/10 p-6'>
             <h2 className='text-lg font-medium text-zinc-100 mb-3'>
               Cosmic Insight
             </h2>
@@ -122,20 +118,6 @@ export default function HoroscopePage() {
             </div>
           </div>
 
-          <div className='rounded-lg border border-amber-500/30 bg-amber-500/10 p-6'>
-            <h2 className='text-lg font-medium text-zinc-100 mb-3 flex items-center gap-2'>
-              <TrendingUp
-                className='w-5 h-5 text-amber-300/80'
-                strokeWidth={1.5}
-              />
-              Daily Affirmation
-            </h2>
-            <p className='text-sm text-zinc-300 leading-relaxed italic text-center'>
-              "I am aligned with the cosmic flow and trust in the wisdom of the
-              universe to guide my path."
-            </p>
-          </div>
-
           <div>
             <div className='flex justify-between items-center mb-4'>
               <h2 className='text-lg font-medium text-zinc-100'>
@@ -170,10 +152,6 @@ export default function HoroscopePage() {
               </div>
               <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-zinc-900/90'>
                 <div className='text-center p-6 max-w-sm'>
-                  <Gem
-                    className='w-8 h-8 text-purple-400/80 mx-auto mb-3'
-                    strokeWidth={1.5}
-                  />
                   <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                     Personal Lucky Elements
                   </h3>
@@ -193,7 +171,7 @@ export default function HoroscopePage() {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
+          <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-6'>
             <h2 className='text-lg font-medium text-zinc-100 mb-3'>
               Cosmic Elements
             </h2>
@@ -201,23 +179,23 @@ export default function HoroscopePage() {
               Universal elements favored by today&apos;s planetary positions
             </p>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-              <div className='rounded border border-zinc-700/50 bg-zinc-800/50 p-3'>
-                <p className='text-sm font-medium text-center text-zinc-300'>
+              <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/15 transition-colors'>
+                <p className='text-sm font-medium text-center text-zinc-100'>
                   Purple & Silver
                 </p>
               </div>
-              <div className='rounded border border-zinc-700/50 bg-zinc-800/50 p-3'>
-                <p className='text-sm font-medium text-center text-zinc-300'>
+              <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/15 transition-colors'>
+                <p className='text-sm font-medium text-center text-zinc-100'>
                   Amethyst & Moonstone
                 </p>
               </div>
-              <div className='rounded border border-zinc-700/50 bg-zinc-800/50 p-3'>
-                <p className='text-sm font-medium text-center text-zinc-300'>
+              <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/15 transition-colors'>
+                <p className='text-sm font-medium text-center text-zinc-100'>
                   Evening Hours
                 </p>
               </div>
-              <div className='rounded border border-zinc-700/50 bg-zinc-800/50 p-3'>
-                <p className='text-sm font-medium text-center text-zinc-300'>
+              <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/15 transition-colors'>
+                <p className='text-sm font-medium text-center text-zinc-100'>
                   Water Element
                 </p>
               </div>
@@ -226,8 +204,7 @@ export default function HoroscopePage() {
 
           <div>
             <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-lg font-medium text-zinc-100 flex items-center gap-2'>
-                <Calendar className='w-5 h-5 text-zinc-400' strokeWidth={1.5} />
+              <h2 className='text-lg font-medium text-zinc-100'>
                 Solar Return Insights
               </h2>
               <div className='px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10'>
@@ -268,10 +245,6 @@ export default function HoroscopePage() {
               </div>
               <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-zinc-900/90'>
                 <div className='text-center p-6 max-w-sm'>
-                  <Calendar
-                    className='w-8 h-8 text-purple-400/80 mx-auto mb-3'
-                    strokeWidth={1.5}
-                  />
                   <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                     Solar Return Analysis
                   </h3>
@@ -291,11 +264,7 @@ export default function HoroscopePage() {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-            <h2 className='text-lg font-medium text-zinc-100 mb-3 flex items-center gap-2'>
-              <Calendar
-                className='w-5 h-5 text-indigo-400/80'
-                strokeWidth={1.5}
-              />
+            <h2 className='text-lg font-medium text-zinc-100 mb-3'>
               Cosmic Calendar
             </h2>
             <p className='text-sm text-zinc-400 mb-4'>
@@ -346,11 +315,7 @@ export default function HoroscopePage() {
 
           <div>
             <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-lg font-medium text-zinc-100 flex items-center gap-2'>
-                <TrendingUp
-                  className='w-5 h-5 text-zinc-400'
-                  strokeWidth={1.5}
-                />
+              <h2 className='text-lg font-medium text-zinc-100'>
                 Personal Transit Impact
               </h2>
               <div className='px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10'>
@@ -396,10 +361,6 @@ export default function HoroscopePage() {
               </div>
               <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-zinc-900/90'>
                 <div className='text-center p-6 max-w-sm'>
-                  <TrendingUp
-                    className='w-8 h-8 text-purple-400/80 mx-auto mb-3'
-                    strokeWidth={1.5}
-                  />
                   <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                     Personal Transit Impact
                   </h3>
@@ -436,12 +397,13 @@ export default function HoroscopePage() {
               <li>• Enhanced daily guidance</li>
               <li>• Complete cosmic profile features</li>
             </ul>
-            <Link
-              href='/pricing'
-              className='inline-block rounded-lg border border-purple-500/30 bg-purple-500/15 hover:bg-purple-500/20 text-purple-300/90 px-6 py-2.5 text-sm font-medium transition-colors'
+            <SmartTrialButton
+              size='md'
+              variant='primary'
+              className='inline-block'
             >
               Start Free Trial
-            </Link>
+            </SmartTrialButton>
           </div>
         </div>
       </div>
@@ -471,11 +433,7 @@ export default function HoroscopePage() {
 
       <div className='space-y-6'>
         <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-3 flex items-center gap-2'>
-            <Sparkles
-              className='w-5 h-5 text-purple-300/80'
-              strokeWidth={1.5}
-            />
+          <h2 className='text-lg font-medium text-zinc-100 mb-3'>
             Cosmic Highlight
           </h2>
           <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -483,16 +441,7 @@ export default function HoroscopePage() {
           </p>
         </div>
 
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-3'>
-            Your Daily Guidance
-          </h2>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            {horoscope.dailyGuidance}
-          </p>
-        </div>
-
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
+        <div className='rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-6'>
           <h2 className='text-lg font-medium text-zinc-100 mb-3'>
             Personal Insight
           </h2>
@@ -501,22 +450,8 @@ export default function HoroscopePage() {
           </p>
         </div>
 
-        <div className='rounded-lg border border-amber-500/30 bg-amber-500/10 p-6'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-3 flex items-center gap-2'>
-            <TrendingUp
-              className='w-5 h-5 text-amber-300/80'
-              strokeWidth={1.5}
-            />
-            Daily Affirmation
-          </h2>
-          <p className='text-sm text-zinc-300 leading-relaxed italic text-center'>
-            "{horoscope.dailyAffirmation}"
-          </p>
-        </div>
-
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-3 flex items-center gap-2'>
-            <Gem className='w-5 h-5 text-zinc-400' strokeWidth={1.5} />
+        <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-6'>
+          <h2 className='text-lg font-medium text-zinc-100 mb-3'>
             Your Lucky Elements
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
@@ -524,26 +459,30 @@ export default function HoroscopePage() {
             numerology, and your birth chart
           </p>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-            {horoscope.luckyElements.map((element: string, index: number) => (
-              <div
-                key={index}
-                className='rounded border border-zinc-700/50 bg-zinc-800/50 p-3'
-              >
-                <p className='text-sm font-medium text-center text-zinc-300'>
-                  {element}
-                </p>
-              </div>
-            ))}
+            {horoscope.luckyElements.map((element: string, index: number) => {
+              const colors = [
+                'border-indigo-500/30 bg-indigo-500/10',
+                'border-purple-500/30 bg-purple-500/10',
+                'border-violet-500/30 bg-violet-500/10',
+                'border-blue-500/30 bg-blue-500/10',
+              ];
+              return (
+                <div
+                  key={index}
+                  className={`rounded-lg border ${colors[index % colors.length]} p-4 hover:opacity-80 transition-opacity`}
+                >
+                  <p className='text-sm font-medium text-center text-zinc-100'>
+                    {element}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {solarReturnData && (
           <div className='rounded-lg border border-amber-500/30 bg-amber-500/10 p-6'>
-            <h2 className='text-lg font-medium text-zinc-100 mb-3 flex items-center gap-2'>
-              <Calendar
-                className='w-5 h-5 text-amber-300/80'
-                strokeWidth={1.5}
-              />
+            <h2 className='text-lg font-medium text-zinc-100 mb-3'>
               Solar Return Insights
             </h2>
             <div className='space-y-3 pt-3'>
@@ -587,11 +526,7 @@ export default function HoroscopePage() {
         )}
 
         <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-3 flex items-center gap-2'>
-            <Calendar
-              className='w-5 h-5 text-indigo-400/80'
-              strokeWidth={1.5}
-            />
+          <h2 className='text-lg font-medium text-zinc-100 mb-3'>
             Transit Calendar
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
