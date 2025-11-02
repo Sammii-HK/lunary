@@ -43,6 +43,14 @@ export function PWAHandler() {
 
             return navigator.serviceWorker.ready.then(() => {
               console.log('✅ Service Worker is ready');
+              // Ensure service worker is controlling the page
+              if (navigator.serviceWorker.controller) {
+                console.log('✅ Service Worker is controlling the page');
+              } else {
+                console.warn(
+                  '⚠️ Service Worker registered but not controlling - refresh may be needed',
+                );
+              }
             });
           } else {
             // Register new service worker
@@ -57,9 +65,16 @@ export function PWAHandler() {
                   registration.scope,
                 );
 
-                // Wait for ready
+                // Wait for ready AND reload to ensure it controls the page
                 return navigator.serviceWorker.ready.then(() => {
-                  console.log('✅ Service Worker is ready and controlling');
+                  console.log('✅ Service Worker is ready');
+                  // On first registration, service worker might not control immediately
+                  // Check if it's controlling
+                  if (navigator.serviceWorker.controller) {
+                    console.log('✅ Service Worker is controlling the page');
+                  } else {
+                    console.log('⚠️ Service Worker will control after reload');
+                  }
                 });
               });
           }

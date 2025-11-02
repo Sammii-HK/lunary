@@ -14,10 +14,22 @@ self.addEventListener('install', (event) => {
       .open(CACHE_NAME)
       .then((cache) => {
         console.log('Caching static assets');
-        return cache.addAll(STATIC_CACHE_URLS);
+        // Explicitly cache the start URL - this is CRITICAL for PWA
+        return Promise.all([
+          cache.add('/'),
+          cache.add('/manifest.json'),
+          cache.add('/icons/icon-192x192.png'),
+          cache.add('/icons/icon-512x512.png'),
+        ]).catch((error) => {
+          console.error('Error caching assets:', error);
+          // Still try to cache what we can
+          return cache.add('/').catch(() => {
+            console.error('Failed to cache start URL');
+          });
+        });
       })
       .then(() => {
-        console.log('Service worker installed');
+        console.log('Service worker installed - start URL cached');
         return self.skipWaiting();
       }),
   );
@@ -74,27 +86,29 @@ self.addEventListener('fetch', (event) => {
   }
 
   // CRITICAL for PWA: Navigation requests (like opening from homescreen) MUST be served from cache
+  // This is REQUIRED for mobile Chrome to recognize it as a PWA
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        // Always return cached version for navigation if available
+      caches.match('/').then((cachedResponse) => {
+        // ALWAYS return cached home page for navigation - this makes it a PWA
         if (cachedResponse) {
           return cachedResponse;
         }
-        // If not in cache, fetch and cache it
+        // If somehow not cached, fetch and immediately cache
         return fetch(event.request)
           .then((response) => {
             if (response && response.status === 200) {
               const responseToCache = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseToCache);
+              return caches.open(CACHE_NAME).then((cache) => {
+                cache.put('/', responseToCache);
+                return response;
               });
             }
             return response;
           })
           .catch(() => {
-            // Fallback to cached home page
-            return caches.match('/');
+            // If fetch fails and no cache, return a basic HTML fallback
+            return new Response('Offline', { status: 503 });
           });
       }),
     );
