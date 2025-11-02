@@ -28,7 +28,10 @@ import { SignOutButton } from '@/components/SignOutButton';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 
 export default function ProfilePage() {
-  const { me } = useAccount();
+  // Hooks must be called unconditionally - handle errors inside the hook or in the component
+  const accountResult = useAccount();
+  const me = accountResult?.me || null;
+
   const subscription = useSubscription();
   const authState = useAuthStatus();
   const [name, setName] = useState('');
@@ -53,8 +56,12 @@ export default function ProfilePage() {
   useEffect(() => {
     if (me?.profile) {
       try {
-        let profileName = (me.profile as any).name || '';
-        const profileBirthday = (me.profile as any).birthday || '';
+        let profileName = (me.profile as any)?.name || '';
+        const profileBirthday = (me.profile as any)?.birthday || '';
+
+        setName(profileName);
+        setBirthday(profileBirthday);
+        setIsEditing(!profileName && !profileBirthday);
 
         // // Check if we have migrated profile data to restore
         // if (typeof window !== 'undefined') {
@@ -107,17 +114,16 @@ export default function ProfilePage() {
         //   }
         // }
 
-        setName(profileName);
-        setBirthday(profileBirthday);
-
-        // If profile is empty, start in editing mode
-        setIsEditing(!profileName && !profileBirthday);
         setIsLoading(false);
       } catch (error) {
         console.log('Error loading profile:', error);
         setIsLoading(false);
         setIsEditing(true);
       }
+    } else {
+      // If no profile exists, allow editing
+      setIsLoading(false);
+      setIsEditing(false);
     }
   }, [me?.profile]);
 
@@ -165,12 +171,12 @@ export default function ProfilePage() {
     }
   };
 
-  // Show loading state while checking auth
-  if (authState.loading) {
+  // Show loading state while checking auth or if me is loading
+  if (authState.loading || isLoading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
         <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400'></div>
-        <p className='text-zinc-400'>Checking authentication...</p>
+        <p className='text-zinc-400'>Loading your profile...</p>
       </div>
     );
   }
