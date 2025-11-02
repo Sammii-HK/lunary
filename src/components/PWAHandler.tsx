@@ -26,15 +26,32 @@ export function PWAHandler() {
   useEffect(() => {
     // Register service worker
     if ('serviceWorker' in navigator) {
-      // Check if service worker is already registered
+      // Always check for updates first, then register if needed
       navigator.serviceWorker
-        .getRegistration()
+        .getRegistrations()
+        .then((registrations) => {
+          // Unregister any old service workers with wrong scope
+          const promises = registrations.map((reg) => {
+            if (reg.scope !== window.location.origin + '/') {
+              console.log('Unregistering old service worker:', reg.scope);
+              return reg.unregister();
+            }
+            return Promise.resolve();
+          });
+          return Promise.all(promises);
+        })
+        .then(() => {
+          // Check if service worker is already registered
+          return navigator.serviceWorker.getRegistration();
+        })
         .then((existingRegistration) => {
           if (existingRegistration) {
             console.log(
               '✅ Service Worker already registered:',
               existingRegistration.scope,
             );
+            // Check for updates
+            existingRegistration.update();
             return navigator.serviceWorker.ready;
           } else {
             // Register new service worker

@@ -65,8 +65,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // CRITICAL: Skip ALL API routes and authentication - always use network, don't intercept
+  // CRITICAL: Never intercept service worker or manifest - always use network
   if (
+    url.pathname === '/sw.js' ||
+    url.pathname === '/manifest.json' ||
     url.pathname.startsWith('/api/') ||
     url.pathname.includes('/auth/') ||
     url.pathname.includes('sign-in') ||
