@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v1';
+const CACHE_NAME = 'lunary-v2';
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -14,22 +14,10 @@ self.addEventListener('install', (event) => {
       .open(CACHE_NAME)
       .then((cache) => {
         console.log('Caching static assets');
-        // Explicitly cache the start URL - this is CRITICAL for PWA
-        return Promise.all([
-          cache.add('/'),
-          cache.add('/manifest.json'),
-          cache.add('/icons/icon-192x192.png'),
-          cache.add('/icons/icon-512x512.png'),
-        ]).catch((error) => {
-          console.error('Error caching assets:', error);
-          // Still try to cache what we can
-          return cache.add('/').catch(() => {
-            console.error('Failed to cache start URL');
-          });
-        });
+        return cache.addAll(STATIC_CACHE_URLS);
       })
       .then(() => {
-        console.log('Service worker installed - start URL cached');
+        console.log('Service worker installed');
         return self.skipWaiting();
       }),
   );
@@ -52,13 +40,8 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        console.log(
-          'Service worker activated - claiming all clients immediately',
-        );
-        // CRITICAL: Claim clients immediately so SW controls all pages
-        return self.clients.claim().then(() => {
-          console.log('✅ All clients claimed - service worker is controlling');
-        });
+        console.log('Service worker activated');
+        return self.clients.claim();
       }),
   );
 });
@@ -90,37 +73,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CRITICAL for PWA: Navigation requests (like opening from homescreen) MUST be served from cache
-  // This is REQUIRED for mobile Chrome to recognize it as a PWA
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      caches.match('/').then((cachedResponse) => {
-        // ALWAYS return cached home page for navigation - this makes it a PWA
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        // If somehow not cached, fetch and immediately cache
-        return fetch(event.request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              const responseToCache = response.clone();
-              return caches.open(CACHE_NAME).then((cache) => {
-                cache.put('/', responseToCache);
-                return response;
-              });
-            }
-            return response;
-          })
-          .catch(() => {
-            // If fetch fails and no cache, return a basic HTML fallback
-            return new Response('Offline', { status: 503 });
-          });
-      }),
-    );
-    return;
-  }
-
-  // For all other requests, cache-first strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
