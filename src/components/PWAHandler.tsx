@@ -22,6 +22,8 @@ export function PWAHandler() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileInstructions, setShowMobileInstructions] = useState(false);
 
   useEffect(() => {
     // Register service worker - KEEP IT REGISTERED once working
@@ -88,6 +90,22 @@ export function PWAHandler() {
 
     checkInstalled();
 
+    // Detect mobile
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileDevice =
+      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+        userAgent,
+      );
+    setIsMobile(isMobileDevice);
+
+    // On mobile, show instructions after a delay if not installed
+    let mobileTimer: NodeJS.Timeout;
+    if (isMobileDevice && !isInstalled) {
+      mobileTimer = setTimeout(() => {
+        setShowMobileInstructions(true);
+      }, 3000); // Show after 3 seconds
+    }
+
     // Debug: Check PWA criteria
     const debugInfo = {
       isSecureContext: window.isSecureContext,
@@ -143,6 +161,9 @@ export function PWAHandler() {
         handleBeforeInstallPrompt,
       );
       window.removeEventListener('appinstalled', handleAppInstalled);
+      if (mobileTimer) {
+        clearTimeout(mobileTimer);
+      }
     };
   }, []);
 
@@ -164,32 +185,75 @@ export function PWAHandler() {
 
   const handleDismiss = () => {
     setShowInstallPrompt(false);
+    setShowMobileInstructions(false);
   };
 
+  // Mobile instructions modal
+  if (isMobile && showMobileInstructions && !isInstalled) {
+    return (
+      <div className='fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4'>
+        <div className='bg-zinc-800 border border-zinc-700 rounded-lg p-6 max-w-sm w-full shadow-xl'>
+          <h3 className='text-lg font-semibold text-white mb-3'>
+            Install Lunary
+          </h3>
+          <div className='space-y-3 text-sm text-zinc-300'>
+            <p className='font-medium'>Follow these steps:</p>
+            <ol className='list-decimal list-inside space-y-2 ml-2'>
+              <li>
+                Tap the <strong className='text-white'>menu</strong> button (⋮)
+                in Chrome
+              </li>
+              <li>
+                Select <strong className='text-white'>"Install app"</strong> or{' '}
+                <strong className='text-white'>"Add to Home Screen"</strong>
+              </li>
+              <li>
+                Tap <strong className='text-white'>"Install"</strong> when
+                prompted
+              </li>
+            </ol>
+            <p className='text-xs text-zinc-400 mt-4'>
+              Installing the app gives you faster access and works offline
+            </p>
+          </div>
+          <button
+            onClick={handleDismiss}
+            className='mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-medium transition-colors'
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop install prompt (beforeinstallprompt)
   if (isInstalled || !showInstallPrompt) {
     return null;
   }
 
   return (
     <div className='fixed bottom-20 left-4 right-4 z-50'>
-      <div className='bg-zinc-800 border border-zinc-700 rounded-lg p-4 shadow-lg'>
+      <div className='bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-lg p-4 shadow-lg backdrop-blur-sm'>
         <div className='flex items-center justify-between'>
           <div className='flex-1'>
-            <h3 className='text-sm font-medium text-white'>Install Lunary</h3>
-            <p className='text-xs text-zinc-400 mt-1'>
-              Add to your home screen for quick access
+            <h3 className='text-base font-semibold text-white'>
+              Install Lunary App
+            </h3>
+            <p className='text-sm text-purple-200 mt-1'>
+              Get faster access and offline support
             </p>
           </div>
           <div className='flex gap-2 ml-4'>
             <button
               onClick={handleDismiss}
-              className='px-3 py-1 text-xs text-zinc-400 hover:text-white transition-colors'
+              className='px-4 py-2 text-sm text-zinc-300 hover:text-white transition-colors'
             >
               Later
             </button>
             <button
               onClick={handleInstallClick}
-              className='px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-white text-xs rounded transition-colors'
+              className='px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg font-medium transition-colors shadow-lg'
             >
               Install
             </button>

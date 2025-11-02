@@ -73,6 +73,35 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // CRITICAL for PWA: Navigation requests (like opening from homescreen) MUST be served from cache
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        // Always return cached version for navigation if available
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        // If not in cache, fetch and cache it
+        return fetch(event.request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // Fallback to cached home page
+            return caches.match('/');
+          });
+      }),
+    );
+    return;
+  }
+
+  // For all other requests, cache-first strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
