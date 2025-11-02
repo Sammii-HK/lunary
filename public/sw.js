@@ -52,8 +52,13 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        console.log('Service worker activated');
-        return self.clients.claim();
+        console.log(
+          'Service worker activated - claiming all clients immediately',
+        );
+        // CRITICAL: Claim clients immediately so SW controls all pages
+        return self.clients.claim().then(() => {
+          console.log('✅ All clients claimed - service worker is controlling');
+        });
       }),
   );
 });
@@ -85,31 +90,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CRITICAL for PWA: Navigation requests (like opening from homescreen) MUST be served from cache
-  // This is REQUIRED for mobile Chrome to recognize it as a PWA
+  // CRITICAL for PWA: Navigation requests MUST be served from cache
+  // Chrome iOS checks this - if start_url isn't served from cache, opens in tab
   if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match('/').then((cachedResponse) => {
-        // ALWAYS return cached home page for navigation - this makes it a PWA
+        // CRITICAL: Must return cached response immediately for PWA
         if (cachedResponse) {
           return cachedResponse;
         }
-        // If somehow not cached, fetch and immediately cache
-        return fetch(event.request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              const responseToCache = response.clone();
-              return caches.open(CACHE_NAME).then((cache) => {
-                cache.put('/', responseToCache);
-                return response;
-              });
-            }
-            return response;
-          })
-          .catch(() => {
-            // If fetch fails and no cache, return a basic HTML fallback
-            return new Response('Offline', { status: 503 });
-          });
+        // Fallback: fetch and cache
+        return fetch(event.request).then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put('/', responseToCache);
+            });
+          }
+          return response;
+        });
       }),
     );
     return;

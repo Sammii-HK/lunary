@@ -26,6 +26,7 @@ export function PWAHandler() {
   const [showMobileInstructions, setShowMobileInstructions] = useState(false);
   const [swStatus, setSwStatus] = useState<string>('Checking...');
   const [manifestStatus, setManifestStatus] = useState<string>('Checking...');
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     // Register service worker - KEEP IT REGISTERED once working
@@ -112,21 +113,48 @@ export function PWAHandler() {
 
     checkInstalled();
 
-    // Detect mobile
+    // Detect mobile and iOS specifically
     const userAgent = navigator.userAgent.toLowerCase();
     const isMobileDevice =
       /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
         userAgent,
       );
+    const iosDevice = /iphone|ipad|ipod/i.test(userAgent);
     setIsMobile(isMobileDevice);
+    setIsIOS(iosDevice);
 
-    // On mobile, show instructions after a short delay if not installed
+    // On mobile, show instructions after service worker is ready (iOS doesn't need SW for basic PWA)
     let mobileTimer: NodeJS.Timeout;
     if (isMobileDevice && !isInstalled) {
-      // Show immediately but allow time for status to populate
-      mobileTimer = setTimeout(() => {
-        setShowMobileInstructions(true);
-      }, 1500); // 1.5 seconds - enough time for SW and manifest to check
+      if (iosDevice) {
+        // iOS Safari: Service worker not required for basic "Add to Home Screen"
+        setSwStatus('ℹ️ iOS (SW optional)');
+        mobileTimer = setTimeout(() => {
+          setShowMobileInstructions(true);
+        }, 1000);
+      } else {
+        // Android Chrome: Service worker REQUIRED
+        navigator.serviceWorker.ready
+          .then(() => {
+            if (navigator.serviceWorker.controller) {
+              setSwStatus('✅ Ready for Install');
+              mobileTimer = setTimeout(() => {
+                setShowMobileInstructions(true);
+              }, 500);
+            } else {
+              setSwStatus('⚠️ Reload page first');
+              mobileTimer = setTimeout(() => {
+                setShowMobileInstructions(true);
+              }, 2000);
+            }
+          })
+          .catch(() => {
+            setSwStatus('❌ Not ready');
+            mobileTimer = setTimeout(() => {
+              setShowMobileInstructions(true);
+            }, 2000);
+          });
+      }
     }
 
     // Debug: Check PWA criteria
@@ -250,17 +278,46 @@ export function PWAHandler() {
                 </span>
               </div>
             </div>
+            {swStatus.includes('⚠️') || swStatus.includes('❌') ? (
+              <div className='bg-yellow-900/30 border border-yellow-700 rounded p-3 mb-3'>
+                <p className='text-yellow-200 text-sm font-medium'>
+                  ⚠️ Action Required:{' '}
+                  {swStatus.includes('reload')
+                    ? 'Please reload this page first, then add to home screen.'
+                    : 'Service worker not ready. Wait a moment and try again.'}
+                </p>
+              </div>
+            ) : null}
             <div className='space-y-2 text-zinc-300'>
               <p className='font-medium'>Follow these steps:</p>
               <ol className='list-decimal list-inside space-y-2 ml-2'>
                 <li>
-                  Tap the <strong className='text-white'>menu</strong> button
-                  (⋮) in Chrome
+                  {swStatus.includes('⚠️') || swStatus.includes('❌') ? (
+                    <span className='line-through text-zinc-500'>
+                      Tap the menu button (⋮) in Chrome
+                    </span>
+                  ) : (
+                    <>
+                      Tap the <strong className='text-white'>menu</strong>{' '}
+                      button (⋮) in Chrome
+                    </>
+                  )}
                 </li>
                 <li>
-                  Select <strong className='text-white'>"Install app"</strong>{' '}
-                  or{' '}
-                  <strong className='text-white'>"Add to Home Screen"</strong>
+                  {isIOS ? (
+                    <>
+                      Tap{' '}
+                      <strong className='text-white'>
+                        "Add to Home Screen"
+                      </strong>
+                    </>
+                  ) : (
+                    <>
+                      Select{' '}
+                      <strong className='text-white'>"Install app"</strong> (not
+                      "Add to Home Screen")
+                    </>
+                  )}
                 </li>
                 <li>
                   Tap <strong className='text-white'>"Install"</strong> when
@@ -269,7 +326,11 @@ export function PWAHandler() {
               </ol>
             </div>
             <p className='text-xs text-zinc-400 mt-4'>
-              Installing the app gives you faster access and works offline
+              {isIOS
+                ? 'ℹ️ Note: On iOS 17.4+, PWAs open in Safari. On older iOS, they open standalone. Make sure to DELETE the old home screen icon and add a NEW one after visiting this page.'
+                : swStatus.includes('✅')
+                  ? '✅ Ready to install! Make sure to use "Install app" not "Add to Home Screen".'
+                  : 'Service worker must be active for proper PWA installation.'}
             </p>
           </div>
           <button
