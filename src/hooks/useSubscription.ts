@@ -82,6 +82,7 @@ export function useSubscription(): SubscriptionStatus {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerId }),
+        cache: 'no-store', // Prevent service worker caching
       });
 
       if (response.ok) {
@@ -123,6 +124,8 @@ export function useSubscription(): SubscriptionStatus {
           setSubscriptionState(stripeBasedState);
           return;
         }
+      } else {
+        console.warn('Failed to fetch subscription:', response.status);
       }
     } catch (error) {
       console.error('Error fetching subscription from Stripe:', error);

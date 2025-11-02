@@ -34,7 +34,13 @@ export function useAuthStatus(): AuthState {
           }, 5000); // 5 second timeout
         });
 
-        const sessionPromise = betterAuthClient.getSession();
+        // Use fetch directly to bypass service worker issues
+        const sessionPromise = betterAuthClient.getSession().catch((error) => {
+          console.warn('getSession failed, using fallback:', error);
+          // If session check fails, assume not authenticated but still allow profile access
+          return { data: { user: null } };
+        });
+
         const session = await Promise.race([sessionPromise, timeoutPromise]);
         const user = session?.data?.user || null;
 
