@@ -8,68 +8,42 @@ import { AuthComponent } from './Auth';
 
 interface SmartTrialButtonProps {
   className?: string;
-  variant?: 'primary' | 'secondary';
-  size?: 'sm' | 'md' | 'lg';
-  children?: React.ReactNode;
 }
 
-export function SmartTrialButton({
-  className = '',
-  variant = 'primary',
-  size = 'md',
-  children,
-}: SmartTrialButtonProps) {
+export function SmartTrialButton({ className = '' }: SmartTrialButtonProps) {
   const authState = useAuthStatus();
   const { isSubscribed, isTrialActive } = useSubscription();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Determine button text and action
   const getButtonConfig = () => {
     if (isSubscribed) {
       return {
         text: 'Manage Subscription',
         href: '/profile',
-        action: 'link',
+        action: 'link' as const,
       };
     }
 
-    // Simple logic: Better Auth required for subscriptions
     if (authState.isAuthenticated && authState.user) {
-      // User has Better Auth - can proceed to subscription
       return {
         text: isTrialActive ? 'Continue Trial' : 'Start Free Trial',
         href: '/pricing',
-        action: 'link',
+        action: 'link' as const,
       };
     }
 
-    // Not authenticated with Better Auth - need to sign in
     return {
       text: 'Sign In to Start Trial',
       href: null,
-      action: 'modal',
+      action: 'modal' as const,
     };
   };
 
   const config = getButtonConfig();
-
-  // Size classes
-  const sizeClasses = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg',
-  };
-
-  const variantClasses = {
-    primary:
-      'bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30',
-    secondary:
-      'bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 border border-zinc-700/50',
-  };
-
   const buttonClasses = `
-    ${sizeClasses[size]} 
-    ${variantClasses[variant]} 
+    px-6 py-3 text-base
+    bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 
+    border border-purple-500/20 hover:border-purple-500/30
     rounded-lg font-medium transition-all duration-200
     ${className}
   `.trim();
@@ -77,7 +51,7 @@ export function SmartTrialButton({
   if (config.action === 'link' && config.href) {
     return (
       <Link href={config.href} className={buttonClasses}>
-        {children || config.text}
+        {config.text}
       </Link>
     );
   }
@@ -91,10 +65,9 @@ export function SmartTrialButton({
   return (
     <>
       <button onClick={handleClick} className={buttonClasses}>
-        {children || config.text}
+        {config.text}
       </button>
 
-      {/* Auth Modal for new users */}
       {showAuthModal && (
         <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
           <div className='bg-zinc-900 rounded-lg p-6 w-full max-w-md relative'>
@@ -119,9 +92,7 @@ export function SmartTrialButton({
               compact={false}
               defaultToSignUp={true}
               onSuccess={() => {
-                console.log('🎉 Auth success - redirecting to pricing');
                 setShowAuthModal(false);
-                // After successful auth, redirect to pricing page
                 window.location.href = '/pricing';
               }}
             />
