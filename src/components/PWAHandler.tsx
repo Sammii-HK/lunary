@@ -26,13 +26,43 @@ export function PWAHandler() {
   useEffect(() => {
     // Register service worker
     if ('serviceWorker' in navigator) {
+      // Check if service worker is already registered
       navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log('Service Worker registered:', registration);
+        .getRegistration()
+        .then((existingRegistration) => {
+          if (existingRegistration) {
+            console.log(
+              '✅ Service Worker already registered:',
+              existingRegistration.scope,
+            );
+            return navigator.serviceWorker.ready;
+          } else {
+            // Register new service worker
+            return navigator.serviceWorker
+              .register('/sw.js', {
+                scope: '/',
+              })
+              .then((registration) => {
+                console.log(
+                  '✅ Service Worker registered:',
+                  registration.scope,
+                );
+                return navigator.serviceWorker.ready;
+              });
+          }
+        })
+        .then(() => {
+          console.log('✅ Service Worker is ready');
         })
         .catch((error) => {
-          console.error('Service Worker registration failed:', error);
+          console.error('❌ Service Worker registration failed:', error);
+          if (error instanceof Error) {
+            console.error('Error details:', {
+              message: error.message,
+              name: error.name,
+              stack: error.stack,
+            });
+          }
         });
     }
 

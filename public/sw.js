@@ -14,10 +14,19 @@ self.addEventListener('install', (event) => {
       .open(CACHE_NAME)
       .then((cache) => {
         console.log('Caching static assets');
-        return cache.addAll(STATIC_CACHE_URLS);
+        // Use addAll but catch errors for individual files
+        return cache.addAll(STATIC_CACHE_URLS).catch((error) => {
+          console.warn('Some assets failed to cache:', error);
+          // Continue even if some assets fail to cache
+        });
       })
       .then(() => {
         console.log('Service worker installed');
+        return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('Service worker installation failed:', error);
+        // Still try to activate even if caching fails
         return self.skipWaiting();
       }),
   );
@@ -36,11 +45,17 @@ self.addEventListener('activate', (event) => {
               console.log('Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
+            return Promise.resolve();
           }),
         );
       })
       .then(() => {
         console.log('Service worker activated');
+        return self.clients.claim();
+      })
+      .catch((error) => {
+        console.error('Service worker activation failed:', error);
+        // Still try to claim clients even if cache cleanup fails
         return self.clients.claim();
       }),
   );
@@ -116,14 +131,32 @@ self.addEventListener('sync', (event) => {
 
 // Push notifications for astronomical events
 self.addEventListener('push', (event) => {
-  console.log('Push message received');
+  console.log('🔔 Push message received', event);
 
   let notificationData;
   try {
-    notificationData = event.data ? event.data.json() : null;
+    if (event.data) {
+      const text = event.data.text();
+      console.log('Push data text:', text);
+
+      if (text) {
+        try {
+          notificationData = JSON.parse(text);
+        } catch (parseError) {
+          // If it's not JSON, treat it as plain text
+          notificationData = {
+            title: 'Lunary',
+            body: text,
+          };
+        }
+      }
+    }
   } catch (e) {
-    console.error('Error parsing push data:', e);
-    notificationData = null;
+    console.error('❌ Error parsing push data:', e);
+    notificationData = {
+      title: 'Lunary',
+      body: 'New cosmic update available',
+    };
   }
 
   const options = {
@@ -142,21 +175,58 @@ self.addEventListener('push', (event) => {
     ],
     requireInteraction: false,
     silent: false,
+    timestamp: Date.now(),
   };
 
+  console.log(
+    'Showing notification:',
+    notificationData?.title || 'Lunary',
+    options,
+  );
+
   event.waitUntil(
-    self.registration.showNotification(
-      notificationData?.title || 'Lunary',
-      options,
-    ),
+    self.registration
+      .showNotification(notificationData?.title || 'Lunary', options)
+      .then(() => {
+        console.log('✅ Notification displayed successfully');
+      })
+      .catch((error) => {
+        console.error('❌ Error showing notification:', error);
+      }),
   );
 });
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
+  console.log('🔔 Notification clicked:', event);
   event.notification.close();
 
-  if (event.action === 'open' || !event.action) {
-    event.waitUntil(clients.openWindow('/'));
-  }
+  const notificationData = event.notification.data || {};
+  const urlToOpen = notificationData.url || '/';
+
+  event.waitUntil(
+    clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if there's already a window/tab open with the target URL
+        for (let i = 0; i < clientList.length; i++) {
+          const client = clientList[i];
+          if (client.url === urlToOpen && 'focus' in client) {
+            return client.focus();
+          }
+        }
+
+        // If no window is open, open a new one
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+      .catch((error) => {
+        console.error('❌ Error handling notification click:', error);
+        // Fallback: try to open the URL anyway
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      }),
+  );
 });
