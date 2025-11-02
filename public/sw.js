@@ -48,7 +48,22 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
+  const url = new URL(event.request.url);
+
+  // CRITICAL: Skip ALL API routes and authentication - always use network, don't intercept
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname.includes('/auth/') ||
+    url.pathname.includes('sign-in') ||
+    url.pathname.includes('sign-out') ||
+    url.pathname.includes('get-session') ||
+    url.pathname.includes('get-subscription')
+  ) {
+    // Let the request go directly to network without any interception
+    return;
+  }
+
+  // Skip non-GET requests (for non-API routes)
   if (event.request.method !== 'GET') {
     return;
   }
@@ -56,18 +71,6 @@ self.addEventListener('fetch', (event) => {
   // Skip external requests
   if (!event.request.url.startsWith(self.location.origin)) {
     return;
-  }
-
-  // Skip authentication and API routes - always use network
-  const url = new URL(event.request.url);
-  if (
-    url.pathname.startsWith('/api/auth') ||
-    url.pathname.startsWith('/api/') ||
-    url.pathname.includes('auth') ||
-    url.pathname.includes('sign-in') ||
-    url.pathname.includes('sign-out')
-  ) {
-    return; // Let the request go to network, don't cache or intercept
   }
 
   event.respondWith(
