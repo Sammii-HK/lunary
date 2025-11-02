@@ -68,13 +68,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
         )}
 
         <div className='space-y-3'>
-          <SmartTrialButton
-            className='block w-full'
-            variant='secondary'
-            size='md'
-          >
-            {isTrialActive ? 'Continue Trial' : 'Start Free Trial'}
-          </SmartTrialButton>
+          <SmartTrialButton fullWidth />
 
           <Link
             href='/welcome'

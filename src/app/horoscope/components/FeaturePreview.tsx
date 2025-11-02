@@ -37,7 +37,7 @@ export function FeaturePreview({
             <p className='text-sm text-zinc-400 mb-4 leading-relaxed'>
               {description}
             </p>
-            <SmartTrialButton className='inline-block' />
+            <SmartTrialButton size='sm' />
           </div>
         </div>
       </div>

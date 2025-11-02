@@ -252,13 +252,7 @@ export default function ProfilePage() {
                 your birth chart, personalized horoscopes, and cosmic insights
                 tailored specifically to you.
               </p>
-              <SmartTrialButton
-                size='sm'
-                variant='primary'
-                className='inline-block'
-              >
-                Start Free Trial
-              </SmartTrialButton>
+              <SmartTrialButton size='sm' />
             </div>
           )}
 

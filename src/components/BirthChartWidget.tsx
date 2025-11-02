@@ -44,13 +44,7 @@ export const BirthChartWidget = () => {
               <li>• Cosmic aspects and their meanings</li>
               <li>• Detailed personality insights</li>
             </ul>
-            <SmartTrialButton
-              size='sm'
-              variant='primary'
-              className='inline-block'
-            >
-              Start Free Trial
-            </SmartTrialButton>
+            <SmartTrialButton size='sm' />
           </div>
         </div>
       </div>

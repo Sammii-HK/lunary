@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { MyAppAccount } from '../../schema';
 import {
@@ -40,7 +40,7 @@ export function useSubscription(): SubscriptionStatus {
 
   const [subscriptionState, setSubscriptionState] =
     useState<SubscriptionStatus>(defaultState);
-  const hasCheckedStripeRef = useRef<string | null>(null);
+  const [hasCheckedStripe, setHasCheckedStripe] = useState(false);
 
   let me: any;
   let hasJazzProvider = true;
@@ -138,12 +138,7 @@ export function useSubscription(): SubscriptionStatus {
 
     if (!me?.profile) {
       console.log('useSubscription: No profile found');
-      setSubscriptionState((prev) => ({
-        ...prev,
-        loading: false,
-        status: 'free',
-        plan: 'free',
-      }));
+      setSubscriptionState(defaultState);
       return;
     }
 
@@ -153,7 +148,6 @@ export function useSubscription(): SubscriptionStatus {
       profileSubscription,
     );
 
-    // If we have subscription data in profile, use it immediately
     if (
       profileSubscription &&
       profileSubscription.status &&
@@ -192,30 +186,33 @@ export function useSubscription(): SubscriptionStatus {
 
       console.log('useSubscription profile-based result:', profileBasedState);
       setSubscriptionState(profileBasedState);
-      // Mark as checked since we have subscription data
-      const profileId = me?.profile ? 'profile-exists' : null;
-      hasCheckedStripeRef.current = profileId;
+      setHasCheckedStripe(true);
       return;
     }
 
-    // Only check Stripe once per profile
-    const profileId = me?.profile ? 'profile-exists' : null;
-    if (hasCheckedStripeRef.current !== profileId) {
+    if (!hasCheckedStripe) {
+      setHasCheckedStripe(true);
       const customerId = getCustomerId();
 
       if (customerId) {
         console.log(
           'No profile subscription but found customer ID, fetching from Stripe...',
         );
-        hasCheckedStripeRef.current = profileId;
         fetchFromStripe(customerId);
+        return;
       } else {
         console.log('No customer ID found, using default state');
-        setSubscriptionState((prev) => ({ ...prev, loading: false }));
-        hasCheckedStripeRef.current = profileId;
+        setSubscriptionState(defaultState);
       }
     }
-  }, [me?.profile, getCustomerId, fetchFromStripe]);
+  }, [
+    me?.profile,
+    hasCheckedStripe,
+    hasJazzProvider,
+    defaultState,
+    getCustomerId,
+    fetchFromStripe,
+  ]);
 
   if (!hasJazzProvider) {
     return defaultState;

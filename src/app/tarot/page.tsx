@@ -174,13 +174,7 @@ const TarotReadings = () => {
                 <span>Suit and number pattern insights</span>
               </li>
             </ul>
-            <SmartTrialButton
-              size='md'
-              variant='primary'
-              className='inline-block'
-            >
-              Start Free Trial
-            </SmartTrialButton>
+            <SmartTrialButton />
           </div>
 
           <div>
@@ -224,13 +218,7 @@ const TarotReadings = () => {
                     Track your personal tarot journey with 7+ days of card
                     history
                   </p>
-                  <SmartTrialButton
-                    size='sm'
-                    variant='primary'
-                    className='inline-block'
-                  >
-                    Start Free Trial
-                  </SmartTrialButton>
+                  <SmartTrialButton />
                 </div>
               </div>
             </div>

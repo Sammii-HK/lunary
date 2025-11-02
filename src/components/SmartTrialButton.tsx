@@ -7,10 +7,16 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { AuthComponent } from './Auth';
 
 interface SmartTrialButtonProps {
-  className?: string;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'button' | 'link';
+  fullWidth?: boolean;
 }
 
-export function SmartTrialButton({ className = '' }: SmartTrialButtonProps) {
+export function SmartTrialButton({
+  size = 'md',
+  variant = 'button',
+  fullWidth = false,
+}: SmartTrialButtonProps) {
   const authState = useAuthStatus();
   const { isSubscribed, isTrialActive } = useSubscription();
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -40,12 +46,29 @@ export function SmartTrialButton({ className = '' }: SmartTrialButtonProps) {
   };
 
   const config = getButtonConfig();
+
+  // Size styles
+  const sizeClasses = {
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-3 text-base',
+    lg: 'px-8 py-4 text-lg',
+  };
+
+  // Variant styles
+  const variantClasses = {
+    button:
+      'bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 rounded-lg font-medium',
+    link: 'text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1 border-0',
+  };
+
+  // Base classes
+  const baseClasses = 'inline-block transition-all duration-200';
+
   const buttonClasses = `
-    px-6 py-3 text-base
-    bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 
-    border border-purple-500/20 hover:border-purple-500/30
-    rounded-lg font-medium transition-all duration-200
-    ${className}
+    ${baseClasses}
+    ${sizeClasses[size]}
+    ${variantClasses[variant]}
+    ${fullWidth ? 'block w-full' : ''}
   `.trim();
 
   if (config.action === 'link' && config.href) {

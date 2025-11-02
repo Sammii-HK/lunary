@@ -829,13 +829,7 @@ const BirthChartPage = () => {
               <li>🎯 Personality insights and guidance</li>
             </ul>
           </div>
-          <SmartTrialButton
-            size='lg'
-            variant='primary'
-            className='inline-block shadow-lg hover:shadow-xl'
-          >
-            Start Free Trial
-          </SmartTrialButton>
+          <SmartTrialButton size='lg' />
         </div>
       </div>
     );
