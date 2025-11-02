@@ -488,8 +488,8 @@ export default function ProfilePage() {
       {/* Notification Settings - only for authenticated users */}
       {authState.isAuthenticated && !isEditing && <NotificationSettings />}
 
-      {/* Subscription Management Section - only for authenticated users */}
-      {authState.isAuthenticated && !isEditing && (
+      {/* Subscription Management Section - always show for authenticated users */}
+      {authState.isAuthenticated && (
         <SubscriptionManagement
           customerId={
             (me?.profile as any)?.stripeCustomerId ||

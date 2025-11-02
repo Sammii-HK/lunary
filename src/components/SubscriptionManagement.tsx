@@ -29,7 +29,8 @@ export default function SubscriptionManagement({
   const [stripeSubscription, setStripeSubscription] =
     useState<StripeSubscription | null>(null);
 
-  const displaySubscription = stripeSubscription || subscription;
+  const displaySubscription = stripeSubscription ||
+    subscription || { status: 'free', isSubscribed: false };
 
   useEffect(() => {
     const fetchStripeSubscription = async () => {
@@ -99,8 +100,9 @@ export default function SubscriptionManagement({
   };
 
   if (
-    (displaySubscription as any)?.isSubscribed === false &&
-    displaySubscription.status === 'free'
+    !displaySubscription ||
+    ((displaySubscription as any)?.isSubscribed === false &&
+      displaySubscription.status === 'free')
   ) {
     return (
       <div className='bg-zinc-800 rounded-lg p-4 w-full max-w-md border border-zinc-700'>
