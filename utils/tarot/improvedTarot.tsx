@@ -199,6 +199,7 @@ const getSuitReading = (suit: string, count: number, total: number): string => {
 const analyzeTrends = (
   userName?: string,
   timeFrameDays: number = 30,
+  userBirthday?: string,
 ): TrendAnalysis => {
   const pastReadings: TarotCard[] = [];
   const today = dayjs();
@@ -206,7 +207,11 @@ const analyzeTrends = (
   // Collect past readings
   for (let i = 1; i <= timeFrameDays; i++) {
     const date = today.subtract(i, 'day');
-    const card = getTarotCard(date.toDate().toDateString(), userName);
+    const card = getTarotCard(
+      date.toDate().toDateString(),
+      userName,
+      userBirthday,
+    );
     pastReadings.push(card);
   }
 
@@ -382,15 +387,32 @@ export const getImprovedTarotReading = (
   userName?: string,
   includeTrends: boolean = true,
   timeFrameDays: number = 30,
+  userBirthday?: string,
 ): ImprovedReading => {
-  const today = new Date().toDateString();
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  const weekStartString = weekStart.toDateString();
+  const today = new Date();
+  const todayString = today.toDateString();
 
-  // Get cards
-  const daily = getTarotCard(today, userName);
-  const weekly = getTarotCard(weekStartString, userName);
+  // Calculate week start and week number for unique weekly seed
+  const weekStart = new Date(today);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+
+  // Get ISO week number and year for unique weekly seed
+  const weekStartYear = weekStart.getFullYear();
+  const weekStartMonth = weekStart.getMonth() + 1; // 1-based
+  const weekStartDate = weekStart.getDate();
+  const dayOfYear = Math.floor(
+    (weekStart.getTime() - new Date(weekStartYear, 0, 0).getTime()) / 86400000,
+  );
+  const weekNumber = Math.floor(dayOfYear / 7);
+
+  // Create UNIQUE weekly seed - must be completely different from daily seed
+  // Include "weekly" prefix to ensure it's different from daily
+  const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
+
+  // Get cards - daily uses todayString, weekly uses weeklySeed
+  // The seed strings are completely different so cards will be different
+  const daily = getTarotCard(`daily-${todayString}`, userName, userBirthday);
+  const weekly = getTarotCard(weeklySeed, userName, userBirthday);
 
   // Generate guidance
   const guidance = generateClearGuidance(daily, weekly, userName);
@@ -398,7 +420,7 @@ export const getImprovedTarotReading = (
   // Get trends if requested
   let trendAnalysis: TrendAnalysis | undefined;
   if (includeTrends) {
-    trendAnalysis = analyzeTrends(userName, timeFrameDays);
+    trendAnalysis = analyzeTrends(userName, timeFrameDays, userBirthday);
   }
 
   return {

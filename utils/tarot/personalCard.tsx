@@ -21,7 +21,7 @@ const calculatePersonalCard = (
   const birthDate = dayjs(userBirthday);
   const seed = `${userName || 'seeker'}-${birthDate.year()}-${birthDate.month()}-${birthDate.date()}-personal`;
 
-  const card = getTarotCard(seed, userName);
+  const card = getTarotCard(seed, userName, userBirthday);
 
   // Get detailed card information
   const cardDetails = getCardDetails(card);

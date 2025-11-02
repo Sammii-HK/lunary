@@ -105,7 +105,7 @@ const getEnhancedPersonalCard = (
   // Combine all influences for personal card selection
   const personalSeed = `${userBirthday || 'seeker'}-${planetaryInfluence}-${numerologyInfluence}-${weekInfluence}-${dailyInfluences.dateString}`;
 
-  const card = getTarotCard(personalSeed, userName);
+  const card = getTarotCard(personalSeed, userName, userBirthday);
 
   // Generate explanation for why this card was chosen
   const planetaryMeanings = {
@@ -150,6 +150,7 @@ const getEnhancedPersonalCard = (
 const analyzeTarotTrends = (
   userName?: string,
   days: number = 30,
+  userBirthday?: string,
 ): TrendAnalysis => {
   const pastReadings: { date: string; card: TarotCard }[] = [];
   const today = dayjs();
@@ -157,7 +158,11 @@ const analyzeTarotTrends = (
   // Collect past readings
   for (let i = 0; i < days; i++) {
     const date = today.subtract(i, 'day');
-    const card = getTarotCard(date.toDate().toDateString(), userName);
+    const card = getTarotCard(
+      date.toDate().toDateString(),
+      userName,
+      userBirthday,
+    );
     pastReadings.push({
       date: date.format('YYYY-MM-DD'),
       card,
@@ -306,16 +311,30 @@ export const getEnhancedPersonalizedTarotReading = (
   userBirthday?: string,
   includeTrends: boolean = true,
 ): EnhancedReading => {
-  const today = new Date().toDateString();
-  const weekStart = new Date();
+  const today = new Date();
+  const todayString = today.toDateString();
+
+  // Calculate week start and week number for unique weekly seed
+  const weekStart = new Date(today);
   weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  const weekStartString = weekStart.toDateString();
 
-  // Daily card for today
-  const daily = getTarotCard(today, userName);
+  // Get week number of year and other date components
+  const weekStartYear = weekStart.getFullYear();
+  const weekStartMonth = weekStart.getMonth() + 1;
+  const weekStartDate = weekStart.getDate();
+  const dayOfYear = Math.floor(
+    (weekStart.getTime() - new Date(weekStartYear, 0, 0).getTime()) / 86400000,
+  );
+  const weekNumber = Math.floor(dayOfYear / 7);
 
-  // Weekly card based on start of week
-  const weekly = getTarotCard(weekStartString, userName);
+  // Create UNIQUE weekly seed - must be completely different from daily seed
+  const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
+
+  // Daily card for today - prefix with "daily-" to ensure uniqueness
+  const daily = getTarotCard(`daily-${todayString}`, userName, userBirthday);
+
+  // Weekly card based on week number and date
+  const weekly = getTarotCard(weeklySeed, userName, userBirthday);
 
   // Enhanced personal card with daily variation
   const { card: personal, reason: personalCardReason } =
@@ -324,7 +343,7 @@ export const getEnhancedPersonalizedTarotReading = (
   // Analyze trends if requested
   let trendAnalysis: TrendAnalysis | undefined;
   if (includeTrends) {
-    trendAnalysis = analyzeTarotTrends(userName, 30);
+    trendAnalysis = analyzeTarotTrends(userName, 30, userBirthday);
   }
 
   // Generate enhanced advice

@@ -232,6 +232,7 @@ const TarotReadings = () => {
     userName,
     true,
     timeFrame,
+    userBirthday,
   );
 
   const currentDate = dayjs();
@@ -248,7 +249,11 @@ const TarotReadings = () => {
     return {
       day: day.format('dddd'),
       date: day.format('MMM D'),
-      card: getTarotCard(dayjs(day).toDate().toDateString(), userName),
+      card: getTarotCard(
+        dayjs(day).toDate().toDateString(),
+        userName,
+        userBirthday,
+      ),
     };
   });
 

@@ -11,8 +11,9 @@ type TarotCard = {
 export const getPersonalizedTarotCard = (
   date: string,
   userName?: string,
+  userBirthday?: string,
 ): TarotCard => {
-  return getTarotCard(date, userName);
+  return getTarotCard(date, userName, userBirthday);
 };
 
 export const getPersonalizedTarotReading = (
@@ -24,23 +25,37 @@ export const getPersonalizedTarotReading = (
   personal: TarotCard;
   advice: string;
 } => {
-  const today = new Date().toDateString();
-  const weekStart = new Date();
+  const today = new Date();
+  const todayString = today.toDateString();
+
+  // Calculate week start and week number for unique weekly seed
+  const weekStart = new Date(today);
   weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  const weekStartString = weekStart.toDateString();
 
-  // Daily card for today
-  const daily = getTarotCard(today, userName);
+  // Get week number of year and other date components
+  const weekStartYear = weekStart.getFullYear();
+  const weekStartMonth = weekStart.getMonth() + 1;
+  const weekStartDate = weekStart.getDate();
+  const dayOfYear = Math.floor(
+    (weekStart.getTime() - new Date(weekStartYear, 0, 0).getTime()) / 86400000,
+  );
+  const weekNumber = Math.floor(dayOfYear / 7);
 
-  // Weekly card based on start of week
-  const weekly = getTarotCard(weekStartString, userName);
+  // Create UNIQUE weekly seed - must be completely different from daily seed
+  const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
+
+  // Daily card for today - prefix with "daily-" to ensure uniqueness
+  const daily = getTarotCard(`daily-${todayString}`, userName, userBirthday);
+
+  // Weekly card based on week number and date
+  const weekly = getTarotCard(weeklySeed, userName, userBirthday);
 
   // Personal card based on birthday + current month
   const currentMonth = new Date().getMonth().toString();
   const personalSeed = userBirthday
     ? userBirthday + currentMonth
     : currentMonth;
-  const personal = getTarotCard(personalSeed, userName);
+  const personal = getTarotCard(personalSeed, userName, userBirthday);
 
   // Generate personalized advice
   const advice = generatePersonalizedAdvice(daily, weekly, personal, userName);
