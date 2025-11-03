@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v5'; // Bumped to force fresh PWA install
+const CACHE_NAME = 'lunary-v6'; // Network-first navigation fix to prevent tab redirects
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -101,36 +101,45 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CRITICAL FOR CHROME iOS: Navigation requests MUST be served from cache
+  // CRITICAL: For navigation requests, use network-first to avoid stale redirects
+  // Only fallback to cache if offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match('/').then((cachedResponse) => {
-        if (cachedResponse) {
-          console.log('✅ Serving start_url from cache');
-          return cachedResponse;
-        }
-        // Fallback to network, then cache it
-        return fetch(event.request)
-          .then((response) => {
-            if (
-              response &&
-              response.status === 200 &&
-              response.type === 'basic'
-            ) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
+      fetch(event.request)
+        .then((response) => {
+          // Only cache successful responses
+          if (
+            response &&
+            response.status === 200 &&
+            response.type === 'basic'
+          ) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request.url, responseToCache);
+              // Also cache as start_url for offline fallback
+              if (event.request.url === self.location.origin + '/') {
                 cache.put('/', responseToCache);
-              });
+              }
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Offline fallback: serve from cache if available
+          console.log('⚠️ Network failed, serving from cache');
+          return caches.match(event.request.url).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
             }
-            return response;
-          })
-          .catch(() => {
-            // Ultimate fallback
-            return caches
-              .match('/')
-              .catch(() => new Response('Offline', { status: 503 }));
+            // Ultimate fallback: try to serve start_url
+            return caches.match('/').catch(() => {
+              return new Response('Offline', {
+                status: 503,
+                headers: { 'Content-Type': 'text/html' },
+              });
+            });
           });
-      }),
+        }),
     );
     return;
   }

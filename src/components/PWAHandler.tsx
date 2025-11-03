@@ -79,10 +79,22 @@ export function PWAHandler() {
       // Register immediately
       registerSW();
 
-      // Also listen for controller changes (important for standalone launches)
+      // Listen for controller changes but don't reload in PWA mode
+      // Reloading in PWA can cause it to open in a tab
       const handleControllerChange = () => {
         console.log('✅ Service worker controller changed');
-        window.location.reload();
+        // Only reload if NOT in PWA mode (to avoid breaking standalone)
+        const isPWA =
+          window.matchMedia('(display-mode: minimal-ui)').matches ||
+          window.matchMedia('(display-mode: standalone)').matches ||
+          (window.navigator as any).standalone === true;
+
+        if (!isPWA) {
+          console.log('Reloading page (not in PWA mode)');
+          window.location.reload();
+        } else {
+          console.log('Skipping reload (PWA mode - would break standalone)');
+        }
       };
 
       navigator.serviceWorker.addEventListener(
