@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v9'; // Skip debug pages, navigation interception for iOS PWA
+const CACHE_NAME = 'lunary-v10'; // Restored to simple working version (no navigation interception)
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -6,44 +6,24 @@ const STATIC_CACHE_URLS = [
   '/icons/icon-512x512.png',
 ];
 
-// Install event - cache static assets IMMEDIATELY
+// Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('Service worker installing...');
-
-  // CRITICAL: Force activate immediately so Chrome iOS sees it controlling
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => {
-        console.log('Caching static assets, prioritizing start_url');
-        // Cache the start_url first - Chrome iOS needs this!
-        return cache.addAll(STATIC_CACHE_URLS).catch((err) => {
-          console.warn(
-            'Failed to cache some assets, trying individually:',
-            err,
-          );
-          return Promise.all(
-            STATIC_CACHE_URLS.map((url) =>
-              cache
-                .add(url)
-                .catch((err) => console.warn('Failed to cache', url, err)),
-            ),
-          );
-        });
+        console.log('Caching static assets');
+        return cache.addAll(STATIC_CACHE_URLS);
       })
       .then(() => {
-        console.log('✅ Service worker installed, forcing activation');
-        // Force immediate activation - don't wait for old SW to close
+        console.log('Service worker installed');
         return self.skipWaiting();
-      })
-      .catch((err) => {
-        console.error('❌ Service worker install failed:', err);
-        throw err;
       }),
   );
 });
 
-// Activate event - clean up old caches and claim clients
+// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('Service worker activating...');
   event.waitUntil(
@@ -102,38 +82,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CRITICAL FOR iOS: Navigation requests MUST be served from cache
-  // iOS Safari requires start_url to be served from cache for PWA to work
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      caches.match('/').then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        // Fallback to network, then cache it
-        return fetch(event.request)
-          .then((response) => {
-            if (
-              response &&
-              response.status === 200 &&
-              response.type === 'basic'
-            ) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put('/', responseToCache);
-              });
-            }
-            return response;
-          })
-          .catch(() => {
-            return caches.match('/');
-          });
-      }),
-    );
-    return;
-  }
-
-  // For other requests, cache-first strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

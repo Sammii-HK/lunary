@@ -75,6 +75,16 @@ export function PWADebugInline() {
           `Display Mode - Minimal-UI: ${isMinimalUi}, Standalone: ${isStandalone}, iOS: ${iosStandalone}`,
         );
 
+        // Check if using Chrome on iOS (doesn't support PWAs)
+        const userAgent = window.navigator?.userAgent || '';
+        const isIOS = /iPhone|iPad|iPod/.test(userAgent);
+        const isChrome = /CriOS|Chrome/.test(userAgent);
+        if (isIOS && isChrome) {
+          info.push(
+            '⚠️ WARNING: Chrome on iOS does NOT support PWAs! Use Safari instead.',
+          );
+        }
+
         // Check manifest
         try {
           const manifestRes = await fetch('/manifest.json');

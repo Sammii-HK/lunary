@@ -12,6 +12,7 @@ import { PWAHandler } from '@/components/PWAHandler';
 import { NotificationManager } from '@/components/NotificationManager';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PWADebugInline } from '@/components/PWADebugInline';
+import { PWAInstallGuard } from '@/components/PWAInstallGuard';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -61,6 +62,7 @@ export default function RootLayout({
             </main>
             <Navbar />
             <ErrorBoundary>
+              <PWAInstallGuard />
               <PWAHandler />
               <NotificationManager />
               <PWADebugInline />

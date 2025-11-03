@@ -130,9 +130,16 @@ export function PWAHandler() {
     // iOS: Show instructions
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     if (isIOS) {
-      alert(
-        'To install Lunary:\n\n1. Tap the Share button (square with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"\n\nThen open it from your home screen!',
-      );
+      const isChrome = /CriOS|Chrome/.test(navigator.userAgent);
+      if (isChrome) {
+        alert(
+          '⚠️ IMPORTANT: Chrome on iOS does NOT support PWAs!\n\nTo install Lunary as a PWA:\n\n1. Open this page in SAFARI (not Chrome)\n2. Wait for the service worker to register (check debug box)\n3. Tap the Share button (square with arrow)\n4. Scroll down and tap "Add to Home Screen"\n5. Tap "Add"\n\nThen open it from your home screen!\n\nChrome on iOS only creates bookmarks, not real PWAs.',
+        );
+      } else {
+        alert(
+          'To install Lunary:\n\n1. Make sure service worker is registered (check debug box in top-right)\n2. Tap the Share button (square with arrow)\n3. Scroll down and tap "Add to Home Screen"\n4. Tap "Add"\n\nThen open it from your home screen!',
+        );
+      }
       setShowInstallPrompt(false);
     }
   };
