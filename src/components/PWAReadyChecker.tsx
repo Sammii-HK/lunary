@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PWA_MANIFEST_URL } from '@/constants/pwa';
 
 export function PWAReadyChecker() {
   const [isReady, setIsReady] = useState(false);
@@ -30,7 +31,9 @@ export function PWAReadyChecker() {
 
       // Check manifest
       try {
-        const manifestResponse = await fetch('/manifest.json');
+        const manifestResponse = await fetch(PWA_MANIFEST_URL, {
+          cache: 'no-store',
+        });
         if (manifestResponse.ok) {
           const manifest = await manifestResponse.json();
           newChecks.manifest = !!manifest && !!manifest.name;

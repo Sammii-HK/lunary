@@ -11,7 +11,7 @@ import { LunaryJazzProvider } from '@/components/JazzProvider';
 import { PWAHandler } from '@/components/PWAHandler';
 import { NotificationManager } from '@/components/NotificationManager';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { PWADebugInline } from '@/components/PWADebugInline';
+import { PWA_MANIFEST_URL } from '@/constants/pwa';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${moonSymbol} Lunary`,
     description: 'Your Lunar Diary',
-    manifest: '/manifest.json',
+    manifest: PWA_MANIFEST_URL,
     themeColor: '#18181b',
     appleWebApp: {
       capable: true,
@@ -61,7 +61,6 @@ export default function RootLayout({
             </main>
             <Navbar />
             <ErrorBoundary>
-              <PWADebugInline />
               <PWAHandler />
               <NotificationManager />
             </ErrorBoundary>

@@ -116,12 +116,12 @@ export function NotificationManager() {
         return;
       }
 
-      // Ensure pushSubscriptions array exists
-      if (!(me.root as any).pushSubscriptions) {
-        (me.root as any).pushSubscriptions = [];
+      const root = me.root as any;
+
+      if (!root.pushSubscriptions) {
+        root.$jazz.set('pushSubscriptions', []);
       }
 
-      // Create client storage subscription object
       const clientSubscription = PushSubscription.create({
         endpoint: subscription.endpoint,
         p256dh: (subscription as any).keys.p256dh,
@@ -138,22 +138,19 @@ export function NotificationManager() {
         },
       });
 
-      // Get the pushSubscriptions list safely
-      const pushSubscriptions = (me.root as any).pushSubscriptions;
-      if (pushSubscriptions) {
-        // Check if subscription already exists
-        const existingIndex = pushSubscriptions.findIndex(
-          (sub: any) => sub?.endpoint === subscription.endpoint,
-        );
+      const pushSubscriptions = (root.pushSubscriptions || []) as any[];
+      const existingIndex = pushSubscriptions.findIndex(
+        (sub: any) => sub?.endpoint === subscription.endpoint,
+      );
 
-        if (existingIndex >= 0) {
-          // Update existing subscription
-          pushSubscriptions[existingIndex] = clientSubscription;
-        } else {
-          // Add new subscription
-          pushSubscriptions.push(clientSubscription);
-        }
-      }
+      const updatedSubscriptions =
+        existingIndex >= 0
+          ? pushSubscriptions.map((sub, index) =>
+              index === existingIndex ? clientSubscription : sub,
+            )
+          : [...pushSubscriptions, clientSubscription];
+
+      root.$jazz.set('pushSubscriptions', updatedSubscriptions);
 
       console.log('✅ Push subscription saved to client storage');
 
@@ -200,16 +197,18 @@ export function NotificationManager() {
       setSubscription(null);
 
       if (me?.root) {
-        const pushSubscriptions = (me.root as any).pushSubscriptions;
-        if (pushSubscriptions) {
-          const subscriptionIndex = pushSubscriptions.findIndex(
-            (sub: any) => sub?.endpoint === subscription.endpoint,
-          );
+        const root = me.root as any;
+        const pushSubscriptions = (root.pushSubscriptions || []) as any[];
+        const subscriptionIndex = pushSubscriptions.findIndex(
+          (sub: any) => sub?.endpoint === subscription.endpoint,
+        );
 
-          if (subscriptionIndex >= 0) {
-            pushSubscriptions.splice(subscriptionIndex, 1);
-            console.log('✅ Push subscription removed from client storage');
-          }
+        if (subscriptionIndex >= 0) {
+          const updatedSubscriptions = pushSubscriptions.filter(
+            (_sub, index) => index !== subscriptionIndex,
+          );
+          root.$jazz.set('pushSubscriptions', updatedSubscriptions);
+          console.log('✅ Push subscription removed from client storage');
         }
       }
 

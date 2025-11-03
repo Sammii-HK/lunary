@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PWA_MANIFEST_URL } from '@/constants/pwa';
 
 export function PWADebugInline() {
   const [status, setStatus] = useState<string>('Checking...');
@@ -87,7 +88,9 @@ export function PWADebugInline() {
 
         // Check manifest
         try {
-          const manifestRes = await fetch('/manifest.json');
+          const manifestRes = await fetch(PWA_MANIFEST_URL, {
+            cache: 'no-store',
+          });
           if (manifestRes.ok) {
             const manifest = await manifestRes.json();
             info.push(

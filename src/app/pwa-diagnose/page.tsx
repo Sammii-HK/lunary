@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PWA_MANIFEST_URL } from '@/constants/pwa';
 
 export default function PWADiagnosePage() {
   const [results, setResults] = useState<
@@ -46,7 +47,9 @@ export default function PWADiagnosePage() {
 
       // 3. Check Manifest
       try {
-        const manifestRes = await fetch('/manifest.json');
+        const manifestRes = await fetch(PWA_MANIFEST_URL, {
+          cache: 'no-store',
+        });
         if (!manifestRes.ok) {
           checks.push({
             check: 'Manifest Access',

@@ -1,7 +1,7 @@
-const CACHE_NAME = 'lunary-v11'; // Ensure start_url cached first for iOS PWA
+const CACHE_NAME = 'lunary-v12'; // Ensure start_url cached first for iOS PWA
 const STATIC_CACHE_URLS = [
   '/',
-  '/manifest.json',
+  '/manifest.json?v=20251103-1',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
 ];

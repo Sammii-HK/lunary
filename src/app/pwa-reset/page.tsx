@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PWA_MANIFEST_URL } from '@/constants/pwa';
 
 export default function PWAResetPage() {
   const [logs, setLogs] = useState<string[]>([]);
@@ -168,7 +169,7 @@ export default function PWAResetPage() {
 
     // Check manifest
     try {
-      const manifest = await fetch('/manifest.json');
+      const manifest = await fetch(PWA_MANIFEST_URL, { cache: 'no-store' });
       if (manifest.ok) {
         const data = await manifest.json();
         addLog('Manifest:');
