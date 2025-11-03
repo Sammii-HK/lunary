@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v10'; // Restored to simple working version (no navigation interception)
+const CACHE_NAME = 'lunary-v11'; // Ensure start_url cached first for iOS PWA
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -7,18 +7,45 @@ const STATIC_CACHE_URLS = [
 ];
 
 // Install event - cache static assets
+// CRITICAL: Cache start_url FIRST - iOS needs this immediately
 self.addEventListener('install', (event) => {
   console.log('Service worker installing...');
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => {
-        console.log('Caching static assets');
-        return cache.addAll(STATIC_CACHE_URLS);
+        console.log('Caching static assets, prioritizing start_url');
+        // Cache start_url FIRST - this is critical for iOS PWA
+        return cache
+          .add('/')
+          .then(() => {
+            console.log('✅ Start URL cached');
+            // Then cache other assets
+            return cache.addAll(STATIC_CACHE_URLS.filter((url) => url !== '/'));
+          })
+          .catch((err) => {
+            console.error('Failed to cache assets:', err);
+            // If addAll fails, try caching individually
+            return Promise.all(
+              STATIC_CACHE_URLS.map((url) =>
+                cache
+                  .add(url)
+                  .catch((e) => console.warn('Failed to cache', url, e)),
+              ),
+            );
+          });
       })
       .then(() => {
-        console.log('Service worker installed');
-        return self.skipWaiting();
+        console.log('✅ Service worker installed - all assets cached');
+        // Verify start_url is cached
+        return caches.match('/').then((cached) => {
+          if (!cached) {
+            console.error('❌ CRITICAL: Start URL not cached after install!');
+            throw new Error('Start URL not cached');
+          }
+          console.log('✅ Verified: Start URL is cached');
+          return self.skipWaiting();
+        });
       }),
   );
 });

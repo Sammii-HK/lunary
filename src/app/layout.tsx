@@ -62,10 +62,8 @@ export default function RootLayout({
             </main>
             <Navbar />
             <ErrorBoundary>
-              <PWAInstallGuard />
               <PWAHandler />
               <NotificationManager />
-              <PWADebugInline />
             </ErrorBoundary>
           </LunaryJazzProvider>
         </ErrorBoundary>
