@@ -25,54 +25,67 @@ export function PWAHandler() {
 
   useEffect(() => {
     // Register service worker IMMEDIATELY on page load
-    if ('serviceWorker' in navigator) {
-      // Force immediate registration for standalone mode
+    if ('serviceWorker' in navigator && navigator.serviceWorker) {
+      // Force immediate registration and control
       const registerSW = async () => {
         try {
-          const registration = await navigator.serviceWorker.getRegistration();
+          let registration = await navigator.serviceWorker.getRegistration();
 
-          if (registration) {
+          if (!registration) {
+            // Register new service worker
+            registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/',
+              updateViaCache: 'none',
+            });
+            console.log('✅ Service worker registered:', registration.scope);
+          } else {
             // Update existing service worker
             await registration.update();
             console.log('✅ Service worker updated');
-
-            // Wait for it to be ready
-            const readyRegistration = await navigator.serviceWorker.ready;
-            console.log(
-              '✅ Service worker ready and controlling:',
-              readyRegistration.active?.state,
-            );
-
-            // Force skip waiting if needed
-            if (readyRegistration.waiting) {
-              readyRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            }
-          } else {
-            // Register new service worker
-            const newRegistration = await navigator.serviceWorker.register(
-              '/sw.js',
-              {
-                scope: '/',
-                updateViaCache: 'none', // Always check for updates
-              },
-            );
-            console.log('✅ Service worker registered:', newRegistration.scope);
-
-            // Wait for it to be ready
-            await navigator.serviceWorker.ready;
-            console.log('✅ Service worker ready');
           }
 
-          // Ensure service worker is controlling this page
-          if (navigator.serviceWorker.controller) {
-            console.log('✅ Service worker is controlling this page');
-          } else {
+          // CRITICAL: Wait for service worker to be ready
+          await navigator.serviceWorker.ready;
+          console.log('✅ Service worker ready');
+
+          // Force skip waiting if there's a waiting worker
+          if (registration.waiting) {
+            console.log('⚠️ Service worker waiting, forcing skip...');
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+
+            // Wait a bit for it to activate
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+
+          // Check if it's controlling - if not, we need to reload
+          if (!navigator.serviceWorker.controller) {
             console.log(
-              '⚠️ Service worker not yet controlling, will activate on next load',
+              '⚠️ Service worker not controlling yet. Checking if we can force it...',
             );
+
+            // Wait a bit more - sometimes it takes time
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            // Still not controlling? The SW might need a reload to take control
+            // But DON'T reload if we're in PWA mode (would break it)
+            const isPWA =
+              window.matchMedia('(display-mode: minimal-ui)').matches ||
+              window.matchMedia('(display-mode: standalone)').matches ||
+              (window.navigator as any).standalone === true;
+
+            if (!isPWA && !navigator.serviceWorker.controller) {
+              console.log('🔄 Service worker needs reload to take control...');
+              // Don't auto-reload - let user know they need to refresh
+              console.warn(
+                '⚠️ Please refresh the page for service worker to take control',
+              );
+            }
+          } else {
+            console.log('✅ Service worker is controlling this page');
           }
         } catch (error) {
           console.error('❌ Service Worker registration failed:', error);
+          console.error('Error details:', error);
         }
       };
 
