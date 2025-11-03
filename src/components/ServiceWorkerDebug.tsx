@@ -68,9 +68,13 @@ export function ServiceWorkerDebug() {
         `navigator.serviceWorker exists: ${navigator.serviceWorker ? 'YES' : 'NO'}`,
       );
 
-      if (!('serviceWorker' in navigator)) {
+      if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
         addLog('❌ Service workers not supported in this browser');
-        addLog(`   User agent: ${navigator.userAgent}`);
+        const userAgent =
+          typeof window !== 'undefined' && window.navigator
+            ? window.navigator.userAgent || 'unknown'
+            : 'unknown';
+        addLog(`   User agent: ${userAgent}`);
         addLog(
           `   This might be private mode, old browser, or service workers disabled`,
         );
