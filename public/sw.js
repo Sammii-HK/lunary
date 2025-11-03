@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v6'; // Network-first navigation fix to prevent tab redirects
+const CACHE_NAME = 'lunary-v7'; // Simplified: no navigation interception to prevent tab redirects
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -101,46 +101,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CRITICAL: For navigation requests, use network-first to avoid stale redirects
-  // Only fallback to cache if offline
+  // CRITICAL: Don't intercept navigation requests - let browser handle them naturally
+  // Intercepting navigation can cause PWA to redirect to tab on iOS
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // Only cache successful responses
-          if (
-            response &&
-            response.status === 200 &&
-            response.type === 'basic'
-          ) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request.url, responseToCache);
-              // Also cache as start_url for offline fallback
-              if (event.request.url === self.location.origin + '/') {
-                cache.put('/', responseToCache);
-              }
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Offline fallback: serve from cache if available
-          console.log('⚠️ Network failed, serving from cache');
-          return caches.match(event.request.url).then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // Ultimate fallback: try to serve start_url
-            return caches.match('/').catch(() => {
-              return new Response('Offline', {
-                status: 503,
-                headers: { 'Content-Type': 'text/html' },
-              });
-            });
-          });
-        }),
-    );
+    // Let the browser handle navigation - don't intercept
     return;
   }
 

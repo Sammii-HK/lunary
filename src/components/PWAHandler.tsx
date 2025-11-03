@@ -110,20 +110,36 @@ export function PWAHandler() {
       };
     }
 
-    // Check if app is already installed
-    if (
+    // Check if app is already installed (including minimal-ui for iOS)
+    const isPWA =
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true
-    ) {
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      (window.navigator as any).standalone === true;
+
+    if (isPWA) {
       setIsInstalled(true);
     }
 
-    // Listen for beforeinstallprompt event
+    // Listen for beforeinstallprompt event (Android/Desktop only)
+    // On iOS, this won't fire - users must manually "Add to Home Screen"
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstallPrompt(true);
     };
+
+    // On iOS, show install prompt after a delay if not installed
+    // beforeinstallprompt doesn't work on iOS Safari
+    if (typeof window !== 'undefined') {
+      const userAgent = window.navigator?.userAgent || '';
+      const isIOS = /iPhone|iPad|iPod/.test(userAgent);
+      if (isIOS && !isPWA && !deferredPrompt) {
+        // Show install prompt on iOS after 5 seconds
+        setTimeout(() => {
+          setShowInstallPrompt(true);
+        }, 5000);
+      }
+    }
 
     // Listen for app installed event
     const handleAppInstalled = (e: Event) => {
@@ -145,19 +161,30 @@ export function PWAHandler() {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
+    // Android/Desktop: Use programmatic install
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
 
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
+      setDeferredPrompt(null);
+      setShowInstallPrompt(false);
+      return;
     }
 
-    setDeferredPrompt(null);
-    setShowInstallPrompt(false);
+    // iOS: Show instructions
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      alert(
+        'To install Lunary:\n\n1. Tap the Share button (square with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"\n\nThen open it from your home screen!',
+      );
+      setShowInstallPrompt(false);
+    }
   };
 
   const handleDismiss = () => {
