@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v8'; // Restored navigation interception (required for iOS PWA)
+const CACHE_NAME = 'lunary-v9'; // Skip debug pages, navigation interception for iOS PWA
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -90,6 +90,15 @@ self.addEventListener('fetch', (event) => {
 
   // Skip external requests
   if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // Skip debug pages - let them go to network
+  if (
+    url.pathname.startsWith('/pwa-reset') ||
+    url.pathname.startsWith('/pwa-debug') ||
+    url.pathname.startsWith('/pwa-guard')
+  ) {
     return;
   }
 

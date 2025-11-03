@@ -136,7 +136,10 @@ export default function PWAResetPage() {
       registrations.forEach((reg, i) => {
         addLog(`  ${i + 1}. Scope: ${reg.scope}`);
         addLog(`     Active: ${reg.active?.state || 'none'}`);
-        addLog(`     Controlling: ${!!navigator.serviceWorker.controller}`);
+        const isControlling = navigator.serviceWorker
+          ? !!navigator.serviceWorker.controller
+          : false;
+        addLog(`     Controlling: ${isControlling}`);
       });
     }
 

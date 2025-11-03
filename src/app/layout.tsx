@@ -11,6 +11,7 @@ import { LunaryJazzProvider } from '@/components/JazzProvider';
 import { PWAHandler } from '@/components/PWAHandler';
 import { NotificationManager } from '@/components/NotificationManager';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { PWADebugInline } from '@/components/PWADebugInline';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -62,6 +63,7 @@ export default function RootLayout({
             <ErrorBoundary>
               <PWAHandler />
               <NotificationManager />
+              <PWADebugInline />
             </ErrorBoundary>
           </LunaryJazzProvider>
         </ErrorBoundary>

@@ -4,19 +4,22 @@ This system automatically generates moon phase packs for different time periods 
 
 ## 🌙 What it creates
 
-### Monthly Packs ($7.99)
+### Monthly Packs ($2.49)
+
 - Generated **3 months in advance**
 - Contains all moon phases for a specific month
 - Includes lunar calendar and spiritual guidance
-- Example: "Moon Phases - January 2025"
+- Example: "Monthly Moon Phases Pack - January 2025"
 
-### Quarterly Packs ($19.99)
+### Quarterly Packs ($4.99)
+
 - Generated **1 quarter in advance**
 - Contains 3 months of moon phases
 - Seasonal energy guidance included
 - Example: "Moon Phases - Q2 2025" (April, May, June)
 
-### Yearly Packs ($49.99)
+### Yearly Packs ($19.99)
+
 - Generated **6 months before the year starts** (July-December)
 - Complete lunar calendar for entire year
 - All 13 lunar cycles with detailed insights
@@ -27,7 +30,7 @@ This system automatically generates moon phase packs for different time periods 
 The system runs automatically via Vercel cron jobs:
 
 - **Monthly (15th, 2 AM)**: Generate monthly packs (checks for next 2-3 months)
-- **Quarterly (15th of Jan/Apr/Jul/Oct, 3 AM)**: Generate quarterly packs (next quarter only)  
+- **Quarterly (15th of Jan/Apr/Jul/Oct, 3 AM)**: Generate quarterly packs (next quarter only)
 - **Yearly (July 1st, 4 AM)**: Generate yearly packs (next year only)
 
 ## 🛠 Manual Usage
@@ -60,18 +63,21 @@ Each pack includes:
 4. **Real Astronomical Data**: Uses astronomy-engine for accuracy
 
 ### Monthly Pack Structure
+
 - Cover page with month/year
 - Each significant moon phase (New, First Quarter, Full, Third Quarter)
 - Moon constellation information
 - Spiritual guidance and energy descriptions
 
 ### Quarterly Pack Structure
+
 - Cover page with quarter/year
 - All moon phases for 3 months
 - Seasonal transition information
 - Extended spiritual practices
 
 ### Yearly Pack Structure
+
 - Comprehensive cover page
 - All 13+ lunar cycles for the year
 - Eclipse information
@@ -81,17 +87,20 @@ Each pack includes:
 ## 🔧 Technical Details
 
 ### Files Created
+
 - `scripts/generate-moon-packs.ts` - Main generation script
 - `src/app/api/cron/moon-packs/route.ts` - Cron endpoint
 - `vercel.json` - Cron job configuration
 
 ### Dependencies
+
 - Uses existing `/api/shop/packs/generate` endpoint
 - Integrates with Stripe for product creation
 - Leverages `/api/og/cosmic-post` for astronomical data
 - Stores files in Vercel Blob storage
 
 ### Environment Variables Required
+
 ```bash
 STRIPE_SECRET_KEY=sk_...
 NEXT_PUBLIC_BASE_URL=https://lunary.app
@@ -107,12 +116,14 @@ CRON_SECRET_TOKEN=your-secret-token
 ## 📊 Monitoring
 
 ### Health Check
+
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET_TOKEN" \
      https://lunary.app/api/cron/moon-packs
 ```
 
 ### Manual Trigger
+
 ```bash
 curl -X POST \
      -H "Authorization: Bearer $CRON_SECRET_TOKEN" \
@@ -135,6 +146,7 @@ The system automatically deactivates old packs (older than 2 years) to keep the 
 ## 📈 Expected Output
 
 With this system running, you'll have:
+
 - **3 new monthly packs** available at any time
 - **1 new quarterly pack** available each quarter
 - **1 new yearly pack** available 6 months before each year
