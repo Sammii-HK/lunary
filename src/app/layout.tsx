@@ -24,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: `${moonSymbol} Lunary`,
     description: 'Your Lunar Diary',
     manifest: '/manifest.json',
+    themeColor: '#18181b',
     appleWebApp: {
       capable: true,
       statusBarStyle: 'black-translucent',

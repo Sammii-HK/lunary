@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v2';
+const CACHE_NAME = 'lunary-v5'; // Bumped to force fresh PWA install
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -6,43 +6,71 @@ const STATIC_CACHE_URLS = [
   '/icons/icon-512x512.png',
 ];
 
-// Install event - cache static assets
+// Install event - cache static assets IMMEDIATELY
 self.addEventListener('install', (event) => {
   console.log('Service worker installing...');
+
+  // CRITICAL: Force activate immediately so Chrome iOS sees it controlling
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => {
-        console.log('Caching static assets');
-        return cache.addAll(STATIC_CACHE_URLS);
+        console.log('Caching static assets, prioritizing start_url');
+        // Cache the start_url first - Chrome iOS needs this!
+        return Promise.all([
+          cache.add('/'), // Start URL must be cached for PWA to work
+          ...STATIC_CACHE_URLS.filter((url) => url !== '/').map((url) =>
+            cache
+              .add(url)
+              .catch((err) => console.warn('Failed to cache', url, err)),
+          ),
+        ]);
       })
       .then(() => {
-        console.log('Service worker installed');
+        console.log('✅ Service worker installed, forcing activation');
+        // Force immediate activation - don't wait for old SW to close
         return self.skipWaiting();
+      })
+      .catch((err) => {
+        console.error('❌ Service worker install failed:', err);
+        throw err;
       }),
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and claim clients IMMEDIATELY
 self.addEventListener('activate', (event) => {
   console.log('Service worker activating...');
   event.waitUntil(
-    caches
-      .keys()
-      .then((cacheNames) => {
+    Promise.all([
+      // Clean up old caches
+      caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
-              console.log('Deleting old cache:', cacheName);
+              console.log('🗑️ Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           }),
         );
-      })
-      .then(() => {
-        console.log('Service worker activated');
-        return self.clients.claim();
       }),
+      // CRITICAL: Claim all clients immediately - Chrome iOS needs this!
+      self.clients.claim().then(() => {
+        console.log('✅ Service worker claimed all clients');
+      }),
+    ]).then(() => {
+      console.log('✅ Service worker activated and controlling pages');
+      // Ensure start_url is cached (double-check)
+      return caches.open(CACHE_NAME).then((cache) => {
+        return cache.match('/').then((cached) => {
+          if (!cached) {
+            console.warn('⚠️ Start URL not cached, fetching now...');
+            return fetch('/').then((res) => cache.put('/', res.clone()));
+          }
+          console.log('✅ Start URL confirmed in cache');
+        });
+      });
+    }),
   );
 });
 
@@ -73,6 +101,41 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // CRITICAL FOR CHROME iOS: Navigation requests MUST be served from cache
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match('/').then((cachedResponse) => {
+        if (cachedResponse) {
+          console.log('✅ Serving start_url from cache');
+          return cachedResponse;
+        }
+        // Fallback to network, then cache it
+        return fetch(event.request)
+          .then((response) => {
+            if (
+              response &&
+              response.status === 200 &&
+              response.type === 'basic'
+            ) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put('/', responseToCache);
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // Ultimate fallback
+            return caches
+              .match('/')
+              .catch(() => new Response('Offline', { status: 503 }));
+          });
+      }),
+    );
+    return;
+  }
+
+  // For other requests, cache-first strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -107,6 +170,14 @@ self.addEventListener('fetch', (event) => {
         });
     }),
   );
+});
+
+// Handle skip waiting message from client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('⚠️ Received SKIP_WAITING, activating immediately');
+    self.skipWaiting();
+  }
 });
 
 // Background sync for future enhancements
