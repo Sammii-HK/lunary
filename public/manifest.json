@@ -3,7 +3,7 @@
   "short_name": "Lunary",
   "description": "The home of your book of shadows, lunar diary, grimoire and ephemeris",
   "start_url": "/",
-  "display": "minimal-ui",
+  "display": "standalone",
   "background_color": "#09090b",
   "theme_color": "#18181b",
   "orientation": "portrait-primary",
