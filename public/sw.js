@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v7'; // Simplified: no navigation interception to prevent tab redirects
+const CACHE_NAME = 'lunary-v8'; // Restored navigation interception (required for iOS PWA)
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -17,14 +17,19 @@ self.addEventListener('install', (event) => {
       .then((cache) => {
         console.log('Caching static assets, prioritizing start_url');
         // Cache the start_url first - Chrome iOS needs this!
-        return Promise.all([
-          cache.add('/'), // Start URL must be cached for PWA to work
-          ...STATIC_CACHE_URLS.filter((url) => url !== '/').map((url) =>
-            cache
-              .add(url)
-              .catch((err) => console.warn('Failed to cache', url, err)),
-          ),
-        ]);
+        return cache.addAll(STATIC_CACHE_URLS).catch((err) => {
+          console.warn(
+            'Failed to cache some assets, trying individually:',
+            err,
+          );
+          return Promise.all(
+            STATIC_CACHE_URLS.map((url) =>
+              cache
+                .add(url)
+                .catch((err) => console.warn('Failed to cache', url, err)),
+            ),
+          );
+        });
       })
       .then(() => {
         console.log('✅ Service worker installed, forcing activation');
@@ -38,39 +43,26 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate event - clean up old caches and claim clients IMMEDIATELY
+// Activate event - clean up old caches and claim clients
 self.addEventListener('activate', (event) => {
   console.log('Service worker activating...');
   event.waitUntil(
-    Promise.all([
-      // Clean up old caches
-      caches.keys().then((cacheNames) => {
+    caches
+      .keys()
+      .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
-              console.log('🗑️ Deleting old cache:', cacheName);
+              console.log('Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           }),
         );
+      })
+      .then(() => {
+        console.log('Service worker activated');
+        return self.clients.claim();
       }),
-      // CRITICAL: Claim all clients immediately - Chrome iOS needs this!
-      self.clients.claim().then(() => {
-        console.log('✅ Service worker claimed all clients');
-      }),
-    ]).then(() => {
-      console.log('✅ Service worker activated and controlling pages');
-      // Ensure start_url is cached (double-check)
-      return caches.open(CACHE_NAME).then((cache) => {
-        return cache.match('/').then((cached) => {
-          if (!cached) {
-            console.warn('⚠️ Start URL not cached, fetching now...');
-            return fetch('/').then((res) => cache.put('/', res.clone()));
-          }
-          console.log('✅ Start URL confirmed in cache');
-        });
-      });
-    }),
   );
 });
 
@@ -101,10 +93,34 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CRITICAL: Don't intercept navigation requests - let browser handle them naturally
-  // Intercepting navigation can cause PWA to redirect to tab on iOS
+  // CRITICAL FOR iOS: Navigation requests MUST be served from cache
+  // iOS Safari requires start_url to be served from cache for PWA to work
   if (event.request.mode === 'navigate') {
-    // Let the browser handle navigation - don't intercept
+    event.respondWith(
+      caches.match('/').then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        // Fallback to network, then cache it
+        return fetch(event.request)
+          .then((response) => {
+            if (
+              response &&
+              response.status === 200 &&
+              response.type === 'basic'
+            ) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put('/', responseToCache);
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            return caches.match('/');
+          });
+      }),
+    );
     return;
   }
 

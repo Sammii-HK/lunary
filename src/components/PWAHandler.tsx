@@ -24,103 +24,40 @@ export function PWAHandler() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Register service worker IMMEDIATELY on page load
-    if ('serviceWorker' in navigator && navigator.serviceWorker) {
-      // Force immediate registration and control
-      const registerSW = async () => {
-        try {
-          let registration = await navigator.serviceWorker.getRegistration();
-
-          if (!registration) {
-            // Register new service worker
-            registration = await navigator.serviceWorker.register('/sw.js', {
-              scope: '/',
-              updateViaCache: 'none',
-            });
-            console.log('✅ Service worker registered:', registration.scope);
-          } else {
-            // Update existing service worker
-            await registration.update();
-            console.log('✅ Service worker updated');
-          }
-
-          // CRITICAL: Wait for service worker to be ready
-          await navigator.serviceWorker.ready;
-          console.log('✅ Service worker ready');
-
-          // Force skip waiting if there's a waiting worker
-          if (registration.waiting) {
-            console.log('⚠️ Service worker waiting, forcing skip...');
-            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-
-            // Wait a bit for it to activate
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-
-          // Check if it's controlling - if not, we need to reload
-          if (!navigator.serviceWorker.controller) {
+    // Register service worker - KEEP IT SIMPLE (like working version)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .getRegistration()
+        .then((existingRegistration) => {
+          if (existingRegistration) {
             console.log(
-              '⚠️ Service worker not controlling yet. Checking if we can force it...',
+              '✅ Service Worker already registered:',
+              existingRegistration.scope,
             );
-
-            // Wait a bit more - sometimes it takes time
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
-            // Still not controlling? The SW might need a reload to take control
-            // But DON'T reload if we're in PWA mode (would break it)
-            const isPWA =
-              window.matchMedia('(display-mode: minimal-ui)').matches ||
-              window.matchMedia('(display-mode: standalone)').matches ||
-              (window.navigator as any).standalone === true;
-
-            if (!isPWA && !navigator.serviceWorker.controller) {
-              console.log('🔄 Service worker needs reload to take control...');
-              // Don't auto-reload - let user know they need to refresh
-              console.warn(
-                '⚠️ Please refresh the page for service worker to take control',
-              );
-            }
+            existingRegistration.update();
+            return navigator.serviceWorker.ready.then(() => {
+              console.log('✅ Service Worker is ready');
+            });
           } else {
-            console.log('✅ Service worker is controlling this page');
+            console.log('Registering service worker...');
+            return navigator.serviceWorker
+              .register('/sw.js', {
+                scope: '/',
+              })
+              .then((registration) => {
+                console.log(
+                  '✅ Service Worker registered:',
+                  registration.scope,
+                );
+                return navigator.serviceWorker.ready.then(() => {
+                  console.log('✅ Service Worker is ready and controlling');
+                });
+              });
           }
-        } catch (error) {
+        })
+        .catch((error) => {
           console.error('❌ Service Worker registration failed:', error);
-          console.error('Error details:', error);
-        }
-      };
-
-      // Register immediately
-      registerSW();
-
-      // Listen for controller changes but don't reload in PWA mode
-      // Reloading in PWA can cause it to open in a tab
-      const handleControllerChange = () => {
-        console.log('✅ Service worker controller changed');
-        // Only reload if NOT in PWA mode (to avoid breaking standalone)
-        const isPWA =
-          window.matchMedia('(display-mode: minimal-ui)').matches ||
-          window.matchMedia('(display-mode: standalone)').matches ||
-          (window.navigator as any).standalone === true;
-
-        if (!isPWA) {
-          console.log('Reloading page (not in PWA mode)');
-          window.location.reload();
-        } else {
-          console.log('Skipping reload (PWA mode - would break standalone)');
-        }
-      };
-
-      navigator.serviceWorker.addEventListener(
-        'controllerchange',
-        handleControllerChange,
-      );
-
-      return () => {
-        navigator.serviceWorker.removeEventListener(
-          'controllerchange',
-          handleControllerChange,
-        );
-      };
+        });
     }
 
     // Check if app is already installed (including minimal-ui for iOS)
