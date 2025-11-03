@@ -24,35 +24,85 @@ export function PWAHandler() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Register service worker - KEEP IT SIMPLE (like working version)
+    // Register service worker - CRITICAL: Must be active and controlling for iOS PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .getRegistration()
-        .then((existingRegistration) => {
+        .then(async (existingRegistration) => {
           if (existingRegistration) {
             console.log(
               '✅ Service Worker already registered:',
               existingRegistration.scope,
             );
+            // Force update to get latest version
             existingRegistration.update();
-            return navigator.serviceWorker.ready.then(() => {
-              console.log('✅ Service Worker is ready');
-            });
+
+            // CRITICAL: Wait for service worker to be ready AND controlling
+            await navigator.serviceWorker.ready;
+
+            // Wait for controller to be set (iOS requirement)
+            if (!navigator.serviceWorker.controller) {
+              console.log('⚠️ Service worker not controlling yet, waiting...');
+              // Wait up to 5 seconds for controller
+              await new Promise((resolve) => {
+                let attempts = 0;
+                const checkController = setInterval(() => {
+                  attempts++;
+                  if (navigator.serviceWorker.controller || attempts > 50) {
+                    clearInterval(checkController);
+                    resolve(true);
+                  }
+                }, 100);
+              });
+            }
+
+            if (navigator.serviceWorker.controller) {
+              console.log('✅ Service Worker is ready and CONTROLLING');
+            } else {
+              console.warn(
+                '⚠️ Service Worker ready but not controlling - will control on next load',
+              );
+            }
           } else {
             console.log('Registering service worker...');
-            return navigator.serviceWorker
-              .register('/sw.js', {
+            const registration = await navigator.serviceWorker.register(
+              '/sw.js',
+              {
                 scope: '/',
-              })
-              .then((registration) => {
-                console.log(
-                  '✅ Service Worker registered:',
-                  registration.scope,
-                );
-                return navigator.serviceWorker.ready.then(() => {
-                  console.log('✅ Service Worker is ready and controlling');
-                });
+              },
+            );
+            console.log('✅ Service Worker registered:', registration.scope);
+
+            // CRITICAL: Wait for service worker to be ready
+            await navigator.serviceWorker.ready;
+
+            // Force claim to make it controlling immediately
+            if (registration.active) {
+              registration.active.postMessage({ type: 'SKIP_WAITING' });
+            }
+
+            // Wait for controller
+            if (!navigator.serviceWorker.controller) {
+              console.log('⚠️ Waiting for service worker to control...');
+              await new Promise((resolve) => {
+                let attempts = 0;
+                const checkController = setInterval(() => {
+                  attempts++;
+                  if (navigator.serviceWorker.controller || attempts > 50) {
+                    clearInterval(checkController);
+                    resolve(true);
+                  }
+                }, 100);
               });
+            }
+
+            if (navigator.serviceWorker.controller) {
+              console.log('✅ Service Worker is ready and CONTROLLING');
+            } else {
+              console.warn(
+                '⚠️ Service Worker registered but not controlling - reload page',
+              );
+            }
           }
         })
         .catch((error) => {
