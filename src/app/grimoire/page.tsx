@@ -1,14 +1,9 @@
-import { Suspense } from 'react';
-import GrimoireIndex from './GrimoireIndex';
-import { GrimoireCanonical } from '@/components/GrimoireCanonical';
+import GrimoireLayout from './GrimoireLayout';
 
 const GrimoireHome = () => {
   return (
     <div className='h-[91vh] w-full'>
-      <Suspense fallback={<div>Loading...</div>}>
-        <GrimoireCanonical />
-        <GrimoireIndex />
-      </Suspense>
+      <GrimoireLayout />
     </div>
   );
 };

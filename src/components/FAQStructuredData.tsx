@@ -1,6 +1,8 @@
-export function FAQStructuredData(
-  faqs: Array<{ question: string; answer: string }>,
-) {
+export function FAQStructuredData({
+  faqs,
+}: {
+  faqs: Array<{ question: string; answer: string }>;
+}) {
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

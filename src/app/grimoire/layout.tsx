@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function GrimoireLayout({
+export default function GrimoireLayoutWrapper({
   children,
 }: {
   children: React.ReactNode;
