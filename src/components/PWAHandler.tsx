@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuthStatus } from '@/components/AuthStatus';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -18,6 +19,7 @@ declare global {
 }
 
 export function PWAHandler() {
+  const authState = useAuthStatus();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
@@ -160,7 +162,13 @@ export function PWAHandler() {
     setShowInstallPrompt(false);
   };
 
-  if (isInstalled || !showInstallPrompt) {
+  // Only show install prompt if user is authenticated and not installed
+  if (
+    isInstalled ||
+    !showInstallPrompt ||
+    !authState.isAuthenticated ||
+    authState.loading
+  ) {
     return null;
   }
 

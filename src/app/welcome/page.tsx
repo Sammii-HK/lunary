@@ -11,6 +11,9 @@ import {
   Telescope,
   Heart,
   Sparkle,
+  Smartphone,
+  Bell,
+  WifiOff,
 } from 'lucide-react';
 
 export default function WelcomePage() {
@@ -278,8 +281,75 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Philosophy */}
+      {/* PWA Features */}
       <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50 bg-zinc-900/20'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
+              Take Lunary with you
+            </h2>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
+              Install Lunary as a Progressive Web App for instant access,
+              offline support, and push notifications.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 max-w-6xl mx-auto'>
+            <div className='p-6 sm:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors text-center'>
+              <div className='w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 flex items-center justify-center'>
+                <Smartphone
+                  className='w-8 h-8 sm:w-10 sm:h-10 text-purple-400'
+                  strokeWidth={1.5}
+                />
+              </div>
+              <h3 className='text-lg sm:text-xl md:text-2xl font-medium text-zinc-100 mb-2 sm:mb-3'>
+                Progressive Web App
+              </h3>
+              <p className='text-sm sm:text-base md:text-lg text-zinc-400 leading-relaxed'>
+                Install Lunary on your phone or tablet for instant access. Works
+                like a native app with home screen icons and full-screen
+                experience.
+              </p>
+            </div>
+
+            <div className='p-6 sm:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors text-center'>
+              <div className='w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 flex items-center justify-center'>
+                <Bell
+                  className='w-8 h-8 sm:w-10 sm:h-10 text-blue-400'
+                  strokeWidth={1.5}
+                />
+              </div>
+              <h3 className='text-lg sm:text-xl md:text-2xl font-medium text-zinc-100 mb-2 sm:mb-3'>
+                Push Notifications
+              </h3>
+              <p className='text-sm sm:text-base md:text-lg text-zinc-400 leading-relaxed'>
+                Get notified about significant cosmic events, daily insights,
+                and important transits. Stay connected to your cosmic rhythm
+                even when you're away.
+              </p>
+            </div>
+
+            <div className='p-6 sm:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors text-center'>
+              <div className='w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 flex items-center justify-center'>
+                <WifiOff
+                  className='w-8 h-8 sm:w-10 sm:h-10 text-green-400'
+                  strokeWidth={1.5}
+                />
+              </div>
+              <h3 className='text-lg sm:text-xl md:text-2xl font-medium text-zinc-100 mb-2 sm:mb-3'>
+                Offline Support
+              </h3>
+              <p className='text-sm sm:text-base md:text-lg text-zinc-400 leading-relaxed'>
+                Access your birth chart and saved insights even without an
+                internet connection. Your cosmic data is always with you.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Philosophy */}
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50'>
         <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='text-center space-y-6 sm:space-y-8'>
             <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>

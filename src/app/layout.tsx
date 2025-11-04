@@ -12,6 +12,8 @@ import { PWAHandler } from '@/components/PWAHandler';
 import { NotificationManager } from '@/components/NotificationManager';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
+import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
+import { StructuredData } from '@/components/StructuredData';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -23,9 +25,52 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: `${moonSymbol} Lunary`,
-    description: 'Your Lunar Diary',
+    description:
+      'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily insights, and cosmic guidance.',
     manifest: PWA_MANIFEST_URL,
     themeColor: '#18181b',
+    keywords: [
+      'astrology',
+      'birth chart',
+      'horoscope',
+      'moon phases',
+      'tarot',
+      'astronomy',
+      'cosmic guidance',
+      'natal chart',
+      'planetary transits',
+      'lunar calendar',
+    ],
+    authors: [{ name: 'Lunary' }],
+    creator: 'Lunary',
+    publisher: 'Lunary',
+    alternates: {
+      canonical: 'https://lunary.app',
+    },
+    openGraph: {
+      title: 'Lunary - Your Daily Cosmic Guide',
+      description:
+        'Astrology based on real astronomical data. Personalized birth chart analysis, daily insights, and cosmic guidance.',
+      url: 'https://lunary.app',
+      siteName: 'Lunary',
+      images: [
+        {
+          url: '/api/og/cosmic',
+          width: 1200,
+          height: 630,
+          alt: 'Lunary - Your Daily Cosmic Guide',
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Lunary - Your Daily Cosmic Guide',
+      description:
+        'Astrology based on real astronomical data. Personalized birth chart analysis and daily insights.',
+      images: ['/api/og/cosmic'],
+    },
     appleWebApp: {
       capable: true,
       statusBarStyle: 'black-translucent',
@@ -53,12 +98,13 @@ export default function RootLayout({
       <body
         className={`${inter.className} w-full h-screen flex flex-col align-middle items-center bg-zinc-950 text-white`}
       >
+        <StructuredData />
         <ErrorBoundary>
           <LunaryJazzProvider>
-            <main className='flex flex-col h-full max-w-md w-full items-center justify-between font-mono text-sm gap-4 overflow-auto px-4 align-self-middle justify-self-center'>
+            <ConditionalMainWrapper>
               <ErrorBoundary>{children}</ErrorBoundary>
               <Analytics />
-            </main>
+            </ConditionalMainWrapper>
             <Navbar />
             <ErrorBoundary>
               <PWAHandler />
