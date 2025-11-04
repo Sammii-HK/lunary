@@ -265,16 +265,16 @@ This is exactly what you'll get every day at 8 AM UTC!`);
 
   return (
     <div className='min-h-screen bg-zinc-950 text-white'>
-      <div className='container mx-auto px-4 py-6 md:py-8 max-w-7xl'>
+      <div className='container mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10 max-w-7xl'>
         {/* Header */}
-        <div className='mb-6 md:mb-8'>
+        <div className='mb-6 md:mb-8 lg:mb-10'>
           <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
             <div>
-              <h1 className='text-3xl md:text-4xl font-bold mb-2 flex items-center gap-2'>
-                <Settings className='h-8 w-8 md:h-10 md:w-10' />
+              <h1 className='text-3xl md:text-4xl lg:text-5xl font-bold mb-2 flex items-center gap-2 md:gap-3'>
+                <Settings className='h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12' />
                 Admin Dashboard
               </h1>
-              <p className='text-lg md:text-xl text-zinc-400'>
+              <p className='text-base md:text-lg lg:text-xl text-zinc-400'>
                 Manage your cosmic content, automation, and shop
               </p>
             </div>
@@ -282,7 +282,7 @@ This is exactly what you'll get every day at 8 AM UTC!`);
         </div>
 
         {/* Quick Stats - Responsive Grid */}
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8'>
+        <div className='grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8 lg:mb-10'>
           <Card className='bg-zinc-900 border-zinc-800'>
             <CardContent className='p-4 md:p-6'>
               <div className='flex items-center gap-2'>
@@ -341,18 +341,18 @@ This is exactly what you'll get every day at 8 AM UTC!`);
         </div>
 
         {/* PWA Notification Testing */}
-        <Card className='mb-6 md:mb-8 bg-zinc-900 border-zinc-800'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl'>
-              <Bell className='h-5 w-5' />
+        <Card className='mb-6 md:mb-8 lg:mb-10 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <Bell className='h-5 w-5 md:h-6 md:w-6' />
               PWA Notification Testing
             </CardTitle>
-            <CardDescription className='text-zinc-400'>
+            <CardDescription className='text-sm md:text-base text-zinc-400'>
               Test push notifications on your device
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6'>
               <Button
                 onClick={testRealNotification}
                 disabled={testingRealNotification}
@@ -416,18 +416,18 @@ This is exactly what you'll get every day at 8 AM UTC!`);
         </Card>
 
         {/* Quick Actions */}
-        <Card className='mb-6 md:mb-8 bg-zinc-900 border-zinc-800'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl'>
-              <Zap className='h-5 w-5' />
+        <Card className='mb-6 md:mb-8 lg:mb-10 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <Zap className='h-5 w-5 md:h-6 md:w-6' />
               Quick Actions
             </CardTitle>
-            <CardDescription className='text-zinc-400'>
+            <CardDescription className='text-sm md:text-base text-zinc-400'>
               Common admin tasks and shortcuts
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+            <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6'>
               <Button
                 asChild
                 variant='outline'
@@ -488,18 +488,18 @@ This is exactly what you'll get every day at 8 AM UTC!`);
         </Card>
 
         {/* Moon Pack Quick Generator */}
-        <Card className='mb-6 md:mb-8 bg-zinc-900 border-zinc-800'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl'>
-              <Sparkles className='h-5 w-5' />
+        <Card className='mb-6 md:mb-8 lg:mb-10 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <Sparkles className='h-5 w-5 md:h-6 md:w-6' />
               Quick Moon Pack Generator
             </CardTitle>
-            <CardDescription className='text-zinc-400'>
+            <CardDescription className='text-sm md:text-base text-zinc-400'>
               Generate moon phase packs quickly with one click
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6'>
               <Button
                 onClick={async () => {
                   const currentYear = new Date().getFullYear();
@@ -654,9 +654,9 @@ This is exactly what you'll get every day at 8 AM UTC!`);
           if (categoryTools.length === 0) return null;
 
           return (
-            <div key={categoryKey} className='mb-6 md:mb-8'>
-              <div className='flex items-center gap-2 mb-4'>
-                <h2 className='text-xl md:text-2xl font-bold'>
+            <div key={categoryKey} className='mb-6 md:mb-8 lg:mb-10'>
+              <div className='flex items-center gap-2 md:gap-3 mb-4 md:mb-6'>
+                <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
                   {categoryInfo.name}
                 </h2>
                 <Badge className={categoryInfo.color}>
@@ -664,7 +664,7 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                 </Badge>
               </div>
 
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 lg:gap-6'>
                 {categoryTools.map((tool) => (
                   <Card
                     key={tool.href}
@@ -704,15 +704,15 @@ This is exactly what you'll get every day at 8 AM UTC!`);
         })}
 
         {/* System Status - Responsive */}
-        <Card className='mt-6 md:mt-8 bg-zinc-900 border-zinc-800'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl'>
-              <Activity className='h-5 w-5' />
+        <Card className='mt-6 md:mt-8 lg:mt-10 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <Activity className='h-5 w-5 md:h-6 md:w-6' />
               System Status
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 lg:gap-6'>
               <div className='flex items-center gap-2'>
                 <div className='w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full animate-pulse'></div>
                 <span className='text-sm md:text-base'>
@@ -736,18 +736,18 @@ This is exactly what you'll get every day at 8 AM UTC!`);
         </Card>
 
         {/* Recent Activity Placeholder */}
-        <Card className='mt-6 md:mt-8 bg-zinc-900 border-zinc-800'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl'>
-              <Clock className='h-5 w-5' />
+        <Card className='mt-6 md:mt-8 lg:mt-10 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <Clock className='h-5 w-5 md:h-6 md:w-6' />
               Recent Activity
             </CardTitle>
-            <CardDescription className='text-zinc-400'>
+            <CardDescription className='text-sm md:text-base text-zinc-400'>
               Latest admin actions and automated tasks
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='text-center py-6 md:py-8 text-zinc-400'>
+            <div className='text-center py-6 md:py-8 lg:py-10 text-zinc-400'>
               <Users className='h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50' />
               <p className='text-sm md:text-base'>
                 Activity tracking coming soon!
