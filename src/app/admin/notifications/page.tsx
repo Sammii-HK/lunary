@@ -71,7 +71,7 @@ export default function NotificationAdminPage() {
           ...data.ingressEvents.map((event: any) => ({
             ...event,
             type: event.type || 'ingress',
-            priority: event.priority || 4,
+            priority: event.priority || 8, // Ingress events have priority 8
           })),
         );
       }
@@ -93,7 +93,7 @@ export default function NotificationAdminPage() {
           ...data.retrogradeEvents.map((event: any) => ({
             ...event,
             type: event.type || 'retrograde',
-            priority: event.priority || 6,
+            priority: event.priority || 8, // Retrograde events have priority 8
           })),
         );
       }
@@ -104,7 +104,7 @@ export default function NotificationAdminPage() {
           ...data.retrogradeIngress.map((event: any) => ({
             ...event,
             type: event.type || 'retrograde',
-            priority: event.priority || 6,
+            priority: event.priority || 8, // Retrograde ingress events have priority 8
           })),
         );
       }
@@ -112,13 +112,9 @@ export default function NotificationAdminPage() {
       // Sort by priority
       allEvents.sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-      // Get notification-worthy events (priority >= 7, or moon phases/seasonal)
+      // Filter notification-worthy events using the same logic as crons
       const notificationWorthyEvents = allEvents.filter((event: any) => {
-        const priority = event.priority || 0;
-        if (priority >= 7) return true;
-        if (event.type === 'moon' && priority >= 10) return true;
-        if (event.type === 'seasonal' && priority >= 8) return true;
-        return false;
+        return isNotificationWorthy(event);
       });
 
       // Create previews for up to 5 most significant events
@@ -263,133 +259,129 @@ export default function NotificationAdminPage() {
   };
 
   const getIngressDescription = (planet: string, sign: string): string => {
+    // Use the same influence mappings as horoscope code for consistency
     const planetInfluences: Record<string, Record<string, string>> = {
       Mars: {
-        Aries: 'amplifies action, courage, and pioneering initiative',
-        Taurus: 'focuses energy on stability, patience, and material progress',
-        Gemini:
-          'directs drive toward communication, learning, and mental agility',
-        Cancer: 'channels energy into emotional security and nurturing actions',
-        Leo: 'ignites creative expression and confident leadership',
-        Virgo: 'brings precision and disciplined action to work and health',
-        Libra: 'seeks balance in partnerships and harmonious action',
-        Scorpio: 'intensifies transformation and deep emotional focus',
-        Sagittarius:
-          'expands horizons through adventure and philosophical exploration',
-        Capricorn: 'builds structured ambition and long-term goals',
-        Aquarius: 'fuels innovation and revolutionary change',
-        Pisces: 'flows through intuitive action and compassionate service',
+        Aries: 'action, courage, and pioneering initiative',
+        Taurus: 'stability, patience, and material progress',
+        Gemini: 'communication, learning, and mental agility',
+        Cancer: 'emotional security and nurturing actions',
+        Leo: 'creative expression and confident leadership',
+        Virgo: 'precision and disciplined action in work and health',
+        Libra: 'balance in partnerships and harmonious action',
+        Scorpio: 'transformation and deep emotional focus',
+        Sagittarius: 'adventure and philosophical exploration',
+        Capricorn: 'structured ambition and long-term goals',
+        Aquarius: 'innovation and revolutionary change',
+        Pisces: 'intuitive action and compassionate service',
       },
       Venus: {
-        Aries: 'brings passionate attraction and bold romance',
-        Taurus: 'enhances sensuality, stability, and material beauty',
-        Gemini: 'fosters lighthearted connections and intellectual attraction',
-        Cancer: 'deepens emotional bonds and nurturing love',
-        Leo: 'magnifies dramatic romance and creative expression',
-        Virgo: 'cultivates practical love and service in relationships',
-        Libra: 'harmonizes partnerships and artistic beauty',
-        Scorpio: 'intensifies transformative love and deep connections',
-        Sagittarius:
-          'expands through adventurous romance and philosophical bonds',
-        Capricorn: 'builds committed, structured relationships',
-        Aquarius: 'creates unconventional connections and friendly love',
-        Pisces: 'flows through dreamy romance and spiritual connection',
+        Aries: 'passionate attraction and bold romance',
+        Taurus: 'sensuality, stability, and material beauty',
+        Gemini: 'lighthearted connections and intellectual attraction',
+        Cancer: 'emotional bonds and nurturing love',
+        Leo: 'dramatic romance and creative expression',
+        Virgo: 'practical love and service in relationships',
+        Libra: 'partnerships and artistic beauty',
+        Scorpio: 'transformative love and deep connections',
+        Sagittarius: 'adventurous romance and philosophical bonds',
+        Capricorn: 'committed, structured relationships',
+        Aquarius: 'unconventional connections and friendly love',
+        Pisces: 'dreamy romance and spiritual connection',
       },
       Mercury: {
-        Aries: 'speaks with directness and pioneering ideas',
-        Taurus: 'communicates with practicality and grounded wisdom',
-        Gemini: 'enhances mental agility, communication, and learning',
-        Cancer: 'expresses through emotional intelligence and intuition',
-        Leo: 'communicates with confidence and creative expression',
-        Virgo: 'organizes thoughts with precision and analytical clarity',
-        Libra: 'seeks harmony in communication and balanced dialogue',
-        Scorpio: 'delves into deep, transformative conversations',
-        Sagittarius: 'expands through philosophical discourse and exploration',
-        Capricorn: 'structures communication for practical achievement',
-        Aquarius: 'innovates through unconventional ideas and technology',
-        Pisces: 'flows through intuitive understanding and artistic expression',
+        Aries: 'directness and pioneering ideas',
+        Taurus: 'practicality and grounded wisdom',
+        Gemini: 'mental agility, communication, and learning',
+        Cancer: 'emotional intelligence and intuition',
+        Leo: 'confidence and creative expression',
+        Virgo: 'precision and analytical clarity',
+        Libra: 'harmony and balanced dialogue',
+        Scorpio: 'deep, transformative conversations',
+        Sagittarius: 'philosophical discourse and exploration',
+        Capricorn: 'practical achievement through communication',
+        Aquarius: 'unconventional ideas and technology',
+        Pisces: 'intuitive understanding and artistic expression',
       },
       Jupiter: {
-        Aries: 'expands leadership opportunities and pioneering ventures',
-        Taurus: 'amplifies financial growth and material abundance',
-        Gemini: 'enhances learning, communication, and short-distance travel',
-        Cancer: 'expands home, family, and emotional security',
-        Leo: 'magnifies creativity, entertainment, and self-expression',
-        Virgo: 'grows through health, work, and service to others',
-        Libra: 'expands partnerships, justice, and artistic pursuits',
-        Scorpio: 'deepens transformation, research, and shared resources',
-        Sagittarius:
-          'magnifies higher education, philosophy, and long-distance travel',
-        Capricorn: 'advances career recognition and public achievement',
-        Aquarius: 'innovates through friendship and humanitarian causes',
-        Pisces: 'expands spirituality, compassion, and artistic inspiration',
+        Aries: 'leadership and pioneering ventures',
+        Taurus: 'financial growth and material abundance',
+        Gemini: 'learning, communication, and short-distance travel',
+        Cancer: 'home, family, and emotional security',
+        Leo: 'creativity, entertainment, and self-expression',
+        Virgo: 'health, work, and service to others',
+        Libra: 'partnerships, justice, and artistic pursuits',
+        Scorpio: 'transformation, research, and shared resources',
+        Sagittarius: 'higher education, philosophy, and long-distance travel',
+        Capricorn: 'career recognition and public achievement',
+        Aquarius: 'friendship and humanitarian causes',
+        Pisces: 'spirituality, compassion, and artistic inspiration',
       },
       Saturn: {
-        Aries: 'brings discipline to personal expression and independence',
-        Taurus: 'structures material values and financial stability',
-        Gemini: 'organizes communication and learning with responsibility',
-        Cancer: 'builds emotional security through family structures',
-        Leo: 'disciplines creative expression and leadership',
-        Virgo: 'structures work methods and health routines',
-        Libra: 'builds committed partnerships and balanced relationships',
-        Scorpio: 'transforms through power structures and deep healing',
-        Sagittarius: 'structures belief systems and educational goals',
-        Capricorn: 'builds authority and institutional achievement',
-        Aquarius: 'innovates through structured social change',
-        Pisces: 'grounds spiritual practice with practical discipline',
+        Aries: 'discipline in personal expression and independence',
+        Taurus: 'structure in material values and financial stability',
+        Gemini: 'responsibility in communication and learning',
+        Cancer: 'structure in emotional security and family',
+        Leo: 'discipline in creative expression and leadership',
+        Virgo: 'structure in work methods and health routines',
+        Libra: 'commitment in partnerships and relationships',
+        Scorpio: 'transformation through power structures and healing',
+        Sagittarius: 'structure in belief systems and education',
+        Capricorn: 'authority and institutional achievement',
+        Aquarius: 'structured social change',
+        Pisces: 'discipline in spiritual practice',
       },
       Uranus: {
-        Aries: 'revolutionizes personal independence and pioneering spirit',
-        Taurus: 'innovates material values and earth-conscious change',
-        Gemini: 'transforms communication technology and mental liberation',
-        Cancer: 'reforms family structures and emotional freedom',
-        Leo: 'awakens creative expression and individual uniqueness',
-        Virgo: 'innovates work methods and health approaches',
-        Libra: 'transforms relationship patterns and social justice',
-        Scorpio: 'revolutionizes power structures and transformational healing',
-        Sagittarius: 'reforms belief systems and educational innovation',
-        Capricorn: 'transforms authority structures and institutional change',
-        Aquarius:
-          'magnifies collective consciousness and technological advancement',
-        Pisces: 'awakens spiritual inspiration and artistic innovation',
+        Aries: 'personal independence and pioneering spirit',
+        Taurus: 'material values and earth-conscious innovation',
+        Gemini: 'communication technology and mental liberation',
+        Cancer: 'family structures and emotional freedom',
+        Leo: 'creative expression and individual uniqueness',
+        Virgo: 'work methods and health innovations',
+        Libra: 'relationship patterns and social justice',
+        Scorpio: 'power structures and transformational healing',
+        Sagittarius: 'belief systems and educational reform',
+        Capricorn: 'authority structures and institutional change',
+        Aquarius: 'collective consciousness and technological advancement',
+        Pisces: 'spiritual awakening and artistic inspiration',
       },
       Neptune: {
-        Aries: 'inspires spiritual leadership and intuitive action',
-        Taurus: 'blends material attachment with earth spirituality',
-        Gemini: 'enhances intuitive communication and mental clarity',
-        Cancer: 'deepens emotional boundaries and family mysticism',
-        Leo: 'inspires creative expression and heart-centered art',
-        Virgo: 'integrates service with practical spirituality',
-        Libra: 'idealizes relationships and artistic beauty',
-        Scorpio: 'reveals hidden truths and mystical transformation',
-        Sagittarius: 'expands spiritual seeking and higher knowledge',
-        Capricorn: 'transcends material illusions with spiritual authority',
-        Aquarius: 'awakens collective dreams and humanitarian vision',
-        Pisces: 'magnifies universal compassion and divine connection',
+        Aries: 'spiritual leadership and intuitive action',
+        Taurus: 'material attachment and earth spirituality',
+        Gemini: 'intuitive communication and mental clarity',
+        Cancer: 'emotional boundaries and family mysticism',
+        Leo: 'creative expression and heart-centered art',
+        Virgo: 'service and practical spirituality',
+        Libra: 'relationship ideals and artistic beauty',
+        Scorpio: 'hidden truths and mystical transformation',
+        Sagittarius: 'spiritual seeking and higher knowledge',
+        Capricorn:
+          'transcendence of material illusions with spiritual authority',
+        Aquarius: 'collective dreams and humanitarian vision',
+        Pisces: 'universal compassion and divine connection',
       },
       Pluto: {
-        Aries: 'transforms personal power and individual identity',
-        Taurus: 'deeply transforms material values and resources',
-        Gemini: 'revolutionizes communication power and mental transformation',
-        Cancer: 'transforms emotional depth and family dynamics',
-        Leo: 'transforms creative power and self-expression',
-        Virgo: 'transforms work and health through deep renewal',
-        Libra: 'transforms relationship power and social structures',
-        Scorpio: 'magnifies deep psychological and spiritual transformation',
-        Sagittarius: 'transforms belief systems and educational approaches',
-        Capricorn:
-          'revolutionizes power structures and institutional transformation',
-        Aquarius: 'transforms collective consciousness and technology',
-        Pisces: 'awakens spiritual evolution and universal consciousness',
+        Aries: 'personal power and individual transformation',
+        Taurus: 'material values and resource transformation',
+        Gemini: 'communication power and mental transformation',
+        Cancer: 'emotional depth and family transformation',
+        Leo: 'creative power and self-expression transformation',
+        Virgo: 'work and health transformation',
+        Libra: 'relationship power and social transformation',
+        Scorpio: 'deep psychological and spiritual transformation',
+        Sagittarius: 'belief systems and educational transformation',
+        Capricorn: 'power structures and institutional transformation',
+        Aquarius: 'collective consciousness and technological transformation',
+        Pisces: 'spiritual evolution and universal consciousness',
       },
     };
 
-    const planetInfluence = planetInfluences[planet]?.[sign];
-    if (planetInfluence) {
-      return `This ${planetInfluence}`;
+    const influence = planetInfluences[planet]?.[sign];
+    if (influence) {
+      return `This amplifies focus on ${influence} energies`;
     }
 
-    return `Planetary energy shifts focus toward ${sign} themes`;
+    return `This amplifies focus on ${sign} themes and energies`;
   };
 
   const getAspectDescription = (event: any): string => {
