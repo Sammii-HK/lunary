@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  getSentEvents,
+  markEventAsSent,
+  cleanupOldDates,
+  getSentEventsCount,
+} from '../shared-notification-tracker';
 
 // This endpoint runs every 4 hours to check for astronomical events
 export async function GET(request: NextRequest) {
@@ -12,12 +18,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log(
-      '🔔 4-hourly notification check started at:',
-      new Date().toISOString(),
-    );
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const checkTime = now.toISOString();
 
-    const today = new Date().toISOString().split('T')[0];
+    console.log('🔔 4-hourly notification check started at:', checkTime);
+
     const baseUrl =
       process.env.NODE_ENV === 'production'
         ? 'https://www.lunary.app'
@@ -37,17 +43,40 @@ export async function GET(request: NextRequest) {
 
     const cosmicData = await cosmicResponse.json();
 
-    // Check if there are notification-worthy events happening today
-    const notificationEvents = getNotificationWorthyEvents(cosmicData);
+    // Cleanup old tracking data (only keep today + 1 day buffer)
+    // We only need to track events for the current day to prevent duplicates
+    await cleanupOldDates(1);
 
-    if (notificationEvents.length === 0) {
-      console.log('📭 No notification-worthy events in this 4-hour check');
+    // Get events that have already been sent today (by daily cron or previous 4-hourly checks)
+    const sentToday = await getSentEvents(today);
+    const alreadySentCount = await getSentEventsCount(today);
+
+    // Check if there are notification-worthy events happening today
+    const currentEvents = getNotificationWorthyEvents(cosmicData);
+
+    // Filter out events that have already been notified about today
+    // This includes events sent by daily cron AND events sent in previous 4-hourly checks
+    const newEvents = currentEvents.filter((event: any) => {
+      const eventKey = `${event.type}-${event.name}-${event.priority}`;
+      // Event is new if it hasn't been sent yet
+      return !sentToday.has(eventKey);
+    });
+
+    // Log comparison for debugging
+    console.log(
+      `📊 Event comparison: ${currentEvents.length} current events, ${alreadySentCount} already sent (by daily cron or previous checks), ${newEvents.length} new events`,
+    );
+
+    if (newEvents.length === 0) {
+      console.log('📭 No new notification-worthy events in this 4-hour check');
       return NextResponse.json({
         success: true,
         notificationsSent: 0,
         primaryEvent: cosmicData.primaryEvent?.name,
-        message: 'No significant events to notify about',
-        checkTime: new Date().toISOString(),
+        message:
+          'No new significant events to notify about (may have already been sent)',
+        checkTime,
+        alreadySent: sentToday.size,
       });
     }
 
@@ -55,8 +84,22 @@ export async function GET(request: NextRequest) {
     const results = [];
     let totalSent = 0;
 
-    for (const event of notificationEvents) {
+    for (const event of newEvents) {
       try {
+        const eventKey = `${event.type}-${event.name}-${event.priority}`;
+
+        // Map event type to notification type format
+        const getNotificationType = (type: string): string => {
+          const mapping: Record<string, string> = {
+            moon: 'moon_phase',
+            aspect: 'major_aspect',
+            ingress: 'planetary_transit',
+            seasonal: 'sabbat',
+            retrograde: 'retrograde',
+          };
+          return mapping[type] || 'moon_phase';
+        };
+
         const response = await fetch(`${baseUrl}/api/notifications/send`, {
           method: 'POST',
           headers: {
@@ -65,7 +108,7 @@ export async function GET(request: NextRequest) {
           },
           body: JSON.stringify({
             payload: {
-              type: event.type,
+              type: getNotificationType(event.type),
               title: event.title,
               body: event.body,
               data: {
@@ -82,6 +125,16 @@ export async function GET(request: NextRequest) {
         const result = await response.json();
         totalSent += result.recipientCount || 0;
         results.push(result);
+
+        // Mark this event as sent in database tracker (so it won't be sent again)
+        await markEventAsSent(
+          today,
+          eventKey,
+          event.type,
+          event.name,
+          event.priority,
+          '4-hourly',
+        );
       } catch (eventError) {
         console.error(
           `Failed to send notification for event ${event.name}:`,
@@ -97,15 +150,18 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(
-      `✅ 4-hourly notification check completed: ${totalSent} notifications sent`,
+      `✅ 4-hourly notification check completed: ${totalSent} notifications sent, ${newEvents.length} new events`,
     );
 
     return NextResponse.json({
       success: totalSent > 0,
       notificationsSent: totalSent,
       primaryEvent: cosmicData.primaryEvent?.name,
+      newEventsCount: newEvents.length,
+      totalEventsToday: currentEvents.length,
+      alreadySentToday: alreadySentCount,
       results,
-      checkTime: new Date().toISOString(),
+      checkTime,
     });
   } catch (error) {
     console.error('❌ 4-hourly notification check failed:', error);
@@ -122,30 +178,100 @@ export async function GET(request: NextRequest) {
 
 // Same logic as daily-posts but for 4-hourly checks
 function getNotificationWorthyEvents(cosmicData: any) {
-  const events = [];
+  const events: any[] = [];
 
-  // Check primary event
-  if (
-    cosmicData.primaryEvent &&
-    isEventNotificationWorthy(cosmicData.primaryEvent)
-  ) {
-    events.push(createNotificationFromEvent(cosmicData.primaryEvent));
+  // Build allEvents array from available data (same as daily-posts)
+  const allEvents: any[] = [];
+
+  // Get primary event with full metadata
+  const primaryEventType =
+    cosmicData.astronomicalData?.primaryEvent?.type || 'unknown';
+  const primaryEventPriority =
+    cosmicData.astronomicalData?.primaryEvent?.priority || 0;
+
+  if (cosmicData.primaryEvent) {
+    allEvents.push({
+      name: cosmicData.primaryEvent.name,
+      energy: cosmicData.primaryEvent.energy,
+      type: primaryEventType,
+      priority: primaryEventPriority,
+      ...cosmicData.astronomicalData?.primaryEvent,
+    });
   }
 
-  // Check secondary high-priority events
-  if (cosmicData.allEvents) {
-    const significantEvents = cosmicData.allEvents
-      .filter(
-        (event: any) =>
-          event.priority >= 8 && event !== cosmicData.primaryEvent,
-      )
-      .slice(0, 1); // Limit to 1 additional notification per 4-hour check
+  // Add aspect events
+  if (cosmicData.aspectEvents && Array.isArray(cosmicData.aspectEvents)) {
+    allEvents.push(
+      ...cosmicData.aspectEvents.map((event: any) => ({
+        ...event,
+        type: event.type || 'aspect',
+      })),
+    );
+  }
 
-    for (const event of significantEvents) {
-      if (isEventNotificationWorthy(event)) {
-        events.push(createNotificationFromEvent(event));
-      }
-    }
+  // Add ingress events
+  if (cosmicData.ingressEvents && Array.isArray(cosmicData.ingressEvents)) {
+    allEvents.push(
+      ...cosmicData.ingressEvents.map((event: any) => ({
+        ...event,
+        type: event.type || 'ingress',
+        priority: event.priority || 4,
+      })),
+    );
+  }
+
+  // Add seasonal events
+  if (cosmicData.seasonalEvents && Array.isArray(cosmicData.seasonalEvents)) {
+    allEvents.push(
+      ...cosmicData.seasonalEvents.map((event: any) => ({
+        ...event,
+        type: event.type || 'seasonal',
+        priority: event.priority || 8,
+      })),
+    );
+  }
+
+  // Add retrograde events
+  if (
+    cosmicData.retrogradeEvents &&
+    Array.isArray(cosmicData.retrogradeEvents)
+  ) {
+    allEvents.push(
+      ...cosmicData.retrogradeEvents.map((event: any) => ({
+        ...event,
+        type: event.type || 'retrograde',
+        priority: event.priority || 6,
+      })),
+    );
+  }
+
+  // Add retrograde ingress events
+  if (
+    cosmicData.retrogradeIngress &&
+    Array.isArray(cosmicData.retrogradeIngress)
+  ) {
+    allEvents.push(
+      ...cosmicData.retrogradeIngress.map((event: any) => ({
+        ...event,
+        type: event.type || 'retrograde',
+        priority: event.priority || 6,
+      })),
+    );
+  }
+
+  // Sort by priority
+  allEvents.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+  // Get notification-worthy events
+  const notificationWorthyEvents = allEvents.filter((event: any) => {
+    return isEventNotificationWorthy(event);
+  });
+
+  // Create notification objects for up to 2 most significant events (limit for 4-hourly)
+  const eventsToSend = notificationWorthyEvents.slice(0, 2);
+
+  for (const event of eventsToSend) {
+    events.push(createNotificationFromEvent(event));
   }
 
   return events;
@@ -189,43 +315,99 @@ function createNotificationFromEvent(event: any) {
     priority: event.priority,
   };
 
-  // Customize based on event type
-  switch (event.type) {
-    case 'moon':
-      return {
-        ...baseEvent,
-        title: `${event.emoji || '🌙'} ${event.name}`,
-        body: `${event.energy} - ${getPhaseGuidance(event.name)}`,
-      };
+  // Create descriptive titles without emojis (same as daily-posts)
+  const createNotificationTitle = (event: any) => {
+    const eventName = event.name || 'Cosmic Event';
 
-    case 'aspect':
-      return {
-        ...baseEvent,
-        title: `${getPlanetEmoji(event)} ${event.name}`,
-        body: `${event.energy} - Powerful cosmic alignment forming`,
-      };
+    switch (event.type) {
+      case 'moon':
+        return eventName;
 
-    case 'seasonal':
-      return {
-        ...baseEvent,
-        title: `🌿 ${event.name}`,
-        body: `${event.energy} - Seasonal energy shift begins`,
-      };
+      case 'aspect':
+        if (event.planetA && event.planetB && event.aspect) {
+          const planetAName = event.planetA.name || event.planetA;
+          const planetBName = event.planetB.name || event.planetB;
+          const aspectName =
+            event.aspect.charAt(0).toUpperCase() + event.aspect.slice(1);
+          return `${planetAName}-${planetBName} ${aspectName}`;
+        }
+        return eventName || 'Planetary Aspect';
 
-    case 'ingress':
-      return {
-        ...baseEvent,
-        title: `${getPlanetEmoji(event)} ${event.name}`,
-        body: `${event.energy} - New cosmic energy emerges`,
-      };
+      case 'seasonal':
+        return eventName;
 
-    default:
-      return {
-        ...baseEvent,
-        title: `✨ ${event.name}`,
-        body: event.energy || 'Significant cosmic event occurring',
-      };
-  }
+      case 'ingress':
+        if (event.planet && event.sign) {
+          return `${event.planet} Enters ${event.sign}`;
+        }
+        return eventName || 'Planetary Ingress';
+
+      case 'retrograde':
+        if (event.planet) {
+          return `${event.planet} Retrograde Begins`;
+        }
+        return eventName || 'Planetary Retrograde';
+
+      default:
+        return eventName || 'Cosmic Event';
+    }
+  };
+
+  const createNotificationBody = (event: any) => {
+    const baseBody = event.energy || 'Cosmic event occurring';
+
+    switch (event.type) {
+      case 'moon':
+        return `${baseBody} - ${getPhaseGuidance(event.name)}`;
+
+      case 'aspect':
+        if (event.aspect) {
+          const aspectDesc = getAspectDescription(event.aspect);
+          const signA = event.planetA?.constellation || event.signA;
+          const signB = event.planetB?.constellation || event.signB;
+          if (signA && signB) {
+            return `${baseBody} - ${aspectDesc} in ${signA} and ${signB}`;
+          }
+          return `${baseBody} - ${aspectDesc} forming`;
+        }
+        return `${baseBody} - Powerful cosmic alignment forming`;
+
+      case 'seasonal':
+        return `${baseBody} - Seasonal energy shift begins`;
+
+      case 'ingress':
+        if (event.planet && event.sign) {
+          return `${baseBody} - ${event.planet} energy shifts to ${event.sign} themes`;
+        }
+        return `${baseBody} - New cosmic energy emerges`;
+
+      case 'retrograde':
+        if (event.planet) {
+          return `${baseBody} - ${event.planet} moves retrograde, inviting reflection`;
+        }
+        return `${baseBody} - Planetary retrograde begins`;
+
+      default:
+        return baseBody;
+    }
+  };
+
+  return {
+    ...baseEvent,
+    title: createNotificationTitle(event),
+    body: createNotificationBody(event),
+  };
+}
+
+function getAspectDescription(aspect: string): string {
+  const descriptions: Record<string, string> = {
+    conjunction: 'Planets unite',
+    trine: 'Harmonious flow',
+    square: 'Dynamic tension',
+    sextile: 'Cooperative opportunities',
+    opposition: 'Seeking balance',
+  };
+  return descriptions[aspect] || 'Planetary alignment';
 }
 
 function getPhaseGuidance(phaseName: string): string {
@@ -241,26 +423,4 @@ function getPhaseGuidance(phaseName: string): string {
   }
 
   return 'Lunar energy shift occurring';
-}
-
-function getPlanetEmoji(event: any): string {
-  const text = event.name || event.description || '';
-  const emojis: Record<string, string> = {
-    Mercury: '☿',
-    Venus: '♀',
-    Mars: '♂',
-    Jupiter: '♃',
-    Saturn: '♄',
-    Uranus: '♅',
-    Neptune: '♆',
-    Pluto: '♇',
-    Sun: '☉',
-    Moon: '☽',
-  };
-
-  for (const [planet, emoji] of Object.entries(emojis)) {
-    if (text.includes(planet)) return emoji;
-  }
-
-  return '⭐';
 }
