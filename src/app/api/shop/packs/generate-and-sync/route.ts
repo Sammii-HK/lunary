@@ -391,6 +391,11 @@ async function createStripeProduct(packData: any) {
     },
   });
 
+  // Set default_price on product so it shows up in shop listings
+  const updatedProduct = await stripe.products.update(product.id, {
+    default_price: price.id,
+  });
+
   // Generate Stripe buy link
   const paymentLinks = await stripe.paymentLinks.create({
     line_items: [
@@ -405,12 +410,13 @@ async function createStripeProduct(packData: any) {
     },
   });
 
-  console.log(`✅ Stripe product created: ${product.id}`);
+  console.log(`✅ Stripe product created: ${updatedProduct.id}`);
   console.log(`💰 Stripe price created: ${price.id}`);
   console.log(`🔗 Payment link created: ${paymentLinks.id}`);
+  console.log(`🔗 Default price set on product`);
 
   return {
-    product,
+    product: updatedProduct,
     price,
     paymentLink: paymentLinks,
     url: paymentLinks.url,

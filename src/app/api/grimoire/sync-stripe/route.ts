@@ -81,12 +81,18 @@ async function createStripeProduct(pack: any) {
     },
   });
 
-  console.log(`✅ Stripe product created: ${product.id}`);
+  // Set default_price on product so it shows up in shop listings
+  const updatedProduct = await stripe.products.update(product.id, {
+    default_price: price.id,
+  });
+
+  console.log(`✅ Stripe product created: ${updatedProduct.id}`);
   console.log(`💰 Stripe price created: ${price.id}`);
+  console.log(`🔗 Default price set on product`);
 
   return NextResponse.json({
     success: true,
-    stripeProductId: product.id,
+    stripeProductId: updatedProduct.id,
     stripePriceId: price.id,
     product: {
       id: product.id,
