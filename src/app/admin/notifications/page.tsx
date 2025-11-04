@@ -167,8 +167,8 @@ export default function NotificationAdminPage() {
       return significantPhases.some((phase) => event.name?.includes(phase));
     }
 
-    // Seasonal events
-    if (event.type === 'seasonal' && priority >= 8) return true;
+    // ALL priority 8 events (seasonal, ingress, retrograde)
+    if (priority === 8) return true;
 
     // Major aspects involving outer planets
     if (event.type === 'aspect' && priority >= 7) {
@@ -178,9 +178,6 @@ export default function NotificationAdminPage() {
         eventText.includes(planet.toLowerCase()),
       );
     }
-
-    // Retrograde events with high priority
-    if (event.type === 'retrograde' && priority >= 7) return true;
 
     return false;
   };
