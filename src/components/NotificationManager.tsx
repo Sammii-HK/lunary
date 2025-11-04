@@ -122,10 +122,16 @@ export function NotificationManager() {
         root.$jazz.set('pushSubscriptions', []);
       }
 
+      const json = subscription.toJSON();
+
+      if (!json?.keys?.p256dh || !json?.keys?.auth) {
+        throw new Error('Subscription keys missing');
+      }
+
       const clientSubscription = PushSubscription.create({
-        endpoint: subscription.endpoint,
-        p256dh: (subscription as any).keys.p256dh,
-        auth: (subscription as any).keys.auth,
+        endpoint: json.endpoint,
+        p256dh: json.keys.p256dh,
+        auth: json.keys.auth,
         userAgent: navigator.userAgent,
         createdAt: new Date().toISOString(),
         preferences: {
@@ -162,7 +168,13 @@ export function NotificationManager() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            subscription,
+            subscription: {
+              endpoint: json.endpoint,
+              keys: {
+                p256dh: json.keys.p256dh,
+                auth: json.keys.auth,
+              },
+            },
             preferences: {
               moonPhases: true,
               planetaryTransits: true,

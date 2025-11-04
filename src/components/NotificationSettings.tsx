@@ -170,16 +170,6 @@ export function NotificationSettings() {
       console.log('Attempting to subscribe to push notifications...');
       console.log('VAPID key length:', vapidPublicKey.length);
 
-      // Check for existing subscription first
-      const existingSubscription =
-        await registration.pushManager.getSubscription();
-      if (existingSubscription) {
-        console.log('Found existing subscription, reusing it');
-        setSubscription(existingSubscription);
-        await sendSubscriptionToServer(existingSubscription);
-        return;
-      }
-
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
@@ -243,10 +233,16 @@ export function NotificationSettings() {
         root.$jazz.set('pushSubscriptions', []);
       }
 
+      const json = subscription.toJSON();
+
+      if (!json?.keys?.p256dh || !json?.keys?.auth) {
+        throw new Error('Subscription keys missing');
+      }
+
       const clientSubscription = PushSubscription.create({
-        endpoint: subscription.endpoint,
-        p256dh: (subscription as any).keys.p256dh,
-        auth: (subscription as any).keys.auth,
+        endpoint: json.endpoint,
+        p256dh: json.keys.p256dh,
+        auth: json.keys.auth,
         userAgent: navigator.userAgent,
         createdAt: new Date().toISOString(),
         preferences: {
@@ -276,13 +272,13 @@ export function NotificationSettings() {
 
       try {
         // Serialize subscription properly for API
-        const subscriptionJson = subscription.toJSON();
+      const subscriptionJson = subscription.toJSON();
 
-        if (!subscriptionJson.keys?.p256dh || !subscriptionJson.keys?.auth) {
-          throw new Error('Subscription keys are missing');
-        }
+      if (!subscriptionJson?.keys?.p256dh || !subscriptionJson?.keys?.auth) {
+        throw new Error('Subscription keys are missing');
+      }
 
-        console.log('Sending subscription to server...');
+      console.log('Sending subscription to server...');
         const response = await fetch('/api/notifications/subscribe', {
           method: 'POST',
           headers: {
