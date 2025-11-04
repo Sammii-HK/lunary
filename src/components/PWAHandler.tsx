@@ -30,20 +30,10 @@ export function PWAHandler() {
         .getRegistration()
         .then(async (existingRegistration) => {
           if (existingRegistration) {
-            console.log(
-              '✅ Service Worker already registered:',
-              existingRegistration.scope,
-            );
-            // Force update to get latest version
             existingRegistration.update();
-
-            // CRITICAL: Wait for service worker to be ready AND controlling
             await navigator.serviceWorker.ready;
 
-            // Wait for controller to be set (iOS requirement)
             if (!navigator.serviceWorker.controller) {
-              console.log('⚠️ Service worker not controlling yet, waiting...');
-              // Wait up to 5 seconds for controller
               await new Promise((resolve) => {
                 let attempts = 0;
                 const checkController = setInterval(() => {
@@ -55,35 +45,21 @@ export function PWAHandler() {
                 }, 100);
               });
             }
-
-            if (navigator.serviceWorker.controller) {
-              console.log('✅ Service Worker is ready and CONTROLLING');
-            } else {
-              console.warn(
-                '⚠️ Service Worker ready but not controlling - will control on next load',
-              );
-            }
           } else {
-            console.log('Registering service worker...');
             const registration = await navigator.serviceWorker.register(
               '/sw.js',
               {
                 scope: '/',
               },
             );
-            console.log('✅ Service Worker registered:', registration.scope);
 
-            // CRITICAL: Wait for service worker to be ready
             await navigator.serviceWorker.ready;
 
-            // Force claim to make it controlling immediately
             if (registration.active) {
               registration.active.postMessage({ type: 'SKIP_WAITING' });
             }
 
-            // Wait for controller
             if (!navigator.serviceWorker.controller) {
-              console.log('⚠️ Waiting for service worker to control...');
               await new Promise((resolve) => {
                 let attempts = 0;
                 const checkController = setInterval(() => {
@@ -94,14 +70,6 @@ export function PWAHandler() {
                   }
                 }, 100);
               });
-            }
-
-            if (navigator.serviceWorker.controller) {
-              console.log('✅ Service Worker is ready and CONTROLLING');
-            } else {
-              console.warn(
-                '⚠️ Service Worker registered but not controlling - reload page',
-              );
             }
           }
         })
@@ -165,12 +133,6 @@ export function PWAHandler() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-      } else {
-        console.log('User dismissed the install prompt');
-      }
 
       setDeferredPrompt(null);
       setShowInstallPrompt(false);

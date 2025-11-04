@@ -26,10 +26,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(
-      `📝 Generating weekly blog content starting ${startDate.toDateString()}`,
-    );
-
     // Generate comprehensive weekly content
     const weeklyData = await generateWeeklyContent(startDate);
 

@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       horoscopeSnippet = cosmicContent.horoscopeSnippet || horoscopeSnippet;
     }
   } catch (error) {
-    console.log('Using fallback horoscope snippet');
+    console.error('Error fetching horoscope snippet:', error);
   }
 
   // Use cosmic-style backgrounds

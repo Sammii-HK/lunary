@@ -75,8 +75,6 @@ export async function GET(req: NextRequest, ctx: Ctx) {
 
   const style =
     responsive[size as keyof typeof responsive] || responsive.square;
-  console.log('style', style);
-  // responsive[sizeParam as keyof typeof responsive] || responsive.square;
 
   // Get REAL astronomical data (SAME AS POST ROUTE)
   const positions = getRealPlanetaryPositions(targetDate);
