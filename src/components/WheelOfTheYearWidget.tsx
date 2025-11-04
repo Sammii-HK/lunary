@@ -29,7 +29,7 @@ export const WheelOfTheYearWidget = () => {
         { name: 'Mabon', month: 9, day: 21, season: 'autumn' },
       ];
 
-      // Find current or approaching sabbat
+      // Find current or approaching sabbat (only show if upcoming or today, not after)
       let current = null;
       let next = null;
 
@@ -39,10 +39,11 @@ export const WheelOfTheYearWidget = () => {
           .month(sabbat.month - 1)
           .date(sabbat.day);
 
-        // Check if we're within 7 days of this sabbat
+        // Check if we're within 7 days BEFORE or ON the sabbat (not after)
         const daysDiff = sabbatDate.diff(now, 'days');
 
-        if (Math.abs(daysDiff) <= 7) {
+        // Only show if sabbat is upcoming (daysDiff > 0) or today (daysDiff === 0) or within 7 days before
+        if (daysDiff >= 0 && daysDiff <= 7) {
           current = sabbat.name;
           break;
         }
