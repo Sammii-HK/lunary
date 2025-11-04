@@ -3,6 +3,11 @@ import {
   sendAdminNotification,
   NotificationTemplates,
 } from '../../../../../utils/notifications/pushNotifications';
+import {
+  getSentEvents,
+  markEventsAsSent,
+  cleanupOldDates,
+} from '../shared-notification-tracker';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -563,15 +568,24 @@ async function runNotificationCheck(dateStr: string) {
         notificationsSent: 0,
         primaryEvent: cosmicData.primaryEvent?.name,
         message: 'No significant events to notify about',
+        eventsSent: [],
       };
     }
 
     // Send each significant event via Jazz worker
     const results = [];
     let totalSent = 0;
+    const eventsToTrack: Array<{
+      key: string;
+      type: string;
+      name: string;
+      priority: number;
+    }> = [];
 
     for (const event of notificationEvents) {
       try {
+        const eventKey = `${event.type}-${event.name}-${event.priority}`;
+
         // Map event type to notification type format
         const getNotificationType = (type: string): string => {
           const mapping: Record<string, string> = {
@@ -600,6 +614,7 @@ async function runNotificationCheck(dateStr: string) {
                 eventName: event.name,
                 priority: event.priority,
                 eventType: event.type,
+                checkType: 'daily',
               },
             },
           }),
@@ -608,6 +623,14 @@ async function runNotificationCheck(dateStr: string) {
         const pgResult = await pgResponse.json();
         totalSent += pgResult.recipientCount || 0;
         results.push(pgResult);
+
+        // Track this event to mark as sent (will be marked in shared tracker below)
+        eventsToTrack.push({
+          key: eventKey,
+          type: event.type,
+          name: event.name,
+          priority: event.priority,
+        });
       } catch (eventError) {
         console.error(
           `Failed to send notification for event ${event.name}:`,
@@ -626,10 +649,18 @@ async function runNotificationCheck(dateStr: string) {
       `✅ PostgreSQL notification check completed: ${totalSent} notifications sent`,
     );
 
+    // Mark all events as sent in shared tracker (database)
+    await markEventsAsSent(dateStr, eventsToTrack, 'daily');
+
+    // Cleanup old tracking data (only keep today + 1 day buffer)
+    await cleanupOldDates(1);
+
     return {
       success: totalSent > 0,
       notificationsSent: totalSent,
       primaryEvent: cosmicData.primaryEvent?.name,
+      eventsSent: eventsToTrack.map((e) => e.key),
+      eventsSentCount: eventsToTrack.length,
       results,
     };
   } catch (error) {
