@@ -19,7 +19,7 @@ export default function SpellPage() {
             The spell you're looking for doesn't exist.
           </p>
           <Link
-            href='/grimoire?item=practices'
+            href='/grimoire/practices'
             className='text-purple-400 hover:text-purple-300 transition-colors'
           >
             ← Return to Grimoire
@@ -41,7 +41,7 @@ export default function SpellPage() {
       {/* Header */}
       <div className='mb-6'>
         <Link
-          href='/grimoire?item=practices'
+          href='/grimoire/practices'
           className='inline-flex items-center text-purple-400 hover:text-purple-300 transition-colors mb-4'
         >
           <ArrowLeft className='w-4 h-4 mr-2' />

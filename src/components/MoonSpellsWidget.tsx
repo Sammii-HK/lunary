@@ -59,7 +59,7 @@ export const MoonSpellsWidget = () => {
           {currentMoonPhase} Spells
         </h3>
         <Link
-          href='/grimoire?item=moon'
+          href='/grimoire/moon'
           className='text-xs text-indigo-400 hover:text-indigo-300 transition-colors'
         >
           Moon Phases →
@@ -126,13 +126,13 @@ export const MoonSpellsWidget = () => {
 
               <div className='flex gap-2'>
                 <Link
-                  href='/grimoire?item=practices'
+                  href='/grimoire/practices'
                   className='flex-1 text-center text-xs bg-indigo-700/30 hover:bg-indigo-700/50 text-indigo-200 px-3 py-2 rounded transition-colors border border-indigo-600/30'
                 >
                   All Spells
                 </Link>
                 <Link
-                  href='/grimoire?item=moon'
+                  href='/grimoire/moon'
                   className='flex-1 text-center text-xs bg-purple-700/30 hover:bg-purple-700/50 text-purple-200 px-3 py-2 rounded transition-colors border border-purple-600/30'
                 >
                   Moon Guide
