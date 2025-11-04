@@ -230,9 +230,13 @@ async function runDailyPosts(dateStr: string) {
   const posts = [
     {
       name: 'Main Cosmic X',
-      content: generateCosmicPost(cosmicContent).snippet,
+      content: generateCosmicPost(cosmicContent).snippet.replace(/\n/g, ' '),
       platforms: ['x'], // Only Twitter/X - single post per day
-      imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}/landscape`],
+      imageUrls: [
+        `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
+        `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
+        `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
+      ],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
     },
