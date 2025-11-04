@@ -13,12 +13,12 @@ const Runes = () => {
         </p>
       </div>
 
-      <div className='space-y-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
         {runes.map((rune: string) => (
           <div
             key={rune}
             id={rune}
-            className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+            className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 transition-colors'
           >
             <h2 className='text-lg font-medium text-zinc-100 mb-2'>
               {runesList[rune as keyof typeof runesList].symbol}{' '}

@@ -3,66 +3,148 @@
 import { useEffect } from 'react';
 
 const BirthChart = () => {
+  // Enhanced planet data with unique, detailed information
   const planets = [
     {
       symbol: '☉',
       name: 'Sun',
+      element: 'Fire',
+      rulingSign: 'Leo',
+      house: '5th',
       keywords: 'Purpose, vitality, self-expression',
-      transitTone: 'Focus, visibility, ego, life direction',
+      inBirthChart:
+        'Your core identity, ego, and life purpose. Shows how you shine and express yourself.',
+      inTransits: 'Focus, visibility, ego, life direction',
+      characteristics: 'Conscious self, willpower, creativity',
+      retrograde:
+        'Rare. Deepens self-reflection, re-evaluation of identity and purpose.',
     },
     {
       symbol: '☽',
       name: 'Moon',
+      element: 'Water',
+      rulingSign: 'Cancer',
+      house: '4th',
       keywords: 'Feelings, needs, rhythms',
-      transitTone: 'Emotional fluctuations, home/family',
+      inBirthChart:
+        'Your emotional nature, instincts, and subconscious patterns. Shows how you nurture and feel secure.',
+      inTransits: 'Emotional fluctuations, home/family, inner needs',
+      characteristics: 'Unconscious, habits, memory, intuition',
+      retrograde:
+        'Rare. Emotional processing, healing childhood patterns, reconnecting with inner self.',
     },
     {
       symbol: '☿',
       name: 'Mercury',
+      element: 'Air',
+      rulingSign: 'Gemini & Virgo',
+      house: '3rd & 6th',
       keywords: 'Thinking, communication, travel',
-      transitTone: 'Learning, exchanging ideas, planning',
+      inBirthChart:
+        'How you think, communicate, and process information. Your learning style and mental approach.',
+      inTransits: 'Learning, exchanging ideas, planning, communication',
+      characteristics: 'Intellect, logic, reasoning, short trips',
+      retrograde:
+        '3-4 times/year, 3 weeks. Review, reflection, reconnection. Communication delays, tech issues.',
     },
     {
       symbol: '♀',
       name: 'Venus',
+      element: 'Earth',
+      rulingSign: 'Libra & Taurus',
+      house: '7th & 2nd',
       keywords: 'Love, pleasure, values',
-      transitTone: 'Relationships, harmony, money',
+      inBirthChart:
+        'What you value, how you love, and what brings you pleasure. Your relationship style and aesthetic.',
+      inTransits: 'Relationships, harmony, money, beauty, creativity',
+      characteristics: 'Attraction, finances, art, luxury',
+      retrograde:
+        'Every 18 months, 6 weeks. Re-evaluate relationships, values, spending. Not ideal for new commitments.',
     },
     {
       symbol: '♂',
       name: 'Mars',
+      element: 'Fire',
+      rulingSign: 'Aries & Scorpio',
+      house: '1st & 8th',
       keywords: 'Action, drive, competition',
-      transitTone: 'Motivation, conflict, assertiveness',
+      inBirthChart:
+        'How you take action, assert yourself, and pursue desires. Your energy, drive, and passion.',
+      inTransits: 'Motivation, conflict, assertiveness, sexual energy',
+      characteristics: 'Will, courage, aggression, physical drive',
+      retrograde:
+        'Every 2 years, 2-3 months. Internal work, suppressed anger, re-evaluating goals. Avoid starting new projects.',
     },
     {
       symbol: '♃',
       name: 'Jupiter',
+      element: 'Fire',
+      rulingSign: 'Sagittarius & Pisces',
+      house: '9th & 12th',
       keywords: 'Growth, optimism, opportunity',
-      transitTone: 'Expansion, luck, abundance',
+      inBirthChart:
+        'Where you expand, find luck, and seek meaning. Your philosophy, beliefs, and areas of abundance.',
+      inTransits: 'Expansion, luck, abundance, opportunities, growth',
+      characteristics: 'Wisdom, generosity, faith, higher learning',
+      retrograde:
+        'Once/year, 4 months. Inner growth, spiritual development, re-evaluating beliefs and expansion.',
     },
     {
       symbol: '♄',
       name: 'Saturn',
+      element: 'Earth',
+      rulingSign: 'Capricorn & Aquarius',
+      house: '10th & 11th',
       keywords: 'Structure, limits, responsibility',
-      transitTone: 'Discipline, lessons, long-term effort',
+      inBirthChart:
+        'Where you face challenges, build discipline, and learn life lessons. Your responsibilities and boundaries.',
+      inTransits: 'Discipline, lessons, long-term effort, restrictions',
+      characteristics: 'Time, karma, authority, structure, maturity',
+      retrograde:
+        'Once/year, 4.5 months. Inner discipline, reassessing responsibilities, facing fears and limitations.',
     },
     {
       symbol: '♅',
       name: 'Uranus',
+      element: 'Air',
+      rulingSign: 'Aquarius',
+      house: '11th',
       keywords: 'Change, awakening, innovation',
-      transitTone: 'Disruption, liberation, experimentation',
+      inBirthChart:
+        'Where you seek freedom, innovation, and break from tradition. Your uniqueness and rebellious streak.',
+      inTransits: 'Disruption, liberation, experimentation, sudden change',
+      characteristics: 'Revolution, technology, independence, originality',
+      retrograde:
+        'Once/year, 5 months. Internal revolution, breaking free from constraints, authentic self-expression.',
     },
     {
       symbol: '♆',
       name: 'Neptune',
+      element: 'Water',
+      rulingSign: 'Pisces',
+      house: '12th',
       keywords: 'Imagination, compassion, illusion',
-      transitTone: 'Spirituality, confusion, idealism',
+      inBirthChart:
+        'Where you connect with spirituality, dreams, and the collective unconscious. Your intuition and idealism.',
+      inTransits: 'Spirituality, confusion, idealism, dreams, deception',
+      characteristics: 'Mysticism, compassion, creativity, illusion',
+      retrograde:
+        'Once/year, 5 months. Deep spiritual work, artistic inspiration, confronting illusions and delusions.',
     },
     {
       symbol: '♇',
       name: 'Pluto',
+      element: 'Water',
+      rulingSign: 'Scorpio',
+      house: '8th',
       keywords: 'Power, transformation, regeneration',
-      transitTone: 'Deep change, endings, rebirth',
+      inBirthChart:
+        'Where you experience deep transformation, power dynamics, and rebirth. Your shadow and regeneration.',
+      inTransits:
+        'Deep change, endings, rebirth, power struggles, transformation',
+      characteristics: 'Death, rebirth, intensity, hidden power',
+      retrograde:
+        '5 months/year. Inner transformation, releasing control, healing deep wounds, personal power.',
     },
   ];
 
@@ -106,28 +188,73 @@ const BirthChart = () => {
       </div>
 
       <section id='planets' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>
-          Planets — &quot;The What&quot;
-        </h2>
-        <div className='space-y-3'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Planets — &quot;The What&quot;
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Each planet represents a different type of energy and motivation in
+            your birth chart. Understanding their meanings helps you interpret
+            how they influence different areas of your life.
+          </p>
+        </div>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           {planets.map((planet) => (
             <div
               key={planet.name}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 transition-colors'
             >
-              <div className='flex items-start gap-3'>
-                <span className='text-2xl'>{planet.symbol}</span>
-                <div className='flex-1'>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              <div className='flex items-start gap-3 mb-3'>
+                <span className='text-2xl flex-shrink-0'>{planet.symbol}</span>
+                <div className='flex-1 min-w-0'>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                     {planet.name}
                   </h3>
-                  <p className='text-sm text-zinc-300 mb-1'>
-                    <span className='font-medium'>Keywords:</span>{' '}
-                    {planet.keywords}
+                  <div className='flex flex-wrap gap-1 mb-2'>
+                    <span className='text-xs px-2 py-0.5 rounded bg-purple-900/20 text-purple-300'>
+                      {planet.element}
+                    </span>
+                    <span className='text-xs px-2 py-0.5 rounded bg-zinc-800/50 text-zinc-300'>
+                      {planet.rulingSign}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className='space-y-2'>
+                <div>
+                  <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                    In Your Birth Chart:
                   </p>
-                  <p className='text-sm text-zinc-400'>
-                    <span className='font-medium'>In Transits:</span>{' '}
-                    {planet.transitTone}
+                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                    {planet.inBirthChart}
+                  </p>
+                </div>
+
+                <div>
+                  <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                    Characteristics:
+                  </p>
+                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                    {planet.characteristics}
+                  </p>
+                </div>
+
+                <div>
+                  <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                    In Transits:
+                  </p>
+                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                    {planet.inTransits}
+                  </p>
+                </div>
+
+                <div className='pt-2 border-t border-zinc-700'>
+                  <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                    Retrograde:
+                  </p>
+                  <p className='text-xs text-zinc-400 leading-relaxed'>
+                    {planet.retrograde}
                   </p>
                 </div>
               </div>

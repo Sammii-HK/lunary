@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className='flex h-fit-content w-full flex-col items-center justify-between gap-4'>
+    <div className='flex h-fit-content w-full flex-col items-center justify-between gap-4 max-w-7xl mx-auto'>
       <AstronomyContextProvider>
         <DateWidget />
         <AstronomyWidget />

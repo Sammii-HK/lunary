@@ -55,11 +55,11 @@ const AstronomyItems = ({ type }: { type: string }) => {
   return (
     <section id={type.toLowerCase()} className='space-y-4'>
       <h2 className='text-xl font-medium text-zinc-100'>{type}</h2>
-      <div className='space-y-3'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
         {Object.keys(items).map((item: string) => (
           <div
             key={item.toLowerCase()}
-            className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+            className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 transition-colors'
           >
             <h3 className='text-lg font-medium text-zinc-100 mb-2'>
               {items[item as keyof typeof items]}{' '}
