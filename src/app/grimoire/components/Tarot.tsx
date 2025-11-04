@@ -3,10 +3,20 @@
 import { useEffect } from 'react';
 import { tarotSpreads, tarotSuits } from '@/constants/tarot';
 import { tarotCards } from '../../../../utils/tarot/tarot-cards';
+import { TarotCard } from '@/components/TarotCard';
 
 const Tarot = () => {
   const suits = Object.keys(tarotSuits);
   const majorArcanaCards = Object.values(tarotCards.majorArcana);
+
+  // Get all minor arcana cards organized by suit
+  const minorArcanaBySuit = Object.entries(tarotCards.minorArcana).map(
+    ([suitKey, suitCards]) => ({
+      suitKey,
+      suitName: tarotSuits[suitKey as keyof typeof tarotSuits]?.name || suitKey,
+      cards: Object.values(suitCards),
+    }),
+  );
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -33,6 +43,52 @@ const Tarot = () => {
         </p>
       </div>
 
+      {/* Spreads Section - Moved to Top */}
+      <section id='spreads' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>Spreads</h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Tarot spreads are layouts that determine how cards are arranged and
+            interpreted. Each spread has specific positions with unique
+            meanings.
+          </p>
+        </div>
+        <div className='space-y-4'>
+          {Object.keys(tarotSpreads).map((spread: string) => (
+            <div
+              key={spread}
+              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+            >
+              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                {tarotSpreads[spread as keyof typeof tarotSpreads].name}
+              </h3>
+              <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+                {tarotSpreads[spread as keyof typeof tarotSpreads].description}
+              </p>
+              {Array.isArray(
+                tarotSpreads[spread as keyof typeof tarotSpreads].instructions,
+              ) &&
+              tarotSpreads[spread as keyof typeof tarotSpreads].instructions
+                .length > 0 ? (
+                <ul className='list-disc list-inside text-sm text-zinc-400 space-y-1'>
+                  {tarotSpreads[
+                    spread as keyof typeof tarotSpreads
+                  ].instructions.map((instruction: string, index: number) => (
+                    <li key={index}>{instruction}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className='text-sm text-zinc-400'>
+                  {tarotSpreads[spread as keyof typeof tarotSpreads]
+                    .instructions || 'Instructions coming soon.'}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Major Arcana Section */}
       <section id='major-arcana' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
@@ -46,46 +102,33 @@ const Tarot = () => {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           {majorArcanaCards.map((card) => (
-            <div
+            <TarotCard
               key={card.name}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 transition-colors'
-            >
-              <h3 className='text-lg font-medium text-purple-300 mb-2'>
-                {card.name}
-              </h3>
-              <div className='mb-2'>
-                <p className='text-xs text-zinc-400 mb-1'>Keywords:</p>
-                <div className='flex flex-wrap gap-1'>
-                  {card.keywords.map((keyword, index) => (
-                    <span
-                      key={index}
-                      className='text-xs px-2 py-0.5 rounded bg-purple-900/20 text-purple-300'
-                    >
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <p className='text-sm text-zinc-300 leading-relaxed'>
-                {card.information}
-              </p>
-            </div>
+              name={card.name}
+              keywords={card.keywords}
+              information={card.information}
+              variant='major'
+            />
           ))}
         </div>
       </section>
 
-      <section id='arcana' className='space-y-6'>
+      {/* Minor Arcana Section */}
+      <section id='minor-arcana' className='space-y-8'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-            Minor Arcana - Suits
+            Minor Arcana
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
-            The four suits of the Minor Arcana represent different aspects of
+            The 56 Minor Arcana cards are organized into four suits (Cups,
+            Wands, Swords, Pentacles), each representing different aspects of
             daily life and experiences. Each suit corresponds to an element and
             has its own symbolic meaning.
           </p>
         </div>
-        <div className='space-y-4'>
+
+        {/* Suit Information */}
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
           {suits.map((suit: string) => (
             <div
               key={suit}
@@ -94,40 +137,38 @@ const Tarot = () => {
               <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                 {tarotSuits[suit as keyof typeof tarotSuits].name}
               </h3>
+              <p className='text-xs text-zinc-400 mb-2'>
+                Element: {tarotSuits[suit as keyof typeof tarotSuits].element}
+              </p>
               <p className='text-sm text-zinc-300 leading-relaxed'>
                 {tarotSuits[suit as keyof typeof tarotSuits].mysticalProperties}
               </p>
             </div>
           ))}
         </div>
-      </section>
 
-      <section id='spreads' className='space-y-6'>
-        <h2 className='text-xl font-medium text-zinc-100'>Spreads</h2>
-        <p className='text-sm text-zinc-400 mb-4'>
-          Tarot spreads are layouts that determine how cards are arranged and
-          interpreted. Each spread has specific positions with unique meanings.
-        </p>
-        <div className='space-y-4'>
-          {Object.keys(tarotSpreads).map((spread: string) => (
-            <div
-              key={spread}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                {tarotSpreads[spread as keyof typeof tarotSpreads].name}
-              </h3>
-              <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
-                {tarotSpreads[spread as keyof typeof tarotSpreads].description}
-              </p>
-              <p className='text-sm text-zinc-400'>
-                {tarotSpreads[spread as keyof typeof tarotSpreads].instructions}
-              </p>
+        {/* All Minor Arcana Cards by Suit */}
+        {minorArcanaBySuit.map(({ suitKey, suitName, cards }) => (
+          <div key={suitKey} className='space-y-4'>
+            <h3 className='text-lg font-medium text-zinc-100 border-b border-zinc-700 pb-2'>
+              {suitName}
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+              {cards.map((card) => (
+                <TarotCard
+                  key={card.name}
+                  name={card.name}
+                  keywords={card.keywords}
+                  information={card.information}
+                  variant='minor'
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </section>
 
+      {/* FAQ Section */}
       <section id='faq' className='space-y-6'>
         <h2 className='text-xl font-medium text-zinc-100'>
           Frequently Asked Questions
