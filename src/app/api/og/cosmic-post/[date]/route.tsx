@@ -262,17 +262,14 @@ export async function GET(request: NextRequest) {
       'Get personalised daily cosmic guidance at lunary.app.',
     ].join('\n'),
     snippetShort: [
-      `Daily cosmic highlights: ${highlights?.[0] || ''}`,
-      ' ',
-      `Crystal: ${getGeneralCrystalRecommendation().guidance}`,
-      ' ',
-      `Tarot: ${getGeneralTarotReading().guidance.dailyMessage}`,
-      ' ',
-      'Get personalised daily cosmic guidance at lunary.app',
-    ].join('\n'),
+      (highlights?.[0] || 'Daily cosmic guidance').substring(0, 100),
+      `Crystal: ${getGeneralCrystalRecommendation().guidance.substring(0, 70)}...`,
+      `Tarot: ${getGeneralTarotReading().guidance.dailyMessage.substring(0, 70)}...`,
+      'lunary.app',
+    ]
+      .filter(Boolean)
+      .join(' '),
   };
-
-  console.log('postContent.snippet', postContent.snippet);
 
   return NextResponse.json(postContent);
 }

@@ -230,7 +230,10 @@ async function runDailyPosts(dateStr: string) {
   const posts = [
     {
       name: 'Main Cosmic X',
-      content: generateCosmicPost(cosmicContent).snippet.replace(/\n/g, ' '),
+      content: generateCosmicPost(cosmicContent).snippetShort.replace(
+        /\n/g,
+        ' ',
+      ),
       platforms: ['x'], // Only Twitter/X - single post per day
       imageUrls: [
         `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
