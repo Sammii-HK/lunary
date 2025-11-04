@@ -307,7 +307,9 @@ export default function BlogPage() {
                   </div>
 
                   <Button asChild>
-                    <Link href={`/blog/${post.slug}`}>Read Full Forecast</Link>
+                    <Link href={`/blog/week/${post.weekNumber}-${post.year}`}>
+                      Read Full Forecast
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
