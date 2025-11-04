@@ -196,7 +196,7 @@ async function syncAllProducts() {
 }
 
 async function getStripeProducts() {
-  // Get all active grimoire products from Stripe
+  // Get all active shop products from Stripe (grimoire packs + moon packs)
   const products = await stripe.products.list({
     active: true,
     expand: ['data.default_price'],
@@ -208,61 +208,88 @@ async function getStripeProducts() {
     limit: 100,
   });
 
-  const grimoireProducts = products.data
-    .filter((product) => product.metadata?.grimoireType === 'grimoire-pack')
-    .map((product) => {
-      const productPrices = prices.data.filter(
-        (price) => price.product === product.id,
-      );
+  // Filter for shop products (grimoire packs OR moon packs)
+  const shopProducts = products.data.filter((product) => {
+    const isGrimoirePack = product.metadata?.grimoireType === 'grimoire-pack';
+    const isMoonPack = product.metadata?.category === 'moon_phases';
+    const hasPackId = !!product.metadata?.packId;
+    return isGrimoirePack || isMoonPack || hasPackId;
+  });
 
-      return {
-        stripeProductId: product.id,
-        stripePriceId: productPrices[0]?.id,
-        title: product.name,
-        description: product.description,
-        category: product.metadata?.category,
+  const transformedProducts = shopProducts.map((product) => {
+    const productPrices = prices.data.filter(
+      (price) => price.product === product.id,
+    );
+    const defaultPrice = productPrices[0];
+    const isMoonPack = product.metadata?.category === 'moon_phases';
 
-        // Reconstruct grimoire data from metadata
-        spellCount: parseInt(product.metadata?.spellCount || '0'),
-        crystalCount: parseInt(product.metadata?.crystalCount || '0'),
-        herbCount: parseInt(product.metadata?.herbCount || '0'),
+    // Extract pricing information
+    const priceAmount = defaultPrice?.unit_amount || 249;
+    const compareAtPrice = product.metadata?.compareAtPrice
+      ? parseInt(product.metadata.compareAtPrice)
+      : undefined;
 
-        timing: {
-          bestDays: product.metadata?.bestDays
-            ? JSON.parse(product.metadata.bestDays)
-            : [],
-          moonPhase: product.metadata?.moonPhase,
-          planetaryHour: product.metadata?.planetaryHour,
-        },
+    // Build base product structure
+    const baseProduct: any = {
+      id: product.metadata?.packId || product.id,
+      stripeProductId: product.id,
+      stripePriceId: defaultPrice?.id,
+      title: product.name,
+      fullName: product.name,
+      subtitle: product.metadata?.subtitle,
+      description: product.description || '',
+      category: product.metadata?.category || 'spells',
+      sku: product.metadata?.sku || product.id,
+      slug: product.metadata?.slug || product.id,
+      series: product.metadata?.series || 'Uncategorized',
+      volume: product.metadata?.volume || '',
+      edition: product.metadata?.edition || '',
+      pricing: {
+        amount: priceAmount,
+        currency: 'usd',
+        compareAtPrice,
+      },
+      isPublished: product.active,
+      createdAt: new Date(product.created * 1000).toISOString(),
+      updatedAt: product.updated
+        ? new Date(product.updated * 1000).toISOString()
+        : null,
+      prices: productPrices.map((price) => ({
+        id: price.id,
+        amount: price.unit_amount,
+        currency: price.currency,
+      })),
+    };
 
-        metadata: {
-          price: productPrices[0]?.unit_amount || 249,
-          difficulty:
-            productPrices[0]?.metadata?.difficulty || 'beginner-intermediate',
-          estimatedTime:
-            productPrices[0]?.metadata?.estimatedTime ||
-            '15-45 minutes per practice',
-        },
-
-        isActive: product.active,
-        createdAt: new Date(product.created * 1000).toISOString(),
-        updatedAt: product.updated
-          ? new Date(product.updated * 1000).toISOString()
-          : null,
-
-        // Stripe-specific data
-        prices: productPrices.map((price) => ({
-          id: price.id,
-          amount: price.unit_amount,
-          currency: price.currency,
-        })),
+    // Add contentCount - handle both grimoire packs and moon packs
+    if (isMoonPack) {
+      // Moon packs have itemCount in metadata
+      const itemCount = parseInt(product.metadata?.itemCount || '0');
+      baseProduct.contentCount = {
+        spells: 0,
+        crystals: 0,
+        herbs: 0,
+        rituals: 0,
+        moonPhases: itemCount,
       };
-    });
+    } else {
+      // Grimoire packs have spell/crystal/herb counts
+      baseProduct.contentCount = {
+        spells: parseInt(product.metadata?.spellCount || '0'),
+        crystals: parseInt(product.metadata?.crystalCount || '0'),
+        herbs: parseInt(product.metadata?.herbCount || '0'),
+        rituals: parseInt(product.metadata?.ritualCount || '0'),
+        moonPhases: 0,
+      };
+    }
+
+    return baseProduct;
+  });
 
   return NextResponse.json({
     success: true,
-    products: grimoireProducts,
-    total: grimoireProducts.length,
+    products: transformedProducts,
+    total: transformedProducts.length,
   });
 }
 

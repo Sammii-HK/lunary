@@ -55,11 +55,12 @@ interface ShopPack {
     compareAtPrice?: number;
   };
   isPublished: boolean;
-  contentCount: {
+  contentCount?: {
     spells: number;
     crystals: number;
     herbs: number;
     rituals: number;
+    moonPhases?: number;
   };
 }
 
@@ -396,12 +397,15 @@ export default function ShopManagerPage() {
                           )}
 
                           <div className='flex items-center gap-4 text-sm text-muted-foreground'>
-                            <span>SKU: {pack.sku}</span>
-                            <span>Edition: {pack.edition}</span>
+                            <span>SKU: {pack.sku || 'N/A'}</span>
+                            <span>Edition: {pack.edition || 'N/A'}</span>
                             <span>
-                              Content: {pack.contentCount.spells}S •{' '}
-                              {pack.contentCount.crystals}C •{' '}
-                              {pack.contentCount.herbs}H
+                              Content:{' '}
+                              {pack.contentCount?.moonPhases
+                                ? `${pack.contentCount.moonPhases} Moon Phases`
+                                : pack.contentCount
+                                  ? `${pack.contentCount.spells || 0}S • ${pack.contentCount.crystals || 0}C • ${pack.contentCount.herbs || 0}H`
+                                  : 'No content info'}
                             </span>
                           </div>
                         </div>
