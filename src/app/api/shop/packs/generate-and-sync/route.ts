@@ -11,6 +11,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Generate grimoire pack and automatically sync to Stripe as SSOT
 export async function POST(request: NextRequest) {
@@ -24,9 +25,12 @@ export async function POST(request: NextRequest) {
       month,
       quarter,
       dateRange,
+      dryRun = false, // Add dry-run mode for testing
     } = await request.json();
 
-    console.log(`🏭 Generating and syncing ${category} pack to Stripe...`);
+    console.log(
+      `🏭 Generating and syncing ${category} pack to Stripe...${dryRun ? ' [DRY RUN]' : ''}`,
+    );
 
     // 1. Generate the grimoire pack with proper naming
     // For moon_phases, we need to use the generate endpoint that supports month/year
@@ -124,6 +128,15 @@ export async function POST(request: NextRequest) {
           customNaming.subtitle ||
           `Complete moon phase guide with lunar calendar and spiritual guidance`,
       };
+
+      console.log('📋 Normalized pack structure:', {
+        id: packData.id,
+        name: packData.name,
+        fullName: packData.fullName,
+        sku: packData.sku,
+        price: packData.price,
+        pricing: packData.pricing,
+      });
     } else {
       // Use standard grimoire pack generation
       packData = await generateGrimoirePackWithNaming(
@@ -166,19 +179,31 @@ export async function POST(request: NextRequest) {
     console.log('📄 Generating PDF from pack content...');
     const pdfBuffer = await generatePDFFromPack(packData);
 
-    // 3. Upload PDF to Vercel Blob (private access)
-    console.log('☁️ Uploading PDF to Vercel Blob...');
-    const packId = packData.id || crypto.randomBytes(16).toString('hex');
-    const fileName = `${packData.sku || packData.slug || category}_${packId}.pdf`;
-    const blobKey = `shop/packs/${category}/${fileName}`;
+    let blobUrl: string;
+    let blobKey: string;
+    let fileSize: number;
 
-    const { url: blobUrl } = await put(blobKey, Buffer.from(pdfBuffer), {
-      access: 'public', // Public but accessed via secure download tokens
-      addRandomSuffix: false,
-      contentType: 'application/pdf',
-    });
+    if (dryRun) {
+      console.log('🔍 [DRY RUN] Skipping PDF upload to Blob');
+      blobUrl = 'https://dry-run-example.com/pack.pdf';
+      blobKey = `shop/packs/${category}/dry-run.pdf`;
+      fileSize = pdfBuffer.byteLength;
+    } else {
+      // 3. Upload PDF to Vercel Blob (private access)
+      console.log('☁️ Uploading PDF to Vercel Blob...');
+      const packId = packData.id || crypto.randomBytes(16).toString('hex');
+      const fileName = `${packData.sku || packData.slug || category}_${packId}.pdf`;
+      blobKey = `shop/packs/${category}/${fileName}`;
 
-    const fileSize = pdfBuffer.byteLength;
+      const { url } = await put(blobKey, Buffer.from(pdfBuffer), {
+        access: 'public', // Public but accessed via secure download tokens
+        addRandomSuffix: false,
+        contentType: 'application/pdf',
+      });
+
+      blobUrl = url;
+      fileSize = pdfBuffer.byteLength;
+    }
 
     // 4. Update pack with Blob URL and file info
     const packWithBlob = {
@@ -191,7 +216,19 @@ export async function POST(request: NextRequest) {
 
     // 5. Create Stripe product as SSOT (with Blob URL in metadata)
     console.log('💳 Creating Stripe product as SSOT...');
-    const stripeProduct = await createStripeProduct(packWithBlob);
+    let stripeProduct: any;
+
+    if (dryRun) {
+      console.log('🔍 [DRY RUN] Skipping Stripe product creation');
+      stripeProduct = {
+        product: { id: 'prod_dry_run_' + Date.now() },
+        price: { id: 'price_dry_run_' + Date.now() },
+        paymentLink: { id: 'plink_dry_run_' + Date.now() },
+        url: 'https://dry-run-example.com/checkout',
+      };
+    } else {
+      stripeProduct = await createStripeProduct(packWithBlob);
+    }
 
     // 6. Update pack with Stripe IDs
     const finalPack = {
@@ -203,17 +240,20 @@ export async function POST(request: NextRequest) {
       syncedAt: new Date().toISOString(),
     };
 
-    console.log(`✅ Pack created and synced: ${finalPack.sku}`);
+    console.log(
+      `✅ Pack created and synced: ${finalPack.sku}${dryRun ? ' [DRY RUN]' : ''}`,
+    );
 
     return NextResponse.json({
       success: true,
-      message: `Pack "${finalPack.fullName}" created and synced to Stripe`,
+      message: `Pack "${finalPack.fullName}" ${dryRun ? 'would be' : ''} created and synced to Stripe`,
       pack: finalPack,
       stripe: {
         productId: stripeProduct.product.id,
         priceId: stripeProduct.price.id,
         url: stripeProduct.url,
       },
+      dryRun,
     });
   } catch (error) {
     console.error('Pack generation and sync error:', error);
