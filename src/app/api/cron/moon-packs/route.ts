@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MoonPackGenerator } from '../../../../../scripts/generate-moon-packs';
+import {
+  sendAdminNotification,
+  NotificationTemplates,
+} from '../../../../../utils/notifications/pushNotifications';
 
 export const runtime = 'nodejs';
 
@@ -22,10 +26,9 @@ export async function POST(request: NextRequest) {
   try {
     // Verify this is being called by an authorized source
     const authHeader = request.headers.get('authorization');
-    const expectedToken = process.env.CRON_SECRET_TOKEN;
+    const expectedToken = process.env.CRON_SECRET;
 
     if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
-      console.log('🔒 Unauthorized cron request blocked');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -48,13 +51,41 @@ export async function POST(request: NextRequest) {
     await generator.generatePacks(type);
     await generator.cleanup();
 
-    console.log('✅ Cron job completed successfully');
+    const createdPacks = generator.getCreatedPacks();
+
+    console.log(
+      `✅ Cron job completed successfully. Created ${createdPacks.length} packs`,
+    );
+
+    // Send notifications for created packs
+    if (createdPacks.length > 0 && !dryRun) {
+      console.log(
+        `📱 Sending notifications for ${createdPacks.length} created packs`,
+      );
+      for (const pack of createdPacks) {
+        try {
+          await sendAdminNotification(
+            NotificationTemplates.packCreated(pack.name, pack.sku, {
+              amount: pack.price,
+            }),
+          );
+          console.log(`✅ Notification sent for pack: ${pack.name}`);
+        } catch (error) {
+          console.error(
+            `❌ Failed to send notification for pack ${pack.name}:`,
+            error,
+          );
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,
       message: `Moon pack generation completed (${type})`,
       timestamp: new Date().toISOString(),
       dryRun,
+      packsCreated: createdPacks.length,
+      packs: createdPacks,
     });
   } catch (error: any) {
     console.error('❌ Cron job failed:', error);
@@ -76,7 +107,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const authHeader = request.headers.get('authorization');
-  const expectedToken = process.env.CRON_SECRET_TOKEN;
+  const expectedToken = process.env.CRON_SECRET;
 
   if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

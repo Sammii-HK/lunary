@@ -97,10 +97,32 @@ export async function POST(request: NextRequest) {
       const generatedPack = await generateResponse.json();
       packData = generatedPack.pack || generatedPack;
 
-      // Ensure price is set correctly
+      // Normalize moon phase pack data to match expected structure
+      const packId =
+        packData.id ||
+        `moon_phases_${packYear}${month ? `_${month}` : ''}${quarter ? `_Q${quarter}` : ''}_${Date.now()}`;
+      const sku =
+        packData.sku ||
+        `MOON-${packYear}${month ? `-${month.toString().padStart(2, '0')}` : ''}${quarter ? `-Q${quarter}` : ''}`;
+
       packData = {
         ...packData,
-        price: packPrice, // Ensure price is set from pricing strategy
+        id: packId,
+        name: packName,
+        fullName: packName,
+        title: packName,
+        sku: sku,
+        slug: packData.slug || sku.toLowerCase().replace(/-/g, '_'),
+        category: 'moon_phases',
+        price: packPrice,
+        pricing: {
+          amount: packPrice,
+          currency: 'usd',
+        },
+        description:
+          packData.description ||
+          customNaming.subtitle ||
+          `Complete moon phase guide with lunar calendar and spiritual guidance`,
       };
     } else {
       // Use standard grimoire pack generation
@@ -109,6 +131,35 @@ export async function POST(request: NextRequest) {
         includeRituals,
         customNaming,
       );
+
+      // Ensure pricing structure is normalized for Stripe
+      if (packData.pricing && typeof packData.pricing === 'object') {
+        // Already has pricing object, ensure it has amount
+        if (!packData.pricing.amount && packData.price) {
+          packData.pricing.amount = packData.price;
+        }
+      } else if (packData.price && !packData.pricing) {
+        // Has price but no pricing object, create one
+        packData.pricing = {
+          amount: packData.price,
+          currency: 'usd',
+        };
+      } else if (!packData.pricing && !packData.price) {
+        // No pricing at all, use default
+        packData.pricing = {
+          amount: 249,
+          currency: 'usd',
+        };
+        packData.price = 249;
+      }
+
+      // Ensure name/fullName fields exist
+      if (!packData.fullName && packData.name) {
+        packData.fullName = packData.name;
+      }
+      if (!packData.fullName && packData.title) {
+        packData.fullName = packData.title;
+      }
     }
 
     // 2. Generate PDF from pack content
@@ -226,12 +277,18 @@ async function generateGrimoirePackWithNaming(
 
 // Create Stripe product with comprehensive metadata
 async function createStripeProduct(packData: any) {
-  console.log(`🛍️ Creating Stripe product: ${packData.fullName}`);
+  const productName =
+    packData.fullName || packData.name || packData.title || 'Grimoire Pack';
+  console.log(`🛍️ Creating Stripe product: ${productName}`);
+
+  if (!productName) {
+    throw new Error('Pack name is required for Stripe product creation');
+  }
 
   // Create comprehensive Stripe product
   const product = await stripe.products.create({
-    name: packData.fullName,
-    description: packData.description,
+    name: productName,
+    description: packData.description || '',
     images: [], // Could add pack preview images
     metadata: {
       // Pack identification
@@ -280,9 +337,10 @@ async function createStripeProduct(packData: any) {
   });
 
   // Create Stripe price with proper metadata
+  const unitAmount = packData.pricing?.amount || packData.price || 249;
   const price = await stripe.prices.create({
     product: product.id,
-    unit_amount: packData.pricing?.amount || 249,
+    unit_amount: unitAmount,
     currency: 'usd',
     metadata: {
       packId: packData.id,

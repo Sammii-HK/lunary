@@ -39,9 +39,20 @@ interface PackConfig {
 
 class MoonPackGenerator {
   private dryRun: boolean;
+  private createdPacks: Array<{
+    name: string;
+    sku: string;
+    price: number;
+    stripeProductId: string;
+  }>;
 
   constructor(dryRun = false) {
     this.dryRun = dryRun;
+    this.createdPacks = [];
+  }
+
+  getCreatedPacks() {
+    return this.createdPacks;
   }
 
   async generatePacks(
@@ -263,6 +274,14 @@ class MoonPackGenerator {
       const { stripeProductId, stripePriceId } = await stripeResponse.json();
       console.log(`   💳 Stripe product created (SSOT): ${stripeProductId}`);
       console.log(`   ✅ Complete automation finished successfully`);
+
+      // Track created pack for notifications
+      this.createdPacks.push({
+        name: config.name,
+        sku: pack.sku || pack.id,
+        price: config.price,
+        stripeProductId,
+      });
 
       // TODO: Save pack data to database when database is implemented
       // For now, we're relying on Stripe as the source of truth
