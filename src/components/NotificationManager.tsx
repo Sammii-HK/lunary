@@ -128,10 +128,18 @@ export function NotificationManager() {
         throw new Error('Subscription keys missing');
       }
 
+      const endpoint = json?.endpoint;
+      const p256dh = json?.keys?.p256dh;
+      const auth = json?.keys?.auth;
+
+      if (!endpoint || !p256dh || !auth) {
+        throw new Error('Subscription JSON missing required keys');
+      }
+
       const clientSubscription = PushSubscription.create({
-        endpoint: json.endpoint,
-        p256dh: json.keys.p256dh,
-        auth: json.keys.auth,
+        endpoint,
+        p256dh,
+        auth,
         userAgent: navigator.userAgent,
         createdAt: new Date().toISOString(),
         preferences: {
@@ -169,10 +177,10 @@ export function NotificationManager() {
           },
           body: JSON.stringify({
             subscription: {
-              endpoint: json.endpoint,
+              endpoint,
               keys: {
-                p256dh: json.keys.p256dh,
-                auth: json.keys.auth,
+                p256dh,
+                auth,
               },
             },
             preferences: {

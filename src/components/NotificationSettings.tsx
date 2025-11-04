@@ -239,10 +239,18 @@ export function NotificationSettings() {
         throw new Error('Subscription keys missing');
       }
 
+      const endpoint = json?.endpoint;
+      const p256dh = json?.keys?.p256dh;
+      const auth = json?.keys?.auth;
+
+      if (!endpoint || !p256dh || !auth) {
+        throw new Error('Subscription JSON missing required keys');
+      }
+
       const clientSubscription = PushSubscription.create({
-        endpoint: json.endpoint,
-        p256dh: json.keys.p256dh,
-        auth: json.keys.auth,
+        endpoint,
+        p256dh,
+        auth,
         userAgent: navigator.userAgent,
         createdAt: new Date().toISOString(),
         preferences: {
@@ -272,13 +280,13 @@ export function NotificationSettings() {
 
       try {
         // Serialize subscription properly for API
-      const subscriptionJson = subscription.toJSON();
+        const subscriptionJson = subscription.toJSON();
 
-      if (!subscriptionJson?.keys?.p256dh || !subscriptionJson?.keys?.auth) {
-        throw new Error('Subscription keys are missing');
-      }
+        if (!subscriptionJson?.keys?.p256dh || !subscriptionJson?.keys?.auth) {
+          throw new Error('Subscription keys are missing');
+        }
 
-      console.log('Sending subscription to server...');
+        console.log('Sending subscription to server...');
         const response = await fetch('/api/notifications/subscribe', {
           method: 'POST',
           headers: {
