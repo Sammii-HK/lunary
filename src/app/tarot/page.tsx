@@ -11,6 +11,8 @@ import { getGeneralTarotReading } from '../../../utils/tarot/generalTarot';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 import { Check, ChevronDown, ChevronRight, Sparkles } from 'lucide-react';
+import { TarotCardModal } from '@/components/TarotCardModal';
+import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 
 const TarotReadings = () => {
   const { me } = useAccount();
@@ -21,6 +23,11 @@ const TarotReadings = () => {
 
   const [timeFrame, setTimeFrame] = useState(30);
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
+  const [selectedCard, setSelectedCard] = useState<{
+    name: string;
+    keywords: string[];
+    information: string;
+  } | null>(null);
 
   if (!me) {
     return (
@@ -77,7 +84,13 @@ const TarotReadings = () => {
                 <h3 className='text-sm font-medium text-zinc-400 mb-2'>
                   Daily Card
                 </h3>
-                <p className='text-lg font-medium text-zinc-100 mb-1'>
+                <p
+                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                  onClick={() => {
+                    const card = getTarotCardByName(generalTarot.daily.name);
+                    if (card) setSelectedCard(card);
+                  }}
+                >
                   {generalTarot.daily.name}
                 </p>
                 <p className='text-sm text-zinc-400'>
@@ -89,7 +102,13 @@ const TarotReadings = () => {
                 <h3 className='text-sm font-medium text-zinc-400 mb-2'>
                   Weekly Card
                 </h3>
-                <p className='text-lg font-medium text-zinc-100 mb-1'>
+                <p
+                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                  onClick={() => {
+                    const card = getTarotCardByName(generalTarot.weekly.name);
+                    if (card) setSelectedCard(card);
+                  }}
+                >
                   {generalTarot.weekly.name}
                 </p>
                 <p className='text-sm text-zinc-400'>
@@ -279,7 +298,15 @@ const TarotReadings = () => {
               <h3 className='text-sm font-medium text-zinc-400 mb-2'>
                 Daily Card
               </h3>
-              <p className='text-lg font-medium text-zinc-100 mb-1'>
+              <p
+                className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                onClick={() => {
+                  const card = getTarotCardByName(
+                    personalizedReading.daily.name,
+                  );
+                  if (card) setSelectedCard(card);
+                }}
+              >
                 {personalizedReading.daily.name}
               </p>
               <p className='text-sm text-zinc-400'>
@@ -291,7 +318,15 @@ const TarotReadings = () => {
               <h3 className='text-sm font-medium text-zinc-400 mb-2'>
                 Weekly Card
               </h3>
-              <p className='text-lg font-medium text-zinc-100 mb-1'>
+              <p
+                className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                onClick={() => {
+                  const card = getTarotCardByName(
+                    personalizedReading.weekly.name,
+                  );
+                  if (card) setSelectedCard(card);
+                }}
+              >
                 {personalizedReading.weekly.name}
               </p>
               <p className='text-sm text-zinc-400'>
@@ -401,7 +436,13 @@ const TarotReadings = () => {
                         key={index}
                         className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'
                       >
-                        <p className='font-medium text-zinc-100 mb-1'>
+                        <p
+                          className='font-medium text-zinc-100 mb-1 cursor-pointer hover:text-indigo-300 transition-colors inline-block'
+                          onClick={() => {
+                            const cardData = getTarotCardByName(card.name);
+                            if (cardData) setSelectedCard(cardData);
+                          }}
+                        >
                           {card.name} ({card.count} times)
                         </p>
                         <p className='text-sm text-zinc-400 leading-relaxed'>
@@ -468,7 +509,17 @@ const TarotReadings = () => {
                                   className='flex justify-between items-center text-sm py-1.5 px-2 rounded bg-zinc-900/50'
                                 >
                                   <span className='text-zinc-300'>
-                                    {card.name}
+                                    <span
+                                      className='cursor-pointer hover:text-purple-300 transition-colors'
+                                      onClick={() => {
+                                        const cardData = getTarotCardByName(
+                                          card.name,
+                                        );
+                                        if (cardData) setSelectedCard(cardData);
+                                      }}
+                                    >
+                                      {card.name}
+                                    </span>
                                   </span>
                                   <span className='text-zinc-500'>
                                     {card.count}x
@@ -504,7 +555,21 @@ const TarotReadings = () => {
                           {pattern.reading}
                         </p>
                         <p className='text-xs text-zinc-500'>
-                          Cards: {pattern.cards.join(', ')}
+                          Cards:{' '}
+                          {pattern.cards.map((cardName, idx) => (
+                            <span key={idx}>
+                              <span
+                                className='cursor-pointer hover:text-amber-300 transition-colors'
+                                onClick={() => {
+                                  const card = getTarotCardByName(cardName);
+                                  if (card) setSelectedCard(card);
+                                }}
+                              >
+                                {cardName}
+                              </span>
+                              {idx < pattern.cards.length - 1 && ', '}
+                            </span>
+                          ))}
                         </p>
                       </div>
                     ),
@@ -558,7 +623,13 @@ const TarotReadings = () => {
                   <span className='text-sm text-zinc-400'>{reading.date}</span>
                 </div>
                 <div className='text-right'>
-                  <p className='font-medium text-zinc-100'>
+                  <p
+                    className='font-medium text-zinc-100 cursor-pointer hover:text-purple-300 transition-colors'
+                    onClick={() => {
+                      const card = getTarotCardByName(reading.card.name);
+                      if (card) setSelectedCard(card);
+                    }}
+                  >
                     {reading.card.name}
                   </p>
                   <p className='text-sm text-zinc-400'>
@@ -570,6 +641,12 @@ const TarotReadings = () => {
           </div>
         </div>
       </div>
+
+      <TarotCardModal
+        card={selectedCard}
+        isOpen={!!selectedCard}
+        onClose={() => setSelectedCard(null)}
+      />
     </div>
   );
 };
