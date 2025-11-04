@@ -96,6 +96,7 @@ export default function GrimoireLayout({
 
   // Handle hash navigation - expand section and scroll to hash
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const hash = window.location.hash.slice(1);
     if (hash && currentSection) {
       const sectionHasHash = grimoire[currentSection]?.contents?.some(
@@ -570,7 +571,7 @@ export default function GrimoireLayout({
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className='fixed inset-0 bg-black/50 z-40 lg:hidden'
+          className='fixed inset-0 bg-black/50 z-40 md:hidden'
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -578,37 +579,36 @@ export default function GrimoireLayout({
       {/* Sidebar */}
       <div
         className={`
-          fixed lg:sticky top-0 left-0
+          fixed md:sticky top-0 left-0
           h-full z-50
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          w-64 flex-shrink-0 bg-zinc-900 border-r border-zinc-700
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          w-64 md:w-72 lg:w-80 xl:w-96 flex-shrink-0 bg-zinc-900 border-r border-zinc-700
           transition-transform duration-300 ease-in-out
           flex flex-col
-          lg:flex
         `}
       >
         {/* Header */}
-        <div className='p-4 border-b border-zinc-700 flex items-center justify-between'>
+        <div className='p-4 md:p-5 lg:p-6 border-b border-zinc-700 flex items-center justify-between'>
           <Link
             href='/grimoire'
             onClick={() => setSidebarOpen(false)}
-            className='text-lg font-bold text-white hover:text-purple-400 transition-colors flex items-center gap-2'
+            className='text-lg md:text-xl lg:text-2xl font-bold text-white hover:text-purple-400 transition-colors flex items-center gap-2'
           >
-            <Sparkles className='w-5 h-5 text-purple-400' />
+            <Sparkles className='w-5 h-5 md:w-6 md:h-6 text-purple-400' />
             Grimoire
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className='lg:hidden p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-white'
+            className='md:hidden p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-white'
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Search */}
-        <div className='p-4 border-b border-zinc-700 relative'>
+        <div className='p-4 md:p-5 lg:p-6 border-b border-zinc-700 relative search-container'>
           <div className='relative'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400' />
+            <Search className='absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-zinc-400' />
             <input
               type='text'
               placeholder='Search grimoire...'
@@ -620,14 +620,14 @@ export default function GrimoireLayout({
               onFocus={() => {
                 if (searchQuery.length > 0) setShowSearchResults(true);
               }}
-              className='w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+              className='w-full pl-10 md:pl-12 pr-4 py-2 md:py-2.5 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base'
             />
           </div>
 
           {/* Search Results Dropdown */}
           {showSearchResults && searchResults.length > 0 && (
             <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg max-h-96 overflow-y-auto z-50'>
-              <div className='p-2 space-y-1'>
+              <div className='p-2 md:p-3 space-y-1'>
                 {searchResults.map((result, index) => (
                   <Link
                     key={index}
@@ -642,15 +642,15 @@ export default function GrimoireLayout({
                         }
                       });
                     }}
-                    className='block p-2 rounded hover:bg-zinc-800 transition-colors'
+                    className='block p-2 md:p-3 rounded hover:bg-zinc-800 transition-colors'
                   >
                     <div className='flex items-start gap-2'>
                       <div className='flex-1 min-w-0'>
-                        <div className='text-sm font-medium text-zinc-100 truncate'>
+                        <div className='text-sm md:text-base font-medium text-zinc-100 truncate'>
                           {result.title}
                         </div>
                         {result.match && (
-                          <div className='text-xs text-zinc-400 mt-1 truncate'>
+                          <div className='text-xs md:text-sm text-zinc-400 mt-1 truncate'>
                             {result.match}
                           </div>
                         )}
@@ -667,7 +667,7 @@ export default function GrimoireLayout({
         </div>
 
         {/* Navigation */}
-        <div className='flex-1 overflow-y-auto p-4'>
+        <div className='flex-1 overflow-y-auto p-4 md:p-5 lg:p-6'>
           {filteredItems.length === 0 ? (
             <div className='text-center text-zinc-400 py-8'>
               <p>No results found</p>
@@ -727,7 +727,7 @@ export default function GrimoireLayout({
                             setSidebarOpen(false);
                           });
                         }}
-                        className={`flex-1 py-2 px-2 text-sm font-medium hover:text-purple-400 transition-colors block ${
+                        className={`flex-1 py-2 md:py-2.5 px-2 md:px-3 text-sm md:text-base lg:text-lg font-medium hover:text-purple-400 transition-colors block ${
                           isActive ? 'text-purple-400' : 'text-white'
                         }`}
                       >
@@ -743,7 +743,7 @@ export default function GrimoireLayout({
                           ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
                         `}
                       >
-                        <div className='ml-6 mt-1 space-y-1'>
+                        <div className='ml-6 md:ml-8 mt-1 space-y-1'>
                           {grimoire[itemKey].contents!.map(
                             (content: string) => {
                               const slug = sectionToSlug(itemKey);
@@ -757,7 +757,7 @@ export default function GrimoireLayout({
                                       setSidebarOpen(false);
                                     });
                                   }}
-                                  className='block py-1.5 px-2 text-xs text-zinc-300 hover:text-purple-300 hover:bg-zinc-800 rounded transition-colors'
+                                  className='block py-1.5 md:py-2 px-2 md:px-3 text-xs md:text-sm text-zinc-300 hover:text-purple-300 hover:bg-zinc-800 rounded transition-colors'
                                 >
                                   {content}
                                 </Link>
@@ -780,7 +780,7 @@ export default function GrimoireLayout({
         {/* Mobile menu button */}
         <button
           onClick={() => setSidebarOpen(true)}
-          className='lg:hidden fixed top-4 left-4 z-30 p-2 bg-zinc-900 border border-zinc-700 rounded-md text-white hover:bg-zinc-800 transition-colors'
+          className='md:hidden fixed top-4 left-4 z-30 p-2 bg-zinc-900 border border-zinc-700 rounded-md text-white hover:bg-zinc-800 transition-colors'
         >
           <Menu size={20} />
         </button>
@@ -793,24 +793,26 @@ export default function GrimoireLayout({
         )}
 
         {currentSection ? (
-          <div className='p-4 md:p-6 lg:p-8 min-h-full'>
-            {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
+          <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+            <div className='max-w-7xl mx-auto'>
+              {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
+            </div>
           </div>
         ) : (
-          <div className='flex items-center justify-center min-h-full text-center px-4 py-8'>
-            <div className='max-w-2xl w-full'>
-              <div className='mb-6'>
-                <Sparkles className='w-16 h-16 text-purple-400 mx-auto mb-4' />
-                <h1 className='text-3xl md:text-4xl font-light text-zinc-100 mb-3'>
+          <div className='flex items-center justify-center min-h-full text-center px-4 py-8 md:py-12 lg:py-16'>
+            <div className='max-w-6xl w-full'>
+              <div className='mb-8 md:mb-12'>
+                <Sparkles className='w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 text-purple-400 mx-auto mb-6 md:mb-8' />
+                <h1 className='text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-zinc-100 mb-4 md:mb-6'>
                   Welcome to the Grimoire
                 </h1>
-                <p className='text-base md:text-lg text-zinc-400 leading-relaxed'>
+                <p className='text-base md:text-lg lg:text-xl text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
                   Explore mystical knowledge, cosmic wisdom, and ancient
                   practices to deepen your spiritual journey.
                 </p>
               </div>
 
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mt-8 md:mt-12'>
                 {grimoireItems.map((itemKey) => {
                   const item = grimoire[itemKey];
                   const slug = sectionToSlug(itemKey);
@@ -819,13 +821,13 @@ export default function GrimoireLayout({
                       key={itemKey}
                       href={`/grimoire/${slug}`}
                       prefetch={true}
-                      className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all'
+                      className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 md:p-6 lg:p-8 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all'
                     >
-                      <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                      <h3 className='text-lg md:text-xl lg:text-2xl font-medium text-zinc-100 mb-2 md:mb-3 group-hover:text-purple-400 transition-colors'>
                         {item.title}
                       </h3>
                       {item.contents && (
-                        <p className='text-sm text-zinc-400'>
+                        <p className='text-sm md:text-base lg:text-lg text-zinc-400'>
                           {item.contents.length} section
                           {item.contents.length !== 1 ? 's' : ''}
                         </p>

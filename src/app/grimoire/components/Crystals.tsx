@@ -253,36 +253,139 @@ const Crystals = () => {
         </div>
       </section>
 
-      <section id='working-with-crystals' className='space-y-4'>
+      <section id='crystal-healing' className='space-y-6'>
         <h2 className='text-xl font-medium text-zinc-100'>
-          Working with Crystals
+          Crystal Healing & Practices
         </h2>
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-          <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
-            Crystals can be used in various ways for healing and magical work:
-          </p>
-          <ul className='space-y-2 text-sm text-zinc-300 list-disc list-inside'>
-            <li>
-              <strong>Meditation:</strong> Hold or place crystals during
-              meditation to enhance focus and intention
-            </li>
-            <li>
-              <strong>Grids:</strong> Arrange crystals in sacred geometric
-              patterns to amplify energy
-            </li>
-            <li>
-              <strong>Wearable:</strong> Carry crystals as jewelry or in pockets
-              for continuous energy support
-            </li>
-            <li>
-              <strong>Cleansing:</strong> Regularly cleanse crystals with sage,
-              moonlight, or running water
-            </li>
-            <li>
-              <strong>Programming:</strong> Set intentions with your crystals by
-              holding them and focusing on your desired outcome
-            </li>
-          </ul>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Crystal Grids
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+              Crystal grids amplify energy by arranging crystals in sacred
+              geometric patterns. Place a central crystal (master stone) in the
+              center, then arrange supporting stones around it. Activate by
+              connecting the stones with intention, visualization, or a wand.
+              Common patterns include circles, triangles, and flower of life.
+            </p>
+            <p className='text-xs text-zinc-400'>
+              Best for: Manifestation, protection, healing, abundance
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Crystal Programming
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+              Programming sets specific intentions into your crystals. Hold the
+              crystal, clear your mind, and visualize your intention flowing
+              into the stone. State your intention clearly either aloud or
+              silently. The crystal will hold and amplify this energy until
+              reprogrammed or cleansed.
+            </p>
+            <p className='text-xs text-zinc-400'>
+              Best for: Setting specific goals, directing crystal energy
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Crystal Cleansing Methods
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <div>
+                <strong>Moonlight:</strong> Place crystals under full moon
+                overnight (avoid direct sunlight for some crystals)
+              </div>
+              <div>
+                <strong>Sunlight:</strong> Brief exposure to sun (check crystal
+                compatibility - some fade)
+              </div>
+              <div>
+                <strong>Water:</strong> Running water or salt water (avoid
+                porous/soft crystals)
+              </div>
+              <div>
+                <strong>Smoke:</strong> Pass through sage, palo santo, or
+                incense smoke
+              </div>
+              <div>
+                <strong>Sound:</strong> Use singing bowls, bells, or chimes
+              </div>
+              <div>
+                <strong>Earth:</strong> Bury in soil overnight (gentle method)
+              </div>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Chakra Crystals
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-zinc-300'>
+              <div>
+                <strong>Root:</strong> Red Jasper, Hematite, Black Tourmaline
+              </div>
+              <div>
+                <strong>Sacral:</strong> Carnelian, Orange Calcite, Sunstone
+              </div>
+              <div>
+                <strong>Solar Plexus:</strong> Citrine, Tiger Eye, Yellow Jasper
+              </div>
+              <div>
+                <strong>Heart:</strong> Rose Quartz, Green Aventurine, Jade
+              </div>
+              <div>
+                <strong>Throat:</strong> Blue Lace Agate, Aquamarine, Sodalite
+              </div>
+              <div>
+                <strong>Third Eye:</strong> Amethyst, Lapis Lazuli, Fluorite
+              </div>
+              <div>
+                <strong>Crown:</strong> Clear Quartz, Amethyst, Selenite
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id='faq' className='space-y-6'>
+        <h2 className='text-xl font-medium text-zinc-100'>
+          Frequently Asked Questions
+        </h2>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              How often should I cleanse my crystals?
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed'>
+              Cleanse after heavy use, when they feel heavy or dull, after
+              others handle them, or monthly as maintenance. Some crystals (like
+              Selenite) are self-cleansing and can cleanse other stones.
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Which crystals work well together?
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed'>
+              Complementary crystals enhance each other: Rose Quartz + Clear
+              Quartz (amplify love), Amethyst + Selenite (spiritual cleansing),
+              Black Tourmaline + Clear Quartz (protection with clarity). Avoid
+              pairing conflicting energies (e.g., calming and energizing stones
+              together).
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Can I put crystals in water?
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed'>
+              Some crystals are water-safe (Quartz, Amethyst, Agate), while
+              others dissolve or are damaged (Selenite, Halite, Malachite).
+              Always research your specific crystal before water exposure. When
+              in doubt, use other cleansing methods.
+            </p>
+          </div>
         </div>
       </section>
     </div>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v12'; // Ensure start_url cached first for iOS PWA
+const CACHE_NAME = 'lunary-v13'; // Ensure start_url cached first for iOS PWA
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json?v=20251103-1',
@@ -90,6 +90,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // CRITICAL: Skip navigation requests (page navigations) - always use network for direct routing
+  // This ensures direct URL navigation works correctly
+  if (event.request.mode === 'navigate') {
+    return;
+  }
+
   // Skip non-GET requests (for non-API routes)
   if (event.request.method !== 'GET') {
     return;
@@ -109,6 +115,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // For non-navigation requests (assets, images, etc.), use cache-first strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -136,10 +143,8 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Return offline fallback for navigation requests
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
+          // Return offline fallback for failed requests
+          return caches.match('/');
         });
     }),
   );

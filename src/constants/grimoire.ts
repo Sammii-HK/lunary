@@ -3,7 +3,7 @@ export const grimoire: {
 } = {
   moon: {
     title: 'Moon',
-    contents: ['Phases', 'Full Moon Names'],
+    contents: ['Phases', 'Full Moon Names', 'Rituals'],
   },
   wheelOfTheYear: {
     title: 'Wheel of the Year',
@@ -17,7 +17,7 @@ export const grimoire: {
   },
   tarot: {
     title: 'Tarot',
-    contents: ['Arcana', 'Spreads'],
+    contents: ['Major Arcana', 'Arcana', 'Spreads'],
   },
   runes: {
     title: 'Runes',
@@ -39,6 +39,7 @@ export const grimoire: {
     contents: [
       'Daily Selection',
       'Crystal Categories',
+      'Crystal Healing',
       'Working with Crystals',
     ],
   },
@@ -53,6 +54,7 @@ export const grimoire: {
       'Numbers',
       'Wood',
       'Herbs',
+      'Herb Profiles',
       'Animals',
     ],
   },
@@ -72,7 +74,7 @@ export const grimoire: {
   },
   birthChart: {
     title: 'Birth Chart',
-    contents: ['Planets', 'Houses'],
+    contents: ['Planets', 'Houses', 'Aspects', 'Retrogrades', 'Transits'],
   },
 };
 
