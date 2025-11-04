@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect } from 'react';
+
 const Numerology = () => {
   const coreNumbers = [
     {
@@ -114,72 +118,120 @@ const Numerology = () => {
     },
   ];
 
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const element = document.getElementById(hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, []);
+
   return (
-    <div className='h-[91vh]'>
-      <h1 className='text-lg font-bold mb-3 pt-12'>Numerology</h1>
-
-      <h2 id='core-numbers' className='text-lg font-bold mb-4 pt-12'>
-        Core Numbers
-      </h2>
-      {coreNumbers.map((number) => (
-        <div key={number.number} className='mb-3 text-xs'>
-          <h3 className='font-bold pb-1'>
-            {number.number} - {number.meaning}
-          </h3>
-          <p className='pb-1'>{number.traits}</p>
-          <p>Best for: {number.day}</p>
-        </div>
-      ))}
-
-      <h2 id='master-numbers' className='text-lg font-bold mb-4 pt-12'>
-        Master Numbers
-      </h2>
-      {masterNumbers.map((master) => (
-        <div key={master.number} className='mb-3 text-xs'>
-          <h3 className='font-bold pb-1'>
-            {master.number} - {master.meaning}
-          </h3>
-          <p>{master.description}</p>
-        </div>
-      ))}
-
-      <h2 id='planetary-days' className='text-lg font-bold mb-4 pt-12'>
-        Planetary Days
-      </h2>
-      {dayEnergies.map((day) => (
-        <div key={day.day} className='mb-3 text-xs'>
-          <h3 className='font-bold pb-1'>
-            {day.day} - {day.planet}
-          </h3>
-          <p>{day.energy}</p>
-        </div>
-      ))}
-
-      <h2 id='calculations' className='text-lg font-bold mb-4 pt-12'>
-        Calculations
-      </h2>
-      <div className='mb-3 text-xs'>
-        <h3 className='font-bold pb-1'>Daily Universal Number</h3>
-        <p className='pb-1'>
-          Add all digits of today&apos;s date and reduce to single digit (except
-          11, 22, 33)
+    <div className='space-y-8 pb-20'>
+      <div className='mb-6'>
+        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Numerology
+        </h1>
+        <p className='text-sm text-zinc-400'>
+          Discover core numbers, master numbers, planetary days, and
+          numerological calculations
         </p>
-        <p className='pb-1'>
-          <strong>Example:</strong> December 15, 2024
-        </p>
-        <p>1+5+1+2+2+0+2+4 = 17 → 1+7 = 8</p>
       </div>
 
-      <div className='mb-3 text-xs'>
-        <h3 className='font-bold pb-1'>Personal Day Number</h3>
-        <p className='pb-1'>
-          Birth month + birth day + current year + current month + current day
-        </p>
-        <p className='pb-1'>
-          <strong>Example:</strong> Born June 10, today Dec 15, 2024
-        </p>
-        <p>6+10+2024+12+15 = 2067 → 2+0+6+7 = 15 → 1+5 = 6</p>
-      </div>
+      <section id='core-numbers' className='space-y-4'>
+        <h2 className='text-xl font-medium text-zinc-100'>Core Numbers</h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {coreNumbers.map((number) => (
+            <div
+              key={number.number}
+              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+            >
+              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                {number.number} - {number.meaning}
+              </h3>
+              <p className='text-sm text-zinc-300 mb-2'>{number.traits}</p>
+              <p className='text-sm text-zinc-400'>Best for: {number.day}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id='master-numbers' className='space-y-4'>
+        <h2 className='text-xl font-medium text-zinc-100'>Master Numbers</h2>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          {masterNumbers.map((master) => (
+            <div
+              key={master.number}
+              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+            >
+              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                {master.number} - {master.meaning}
+              </h3>
+              <p className='text-sm text-zinc-300 leading-relaxed'>
+                {master.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id='planetary-days' className='space-y-4'>
+        <h2 className='text-xl font-medium text-zinc-100'>Planetary Days</h2>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+          {dayEnergies.map((day) => (
+            <div
+              key={day.day}
+              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+            >
+              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                {day.day} - {day.planet}
+              </h3>
+              <p className='text-sm text-zinc-300'>{day.energy}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id='calculations' className='space-y-4'>
+        <h2 className='text-xl font-medium text-zinc-100'>Calculations</h2>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              Daily Universal Number
+            </h3>
+            <p className='text-sm text-zinc-300 mb-2'>
+              Add all digits of today&apos;s date and reduce to single digit
+              (except 11, 22, 33)
+            </p>
+            <p className='text-sm text-zinc-400 mb-1'>
+              <strong>Example:</strong> December 15, 2024
+            </p>
+            <p className='text-sm text-zinc-300'>
+              1+5+1+2+2+0+2+4 = 17 → 1+7 = 8
+            </p>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              Personal Day Number
+            </h3>
+            <p className='text-sm text-zinc-300 mb-2'>
+              Birth month + birth day + current year + current month + current
+              day
+            </p>
+            <p className='text-sm text-zinc-400 mb-1'>
+              <strong>Example:</strong> Born June 10, today Dec 15, 2024
+            </p>
+            <p className='text-sm text-zinc-300'>
+              6+10+2024+12+15 = 2067 → 2+0+6+7 = 15 → 1+5 = 6
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

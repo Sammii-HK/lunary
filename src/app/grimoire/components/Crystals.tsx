@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect } from 'react';
+
 const Crystals = () => {
   const crystalCategories = [
     {
@@ -98,344 +102,189 @@ const Crystals = () => {
         },
         { name: 'Azurite', properties: 'Psychic development, divine guidance' },
         { name: 'Charoite', properties: 'Spiritual courage, transmutation' },
+      ],
+    },
+    {
+      name: 'Prosperity & Abundance',
+      crystals: [
         {
-          name: 'Lepidolite',
-          properties: 'Spiritual transition, stress relief',
+          name: 'Citrine',
+          properties: 'Manifestation, abundance, success',
         },
-      ],
-    },
-    {
-      name: 'Manifestation & Abundance',
-      crystals: [
-        { name: 'Citrine', properties: 'Solar energy, prosperity attraction' },
-        { name: 'Pyrite', properties: 'Confidence, wealth manifestation' },
-        { name: 'Green Jade', properties: 'Luck, harmony, prosperity' },
-        { name: 'Sunstone', properties: 'Personal power, optimism' },
-        { name: 'Tiger Eye', properties: 'Willpower, practical manifestation' },
-        { name: 'Peridot', properties: 'Abundance, positive manifestation' },
-        { name: 'Carnelian', properties: 'Creative manifestation, motivation' },
-        { name: 'Orange Calcite', properties: 'Creative energy, confidence' },
-        { name: 'Golden Topaz', properties: 'Manifestation, divine will' },
-        { name: 'Aventurine', properties: 'Opportunity, luck, prosperity' },
-        { name: 'Malachite', properties: 'Transformation, risk-taking' },
-        { name: 'Moss Agate', properties: 'New beginnings, abundance' },
-      ],
-    },
-    {
-      name: 'Communication & Clarity',
-      crystals: [
-        { name: 'Sodalite', properties: 'Logic, clear communication' },
-        { name: 'Lapis Lazuli', properties: 'Truth, wisdom, inner vision' },
-        { name: 'Aquamarine', properties: 'Honest expression, courage' },
-        { name: 'Clear Quartz', properties: 'Amplification, mental clarity' },
-        { name: 'Blue Lace Agate', properties: 'Gentle communication, peace' },
-        { name: 'Turquoise', properties: 'Honest communication, protection' },
-        { name: 'Amazonite', properties: 'Truth, integrity, harmony' },
-        { name: 'Blue Calcite', properties: 'Peaceful communication, clarity' },
-        { name: 'Celestite', properties: 'Divine communication, tranquility' },
-        { name: 'Chalcedony', properties: 'Diplomatic communication' },
+        {
+          name: 'Green Aventurine',
+          properties: 'Opportunity, luck, prosperity',
+        },
+        {
+          name: 'Pyrite',
+          properties: 'Business success, wealth attraction',
+        },
+        { name: 'Jade', properties: 'Prosperity, harmony, wisdom' },
+        {
+          name: 'Peridot',
+          properties: 'Abundance, growth, positive change',
+        },
+        { name: 'Tiger Eye', properties: 'Practical action, focus' },
+        {
+          name: 'Malachite',
+          properties: 'Transformation, risk-taking, courage',
+        },
       ],
     },
     {
       name: 'Healing & Wellness',
       crystals: [
-        { name: 'Amethyst', properties: 'Pain relief, addiction recovery' },
         {
           name: 'Clear Quartz',
-          properties: 'Master healer, energy amplification',
-        },
-        { name: 'Rose Quartz', properties: 'Emotional healing, self-care' },
-        { name: 'Fluorite', properties: 'Mental healing, concentration' },
-        { name: 'Bloodstone', properties: 'Blood purification, vitality' },
-        {
-          name: 'Carnelian',
-          properties: 'Physical energy, reproductive health',
-        },
-        { name: 'Chrysocolla', properties: 'Throat healing, feminine wisdom' },
-        { name: 'Shungite', properties: 'Detoxification, immune support' },
-        { name: 'Malachite', properties: 'Heart healing, inflammation relief' },
-        { name: 'Turquoise', properties: 'Overall healing, protection' },
-        { name: 'Jade', properties: 'Kidney health, longevity' },
-        { name: 'Hematite', properties: 'Blood circulation, grounding' },
-      ],
-    },
-    {
-      name: 'Chakra Balancing',
-      crystals: [
-        { name: 'Red Jasper', properties: 'Root Chakra - Grounding, survival' },
-        {
-          name: 'Carnelian',
-          properties: 'Sacral Chakra - Creativity, sexuality',
+          properties: 'Universal healer, amplifies energy',
         },
         {
-          name: 'Citrine',
-          properties: 'Solar Plexus - Personal power, confidence',
+          name: 'Rose Quartz',
+          properties: 'Emotional healing, self-love',
         },
-        { name: 'Rose Quartz', properties: 'Heart Chakra - Love, compassion' },
-        {
-          name: 'Sodalite',
-          properties: 'Throat Chakra - Communication, truth',
-        },
-        { name: 'Amethyst', properties: 'Third Eye - Intuition, wisdom' },
-        {
-          name: 'Clear Quartz',
-          properties: 'Crown Chakra - Divine connection',
-        },
-        {
-          name: 'Smoky Quartz',
-          properties: 'Root Chakra - Protection, grounding',
-        },
-        {
-          name: 'Orange Calcite',
-          properties: 'Sacral Chakra - Joy, creativity',
-        },
-        {
-          name: 'Malachite',
-          properties: 'Heart Chakra - Transformation, healing',
-        },
-        {
-          name: 'Lapis Lazuli',
-          properties: 'Throat/Third Eye - Truth, insight',
-        },
-        {
-          name: 'Selenite',
-          properties: 'Crown Chakra - Purification, clarity',
-        },
-      ],
-    },
-    {
-      name: 'Meditation & Peace',
-      crystals: [
         {
           name: 'Amethyst',
-          properties: 'Deep meditation, spiritual connection',
+          properties: 'Pain relief, calming, sleep',
         },
-        {
-          name: 'Selenite',
-          properties: 'Mental clarity, crown chakra opening',
-        },
-        { name: 'Clear Quartz', properties: 'Amplifies meditation intentions' },
-        { name: 'Fluorite', properties: 'Mental focus, concentration' },
-        { name: 'Lepidolite', properties: 'Calming anxiety, peaceful mind' },
-        { name: 'Blue Lace Agate', properties: 'Tranquility, gentle energy' },
-        { name: 'Celestite', properties: 'Divine peace, angelic connection' },
-        { name: 'Howlite', properties: 'Calming the mind, reducing stress' },
-        { name: 'Moonstone', properties: 'Intuitive meditation, cycles' },
-        {
-          name: 'Labradorite',
-          properties: 'Mystical meditation, transformation',
-        },
-        { name: 'Prehnite', properties: 'Inner peace, divine love' },
-        {
-          name: 'Angelite',
-          properties: 'Peaceful awareness, angel communication',
-        },
-      ],
-    },
-    {
-      name: 'Creativity & Inspiration',
-      crystals: [
+        { name: 'Selenite', properties: 'Spiritual cleansing, peace' },
         {
           name: 'Carnelian',
-          properties: 'Creative fire, artistic inspiration',
+          properties: 'Vitality, motivation, physical energy',
         },
-        { name: 'Orange Calcite', properties: 'Creative confidence, joy' },
         {
-          name: 'Citrine',
-          properties: 'Mental clarity, creative manifestation',
+          name: 'Aventurine',
+          properties: 'Heart healing, emotional balance',
         },
-        { name: 'Sunstone', properties: 'Creative leadership, originality' },
-        { name: 'Tiger Eye', properties: 'Practical creativity, focus' },
-        { name: 'Fluorite', properties: 'Mental clarity, innovative thinking' },
-        { name: 'Amazonite', properties: 'Creative communication, harmony' },
-        { name: 'Moonstone', properties: 'Intuitive creativity, inspiration' },
         {
-          name: 'Labradorite',
-          properties: 'Imaginative vision, transformation',
+          name: 'Fluorite',
+          properties: 'Mental clarity, focus, organization',
         },
-        { name: 'Ametrine', properties: 'Creative balance, mental clarity' },
       ],
     },
     {
-      name: 'Sleep & Dreams',
+      name: 'Communication & Creativity',
       crystals: [
-        { name: 'Amethyst', properties: 'Peaceful sleep, prophetic dreams' },
-        { name: 'Moonstone', properties: 'Dream recall, lunar rhythms' },
-        { name: 'Lepidolite', properties: 'Insomnia relief, calming anxiety' },
-        { name: 'Howlite', properties: 'Quieting the mind, restful sleep' },
-        { name: 'Rose Quartz', properties: 'Gentle dreams, emotional healing' },
-        { name: 'Celestite', properties: 'Angelic dreams, peaceful rest' },
-        { name: 'Prehnite', properties: 'Prophetic dreams, inner peace' },
-        { name: 'Labradorite', properties: 'Dream work, subconscious access' },
-        { name: 'Clear Quartz', properties: 'Dream clarity, amplification' },
         {
           name: 'Blue Lace Agate',
-          properties: 'Peaceful sleep, gentle energy',
-        },
-      ],
-    },
-    {
-      name: 'Study & Learning',
-      crystals: [
-        { name: 'Fluorite', properties: 'Mental clarity, concentration' },
-        { name: 'Clear Quartz', properties: 'Memory enhancement, clarity' },
-        { name: 'Sodalite', properties: 'Logic, rational thought' },
-        { name: 'Hematite', properties: 'Mental focus, grounding' },
-        { name: 'Citrine', properties: 'Mental stamina, confidence' },
-        { name: 'Amazonite', properties: 'Clear communication, truth' },
-        { name: 'Lapis Lazuli', properties: 'Wisdom, intellectual ability' },
-        { name: 'Carnelian', properties: 'Motivation, mental courage' },
-        { name: 'Tiger Eye', properties: 'Practical wisdom, discernment' },
-        { name: 'Pyrite', properties: 'Mental clarity, confidence' },
-      ],
-    },
-    {
-      name: 'Travel & Journey',
-      crystals: [
-        {
-          name: 'Moonstone',
-          properties: 'Safe travel, protection on journeys',
-        },
-        { name: 'Malachite', properties: 'Travel protection, transformation' },
-        { name: 'Turquoise', properties: 'Travel safety, communication' },
-        { name: 'Hematite', properties: 'Grounding during travel' },
-        {
-          name: 'Amethyst',
-          properties: 'Protection during spiritual journeys',
+          properties: 'Calm communication, expression',
         },
         {
-          name: 'Labradorite',
-          properties: 'Psychic protection while traveling',
+          name: 'Aquamarine',
+          properties: 'Courageous communication, clarity',
         },
-        { name: 'Garnet', properties: 'Safe return home, courage' },
-        { name: 'Aquamarine', properties: 'Water travel protection, courage' },
-        { name: 'Jade', properties: 'Safe journeys, good fortune' },
-        { name: 'Bloodstone', properties: 'Physical protection, courage' },
+        { name: 'Sodalite', properties: 'Logic, truth, self-expression' },
+        {
+          name: 'Lapis Lazuli',
+          properties: 'Wisdom, truth, communication',
+        },
+        {
+          name: 'Amazonite',
+          properties: 'Harmony, balance, self-expression',
+        },
+        {
+          name: 'Citrine',
+          properties: 'Creativity, inspiration, confidence',
+        },
       ],
     },
   ];
 
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const element = document.getElementById(hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, []);
+
   return (
-    <div className='h-[91vh]'>
-      <h1 className='text-lg font-bold mb-3 pt-12'>Crystals</h1>
-
-      <h2 id='daily-selection' className='text-lg font-bold mb-4 pt-12'>
-        Daily Crystal Selection
-      </h2>
-      <div className='mb-3 text-xs'>
-        <h3 className='font-bold pb-1'>Personalized Algorithm</h3>
-        <p className='pb-1'>
-          Your daily crystal is selected through a sophisticated cosmic
-          alignment analysis that considers multiple astrological and
-          numerological factors.
+    <div className='space-y-8 pb-20'>
+      <div className='mb-6'>
+        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Crystals
+        </h1>
+        <p className='text-sm text-zinc-400'>
+          Comprehensive crystal guide with daily selections, categories, and how
+          to work with crystals for healing and magic
         </p>
       </div>
 
-      <div className='mb-3 text-xs'>
-        <h3 className='font-bold pb-1'>Selection Factors</h3>
-        <p className='pb-1'>
-          <strong>Birth Chart Analysis:</strong> Your Sun, Moon, and planetary
-          placements
-        </p>
-        <p className='pb-1'>
-          <strong>Current Transits:</strong> Today&apos;s planetary positions
-          and their aspects to your natal chart
-        </p>
-        <p className='pb-1'>
-          <strong>Numerological Influence:</strong> Universal Day Number and
-          Personal Day Number
-        </p>
-        <p className='pb-1'>
-          <strong>Planetary Day Ruler:</strong> Each day is ruled by a specific
-          planet (Sunday-Sun, Monday-Moon, etc.)
-        </p>
-        <p>
-          Additional factors include elemental balance, challenging vs
-          harmonious aspects, and daily variation algorithms
-        </p>
-      </div>
+      <section id='daily-selection' className='space-y-4'>
+        <h2 className='text-xl font-medium text-zinc-100'>Daily Selection</h2>
+        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <p className='text-sm text-zinc-300'>
+            Select crystals based on your daily intentions and needs. Choose
+            crystals that resonate with your current energy and goals.
+          </p>
+        </div>
+      </section>
 
-      <div className='mb-3 text-xs'>
-        <h3 className='font-bold pb-1'>Why This Method</h3>
-        <p className='pb-1'>
-          Crystals work through resonance - their molecular structure vibrates
-          at frequencies that can align with and support your energy field.
-        </p>
-        <p>
-          By matching crystal properties to your current astrological
-          influences, we ensure you receive the most beneficial vibrational
-          support for your daily journey.
-        </p>
-      </div>
-
-      <h2 id='crystal-categories' className='text-lg font-bold mb-4 pt-12'>
-        Crystal Categories
-      </h2>
-      {crystalCategories.map((category) => (
-        <div key={category.name} className='mb-4'>
-          <h3 className='font-bold pb-1 text-sm'>{category.name}</h3>
-          {category.crystals.map((crystal) => (
-            <div key={crystal.name} className='mb-2 text-xs pl-2'>
-              <h4 className='font-medium pb-1'>{crystal.name}</h4>
-              <p className='text-zinc-400'>{crystal.properties}</p>
+      <section id='crystal-categories' className='space-y-6'>
+        <h2 className='text-xl font-medium text-zinc-100'>
+          Crystal Categories
+        </h2>
+        <div className='space-y-6'>
+          {crystalCategories.map((category) => (
+            <div key={category.name}>
+              <h3 className='text-lg font-medium text-zinc-200 mb-3'>
+                {category.name}
+              </h3>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+                {category.crystals.map((crystal) => (
+                  <div
+                    key={crystal.name}
+                    className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+                  >
+                    <h4 className='font-medium text-zinc-100 mb-2'>
+                      {crystal.name}
+                    </h4>
+                    <p className='text-sm text-zinc-300 leading-relaxed'>
+                      {crystal.properties}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
-      ))}
+      </section>
 
-      <h2 id='working-with-crystals' className='text-lg font-bold mb-4 pt-12'>
-        Working with Crystals
-      </h2>
-      <div className='mb-3 text-xs'>
-        <h3 className='font-bold pb-1'>Daily Practice</h3>
-        <p className='pb-1'>
-          Hold your daily crystal during meditation, carry it with you, or place
-          it on your workspace
-        </p>
-        <p className='pb-1'>
-          Set an intention that aligns with both the crystal&apos;s properties
-          and your daily astrological influences
-        </p>
-        <p>
-          Take a moment to connect with the stone&apos;s energy and visualize
-          its support throughout your day
-        </p>
-      </div>
-
-      <div className='mb-3 text-xs'>
-        <h3 className='font-bold pb-1'>Cleansing & Charging</h3>
-        <p className='pb-1'>
-          Clear accumulated energies using moonlight, sage, or running water
-          (check crystal compatibility)
-        </p>
-        <p className='pb-1'>
-          Charge crystals under the full moon or with selenite to restore their
-          natural vibration
-        </p>
-        <p>
-          Programming involves holding the crystal and clearly stating your
-          intention for its use
-        </p>
-      </div>
-
-      <div className='mb-3 text-xs'>
-        <h3 className='font-bold pb-1'>Astrological Timing</h3>
-        <p className='pb-1'>
-          New Moon: Ideal for setting intentions with manifestation stones like
-          Citrine
-        </p>
-        <p className='pb-1'>
-          Full Moon: Perfect for charging and releasing with stones like
-          Moonstone
-        </p>
-        <p className='pb-1'>
-          Mercury Retrograde: Use grounding stones like Hematite for stability
-        </p>
-        <p>
-          Eclipse Periods: Powerful times for transformation crystals like
-          Labradorite
-        </p>
-      </div>
+      <section id='working-with-crystals' className='space-y-4'>
+        <h2 className='text-xl font-medium text-zinc-100'>
+          Working with Crystals
+        </h2>
+        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+            Crystals can be used in various ways for healing and magical work:
+          </p>
+          <ul className='space-y-2 text-sm text-zinc-300 list-disc list-inside'>
+            <li>
+              <strong>Meditation:</strong> Hold or place crystals during
+              meditation to enhance focus and intention
+            </li>
+            <li>
+              <strong>Grids:</strong> Arrange crystals in sacred geometric
+              patterns to amplify energy
+            </li>
+            <li>
+              <strong>Wearable:</strong> Carry crystals as jewelry or in pockets
+              for continuous energy support
+            </li>
+            <li>
+              <strong>Cleansing:</strong> Regularly cleanse crystals with sage,
+              moonlight, or running water
+            </li>
+            <li>
+              <strong>Programming:</strong> Set intentions with your crystals by
+              holding them and focusing on your desired outcome
+            </li>
+          </ul>
+        </div>
+      </section>
     </div>
   );
 };

@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect } from 'react';
+
 const BirthChart = () => {
   const planets = [
     {
@@ -77,40 +81,51 @@ const BirthChart = () => {
     { number: '12th', area: 'Subconscious, solitude, healing' },
   ];
 
-  return (
-    <div className='w-full space-y-8'>
-      <h2 id='birth-chart' className='pt-12 text-lg font-bold text-zinc-100'>
-        Birth Chart
-      </h2>
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const element = document.getElementById(hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, []);
 
-      {/* Planets Section */}
-      <div>
-        <h3
-          id='planets'
-          className='mt-8 mb-4 text-base font-bold text-zinc-100'
-        >
-          🪐 Planets — "The What"
-        </h3>
-        <div className='space-y-4'>
+  return (
+    <div className='space-y-8 pb-20'>
+      <div className='mb-6'>
+        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Birth Chart
+        </h1>
+        <p className='text-sm text-zinc-400'>
+          Learn about planets, houses, and astrological components
+        </p>
+      </div>
+
+      <section id='planets' className='space-y-4'>
+        <h2 className='text-xl font-medium text-zinc-100'>
+          Planets — &quot;The What&quot;
+        </h2>
+        <div className='space-y-3'>
           {planets.map((planet) => (
             <div
               key={planet.name}
-              className='border border-zinc-800/50 rounded-lg p-4 bg-zinc-900/30'
+              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
             >
               <div className='flex items-start gap-3'>
                 <span className='text-2xl'>{planet.symbol}</span>
                 <div className='flex-1'>
-                  <h4 className='font-semibold text-zinc-100 mb-1'>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                     {planet.name}
-                  </h4>
-                  <p className='text-sm text-zinc-400 mb-2'>
-                    <span className='font-medium text-zinc-300'>Keywords:</span>{' '}
+                  </h3>
+                  <p className='text-sm text-zinc-300 mb-1'>
+                    <span className='font-medium'>Keywords:</span>{' '}
                     {planet.keywords}
                   </p>
                   <p className='text-sm text-zinc-400'>
-                    <span className='font-medium text-zinc-300'>
-                      In Transits:
-                    </span>{' '}
+                    <span className='font-medium'>In Transits:</span>{' '}
                     {planet.transitTone}
                   </p>
                 </div>
@@ -118,34 +133,32 @@ const BirthChart = () => {
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Houses Section */}
-      <div>
-        <h3 id='houses' className='mt-8 mb-4 text-base font-bold text-zinc-100'>
-          🏠 Houses — "The Where"
-        </h3>
+      <section id='houses' className='space-y-4'>
+        <h2 className='text-xl font-medium text-zinc-100'>
+          Houses — &quot;The Where&quot;
+        </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {houses.map((house) => (
             <div
               key={house.number}
-              className='border border-zinc-800/50 rounded-lg p-4 bg-zinc-900/30'
+              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
             >
               <div className='flex items-start gap-3'>
-                <span className='font-semibold text-zinc-100 text-sm'>
+                <span className='font-medium text-zinc-100 text-sm'>
                   {house.number}
                 </span>
-                <p className='text-sm text-zinc-400 flex-1'>{house.area}</p>
+                <p className='text-sm text-zinc-300 flex-1'>{house.area}</p>
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Interpretation Guide */}
-      <div className='mt-8 border border-purple-500/30 rounded-lg p-6 bg-purple-500/10'>
-        <h3 className='text-base font-bold text-zinc-100 mb-3'>
-          🧭 The Core Logic
+      <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
+        <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          The Core Logic
         </h3>
         <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
           Each planet represents a type of energy or motivation, each house
