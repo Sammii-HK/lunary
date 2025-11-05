@@ -43,7 +43,7 @@ export default function ConditionalWheel() {
   }
 
   return (
-    <div>
+    <div className='flex flex-col h-full'>
       <WheelOfTheYearWidget />
     </div>
   );

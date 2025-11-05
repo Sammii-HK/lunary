@@ -2,6 +2,7 @@
 
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from './SmartTrialButton';
+import { useState, useEffect, useRef } from 'react';
 import {
   getBirthChartFromProfile,
   hasBirthChart,
@@ -646,6 +647,34 @@ export const HoroscopeWidget = () => {
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showBottomBlur, setShowBottomBlur] = useState(false);
+
+  useEffect(() => {
+    const checkScroll = () => {
+      if (scrollRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+        const isScrollable = scrollHeight > clientHeight;
+        const isNotAtBottom = scrollTop + clientHeight < scrollHeight - 10;
+        setShowBottomBlur(isScrollable && isNotAtBottom);
+      }
+    };
+
+    if (!scrollRef.current) return;
+
+    checkScroll();
+    const scrollElement = scrollRef.current;
+    scrollElement.addEventListener('scroll', checkScroll);
+    const timeoutId = setTimeout(checkScroll, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (scrollElement) {
+        scrollElement.removeEventListener('scroll', checkScroll);
+      }
+    };
+  });
+
   const hasChartAccess = hasBirthChartAccess(subscription.status);
 
   // If user doesn't have birth chart access, show general horoscope
@@ -733,15 +762,23 @@ export const HoroscopeWidget = () => {
   );
 
   return (
-    <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
-      <div className='space-y-2'>
-        <div className='flex items-center justify-between'>
-          <h3 className='font-bold'>Personal Horoscope</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+    <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-0'>
+      <div className='flex items-center justify-between mb-2 flex-shrink-0'>
+        <h3 className='font-bold'>Personal Horoscope</h3>
+        <span className='text-xs text-purple-400'>Personalised</span>
+      </div>
+      <div className='relative flex-1 min-h-0'>
+        <div
+          ref={scrollRef}
+          className='h-full overflow-y-auto max-h-48 md:max-h-96 lg:max-h-48'
+        >
+          <div className='text-sm text-zinc-300 leading-relaxed'>
+            {horoscope}
+          </div>
         </div>
-        <div className='text-center text-sm text-zinc-300 leading-relaxed max-h-48 overflow-y-auto'>
-          {horoscope}
-        </div>
+        {showBottomBlur && (
+          <div className='absolute bottom-0 left-0 right-0 h-12 pointer-events-none bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent' />
+        )}
       </div>
     </div>
   );

@@ -52,6 +52,20 @@ export default function ProfilePage() {
     }
   }, [authState.loading]);
 
+  // ESC key handler for auth modal
+  useEffect(() => {
+    if (!showAuthModal) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAuthModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showAuthModal]);
+
   // Load existing profile data when component mounts
   useEffect(() => {
     if (me?.profile) {

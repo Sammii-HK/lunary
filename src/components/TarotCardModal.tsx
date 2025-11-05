@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { TarotCard } from './TarotCard';
 
@@ -14,6 +15,19 @@ interface TarotCardModalProps {
 }
 
 export function TarotCardModal({ card, isOpen, onClose }: TarotCardModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !card) return null;
 
   const isMajorArcana = !card.name.includes(' of ');

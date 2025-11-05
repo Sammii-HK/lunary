@@ -53,7 +53,7 @@ export const MoonSpellsWidget = () => {
   }
 
   return (
-    <div className='bg-gradient-to-br from-indigo-900/20 to-purple-900/20 rounded-lg p-4 border border-indigo-700/30'>
+    <div className='bg-gradient-to-br from-indigo-900/20 to-purple-900/20 rounded-lg p-4 border border-indigo-700/30 h-full flex flex-col'>
       <div className='flex items-center justify-between mb-3'>
         <h3 className='text-lg font-semibold text-indigo-300'>
           {currentMoonPhase} Spells

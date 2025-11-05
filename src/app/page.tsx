@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl'>
+    <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl mx-auto px-4'>
       <AstronomyContextProvider>
         {/* Top Row - Date and Astronomy (always full width) */}
         <div className='w-full space-y-4'>
@@ -55,25 +55,23 @@ export default function Home() {
         {/* Mobile: Single column maintains natural order */}
         {/* Desktop: 2 columns - flows naturally */}
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full'>
-          {/* Mobile order: Moon, Tarot, Crystal, Horoscope, Wheel, Spells, Ephemeris */}
-          {/* Desktop: Natural flow - Col1: Moon, Tarot, Wheel. Col2: Crystal, Horoscope, Spells */}
-          <div>
+          <div className='flex flex-col h-full'>
             <MoonWidget />
           </div>
-          <div className='md:col-start-2'>
+          <div className='flex flex-col h-full'>
             <CrystalWidget />
           </div>
-          <div>
+          <div className='flex flex-col h-full'>
             <TarotWidget />
           </div>
-          <div className='md:col-start-2'>
+          <div className='flex flex-col h-full'>
             <HoroscopeWidget />
           </div>
           <ConditionalWheel />
-          <div>
+          <div className='flex flex-col h-full'>
             <MoonSpellsWidget />
           </div>
-          <div>
+          <div className='flex flex-col h-full'>
             <EphemerisWidget />
           </div>
         </div>

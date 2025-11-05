@@ -919,7 +919,7 @@ export const CrystalWidget = () => {
     if (!generalCrystal) return null;
 
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
         <div className='space-y-2'>
           {/* <div className='flex items-center justify-between'>
             <h3 className='font-bold'>Crystal Energy</h3>
@@ -957,7 +957,7 @@ export const CrystalWidget = () => {
   // For premium users, we need both profile data AND subscription access
   if (!me || !userBirthday) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-purple-400'>Personalised</span>
@@ -975,7 +975,7 @@ export const CrystalWidget = () => {
 
   if (!birthChart) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-purple-400'>Personalised</span>
@@ -990,7 +990,7 @@ export const CrystalWidget = () => {
 
   if (!crystalData) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-purple-400'>Personalised</span>

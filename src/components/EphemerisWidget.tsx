@@ -575,22 +575,24 @@ export default function EphemerisWidget() {
 
   if (!location || locationLoading) {
     return (
-      <div className='w-full max-w-md mx-auto bg-zinc-800 rounded-lg p-4 border border-zinc-700'>
+      <div className='w-full h-full bg-zinc-800 rounded-lg p-4 border border-zinc-700 flex flex-col'>
         <div className='flex items-center justify-center gap-2 mb-3'>
           <MapPin size={16} className='text-purple-400' />
           <h3 className='text-lg font-semibold text-white'>Sky Tonight</h3>
         </div>
 
-        <div className='text-center text-zinc-400'>
-          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400 mx-auto mb-2'></div>
-          <p className='text-sm'>Getting your location...</p>
+        <div className='text-center text-zinc-400 flex-1 flex items-center justify-center'>
+          <div>
+            <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400 mx-auto mb-2'></div>
+            <p className='text-sm'>Getting your location...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className='w-full max-w-md mx-auto bg-zinc-800 rounded-lg p-4 border border-zinc-700'>
+    <div className='w-full h-full bg-zinc-800 rounded-lg p-4 border border-zinc-700 flex flex-col'>
       <div className='flex items-center justify-between mb-4'>
         <div className='flex items-center gap-2'>
           <MapPin size={16} className='text-purple-400' />
@@ -610,174 +612,178 @@ export default function EphemerisWidget() {
         </button>
       </div>
 
-      {!isCollapsed && (
-        <>
-          {loading && (
-            <div className='text-center py-4'>
-              <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400 mx-auto mb-2'></div>
-              <p className='text-sm text-zinc-400'>
-                Calculating celestial events...
-              </p>
-            </div>
-          )}
+      <div className='flex-1 flex flex-col'>
+        {!isCollapsed && (
+          <>
+            {loading && (
+              <div className='text-center py-4'>
+                <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400 mx-auto mb-2'></div>
+                <p className='text-sm text-zinc-400'>
+                  Calculating celestial events...
+                </p>
+              </div>
+            )}
 
-          {error && (
-            <div className='bg-red-900/50 border border-red-500 text-red-300 px-3 py-2 rounded text-sm mb-4'>
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className='bg-red-900/50 border border-red-500 text-red-300 px-3 py-2 rounded text-sm mb-4'>
+                {error}
+              </div>
+            )}
 
-          {ephemerisData && (
-            <div className='space-y-4'>
-              {/* Chart matching the screenshot */}
-              <AltitudeChart
-                celestialBodies={[
-                  {
-                    name: 'Sun',
-                    riseSet: {
-                      rise: ephemerisData.sunMoon.sunrise,
-                      set: ephemerisData.sunMoon.sunset,
-                      isVisible: true,
-                      altitude: 45,
+            {ephemerisData && (
+              <div className='space-y-4'>
+                {/* Chart matching the screenshot */}
+                <AltitudeChart
+                  celestialBodies={[
+                    {
+                      name: 'Sun',
+                      riseSet: {
+                        rise: ephemerisData.sunMoon.sunrise,
+                        set: ephemerisData.sunMoon.sunset,
+                        isVisible: true,
+                        altitude: 45,
+                      },
                     },
-                  },
-                  {
-                    name: 'Moon',
-                    riseSet: {
-                      rise: ephemerisData.sunMoon.moonrise,
-                      set: ephemerisData.sunMoon.moonset,
-                      isVisible: true,
-                      altitude: 40,
+                    {
+                      name: 'Moon',
+                      riseSet: {
+                        rise: ephemerisData.sunMoon.moonrise,
+                        set: ephemerisData.sunMoon.moonset,
+                        isVisible: true,
+                        altitude: 40,
+                      },
                     },
-                  },
-                  ...ephemerisData.planets
-                    .slice(0, 4)
-                    .map((p) => ({ name: p.body, riseSet: p.riseSet })),
-                ]}
-                timezone={location.timezone}
-              />
-
-              {/* Astronomical Conditions */}
-              <AstronomicalDetails
-                ephemerisData={ephemerisData}
-                location={location}
-              />
-
-              {/* Sun & Moon */}
-              <div className='grid grid-cols-2 gap-3'>
-                <div className='bg-zinc-700/50 rounded-lg p-3'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <Sun size={14} className='text-yellow-400' />
-                    <span className='font-medium text-white text-sm'>Sun</span>
-                  </div>
-
-                  <div className='space-y-1 text-xs'>
-                    <div className='flex justify-between'>
-                      <span className='text-zinc-400'>Rise:</span>
-                      <span className='text-white'>
-                        {formatTime(
-                          ephemerisData.sunMoon.sunrise,
-                          location.timezone,
-                        )}
-                      </span>
-                    </div>
-                    <div className='flex justify-between'>
-                      <span className='text-zinc-400'>Set:</span>
-                      <span className='text-white'>
-                        {formatTime(
-                          ephemerisData.sunMoon.sunset,
-                          location.timezone,
-                        )}
-                      </span>
-                    </div>
-                    <div className='flex justify-between'>
-                      <span className='text-zinc-400'>Length:</span>
-                      <span className='text-yellow-300'>
-                        {formatDayLength(ephemerisData.sunMoon.dayLength)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <MoonDisplay
-                  sunMoon={ephemerisData.sunMoon}
+                    ...ephemerisData.planets
+                      .slice(0, 4)
+                      .map((p) => ({ name: p.body, riseSet: p.riseSet })),
+                  ]}
                   timezone={location.timezone}
                 />
-              </div>
 
-              {/* Enhanced Planets Section */}
-              {visiblePlanets.length > 0 && (
-                <div>
-                  <div className='flex items-center justify-between mb-3'>
-                    <h4 className='text-sm font-medium text-zinc-300 flex items-center gap-2'>
-                      <Telescope size={14} />
-                      Planets ({visiblePlanets.length})
-                    </h4>
-                    <button
-                      onClick={() => setShowAllPlanets(!showAllPlanets)}
-                      className='flex items-center gap-1 text-xs text-zinc-400 hover:text-purple-400 transition-colors'
-                    >
-                      {showAllPlanets ? (
-                        <EyeOff size={12} />
-                      ) : (
-                        <Eye size={12} />
-                      )}
-                      {showAllPlanets ? 'Show less' : 'Show all'}
-                    </button>
+                {/* Astronomical Conditions */}
+                <AstronomicalDetails
+                  ephemerisData={ephemerisData}
+                  location={location}
+                />
+
+                {/* Sun & Moon */}
+                <div className='grid grid-cols-2 gap-3'>
+                  <div className='bg-zinc-700/50 rounded-lg p-3'>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <Sun size={14} className='text-yellow-400' />
+                      <span className='font-medium text-white text-sm'>
+                        Sun
+                      </span>
+                    </div>
+
+                    <div className='space-y-1 text-xs'>
+                      <div className='flex justify-between'>
+                        <span className='text-zinc-400'>Rise:</span>
+                        <span className='text-white'>
+                          {formatTime(
+                            ephemerisData.sunMoon.sunrise,
+                            location.timezone,
+                          )}
+                        </span>
+                      </div>
+                      <div className='flex justify-between'>
+                        <span className='text-zinc-400'>Set:</span>
+                        <span className='text-white'>
+                          {formatTime(
+                            ephemerisData.sunMoon.sunset,
+                            location.timezone,
+                          )}
+                        </span>
+                      </div>
+                      <div className='flex justify-between'>
+                        <span className='text-zinc-400'>Length:</span>
+                        <span className='text-yellow-300'>
+                          {formatDayLength(ephemerisData.sunMoon.dayLength)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className='grid grid-cols-1 gap-2'>
-                    {visiblePlanets.map((planet) => (
-                      <PlanetCard
-                        key={planet.body}
-                        planet={planet}
-                        timezone={location.timezone}
-                        location={location}
-                        isDetailed={showAllPlanets}
-                      />
-                    ))}
-                  </div>
+                  <MoonDisplay
+                    sunMoon={ephemerisData.sunMoon}
+                    timezone={location.timezone}
+                  />
                 </div>
-              )}
 
-              {/* Footer */}
-              <div className='text-center text-xs text-zinc-500 flex items-center justify-center gap-2'>
-                <Circle size={8} className='text-green-400 animate-pulse' />
-                Updated:{' '}
-                {ephemerisData.date.toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  timeZone: location.timezone,
-                })}
+                {/* Enhanced Planets Section */}
+                {visiblePlanets.length > 0 && (
+                  <div>
+                    <div className='flex items-center justify-between mb-3'>
+                      <h4 className='text-sm font-medium text-zinc-300 flex items-center gap-2'>
+                        <Telescope size={14} />
+                        Planets ({visiblePlanets.length})
+                      </h4>
+                      <button
+                        onClick={() => setShowAllPlanets(!showAllPlanets)}
+                        className='flex items-center gap-1 text-xs text-zinc-400 hover:text-purple-400 transition-colors'
+                      >
+                        {showAllPlanets ? (
+                          <EyeOff size={12} />
+                        ) : (
+                          <Eye size={12} />
+                        )}
+                        {showAllPlanets ? 'Show less' : 'Show all'}
+                      </button>
+                    </div>
+
+                    <div className='grid grid-cols-1 gap-2'>
+                      {visiblePlanets.map((planet) => (
+                        <PlanetCard
+                          key={planet.body}
+                          planet={planet}
+                          timezone={location.timezone}
+                          location={location}
+                          isDetailed={showAllPlanets}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div className='text-center text-xs text-zinc-500 flex items-center justify-center gap-2'>
+                  <Circle size={8} className='text-green-400 animate-pulse' />
+                  Updated:{' '}
+                  {ephemerisData.date.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: location.timezone,
+                  })}
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
 
-      {/* Collapsed state summary */}
-      {isCollapsed && ephemerisData && (
-        <div className='text-center text-sm text-zinc-400'>
-          <div className='flex items-center justify-center gap-4'>
-            <div className='flex items-center gap-1'>
-              <Sun size={12} className='text-yellow-400' />
-              <span>
-                {formatTime(ephemerisData.sunMoon.sunrise, location.timezone)}
-              </span>
-            </div>
-            <div className='flex items-center gap-1'>
-              {getMoonPhaseIcon(
-                Math.round(ephemerisData.sunMoon.moonPhase.illumination),
-              )}
-              <span>
-                {getMoonPhaseName(
+        {/* Collapsed state summary */}
+        {isCollapsed && ephemerisData && (
+          <div className='text-center text-sm text-zinc-400 flex-1 flex items-center justify-center'>
+            <div className='flex items-center justify-center gap-4'>
+              <div className='flex items-center gap-1'>
+                <Sun size={12} className='text-yellow-400' />
+                <span>
+                  {formatTime(ephemerisData.sunMoon.sunrise, location.timezone)}
+                </span>
+              </div>
+              <div className='flex items-center gap-1'>
+                {getMoonPhaseIcon(
                   Math.round(ephemerisData.sunMoon.moonPhase.illumination),
                 )}
-              </span>
+                <span>
+                  {getMoonPhaseName(
+                    Math.round(ephemerisData.sunMoon.moonPhase.illumination),
+                  )}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
