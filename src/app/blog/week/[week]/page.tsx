@@ -15,6 +15,38 @@ interface BlogPostPageProps {
   params: Promise<{ week: string }>;
 }
 
+function convertDatesToObjects(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertDatesToObjects);
+  }
+
+  if (typeof obj === 'object') {
+    const converted: any = {};
+    for (const key in obj) {
+      const value = obj[key];
+      if (typeof value === 'string') {
+        const date = new Date(value);
+        if (!isNaN(date.getTime()) && value.includes('T')) {
+          converted[key] = date;
+        } else {
+          converted[key] = value;
+        }
+      } else if (typeof value === 'object') {
+        converted[key] = convertDatesToObjects(value);
+      } else {
+        converted[key] = value;
+      }
+    }
+    return converted;
+  }
+
+  return obj;
+}
+
 async function getBlogData(week: string) {
   const [weekNumber, year] = week.split('-');
   const startOfYear = new Date(parseInt(year), 0, 1);
@@ -38,7 +70,7 @@ async function getBlogData(week: string) {
   }
 
   const result = await response.json();
-  return result.data;
+  return convertDatesToObjects(result.data);
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
@@ -263,13 +295,33 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className='mb-2'>{forecast.summary}</p>
-                    {forecast.themes && forecast.themes.length > 0 && (
+                    <p className='mb-2'>{forecast.energy}</p>
+                    <p className='text-sm text-muted-foreground mb-2'>
+                      {forecast.guidance}
+                    </p>
+                    {forecast.bestFor && forecast.bestFor.length > 0 && (
                       <div className='flex flex-wrap gap-2 mt-2'>
-                        {forecast.themes.map(
-                          (theme: string, themeIndex: number) => (
-                            <Badge key={themeIndex} variant='outline'>
-                              {theme}
+                        <span className='text-xs text-muted-foreground mr-2'>
+                          Best for:
+                        </span>
+                        {forecast.bestFor.map(
+                          (item: string, itemIndex: number) => (
+                            <Badge key={itemIndex} variant='outline'>
+                              {item}
+                            </Badge>
+                          ),
+                        )}
+                      </div>
+                    )}
+                    {forecast.avoid && forecast.avoid.length > 0 && (
+                      <div className='flex flex-wrap gap-2 mt-2'>
+                        <span className='text-xs text-muted-foreground mr-2'>
+                          Avoid:
+                        </span>
+                        {forecast.avoid.map(
+                          (item: string, itemIndex: number) => (
+                            <Badge key={itemIndex} variant='secondary'>
+                              {item}
                             </Badge>
                           ),
                         )}
@@ -295,11 +347,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className='text-sm'>
-                        {Array.isArray(days)
-                          ? days
-                              .map((d: any) =>
-                                d.date.toLocaleDateString('en-US', {
+                      <p className='text-sm mb-2'>
+                        {days?.dates &&
+                        Array.isArray(days.dates) &&
+                        days.dates.length > 0
+                          ? days.dates
+                              .map((d: Date) =>
+                                d.toLocaleDateString('en-US', {
                                   weekday: 'long',
                                   month: 'long',
                                   day: 'numeric',
@@ -308,6 +362,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                               .join(', ')
                           : 'Check your personalized forecast'}
                       </p>
+                      {days?.reason && (
+                        <p className='text-xs text-muted-foreground italic'>
+                          {days.reason}
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
                 ),
@@ -326,23 +385,24 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     <Card key={index}>
                       <CardHeader>
                         <CardTitle className='text-lg'>
-                          {crystal.name}
+                          {crystal.crystal}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className='text-sm mb-2'>{crystal.guidance}</p>
-                        {crystal.properties &&
-                          crystal.properties.length > 0 && (
-                            <div className='flex flex-wrap gap-2'>
-                              {crystal.properties.map(
-                                (prop: string, propIndex: number) => (
-                                  <Badge key={propIndex} variant='secondary'>
-                                    {prop}
-                                  </Badge>
-                                ),
-                              )}
-                            </div>
+                        <p className='text-sm mb-2'>{crystal.reason}</p>
+                        <p className='text-xs text-muted-foreground mb-2'>
+                          {crystal.usage}
+                        </p>
+                        <div className='flex flex-wrap gap-2 mt-2'>
+                          {crystal.intention && (
+                            <Badge variant='secondary'>
+                              {crystal.intention}
+                            </Badge>
                           )}
+                          {crystal.chakra && (
+                            <Badge variant='outline'>{crystal.chakra}</Badge>
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ),
