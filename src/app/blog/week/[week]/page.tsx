@@ -440,54 +440,57 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </section>
         )}
 
-        {blogData.bestDaysFor && (
-          <section className='space-y-6'>
-            <h2 className='text-3xl font-bold'>Best Days For</h2>
-            <div className='grid gap-4 md:grid-cols-2'>
-              {Object.entries(blogData.bestDaysFor).map(
-                ([category, days]: [string, any]) => (
-                  <Card key={category}>
-                    <CardHeader>
-                      <CardTitle className='text-lg capitalize'>
-                        {category.replace(/([A-Z])/g, ' $1').trim()}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {days?.dates &&
-                      Array.isArray(days.dates) &&
-                      days.dates.length > 0 ? (
-                        <>
-                          <p className='text-sm mb-2'>
-                            {days.dates
-                              .map((d: Date) =>
-                                d.toLocaleDateString('en-US', {
-                                  weekday: 'long',
-                                  month: 'long',
-                                  day: 'numeric',
-                                }),
-                              )
-                              .join(', ')}
-                          </p>
-                          {days?.reason && (
-                            <p className='text-xs text-muted-foreground italic'>
-                              {days.reason}
-                            </p>
-                          )}
-                        </>
-                      ) : (
-                        days?.reason && (
-                          <p className='text-sm text-muted-foreground'>
+        {blogData.bestDaysFor &&
+          (() => {
+            // Filter to only show categories that have actual dates
+            const entriesWithDates = Object.entries(
+              blogData.bestDaysFor,
+            ).filter(([, days]: [string, any]) => {
+              return (
+                days?.dates &&
+                Array.isArray(days.dates) &&
+                days.dates.length > 0
+              );
+            });
+
+            // Only render section if there are entries with dates
+            if (entriesWithDates.length === 0) return null;
+
+            return (
+              <section className='space-y-6'>
+                <h2 className='text-3xl font-bold'>Best Days For</h2>
+                <div className='grid gap-4 md:grid-cols-2'>
+                  {entriesWithDates.map(([category, days]: [string, any]) => (
+                    <Card key={category}>
+                      <CardHeader>
+                        <CardTitle className='text-lg capitalize'>
+                          {category.replace(/([A-Z])/g, ' $1').trim()}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className='text-sm mb-2'>
+                          {days.dates
+                            .map((d: Date) =>
+                              d.toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                month: 'long',
+                                day: 'numeric',
+                              }),
+                            )
+                            .join(', ')}
+                        </p>
+                        {days?.reason && (
+                          <p className='text-xs text-muted-foreground italic'>
                             {days.reason}
                           </p>
-                        )
-                      )}
-                    </CardContent>
-                  </Card>
-                ),
-              )}
-            </div>
-          </section>
-        )}
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
 
         {blogData.crystalRecommendations &&
           blogData.crystalRecommendations.length > 0 && (
