@@ -190,57 +190,58 @@ const getMoonPhaseGuidance = (moonPhase: string, crystal: string): string => {
   );
 };
 
-export const getGeneralCrystalRecommendation =
-  (): GeneralCrystalRecommendation => {
-    const today = dayjs();
-    const observer = new Observer(51.4769, 0.0005, 0); // Default location
-    const currentChart = getAstrologicalChart(today.toDate(), observer);
-    const moonPhase = getMoonPhase(today.toDate());
+export const getGeneralCrystalRecommendation = (
+  date?: Date,
+): GeneralCrystalRecommendation => {
+  const today = date ? dayjs(date) : dayjs();
+  const observer = new Observer(51.4769, 0.0005, 0); // Default location
+  const currentChart = getAstrologicalChart(today.toDate(), observer);
+  const moonPhase = getMoonPhase(today.toDate());
 
-    // Get dominant elemental energy
-    const dominantElement = getDominantEnergy(currentChart);
+  // Get dominant elemental energy
+  const dominantElement = getDominantEnergy(currentChart);
 
-    // Get current sun and moon signs for selection
-    const sun = currentChart.find((p) => p.body === 'Sun');
-    const moon = currentChart.find((p) => p.body === 'Moon');
+  // Get current sun and moon signs for selection
+  const sun = currentChart.find((p) => p.body === 'Sun');
+  const moon = currentChart.find((p) => p.body === 'Moon');
 
-    // Create pools of crystals from different sources
-    const sunCrystals = sun
-      ? CRYSTALS_BY_SIGN[sun.sign as keyof typeof CRYSTALS_BY_SIGN] || []
-      : [];
-    const moonCrystals = moon
-      ? CRYSTALS_BY_SIGN[moon.sign as keyof typeof CRYSTALS_BY_SIGN] || []
-      : [];
-    const moonPhaseCrystals =
-      MOON_PHASE_CRYSTALS[moonPhase as keyof typeof MOON_PHASE_CRYSTALS] ||
-      MOON_PHASE_CRYSTALS['New Moon'];
-    const elementalCrystals = getElementalCrystals(dominantElement);
+  // Create pools of crystals from different sources
+  const sunCrystals = sun
+    ? CRYSTALS_BY_SIGN[sun.sign as keyof typeof CRYSTALS_BY_SIGN] || []
+    : [];
+  const moonCrystals = moon
+    ? CRYSTALS_BY_SIGN[moon.sign as keyof typeof CRYSTALS_BY_SIGN] || []
+    : [];
+  const moonPhaseCrystals =
+    MOON_PHASE_CRYSTALS[moonPhase as keyof typeof MOON_PHASE_CRYSTALS] ||
+    MOON_PHASE_CRYSTALS['New Moon'];
+  const elementalCrystals = getElementalCrystals(dominantElement);
 
-    // Combine all crystal options
-    const allCrystals = [
-      ...sunCrystals,
-      ...moonCrystals,
-      ...moonPhaseCrystals,
-      ...elementalCrystals,
-    ];
+  // Combine all crystal options
+  const allCrystals = [
+    ...sunCrystals,
+    ...moonCrystals,
+    ...moonPhaseCrystals,
+    ...elementalCrystals,
+  ];
 
-    // Select crystal based on current day to ensure consistency
-    const dayOfYear = today.dayOfYear();
-    const selectedCrystal = allCrystals[dayOfYear % allCrystals.length];
+  // Select crystal based on current day to ensure consistency
+  const dayOfYear = today.dayOfYear();
+  const selectedCrystal = allCrystals[dayOfYear % allCrystals.length];
 
-    // Generate reason
-    let reason = `Based on today's cosmic energy`;
-    if (sun) reason += ` with the Sun in ${sun.sign}`;
-    if (moon) reason += ` and Moon in ${moon.sign}`;
-    reason += `, ${selectedCrystal} resonates perfectly with the ${dominantElement} elemental influence.`;
+  // Generate reason
+  let reason = `Based on today's cosmic energy`;
+  if (sun) reason += ` with the Sun in ${sun.sign}`;
+  if (moon) reason += ` and Moon in ${moon.sign}`;
+  reason += `, ${selectedCrystal} resonates perfectly with the ${dominantElement} elemental influence.`;
 
-    return {
-      name: selectedCrystal,
-      reason,
-      properties: CRYSTAL_PROPERTIES[
-        selectedCrystal as keyof typeof CRYSTAL_PROPERTIES
-      ] || ['balance', 'harmony', 'energy', 'healing'],
-      guidance: getCrystalGuidance(selectedCrystal, moonPhase, dominantElement),
-      moonPhaseAlignment: getMoonPhaseGuidance(moonPhase, selectedCrystal),
-    };
+  return {
+    name: selectedCrystal,
+    reason,
+    properties: CRYSTAL_PROPERTIES[
+      selectedCrystal as keyof typeof CRYSTAL_PROPERTIES
+    ] || ['balance', 'harmony', 'energy', 'healing'],
+    guidance: getCrystalGuidance(selectedCrystal, moonPhase, dominantElement),
+    moonPhaseAlignment: getMoonPhaseGuidance(moonPhase, selectedCrystal),
   };
+};

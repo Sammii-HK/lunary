@@ -1,6 +1,7 @@
 'use client';
 
 import { useAccount } from 'jazz-tools/react';
+import { useMemo } from 'react';
 import { SmartTrialButton } from './SmartTrialButton';
 import {
   getBirthChartFromProfile,
@@ -865,9 +866,57 @@ export const CrystalWidget = () => {
 
   const hasChartAccess = hasBirthChartAccess(subscription.status);
 
+  // Get birth chart data (needed for hooks)
+  const hasBirthChartData = hasBirthChart(me?.profile);
+  const birthChart = hasBirthChartData
+    ? getBirthChartFromProfile(me?.profile)
+    : null;
+
+  // Memoize general crystal for non-premium users
+  const generalCrystal = useMemo(() => {
+    if (hasChartAccess) return null;
+    return getGeneralCrystalRecommendation();
+  }, [hasChartAccess]);
+
+  // Memoize crystal calculation to ensure it's seeded and deterministic
+  // Calculate stable date string once - will be same for entire day
+  const todayDateString = useMemo(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // YYYY-MM-DD
+  }, []);
+
+  const crystalData = useMemo(() => {
+    if (!birthChart || !userBirthday) return null;
+
+    // Use the date string to create a stable Date object for the day
+    const today = new Date(todayDateString + 'T12:00:00'); // Use noon to avoid timezone issues
+    const observer = new Observer(51.4769, 0.0005, 0);
+    const currentTransits = getAstrologicalChart(today, observer);
+
+    const recommendedCrystal = calculateCrystalRecommendation(
+      birthChart,
+      currentTransits,
+      today,
+      userBirthday,
+    );
+    const sunSign = birthChart.find((p) => p.body === 'Sun')?.sign || 'Aries';
+    const guidance = getCrystalGuidance(
+      recommendedCrystal,
+      sunSign,
+      today,
+      userBirthday,
+    );
+
+    return {
+      crystal: recommendedCrystal,
+      guidance,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todayDateString, userBirthday, JSON.stringify(birthChart)]);
+
   // If user doesn't have birth chart access, show general crystal recommendation
   if (!hasChartAccess) {
-    const generalCrystal = getGeneralCrystalRecommendation();
+    if (!generalCrystal) return null;
 
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
@@ -924,11 +973,6 @@ export const CrystalWidget = () => {
     );
   }
 
-  const hasBirthChartData = hasBirthChart(me.profile);
-  const birthChart = hasBirthChartData
-    ? getBirthChartFromProfile(me.profile)
-    : null;
-
   if (!birthChart) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
@@ -944,25 +988,23 @@ export const CrystalWidget = () => {
     );
   }
 
-  // Get current planetary positions
-  const today = new Date();
-  const observer = new Observer(51.4769, 0.0005, 0);
-  const currentTransits = getAstrologicalChart(today, observer);
+  if (!crystalData) {
+    return (
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+        <div className='text-center'>
+          <h3 className='font-bold mb-2'>Personal Crystal</h3>
+          <span className='text-xs text-purple-400'>Personalised</span>
+          <div className='text-4xl mb-2'>🔮</div>
+          <p className='text-zinc-400 text-xs'>
+            Calculating your crystal alignment...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  // Calculate personalized crystal recommendation
-  const recommendedCrystal = calculateCrystalRecommendation(
-    birthChart,
-    currentTransits,
-    today,
-    userBirthday,
-  );
-  const sunSign = birthChart.find((p) => p.body === 'Sun')?.sign || 'Aries';
-  const guidance = getCrystalGuidance(
-    recommendedCrystal,
-    sunSign,
-    today,
-    userBirthday,
-  );
+  const recommendedCrystal = crystalData.crystal;
+  const guidance = crystalData.guidance;
 
   return (
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>

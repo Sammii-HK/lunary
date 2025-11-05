@@ -19,6 +19,10 @@ export interface Crystal {
   metaphysicalProperties: string;
   physicalProperties?: string;
   historicalUse?: string;
+  // OG Image properties
+  ogColor?: string; // Hex color code for OG images
+  primaryChakra?: string; // Formatted chakra name for OG display (e.g., "Crown Chakra")
+  keywords?: string[]; // Top keywords for OG display
   workingWith: {
     meditation: string;
     spellwork: string;
@@ -78,6 +82,9 @@ export const crystalDatabase: Crystal[] = [
     hardness: 7,
     origin: ['Brazil', 'Uruguay', 'Russia', 'South Korea', 'United States'],
     rarity: 'common',
+    ogColor: '#9333EA',
+    primaryChakra: 'Crown Chakra',
+    keywords: ['Intuition', 'Clarity', 'Protection'],
     description:
       'A powerful spiritual stone that opens the third eye and connects you to higher wisdom',
     metaphysicalProperties:
@@ -149,6 +156,9 @@ export const crystalDatabase: Crystal[] = [
     hardness: 7,
     origin: ['Brazil', 'Madagascar', 'India', 'South Africa', 'United States'],
     rarity: 'common',
+    ogColor: '#F472B6',
+    primaryChakra: 'Heart Chakra',
+    keywords: ['Love', 'Compassion', 'Peace'],
     description:
       'The ultimate stone of unconditional love that soothes emotional wounds and attracts loving relationships',
     metaphysicalProperties:
@@ -221,6 +231,9 @@ export const crystalDatabase: Crystal[] = [
     hardness: 7,
     origin: ['Brazil', 'Arkansas USA', 'Madagascar', 'Tibet', 'Worldwide'],
     rarity: 'common',
+    ogColor: '#F3F4F6',
+    primaryChakra: 'All Chakras',
+    keywords: ['Amplification', 'Clarity', 'Healing'],
     description:
       'The master healer that amplifies energy and intention while bringing clarity to all situations',
     metaphysicalProperties:
@@ -293,6 +306,9 @@ export const crystalDatabase: Crystal[] = [
     hardness: 7.5,
     origin: ['Brazil', 'Afghanistan', 'United States', 'Pakistan', 'Kenya'],
     rarity: 'common',
+    ogColor: '#1F2937',
+    primaryChakra: 'Root Chakra',
+    keywords: ['Protection', 'Grounding', 'Strength'],
     description:
       'The ultimate protection stone that creates an energetic shield and grounds excess energy',
     metaphysicalProperties:
@@ -431,3 +447,90 @@ export const crystalElements = [
   'Spirit',
   'All Elements',
 ];
+
+// Helper function to get crystal by name (case-insensitive)
+export const getCrystalByName = (name: string): Crystal | undefined => {
+  return crystalDatabase.find(
+    (crystal) =>
+      crystal.name.toLowerCase() === name.toLowerCase() ||
+      crystal.alternativeNames?.some(
+        (alt) => alt.toLowerCase() === name.toLowerCase(),
+      ),
+  );
+};
+
+// Helper function to get OG properties for a crystal
+export const getCrystalOGProperties = (
+  crystalName: string,
+): {
+  color: string;
+  chakra: string;
+  keywords: string[];
+} => {
+  const crystal = getCrystalByName(crystalName);
+
+  if (crystal) {
+    return {
+      color: crystal.ogColor || getColorFromName(crystal.colors[0] || 'Purple'),
+      chakra:
+        crystal.primaryChakra || formatChakra(crystal.chakras[0] || 'Crown'),
+      keywords:
+        crystal.keywords || crystal.properties.slice(0, 3).map(capitalize),
+    };
+  }
+
+  // Fallback for unknown crystals
+  return {
+    color: '#9333EA',
+    chakra: 'Crown Chakra',
+    keywords: ['Balance', 'Harmony', 'Energy'],
+  };
+};
+
+// Helper to format chakra name for OG display
+const formatChakra = (chakra: string): string => {
+  if (chakra === 'All Chakras') return 'All Chakras';
+  const chakraMap: Record<string, string> = {
+    Root: 'Root Chakra',
+    Sacral: 'Sacral Chakra',
+    'Solar Plexus': 'Solar Plexus',
+    Heart: 'Heart Chakra',
+    Throat: 'Throat Chakra',
+    'Third Eye': 'Third Eye',
+    Crown: 'Crown Chakra',
+  };
+  return chakraMap[chakra] || `${chakra} Chakra`;
+};
+
+// Helper to get hex color from color name
+const getColorFromName = (colorName: string): string => {
+  const colorMap: Record<string, string> = {
+    Purple: '#9333EA',
+    Violet: '#9333EA',
+    Lavender: '#9333EA',
+    Pink: '#F472B6',
+    Rose: '#F472B6',
+    Clear: '#F3F4F6',
+    White: '#F3F4F6',
+    Black: '#1F2937',
+    Yellow: '#F59E0B',
+    Golden: '#F59E0B',
+    Orange: '#EA580C',
+    'Red-Orange': '#EA580C',
+    Green: '#10B981',
+    Blue: '#3B82F6',
+    'Blue-Green': '#14B8A6',
+    Turquoise: '#14B8A6',
+    Brown: '#92400E',
+    Gray: '#6B7280',
+    Silver: '#9CA3AF',
+    Metallic: '#9CA3AF',
+    Red: '#DC2626',
+    'Deep Red': '#991B1B',
+  };
+  return colorMap[colorName] || '#9333EA';
+};
+
+const capitalize = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};

@@ -1,7 +1,7 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import Link from 'next/link';
@@ -29,6 +29,68 @@ const TarotReadings = () => {
     information: string;
   } | null>(null);
 
+  // All hooks must be called before any early returns
+  const generalTarot = useMemo(() => {
+    if (hasChartAccess) return null;
+    return getGeneralTarotReading();
+  }, [hasChartAccess]);
+
+  const previousReadings = useMemo(() => {
+    if (hasChartAccess) return [];
+    const currentDate = dayjs();
+    const previousWeek = () => {
+      let week = [];
+      for (let i = 0; i < 7; i++) {
+        week.push(currentDate.subtract(i, 'day'));
+      }
+      return week;
+    };
+    const week = previousWeek();
+
+    return week.map((day) => {
+      const dayOfYear = day.dayOfYear();
+      const seed = `cosmic-${day.format('YYYY-MM-DD')}-${dayOfYear}-energy`;
+      return {
+        day: day.format('dddd'),
+        date: day.format('MMM D'),
+        card: getTarotCard(seed, 'cosmic-daily-energy'),
+      };
+    });
+  }, [hasChartAccess]);
+
+  const personalizedReading = useMemo(
+    () =>
+      hasChartAccess && userName && userBirthday
+        ? getImprovedTarotReading(userName, true, timeFrame, userBirthday)
+        : null,
+    [hasChartAccess, userName, timeFrame, userBirthday],
+  );
+
+  const personalizedPreviousReadings = useMemo(() => {
+    if (!hasChartAccess || !userName || !userBirthday) return [];
+    const currentDate = dayjs();
+    const previousWeek = () => {
+      let week = [];
+      for (let i = 1; i < 8; i++) {
+        week.push(currentDate.subtract(i, 'day'));
+      }
+      return week;
+    };
+    const week = previousWeek();
+
+    return week.map((day) => {
+      return {
+        day: day.format('dddd'),
+        date: day.format('MMM D'),
+        card: getTarotCard(
+          dayjs(day).toDate().toDateString(),
+          userName,
+          userBirthday,
+        ),
+      };
+    });
+  }, [hasChartAccess, userName, userBirthday]);
+
   if (!me) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
@@ -41,26 +103,7 @@ const TarotReadings = () => {
   }
 
   if (!hasChartAccess) {
-    const generalTarot = getGeneralTarotReading();
-    const currentDate = dayjs();
-    const previousWeek = () => {
-      let week = [];
-      for (let i = 0; i < 7; i++) {
-        week.push(currentDate.subtract(i, 'day'));
-      }
-      return week;
-    };
-    const week = previousWeek();
-
-    const previousReadings = week.map((day) => {
-      const dayOfYear = day.dayOfYear();
-      const seed = `cosmic-${day.format('YYYY-MM-DD')}-${dayOfYear}-energy`;
-      return {
-        day: day.format('dddd'),
-        date: day.format('MMM D'),
-        card: getTarotCard(seed, 'cosmic-daily-energy'),
-      };
-    });
+    if (!generalTarot) return null;
 
     return (
       <div className='min-h-screen space-y-6 pb-20 px-4'>
@@ -247,34 +290,16 @@ const TarotReadings = () => {
     );
   }
 
-  const personalizedReading = getImprovedTarotReading(
-    userName,
-    true,
-    timeFrame,
-    userBirthday,
-  );
-
-  const currentDate = dayjs();
-  const previousWeek = () => {
-    let week = [];
-    for (let i = 1; i < 8; i++) {
-      week.push(currentDate.subtract(i, 'day'));
-    }
-    return week;
-  };
-  const week = previousWeek();
-
-  const previousReadings = week.map((day) => {
-    return {
-      day: day.format('dddd'),
-      date: day.format('MMM D'),
-      card: getTarotCard(
-        dayjs(day).toDate().toDateString(),
-        userName,
-        userBirthday,
-      ),
-    };
-  });
+  if (!personalizedReading) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='w-8 h-8 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+          <p className='text-zinc-400'>Loading your tarot reading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen space-y-6 pb-20 px-4'>
@@ -611,7 +636,7 @@ const TarotReadings = () => {
             Recent Daily Cards
           </h2>
           <div className='space-y-3'>
-            {previousReadings.map((reading) => (
+            {personalizedPreviousReadings.map((reading) => (
               <div
                 key={reading.date}
                 className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 flex justify-between items-center hover:bg-zinc-900/50 transition-colors'

@@ -1,62 +1,38 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { getGeneralCrystalRecommendation } from '../../../../../utils/crystals/generalCrystals';
+import { getCrystalOGProperties } from '../../../../../src/constants/grimoire/crystals';
 
 export const dynamic = 'force-dynamic';
-
-const crystals = [
-  {
-    name: 'Amethyst',
-    color: '#9333EA',
-    chakra: 'Crown Chakra',
-    keywords: ['Intuition', 'Clarity', 'Protection'],
-  },
-  {
-    name: 'Rose Quartz',
-    color: '#F472B6',
-    chakra: 'Heart Chakra',
-    keywords: ['Love', 'Compassion', 'Peace'],
-  },
-  {
-    name: 'Citrine',
-    color: '#F59E0B',
-    chakra: 'Solar Plexus',
-    keywords: ['Abundance', 'Confidence', 'Joy'],
-  },
-  {
-    name: 'Black Tourmaline',
-    color: '#1F2937',
-    chakra: 'Root Chakra',
-    keywords: ['Protection', 'Grounding', 'Strength'],
-  },
-  {
-    name: 'Clear Quartz',
-    color: '#F3F4F6',
-    chakra: 'All Chakras',
-    keywords: ['Amplification', 'Clarity', 'Healing'],
-  },
-  {
-    name: 'Moonstone',
-    color: '#E5E7EB',
-    chakra: 'Sacral Chakra',
-    keywords: ['Intuition', 'Cycles', 'Feminine'],
-  },
-  {
-    name: 'Carnelian',
-    color: '#EA580C',
-    chakra: 'Sacral Chakra',
-    keywords: ['Creativity', 'Courage', 'Passion'],
-  },
-];
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
   const sizeParam = searchParams.get('size') || 'square';
+  const crystalNameParam = searchParams.get('crystal');
 
   const targetDate = dateParam || new Date().toISOString().split('T')[0];
-  const dateObj = new Date(targetDate);
-  const seed = dateObj.getDate() + dateObj.getMonth() * 31;
-  const crystal = crystals[seed % crystals.length];
+  const dateObj = new Date(targetDate + 'T12:00:00');
+
+  // Get crystal recommendation - use provided name or get general recommendation
+  // For date-specific requests, pass the date to getGeneralCrystalRecommendation
+  let crystalName: string;
+  if (crystalNameParam) {
+    crystalName = crystalNameParam;
+  } else {
+    // Use the same logic as the widget for consistency
+    const recommendation = getGeneralCrystalRecommendation(dateObj);
+    crystalName = recommendation.name;
+  }
+
+  // Get OG properties from crystal database
+  const ogProps = getCrystalOGProperties(crystalName);
+  const crystal = {
+    name: crystalName,
+    color: ogProps.color,
+    chakra: ogProps.chakra,
+    keywords: ogProps.keywords,
+  };
 
   // Format date for display
   const formattedDate = dateObj
@@ -66,6 +42,8 @@ export async function GET(request: NextRequest) {
       year: 'numeric',
     })
     .replace(/\//g, '/');
+
+  // Use date-based variation for background theme
 
   // Define responsive sizes and styles
   const sizes = {
