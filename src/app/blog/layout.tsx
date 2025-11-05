@@ -31,6 +31,27 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/blog',
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  keywords: [
+    'astrology blog',
+    'weekly horoscope',
+    'planetary transits',
+    'moon phases',
+    'astrological guidance',
+    'cosmic insights',
+    'weekly forecast',
+    'astrology weekly',
+  ],
 };
 
 export default function BlogLayout({

@@ -82,6 +82,12 @@ export default function WelcomePage() {
             </Link>
             <div className='hidden sm:flex items-center gap-6'>
               <Link
+                href='/blog'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Blog
+              </Link>
+              <Link
                 href='/pricing'
                 className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
               >
@@ -427,6 +433,12 @@ export default function WelcomePage() {
           <div className='flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm md:text-base text-zinc-500'>
             <div>© {new Date().getFullYear()} Lunary</div>
             <div className='flex gap-4 sm:gap-6 md:gap-8'>
+              <Link
+                href='/blog'
+                className='hover:text-zinc-400 transition-colors'
+              >
+                Blog
+              </Link>
               <Link
                 href='/pricing'
                 className='hover:text-zinc-400 transition-colors'

@@ -103,7 +103,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <span>•</span>
             <span>{blogData.year}</span>
             <span>•</span>
-            <span>{weekRange}</span>
+            <time dateTime={blogData.weekStart.toISOString()}>{weekRange}</time>
           </div>
 
           <h1 className='text-4xl font-bold'>{blogData.title}</h1>
@@ -411,6 +411,50 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </section>
           )}
       </article>
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: blogData.title,
+            description: blogData.subtitle,
+            image: `https://lunary.app/api/og/cosmic?date=${blogData.weekStart.toISOString().split('T')[0]}`,
+            datePublished: blogData.weekStart.toISOString(),
+            dateModified: blogData.generatedAt,
+            author: {
+              '@type': 'Organization',
+              name: 'Lunary Cosmic Team',
+              url: 'https://lunary.app',
+            },
+            publisher: {
+              '@type': 'Organization',
+              name: 'Lunary',
+              url: 'https://lunary.app',
+              logo: {
+                '@type': 'ImageObject',
+                url: 'https://lunary.app/logo.png',
+              },
+            },
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': `https://lunary.app/blog/week/${week}`,
+            },
+            articleSection: 'Weekly Forecast',
+            keywords: [
+              'astrology',
+              'weekly forecast',
+              'horoscope',
+              'planetary transits',
+              'moon phases',
+              `week ${blogData.weekNumber} ${blogData.year}`,
+            ],
+            wordCount:
+              blogData.summary.split(' ').length +
+              (blogData.planetaryHighlights?.length || 0) * 50,
+          }),
+        }}
+      />
     </div>
   );
 }
@@ -421,8 +465,86 @@ export async function generateMetadata({
   const { week } = await params;
   const blogData = await getBlogData(week);
 
+  const weekRange = `${blogData.weekStart.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+  })} - ${blogData.weekEnd.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })}`;
+
+  const url = `https://lunary.app/blog/week/${week}`;
+  const ogImage = `https://lunary.app/api/og/cosmic?date=${blogData.weekStart.toISOString().split('T')[0]}`;
+
+  const keywords = [
+    'astrology',
+    'weekly forecast',
+    'horoscope',
+    'planetary transits',
+    'moon phases',
+    'astrological guidance',
+    'cosmic insights',
+    `week ${blogData.weekNumber} ${blogData.year}`,
+    'retrograde',
+    'astrological aspects',
+    'lunar calendar',
+  ];
+
   return {
     title: `${blogData.title} | Lunary Blog`,
-    description: blogData.subtitle,
+    description: `${blogData.subtitle} Week of ${weekRange}. ${blogData.summary.substring(0, 120)}...`,
+    keywords,
+    authors: [{ name: 'Lunary Cosmic Team' }],
+    creator: 'Lunary',
+    publisher: 'Lunary',
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: blogData.title,
+      description: `${blogData.subtitle} Week of ${weekRange}`,
+      url,
+      siteName: 'Lunary',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: blogData.title,
+        },
+      ],
+      locale: 'en_US',
+      type: 'article',
+      publishedTime: blogData.weekStart.toISOString(),
+      modifiedTime: blogData.generatedAt,
+      authors: ['Lunary Cosmic Team'],
+      section: 'Weekly Forecast',
+      tags: keywords,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: blogData.title,
+      description: `${blogData.subtitle} Week of ${weekRange}`,
+      images: [ogImage],
+      creator: '@lunaryapp',
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    other: {
+      'article:published_time': blogData.weekStart.toISOString(),
+      'article:modified_time': blogData.generatedAt,
+      'article:author': 'Lunary Cosmic Team',
+      'article:section': 'Weekly Forecast',
+    },
   };
 }
