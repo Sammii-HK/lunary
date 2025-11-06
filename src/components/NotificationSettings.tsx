@@ -20,10 +20,114 @@ export function NotificationSettings() {
   const [subscription, setSubscription] =
     useState<globalThis.PushSubscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [tarotEnabled, setTarotEnabled] = useState(false);
+  const [tarotLoading, setTarotLoading] = useState(false);
 
   useEffect(() => {
     checkNotificationStatus();
   }, []);
+
+  useEffect(() => {
+    if (subscription) {
+      checkTarotNotificationStatus();
+    }
+  }, [subscription]);
+
+  const checkTarotNotificationStatus = async () => {
+    if (!subscription) {
+      setTarotEnabled(false);
+      return;
+    }
+
+    try {
+      // Check if tarot notifications are enabled in PostgreSQL
+      const response = await fetch('/api/notifications/check-tarot-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          endpoint: subscription.endpoint,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTarotEnabled(data.enabled || false);
+      }
+    } catch (error) {
+      console.error('Error checking tarot notification status:', error);
+    }
+  };
+
+  const toggleTarotNotifications = async () => {
+    if (!subscription) {
+      alert('Please enable push notifications first');
+      return;
+    }
+
+    const birthday = (me?.profile as any)?.birthday;
+    if (!birthday && !tarotEnabled) {
+      alert(
+        'Please add your birthday to your profile to enable personalized tarot notifications',
+      );
+      return;
+    }
+
+    setTarotLoading(true);
+    try {
+      const endpoint = subscription.endpoint;
+      const userName = (me?.profile as any)?.name || undefined;
+
+      if (tarotEnabled) {
+        // Disable
+        const response = await fetch('/api/notifications/enable-tarot', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ endpoint }),
+        });
+
+        if (response.ok) {
+          setTarotEnabled(false);
+        } else {
+          throw new Error('Failed to disable tarot notifications');
+        }
+      } else {
+        // Enable
+        const response = await fetch('/api/notifications/enable-tarot', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            endpoint,
+            birthday,
+            name: userName,
+          }),
+        });
+
+        if (response.ok) {
+          setTarotEnabled(true);
+        } else {
+          const error = await response.json();
+          throw new Error(
+            error.error || 'Failed to enable tarot notifications',
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling tarot notifications:', error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Failed to update tarot notification settings',
+      );
+    } finally {
+      setTarotLoading(false);
+    }
+  };
 
   const checkNotificationStatus = async () => {
     if ('Notification' in window) {
@@ -492,7 +596,7 @@ export function NotificationSettings() {
           </p>
         </div>
       ) : subscription && permission.granted ? (
-        <div className='space-y-3'>
+        <div className='space-y-4'>
           <div className='flex items-center justify-between'>
             <div>
               <p className='text-sm text-green-400 font-medium'>
@@ -503,6 +607,40 @@ export function NotificationSettings() {
               </p>
             </div>
           </div>
+
+          {/* Personalized Tarot Notifications Toggle */}
+          {(me?.profile as any)?.birthday && (
+            <div className='pt-3 border-t border-zinc-700'>
+              <div className='flex items-center justify-between mb-2'>
+                <div>
+                  <p className='text-sm text-white font-medium'>
+                    🔮 Personalized Daily Tarot
+                  </p>
+                  <p className='text-xs text-zinc-400 mt-1'>
+                    Get your personalized daily tarot card based on your birth
+                    date
+                  </p>
+                </div>
+                <button
+                  onClick={toggleTarotNotifications}
+                  disabled={tarotLoading}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    tarotEnabled ? 'bg-purple-600' : 'bg-zinc-600'
+                  } disabled:opacity-50`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      tarotEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {tarotLoading && (
+                <p className='text-xs text-zinc-400'>Updating...</p>
+              )}
+            </div>
+          )}
+
           <button
             onClick={unsubscribe}
             className='w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors text-sm font-medium'
