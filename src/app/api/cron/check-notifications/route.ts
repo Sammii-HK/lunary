@@ -267,11 +267,11 @@ function getNotificationWorthyEvents(cosmicData: any) {
     return isEventNotificationWorthy(event);
   });
 
-  // Create notification objects for up to 2 most significant events (limit for 4-hourly)
-  const eventsToSend = notificationWorthyEvents.slice(0, 2);
+  // Create notification objects for only 1 most significant event (limit for 4-hourly)
+  const eventsToSend = notificationWorthyEvents.slice(0, 1);
 
   for (const event of eventsToSend) {
-    events.push(createNotificationFromEvent(event));
+    events.push(createNotificationFromEvent(event, cosmicData));
   }
 
   return events;
@@ -308,7 +308,7 @@ function isEventNotificationWorthy(event: any): boolean {
   return false;
 }
 
-function createNotificationFromEvent(event: any) {
+function createNotificationFromEvent(event: any, cosmicData?: any) {
   const baseEvent = {
     name: event.name,
     type: event.type,
@@ -354,28 +354,106 @@ function createNotificationFromEvent(event: any) {
   };
 
   const createNotificationBody = (event: any) => {
+    let body = '';
     switch (event.type) {
       case 'moon':
-        return getMoonPhaseDescription(event.name);
+        body = getMoonPhaseDescription(event.name, cosmicData);
+        break;
 
       case 'aspect':
-        return getAspectDescription(event);
+        body = getAspectDescription(event);
+        break;
 
       case 'seasonal':
-        return getSeasonalDescription(event.name);
+        body = getSeasonalDescription(event.name);
+        break;
 
       case 'ingress':
-        return getIngressDescription(event.planet, event.sign);
+        body = getIngressDescription(event.planet, event.sign);
+        break;
 
       case 'retrograde':
-        return getRetrogradeDescription(event.planet, event.sign);
+        body = getRetrogradeDescription(event.planet, event.sign);
+        break;
 
       default:
-        return 'Significant cosmic energy shift occurring';
+        body = 'Significant cosmic energy shift occurring';
     }
+
+    return body;
   };
 
-  const getMoonPhaseDescription = (phaseName: string): string => {
+  const getMoonPhaseDescription = (
+    phaseName: string,
+    cosmicData?: any,
+  ): string => {
+    // Get moon constellation from cosmic data
+    const moonSign = cosmicData?.astronomicalData?.planets?.moon?.sign;
+
+    // Import constellations dynamically
+    const constellations: Record<string, any> = {
+      aries: {
+        name: 'Aries',
+        information:
+          'Aries is known for its courage, initiative, and leadership. This is a time to take bold actions, start new projects, and assert yourself confidently.',
+      },
+      taurus: {
+        name: 'Taurus',
+        information:
+          "Taurus emphasizes stability, security, and sensuality. It's a time to build solid foundations, enjoy life's pleasures, and value consistency.",
+      },
+      gemini: {
+        name: 'Gemini',
+        information:
+          'Gemini is characterized by adaptability, communication, and intellect. This is a time to explore new ideas, connect with others, and stay curious.',
+      },
+      cancer: {
+        name: 'Cancer',
+        information:
+          "Cancer is associated with nurturing, emotion, and home. It's a time to care for yourself and loved ones, create a cozy home environment, and honor your feelings.",
+      },
+      leo: {
+        name: 'Leo',
+        information:
+          'Leo shines with creativity, confidence, and generosity. This is a time to express your talents, lead with confidence, and give generously.',
+      },
+      virgo: {
+        name: 'Virgo',
+        information:
+          "Virgo values analysis, perfection, and service. It's a time to focus on details, improve your skills, and be of service to others.",
+      },
+      libra: {
+        name: 'Libra',
+        information:
+          'Libra seeks balance, harmony, and relationships. This is a time to cultivate partnerships, seek fairness, and create beauty.',
+      },
+      scorpio: {
+        name: 'Scorpio',
+        information:
+          "Scorpio is known for its intensity, transformation, and mystery. It's a time to delve deep into your psyche, embrace change, and explore hidden truths.",
+      },
+      sagittarius: {
+        name: 'Sagittarius',
+        information:
+          'Sagittarius is adventurous, philosophical, and freedom-loving. This is a time to broaden your horizons, seek truth, and embrace new experiences.',
+      },
+      capricorn: {
+        name: 'Capricorn',
+        information:
+          "Capricorn emphasizes ambition, discipline, and practicality. It's a time to set long-term goals, work hard, and stay focused on your ambitions.",
+      },
+      aquarius: {
+        name: 'Aquarius',
+        information:
+          'Aquarius is innovative, individualistic, and humanitarian. This is a time to embrace your unique qualities, think outside the box, and contribute to the greater good.',
+      },
+      pisces: {
+        name: 'Pisces',
+        information:
+          "Pisces is compassionate, imaginative, and spiritual. It's a time to connect with your inner self, explore your creativity, and show empathy to others.",
+      },
+    };
+
     const descriptions: Record<string, string> = {
       'New Moon':
         'A powerful reset point for manifestation and new beginnings. Set intentions aligned with your deeper purpose.',
@@ -387,11 +465,30 @@ function createNotificationFromEvent(event: any) {
         'A time for reflection, release, and preparing for the next lunar cycle.',
     };
 
-    for (const [phase, description] of Object.entries(descriptions)) {
-      if (phaseName.includes(phase)) return description;
+    let description = '';
+    for (const [phase, phaseDesc] of Object.entries(descriptions)) {
+      if (phaseName.includes(phase)) {
+        description = phaseDesc;
+        break;
+      }
     }
 
-    return 'Lunar energy shift creating new opportunities for growth';
+    if (!description) {
+      description = 'Lunar energy shift creating new opportunities for growth';
+    }
+
+    // Add moon constellation info if available
+    if (moonSign) {
+      const constellationKey =
+        moonSign.toLowerCase() as keyof typeof constellations;
+      const constellation = constellations[constellationKey];
+      if (constellation) {
+        return `Moon enters ${constellation.name}: ${constellation.information} ${description}`;
+      }
+      return `Moon in ${moonSign}: ${description}`;
+    }
+
+    return description;
   };
 
   const getIngressDescription = (planet: string, sign: string): string => {
