@@ -13,6 +13,7 @@ interface PostContent {
 
 interface SucculentPostData {
   accountGroupId: string;
+  name?: string;
   content: string;
   platforms: string[];
   scheduledDate: string;
@@ -110,6 +111,7 @@ export async function POST(request: NextRequest) {
 
       const postData: SucculentPostData = {
         accountGroupId,
+        name: `Cosmic Post ${dateStr}`,
         content: socialContent,
         platforms: ['instagram', 'x', 'facebook', 'linkedin'],
         scheduledDate: scheduledDateTime.toISOString(),
