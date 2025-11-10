@@ -18,14 +18,34 @@ export async function GET(request: NextRequest) {
     // Vercel cron jobs send x-vercel-cron header, allow those
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';
     const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
 
     // If not from Vercel cron, require CRON_SECRET
     if (!isVercelCron) {
-      if (
-        process.env.CRON_SECRET &&
-        authHeader !== `Bearer ${process.env.CRON_SECRET}`
-      ) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      // If CRON_SECRET is set, require it to match
+      if (cronSecret) {
+        const expectedAuth = `Bearer ${cronSecret}`;
+        if (authHeader !== expectedAuth) {
+          console.warn('⚠️ Authorization failed:', {
+            hasAuthHeader: !!authHeader,
+            authHeaderLength: authHeader?.length || 0,
+            expectedLength: expectedAuth.length,
+            cronSecretSet: !!cronSecret,
+          });
+          return NextResponse.json(
+            {
+              error: 'Unauthorized',
+              message:
+                'Invalid or missing Authorization header. Ensure CRON_SECRET matches.',
+            },
+            { status: 401 },
+          );
+        }
+      } else {
+        // If CRON_SECRET is not set, allow the request (for local development)
+        console.warn(
+          '⚠️ CRON_SECRET not set - allowing request (local dev mode)',
+        );
       }
     }
 
