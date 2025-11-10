@@ -10,7 +10,7 @@ import { Navbar } from '@/components/Navbar';
 import { LunaryJazzProvider } from '@/components/JazzProvider';
 import { PWAHandler } from '@/components/PWAHandler';
 import { NotificationManager } from '@/components/NotificationManager';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
 import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
 import { StructuredData } from '@/components/StructuredData';
@@ -99,19 +99,19 @@ export default function RootLayout({
         className={`${inter.className} w-full h-screen flex flex-col align-middle items-center bg-zinc-950 text-white`}
       >
         <StructuredData />
-        <ErrorBoundary>
+        <ErrorBoundaryWrapper>
           <LunaryJazzProvider>
             <ConditionalMainWrapper>
-              <ErrorBoundary>{children}</ErrorBoundary>
+              <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
               <Analytics />
             </ConditionalMainWrapper>
             <Navbar />
-            <ErrorBoundary>
+            <ErrorBoundaryWrapper>
               <PWAHandler />
               <NotificationManager />
-            </ErrorBoundary>
+            </ErrorBoundaryWrapper>
           </LunaryJazzProvider>
-        </ErrorBoundary>
+        </ErrorBoundaryWrapper>
       </body>
     </html>
   );
