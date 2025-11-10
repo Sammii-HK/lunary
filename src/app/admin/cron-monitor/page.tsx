@@ -31,14 +31,16 @@ interface CronResult {
     failed: number;
     successRate: string;
   };
-  results?: Array<{
-    name: string;
-    platforms: string[];
-    status: string;
-    error?: string;
-    postId?: string;
-    scheduledDate?: string;
-  }>;
+  results?:
+    | Array<{
+        name: string;
+        platforms: string[];
+        status: string;
+        error?: string;
+        postId?: string;
+        scheduledDate?: string;
+      }>
+    | Record<string, any>; // Can be array or object
 }
 
 export default function CronMonitorPage() {
@@ -56,7 +58,18 @@ export default function CronMonitorPage() {
       });
 
       const result = await response.json();
-      setLastResult(result.cronResult);
+      // Handle nested structure - cronResult might have results.dailyPosts.results
+      const cronResult = result.cronResult;
+      if (cronResult?.results && !Array.isArray(cronResult.results)) {
+        // If results is an object, try to extract the array from dailyPosts
+        if (cronResult.results.dailyPosts?.results) {
+          cronResult.results = cronResult.results.dailyPosts.results;
+        } else {
+          // If no array found, set to empty array
+          cronResult.results = [];
+        }
+      }
+      setLastResult(cronResult);
 
       setLogs(
         (prev) =>
@@ -234,7 +247,7 @@ export default function CronMonitorPage() {
               </div>
             )}
 
-            {lastResult.results && (
+            {lastResult.results && Array.isArray(lastResult.results) && (
               <div className='space-y-2'>
                 <h4 className='font-semibold'>Post Results:</h4>
                 {lastResult.results.map((result, index) => (
