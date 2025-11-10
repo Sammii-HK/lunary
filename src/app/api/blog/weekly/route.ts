@@ -29,6 +29,19 @@ export async function GET(request: NextRequest) {
     // Generate comprehensive weekly content
     const weeklyData = await generateWeeklyContent(startDate);
 
+    // Validate crystal recommendations were generated
+    console.log(
+      `[API Blog Weekly] Generated ${weeklyData.crystalRecommendations?.length || 0} crystal recommendations`,
+    );
+    if (
+      !weeklyData.crystalRecommendations ||
+      weeklyData.crystalRecommendations.length === 0
+    ) {
+      console.warn(
+        '[API Blog Weekly] WARNING: No crystal recommendations generated!',
+      );
+    }
+
     if (format === 'markdown') {
       const markdown = generateMarkdownContent(weeklyData);
       return new Response(markdown, {
@@ -212,7 +225,6 @@ ${data.dailyForecasts
 
 ${day.energy}
 
-**Best for:** ${day.bestFor.join(', ')}
 ${day.avoid.length > 0 ? `**Avoid:** ${day.avoid.join(', ')}` : ''}
 
 ${day.guidance}

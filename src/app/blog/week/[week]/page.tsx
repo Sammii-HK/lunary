@@ -7,9 +7,11 @@ import {
   TrendingUp,
   Moon,
   Sparkles,
+  Gem,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 
 interface BlogPostPageProps {
   params: Promise<{ week: string }>;
@@ -63,8 +65,30 @@ function getPlanetBgColor(planet: string): string {
   return colors[planet] || 'bg-zinc-800/50';
 }
 
+// Cache for blog data to avoid regenerating for the same week
+const blogDataCache = new Map<string, Promise<any>>();
+
+// Helper function to safely convert any value to string for rendering
+function safeToString(value: any): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
 function convertDatesToObjects(obj: any): any {
   if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  // If it's already a Date object, return it as-is (we'll handle conversion at render time)
+  if (obj instanceof Date) {
     return obj;
   }
 
@@ -76,14 +100,21 @@ function convertDatesToObjects(obj: any): any {
     const converted: any = {};
     for (const key in obj) {
       const value = obj[key];
-      if (typeof value === 'string') {
+      // If it's already a Date object, keep it (we'll convert at render time)
+      if (value instanceof Date) {
+        converted[key] = value;
+      } else if (typeof value === 'string') {
+        // Try to parse as date if it looks like an ISO date string
         const date = new Date(value);
-        if (!isNaN(date.getTime()) && value.includes('T')) {
+        if (
+          !isNaN(date.getTime()) &&
+          (value.includes('T') || value.match(/^\d{4}-\d{2}-\d{2}/))
+        ) {
           converted[key] = date;
         } else {
           converted[key] = value;
         }
-      } else if (typeof value === 'object') {
+      } else if (typeof value === 'object' && value !== null) {
         converted[key] = convertDatesToObjects(value);
       } else {
         converted[key] = value;
@@ -96,484 +127,800 @@ function convertDatesToObjects(obj: any): any {
 }
 
 async function getBlogData(week: string) {
-  const [weekNumber, year] = week.split('-');
-  const startOfYear = new Date(parseInt(year), 0, 1);
-  const weekStartDate = new Date(startOfYear);
-  weekStartDate.setDate(
-    weekStartDate.getDate() + (parseInt(weekNumber) - 1) * 7,
-  );
-
-  const baseUrl =
-    process.env.NODE_ENV === 'production'
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
-
-  const response = await fetch(
-    `${baseUrl}/api/blog/weekly?date=${weekStartDate.toISOString().split('T')[0]}`,
-    { cache: 'no-store' },
-  );
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch blog data');
+  // Check cache first
+  if (blogDataCache.has(week)) {
+    const cached = await blogDataCache.get(week)!;
+    console.log(
+      '[getBlogData] Using cached data, crystal count:',
+      cached.crystalRecommendations?.length || 0,
+    );
+    return cached;
   }
 
-  const result = await response.json();
-  return convertDatesToObjects(result.data);
+  // Create promise for this week
+  const promise = (async () => {
+    const [weekNumber, year] = week.split('-');
+    const startOfYear = new Date(parseInt(year), 0, 1);
+    const weekStartDate = new Date(startOfYear);
+    weekStartDate.setDate(
+      weekStartDate.getDate() + (parseInt(weekNumber) - 1) * 7,
+    );
+
+    try {
+      console.log(
+        '[getBlogData] Generating weekly content for:',
+        weekStartDate.toISOString(),
+      );
+      const startTime = Date.now();
+      // Call the function directly instead of making an HTTP request
+      const weeklyData = await generateWeeklyContent(weekStartDate);
+      const duration = Date.now() - startTime;
+      console.log(`[getBlogData] Weekly content generated in ${duration}ms`);
+      // Dates are already Date objects when calling directly, but ensure they're properly formatted
+      // Convert any nested date strings that might exist
+      return convertDatesToObjects(weeklyData);
+    } catch (error) {
+      console.error('[getBlogData] Error generating blog data:', error);
+      console.error(
+        '[getBlogData] Error stack:',
+        error instanceof Error ? error.stack : 'No stack',
+      );
+      // Remove from cache on error
+      blogDataCache.delete(week);
+      throw new Error(
+        `Failed to generate blog data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  })();
+
+  // Store in cache
+  blogDataCache.set(week, promise);
+
+  // Clean up cache after 1 hour to prevent memory leaks
+  setTimeout(
+    () => {
+      blogDataCache.delete(week);
+    },
+    60 * 60 * 1000,
+  );
+
+  return promise;
+}
+
+// Helper to ensure all Date objects in nested structures are properly handled
+function ensureDatesAreObjects(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (obj instanceof Date) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(ensureDatesAreObjects);
+  }
+
+  if (typeof obj === 'object') {
+    const result: any = {};
+    for (const key in obj) {
+      const value = obj[key];
+      if (value instanceof Date) {
+        result[key] = value;
+      } else if (
+        typeof value === 'string' &&
+        (value.includes('T') || value.match(/^\d{4}-\d{2}-\d{2}/))
+      ) {
+        // Try to parse as date
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          result[key] = date;
+        } else {
+          result[key] = value;
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        result[key] = ensureDatesAreObjects(value);
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+
+  return obj;
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { week } = await params;
-  const blogData = await getBlogData(week);
+  let week: string | undefined;
+  try {
+    const resolvedParams = await params;
+    week = resolvedParams.week;
+    console.log('[BlogPostPage] Starting render for week:', week);
+    console.log('[BlogPostPage] Fetching blog data for week:', week);
+    const blogDataRaw = await getBlogData(week);
+    console.log('[BlogPostPage] Blog data fetched, processing dates...');
 
-  const weekRange = `${blogData.weekStart.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-  })} - ${blogData.weekEnd.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })}`;
+    // Ensure all dates are properly converted
+    const blogData = ensureDatesAreObjects(blogDataRaw);
+    console.log('[BlogPostPage] Dates processed, rendering page...');
+    console.log(
+      '[BlogPostPage] crystalRecommendations count:',
+      blogData.crystalRecommendations?.length || 0,
+    );
+    if (
+      blogData.crystalRecommendations &&
+      blogData.crystalRecommendations.length > 0
+    ) {
+      console.log(
+        '[BlogPostPage] All crystal dates:',
+        blogData.crystalRecommendations.map((c: any) => ({
+          date:
+            c.date instanceof Date
+              ? c.date.toDateString()
+              : new Date(c.date).toDateString(),
+          crystal: c.crystal,
+          rawDate: c.date,
+        })),
+      );
+    }
+    if (blogData.dailyForecasts && blogData.dailyForecasts.length > 0) {
+      console.log(
+        '[BlogPostPage] All forecast dates:',
+        blogData.dailyForecasts.map((f: any) => ({
+          date:
+            f.date instanceof Date
+              ? f.date.toDateString()
+              : new Date(f.date).toDateString(),
+          rawDate: f.date,
+        })),
+      );
+    }
 
-  return (
-    <div className='container mx-auto py-8 px-4 max-w-4xl'>
-      <Link
-        href='/blog'
-        className='inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors'
-      >
-        <ArrowLeft className='h-4 w-4' />
-        Back to Blog
-      </Link>
+    // Validate required fields
+    if (!blogData || !blogData.weekStart || !blogData.weekEnd) {
+      throw new Error(
+        'Blog data is missing required fields (weekStart, weekEnd)',
+      );
+    }
 
-      <article className='space-y-8'>
-        <header className='space-y-4'>
-          <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-            <Badge variant='outline'>Week {blogData.weekNumber}</Badge>
-            <span>•</span>
-            <span>{blogData.year}</span>
-            <span>•</span>
-            <time dateTime={blogData.weekStart.toISOString()}>{weekRange}</time>
+    if (!blogData.title || !blogData.subtitle || !blogData.summary) {
+      throw new Error(
+        'Blog data is missing required content fields (title, subtitle, summary)',
+      );
+    }
+
+    // Ensure weekStart and weekEnd are Date objects before calling toLocaleDateString
+    const weekStart =
+      blogData.weekStart instanceof Date
+        ? blogData.weekStart
+        : new Date(blogData.weekStart);
+    const weekEnd =
+      blogData.weekEnd instanceof Date
+        ? blogData.weekEnd
+        : new Date(blogData.weekEnd);
+
+    // Validate dates
+    if (isNaN(weekStart.getTime()) || isNaN(weekEnd.getTime())) {
+      throw new Error('Invalid dates in blog data');
+    }
+
+    const weekRange = `${weekStart.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+    })} - ${weekEnd.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    })}`;
+
+    return (
+      <div className='container mx-auto py-8 px-4 max-w-4xl'>
+        <Link
+          href='/blog'
+          className='inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors'
+        >
+          <ArrowLeft className='h-4 w-4' />
+          Back to Blog
+        </Link>
+
+        <article className='space-y-8'>
+          <header className='space-y-4'>
+            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+              <Badge variant='outline'>Week {blogData.weekNumber || '?'}</Badge>
+              <span>•</span>
+              <span>{blogData.year || new Date().getFullYear()}</span>
+              <span>•</span>
+              <time dateTime={weekStart.toISOString()}>{weekRange}</time>
+            </div>
+
+            <h1 className='text-4xl font-bold'>
+              {blogData.title || 'Weekly Cosmic Forecast'}
+            </h1>
+            <p className='text-xl text-muted-foreground italic'>
+              {blogData.subtitle || ''}
+            </p>
+
+            <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
+              <span className='flex items-center gap-1'>
+                <Star className='h-4 w-4' />
+                {blogData.planetaryHighlights?.length || 0} planetary events
+              </span>
+              <span className='flex items-center gap-1'>
+                <TrendingUp className='h-4 w-4' />
+                {blogData.retrogradeChanges?.length || 0} retrograde changes
+              </span>
+              <span className='flex items-center gap-1'>
+                <Moon className='h-4 w-4' />
+                {blogData.moonPhases?.length || 0} moon phases
+              </span>
+              <span className='flex items-center gap-1'>
+                <Sparkles className='h-4 w-4' />
+                {blogData.majorAspects?.length || 0} major aspects
+              </span>
+            </div>
+          </header>
+
+          <div className='prose prose-invert max-w-none'>
+            <p className='text-lg leading-relaxed'>
+              {blogData.summary || 'Weekly cosmic insights and guidance.'}
+            </p>
           </div>
 
-          <h1 className='text-4xl font-bold'>{blogData.title}</h1>
-          <p className='text-xl text-muted-foreground italic'>
-            {blogData.subtitle}
-          </p>
+          {blogData.planetaryHighlights &&
+            blogData.planetaryHighlights.length > 0 && (
+              <section className='space-y-6'>
+                <h2 className='text-3xl font-bold flex items-center gap-2'>
+                  <Star className='h-8 w-8' />
+                  Major Planetary Highlights
+                </h2>
+                <div className='space-y-6'>
+                  {blogData.planetaryHighlights.map(
+                    (highlight: any, index: number) => {
+                      const planetColor = getPlanetColor(highlight.planet);
+                      const borderColor = getPlanetBorderColor(
+                        highlight.planet,
+                      );
+                      const bgColor = getPlanetBgColor(highlight.planet);
 
-          <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
-            <span className='flex items-center gap-1'>
-              <Star className='h-4 w-4' />
-              {blogData.planetaryHighlights?.length || 0} planetary events
-            </span>
-            <span className='flex items-center gap-1'>
-              <TrendingUp className='h-4 w-4' />
-              {blogData.retrogradeChanges?.length || 0} retrograde changes
-            </span>
-            <span className='flex items-center gap-1'>
-              <Moon className='h-4 w-4' />
-              {blogData.moonPhases?.length || 0} moon phases
-            </span>
-            <span className='flex items-center gap-1'>
-              <Sparkles className='h-4 w-4' />
-              {blogData.majorAspects?.length || 0} major aspects
-            </span>
-          </div>
-        </header>
+                      const getEventTitle = () => {
+                        if (
+                          highlight.event === 'enters-sign' &&
+                          highlight.details?.toSign
+                        ) {
+                          return `${highlight.planet} enters ${highlight.details.toSign}`;
+                        }
+                        return `${highlight.planet} ${highlight.event.replace('-', ' ')}`;
+                      };
 
-        <div className='prose prose-invert max-w-none'>
-          <p className='text-lg leading-relaxed'>{blogData.summary}</p>
-        </div>
+                      return (
+                        <Card
+                          key={index}
+                          className={`border ${borderColor} ${bgColor}`}
+                        >
+                          <CardHeader>
+                            <div className='flex items-start justify-between'>
+                              <CardTitle className={`text-xl ${planetColor}`}>
+                                {getEventTitle()}
+                              </CardTitle>
+                              <Badge variant='secondary'>
+                                {highlight.date instanceof Date
+                                  ? highlight.date.toLocaleDateString('en-US', {
+                                      weekday: 'long',
+                                      month: 'long',
+                                      day: 'numeric',
+                                    })
+                                  : new Date(highlight.date).toLocaleDateString(
+                                      'en-US',
+                                      {
+                                        weekday: 'long',
+                                        month: 'long',
+                                        day: 'numeric',
+                                      },
+                                    )}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className='space-y-2'>
+                            <p className='text-sm text-muted-foreground italic'>
+                              Significance:{' '}
+                              <span className='capitalize'>
+                                {highlight.significance}
+                              </span>
+                            </p>
+                            {highlight.details?.fromSign &&
+                              highlight.details?.toSign && (
+                                <p className='text-sm'>
+                                  This transition from{' '}
+                                  {highlight.details.fromSign} to{' '}
+                                  {highlight.details.toSign} brings
+                                  transformative energy.
+                                </p>
+                              )}
+                            {highlight.description &&
+                              !highlight.description.includes(
+                                highlight.planet,
+                              ) &&
+                              !highlight.description.includes(
+                                highlight.details?.toSign || '',
+                              ) && <p>{highlight.description}</p>}
+                          </CardContent>
+                        </Card>
+                      );
+                    },
+                  )}
+                </div>
+              </section>
+            )}
 
-        {blogData.planetaryHighlights &&
-          blogData.planetaryHighlights.length > 0 && (
+          {blogData.retrogradeChanges &&
+            blogData.retrogradeChanges.length > 0 && (
+              <section className='space-y-6'>
+                <h2 className='text-3xl font-bold flex items-center gap-2'>
+                  <TrendingUp className='h-8 w-8' />
+                  Retrograde Activity
+                </h2>
+                <div className='space-y-4'>
+                  {blogData.retrogradeChanges.map(
+                    (change: any, index: number) => {
+                      const planetColor = getPlanetColor(change.planet);
+                      const borderColor = getPlanetBorderColor(change.planet);
+                      const bgColor = getPlanetBgColor(change.planet);
+
+                      return (
+                        <Card
+                          key={index}
+                          className={`border ${borderColor} ${bgColor}`}
+                        >
+                          <CardHeader>
+                            <CardTitle className={`text-xl ${planetColor}`}>
+                              {change.planet}{' '}
+                              {change.type === 'station-direct'
+                                ? 'Stations Direct'
+                                : 'Stations Retrograde'}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className='text-sm text-muted-foreground mb-2'>
+                              {change.date instanceof Date
+                                ? change.date.toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  })
+                                : new Date(change.date).toLocaleDateString(
+                                    'en-US',
+                                    {
+                                      weekday: 'long',
+                                      month: 'long',
+                                      day: 'numeric',
+                                    },
+                                  )}
+                            </p>
+                            <p>{change.description}</p>
+                          </CardContent>
+                        </Card>
+                      );
+                    },
+                  )}
+                </div>
+              </section>
+            )}
+
+          {blogData.moonPhases && blogData.moonPhases.length > 0 && (
             <section className='space-y-6'>
               <h2 className='text-3xl font-bold flex items-center gap-2'>
-                <Star className='h-8 w-8' />
-                Major Planetary Highlights
+                <Moon className='h-8 w-8' />
+                Moon Phases
               </h2>
-              <div className='space-y-6'>
-                {blogData.planetaryHighlights.map(
-                  (highlight: any, index: number) => {
-                    const planetColor = getPlanetColor(highlight.planet);
-                    const borderColor = getPlanetBorderColor(highlight.planet);
-                    const bgColor = getPlanetBgColor(highlight.planet);
+              <div className='grid gap-4 md:grid-cols-2'>
+                {blogData.moonPhases.map((phase: any, index: number) => {
+                  const moonColor = getPlanetColor('Moon');
+                  const borderColor = getPlanetBorderColor('Moon');
+                  const bgColor = getPlanetBgColor('Moon');
 
-                    const getEventTitle = () => {
-                      if (
-                        highlight.event === 'enters-sign' &&
-                        highlight.details?.toSign
-                      ) {
-                        return `${highlight.planet} enters ${highlight.details.toSign}`;
-                      }
-                      return `${highlight.planet} ${highlight.event.replace('-', ' ')}`;
-                    };
-
-                    return (
-                      <Card
-                        key={index}
-                        className={`border ${borderColor} ${bgColor}`}
-                      >
-                        <CardHeader>
-                          <div className='flex items-start justify-between'>
-                            <CardTitle className={`text-xl ${planetColor}`}>
-                              {getEventTitle()}
-                            </CardTitle>
-                            <Badge variant='secondary'>
-                              {highlight.date.toLocaleDateString('en-US', {
+                  return (
+                    <Card
+                      key={index}
+                      className={`border ${borderColor} ${bgColor}`}
+                    >
+                      <CardHeader>
+                        <CardTitle className={`text-lg ${moonColor}`}>
+                          {phase.phase || phase.name}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className='text-sm text-muted-foreground mb-2'>
+                          {phase.date instanceof Date
+                            ? phase.date.toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                month: 'long',
+                                day: 'numeric',
+                              })
+                            : new Date(phase.date).toLocaleDateString('en-US', {
                                 weekday: 'long',
                                 month: 'long',
                                 day: 'numeric',
                               })}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className='space-y-2'>
-                          <p className='text-sm text-muted-foreground italic'>
-                            Significance:{' '}
-                            <span className='capitalize'>
-                              {highlight.significance}
-                            </span>
+                          {phase.time && ` at ${phase.time}`}
+                        </p>
+                        <p className='text-sm mb-2'>
+                          {phase.energy || phase.description}
+                        </p>
+                        {phase.guidance && (
+                          <p className='text-xs text-muted-foreground mb-2'>
+                            {phase.guidance}
                           </p>
-                          {highlight.details?.fromSign &&
-                            highlight.details?.toSign && (
-                              <p className='text-sm'>
-                                This transition from{' '}
-                                {highlight.details.fromSign} to{' '}
-                                {highlight.details.toSign} brings transformative
-                                energy.
-                              </p>
-                            )}
-                          {highlight.description &&
-                            !highlight.description.includes(highlight.planet) &&
-                            !highlight.description.includes(
-                              highlight.details?.toSign || '',
-                            ) && <p>{highlight.description}</p>}
-                        </CardContent>
-                      </Card>
-                    );
-                  },
-                )}
+                        )}
+                        {phase.sign && (
+                          <Badge variant='outline' className='text-xs'>
+                            Moon in {phase.sign}
+                          </Badge>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </section>
           )}
 
-        {blogData.retrogradeChanges &&
-          blogData.retrogradeChanges.length > 0 && (
+          {blogData.majorAspects && blogData.majorAspects.length > 0 && (
             <section className='space-y-6'>
               <h2 className='text-3xl font-bold flex items-center gap-2'>
-                <TrendingUp className='h-8 w-8' />
-                Retrograde Activity
+                <Sparkles className='h-8 w-8' />
+                Major Aspects
               </h2>
               <div className='space-y-4'>
-                {blogData.retrogradeChanges.map(
-                  (change: any, index: number) => {
-                    const planetColor = getPlanetColor(change.planet);
-                    const borderColor = getPlanetBorderColor(change.planet);
-                    const bgColor = getPlanetBgColor(change.planet);
+                {blogData.majorAspects.map((aspect: any, index: number) => {
+                  const planetAColor = getPlanetColor(aspect.planetA);
+                  const planetBColor = getPlanetColor(aspect.planetB);
+                  const borderColor = 'border-zinc-700';
+                  const bgColor = 'bg-zinc-800/50';
 
-                    return (
-                      <Card
-                        key={index}
-                        className={`border ${borderColor} ${bgColor}`}
-                      >
-                        <CardHeader>
-                          <CardTitle className={`text-xl ${planetColor}`}>
-                            {change.planet}{' '}
-                            {change.type === 'station-direct'
-                              ? 'Stations Direct'
-                              : 'Stations Retrograde'}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className='text-sm text-muted-foreground mb-2'>
-                            {change.date.toLocaleDateString('en-US', {
-                              weekday: 'long',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                          </p>
-                          <p>{change.description}</p>
-                        </CardContent>
-                      </Card>
-                    );
-                  },
-                )}
-              </div>
-            </section>
-          )}
-
-        {blogData.moonPhases && blogData.moonPhases.length > 0 && (
-          <section className='space-y-6'>
-            <h2 className='text-3xl font-bold flex items-center gap-2'>
-              <Moon className='h-8 w-8' />
-              Moon Phases
-            </h2>
-            <div className='grid gap-4 md:grid-cols-2'>
-              {blogData.moonPhases.map((phase: any, index: number) => {
-                const moonColor = getPlanetColor('Moon');
-                const borderColor = getPlanetBorderColor('Moon');
-                const bgColor = getPlanetBgColor('Moon');
-
-                return (
-                  <Card
-                    key={index}
-                    className={`border ${borderColor} ${bgColor}`}
-                  >
-                    <CardHeader>
-                      <CardTitle className={`text-lg ${moonColor}`}>
-                        {phase.name}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className='text-sm text-muted-foreground mb-2'>
-                        {phase.date.toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          month: 'long',
-                          day: 'numeric',
-                        })}
-                      </p>
-                      <p className='text-sm'>{phase.description}</p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {blogData.majorAspects && blogData.majorAspects.length > 0 && (
-          <section className='space-y-6'>
-            <h2 className='text-3xl font-bold flex items-center gap-2'>
-              <Sparkles className='h-8 w-8' />
-              Major Aspects
-            </h2>
-            <div className='space-y-4'>
-              {blogData.majorAspects.map((aspect: any, index: number) => {
-                const planetAColor = getPlanetColor(aspect.planetA);
-                const planetBColor = getPlanetColor(aspect.planetB);
-                const borderColor = 'border-zinc-700';
-                const bgColor = 'bg-zinc-800/50';
-
-                return (
-                  <Card
-                    key={index}
-                    className={`border ${borderColor} ${bgColor}`}
-                  >
-                    <CardHeader>
-                      <CardTitle className='text-xl'>
-                        <span className={planetAColor}>{aspect.planetA}</span>{' '}
-                        <span className='text-zinc-400'>{aspect.aspect}</span>{' '}
-                        <span className={planetBColor}>{aspect.planetB}</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className='text-sm text-muted-foreground mb-2'>
-                        {aspect.date.toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          month: 'long',
-                          day: 'numeric',
-                        })}
-                      </p>
-                      <p>{aspect.description}</p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {blogData.dailyForecasts && blogData.dailyForecasts.length > 0 && (
-          <section className='space-y-6'>
-            <h2 className='text-3xl font-bold flex items-center gap-2'>
-              <Calendar className='h-8 w-8' />
-              Daily Forecasts
-            </h2>
-            <div className='space-y-4'>
-              {blogData.dailyForecasts.map((forecast: any, index: number) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className='text-lg'>
-                      {forecast.date.toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className='mb-2'>{forecast.energy}</p>
-                    <p className='text-sm text-muted-foreground mb-2'>
-                      {forecast.guidance}
-                    </p>
-                    {forecast.bestFor && forecast.bestFor.length > 0 && (
-                      <div className='flex flex-wrap gap-2 mt-2'>
-                        <span className='text-xs text-muted-foreground mr-2'>
-                          Best for:
-                        </span>
-                        {forecast.bestFor.map(
-                          (item: string, itemIndex: number) => (
-                            <Badge key={itemIndex} variant='outline'>
-                              {item}
-                            </Badge>
-                          ),
-                        )}
-                      </div>
-                    )}
-                    {forecast.avoid && forecast.avoid.length > 0 && (
-                      <div className='flex flex-wrap gap-2 mt-2'>
-                        <span className='text-xs text-muted-foreground mr-2'>
-                          Avoid:
-                        </span>
-                        {forecast.avoid.map(
-                          (item: string, itemIndex: number) => (
-                            <Badge key={itemIndex} variant='secondary'>
-                              {item}
-                            </Badge>
-                          ),
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {blogData.bestDaysFor &&
-          (() => {
-            // Filter to only show categories that have actual dates
-            const entriesWithDates = Object.entries(
-              blogData.bestDaysFor,
-            ).filter(([, days]: [string, any]) => {
-              return (
-                days?.dates &&
-                Array.isArray(days.dates) &&
-                days.dates.length > 0
-              );
-            });
-
-            // Only render section if there are entries with dates
-            if (entriesWithDates.length === 0) return null;
-
-            return (
-              <section className='space-y-6'>
-                <h2 className='text-3xl font-bold'>Best Days For</h2>
-                <div className='grid gap-4 md:grid-cols-2'>
-                  {entriesWithDates.map(([category, days]: [string, any]) => (
-                    <Card key={category}>
+                  return (
+                    <Card
+                      key={index}
+                      className={`border ${borderColor} ${bgColor}`}
+                    >
                       <CardHeader>
-                        <CardTitle className='text-lg capitalize'>
-                          {category.replace(/([A-Z])/g, ' $1').trim()}
+                        <CardTitle className='text-xl'>
+                          <span className={planetAColor}>{aspect.planetA}</span>{' '}
+                          <span className='text-zinc-400'>{aspect.aspect}</span>{' '}
+                          <span className={planetBColor}>{aspect.planetB}</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className='text-sm mb-2'>
-                          {days.dates
-                            .map((d: Date) =>
-                              d.toLocaleDateString('en-US', {
+                        <p className='text-sm text-muted-foreground mb-2'>
+                          {aspect.date instanceof Date
+                            ? aspect.date.toLocaleDateString('en-US', {
                                 weekday: 'long',
                                 month: 'long',
                                 day: 'numeric',
-                              }),
-                            )
-                            .join(', ')}
+                              })
+                            : new Date(aspect.date).toLocaleDateString(
+                                'en-US',
+                                {
+                                  weekday: 'long',
+                                  month: 'long',
+                                  day: 'numeric',
+                                },
+                              )}
                         </p>
-                        {days?.reason && (
-                          <p className='text-xs text-muted-foreground italic'>
-                            {days.reason}
-                          </p>
-                        )}
+                        <p>{aspect.description}</p>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-              </section>
-            );
-          })()}
-
-        {blogData.crystalRecommendations &&
-          blogData.crystalRecommendations.length > 0 && (
-            <section className='space-y-6'>
-              <h2 className='text-3xl font-bold'>Crystal Recommendations</h2>
-              <div className='grid gap-4 md:grid-cols-2'>
-                {blogData.crystalRecommendations.map(
-                  (crystal: any, index: number) => (
-                    <Card key={index}>
-                      <CardHeader>
-                        <CardTitle className='text-lg'>
-                          {crystal.crystal}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className='text-sm mb-2'>{crystal.reason}</p>
-                        <p className='text-xs text-muted-foreground mb-2'>
-                          {crystal.usage}
-                        </p>
-                        <div className='flex flex-wrap gap-2 mt-2'>
-                          {crystal.intention && (
-                            <Badge variant='secondary'>
-                              {crystal.intention}
-                            </Badge>
-                          )}
-                          {crystal.chakra && (
-                            <Badge variant='outline'>{crystal.chakra}</Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ),
-                )}
+                  );
+                })}
               </div>
             </section>
           )}
-      </article>
-      <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Article',
-            headline: blogData.title,
-            description: blogData.subtitle,
-            image: `https://lunary.app/api/og/cosmic?date=${blogData.weekStart.toISOString().split('T')[0]}`,
-            datePublished: blogData.weekStart.toISOString(),
-            dateModified: blogData.generatedAt,
-            author: {
-              '@type': 'Organization',
-              name: 'Lunary Cosmic Team',
-              url: 'https://lunary.app',
-            },
-            publisher: {
-              '@type': 'Organization',
-              name: 'Lunary',
-              url: 'https://lunary.app',
-              logo: {
-                '@type': 'ImageObject',
-                url: 'https://lunary.app/logo.png',
+
+          {blogData.dailyForecasts && blogData.dailyForecasts.length > 0 && (
+            <section className='space-y-6'>
+              <h2 className='text-3xl font-bold flex items-center gap-2'>
+                <Calendar className='h-8 w-8' />
+                Daily Forecasts
+              </h2>
+              <div className='space-y-4'>
+                {blogData.dailyForecasts.map((forecast: any, index: number) => {
+                  // Find matching crystal recommendation for this day
+                  // Ensure dates are Date objects before comparison
+                  const forecastDate =
+                    forecast.date instanceof Date
+                      ? forecast.date
+                      : new Date(forecast.date);
+
+                  // Debug logging
+                  if (index === 0) {
+                    console.log(
+                      '[BlogPostPage] crystalRecommendations:',
+                      blogData.crystalRecommendations?.length || 0,
+                    );
+                    console.log(
+                      '[BlogPostPage] First forecast date:',
+                      forecastDate.toDateString(),
+                    );
+                    if (
+                      blogData.crystalRecommendations &&
+                      blogData.crystalRecommendations.length > 0
+                    ) {
+                      console.log(
+                        '[BlogPostPage] First crystal date:',
+                        blogData.crystalRecommendations[0].date instanceof Date
+                          ? blogData.crystalRecommendations[0].date.toDateString()
+                          : new Date(
+                              blogData.crystalRecommendations[0].date,
+                            ).toDateString(),
+                      );
+                    }
+                  }
+
+                  const crystal = blogData.crystalRecommendations?.find(
+                    (c: any) => {
+                      if (!c || !c.date) return false;
+                      // Use toDateString() for comparison (same as blog manager)
+                      const cDateStr = new Date(c.date).toDateString();
+                      const forecastDateStr = forecastDate.toDateString();
+                      const match = cDateStr === forecastDateStr;
+                      if (index === 0) {
+                        console.log(
+                          `[BlogPostPage] Comparing forecast ${forecastDateStr} with crystal ${cDateStr}: ${match ? 'MATCH' : 'NO MATCH'} (${c.crystal})`,
+                        );
+                      }
+                      return match;
+                    },
+                  );
+
+                  if (index === 0) {
+                    console.log(
+                      `[BlogPostPage] Result for first forecast: ${crystal ? `Found crystal: ${crystal.crystal}` : 'NO CRYSTAL FOUND'}`,
+                    );
+                  }
+
+                  return (
+                    <Card key={index}>
+                      <CardHeader>
+                        <CardTitle className='text-lg'>
+                          {forecastDate.toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className='space-y-3'>
+                        <div>
+                          <p className='mb-2'>{forecast.energy}</p>
+                          <p className='text-sm text-muted-foreground mb-2'>
+                            {forecast.guidance}
+                          </p>
+                        </div>
+
+                        {crystal && (
+                          <div className='pt-3 border-t border-zinc-700'>
+                            <div className='flex items-start gap-2 mb-2'>
+                              <Sparkles className='h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0' />
+                              <div className='flex-1'>
+                                <p className='text-sm font-medium mb-1'>
+                                  Crystal: {crystal.crystal}
+                                </p>
+                                <p className='text-xs text-muted-foreground mb-2'>
+                                  {crystal.reason}
+                                </p>
+                                <p className='text-xs text-muted-foreground mb-2'>
+                                  {crystal.usage}
+                                </p>
+                                <div className='flex flex-wrap gap-2'>
+                                  {crystal.chakra && (
+                                    <Badge
+                                      variant='outline'
+                                      className='text-xs'
+                                    >
+                                      {crystal.chakra} Chakra
+                                    </Badge>
+                                  )}
+                                  {crystal.intention && (
+                                    <Badge
+                                      variant='secondary'
+                                      className='text-xs'
+                                    >
+                                      {crystal.intention}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {forecast.avoid && forecast.avoid.length > 0 && (
+                          <div className='flex flex-wrap gap-2'>
+                            <span className='text-xs text-muted-foreground mr-2'>
+                              Avoid:
+                            </span>
+                            {forecast.avoid.map(
+                              (item: string, itemIndex: number) => (
+                                <Badge key={itemIndex} variant='secondary'>
+                                  {item}
+                                </Badge>
+                              ),
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {blogData.bestDaysFor &&
+            (() => {
+              // Filter to only show categories that have actual dates
+              const entriesWithDates = Object.entries(
+                blogData.bestDaysFor,
+              ).filter(([, days]: [string, any]) => {
+                return (
+                  days?.dates &&
+                  Array.isArray(days.dates) &&
+                  days.dates.length > 0
+                );
+              });
+
+              // Only render section if there are entries with dates
+              if (entriesWithDates.length === 0) return null;
+
+              return (
+                <section className='space-y-6'>
+                  <h2 className='text-3xl font-bold'>Best Days For</h2>
+                  <div className='grid gap-4 md:grid-cols-2'>
+                    {entriesWithDates.map(([category, days]: [string, any]) => (
+                      <Card key={category}>
+                        <CardHeader>
+                          <CardTitle className='text-lg capitalize'>
+                            {category.replace(/([A-Z])/g, ' $1').trim()}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className='text-sm mb-2'>
+                            {days.dates
+                              .map((d: any) => {
+                                // Ensure we have a Date object
+                                const date =
+                                  d instanceof Date ? d : new Date(d);
+                                // Check if date is valid
+                                if (isNaN(date.getTime())) {
+                                  return '';
+                                }
+                                return date.toLocaleDateString('en-US', {
+                                  weekday: 'long',
+                                  month: 'long',
+                                  day: 'numeric',
+                                });
+                              })
+                              .filter(Boolean)
+                              .join(', ')}
+                          </p>
+                          {days?.reason && (
+                            <p className='text-xs text-muted-foreground italic'>
+                              {days.reason}
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
+        </article>
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Article',
+              headline: blogData.title,
+              description: blogData.subtitle,
+              image: `https://lunary.app/api/og/cosmic?date=${weekStart.toISOString().split('T')[0]}`,
+              datePublished: weekStart.toISOString(),
+              dateModified:
+                typeof blogData.generatedAt === 'string'
+                  ? blogData.generatedAt
+                  : blogData.generatedAt instanceof Date
+                    ? blogData.generatedAt.toISOString()
+                    : new Date(blogData.generatedAt).toISOString(),
+              author: {
+                '@type': 'Organization',
+                name: 'Lunary Cosmic Team',
+                url: 'https://lunary.app',
               },
-            },
-            mainEntityOfPage: {
-              '@type': 'WebPage',
-              '@id': `https://lunary.app/blog/week/${week}`,
-            },
-            articleSection: 'Weekly Forecast',
-            keywords: [
-              'astrology',
-              'weekly forecast',
-              'horoscope',
-              'planetary transits',
-              'moon phases',
-              `week ${blogData.weekNumber} ${blogData.year}`,
-            ],
-            wordCount:
-              blogData.summary.split(' ').length +
-              (blogData.planetaryHighlights?.length || 0) * 50,
-          }),
-        }}
-      />
-    </div>
-  );
+              publisher: {
+                '@type': 'Organization',
+                name: 'Lunary',
+                url: 'https://lunary.app',
+                logo: {
+                  '@type': 'ImageObject',
+                  url: 'https://lunary.app/logo.png',
+                },
+              },
+              mainEntityOfPage: {
+                '@type': 'WebPage',
+                '@id': `https://lunary.app/blog/week/${week}`,
+              },
+              articleSection: 'Weekly Forecast',
+              keywords: [
+                'astrology',
+                'weekly forecast',
+                'horoscope',
+                'planetary transits',
+                'moon phases',
+                `week ${blogData.weekNumber} ${blogData.year}`,
+              ],
+              wordCount:
+                blogData.summary.split(' ').length +
+                (blogData.planetaryHighlights?.length || 0) * 50,
+            }),
+          }}
+        />
+      </div>
+    );
+  } catch (error) {
+    console.error('[BlogPostPage] Error rendering blog post page:', error);
+    console.error(
+      '[BlogPostPage] Error name:',
+      error instanceof Error ? error.name : 'Unknown',
+    );
+    console.error(
+      '[BlogPostPage] Error message:',
+      error instanceof Error ? error.message : String(error),
+    );
+    console.error(
+      '[BlogPostPage] Error stack:',
+      error instanceof Error ? error.stack : 'No stack',
+    );
+
+    // Log blogData structure if available
+    try {
+      if (week) {
+        const blogDataRaw = await getBlogData(week).catch(() => null);
+        if (blogDataRaw) {
+          console.error('[BlogPostPage] Blog data structure:', {
+            hasWeekStart: !!blogDataRaw.weekStart,
+            hasWeekEnd: !!blogDataRaw.weekEnd,
+            hasTitle: !!blogDataRaw.title,
+            hasSubtitle: !!blogDataRaw.subtitle,
+            hasSummary: !!blogDataRaw.summary,
+            planetaryHighlightsLength: blogDataRaw.planetaryHighlights?.length,
+            retrogradeChangesLength: blogDataRaw.retrogradeChanges?.length,
+            moonPhasesLength: blogDataRaw.moonPhases?.length,
+            majorAspectsLength: blogDataRaw.majorAspects?.length,
+            dailyForecastsLength: blogDataRaw.dailyForecasts?.length,
+          });
+        }
+      }
+    } catch (e) {
+      console.error('[BlogPostPage] Could not log blog data structure:', e);
+    }
+
+    return (
+      <div className='container mx-auto py-8 px-4 max-w-4xl'>
+        <h1 className='text-2xl font-bold mb-4'>Error loading blog post</h1>
+        <p className='text-muted-foreground mb-4'>
+          {error instanceof Error ? error.message : 'An unknown error occurred'}
+        </p>
+        {error instanceof Error && error.stack && (
+          <pre className='text-xs bg-zinc-900 p-4 rounded overflow-auto max-h-96'>
+            {error.stack}
+          </pre>
+        )}
+        <p className='text-sm text-muted-foreground mt-4'>
+          Check the browser console and server logs for more details.
+        </p>
+      </div>
+    );
+  }
 }
 
 export async function generateMetadata({
@@ -582,17 +929,27 @@ export async function generateMetadata({
   const { week } = await params;
   const blogData = await getBlogData(week);
 
-  const weekRange = `${blogData.weekStart.toLocaleDateString('en-US', {
+  // Ensure weekStart and weekEnd are Date objects before calling toLocaleDateString
+  const weekStart =
+    blogData.weekStart instanceof Date
+      ? blogData.weekStart
+      : new Date(blogData.weekStart);
+  const weekEnd =
+    blogData.weekEnd instanceof Date
+      ? blogData.weekEnd
+      : new Date(blogData.weekEnd);
+
+  const weekRange = `${weekStart.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
-  })} - ${blogData.weekEnd.toLocaleDateString('en-US', {
+  })} - ${weekEnd.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
   })}`;
 
   const url = `https://lunary.app/blog/week/${week}`;
-  const ogImage = `https://lunary.app/api/og/cosmic?date=${blogData.weekStart.toISOString().split('T')[0]}`;
+  const ogImage = `https://lunary.app/api/og/cosmic?date=${weekStart.toISOString().split('T')[0]}`;
 
   const keywords = [
     'astrology',
@@ -633,7 +990,7 @@ export async function generateMetadata({
       ],
       locale: 'en_US',
       type: 'article',
-      publishedTime: blogData.weekStart.toISOString(),
+      publishedTime: weekStart.toISOString(),
       modifiedTime: blogData.generatedAt,
       authors: ['Lunary Cosmic Team'],
       section: 'Weekly Forecast',
@@ -658,7 +1015,7 @@ export async function generateMetadata({
       },
     },
     other: {
-      'article:published_time': blogData.weekStart.toISOString(),
+      'article:published_time': weekStart.toISOString(),
       'article:modified_time': blogData.generatedAt,
       'article:author': 'Lunary Cosmic Team',
       'article:section': 'Weekly Forecast',

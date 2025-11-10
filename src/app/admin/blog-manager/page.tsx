@@ -27,6 +27,11 @@ import {
   Users,
   TrendingUp,
   Sparkles,
+  ExternalLink,
+  Star,
+  RotateCcw,
+  Moon,
+  Gem,
 } from 'lucide-react';
 
 interface WeeklyContent {
@@ -37,14 +42,21 @@ interface WeeklyContent {
   year: number;
   planetaryHighlights: any[];
   retrogradeChanges: any[];
+  signIngresses?: any[];
   majorAspects: any[];
   moonPhases: any[];
+  seasonalEvents?: any[];
+  dailyForecasts?: any[];
+  bestDaysFor?: any;
+  crystalRecommendations?: any[];
+  magicalTiming?: any;
 }
 
 export default function BlogManagerPage() {
   const [currentWeek, setCurrentWeek] = useState<WeeklyContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Newsletter settings
   const [customSubject, setCustomSubject] = useState('');
@@ -85,6 +97,12 @@ export default function BlogManagerPage() {
 
       if (data.success) {
         console.log('Generated weekly post:', data.data.title);
+        console.log('[Blog Manager] Generated data:', {
+          title: data.data.title,
+          crystalCount: data.data.crystalRecommendations?.length || 0,
+          dailyForecastCount: data.data.dailyForecasts?.length || 0,
+        });
+
         alert(`✅ Generated: "${data.data.title}"`);
 
         if (offset === 0) {
@@ -202,18 +220,250 @@ export default function BlogManagerPage() {
       {currentWeek && (
         <Card className='mb-8'>
           <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Calendar className='h-5 w-5' />
-              This Week: {currentWeek.title}
-            </CardTitle>
-            <CardDescription>{currentWeek.subtitle}</CardDescription>
+            <div className='flex items-start justify-between'>
+              <div className='flex-1'>
+                <CardTitle className='flex items-center gap-2'>
+                  <Calendar className='h-5 w-5' />
+                  This Week: {currentWeek.title}
+                </CardTitle>
+                <CardDescription>{currentWeek.subtitle}</CardDescription>
+              </div>
+              <div className='flex gap-2'>
+                <Button
+                  variant={showPreview ? 'default' : 'outline'}
+                  size='sm'
+                  onClick={() => setShowPreview(!showPreview)}
+                  className='ml-4'
+                >
+                  <Eye className='h-4 w-4 mr-2' />
+                  {showPreview ? 'Hide' : 'Show'} Preview
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <p className='mb-4'>{currentWeek.summary}</p>
-            <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+
+            {/* Inline Preview */}
+            {showPreview && (
+              <div className='mb-6 prose prose-invert max-w-none bg-zinc-950 p-6 rounded-lg border border-zinc-800 overflow-auto max-h-[60vh]'>
+                <article className='space-y-8'>
+                  <header className='space-y-4 border-b border-zinc-800 pb-6'>
+                    <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                      <Badge variant='outline'>
+                        Week {currentWeek.weekNumber}
+                      </Badge>
+                      <span>•</span>
+                      <span>{currentWeek.year}</span>
+                    </div>
+                    <h1 className='text-4xl font-bold'>{currentWeek.title}</h1>
+                    <p className='text-xl text-muted-foreground italic'>
+                      {currentWeek.subtitle}
+                    </p>
+                    <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
+                      <span className='flex items-center gap-1'>
+                        <Star className='h-4 w-4' />
+                        {currentWeek.planetaryHighlights?.length || 0} planetary
+                        events
+                      </span>
+                      <span className='flex items-center gap-1'>
+                        <RotateCcw className='h-4 w-4' />
+                        {currentWeek.retrogradeChanges?.length || 0} retrograde
+                        changes
+                      </span>
+                      <span className='flex items-center gap-1'>
+                        <Moon className='h-4 w-4' />
+                        {currentWeek.moonPhases?.length || 0} moon phases
+                      </span>
+                      <span className='flex items-center gap-1'>
+                        <Sparkles className='h-4 w-4' />
+                        {currentWeek.majorAspects?.length || 0} major aspects
+                      </span>
+                    </div>
+                  </header>
+
+                  <div className='prose prose-invert max-w-none'>
+                    <p className='text-lg leading-relaxed'>
+                      {currentWeek.summary}
+                    </p>
+                  </div>
+
+                  {currentWeek.planetaryHighlights &&
+                    currentWeek.planetaryHighlights.length > 0 && (
+                      <section className='space-y-4'>
+                        <h2 className='text-3xl font-bold'>
+                          Major Planetary Highlights
+                        </h2>
+                        <div className='space-y-4'>
+                          {currentWeek.planetaryHighlights.map(
+                            (highlight: any, index: number) => (
+                              <div
+                                key={index}
+                                className='border border-zinc-800 rounded-lg p-4'
+                              >
+                                <div className='flex items-start justify-between mb-2'>
+                                  <h3 className='text-xl font-semibold'>
+                                    {highlight.planet}{' '}
+                                    {highlight.event.replace('-', ' ')}
+                                  </h3>
+                                  <Badge variant='secondary'>
+                                    {highlight.date
+                                      ? new Date(
+                                          highlight.date,
+                                        ).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                        })
+                                      : ''}
+                                  </Badge>
+                                </div>
+                                <p className='text-muted-foreground'>
+                                  {highlight.description}
+                                </p>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </section>
+                    )}
+
+                  {currentWeek.moonPhases &&
+                    currentWeek.moonPhases.length > 0 && (
+                      <section className='space-y-4'>
+                        <h2 className='text-3xl font-bold'>Moon Phases</h2>
+                        <div className='space-y-4'>
+                          {currentWeek.moonPhases.map(
+                            (phase: any, index: number) => (
+                              <div
+                                key={index}
+                                className='border border-zinc-800 rounded-lg p-4'
+                              >
+                                <div className='flex items-start justify-between mb-2'>
+                                  <h3 className='text-xl font-semibold'>
+                                    {phase.phase}
+                                  </h3>
+                                  <Badge variant='secondary'>
+                                    {phase.date
+                                      ? new Date(phase.date).toLocaleDateString(
+                                          'en-US',
+                                          {
+                                            month: 'short',
+                                            day: 'numeric',
+                                          },
+                                        )
+                                      : ''}
+                                  </Badge>
+                                </div>
+                                {phase.energy && (
+                                  <p className='text-muted-foreground mb-2'>
+                                    {phase.energy}
+                                  </p>
+                                )}
+                                {phase.guidance && (
+                                  <p className='text-sm text-muted-foreground'>
+                                    {phase.guidance}
+                                  </p>
+                                )}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </section>
+                    )}
+
+                  {currentWeek.dailyForecasts &&
+                    currentWeek.dailyForecasts.length > 0 && (
+                      <section className='space-y-4'>
+                        <h2 className='text-3xl font-bold'>Daily Forecasts</h2>
+                        <div className='space-y-6'>
+                          {currentWeek.dailyForecasts.map(
+                            (forecast: any, index: number) => {
+                              // Find crystal recommendation for this day
+                              const dayCrystal =
+                                currentWeek.crystalRecommendations?.find(
+                                  (crystal: any) => {
+                                    if (!forecast.date || !crystal.date)
+                                      return false;
+                                    const forecastDate = new Date(
+                                      forecast.date,
+                                    ).toDateString();
+                                    const crystalDate = new Date(
+                                      crystal.date,
+                                    ).toDateString();
+                                    return forecastDate === crystalDate;
+                                  },
+                                );
+
+                              return (
+                                <div
+                                  key={index}
+                                  className='border border-zinc-800 rounded-lg p-4'
+                                >
+                                  <h3 className='text-xl font-semibold mb-2'>
+                                    {forecast.date
+                                      ? new Date(
+                                          forecast.date,
+                                        ).toLocaleDateString('en-US', {
+                                          weekday: 'long',
+                                          month: 'long',
+                                          day: 'numeric',
+                                        })
+                                      : `Day ${index + 1}`}
+                                  </h3>
+                                  {forecast.energy && (
+                                    <p className='text-muted-foreground mb-2'>
+                                      {forecast.energy}
+                                    </p>
+                                  )}
+                                  {forecast.guidance && (
+                                    <p className='mb-2'>{forecast.guidance}</p>
+                                  )}
+
+                                  {dayCrystal && (
+                                    <div className='mt-3 p-3 bg-pink-950/20 border border-pink-800/30 rounded-lg'>
+                                      <div className='flex items-center gap-2 mb-2'>
+                                        <Gem className='h-4 w-4 text-pink-300' />
+                                        <p className='text-sm font-semibold text-pink-300'>
+                                          Crystal: {dayCrystal.crystal}
+                                        </p>
+                                      </div>
+                                      {dayCrystal.reason && (
+                                        <p className='text-xs text-muted-foreground mb-1'>
+                                          {dayCrystal.reason}
+                                        </p>
+                                      )}
+                                      {dayCrystal.intention && (
+                                        <p className='text-xs text-pink-200/80 mb-1'>
+                                          Intention: {dayCrystal.intention}
+                                        </p>
+                                      )}
+                                      {dayCrystal.chakra && (
+                                        <p className='text-xs text-muted-foreground'>
+                                          Chakra: {dayCrystal.chakra}
+                                        </p>
+                                      )}
+                                      {dayCrystal.usage && (
+                                        <p className='text-xs text-muted-foreground mt-1 italic'>
+                                          {dayCrystal.usage}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            },
+                          )}
+                        </div>
+                      </section>
+                    )}
+                </article>
+              </div>
+            )}
+
+            <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'>
               <div className='text-center'>
                 <div className='text-2xl font-bold text-purple-600'>
-                  {currentWeek.planetaryHighlights.length}
+                  {currentWeek.planetaryHighlights?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>
                   Planetary Events
@@ -221,15 +471,23 @@ export default function BlogManagerPage() {
               </div>
               <div className='text-center'>
                 <div className='text-2xl font-bold text-blue-600'>
-                  {currentWeek.retrogradeChanges.length}
+                  {currentWeek.retrogradeChanges?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>
                   Retrograde Changes
                 </div>
               </div>
               <div className='text-center'>
+                <div className='text-2xl font-bold text-indigo-600'>
+                  {currentWeek.signIngresses?.length || 0}
+                </div>
+                <div className='text-sm text-muted-foreground'>
+                  Sign Ingresses
+                </div>
+              </div>
+              <div className='text-center'>
                 <div className='text-2xl font-bold text-green-600'>
-                  {currentWeek.majorAspects.length}
+                  {currentWeek.majorAspects?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>
                   Major Aspects
@@ -237,11 +495,59 @@ export default function BlogManagerPage() {
               </div>
               <div className='text-center'>
                 <div className='text-2xl font-bold text-yellow-600'>
-                  {currentWeek.moonPhases.length}
+                  {currentWeek.moonPhases?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>Moon Phases</div>
               </div>
+              <div className='text-center'>
+                <div className='text-2xl font-bold text-orange-600'>
+                  {currentWeek.seasonalEvents?.length || 0}
+                </div>
+                <div className='text-sm text-muted-foreground'>
+                  Seasonal Events
+                </div>
+              </div>
             </div>
+            {(currentWeek.dailyForecasts?.length ||
+              currentWeek.crystalRecommendations?.length ||
+              currentWeek.bestDaysFor) && (
+              <div className='mt-6 pt-6 border-t grid grid-cols-1 md:grid-cols-3 gap-4'>
+                {currentWeek.dailyForecasts && (
+                  <div className='text-center'>
+                    <div className='text-xl font-bold text-cyan-600'>
+                      {currentWeek.dailyForecasts.length}
+                    </div>
+                    <div className='text-sm text-muted-foreground'>
+                      Daily Forecasts
+                    </div>
+                  </div>
+                )}
+                {currentWeek.crystalRecommendations && (
+                  <div className='text-center'>
+                    <div className='text-xl font-bold text-pink-600'>
+                      {currentWeek.crystalRecommendations.length}
+                    </div>
+                    <div className='text-sm text-muted-foreground'>
+                      Crystal Recommendations
+                    </div>
+                  </div>
+                )}
+                {currentWeek.bestDaysFor && (
+                  <div className='text-center'>
+                    <div className='text-xl font-bold text-emerald-600'>
+                      {
+                        Object.values(currentWeek.bestDaysFor).filter(
+                          (item: any) => item.dates?.length > 0,
+                        ).length
+                      }
+                    </div>
+                    <div className='text-sm text-muted-foreground'>
+                      Best Days Categories
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -295,25 +601,255 @@ export default function BlogManagerPage() {
                 </Button>
               </div>
 
-              <div className='flex gap-2'>
+              <div className='flex gap-2 flex-wrap'>
+                {currentWeek && (
+                  <Button
+                    variant={showPreview ? 'default' : 'outline'}
+                    size='sm'
+                    onClick={() => setShowPreview(!showPreview)}
+                  >
+                    <Eye className='h-4 w-4 mr-2' />
+                    {showPreview ? 'Hide' : 'Show'} Preview
+                  </Button>
+                )}
                 <Button onClick={downloadMarkdown} variant='outline' size='sm'>
                   <Download className='h-4 w-4 mr-2' />
                   Download Markdown
                 </Button>
-
-                <Button
-                  onClick={() =>
-                    window.open('/api/blog/weekly?format=html', '_blank')
-                  }
-                  variant='outline'
-                  size='sm'
-                >
-                  <Eye className='h-4 w-4 mr-2' />
-                  Preview HTML
-                </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Inline Preview */}
+          {showPreview && currentWeek && (
+            <Card className='mt-6'>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <Eye className='h-5 w-5' />
+                  Blog Preview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='prose prose-invert max-w-none bg-zinc-950 p-6 rounded-lg border border-zinc-800 overflow-auto max-h-[80vh]'>
+                  <article className='space-y-8'>
+                    <header className='space-y-4 border-b border-zinc-800 pb-6'>
+                      <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                        <Badge variant='outline'>
+                          Week {currentWeek.weekNumber}
+                        </Badge>
+                        <span>•</span>
+                        <span>{currentWeek.year}</span>
+                      </div>
+                      <h1 className='text-4xl font-bold'>
+                        {currentWeek.title}
+                      </h1>
+                      <p className='text-xl text-muted-foreground italic'>
+                        {currentWeek.subtitle}
+                      </p>
+                      <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
+                        <span className='flex items-center gap-1'>
+                          <Star className='h-4 w-4' />
+                          {currentWeek.planetaryHighlights?.length || 0}{' '}
+                          planetary events
+                        </span>
+                        <span className='flex items-center gap-1'>
+                          <RotateCcw className='h-4 w-4' />
+                          {currentWeek.retrogradeChanges?.length || 0}{' '}
+                          retrograde changes
+                        </span>
+                        <span className='flex items-center gap-1'>
+                          <Moon className='h-4 w-4' />
+                          {currentWeek.moonPhases?.length || 0} moon phases
+                        </span>
+                        <span className='flex items-center gap-1'>
+                          <Sparkles className='h-4 w-4' />
+                          {currentWeek.majorAspects?.length || 0} major aspects
+                        </span>
+                      </div>
+                    </header>
+
+                    <div className='prose prose-invert max-w-none'>
+                      <p className='text-lg leading-relaxed'>
+                        {currentWeek.summary}
+                      </p>
+                    </div>
+
+                    {currentWeek.planetaryHighlights &&
+                      currentWeek.planetaryHighlights.length > 0 && (
+                        <section className='space-y-4'>
+                          <h2 className='text-3xl font-bold'>
+                            Major Planetary Highlights
+                          </h2>
+                          <div className='space-y-4'>
+                            {currentWeek.planetaryHighlights.map(
+                              (highlight: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className='border border-zinc-800 rounded-lg p-4'
+                                >
+                                  <div className='flex items-start justify-between mb-2'>
+                                    <h3 className='text-xl font-semibold'>
+                                      {highlight.planet}{' '}
+                                      {highlight.event.replace('-', ' ')}
+                                    </h3>
+                                    <Badge variant='secondary'>
+                                      {highlight.date
+                                        ? new Date(
+                                            highlight.date,
+                                          ).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                          })
+                                        : ''}
+                                    </Badge>
+                                  </div>
+                                  <p className='text-muted-foreground'>
+                                    {highlight.description}
+                                  </p>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        </section>
+                      )}
+
+                    {currentWeek.moonPhases &&
+                      currentWeek.moonPhases.length > 0 && (
+                        <section className='space-y-4'>
+                          <h2 className='text-3xl font-bold'>Moon Phases</h2>
+                          <div className='space-y-4'>
+                            {currentWeek.moonPhases.map(
+                              (phase: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className='border border-zinc-800 rounded-lg p-4'
+                                >
+                                  <div className='flex items-start justify-between mb-2'>
+                                    <h3 className='text-xl font-semibold'>
+                                      {phase.phase}
+                                    </h3>
+                                    <Badge variant='secondary'>
+                                      {phase.date
+                                        ? new Date(
+                                            phase.date,
+                                          ).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                          })
+                                        : ''}
+                                    </Badge>
+                                  </div>
+                                  {phase.energy && (
+                                    <p className='text-muted-foreground mb-2'>
+                                      {phase.energy}
+                                    </p>
+                                  )}
+                                  {phase.guidance && (
+                                    <p className='text-sm text-muted-foreground'>
+                                      {phase.guidance}
+                                    </p>
+                                  )}
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        </section>
+                      )}
+
+                    {currentWeek.dailyForecasts &&
+                      currentWeek.dailyForecasts.length > 0 && (
+                        <section className='space-y-4'>
+                          <h2 className='text-3xl font-bold'>
+                            Daily Forecasts
+                          </h2>
+                          <div className='space-y-6'>
+                            {currentWeek.dailyForecasts.map(
+                              (forecast: any, index: number) => {
+                                // Find crystal recommendation for this day
+                                const dayCrystal =
+                                  currentWeek.crystalRecommendations?.find(
+                                    (crystal: any) => {
+                                      if (!forecast.date || !crystal.date)
+                                        return false;
+                                      const forecastDate = new Date(
+                                        forecast.date,
+                                      ).toDateString();
+                                      const crystalDate = new Date(
+                                        crystal.date,
+                                      ).toDateString();
+                                      return forecastDate === crystalDate;
+                                    },
+                                  );
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className='border border-zinc-800 rounded-lg p-4'
+                                  >
+                                    <h3 className='text-xl font-semibold mb-2'>
+                                      {forecast.date
+                                        ? new Date(
+                                            forecast.date,
+                                          ).toLocaleDateString('en-US', {
+                                            weekday: 'long',
+                                            month: 'long',
+                                            day: 'numeric',
+                                          })
+                                        : `Day ${index + 1}`}
+                                    </h3>
+                                    {forecast.energy && (
+                                      <p className='text-muted-foreground mb-2'>
+                                        {forecast.energy}
+                                      </p>
+                                    )}
+                                    {forecast.guidance && (
+                                      <p className='mb-2'>
+                                        {forecast.guidance}
+                                      </p>
+                                    )}
+
+                                    {dayCrystal && (
+                                      <div className='mt-3 p-3 bg-pink-950/20 border border-pink-800/30 rounded-lg'>
+                                        <div className='flex items-center gap-2 mb-2'>
+                                          <Gem className='h-4 w-4 text-pink-300' />
+                                          <p className='text-sm font-semibold text-pink-300'>
+                                            Crystal: {dayCrystal.crystal}
+                                          </p>
+                                        </div>
+                                        {dayCrystal.reason && (
+                                          <p className='text-xs text-muted-foreground mb-1'>
+                                            {dayCrystal.reason}
+                                          </p>
+                                        )}
+                                        {dayCrystal.intention && (
+                                          <p className='text-xs text-pink-200/80 mb-1'>
+                                            Intention: {dayCrystal.intention}
+                                          </p>
+                                        )}
+                                        {dayCrystal.chakra && (
+                                          <p className='text-xs text-muted-foreground'>
+                                            Chakra: {dayCrystal.chakra}
+                                          </p>
+                                        )}
+                                        {dayCrystal.usage && (
+                                          <p className='text-xs text-muted-foreground mt-1 italic'>
+                                            {dayCrystal.usage}
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              },
+                            )}
+                          </div>
+                        </section>
+                      )}
+                  </article>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value='newsletter' className='space-y-6'>
