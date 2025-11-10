@@ -83,10 +83,12 @@ export default function BlogPage() {
   }, []);
 
   useEffect(() => {
-    // Set posts from generated weeks
+    // Set posts from generated weeks initially
     setPosts(generateAllWeeks);
     setLoading(false);
     fetchCurrentWeek();
+    // Fetch actual data for all weeks
+    fetchAllWeeksData();
   }, [generateAllWeeks]);
 
   const fetchCurrentWeek = async () => {
@@ -97,6 +99,41 @@ export default function BlogPage() {
     } catch (error) {
       console.error('Error fetching current week:', error);
     }
+  };
+
+  const fetchAllWeeksData = async () => {
+    // Fetch data for each week asynchronously
+    const fetchPromises = generateAllWeeks.map(async (week) => {
+      try {
+        const weekStartDate = new Date(week.weekStart);
+        const response = await fetch(
+          `/api/blog/weekly?date=${weekStartDate.toISOString().split('T')[0]}`,
+        );
+        const data = await response.json();
+
+        if (data.success && data.data) {
+          return {
+            ...week,
+            title: data.data.title,
+            subtitle: data.data.subtitle,
+            summary: data.data.summary,
+            contentSummary: {
+              planetaryHighlights: data.data.planetaryHighlights?.length || 0,
+              retrogradeChanges: data.data.retrogradeChanges?.length || 0,
+              majorAspects: data.data.majorAspects?.length || 0,
+              moonPhases: data.data.moonPhases?.length || 0,
+            },
+          };
+        }
+        return week;
+      } catch (error) {
+        console.error(`Error fetching week ${week.weekNumber}:`, error);
+        return week;
+      }
+    });
+
+    const updatedPosts = await Promise.all(fetchPromises);
+    setPosts(updatedPosts);
   };
 
   // Sort posts newest first
