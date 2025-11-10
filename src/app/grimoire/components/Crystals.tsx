@@ -1,193 +1,26 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import {
+  crystalDatabase,
+  crystalCategories,
+  getCrystalsByCategory,
+} from '@/constants/grimoire/crystals';
 
 const Crystals = () => {
-  const crystalCategories = [
-    {
-      name: 'Protection & Grounding',
-      crystals: [
-        {
-          name: 'Black Tourmaline',
-          properties: 'Shields from negativity, grounds excess energy',
-        },
-        {
-          name: 'Obsidian',
-          properties: 'Powerful protection, reveals hidden truths',
-        },
-        { name: 'Hematite', properties: 'Mental focus, physical grounding' },
-        {
-          name: 'Smoky Quartz',
-          properties: 'Gentle grounding, negativity clearing',
-        },
-        { name: 'Shungite', properties: 'EMF protection, ancient wisdom' },
-        { name: 'Red Jasper', properties: 'Physical strength, endurance' },
-        { name: 'Garnet', properties: 'Courage, protection during travel' },
-        { name: 'Onyx', properties: 'Emotional protection, self-control' },
-        {
-          name: 'Apache Tear',
-          properties: 'Grief healing, psychic protection',
-        },
-        {
-          name: 'Fire Agate',
-          properties: 'Shield against ill-wishes, vitality',
-        },
-        {
-          name: 'Jet',
-          properties: 'Ancient protection, absorbs negative energy',
-        },
-        { name: 'Bloodstone', properties: 'Courage, protection in conflict' },
-      ],
-    },
-    {
-      name: 'Love & Heart Healing',
-      crystals: [
-        {
-          name: 'Rose Quartz',
-          properties: 'Unconditional love, emotional healing',
-        },
-        {
-          name: 'Green Aventurine',
-          properties: 'Heart chakra healing, good fortune',
-        },
-        { name: 'Rhodonite', properties: 'Forgiveness, self-love' },
-        { name: 'Morganite', properties: 'Divine love, compassionate healing' },
-        { name: 'Pink Tourmaline', properties: 'Emotional healing, self-love' },
-        { name: 'Emerald', properties: 'Divine love, loyalty, partnership' },
-        {
-          name: 'Prehnite',
-          properties: 'Unconditional love, healing the healer',
-        },
-        { name: 'Kunzite', properties: 'Heart healing, emotional balance' },
-        {
-          name: 'Green Calcite',
-          properties: 'Heart chakra cleansing, renewal',
-        },
-        { name: 'Chrysoprase', properties: 'Heart healing, joy, optimism' },
-        { name: 'Unakite', properties: 'Emotional balance, patience in love' },
-        {
-          name: 'Amazonite',
-          properties: 'Heart-throat connection, truth in love',
-        },
-      ],
-    },
-    {
-      name: 'Spiritual & Intuitive',
-      crystals: [
-        {
-          name: 'Amethyst',
-          properties: 'Third eye opening, spiritual protection',
-        },
-        {
-          name: 'Labradorite',
-          properties: 'Psychic abilities, transformation',
-        },
-        { name: 'Moonstone', properties: 'Lunar cycles, feminine wisdom' },
-        { name: 'Celestite', properties: 'Angelic communication, peace' },
-        { name: 'Selenite', properties: 'Crown chakra activation, cleansing' },
-        {
-          name: 'Lapis Lazuli',
-          properties: 'Third eye wisdom, divine connection',
-        },
-        { name: 'Iolite', properties: 'Vision quests, shamanic journeying' },
-        { name: 'Kyanite', properties: 'Psychic alignment, meditation' },
-        {
-          name: 'Fluorite',
-          properties: 'Mental clarity, spiritual discernment',
-        },
-        { name: 'Moldavite', properties: 'Rapid spiritual transformation' },
-        {
-          name: 'Angelite',
-          properties: 'Angel communication, peaceful awareness',
-        },
-        { name: 'Azurite', properties: 'Psychic development, divine guidance' },
-        { name: 'Charoite', properties: 'Spiritual courage, transmutation' },
-      ],
-    },
-    {
-      name: 'Prosperity & Abundance',
-      crystals: [
-        {
-          name: 'Citrine',
-          properties: 'Manifestation, abundance, success',
-        },
-        {
-          name: 'Green Aventurine',
-          properties: 'Opportunity, luck, prosperity',
-        },
-        {
-          name: 'Pyrite',
-          properties: 'Business success, wealth attraction',
-        },
-        { name: 'Jade', properties: 'Prosperity, harmony, wisdom' },
-        {
-          name: 'Peridot',
-          properties: 'Abundance, growth, positive change',
-        },
-        { name: 'Tiger Eye', properties: 'Practical action, focus' },
-        {
-          name: 'Malachite',
-          properties: 'Transformation, risk-taking, courage',
-        },
-      ],
-    },
-    {
-      name: 'Healing & Wellness',
-      crystals: [
-        {
-          name: 'Clear Quartz',
-          properties: 'Universal healer, amplifies energy',
-        },
-        {
-          name: 'Rose Quartz',
-          properties: 'Emotional healing, self-love',
-        },
-        {
-          name: 'Amethyst',
-          properties: 'Pain relief, calming, sleep',
-        },
-        { name: 'Selenite', properties: 'Spiritual cleansing, peace' },
-        {
-          name: 'Carnelian',
-          properties: 'Vitality, motivation, physical energy',
-        },
-        {
-          name: 'Aventurine',
-          properties: 'Heart healing, emotional balance',
-        },
-        {
-          name: 'Fluorite',
-          properties: 'Mental clarity, focus, organization',
-        },
-      ],
-    },
-    {
-      name: 'Communication & Creativity',
-      crystals: [
-        {
-          name: 'Blue Lace Agate',
-          properties: 'Calm communication, expression',
-        },
-        {
-          name: 'Aquamarine',
-          properties: 'Courageous communication, clarity',
-        },
-        { name: 'Sodalite', properties: 'Logic, truth, self-expression' },
-        {
-          name: 'Lapis Lazuli',
-          properties: 'Wisdom, truth, communication',
-        },
-        {
-          name: 'Amazonite',
-          properties: 'Harmony, balance, self-expression',
-        },
-        {
-          name: 'Citrine',
-          properties: 'Creativity, inspiration, confidence',
-        },
-      ],
-    },
-  ];
+  // Group crystals by category from the grimoire database
+  const crystalCategoriesData = useMemo(() => {
+    return crystalCategories.map((categoryName) => {
+      const crystals = getCrystalsByCategory(categoryName);
+      return {
+        name: categoryName,
+        crystals: crystals.map((crystal) => ({
+          name: crystal.name,
+          properties: crystal.description || crystal.metaphysicalProperties,
+        })),
+      };
+    });
+  }, []);
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -228,7 +61,7 @@ const Crystals = () => {
           Crystal Categories
         </h2>
         <div className='space-y-6'>
-          {crystalCategories.map((category) => (
+          {crystalCategoriesData.map((category) => (
             <div key={category.name}>
               <h3 className='text-lg font-medium text-zinc-200 mb-3'>
                 {category.name}
