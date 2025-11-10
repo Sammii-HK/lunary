@@ -115,7 +115,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For non-navigation requests (assets, images, etc.), use cache-first strategy
+  // DEVELOPMENT MODE: Skip caching for localhost to prevent dev workflow issues
+  // Always use network-first in development
+  const isLocalhost =
+    url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  if (isLocalhost) {
+    // In development, always fetch from network and don't cache
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // Only fallback to cache if network fails
+        return caches
+          .match(event.request)
+          .then((cached) => cached || caches.match('/'));
+      }),
+    );
+    return;
+  }
+
+  // PRODUCTION: For non-navigation requests (assets, images, etc.), use cache-first strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

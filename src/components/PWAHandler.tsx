@@ -26,6 +26,27 @@ export function PWAHandler() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    // Skip service worker registration in development to prevent caching issues
+    const isDevelopment =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      process.env.NODE_ENV === 'development';
+
+    if (isDevelopment) {
+      console.log('🔧 Development mode: Skipping service worker registration');
+      // Unregister any existing service workers in development
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          registrations.forEach((registration) => {
+            registration.unregister().then(() => {
+              console.log('✅ Unregistered service worker for development');
+            });
+          });
+        });
+      }
+      return;
+    }
+
     // Register service worker - CRITICAL: Must be active and controlling for iOS PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
