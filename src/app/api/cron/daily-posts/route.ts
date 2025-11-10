@@ -453,33 +453,8 @@ async function runDailyPosts(dateStr: string) {
     if (successCount > 0) {
       // Collect all image URLs from the post variants
       const allImageUrls: string[] = [];
-      const productionUrl = 'https://lunary.app';
-      
-      // Add all images from variants
-      if (posts[0]?.variants) {
-        // Instagram images
-        if (posts[0].variants.instagram?.media) {
-          allImageUrls.push(...posts[0].variants.instagram.media);
-        }
-        // X/Twitter images
-        if (posts[0].variants.x?.media) {
-          posts[0].variants.x.media.forEach((url: string) => {
-            if (!allImageUrls.includes(url)) {
-              allImageUrls.push(url);
-            }
-          });
-        }
-        // Bluesky images
-        if (posts[0].variants.bluesky?.media) {
-          posts[0].variants.bluesky.media.forEach((url: string) => {
-            if (!allImageUrls.includes(url)) {
-              allImageUrls.push(url);
-            }
-          });
-        }
-      }
-      
-      // Add main image URLs if not already included
+
+      // Add main image URLs
       if (posts[0]?.imageUrls) {
         posts[0].imageUrls.forEach((url: string) => {
           if (!allImageUrls.includes(url)) {
@@ -487,11 +462,12 @@ async function runDailyPosts(dateStr: string) {
           }
         });
       }
-      
+
       // Get post content snippet
-      const postContent = posts[0]?.content || generateCosmicPost(cosmicContent).snippet;
-      
-      // Send preview notification with today's cosmic event, all images, and post content
+      const postContent =
+        posts[0]?.content || generateCosmicPost(cosmicContent).snippet;
+
+      // Send one notification for daily posts with all images and content
       await sendAdminNotification(
         NotificationTemplates.dailyPreview(
           dateStr,
@@ -561,7 +537,7 @@ async function runWeeklyTasks(request: NextRequest) {
     console.log('📧 Weekly newsletter result:', newsletterData.message);
 
     // Generate blog preview image URL (use first day of the week)
-    const weekStartDate = blogData.data?.weekStart 
+    const weekStartDate = blogData.data?.weekStart
       ? new Date(blogData.data.weekStart).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0];
     const blogPreviewUrl = `${baseUrl}/api/og/cosmic/${weekStartDate}`;
