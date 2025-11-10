@@ -14,13 +14,19 @@ import { getGeneralCrystalRecommendation } from '../../../../../../utils/crystal
 import { getGeneralTarotReading } from '../../../../../../utils/tarot/generalTarot';
 import { getGeneralHoroscope } from '../../../../../../utils/astrology/generalHoroscope';
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ date: string }> },
+) {
+  const { date: dateParam } = await params;
   const { searchParams } = new URL(request.url);
-  const dateParam = searchParams.get('date');
+  // Support both path parameter and query parameter for backward compatibility
+  const dateFromQuery = searchParams.get('date');
+  const dateToUse = dateParam || dateFromQuery;
 
   let targetDate: Date;
-  if (dateParam) {
-    targetDate = new Date(dateParam + 'T12:00:00Z');
+  if (dateToUse) {
+    targetDate = new Date(dateToUse + 'T12:00:00Z');
   } else {
     targetDate = new Date();
   }
@@ -261,14 +267,47 @@ export async function GET(request: NextRequest) {
       ' ',
       'Get personalised daily cosmic guidance at lunary.app.',
     ].join('\n'),
-    snippetShort: [
-      (highlights?.[0] || 'Daily cosmic guidance').substring(0, 100),
-      `Crystal: ${getGeneralCrystalRecommendation().guidance.substring(0, 70)}...`,
-      `Tarot: ${getGeneralTarotReading().guidance.dailyMessage.substring(0, 70)}...`,
-      'lunary.app',
-    ]
-      .filter(Boolean)
-      .join(' '),
+    snippetShort: (() => {
+      const parts = [
+        (highlights?.[0] || 'Daily cosmic guidance').substring(0, 100),
+        `Crystal: ${getGeneralCrystalRecommendation().guidance.substring(0, 70)}...`,
+        `Tarot: ${getGeneralTarotReading().guidance.dailyMessage.substring(0, 70)}...`,
+        'lunary.app',
+      ].filter(Boolean);
+
+      let snippet = parts.join(' ');
+
+      // Ensure it's 280 characters or less for Twitter
+      if (snippet.length > 280) {
+        // Find the last sentence-ending punctuation before 280 chars
+        const maxLength = 280;
+        let cutPoint = maxLength;
+
+        // Look for sentence endings (. ! ?) in reverse order
+        const sentenceEnders = ['.', '!', '?'];
+        for (let i = maxLength - 1; i >= Math.max(0, maxLength - 50); i--) {
+          if (sentenceEnders.includes(snippet[i])) {
+            // Check if it's followed by a space or end of string
+            if (i === snippet.length - 1 || snippet[i + 1] === ' ') {
+              cutPoint = i + 1;
+              break;
+            }
+          }
+        }
+
+        // If no sentence ender found, try to break at last space
+        if (cutPoint === maxLength) {
+          const lastSpace = snippet.lastIndexOf(' ', maxLength);
+          if (lastSpace > maxLength - 50) {
+            cutPoint = lastSpace;
+          }
+        }
+
+        snippet = snippet.substring(0, cutPoint).trim();
+      }
+
+      return snippet;
+    })(),
   };
 
   return NextResponse.json(postContent);
