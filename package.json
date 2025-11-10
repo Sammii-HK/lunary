@@ -14,6 +14,7 @@
     "generate-moon-packs:monthly": "tsx scripts/generate-moon-packs.ts --type=monthly",
     "generate-moon-packs:quarterly": "tsx scripts/generate-moon-packs.ts --type=quarterly",
     "generate-moon-packs:yearly": "tsx scripts/generate-moon-packs.ts --type=yearly",
+    "deploy:worker": "bash scripts/deploy-worker.sh",
     "prepare": "husky"
   },
   "lint-staged": {

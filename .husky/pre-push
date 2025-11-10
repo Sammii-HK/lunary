@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check if cloudflare-worker has changes and deploy if needed
+# Pass stdin to the script so it can read the refs being pushed
+cat | ./scripts/check-and-deploy-worker.sh "$@"
+
