@@ -6,7 +6,7 @@ import {
 import {
   markEventsAsSent,
   cleanupOldDates,
-} from '../shared-notification-tracker';
+} from '@/app/api/cron/shared-notification-tracker';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -15,12 +15,18 @@ const executionTracker = new Map<string, boolean>();
 export async function GET(request: NextRequest) {
   try {
     // Verify cron request
+    // Vercel cron jobs send x-vercel-cron header, allow those
+    const isVercelCron = request.headers.get('x-vercel-cron') === '1';
     const authHeader = request.headers.get('authorization');
-    if (
-      process.env.CRON_SECRET &&
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    // If not from Vercel cron, require CRON_SECRET
+    if (!isVercelCron) {
+      if (
+        process.env.CRON_SECRET &&
+        authHeader !== `Bearer ${process.env.CRON_SECRET}`
+      ) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -229,49 +235,44 @@ async function runDailyPosts(dateStr: string) {
   // Generate posts with dynamic content - ONE Twitter post only
   const posts = [
     {
-      name: 'Main Cosmic X',
-      content: generateCosmicPost(cosmicContent).snippetShort.replace(
-        /\n/g,
-        ' ',
-      ),
-      platforms: ['x'], // Only Twitter/X - single post per day
-      imageUrls: [
-        `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
-        `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
-        `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
-      ],
-      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
-      scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
-    },
-    {
-      name: 'Main Cosmic',
+      name: dateStr,
       content: generateCosmicPost(cosmicContent).snippet,
       platforms: ['reddit', 'pinterest'],
       imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
-    },
-    {
-      name: 'Main Cosmic Bluesky',
-      content: generateCosmicPost(cosmicContent).snippetShort,
-      platforms: ['bluesky'],
-      imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
-      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
-      scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
-    },
-    {
-      name: 'Main Cosmic Carousel',
-      content: generateCosmicPost(cosmicContent).snippet,
-      platforms: ['instagram'],
-      imageUrls: [
-        `${productionUrl}/api/og/cosmic/${dateStr}`,
-        `${productionUrl}/api/og/crystal?date=${dateStr}`,
-        `${productionUrl}/api/og/tarot?date=${dateStr}`,
-        `${productionUrl}/api/og/moon?date=${dateStr}`,
-        `${productionUrl}/api/og/horoscope?date=${dateStr}`,
-      ],
-      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
-      scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
+      variants: {
+        instagram: {
+          media: [
+            `${productionUrl}/api/og/cosmic/${dateStr}`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}`,
+            `${productionUrl}/api/og/moon?date=${dateStr}`,
+            `${productionUrl}/api/og/horoscope?date=${dateStr}`,
+          ],
+        },
+        x: {
+          content: generateCosmicPost(cosmicContent).snippetShort.replace(
+            /\n/g,
+            ' ',
+          ),
+          media: [
+            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
+          ],
+        },
+        bluesky: {
+          content: generateCosmicPost(cosmicContent).snippetShort,
+          media: [
+            `${productionUrl}/api/og/cosmic/${dateStr}`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}`,
+            `${productionUrl}/api/og/moon?date=${dateStr}`,
+            `${productionUrl}/api/og/horoscope?date=${dateStr}`,
+          ],
+        },
+      },
     },
   ];
 
@@ -284,14 +285,16 @@ async function runDailyPosts(dateStr: string) {
     try {
       const postData = {
         accountGroupId: process.env.SUCCULENT_ACCOUNT_GROUP_ID,
+        name: post.name || `Cosmic Post ${dateStr}`,
         content: post.content,
         platforms: post.platforms,
         scheduledDate: post.scheduledDate,
-        media: post.imageUrls.map((imageUrl: string) => ({
+        media: (post.imageUrls || []).map((imageUrl: string) => ({
           type: 'image',
           url: imageUrl,
           alt: post.alt,
         })),
+        variants: post.variants,
       };
 
       const response = await fetch(succulentApiUrl, {
