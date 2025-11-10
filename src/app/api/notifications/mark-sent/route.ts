@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { markEventAsSent } from '../cron/shared-notification-tracker';
+import { markEventAsSent } from '@/app/api/cron/shared-notification-tracker';
 
 // API endpoint for Cloudflare worker to mark events as sent
 export async function POST(request: NextRequest) {

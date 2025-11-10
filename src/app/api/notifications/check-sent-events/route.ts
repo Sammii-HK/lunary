@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSentEvents } from '../cron/shared-notification-tracker';
+import { getSentEvents } from '@/app/api/cron/shared-notification-tracker';
 
 // API endpoint for Cloudflare worker to check what events have been sent
 export async function GET(request: NextRequest) {
