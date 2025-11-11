@@ -506,30 +506,8 @@ Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}
       }
     }
 
-    // Send Pushover notification
-    if (savedPostIds.length > 0) {
-      try {
-        const { sendPushoverNotification } = await import(
-          '../../../../../../utils/notifications/pushNotifications'
-        );
-        const baseUrl =
-          process.env.NODE_ENV === 'production'
-            ? 'https://lunary.app'
-            : 'http://localhost:3000';
-
-        const weekRange = `${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}`;
-
-        await sendPushoverNotification({
-          title: '📅 Weekly Social Media Posts Generated',
-          message: `${savedPostIds.length} posts generated for the week\n\nWeek: ${weekRange}\n\nPlatforms: Instagram (${allGeneratedPosts.filter((p) => p.platform === 'instagram').length}), Twitter (${allGeneratedPosts.filter((p) => p.platform === 'twitter').length})\n\nReview and approve in the approval queue`,
-          url: `${baseUrl}/admin/social-posts/approve`,
-          priority: 'high',
-          sound: 'cashregister',
-        });
-      } catch (notifError) {
-        console.error('Failed to send Pushover notification:', notifError);
-      }
-    }
+    // Skip Pushover notification for weekly post generation - too noisy
+    // Users can check the approval queue directly
 
     return NextResponse.json({
       success: true,

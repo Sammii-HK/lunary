@@ -23,6 +23,12 @@ export interface NotificationResult {
 export async function sendPushoverNotification(
   notification: PushNotification,
 ): Promise<NotificationResult> {
+  // Only send Pushover notifications in production
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('📱 Pushover notifications disabled in development, skipping');
+    return { success: false, service: 'pushover', error: 'Development mode' };
+  }
+
   const apiToken = process.env.PUSHOVER_API_TOKEN;
   const userKey = process.env.PUSHOVER_USER_KEY;
 

@@ -379,28 +379,8 @@ Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}
       throw new Error(`Failed to save posts to database: ${dbErrors[0]}`);
     }
 
-    // Send Pushover notification if posts were generated
-    if (savedPostIds.length > 0) {
-      try {
-        const { sendPushoverNotification } = await import(
-          '../../../../../../utils/notifications/pushNotifications'
-        );
-        const baseUrl =
-          process.env.NODE_ENV === 'production'
-            ? 'https://lunary.app'
-            : 'http://localhost:3000';
-
-        await sendPushoverNotification({
-          title: '📝 New Social Media Posts Generated',
-          message: `${savedPostIds.length} new ${platform} post(s) ready for approval\n\nPlatform: ${platform}\nType: ${postType}\n${topic ? `Topic: ${topic}` : ''}\n\nReview in approval queue`,
-          url: `${baseUrl}/admin/social-posts/approve`,
-          priority: 'normal',
-          sound: 'default',
-        });
-      } catch (notifError) {
-        console.error('Failed to send Pushover notification:', notifError);
-      }
-    }
+    // Skip Pushover notification for manual post generation - too noisy
+    // Users can check the approval queue directly
 
     return NextResponse.json({
       success: true,
