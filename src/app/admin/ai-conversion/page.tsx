@@ -31,11 +31,23 @@ export default function AIConversionPage() {
         const result = await response.json();
         setResults((prev: any) => ({ ...prev, [type]: result }));
       } else {
-        alert('Failed to generate insights');
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        const errorMessage =
+          errorData.error ||
+          errorData.details ||
+          `HTTP ${response.status}: ${response.statusText}`;
+        console.error('API Error:', errorData);
+        alert(
+          `Failed to generate insights:\n\n${errorMessage}\n\nCheck console for details.`,
+        );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
-      alert('Failed to generate insights');
+      alert(
+        `Failed to generate insights:\n\n${error.message || 'Network error or API unavailable'}\n\nCheck console for details.`,
+      );
     } finally {
       setLoading(null);
     }
