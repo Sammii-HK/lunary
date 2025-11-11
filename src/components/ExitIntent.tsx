@@ -6,16 +6,40 @@ import { SmartTrialButton } from './SmartTrialButton';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 
+const EXIT_INTENT_STORAGE_KEY = 'exitIntentDismissed';
+const EXIT_INTENT_COOLDOWN_DAYS = 7; // Show again after 7 days
+
 export function ExitIntent() {
   const [showModal, setShowModal] = useState(false);
   const authState = useAuthStatus();
   const subscription = useSubscription();
-  const [hasShown, setHasShown] = useState(false);
 
   useEffect(() => {
-    // Only show for non-subscribers
-    if (subscription.isSubscribed || hasShown) {
+    // Don't show for:
+    // 1. Free plan users (status === 'free')
+    // 2. Active subscribers
+    // 3. Users who dismissed it recently (within cooldown period)
+    if (
+      subscription.status === 'free' ||
+      subscription.isSubscribed ||
+      !authState.isAuthenticated
+    ) {
       return;
+    }
+
+    // Check if user dismissed it recently
+    const dismissedData = localStorage.getItem(EXIT_INTENT_STORAGE_KEY);
+    if (dismissedData) {
+      try {
+        const { timestamp } = JSON.parse(dismissedData);
+        const daysSinceDismissed =
+          (Date.now() - timestamp) / (1000 * 60 * 60 * 24);
+        if (daysSinceDismissed < EXIT_INTENT_COOLDOWN_DAYS) {
+          return; // Still in cooldown period
+        }
+      } catch (e) {
+        // Invalid data, continue
+      }
     }
 
     let mouseLeaveTimer: NodeJS.Timeout;
@@ -24,10 +48,7 @@ export function ExitIntent() {
       // Only trigger if mouse is leaving the top of the viewport
       if (e.clientY <= 0) {
         mouseLeaveTimer = setTimeout(() => {
-          if (!hasShown && !subscription.isSubscribed) {
-            setShowModal(true);
-            setHasShown(true);
-          }
+          setShowModal(true);
         }, 100);
       }
     };
@@ -48,17 +69,34 @@ export function ExitIntent() {
         clearTimeout(mouseLeaveTimer);
       }
     };
-  }, [subscription.isSubscribed, hasShown]);
+  }, [
+    subscription.status,
+    subscription.isSubscribed,
+    authState.isAuthenticated,
+  ]);
 
-  if (!showModal || subscription.isSubscribed) {
+  if (
+    !showModal ||
+    subscription.isSubscribed ||
+    subscription.status === 'free'
+  ) {
     return null;
   }
+
+  const handleClose = () => {
+    setShowModal(false);
+    // Store dismissal timestamp in localStorage
+    localStorage.setItem(
+      EXIT_INTENT_STORAGE_KEY,
+      JSON.stringify({ timestamp: Date.now() }),
+    );
+  };
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
       <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-md w-full shadow-xl'>
         <button
-          onClick={() => setShowModal(false)}
+          onClick={handleClose}
           className='absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors'
           aria-label='Close'
         >
@@ -106,7 +144,7 @@ export function ExitIntent() {
           </div>
 
           <button
-            onClick={() => setShowModal(false)}
+            onClick={handleClose}
             className='text-sm text-zinc-400 hover:text-zinc-300 transition-colors'
           >
             No thanks, I'll stay on the free plan
