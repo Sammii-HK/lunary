@@ -1,16 +1,23 @@
-import { Resend } from 'resend';
+import {
+  TransactionalEmailsApi,
+  TransactionalEmailsApiApiKeys,
+  SendSmtpEmail,
+} from '@getbrevo/brevo';
 
-// Lazy initialization of Resend to avoid build-time env var issues
-let resend: Resend | null = null;
+let brevoApiInstance: TransactionalEmailsApi | null = null;
 
-function getResendClient() {
-  if (!resend) {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY is not configured');
+function getBrevoClient() {
+  if (!brevoApiInstance) {
+    if (!process.env.BREVO_API_KEY) {
+      throw new Error('BREVO_API_KEY is not configured');
     }
-    resend = new Resend(process.env.RESEND_API_KEY);
+    brevoApiInstance = new TransactionalEmailsApi();
+    brevoApiInstance.setApiKey(
+      TransactionalEmailsApiApiKeys.apiKey,
+      process.env.BREVO_API_KEY,
+    );
   }
-  return resend;
+  return brevoApiInstance;
 }
 
 export interface EmailOptions {
@@ -27,10 +34,18 @@ export interface BatchEmailResult {
   errors: Array<{ email: string; error: string }>;
 }
 
-/**
- * Send email using Resend (single or multiple recipients)
- * Returns Resend response (with id) for single emails, or BatchEmailResult for multiple
- */
+const getFromEmail = () => {
+  return process.env.EMAIL_FROM || 'Lunary <cosmic@lunary.app>';
+};
+
+const parseFromEmail = (from: string) => {
+  const match = from.match(/^(.+?)\s*<(.+?)>$/);
+  if (match) {
+    return { name: match[1].trim(), email: match[2].trim() };
+  }
+  return { name: 'Lunary', email: from.replace(/[<>]/g, '') };
+};
+
 export async function sendEmail({
   to,
   subject,
@@ -38,33 +53,28 @@ export async function sendEmail({
   text,
 }: EmailOptions): Promise<{ id: string } | BatchEmailResult> {
   try {
-    const resendClient = getResendClient();
-
-    // Handle single email or array of emails
+    const brevoClient = getBrevoClient();
     const recipients = Array.isArray(to) ? to : [to];
+    const fromInfo = parseFromEmail(getFromEmail());
 
-    // If single recipient, use regular send
     if (recipients.length === 1) {
-      const { data, error } = await resendClient.emails.send({
-        from: process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>',
-        to: recipients[0],
-        subject,
-        html: html || text || 'No content provided',
-        text,
-      });
-
-      if (error) {
-        console.error('Resend error:', error);
-        throw new Error(`Failed to send email: ${error.message}`);
+      const sendSmtpEmail = new SendSmtpEmail();
+      sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
+      sendSmtpEmail.to = [{ email: recipients[0] }];
+      sendSmtpEmail.subject = subject;
+      sendSmtpEmail.htmlContent = html || text || 'No content provided';
+      if (text) {
+        sendSmtpEmail.textContent = text;
       }
 
-      console.log('✅ Email sent successfully:', data?.id);
-      // Return Resend response with id (matches { id: string })
-      return data as { id: string };
+      const data = await brevoClient.sendTransacEmail(sendSmtpEmail);
+
+      const messageId = data.body?.messageId || '';
+      console.log('✅ Email sent successfully:', messageId);
+      return { id: messageId };
     }
 
-    // Multiple recipients - use batch API (100 per request)
-    return await sendBatchEmails(resendClient, {
+    return await sendBatchEmails(brevoClient, {
       to: recipients,
       subject,
       html: html || text || 'No content provided',
@@ -76,13 +86,8 @@ export async function sendEmail({
   }
 }
 
-/**
- * Send emails in batches using Resend batch API
- * Resend allows up to 100 recipients per batch request
- * This prevents exposing all emails in TO/CC/BCC fields
- */
 async function sendBatchEmails(
-  resendClient: Resend,
+  brevoClient: TransactionalEmailsApi,
   {
     to,
     subject,
@@ -95,8 +100,8 @@ async function sendBatchEmails(
     text?: string;
   },
 ): Promise<BatchEmailResult> {
-  const BATCH_SIZE = 100;
-  const from = process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>';
+  const BATCH_SIZE = 50;
+  const fromInfo = parseFromEmail(getFromEmail());
   const results: BatchEmailResult = {
     success: 0,
     failed: 0,
@@ -104,7 +109,6 @@ async function sendBatchEmails(
     errors: [],
   };
 
-  // Process in batches of 100
   for (let i = 0; i < to.length; i += BATCH_SIZE) {
     const batch = to.slice(i, i + BATCH_SIZE);
     const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
@@ -114,51 +118,60 @@ async function sendBatchEmails(
       `📧 Sending batch ${batchNumber}/${totalBatches} (${batch.length} recipients)`,
     );
 
-    try {
-      // Use Resend batch API - sends individually to each recipient
-      // This prevents exposing all emails in TO field
-      const batchPromises = batch.map((email) =>
-        resendClient.emails.send({
-          from,
-          to: email,
-          subject,
-          html,
-          text,
-        }),
-      );
+    const batchPromises = batch.map(async (email) => {
+      try {
+        const sendSmtpEmail = new SendSmtpEmail();
+        sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
+        sendSmtpEmail.to = [{ email }];
+        sendSmtpEmail.subject = subject;
+        sendSmtpEmail.htmlContent = html;
+        if (text) {
+          sendSmtpEmail.textContent = text;
+        }
 
-      const batchResults = await Promise.allSettled(batchPromises);
+        const data = await brevoClient.sendTransacEmail(sendSmtpEmail);
+        const messageId = data.body?.messageId || '';
+        return { success: true, email, messageId };
+      } catch (error) {
+        return {
+          success: false,
+          email,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
+    });
 
-      batchResults.forEach((result, idx) => {
-        const email = batch[idx];
-        if (result.status === 'fulfilled' && result.value.data) {
+    const batchResults = await Promise.allSettled(batchPromises);
+
+    batchResults.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        const emailResult = result.value;
+        if (emailResult.success) {
           results.success++;
-          console.log(`✅ Sent to ${email}`);
+          console.log(`✅ Sent to ${emailResult.email}`);
         } else {
           results.failed++;
-          const error =
-            result.status === 'rejected'
-              ? result.reason?.message || 'Unknown error'
-              : result.value?.error?.message || 'Unknown error';
-          results.errors.push({ email, error });
-          console.error(`❌ Failed to send to ${email}:`, error);
+          results.errors.push({
+            email: emailResult.email,
+            error: emailResult.error || 'Unknown error',
+          });
+          console.error(
+            `❌ Failed to send to ${emailResult.email}:`,
+            emailResult.error,
+          );
         }
-      });
-
-      // Rate limiting: small delay between batches to avoid hitting limits
-      if (i + BATCH_SIZE < to.length) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-    } catch (error) {
-      console.error(`❌ Batch ${batchNumber} failed:`, error);
-      batch.forEach((email) => {
+      } else {
         results.failed++;
+        const email = batch[batchResults.indexOf(result)];
         results.errors.push({
           email,
-          error:
-            error instanceof Error ? error.message : 'Batch processing error',
+          error: result.reason?.message || 'Unknown error',
         });
-      });
+      }
+    });
+
+    if (i + BATCH_SIZE < to.length) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
 
@@ -169,9 +182,6 @@ async function sendBatchEmails(
   return results;
 }
 
-/**
- * Generate email verification HTML template
- */
 export function generateVerificationEmailHTML(
   verificationUrl: string,
   userEmail: string,
@@ -257,7 +267,7 @@ export function generateVerificationEmailHTML(
       <body>
         <div class="container">
           <div class="header">
-            <div class="moon-symbol">🌙</div>
+            <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/logo.png" alt="Lunary" style="max-width: 120px; height: auto; margin: 0 auto 20px; display: block;" />
             <h1 class="title">Welcome to Lunary</h1>
             <p class="subtitle">Your Cosmic Journey Begins</p>
           </div>
@@ -290,6 +300,10 @@ export function generateVerificationEmailHTML(
           <div class="footer">
             <p>If you didn't create an account with Lunary, you can safely ignore this email.</p>
             <p>Questions? Reply to this email or visit our support page.</p>
+            <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/unsubscribe?email=${encodeURIComponent(userEmail)}" style="color: #6b7280; text-decoration: underline;">Unsubscribe</a> | 
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/profile" style="color: #6b7280; text-decoration: underline;">Manage Preferences</a>
+            </p>
             <p>© ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.</p>
           </div>
         </div>
@@ -298,9 +312,6 @@ export function generateVerificationEmailHTML(
   `;
 }
 
-/**
- * Generate plain text version of verification email
- */
 export function generateVerificationEmailText(
   verificationUrl: string,
   userEmail: string,
@@ -324,6 +335,9 @@ Once verified, you'll have access to:
 If you didn't create an account with Lunary, you can safely ignore this email.
 
 Questions? Reply to this email or visit our support page.
+
+Unsubscribe: ${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/unsubscribe?email=${encodeURIComponent(userEmail)}
+Manage Preferences: ${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/profile
 
 © ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.
   `.trim();

@@ -700,9 +700,12 @@ export const HoroscopeWidget = () => {
             {/* <p className='text-xs text-purple-200 mb-1'>
               🌟 Start Your Free Trial
             </p> */}
+            <p className='text-xs text-purple-200 mb-1 font-medium'>
+              ✨ Your personalized horoscope is ready
+            </p>
             <p className='text-xs text-zinc-400 mb-2'>
-              Unlock horoscopes tailored to YOUR birth chart. Experience the
-              difference personalized astrology makes!
+              Unlock it now to see how today's cosmic energy affects YOUR birth
+              chart. Experience the difference personalized astrology makes!
             </p>
             <SmartTrialButton variant='link' />
           </div>

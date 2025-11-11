@@ -86,6 +86,29 @@ export default function SuccessPage() {
                 session.customer_email,
                 planType as 'monthly' | 'yearly',
               );
+
+              // Send trial welcome email
+              try {
+                const trialDays = planType === 'yearly' ? 14 : 7;
+                const userName = (me?.profile as any)?.name || 'there';
+
+                await fetch('/api/emails/trial-welcome', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    email: session.customer_email,
+                    userName,
+                    trialDaysRemaining: trialDays,
+                    planType,
+                  }),
+                });
+              } catch (emailError) {
+                console.error(
+                  'Failed to send trial welcome email:',
+                  emailError,
+                );
+                // Don't block success page
+              }
             } else {
               conversionTracking.subscriptionStarted(
                 me?.id,

@@ -120,6 +120,43 @@ export async function POST(request: NextRequest) {
 
     const subscriber = result.rows[0];
 
+    // Send verification email if not already verified
+    if (!subscriber.is_verified && subscriber.verification_token) {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+        const verificationUrl = `${baseUrl}/api/newsletter/verify?token=${subscriber.verification_token}&email=${encodeURIComponent(subscriber.email)}`;
+
+        const { sendEmail } = await import('@/lib/email');
+        const {
+          generateNewsletterVerificationEmailHTML,
+          generateNewsletterVerificationEmailText,
+        } = await import('@/lib/email-templates/newsletter-verification');
+
+        const html = generateNewsletterVerificationEmailHTML(
+          verificationUrl,
+          subscriber.email,
+        );
+        const text = generateNewsletterVerificationEmailText(
+          verificationUrl,
+          subscriber.email,
+        );
+
+        await sendEmail({
+          to: subscriber.email,
+          subject: '🌙 Confirm Your Email - Lunary Newsletter',
+          html,
+          text,
+        });
+
+        console.log(
+          `✅ Newsletter verification email sent to ${subscriber.email}`,
+        );
+      } catch (emailError) {
+        console.error('Failed to send verification email:', emailError);
+        // Don't fail the subscription, just log the error
+      }
+    }
+
     return NextResponse.json({
       success: true,
       subscriber: {

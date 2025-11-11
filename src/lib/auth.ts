@@ -22,17 +22,39 @@ export const auth = betterAuth({
   // Email and password authentication
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // Disabled for testing - can re-enable later
+    requireEmailVerification: false, // Disabled - free users don't need verification
+    // Email verification will be required when subscribing or accessing personalized features
   },
 
-  // Email verification disabled for testing
-  // emailVerification: {
-  //   sendOnSignUp: true,
-  //   autoSignInAfterVerification: true,
-  //   async sendVerificationEmail({ user, url, token }, request) {
-  //     // Email verification code here when needed
-  //   },
-  // },
+  // Email verification (optional - can be triggered when subscribing)
+  emailVerification: {
+    sendOnSignUp: false, // Don't require verification on signup
+    autoSignInAfterVerification: true,
+    async sendVerificationEmail({ user, url, token }, request) {
+      try {
+        const {
+          sendEmail,
+          generateVerificationEmailHTML,
+          generateVerificationEmailText,
+        } = await import('./email');
+
+        const html = generateVerificationEmailHTML(url, user.email);
+        const text = generateVerificationEmailText(url, user.email);
+
+        await sendEmail({
+          to: user.email,
+          subject: '✨ Verify Your Email - Lunary',
+          html,
+          text,
+        });
+
+        console.log(`✅ Verification email sent to ${user.email}`);
+      } catch (error) {
+        console.error('Failed to send verification email:', error);
+        throw error;
+      }
+    },
+  },
 
   // Session configuration
   session: {

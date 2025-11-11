@@ -77,7 +77,65 @@ export async function POST(request: NextRequest) {
       metadata: {
         planType: isMonthly ? 'monthly' : 'yearly',
       },
+      // Enable promo codes in Stripe Checkout
+      allow_promotion_codes: true,
     };
+
+    // Apply promo/discount code if provided
+    const { discountCode, promoCode, referralCode } = requestBody;
+
+    // Handle promo codes (Stripe promotion codes)
+    if (promoCode) {
+      try {
+        const promoCodes = await stripe.promotionCodes.list({
+          code: promoCode,
+          active: true,
+        });
+
+        if (promoCodes.data.length > 0) {
+          const promoCodeObj = promoCodes.data[0];
+          sessionConfig.discounts = [{ promotion_code: promoCodeObj.id }];
+          console.log(`✅ Applied promo code: ${promoCode}`);
+        } else {
+          console.warn(`⚠️ Promo code not found: ${promoCode}`);
+        }
+      } catch (error) {
+        console.error('Failed to apply promo code:', error);
+        // Continue without promo code if invalid
+      }
+    }
+
+    // Handle discount codes (for trial expired users - legacy)
+    if (discountCode && !promoCode) {
+      try {
+        const coupons = await stripe.coupons.list({ code: discountCode });
+        if (coupons.data.length > 0) {
+          sessionConfig.discounts = [{ coupon: coupons.data[0].id }];
+        }
+      } catch (error) {
+        console.error('Failed to apply discount code:', error);
+        // Continue without discount if code is invalid
+      }
+    }
+
+    // Handle referral code
+    if (referralCode) {
+      try {
+        const { validateReferralCode } = await import('@/lib/referrals');
+        const validation = await validateReferralCode(referralCode);
+        if (validation.valid) {
+          // Store referral code in metadata to process after successful checkout
+          sessionConfig.metadata = {
+            ...sessionConfig.metadata,
+            referralCode,
+            referrerUserId: validation.userId,
+          };
+        }
+      } catch (error) {
+        console.error('Failed to validate referral code:', error);
+        // Continue without referral if code is invalid
+      }
+    }
 
     // If we have a customer ID, use it
     if (customerId) {

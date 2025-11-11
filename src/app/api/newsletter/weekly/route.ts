@@ -41,7 +41,11 @@ export async function POST(request: NextRequest) {
 
     if (send) {
       // Send newsletter (implement with your preferred email service)
-      const emailResult = await sendNewsletter(newsletter, testEmail);
+      const emailResult = await sendNewsletter(
+        newsletter,
+        testEmail,
+        weeklyData,
+      );
 
       return NextResponse.json({
         success: true,
@@ -256,6 +260,7 @@ function generateNewsletterHTML(
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://lunary.app/logo.png" alt="Lunary" style="max-width: 120px; height: auto; margin: 0 auto 20px; display: block;" />
             <h1>${data.title}</h1>
             <div class="subtitle">${data.subtitle}</div>
             <div class="week-range">Week of ${weekRange}</div>
@@ -373,19 +378,25 @@ function generateNewsletterHTML(
         <div class="footer">
             <p>Generated with cosmic intelligence by Lunary</p>
             <p>Visit <a href="https://lunary.app">lunary.app</a> for daily updates and personalized guidance</p>
-            <p><a href="{{unsubscribe_url}}">Unsubscribe</a> | <a href="https://lunary.app/newsletter">Manage Preferences</a></p>
+            <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                <a href="{{UNSUBSCRIBE_URL}}">Unsubscribe</a> | 
+                <a href="https://lunary.app/profile">Manage Preferences</a>
+            </p>
         </div>
     </div>
 </body>
 </html>`;
 
-  // Generate plain text version
+  // Generate plain text version (without unsubscribe URL - will be added per email)
   const text = generateTextNewsletter(data);
 
   return { subject, html, text };
 }
 
-function generateTextNewsletter(data: WeeklyCosmicData): string {
+function generateTextNewsletter(
+  data: WeeklyCosmicData,
+  unsubscribeUrl?: string,
+): string {
   const weekRange = `${data.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${data.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
 
   return `
@@ -457,12 +468,17 @@ ${(guidance as any).reason}
 ---
 Generated with cosmic intelligence by Lunary
 Visit lunary.app for daily updates and personalized guidance
+
+---
+${unsubscribeUrl ? `Unsubscribe: ${unsubscribeUrl}` : 'Unsubscribe: https://lunary.app/unsubscribe'}
+Manage Preferences: https://lunary.app/profile
 `.trim();
 }
 
 async function sendNewsletter(
   newsletter: { subject: string; html: string; text: string },
   testEmail?: string,
+  weeklyData?: any,
 ) {
   const { sendEmail } = await import('@/lib/email');
   const { sql } = await import('@vercel/postgres');
@@ -482,11 +498,21 @@ async function sendNewsletter(
   if (testEmail) {
     console.log(`🧪 Test mode: sending to ${testEmail}`);
     try {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(testEmail)}`;
+      const personalizedHtml = newsletter.html.replace(
+        /{{UNSUBSCRIBE_URL}}/g,
+        unsubscribeUrl,
+      );
+      const personalizedText = weeklyData
+        ? generateTextNewsletter(weeklyData, unsubscribeUrl)
+        : newsletter.text;
+
       await sendEmail({
         to: testEmail,
         subject: newsletter.subject,
-        html: newsletter.html,
-        text: newsletter.text,
+        html: personalizedHtml,
+        text: personalizedText,
       });
       return {
         recipients: 1,
@@ -534,13 +560,59 @@ async function sendNewsletter(
 
     console.log(`📬 Sending to ${emailList.length} subscribers`);
 
-    // Use batch email function (handles 100 per batch automatically)
-    const result = await sendEmail({
-      to: emailList,
-      subject: newsletter.subject,
-      html: newsletter.html,
-      text: newsletter.text,
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+
+    // Replace unsubscribe URLs per email
+    const personalizedEmails = emailList.map((email) => {
+      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(email)}`;
+      const personalizedHtml = newsletter.html.replace(
+        /{{UNSUBSCRIBE_URL}}/g,
+        unsubscribeUrl,
+      );
+      const personalizedText = generateTextNewsletter(
+        JSON.parse(JSON.stringify(weeklyData)),
+        unsubscribeUrl,
+      );
+
+      return {
+        email,
+        html: personalizedHtml,
+        text: personalizedText,
+      };
     });
+
+    // Send emails individually to personalize unsubscribe links
+    const results = await Promise.allSettled(
+      personalizedEmails.map(({ email, html, text }) =>
+        sendEmail({
+          to: email,
+          subject: newsletter.subject,
+          html,
+          text,
+        }),
+      ),
+    );
+
+    const success = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    const errors = results
+      .map((r, i) => {
+        if (r.status === 'rejected') {
+          return {
+            email: emailList[i],
+            error: r.reason?.message || 'Unknown error',
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as Array<{ email: string; error: string }>;
+
+    const result = {
+      success,
+      failed,
+      total: emailList.length,
+      errors,
+    };
 
     // Update last_email_sent and increment email_count for successful sends
     if (typeof result === 'object' && 'success' in result) {

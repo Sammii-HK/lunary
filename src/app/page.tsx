@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect } from 'react';
 import { TarotWidget } from '@/components/TarotWidget';
 import { MoonWidget } from '../components/MoonWidget';
 import { AstronomyWidget } from '@/components/AstronomyWidget';
@@ -7,44 +10,31 @@ import { CrystalWidget } from '@/components/CrystalWidget';
 import { MoonSpellsWidget } from '@/components/MoonSpellsWidget';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import EphemerisWidget from '@/components/EphemerisWidget';
-import { Metadata } from 'next';
 import ConditionalWheel from '@/components/ConditionalWheel';
-// import { LuckyElements } from '@/components/LuckyElements';
-
-export const metadata: Metadata = {
-  title: 'Lunary - Your Daily Cosmic Guide',
-  description:
-    "Discover today's cosmic alignments, moon phases, planetary positions, and personalized astrological insights.",
-  openGraph: {
-    title: 'Lunary - Your Daily Cosmic Guide',
-    description:
-      "Discover today's cosmic alignments, moon phases, and personalized astrological insights.",
-    url: 'https://lunary.app',
-    siteName: 'Lunary',
-    images: [
-      {
-        url: '/api/og/cosmic',
-        width: 1200,
-        height: 630,
-        alt: "Today's Cosmic Alignments - Lunary",
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Lunary - Your Daily Cosmic Guide',
-    description:
-      "Discover today's cosmic alignments, moon phases, and personalized astrological insights.",
-    images: ['/api/og/cosmic'],
-  },
-};
+import { PostTrialMessaging } from '@/components/PostTrialMessaging';
+import { useAccount } from 'jazz-tools/react';
+import { conversionTracking } from '@/lib/analytics';
+import { useAuthStatus } from '@/components/AuthStatus';
 
 export default function Home() {
+  const { me } = useAccount();
+  const authState = useAuthStatus();
+
+  useEffect(() => {
+    // Track app opened event
+    if (authState.isAuthenticated && me?.id) {
+      conversionTracking.appOpened(me.id, '/');
+    } else if (!authState.loading) {
+      conversionTracking.appOpened(undefined, '/');
+    }
+  }, [authState.isAuthenticated, authState.loading, me?.id]);
+
   return (
     <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl mx-auto px-4'>
       <AstronomyContextProvider>
+        {/* Post-trial messaging for expired trial users */}
+        <PostTrialMessaging />
+
         {/* Top Row - Date and Astronomy (always full width) */}
         <div className='w-full space-y-4'>
           <DateWidget />
@@ -79,5 +69,3 @@ export default function Home() {
     </div>
   );
 }
-
-export const revalidate = 60; // never cache for longer than a minute

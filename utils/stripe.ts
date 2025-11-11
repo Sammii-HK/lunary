@@ -7,6 +7,8 @@ export const stripePromise = loadStripe(
 export async function createCheckoutSession(
   priceId: string,
   customerId?: string,
+  referralCode?: string,
+  discountCode?: string,
 ) {
   const response = await fetch('/api/stripe/create-checkout-session', {
     method: 'POST',
@@ -16,6 +18,8 @@ export async function createCheckoutSession(
     body: JSON.stringify({
       priceId,
       customerId,
+      referralCode,
+      discountCode,
     }),
   });
 

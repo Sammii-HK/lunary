@@ -3,8 +3,11 @@
 import { track } from '@vercel/analytics';
 
 export type ConversionEvent =
+  | 'app_opened'
   | 'signup'
+  | 'birth_data_submitted'
   | 'trial_started'
+  | 'trial_expired'
   | 'trial_converted'
   | 'subscription_started'
   | 'pricing_page_viewed'
@@ -139,4 +142,13 @@ export const conversionTracking = {
 
   birthChartViewed: (userId?: string) =>
     trackConversion('birth_chart_viewed', { userId }),
+
+  appOpened: (userId?: string, pagePath?: string) =>
+    trackConversion('app_opened', { userId, pagePath }),
+
+  birthDataSubmitted: (userId?: string) =>
+    trackConversion('birth_data_submitted', { userId }),
+
+  trialExpired: (userId?: string, email?: string) =>
+    trackConversion('trial_expired', { userId, userEmail: email }),
 };

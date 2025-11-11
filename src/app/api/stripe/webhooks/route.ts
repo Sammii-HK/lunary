@@ -93,6 +93,34 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       ? 'monthly'
       : 'yearly';
 
+  // Process referral code if present
+  const referralCode = subscription.metadata?.referralCode;
+  const referrerUserId = subscription.metadata?.referrerUserId;
+
+  if (referralCode && referrerUserId) {
+    try {
+      // Get the new user's ID from customer metadata or lookup
+      const customer = await stripe.customers.retrieve(customerId);
+      const newUserId = (customer as any).metadata?.userId;
+
+      if (newUserId) {
+        const { processReferralCode } = await import('@/lib/referrals');
+        const result = await processReferralCode(referralCode, newUserId);
+
+        if (result.success) {
+          console.log(
+            `✅ Referral processed: ${referralCode} by user ${newUserId}`,
+          );
+        } else {
+          console.error(`Failed to process referral: ${result.error}`);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to process referral in webhook:', error);
+      // Don't fail subscription creation if referral processing fails
+    }
+  }
+
   const result = await updateUserSubscriptionStatus(customerId, {
     id: subscription.id,
     status: status,

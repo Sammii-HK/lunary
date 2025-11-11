@@ -21,6 +21,8 @@ import {
 import SubscriptionManagement from '../../components/SubscriptionManagement';
 import LocationRefresh from '../../components/LocationRefresh';
 import { NotificationSettings } from '../../components/NotificationSettings';
+import { EmailSubscriptionSettings } from '../../components/EmailSubscriptionSettings';
+import { ReferralProgram } from '../../components/ReferralProgram';
 import { AuthComponent } from '@/components/Auth';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -512,7 +514,13 @@ export default function ProfilePage() {
       {authState.isAuthenticated && !isEditing && <LocationRefresh />}
 
       {/* Notification Settings - only for authenticated users */}
-      {authState.isAuthenticated && !isEditing && <NotificationSettings />}
+      {authState.isAuthenticated && !isEditing && (
+        <>
+          <EmailSubscriptionSettings />
+          <NotificationSettings />
+          <ReferralProgram />
+        </>
+      )}
 
       {/* Subscription Management Section - always show for authenticated users */}
       {authState.isAuthenticated && (

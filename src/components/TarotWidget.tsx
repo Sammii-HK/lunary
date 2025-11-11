@@ -41,14 +41,14 @@ export const TarotWidget = () => {
             {generalTarot.guidance.dailyMessage}
           </p>
 
-          {/* Upsell Section */}
+          {/* Upsell Section - Sophisticated Teaser */}
           <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-3 border border-purple-500/20'>
-            {/* <p className='text-xs text-purple-200 mb-1'>
-              🔮 Start Your Free Trial
-            </p> */}
+            <p className='text-xs text-purple-200 mb-1 font-medium'>
+              ✨ Your personalized tarot pattern has been calculated
+            </p>
             <p className='text-xs text-zinc-400 mb-2'>
-              Get tarot readings based on YOUR name and birthday. Discover what
-              the cards reveal about you!
+              Unlock it now to see what's influencing you today based on your
+              name and birthday. Discover what the cards reveal about you!
             </p>
             <SmartTrialButton variant='link' />
           </div>

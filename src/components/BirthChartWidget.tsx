@@ -33,10 +33,12 @@ export const BirthChartWidget = () => {
             <h4 className='text-white font-medium mb-2'>
               🌟 Your Cosmic Blueprint
             </h4>
+            <p className='text-purple-200 text-sm mb-2 font-medium'>
+              ✨ Your birth chart has been calculated
+            </p>
             <p className='text-zinc-300 text-sm mb-3'>
-              Unlock your complete birth chart analysis with planetary
-              positions, aspects, and detailed interpretations of your cosmic
-              nature.
+              Unlock it now to see your complete planetary positions, aspects,
+              and detailed interpretations of your cosmic nature.
             </p>
             <ul className='text-xs text-zinc-400 space-y-1 mb-3'>
               <li>• Sun, Moon, and Rising sign placements</li>
