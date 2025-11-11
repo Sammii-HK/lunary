@@ -9,6 +9,15 @@ import {
   cleanupOldDates,
 } from '@/app/api/cron/shared-notification-tracker';
 import { sql } from '@vercel/postgres';
+import { sendEmail } from '@/lib/email';
+import {
+  generateTrialReminderEmailHTML,
+  generateTrialReminderEmailText,
+} from '@/lib/email-templates/trial-nurture';
+import {
+  generateTrialExpiredEmailHTML,
+  generateTrialExpiredEmailText,
+} from '@/lib/email-templates/trial-expired';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -538,6 +547,51 @@ async function runWeeklyTasks(request: NextRequest) {
     const newsletterData = await newsletterResponse.json();
     console.log('📧 Weekly newsletter result:', newsletterData.message);
 
+    // 3. Generate social media posts for the week ahead (7 days in advance)
+    console.log(
+      '📱 Generating social media posts for the week ahead (7 days in advance)...',
+    );
+    let socialPostsResult = null;
+    try {
+      // Calculate the week that starts 7 days from now
+      // This ensures posts are always generated exactly 7 days in advance
+      const today = new Date();
+      const weekAheadDate = new Date(today);
+      weekAheadDate.setDate(today.getDate() + 7);
+
+      console.log(
+        `📅 Generating posts for week starting: ${weekAheadDate.toISOString()}`,
+      );
+
+      const socialPostsResponse = await fetch(
+        `${baseUrl}/api/admin/social-posts/generate-weekly`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Lunary-Master-Cron/1.0',
+          },
+          body: JSON.stringify({
+            weekStart: weekAheadDate.toISOString(),
+          }),
+        },
+      );
+
+      if (socialPostsResponse.ok) {
+        socialPostsResult = await socialPostsResponse.json();
+        console.log(
+          `✅ Generated ${socialPostsResult.savedIds?.length || 0} social media posts for next week`,
+        );
+      } else {
+        console.error(
+          '❌ Social posts generation failed:',
+          socialPostsResponse.status,
+        );
+      }
+    } catch (socialPostsError) {
+      console.error('❌ Social posts generation error:', socialPostsError);
+    }
+
     // Generate blog preview image URL (use first day of the week)
     const weekStartDate = blogData.data?.weekStart
       ? new Date(blogData.data.weekStart).toISOString().split('T')[0]
@@ -570,6 +624,12 @@ async function runWeeklyTasks(request: NextRequest) {
         sent: newsletterData.success,
         recipients: newsletterData.data?.recipients || 0,
       },
+      socialPosts: socialPostsResult
+        ? {
+            generated: socialPostsResult.savedIds?.length || 0,
+            weekRange: socialPostsResult.weekRange,
+          }
+        : null,
     };
   } catch (error) {
     console.error('❌ Weekly tasks failed:', error);
@@ -891,6 +951,221 @@ Last 30 Days:
       } catch (digestError) {
         console.error('❌ Failed to send weekly digest:', digestError);
       }
+    }
+
+    // Send trial reminder emails (3 days and 1 day before trial ends)
+    try {
+      const threeDaysFromNow = new Date();
+      threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+      const oneDayFromNow = new Date();
+      oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+
+      // Get trials ending in 3 days (first reminder)
+      const threeDayReminders = await sql`
+        SELECT DISTINCT
+          p.user_id,
+          p.email,
+          p.name,
+          s.trial_ends_at,
+          s.plan_type
+        FROM user_profiles p
+        JOIN subscriptions s ON p.user_id = s.user_id
+        WHERE s.status = 'trial'
+        AND s.trial_ends_at::date = ${threeDaysFromNow.toISOString().split('T')[0]}
+        AND (s.trial_reminder_3d_sent = false OR s.trial_reminder_3d_sent IS NULL)
+      `;
+
+      // Get trials ending in 1 day (final reminder)
+      const oneDayReminders = await sql`
+        SELECT DISTINCT
+          p.user_id,
+          p.email,
+          p.name,
+          s.trial_ends_at,
+          s.plan_type
+        FROM user_profiles p
+        JOIN subscriptions s ON p.user_id = s.user_id
+        WHERE s.status = 'trial'
+        AND s.trial_ends_at::date = ${oneDayFromNow.toISOString().split('T')[0]}
+        AND (s.trial_reminder_1d_sent = false OR s.trial_reminder_1d_sent IS NULL)
+      `;
+
+      let sent3Day = 0;
+      let sent1Day = 0;
+
+      // Send 3-day reminders
+      for (const user of threeDayReminders.rows) {
+        try {
+          const trialEnd = new Date(user.trial_ends_at);
+          const daysRemaining = Math.ceil(
+            (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+          );
+
+          const html = generateTrialReminderEmailHTML(
+            user.name || 'there',
+            daysRemaining,
+          );
+          const text = generateTrialReminderEmailText(
+            user.name || 'there',
+            daysRemaining,
+          );
+
+          await sendEmail({
+            to: user.email,
+            subject: `⏰ ${daysRemaining} Days Left in Your Trial - Lunary`,
+            html,
+            text,
+          });
+
+          // Mark as sent (using Jazz profile for now, will migrate to PostgreSQL)
+          await sql`
+            UPDATE subscriptions
+            SET trial_reminder_3d_sent = true
+            WHERE user_id = ${user.user_id}
+            AND status = 'trial'
+          `;
+
+          sent3Day++;
+        } catch (error) {
+          console.error(
+            `Failed to send 3-day reminder to ${user.email}:`,
+            error,
+          );
+        }
+      }
+
+      // Send 1-day reminders
+      for (const user of oneDayReminders.rows) {
+        try {
+          const trialEnd = new Date(user.trial_ends_at);
+          const daysRemaining = Math.ceil(
+            (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+          );
+
+          const html = generateTrialReminderEmailHTML(
+            user.name || 'there',
+            daysRemaining,
+          );
+          const text = generateTrialReminderEmailText(
+            user.name || 'there',
+            daysRemaining,
+          );
+
+          await sendEmail({
+            to: user.email,
+            subject: `⏰ Last Day! Your Trial Ends Tomorrow - Lunary`,
+            html,
+            text,
+          });
+
+          // Mark as sent
+          await sql`
+            UPDATE subscriptions
+            SET trial_reminder_1d_sent = true
+            WHERE user_id = ${user.user_id}
+            AND status = 'trial'
+          `;
+
+          sent1Day++;
+        } catch (error) {
+          console.error(
+            `Failed to send 1-day reminder to ${user.email}:`,
+            error,
+          );
+        }
+      }
+
+      if (sent3Day > 0 || sent1Day > 0) {
+        console.log(
+          `✅ Sent ${sent3Day} three-day reminders and ${sent1Day} one-day reminders`,
+        );
+      }
+
+      // Send trial expired emails (trials that ended yesterday)
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const expiredTrials = await sql`
+        SELECT DISTINCT
+          p.user_id,
+          p.email,
+          p.name,
+          s.trial_ends_at
+        FROM user_profiles p
+        JOIN subscriptions s ON p.user_id = s.user_id
+        WHERE s.status = 'trial'
+        AND s.trial_ends_at::date = ${yesterday.toISOString().split('T')[0]}
+        AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
+      `;
+
+      let sentExpired = 0;
+      for (const user of expiredTrials.rows) {
+        try {
+          const trialEnd = new Date(user.trial_ends_at);
+          const daysSince = Math.floor(
+            (Date.now() - trialEnd.getTime()) / (1000 * 60 * 60 * 24),
+          );
+          const missedInsights = Math.max(1, daysSince);
+
+          const html = generateTrialExpiredEmailHTML(
+            user.name || 'there',
+            missedInsights,
+          );
+          const text = generateTrialExpiredEmailText(
+            user.name || 'there',
+            missedInsights,
+          );
+
+          await sendEmail({
+            to: user.email,
+            subject: `🌙 Your Trial Has Ended - ${missedInsights} Insights Waiting`,
+            html,
+            text,
+          });
+
+          // Mark as sent and update status
+          await sql`
+            UPDATE subscriptions
+            SET 
+              trial_expired_email_sent = true,
+              status = 'cancelled'
+            WHERE user_id = ${user.user_id}
+            AND status = 'trial'
+          `;
+
+          // Track trial expired event
+          try {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/api/analytics/conversion`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  event: 'trial_expired',
+                  userId: user.user_id,
+                  userEmail: user.email,
+                  metadata: { missedInsights },
+                }),
+              },
+            );
+          } catch (trackError) {
+            console.error('Failed to track trial expired:', trackError);
+          }
+
+          sentExpired++;
+        } catch (error) {
+          console.error(
+            `Failed to send expired email to ${user.email}:`,
+            error,
+          );
+        }
+      }
+
+      if (sentExpired > 0) {
+        console.log(`✅ Sent ${sentExpired} trial expired emails`);
+      }
+    } catch (trialReminderError) {
+      console.error('❌ Failed to send trial reminders:', trialReminderError);
     }
 
     return {
