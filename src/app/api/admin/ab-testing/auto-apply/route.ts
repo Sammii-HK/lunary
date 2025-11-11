@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       SELECT DISTINCT metadata->>'abTest' as test_name
       FROM conversion_events
       WHERE metadata->>'abTest' IS NOT NULL
-      AND ${sql.raw(dateFilter)}
+      AND ${(sql as any).raw(dateFilter)}
     `;
 
     const suggestions: AutoApplySuggestion[] = [];
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         WHERE metadata->>'abTest' = ${testName}
         AND metadata->>'abVariant' = 'A'
         AND event_type IN ('app_opened', 'pricing_page_viewed')
-        AND ${sql.raw(dateFilter)}
+        AND ${(sql as any).raw(dateFilter)}
       `;
 
       const impressionsB = await sql`
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         WHERE metadata->>'abTest' = ${testName}
         AND metadata->>'abVariant' = 'B'
         AND event_type IN ('app_opened', 'pricing_page_viewed')
-        AND ${sql.raw(dateFilter)}
+        AND ${(sql as any).raw(dateFilter)}
       `;
 
       const conversionsA = await sql`
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         WHERE metadata->>'abTest' = ${testName}
         AND metadata->>'abVariant' = 'A'
         AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
-        AND ${sql.raw(dateFilter)}
+        AND ${(sql as any).raw(dateFilter)}
       `;
 
       const conversionsB = await sql`
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
         WHERE metadata->>'abTest' = ${testName}
         AND metadata->>'abVariant' = 'B'
         AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
-        AND ${sql.raw(dateFilter)}
+        AND ${(sql as any).raw(dateFilter)}
       `;
 
       const impressionsA_count = parseInt(impressionsA.rows[0]?.count || '0');

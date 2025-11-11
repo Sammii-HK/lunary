@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { useAuthStatus } from './AuthStatus';
 import { getUserReferralStats, generateReferralCode } from '@/lib/referrals';
@@ -14,15 +14,7 @@ export function ReferralProgram() {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (authState.isAuthenticated && me?.id) {
-      loadReferralData();
-    } else {
-      setLoading(false);
-    }
-  }, [authState.isAuthenticated, me?.id]);
-
-  const loadReferralData = async () => {
+  const loadReferralData = useCallback(async () => {
     if (!me?.id) return;
 
     try {
@@ -44,7 +36,15 @@ export function ReferralProgram() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [me?.id]);
+
+  useEffect(() => {
+    if (authState.isAuthenticated && me?.id) {
+      loadReferralData();
+    } else {
+      setLoading(false);
+    }
+  }, [authState.isAuthenticated, me?.id, loadReferralData]);
 
   const handleCopy = async () => {
     if (!referralCode) return;
