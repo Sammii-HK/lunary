@@ -89,6 +89,7 @@ export default function BlogPage() {
     fetchCurrentWeek();
     // Fetch actual data for all weeks
     fetchAllWeeksData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [generateAllWeeks]);
 
   const fetchCurrentWeek = async () => {
@@ -157,7 +158,6 @@ export default function BlogPage() {
           <p className='text-lg md:text-xl text-zinc-400'>
             Weekly cosmic guidance and planetary insights
           </p>
-          updating blog paege{' '}
         </div>
 
         {/* Current Week Highlight */}

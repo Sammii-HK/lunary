@@ -3,7 +3,15 @@ export const grimoire: {
 } = {
   moon: {
     title: 'Moon',
-    contents: ['Phases', 'Full Moon Names', 'Rituals'],
+    contents: [
+      'Phases',
+      'Full Moon Names',
+      'Rituals',
+      'Moon Signs',
+      'Void of Course',
+      'Eclipses',
+      'Moon Gardening',
+    ],
   },
   wheelOfTheYear: {
     title: 'Wheel of the Year',
@@ -17,7 +25,14 @@ export const grimoire: {
   },
   tarot: {
     title: 'Tarot',
-    contents: ['Major Arcana', 'Arcana', 'Spreads'],
+    contents: [
+      'Major Arcana',
+      'Arcana',
+      'Spreads',
+      'Reversed Cards',
+      'Card Combinations',
+      'Ethics',
+    ],
   },
   runes: {
     title: 'Runes',
@@ -61,6 +76,8 @@ export const grimoire: {
   practices: {
     title: 'Practices',
     contents: [
+      'Spellcraft Fundamentals',
+      'Altar Setup',
       'Spells & Rituals',
       'Protection',
       'Love & Relationships',
@@ -74,7 +91,51 @@ export const grimoire: {
   },
   birthChart: {
     title: 'Birth Chart',
-    contents: ['Planets', 'Houses', 'Aspects', 'Retrogrades', 'Transits'],
+    contents: [
+      'Planets',
+      'Houses',
+      'Aspects',
+      'Retrogrades',
+      'Transits',
+      'Rising Sign',
+      'Synastry',
+    ],
+  },
+  candleMagic: {
+    title: 'Candle Magic',
+    contents: [
+      'Color Meanings',
+      'Carving',
+      'Anointing',
+      'Altar Lighting',
+      'Color Incantations',
+      'Safety',
+      'Rituals',
+    ],
+  },
+  divination: {
+    title: 'Divination',
+    contents: ['Pendulum', 'Scrying', 'Dream Interpretation', 'Omen Reading'],
+  },
+  modernWitchcraft: {
+    title: 'Modern Witchcraft',
+    contents: [
+      'Witch Types',
+      'Tools',
+      'Ethics',
+      'Coven vs Solitary',
+      'Book of Shadows',
+    ],
+  },
+  meditation: {
+    title: 'Meditation & Mindfulness',
+    contents: [
+      'Techniques',
+      'Breathwork',
+      'Grounding',
+      'Centering',
+      'Journaling',
+    ],
   },
 };
 

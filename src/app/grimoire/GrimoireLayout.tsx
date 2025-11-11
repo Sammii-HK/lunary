@@ -36,6 +36,10 @@ import Chakras from './components/Chakras';
 import { Numerology } from './components/Numerology';
 import Crystals from './components/Crystals';
 import BirthChart from './components/BirthChart';
+import CandleMagic from './components/CandleMagic';
+import Divination from './components/Divination';
+import ModernWitchcraft from './components/ModernWitchcraft';
+import Meditation from './components/Meditation';
 
 const GrimoireContent = {
   moon: <Moon />,
@@ -49,6 +53,10 @@ const GrimoireContent = {
   numerology: <Numerology />,
   crystals: <Crystals />,
   birthChart: <BirthChart />,
+  candleMagic: <CandleMagic />,
+  divination: <Divination />,
+  modernWitchcraft: <ModernWitchcraft />,
+  meditation: <Meditation />,
 };
 
 interface SearchResult {

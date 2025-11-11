@@ -168,6 +168,288 @@ const Tarot = () => {
         ))}
       </section>
 
+      {/* Reversed Cards Section */}
+      <section id='reversed-cards' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Reversed Cards Guide
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Reversed cards (cards that appear upside down) add depth and nuance
+            to tarot readings. They don't always mean the opposite of the
+            upright meaning—often they indicate internal processes, delays, or
+            blocked energy.
+          </p>
+        </div>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Understanding Reversed Cards
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              Reversed cards can mean several things depending on context:
+            </p>
+            <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2 mb-3'>
+              <li>
+                <strong>Blocked energy:</strong> The card's energy is present
+                but not flowing freely
+              </li>
+              <li>
+                <strong>Internal process:</strong> The meaning is happening
+                within rather than externally
+              </li>
+              <li>
+                <strong>Delay:</strong> The energy is coming but not yet
+                manifesting
+              </li>
+              <li>
+                <strong>Opposite meaning:</strong> Sometimes the reversed card
+                represents the opposite of its upright meaning
+              </li>
+              <li>
+                <strong>Shadow aspect:</strong> The darker or less conscious
+                side of the card's energy
+              </li>
+            </ul>
+            <p className='text-sm text-zinc-300 leading-relaxed'>
+              Always consider the card's position in the spread, surrounding
+              cards, and your intuition when interpreting reversals.
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              How to Read Reversed Cards
+            </h3>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>1. Check the context:</strong> What question are you
+                asking? What position is the card in?
+              </div>
+              <div>
+                <strong>2. Look at surrounding cards:</strong> Do other cards
+                support or contradict the reversal?
+              </div>
+              <div>
+                <strong>3. Consider the element:</strong> Reversed Cups might
+                mean blocked emotions; reversed Swords might mean mental
+                confusion.
+              </div>
+              <div>
+                <strong>4. Trust your intuition:</strong> What does the reversal
+                feel like to you?
+              </div>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Common Reversed Patterns
+            </h3>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>Major Arcana reversed:</strong> Often indicates internal
+                spiritual work or shadow aspects of major life themes
+              </div>
+              <div>
+                <strong>Court cards reversed:</strong> May represent blocked
+                expression of that personality type or its shadow side
+              </div>
+              <div>
+                <strong>Pip cards reversed:</strong> Usually indicate delays,
+                internal processes, or blocked energy in that area of life
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Card Combinations Section */}
+      <section id='card-combinations' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Reading Card Combinations
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Cards don't exist in isolation. Learning to read cards together
+            creates richer, more nuanced interpretations. Here are common
+            combination patterns.
+          </p>
+        </div>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Element Combinations
+            </h3>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>Fire + Air:</strong> Action and ideas combine for
+                inspired action and communication
+              </div>
+              <div>
+                <strong>Water + Earth:</strong> Emotions grounded in reality,
+                practical emotional work
+              </div>
+              <div>
+                <strong>Fire + Water:</strong> Passionate emotions, intense
+                feelings driving action
+              </div>
+              <div>
+                <strong>Air + Earth:</strong> Ideas made practical, mental
+                planning with tangible results
+              </div>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Number Patterns
+            </h3>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>Multiple Aces:</strong> New beginnings in multiple areas
+                of life
+              </div>
+              <div>
+                <strong>Multiple Court Cards:</strong> People and personalities
+                influencing the situation
+              </div>
+              <div>
+                <strong>Sequential Numbers:</strong> A progression or journey
+                through that energy
+              </div>
+              <div>
+                <strong>Same Number Different Suits:</strong> The same theme
+                playing out in different life areas
+              </div>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Major Arcana Combinations
+            </h3>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>The Fool + The World:</strong> Beginning and ending of a
+                cycle, completion leading to new start
+              </div>
+              <div>
+                <strong>The Magician + The Star:</strong> Manifestation with
+                hope and inspiration
+              </div>
+              <div>
+                <strong>Death + The Tower:</strong> Major transformation and
+                sudden change
+              </div>
+              <div>
+                <strong>The Sun + The Moon:</strong> Balance of conscious and
+                unconscious, clarity and mystery
+              </div>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              How to Read Combinations
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                1. <strong>Look for themes:</strong> What do the cards have in
+                common?
+              </p>
+              <p>
+                2. <strong>Notice contrasts:</strong> How do the cards differ or
+                balance each other?
+              </p>
+              <p>
+                3. <strong>Consider position:</strong> Cards near each other
+                interact more directly
+              </p>
+              <p>
+                4. <strong>Find the story:</strong> How do these cards create a
+                narrative together?
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tarot Ethics Section */}
+      <section id='tarot-ethics' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Tarot Ethics & Best Practices
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Reading tarot for others comes with responsibility. Here are ethical
+            guidelines and best practices for tarot readers.
+          </p>
+        </div>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              When to Read for Others
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                Reading for others can be rewarding but requires skill and
+                sensitivity. Consider reading for others when:
+              </p>
+              <ul className='list-disc list-inside space-y-1 ml-4'>
+                <li>You feel confident in your interpretation skills</li>
+                <li>The querent is open and consenting</li>
+                <li>You can maintain boundaries and objectivity</li>
+                <li>You're prepared to handle difficult or emotional topics</li>
+              </ul>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Ethical Guidelines
+            </h3>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>Consent:</strong> Always get permission before reading
+                for someone
+              </div>
+              <div>
+                <strong>Confidentiality:</strong> Keep readings private unless
+                given permission to share
+              </div>
+              <div>
+                <strong>Empowerment:</strong> Focus on guidance and empowerment,
+                not fear or dependency
+              </div>
+              <div>
+                <strong>Boundaries:</strong> Don't read about third parties
+                without their consent
+              </div>
+              <div>
+                <strong>Medical/Legal:</strong> Never replace professional
+                medical or legal advice
+              </div>
+              <div>
+                <strong>Honesty:</strong> If you're unsure, say so. Don't make
+                up meanings
+              </div>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Self-Reading Best Practices
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                Reading for yourself is valuable but requires awareness of bias:
+              </p>
+              <ul className='list-disc list-inside space-y-1 ml-4'>
+                <li>Take time to reflect before interpreting</li>
+                <li>Journal your readings for deeper insight</li>
+                <li>Be honest about emotional attachment to outcomes</li>
+                <li>Consider getting a second opinion for major decisions</li>
+                <li>Don't read the same question repeatedly</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section id='faq' className='space-y-6'>
         <h2 className='text-xl font-medium text-zinc-100'>
@@ -194,7 +476,8 @@ const Tarot = () => {
               processes, or a need to look within. They can also represent the
               opposite of the card's upright meaning or a delay in the energy's
               manifestation. Trust your intuition and the context of the
-              reading.
+              reading. See the Reversed Cards Guide section above for detailed
+              information.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
@@ -230,6 +513,39 @@ const Tarot = () => {
               Cross or other spreads for deeper insights.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Related Topics Section */}
+      <section className='mt-12 pt-8 border-t border-zinc-800/50'>
+        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          Related Topics
+        </h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+          <a
+            href='/grimoire/divination'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Other Divination Methods
+          </a>
+          <a
+            href='/grimoire/practices#spellcraft-fundamentals'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Spellcraft & Magic
+          </a>
+          <a
+            href='/grimoire/birth-chart'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Birth Chart Reading
+          </a>
+          <a
+            href='/grimoire/crystals'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Crystals for Divination
+          </a>
         </div>
       </section>
     </div>

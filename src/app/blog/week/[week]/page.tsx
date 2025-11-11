@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import {
   ArrowLeft,
+  ArrowRight,
   Calendar,
   Star,
   TrendingUp,
@@ -815,6 +816,108 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               );
             })()}
         </article>
+
+        {/* Related Posts Section */}
+        <section className='mt-12 pt-8 border-t border-zinc-800'>
+          <h2 className='text-2xl font-semibold mb-6'>
+            Related Weekly Forecasts
+          </h2>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            {(() => {
+              const currentWeekNum = blogData.weekNumber || 1;
+              const currentYear = blogData.year || 2025;
+              const relatedWeeks = [
+                {
+                  week: currentWeekNum - 1,
+                  year: currentYear,
+                  label: 'Previous Week',
+                },
+                {
+                  week: currentWeekNum + 1,
+                  year: currentYear,
+                  label: 'Next Week',
+                },
+                {
+                  week: currentWeekNum - 4,
+                  year: currentYear,
+                  label: 'Last Month',
+                },
+              ].filter((w) => w.week > 0);
+
+              return relatedWeeks.map((related) => {
+                const weekSlug = `week-${related.week}-${related.year}`;
+                return (
+                  <Link
+                    key={weekSlug}
+                    href={`/blog/week/${weekSlug}`}
+                    className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+                  >
+                    <div className='flex items-center gap-2 mb-2'>
+                      <Badge variant='outline' className='text-xs'>
+                        Week {related.week}
+                      </Badge>
+                      <span className='text-xs text-zinc-500'>
+                        {related.year}
+                      </span>
+                    </div>
+                    <h3 className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-1'>
+                      {related.label}
+                    </h3>
+                    <p className='text-sm text-zinc-400'>
+                      {related.week === currentWeekNum - 1
+                        ? 'Previous cosmic forecast'
+                        : related.week === currentWeekNum + 1
+                          ? 'Upcoming cosmic forecast'
+                          : 'Earlier cosmic forecast'}
+                    </p>
+                  </Link>
+                );
+              });
+            })()}
+          </div>
+          <div className='mt-6'>
+            <Link
+              href='/blog'
+              className='inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors text-sm font-medium'
+            >
+              View All Weekly Forecasts
+              <ArrowRight className='h-4 w-4' />
+            </Link>
+          </div>
+        </section>
+
+        {/* Breadcrumb Schema */}
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'Home',
+                  item: 'https://lunary.app',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'Blog',
+                  item: 'https://lunary.app/blog',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 3,
+                  name: blogData.title,
+                  item: `https://lunary.app/blog/week/${week}`,
+                },
+              ],
+            }),
+          }}
+        />
+
+        {/* Article Schema */}
         <script
           type='application/ld+json'
           dangerouslySetInnerHTML={{

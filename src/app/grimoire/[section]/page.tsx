@@ -26,6 +26,14 @@ const sectionDescriptions: Record<string, string> = {
     'Spells, rituals, protection, love magic, prosperity, healing, cleansing, divination, manifestation, and banishing practices.',
   'birth-chart':
     'Learn about planets, houses, and astrological components. Understand how birth charts are calculated and interpreted.',
+  'candle-magic':
+    'Complete guide to candle magic: color meanings, carving techniques, anointing with oils, lighting candles on altar, incantations by color, safety practices, and candle rituals.',
+  divination:
+    'Explore divination methods beyond tarot: pendulum reading, scrying, dream interpretation, and reading omens from nature.',
+  'modern-witchcraft':
+    'Discover different paths of modern witchcraft, essential tools, ethics, coven vs solitary practice, and creating your Book of Shadows.',
+  meditation:
+    'Meditation and mindfulness practices for spiritual growth: techniques, breathwork, grounding exercises, centering, and magical journaling.',
 };
 
 export async function generateMetadata({

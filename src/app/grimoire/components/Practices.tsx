@@ -258,6 +258,219 @@ const Practices = () => {
         )}
       </section>
 
+      {/* Spellcraft Fundamentals Section */}
+      <section id='spellcraft-fundamentals' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Spellcraft Fundamentals
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Before casting spells, understand the foundational principles of
+            spellcraft. These fundamentals ensure your magic is effective,
+            ethical, and aligned with your intentions.
+          </p>
+        </div>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Intention Setting
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              Clear intention is the foundation of all magic. Your intention
+              directs energy and determines outcomes.
+            </p>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>How to set clear intentions:</strong>
+              </p>
+              <ul className='list-disc list-inside space-y-1 ml-4'>
+                <li>Be specific about what you want (not vague)</li>
+                <li>
+                  Focus on what you want to attract, not what you want to avoid
+                </li>
+                <li>Use present tense ("I am" not "I will be")</li>
+                <li>Include how it benefits you and others</li>
+                <li>Write it down or speak it aloud clearly</li>
+              </ul>
+            </div>
+            <p className='text-sm text-zinc-300 leading-relaxed mt-3'>
+              Example: Instead of "I don't want to be poor," say "I am
+              financially abundant and secure."
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Altar Setup
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              An altar is a sacred space for magical work. It doesn't need to be
+              elaborate—simplicity and intention matter most.
+            </p>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Essential altar elements:</strong>
+              </p>
+              <ul className='list-disc list-inside space-y-1 ml-4'>
+                <li>
+                  <strong>Representation of elements:</strong> Candle (fire),
+                  water, salt (earth), incense (air)
+                </li>
+                <li>
+                  <strong>Personal items:</strong> Photos, crystals, symbols
+                  that hold meaning
+                </li>
+                <li>
+                  <strong>Tools:</strong> Matches, athame or wand (optional),
+                  offering bowl
+                </li>
+                <li>
+                  <strong>Cleansing tools:</strong> Sage, salt, or cleansing
+                  spray
+                </li>
+              </ul>
+            </div>
+            <p className='text-sm text-zinc-300 leading-relaxed mt-3'>
+              Cleanse your altar before each use. Arrange items
+              intuitively—there's no single "correct" way. Your altar should
+              feel sacred and personal.
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Altar Layout & Organization
+            </h3>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>Directional Placement:</strong>
+                <ul className='list-disc list-inside ml-4 mt-1 space-y-1'>
+                  <li>
+                    <strong>North (Earth):</strong> Crystals, salt, plants,
+                    earth representations
+                  </li>
+                  <li>
+                    <strong>East (Air):</strong> Incense, feathers, bells, air
+                    representations
+                  </li>
+                  <li>
+                    <strong>South (Fire):</strong> Candles, matches, fire-safe
+                    dish, fire representations
+                  </li>
+                  <li>
+                    <strong>West (Water):</strong> Water bowl, shells, water
+                    representations
+                  </li>
+                  <li>
+                    <strong>Center:</strong> Main working candle, intention
+                    items, focal point
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <strong>Altar Maintenance:</strong>
+                <ul className='list-disc list-inside ml-4 mt-1 space-y-1'>
+                  <li>
+                    Cleanse before each ritual (sage, salt, or visualization)
+                  </li>
+                  <li>Keep items organized and meaningful</li>
+                  <li>Refresh offerings regularly</li>
+                  <li>Dust and clean physical items monthly</li>
+                  <li>Recharge crystals under moonlight or sunlight</li>
+                </ul>
+              </div>
+              <div>
+                <strong>Creating Sacred Space:</strong>
+                <ul className='list-disc list-inside ml-4 mt-1 space-y-1'>
+                  <li>Light white candle first for protection</li>
+                  <li>Ring bell or chime to clear energy</li>
+                  <li>Visualize white light surrounding your altar</li>
+                  <li>State your intention for the ritual</li>
+                  <li>Thank the elements and close properly when done</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Understanding Magical Timing
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              Timing amplifies spell effectiveness. Align your magic with
+              natural cycles for best results.
+            </p>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>Moon phases:</strong>
+                <ul className='list-disc list-inside ml-4 mt-1'>
+                  <li>New Moon: New beginnings, setting intentions</li>
+                  <li>Waxing Moon: Growth, attraction, building energy</li>
+                  <li>Full Moon: Manifestation, release, charging</li>
+                  <li>Waning Moon: Banishing, letting go, breaking habits</li>
+                </ul>
+              </div>
+              <div>
+                <strong>Days of the week:</strong>
+                <ul className='list-disc list-inside ml-4 mt-1'>
+                  <li>Monday (Moon): Intuition, dreams, emotions</li>
+                  <li>Tuesday (Mars): Action, courage, protection</li>
+                  <li>Wednesday (Mercury): Communication, learning, travel</li>
+                  <li>Thursday (Jupiter): Abundance, expansion, luck</li>
+                  <li>Friday (Venus): Love, beauty, relationships</li>
+                  <li>Saturday (Saturn): Banishing, protection, discipline</li>
+                  <li>Sunday (Sun): Success, vitality, confidence</li>
+                </ul>
+              </div>
+              <div>
+                <strong>Time of day:</strong>
+                <ul className='list-disc list-inside ml-4 mt-1'>
+                  <li>Dawn: New beginnings, fresh starts</li>
+                  <li>Noon: Peak power, manifestation</li>
+                  <li>Sunset: Release, gratitude, closure</li>
+                  <li>Midnight: Transformation, shadow work</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Energy Work Basics
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              Magic works with energy. Learning to sense, direct, and work with
+              energy is fundamental to spellcraft.
+            </p>
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <div>
+                <strong>Grounding:</strong> Connect with earth energy. Visualize
+                roots extending from your feet into the earth. Feel stable and
+                centered. Essential before and after spellwork.
+              </div>
+              <div>
+                <strong>Centering:</strong> Find your core energy. Take deep
+                breaths, feel your energy at your center (solar plexus or
+                heart). This is your power source.
+              </div>
+              <div>
+                <strong>Shielding:</strong> Protect your energy. Visualize a
+                bubble of light around you. Set intention: "I am protected."
+                Essential for protection work and when working with others'
+                energy.
+              </div>
+              <div>
+                <strong>Raising energy:</strong> Build power for spells. Methods
+                include chanting, dancing, visualization, breathwork, or
+                drumming. Feel energy building before directing it.
+              </div>
+              <div>
+                <strong>Directing energy:</strong> Send intention outward.
+                Visualize your intention clearly, feel energy flowing through
+                you, and release it with purpose. Always ground excess energy
+                afterward.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-4'>
         <h3 className='text-lg font-medium text-zinc-100 mb-2'>
           About These Spells & Rituals

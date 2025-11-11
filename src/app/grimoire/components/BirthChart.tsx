@@ -443,6 +443,238 @@ const BirthChart = () => {
         </div>
       </section>
 
+      {/* Rising Sign Section */}
+      <section id='rising-sign' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Rising Sign (Ascendant)
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Your rising sign, also called the Ascendant, is the zodiac sign that
+            was rising on the eastern horizon at your exact moment of birth. It
+            represents your outer personality, how others see you, and your
+            approach to life.
+          </p>
+        </div>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              What Is the Rising Sign?
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              The rising sign changes approximately every 2 hours, making it the
+              most time-sensitive part of your chart. It's calculated using:
+            </p>
+            <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1 ml-4'>
+              <li>Your exact birth time (most important)</li>
+              <li>Your birth location (latitude/longitude)</li>
+              <li>Your birth date</li>
+            </ul>
+            <p className='text-sm text-zinc-300 leading-relaxed mt-3'>
+              If you don't know your exact birth time, you can use noon as a
+              placeholder, but your rising sign may be inaccurate.
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Rising Sign Meanings
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              Your rising sign influences:
+            </p>
+            <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1 ml-4'>
+              <li>
+                <strong>First impressions:</strong> How others initially
+                perceive you
+              </li>
+              <li>
+                <strong>Outward personality:</strong> Your social mask and
+                presentation
+              </li>
+              <li>
+                <strong>Physical appearance:</strong> Body type, features, and
+                style
+              </li>
+              <li>
+                <strong>Approach to life:</strong> How you navigate new
+                situations
+              </li>
+              <li>
+                <strong>First house themes:</strong> Self-image, identity, and
+                personal expression
+              </li>
+            </ul>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              How Rising Sign Differs from Sun Sign
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Sun Sign:</strong> Your core identity, ego, and life
+                purpose (who you are at your core)
+              </p>
+              <p>
+                <strong>Rising Sign:</strong> Your outer personality and how you
+                present yourself (how others see you)
+              </p>
+              <p className='mt-2'>
+                Think of it this way: Your Sun sign is your true self, while
+                your Rising sign is the mask you wear in the world. Both are
+                authentic parts of you, but serve different purposes.
+              </p>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Rising Sign by Element
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div>
+                <p className='text-sm font-medium text-zinc-200 mb-1'>
+                  Fire Rising (Aries, Leo, Sagittarius)
+                </p>
+                <p className='text-xs text-zinc-400'>
+                  Energetic, confident, action-oriented first impression
+                </p>
+              </div>
+              <div>
+                <p className='text-sm font-medium text-zinc-200 mb-1'>
+                  Earth Rising (Taurus, Virgo, Capricorn)
+                </p>
+                <p className='text-xs text-zinc-400'>
+                  Grounded, practical, reliable first impression
+                </p>
+              </div>
+              <div>
+                <p className='text-sm font-medium text-zinc-200 mb-1'>
+                  Air Rising (Gemini, Libra, Aquarius)
+                </p>
+                <p className='text-xs text-zinc-400'>
+                  Communicative, social, intellectual first impression
+                </p>
+              </div>
+              <div>
+                <p className='text-sm font-medium text-zinc-200 mb-1'>
+                  Water Rising (Cancer, Scorpio, Pisces)
+                </p>
+                <p className='text-xs text-zinc-400'>
+                  Intuitive, emotional, sensitive first impression
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Synastry Section */}
+      <section id='synastry' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Synastry: Relationship Compatibility
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Synastry is the comparison of two birth charts to understand
+            relationship dynamics, compatibility, and how two people interact.
+          </p>
+        </div>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Understanding Synastry
+            </h3>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              Synastry looks at how planets in one person's chart interact with
+              planets in another's chart. Key areas to examine:
+            </p>
+            <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1 ml-4'>
+              <li>
+                <strong>Sun-Moon aspects:</strong> Emotional compatibility and
+                understanding
+              </li>
+              <li>
+                <strong>Venus-Mars aspects:</strong> Romantic and sexual
+                attraction
+              </li>
+              <li>
+                <strong>Mercury aspects:</strong> Communication style and mental
+                connection
+              </li>
+              <li>
+                <strong>Saturn aspects:</strong> Long-term stability and
+                commitment
+              </li>
+              <li>
+                <strong>Jupiter aspects:</strong> Growth, expansion, and shared
+                values
+              </li>
+            </ul>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Compatible Aspects
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Trines (120°):</strong> Easy, harmonious connection.
+                Natural understanding.
+              </p>
+              <p>
+                <strong>Sextiles (60°):</strong> Supportive, friendly energy.
+                Growth opportunities.
+              </p>
+              <p>
+                <strong>Conjunctions (0°):</strong> Intense connection. Can be
+                harmonious or challenging.
+              </p>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              Challenging Aspects
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Squares (90°):</strong> Tension and friction, but also
+                growth through challenge.
+              </p>
+              <p>
+                <strong>Oppositions (180°):</strong> Attraction and repulsion.
+                Balance needed.
+              </p>
+              <p className='mt-2'>
+                Remember: Challenging aspects don't mean incompatibility. They
+                often create the most dynamic and growth-oriented relationships.
+              </p>
+            </div>
+          </div>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+              How to Read Synastry
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>1. Compare both charts side by side</p>
+              <p>
+                2. Look for aspects between planets (especially personal
+                planets)
+              </p>
+              <p>
+                3. Note which houses each person's planets fall into in the
+                other's chart
+              </p>
+              <p>
+                4. Consider the overall balance of harmonious vs challenging
+                aspects
+              </p>
+              <p>
+                5. Remember: No relationship is perfect—challenges create growth
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
       <section id='faq' className='space-y-6'>
         <h2 className='text-xl font-medium text-zinc-100'>
           Frequently Asked Questions
@@ -457,6 +689,7 @@ const BirthChart = () => {
               horizon at your exact time of birth. It represents how you present
               yourself to the world, your outward personality, and your first
               impressions. It's calculated using your birth time and location.
+              See the Rising Sign section above for detailed information.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
