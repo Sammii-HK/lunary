@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: 28,
+                fontSize: 36,
                 color: '#a78bfa',
                 opacity: 0.9,
                 marginTop: '20px',

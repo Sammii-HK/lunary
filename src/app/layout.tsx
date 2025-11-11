@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/next';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
@@ -14,6 +14,8 @@ import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
 import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
 import { StructuredData } from '@/components/StructuredData';
+import { ExitIntent } from '@/components/ExitIntent';
+import { OnboardingFlow } from '@/components/OnboardingFlow';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -28,7 +30,6 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily insights, and cosmic guidance.',
     manifest: PWA_MANIFEST_URL,
-    themeColor: '#18181b',
     keywords: [
       'astrology',
       'birth chart',
@@ -88,6 +89,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+export const viewport: Viewport = {
+  themeColor: '#18181b',
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -109,6 +114,8 @@ export default function RootLayout({
             <ErrorBoundaryWrapper>
               <PWAHandler />
               <NotificationManager />
+              <ExitIntent />
+              <OnboardingFlow />
             </ErrorBoundaryWrapper>
           </LunaryJazzProvider>
         </ErrorBoundaryWrapper>
