@@ -407,6 +407,51 @@ const Correspondences = () => {
           </div>
         </div>
       </section>
+
+      {/* Related Topics Section */}
+      <section className='mt-12 pt-8 border-t border-zinc-800/50'>
+        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          Related Topics
+        </h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+          <a
+            href='/grimoire/candle-magic#color-meanings'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Candle Color Meanings
+          </a>
+          <a
+            href='/grimoire/practices'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Spells & Rituals
+          </a>
+          <a
+            href='/grimoire/crystals'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Crystal Correspondences
+          </a>
+          <a
+            href='/grimoire/moon'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Moon & Timing
+          </a>
+          <a
+            href='/grimoire/birth-chart#planets'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Planetary Influences
+          </a>
+          <a
+            href='/grimoire/numerology'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Number Correspondences
+          </a>
+        </div>
+      </section>
     </div>
   );
 };

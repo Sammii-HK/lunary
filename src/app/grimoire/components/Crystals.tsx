@@ -221,6 +221,51 @@ const Crystals = () => {
           </div>
         </div>
       </section>
+
+      {/* Related Topics Section */}
+      <section className='mt-12 pt-8 border-t border-zinc-800/50'>
+        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          Related Topics
+        </h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+          <a
+            href='/grimoire/practices'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Spells & Rituals
+          </a>
+          <a
+            href='/grimoire/moon'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Moon Magic
+          </a>
+          <a
+            href='/grimoire/candle-magic'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Candle Magic
+          </a>
+          <a
+            href='/grimoire/correspondences#colors'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Color Correspondences
+          </a>
+          <a
+            href='/grimoire/chakras'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Chakra Healing
+          </a>
+          <a
+            href='/grimoire/correspondences'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Magical Correspondences
+          </a>
+        </div>
+      </section>
     </div>
   );
 };
