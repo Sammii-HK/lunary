@@ -4,11 +4,15 @@ export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
 
   // Redirect www to non-www (fix duplicate content issue)
-  if (hostname.startsWith('www.')) {
+  // Only redirect if we have a valid hostname (not during build)
+  if (hostname && hostname.startsWith('www.')) {
     const newHostname = hostname.replace('www.', '');
-    const url = new URL(request.url);
-    url.hostname = newHostname;
-    return NextResponse.redirect(url, 301);
+    const url = request.nextUrl.clone();
+    // Construct redirect URL using Next.js NextURL properly
+    const redirectUrl = new URL(
+      `${url.protocol}//${newHostname}${url.pathname}${url.search}`,
+    );
+    return NextResponse.redirect(redirectUrl, 301);
   }
 
   const url = request.nextUrl.clone();
