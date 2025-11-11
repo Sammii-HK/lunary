@@ -17,28 +17,33 @@ A complete digital product shop built for Lunary, featuring automatic pack gener
 ### Core Components
 
 1. **Pack Generation API** (`/api/shop/packs/generate`)
+
    - Generates content based on category (moon phases, crystals, spells, etc.)
    - Creates PDF files using pdf-lib
    - Uploads to Vercel Blob with private access
    - Generates OG images for previews
 
 2. **Stripe Integration** (`/api/shop/stripe/`)
+
    - Creates products and prices in Stripe
    - Handles checkout sessions
    - Processes webhooks for payment confirmation
 
 3. **Purchase Flow** (`/api/shop/purchase`)
+
    - Creates secure checkout sessions
    - Generates download tokens
    - Tracks purchase status
 
 4. **Secure Downloads** (`/api/shop/download/[token]`)
+
    - Token-based authentication
    - Download limits (5 per purchase)
    - 30-day expiry
    - Signed URL generation
 
 5. **Shop Interface** (`/shop`)
+
    - Category filtering
    - Real-time product display
    - Stripe Checkout integration
@@ -85,31 +90,37 @@ NEXT_PUBLIC_BASE_URL=https://yourdomain.com
 ## 📦 Pack Categories
 
 ### Moon Phases
+
 - Yearly, quarterly, or monthly moon phase guides
 - Includes lunar calendars and spiritual guidance
 - Automatically fetches real astronomical data
 
 ### Crystals
+
 - Crystal healing guides
 - Properties, chakras, and usage instructions
 - Comprehensive crystal databases
 
 ### Spells
+
 - Sacred ritual collections
 - Protection, abundance, love spells
 - Ingredient lists and instructions
 
 ### Tarot
+
 - Tarot card meanings and spreads
 - Major and minor arcana guides
 - Personalized reading techniques
 
 ### Astrology
+
 - Planetary transit guides
 - Birth chart interpretations
 - Astrological calendars
 
 ### Seasonal
+
 - Seasonal celebration guides
 - Sabbat rituals and traditions
 - Nature-based spiritual practices
@@ -140,7 +151,7 @@ Modify the generation functions in `/api/shop/packs/generate/route.ts`:
 async function generateCustomPack(
   name: string,
   description: string,
-  options: CustomOptions
+  options: CustomOptions,
 ): Promise<PackContent> {
   // Your custom generation logic
 }
@@ -166,6 +177,7 @@ yarn dev
 ### Testing Payments
 
 Use Stripe test cards:
+
 - Success: `4242 4242 4242 4242`
 - Decline: `4000 0000 0000 0002`
 
