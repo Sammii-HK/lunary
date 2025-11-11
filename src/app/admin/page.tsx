@@ -294,6 +294,15 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       category: 'content',
       status: 'new',
     },
+    {
+      title: 'Test Calendar Generator',
+      description:
+        'Generate and test cosmic calendars without creating Stripe products',
+      href: '/admin/test-calendar',
+      icon: <Download className='h-5 w-5' />,
+      category: 'tools',
+      status: 'new',
+    },
   ];
 
   const categories = {
