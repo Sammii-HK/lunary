@@ -28,9 +28,13 @@ export async function POST(request: NextRequest) {
   try {
     const { type, data } = await request.json();
 
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    if (!apiKey) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        {
+          error: 'OpenAI API key not configured',
+          hint: 'Set OPENAI_API_KEY in your .env.local file and restart your dev server',
+        },
         { status: 400 },
       );
     }
@@ -69,7 +73,14 @@ async function generatePersonalizedCTA(data: {
   goal: string;
 }): Promise<NextResponse> {
   const { OpenAI } = await import('openai');
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'OpenAI API key not configured' },
+      { status: 400 },
+    );
+  }
+  const openai = new OpenAI({ apiKey });
 
   const prompt = `Context: ${data.context}
 Goal: ${data.goal}
@@ -99,17 +110,11 @@ async function analyzeConversionFunnel(data: {
   timeRange?: string;
 }): Promise<NextResponse> {
   const timeRange = data.timeRange || '30d';
-  let dateFilter = '';
-  switch (timeRange) {
-    case '7d':
-      dateFilter = "created_at >= NOW() - INTERVAL '7 days'";
-      break;
-    case '30d':
-      dateFilter = "created_at >= NOW() - INTERVAL '30 days'";
-      break;
-    default:
-      dateFilter = "created_at >= NOW() - INTERVAL '30 days'";
-  }
+
+  // Calculate the date threshold based on time range
+  const days = timeRange === '7d' ? 7 : 30;
+  const thresholdDate = new Date();
+  thresholdDate.setDate(thresholdDate.getDate() - days);
 
   // Get funnel data
   const funnel = await sql`
@@ -118,7 +123,7 @@ async function analyzeConversionFunnel(data: {
       COUNT(DISTINCT user_id) as users,
       COUNT(*) as events
     FROM conversion_events
-    WHERE ${sql.raw(dateFilter)}
+    WHERE created_at >= ${thresholdDate.toISOString()}::timestamp with time zone
     GROUP BY event_type
     ORDER BY 
       CASE event_type
@@ -133,7 +138,14 @@ async function analyzeConversionFunnel(data: {
   `;
 
   const { OpenAI } = await import('openai');
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'OpenAI API key not configured' },
+      { status: 400 },
+    );
+  }
+  const openai = new OpenAI({ apiKey });
 
   const funnelData = funnel.rows.map((r: any) => ({
     event: r.event_type,
@@ -170,7 +182,14 @@ async function suggestABTests(data: {
   conversionGoals?: string[];
 }): Promise<NextResponse> {
   const { OpenAI } = await import('openai');
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'OpenAI API key not configured' },
+      { status: 400 },
+    );
+  }
+  const openai = new OpenAI({ apiKey });
 
   // Get current conversion rates
   const currentRates = await sql`
@@ -217,7 +236,14 @@ async function optimizeEmailCopy(data: {
   goal: string;
 }): Promise<NextResponse> {
   const { OpenAI } = await import('openai');
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'OpenAI API key not configured' },
+      { status: 400 },
+    );
+  }
+  const openai = new OpenAI({ apiKey });
 
   const prompt = `Optimize email copy.
 
@@ -260,7 +286,14 @@ async function predictChurn(data: { userId?: string }): Promise<NextResponse> {
     `;
 
     const { OpenAI } = await import('openai');
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'OpenAI API key not configured' },
+        { status: 400 },
+      );
+    }
+    const openai = new OpenAI({ apiKey });
 
     const activityData = userActivity.rows.slice(0, 50).map((r: any) => ({
       userId: r.user_id,
@@ -314,7 +347,14 @@ async function personalizeExperience(data: {
   `;
 
   const { OpenAI } = await import('openai');
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'OpenAI API key not configured' },
+      { status: 400 },
+    );
+  }
+  const openai = new OpenAI({ apiKey });
 
   const eventsData = userEvents.rows.map((r: any) => ({
     event: r.event_type,
