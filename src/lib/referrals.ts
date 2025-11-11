@@ -136,14 +136,18 @@ async function grantReferralReward(userId: string): Promise<void> {
       `;
     } else {
       // Create a 1-month free trial
+      // Note: user_email and user_name are set to NULL here as they're not available in this context
+      // They should be populated when subscriptions are created from Stripe webhooks or other sources
       await sql`
-        INSERT INTO subscriptions (user_id, status, plan_type, trial_ends_at, current_period_end)
+        INSERT INTO subscriptions (user_id, status, plan_type, trial_ends_at, current_period_end, user_email, user_name)
         VALUES (
           ${userId},
           'trial',
           'monthly',
           NOW() + INTERVAL '30 days',
-          NOW() + INTERVAL '30 days'
+          NOW() + INTERVAL '30 days',
+          NULL,
+          NULL
         )
         ON CONFLICT (user_id) DO UPDATE SET
           status = 'trial',

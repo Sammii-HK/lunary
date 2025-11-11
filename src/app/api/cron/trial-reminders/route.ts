@@ -27,31 +27,31 @@ export async function GET(request: NextRequest) {
     // Get trials ending in 3 days (first reminder)
     const threeDayReminders = await sql`
       SELECT DISTINCT
-        p.user_id,
-        p.email,
-        p.name,
+        s.user_id,
+        s.user_email as email,
+        s.user_name as name,
         s.trial_ends_at,
         s.plan_type
-      FROM user_profiles p
-      JOIN subscriptions s ON p.user_id = s.user_id
+      FROM subscriptions s
       WHERE s.status = 'trial'
       AND s.trial_ends_at::date = ${threeDaysFromNow.toISOString().split('T')[0]}
-      AND s.trial_reminder_3d_sent = false
+      AND (s.trial_reminder_3d_sent = false OR s.trial_reminder_3d_sent IS NULL)
+      AND s.user_email IS NOT NULL
     `;
 
     // Get trials ending in 1 day (final reminder)
     const oneDayReminders = await sql`
       SELECT DISTINCT
-        p.user_id,
-        p.email,
-        p.name,
+        s.user_id,
+        s.user_email as email,
+        s.user_name as name,
         s.trial_ends_at,
         s.plan_type
-      FROM user_profiles p
-      JOIN subscriptions s ON p.user_id = s.user_id
+      FROM subscriptions s
       WHERE s.status = 'trial'
       AND s.trial_ends_at::date = ${oneDayFromNow.toISOString().split('T')[0]}
-      AND s.trial_reminder_1d_sent = false
+      AND (s.trial_reminder_1d_sent = false OR s.trial_reminder_1d_sent IS NULL)
+      AND s.user_email IS NOT NULL
     `;
 
     let sent3Day = 0;
