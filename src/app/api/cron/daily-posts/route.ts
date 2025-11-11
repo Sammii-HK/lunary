@@ -18,6 +18,7 @@ import {
   generateTrialExpiredEmailHTML,
   generateTrialExpiredEmailText,
 } from '@/lib/email-templates/trial-expired';
+import { getNextSubreddit } from '@/config/reddit-subreddits';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -335,6 +336,12 @@ async function runDailyPosts(dateStr: string) {
   const scheduleBase = new Date();
   scheduleBase.setHours(12, 0, 0, 0); // Start at 12 PM UTC
 
+  // Get next subreddit for rotation
+  const subreddit = getNextSubreddit();
+
+  // Generate Reddit title from cosmic content
+  const redditTitle = `Daily Cosmic Guidance - ${dateStr}: ${cosmicContent.primaryEvent.name}`;
+
   // Generate posts with dynamic content - ONE Twitter post only
   const posts = [
     {
@@ -344,6 +351,10 @@ async function runDailyPosts(dateStr: string) {
       imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
+      reddit: {
+        title: redditTitle,
+        subreddit: subreddit.name,
+      },
       variants: {
         instagram: {
           media: [
@@ -364,6 +375,10 @@ async function runDailyPosts(dateStr: string) {
             `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
             `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
           ],
+          twitterOptions: {
+            thread: false,
+            threadNumber: false,
+          },
         },
         bluesky: {
           content: generateCosmicPost(cosmicContent).snippetShort,
@@ -398,6 +413,7 @@ async function runDailyPosts(dateStr: string) {
           alt: post.alt,
         })),
         variants: post.variants,
+        reddit: post.reddit,
       };
 
       const response = await fetch(succulentApiUrl, {
