@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { PushSubscription } from '../../schema';
 
@@ -23,17 +23,7 @@ export function NotificationSettings() {
   const [tarotEnabled, setTarotEnabled] = useState(false);
   const [tarotLoading, setTarotLoading] = useState(false);
 
-  useEffect(() => {
-    checkNotificationStatus();
-  }, []);
-
-  useEffect(() => {
-    if (subscription) {
-      checkTarotNotificationStatus();
-    }
-  }, [subscription]);
-
-  const checkTarotNotificationStatus = async () => {
+  const checkTarotNotificationStatus = useCallback(async () => {
     if (!subscription) {
       setTarotEnabled(false);
       return;
@@ -58,7 +48,86 @@ export function NotificationSettings() {
     } catch (error) {
       console.error('Error checking tarot notification status:', error);
     }
-  };
+  }, [subscription]);
+
+  const getExistingSubscription = useCallback(async () => {
+    try {
+      if (!('serviceWorker' in navigator)) {
+        console.log('Service Worker not supported');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!('PushManager' in window)) {
+        console.log('PushManager not supported');
+        setIsLoading(false);
+        return;
+      }
+
+      // Ensure service worker is registered
+      let registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        console.log('Service worker not registered yet');
+        setIsLoading(false);
+        return;
+      }
+
+      registration = await navigator.serviceWorker.ready;
+      console.log(
+        'Service worker ready, checking for existing subscription...',
+      );
+
+      const existingSub = await registration.pushManager.getSubscription();
+
+      if (existingSub) {
+        setSubscription(existingSub);
+        console.log('✅ Found existing push subscription');
+        console.log(
+          'Subscription endpoint:',
+          existingSub.endpoint.substring(0, 50) + '...',
+        );
+      } else {
+        console.log('ℹ️ No existing push subscription found');
+      }
+    } catch (error) {
+      console.error('❌ Error getting existing subscription:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const checkNotificationStatus = useCallback(async () => {
+    if ('Notification' in window) {
+      const currentPermission = Notification.permission;
+      setPermission({
+        granted: currentPermission === 'granted',
+        denied: currentPermission === 'denied',
+        default: currentPermission === 'default',
+      });
+
+      // If permission is granted, check for existing subscription
+      if (currentPermission === 'granted' && 'serviceWorker' in navigator) {
+        await getExistingSubscription();
+      } else {
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
+    }
+  }, [getExistingSubscription]);
+
+  useEffect(() => {
+    checkNotificationStatus();
+  }, [checkNotificationStatus]);
+
+  useEffect(() => {
+    if (subscription) {
+      checkTarotNotificationStatus();
+    }
+  }, [subscription, checkTarotNotificationStatus]);
 
   const toggleTarotNotifications = async () => {
     if (!subscription) {
@@ -126,75 +195,6 @@ export function NotificationSettings() {
       );
     } finally {
       setTarotLoading(false);
-    }
-  };
-
-  const checkNotificationStatus = async () => {
-    if ('Notification' in window) {
-      const currentPermission = Notification.permission;
-      setPermission({
-        granted: currentPermission === 'granted',
-        denied: currentPermission === 'denied',
-        default: currentPermission === 'default',
-      });
-
-      // If permission is granted, check for existing subscription
-      if (currentPermission === 'granted' && 'serviceWorker' in navigator) {
-        await getExistingSubscription();
-      } else {
-        setIsLoading(false);
-      }
-    } else {
-      setIsLoading(false);
-    }
-  };
-
-  const getExistingSubscription = async () => {
-    try {
-      if (!('serviceWorker' in navigator)) {
-        console.log('Service Worker not supported');
-        setIsLoading(false);
-        return;
-      }
-
-      if (!('PushManager' in window)) {
-        console.log('PushManager not supported');
-        setIsLoading(false);
-        return;
-      }
-
-      // Ensure service worker is registered
-      let registration = await navigator.serviceWorker.getRegistration();
-      if (!registration) {
-        console.log('Service worker not registered yet');
-        setIsLoading(false);
-        return;
-      }
-
-      registration = await navigator.serviceWorker.ready;
-      console.log(
-        'Service worker ready, checking for existing subscription...',
-      );
-
-      const existingSub = await registration.pushManager.getSubscription();
-
-      if (existingSub) {
-        setSubscription(existingSub);
-        console.log('✅ Found existing push subscription');
-        console.log(
-          'Subscription endpoint:',
-          existingSub.endpoint.substring(0, 50) + '...',
-        );
-      } else {
-        console.log('ℹ️ No existing push subscription found');
-      }
-    } catch (error) {
-      console.error('❌ Error getting existing subscription:', error);
-      if (error instanceof Error) {
-        console.error('Error details:', error.message);
-      }
-    } finally {
-      setIsLoading(false);
     }
   };
 
