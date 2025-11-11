@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
 import { useState, useEffect, useMemo, useTransition } from 'react';
+import dynamic from 'next/dynamic';
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -29,21 +30,92 @@ import {
   monthlyMoonPhases,
 } from '../../../utils/moon/monthlyPhases';
 import { zodiacSigns, planetaryBodies } from '../../../utils/zodiac/zodiac';
-import Moon from './components/Moon';
-import WheelOfTheYear from './components/WheelOfTheYear';
-import Astronomy from './components/Astronomy';
-import Correspondences from './components/Correspondences';
-import Practices from './components/Practices';
-import Tarot from './components/Tarot';
-import Runes from './components/Runes';
-import Chakras from './components/Chakras';
-import { Numerology } from './components/Numerology';
-import Crystals from './components/Crystals';
-import BirthChart from './components/BirthChart';
-import CandleMagic from './components/CandleMagic';
-import Divination from './components/Divination';
-import ModernWitchcraft from './components/ModernWitchcraft';
-import Meditation from './components/Meditation';
+
+// Dynamic imports for grimoire components (lazy load to improve build speed)
+const Moon = dynamic(() => import('./components/Moon'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const WheelOfTheYear = dynamic(() => import('./components/WheelOfTheYear'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const Astronomy = dynamic(() => import('./components/Astronomy'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const Correspondences = dynamic(() => import('./components/Correspondences'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const Practices = dynamic(() => import('./components/Practices'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const Tarot = dynamic(() => import('./components/Tarot'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const Runes = dynamic(() => import('./components/Runes'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const Chakras = dynamic(() => import('./components/Chakras'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const Numerology = dynamic(
+  () =>
+    import('./components/Numerology').then((mod) => ({
+      default: mod.Numerology,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+  },
+);
+const Crystals = dynamic(() => import('./components/Crystals'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const BirthChart = dynamic(() => import('./components/BirthChart'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const CandleMagic = dynamic(() => import('./components/CandleMagic'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const Divination = dynamic(() => import('./components/Divination'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const ModernWitchcraft = dynamic(
+  () => import('./components/ModernWitchcraft'),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+  },
+);
+const Meditation = dynamic(() => import('./components/Meditation'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
 
 const GrimoireContent = {
   moon: <Moon />,

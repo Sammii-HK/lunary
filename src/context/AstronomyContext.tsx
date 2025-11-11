@@ -25,8 +25,21 @@ import {
   stringToCamelCase,
 } from '../../utils/moon/moonPhases';
 // import { getHoroscope } from '../../utils/astrology/horoscope';
-import { Observer } from 'astronomy-engine';
 import { useAccount } from 'jazz-tools/react';
+
+// Lazy load astronomy-engine to reduce initial bundle size
+let astronomyEngineModule: typeof import('astronomy-engine') | null = null;
+let astronomyEnginePromise: Promise<typeof import('astronomy-engine')> | null =
+  null;
+
+async function loadAstronomyEngine() {
+  if (astronomyEngineModule) return astronomyEngineModule;
+  if (!astronomyEnginePromise) {
+    astronomyEnginePromise = import('astronomy-engine');
+  }
+  astronomyEngineModule = await astronomyEnginePromise;
+  return astronomyEngineModule;
+}
 
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
@@ -69,21 +82,39 @@ export const AstronomyContextProvider = ({
     currentDateTime.toDateString(),
   );
 
-  const [observer, setObserver] = useState<Observer>(
-    new Observer(51.4769, 0.0005, 0),
-  );
+  const [observer, setObserver] = useState<any>(null);
+  const [isLoadingEngine, setIsLoadingEngine] = useState(true);
+
+  // Lazy load astronomy-engine
+  useEffect(() => {
+    let isMounted = true;
+
+    loadAstronomyEngine().then((module) => {
+      if (!isMounted) return;
+      const { Observer } = module;
+      const defaultObserver = new Observer(51.4769, 0.0005, 0);
+      setObserver(defaultObserver);
+      setIsLoadingEngine(false);
+
+      // Get user location if available
+      getObserverLocation((obs) => {
+        if (isMounted) {
+          setObserver(obs);
+        }
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const natalObserver = observer;
 
-  useEffect(() => {
-    if (!observer) {
-      getObserverLocation((obs) => setObserver(obs));
-    }
-  }, [observer]);
-
-  const currentAstrologicalChart = useMemo(
-    () => getAstrologicalChart(currentDateTime, observer),
-    [currentDateTime, observer],
-  );
+  const currentAstrologicalChart = useMemo(() => {
+    if (!observer) return [];
+    return getAstrologicalChart(currentDateTime, observer);
+  }, [currentDateTime, observer]);
   const currentMoonPosition = currentAstrologicalChart.find(
     ({ body }) => body === 'Moon',
   );
@@ -112,10 +143,10 @@ export const AstronomyContextProvider = ({
       stringToCamelCase(currentMoonPhase) as keyof typeof monthlyMoonPhases
     ]?.symbol;
 
-  const natalChart = useMemo(
-    () => getAstrologicalChart(dayjs('2000-01-01').toDate(), natalObserver),
-    [natalObserver],
-  );
+  const natalChart = useMemo(() => {
+    if (!natalObserver) return [];
+    return getAstrologicalChart(dayjs('2000-01-01').toDate(), natalObserver);
+  }, [natalObserver]);
   // const natalChart = useAstrologicalChart(dayjs("1994-01-20").toDate());
   // const horoscope = useMemo(() => getHoroscope(currentAstrologicalChart, natalChart), [currentAstrologicalChart, natalChart]);
 

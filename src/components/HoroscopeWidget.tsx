@@ -10,7 +10,6 @@ import {
 } from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
-import { Observer } from 'astronomy-engine';
 import { bodiesSymbols } from '../../utils/zodiac/zodiac';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../utils/pricing';
@@ -646,6 +645,15 @@ export const HoroscopeWidget = () => {
   const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
+  const [observer, setObserver] = useState<any>(null);
+
+  // Lazy load astronomy-engine
+  useEffect(() => {
+    import('astronomy-engine').then((module) => {
+      const { Observer } = module;
+      setObserver(new Observer(51.4769, 0.0005, 0));
+    });
+  }, []);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showBottomBlur, setShowBottomBlur] = useState(false);
@@ -751,9 +759,22 @@ export const HoroscopeWidget = () => {
     );
   }
 
-  // Get current planetary positions
+  // Get current planetary positions (only if observer is loaded)
+  if (!observer) {
+    return (
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+        <div className='text-center'>
+          <h3 className='font-bold mb-2'>Personal Horoscope</h3>
+          <span className='text-xs text-purple-400'>Personalised</span>
+          <p className='text-zinc-400 text-xs'>
+            Loading cosmic calculations...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const today = new Date();
-  const observer = new Observer(51.4769, 0.0005, 0); // Default location
   const currentTransits = getAstrologicalChart(today, observer);
 
   // Generate personalized horoscope

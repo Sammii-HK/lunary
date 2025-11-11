@@ -1,7 +1,7 @@
 'use client';
 
 import { useAccount } from 'jazz-tools/react';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { SmartTrialButton } from './SmartTrialButton';
 import {
   getBirthChartFromProfile,
@@ -10,7 +10,6 @@ import {
 } from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCrystals';
-import { Observer } from 'astronomy-engine';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../utils/pricing';
 import dayjs from 'dayjs';
@@ -863,6 +862,15 @@ export const CrystalWidget = () => {
   const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
+  const [observer, setObserver] = useState<any>(null);
+
+  // Lazy load astronomy-engine
+  useEffect(() => {
+    import('astronomy-engine').then((module) => {
+      const { Observer } = module;
+      setObserver(new Observer(51.4769, 0.0005, 0));
+    });
+  }, []);
 
   const hasChartAccess = hasBirthChartAccess(subscription.status);
 
@@ -886,11 +894,10 @@ export const CrystalWidget = () => {
   }, []);
 
   const crystalData = useMemo(() => {
-    if (!birthChart || !userBirthday) return null;
+    if (!birthChart || !userBirthday || !observer) return null;
 
     // Use the date string to create a stable Date object for the day
     const today = new Date(todayDateString + 'T12:00:00'); // Use noon to avoid timezone issues
-    const observer = new Observer(51.4769, 0.0005, 0);
     const currentTransits = getAstrologicalChart(today, observer);
 
     const recommendedCrystal = calculateCrystalRecommendation(
@@ -912,7 +919,7 @@ export const CrystalWidget = () => {
       guidance,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todayDateString, userBirthday, JSON.stringify(birthChart)]);
+  }, [todayDateString, userBirthday, observer, JSON.stringify(birthChart)]);
 
   // If user doesn't have birth chart access, show general crystal recommendation
   if (!hasChartAccess) {
