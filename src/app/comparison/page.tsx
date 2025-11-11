@@ -41,95 +41,36 @@ export default function ComparisonHubPage() {
           </p>
         </div>
 
-        {/* Comparison Pages List */}
-        <section className='space-y-6 mb-12'>
-          <Link
-            href='/comparison/lunary-vs-moonly'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
-          >
-            <div className='flex items-start justify-between'>
-              <div className='flex-1'>
-                <h2 className='text-2xl font-medium text-zinc-100 mb-2 group-hover:text-purple-300 transition-colors'>
-                  Lunary vs Moonly
-                </h2>
-                <p className='text-sm text-zinc-400 mb-4'>
-                  Compare Lunary's real astronomical calculations and
-                  personalized horoscopes with Moonly's Vedic astrology
-                  approach. See which app better fits your needs.
-                </p>
-                <div className='flex flex-wrap gap-2'>
-                  <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
-                    Real Astronomy
-                  </span>
-                  <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
-                    Personalized Charts
-                  </span>
-                  <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
-                    Grimoire Included
-                  </span>
-                </div>
-              </div>
-              <ArrowRight className='h-6 w-6 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
-            </div>
-          </Link>
-
-          <Link
-            href='/comparison/lunary-vs-lunar-guide'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
-          >
-            <div className='flex items-start justify-between'>
-              <div className='flex-1'>
-                <h2 className='text-2xl font-medium text-zinc-100 mb-2 group-hover:text-purple-300 transition-colors'>
-                  Lunary vs Lunar Guide
-                </h2>
-                <p className='text-sm text-zinc-400 mb-4'>
-                  Compare Lunary's real astronomical data with Lunar Guide's
-                  AI-powered approach. See which method works better for
-                  personalized astrology.
-                </p>
-                <div className='flex flex-wrap gap-2'>
-                  <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
-                    Real Astronomy
-                  </span>
-                  <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
-                    AI Comparison
-                  </span>
-                  <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
-                    Personalized Charts
-                  </span>
-                </div>
-              </div>
-              <ArrowRight className='h-6 w-6 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
-            </div>
-          </Link>
-
+        {/* Comparison Page Link */}
+        <section className='mb-12'>
           <Link
             href='/comparison/best-personalized-astrology-apps'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+            className='block rounded-lg border border-purple-500/30 bg-purple-500/10 p-6 hover:border-purple-500/50 hover:bg-purple-500/15 transition-all group'
           >
             <div className='flex items-start justify-between'>
               <div className='flex-1'>
                 <h2 className='text-2xl font-medium text-zinc-100 mb-2 group-hover:text-purple-300 transition-colors'>
-                  Best Personalized Astrology Apps
+                  Complete Comparison: Lunary vs Moonly vs Lunar Guide
                 </h2>
                 <p className='text-sm text-zinc-400 mb-4'>
-                  Comprehensive comparison of top personalized astrology apps,
-                  featuring Lunary, Moonly, Lunar Guide, and more. Find the
-                  perfect app for your cosmic journey.
+                  Comprehensive side-by-side comparison of the top personalized
+                  astrology apps. Compare features, pricing, and see why Lunary
+                  stands out with real astronomical data and a complete
+                  grimoire.
                 </p>
                 <div className='flex flex-wrap gap-2'>
                   <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
-                    Complete Guide
+                    Complete Comparison Chart
                   </span>
                   <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
-                    Top Apps Compared
+                    Lunary vs Moonly vs Lunar Guide
                   </span>
                   <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/30'>
                     Detailed Reviews
                   </span>
                 </div>
               </div>
-              <ArrowRight className='h-6 w-6 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
+              <ArrowRight className='h-6 w-6 text-purple-300 group-hover:text-purple-200 transition-colors ml-4 flex-shrink-0' />
             </div>
           </Link>
         </section>
