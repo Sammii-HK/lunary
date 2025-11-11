@@ -3,6 +3,65 @@ import { sql } from '@vercel/postgres';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+// Ensure conversion_events table exists
+let tableChecked = false;
+async function ensureConversionEventsTable() {
+  if (tableChecked) return; // Only check once per server instance
+
+  try {
+    console.log('🔍 Checking if conversion_events table exists...');
+
+    // Check if table exists first
+    const tableExists = await sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'conversion_events'
+      )
+    `;
+
+    if (tableExists.rows[0]?.exists) {
+      console.log('✅ conversion_events table already exists');
+      tableChecked = true;
+      return;
+    }
+
+    console.log('📦 Creating conversion_events table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS conversion_events (
+        id SERIAL PRIMARY KEY,
+        event_type TEXT NOT NULL,
+        user_id TEXT,
+        user_email TEXT,
+        plan_type TEXT,
+        trial_days_remaining INTEGER,
+        feature_name TEXT,
+        page_path TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    console.log('📊 Creating indexes for conversion_events...');
+    // Create indexes if they don't exist
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_event_type ON conversion_events(event_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_id ON conversion_events(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_email ON conversion_events(user_email)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_created_at ON conversion_events(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_plan_type ON conversion_events(plan_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_event ON conversion_events(user_id, event_type, created_at)`;
+
+    console.log('✅ conversion_events table and indexes created successfully');
+    tableChecked = true;
+  } catch (error: any) {
+    console.error('❌ Failed to create conversion_events table:', error);
+    // Don't throw - let the query fail naturally with a better error message
+    throw new Error(
+      `Database setup failed: ${error.message}. Please run the database setup script or check your database connection.`,
+    );
+  }
+}
+
 // Load AI context once and cache it
 let cachedAIContext: string | null = null;
 
@@ -26,6 +85,22 @@ const AI_CONTEXT = getAIContext();
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure table exists before processing
+    try {
+      await ensureConversionEventsTable();
+    } catch (tableError: any) {
+      console.error('Table creation error:', tableError);
+      return NextResponse.json(
+        {
+          error: 'Database setup failed',
+          details:
+            tableError.message || 'Could not create conversion_events table',
+          hint: 'Please run: yarn setup-db or check your database connection',
+        },
+        { status: 500 },
+      );
+    }
+
     const { type, data } = await request.json();
 
     const apiKey = process.env.OPENAI_API_KEY?.trim();
