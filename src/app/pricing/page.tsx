@@ -18,6 +18,11 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
 import { useConversionTracking } from '@/hooks/useConversionTracking';
 import { conversionTracking } from '@/lib/analytics';
+import {
+  getABTestVariant,
+  AB_TESTS,
+  trackABTestConversion,
+} from '@/lib/ab-testing';
 
 export default function PricingPage() {
   const { me } = useAccount();
@@ -28,6 +33,7 @@ export default function PricingPage() {
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
   const [loadingPlans, setLoadingPlans] = useState(true);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadPricingPlans() {
@@ -39,6 +45,15 @@ export default function PricingPage() {
       } finally {
         setLoadingPlans(false);
       }
+    }
+
+    // Check for referral code in URL
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) {
+      setReferralCode(ref);
+      // Store in localStorage for checkout
+      localStorage.setItem('lunary_referral_code', ref);
     }
 
     loadPricingPlans();
@@ -58,9 +73,13 @@ export default function PricingPage() {
     );
 
     try {
+      // Get referral code from localStorage if present
+      const storedReferralCode = localStorage.getItem('lunary_referral_code');
+
       const { sessionId } = await createCheckoutSession(
         priceId,
         subscription.customerId,
+        storedReferralCode || undefined,
       );
 
       const stripe = await stripePromise;
@@ -161,9 +180,20 @@ export default function PricingPage() {
                 pricing
               </h1>
 
-              <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
-                Start your free trial. No credit card required. Cancel anytime.
-              </p>
+              {/* A/B Test: CTA Copy */}
+              {(() => {
+                const ctaVariant = getABTestVariant(AB_TESTS.PRICING_CTA);
+                const ctaText =
+                  ctaVariant === 'A'
+                    ? 'Start your free trial. No credit card required. Cancel anytime.'
+                    : 'Unlock your cosmic blueprint. Start free trial, no credit card needed.';
+
+                return (
+                  <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
+                    {ctaText}
+                  </p>
+                );
+              })()}
 
               {subscriptionStatus === 'trial' && (
                 <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 bg-purple-500/10 backdrop-blur-sm mt-2'>
