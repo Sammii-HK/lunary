@@ -1,20 +1,84 @@
 'use client';
 
-import { useEffect } from 'react';
-import { TarotWidget } from '@/components/TarotWidget';
-import { MoonWidget } from '../components/MoonWidget';
-import { AstronomyWidget } from '@/components/AstronomyWidget';
-import { DateWidget } from '@/components/DateWidget';
-import { HoroscopeWidget } from '@/components/HoroscopeWidget';
-import { CrystalWidget } from '@/components/CrystalWidget';
-import { MoonSpellsWidget } from '@/components/MoonSpellsWidget';
+import { useEffect, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
-import EphemerisWidget from '@/components/EphemerisWidget';
-import ConditionalWheel from '@/components/ConditionalWheel';
 import { PostTrialMessaging } from '@/components/PostTrialMessaging';
 import { useAccount } from 'jazz-tools/react';
 import { conversionTracking } from '@/lib/analytics';
 import { useAuthStatus } from '@/components/AuthStatus';
+
+// Critical widgets loaded immediately
+import { DateWidget } from '@/components/DateWidget';
+import { AstronomyWidget } from '@/components/AstronomyWidget';
+
+// Heavy widgets loaded dynamically with lazy loading
+const TarotWidget = dynamic(
+  () =>
+    import('@/components/TarotWidget').then((mod) => ({
+      default: mod.TarotWidget,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+  },
+);
+const MoonWidget = dynamic(
+  () =>
+    import('../components/MoonWidget').then((mod) => ({
+      default: mod.MoonWidget,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+  },
+);
+const HoroscopeWidget = dynamic(
+  () =>
+    import('@/components/HoroscopeWidget').then((mod) => ({
+      default: mod.HoroscopeWidget,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+  },
+);
+const CrystalWidget = dynamic(
+  () =>
+    import('@/components/CrystalWidget').then((mod) => ({
+      default: mod.CrystalWidget,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+  },
+);
+const MoonSpellsWidget = dynamic(
+  () =>
+    import('@/components/MoonSpellsWidget').then((mod) => ({
+      default: mod.MoonSpellsWidget,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+  },
+);
+const EphemerisWidget = dynamic(() => import('@/components/EphemerisWidget'), {
+  loading: () => (
+    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+  ),
+});
+const ConditionalWheel = dynamic(
+  () => import('@/components/ConditionalWheel'),
+  {
+    loading: () => null, // ConditionalWheel handles its own loading state
+  },
+);
 
 export default function Home() {
   const { me } = useAccount();
