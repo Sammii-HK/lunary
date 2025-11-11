@@ -31,6 +31,7 @@ import {
   Smartphone,
   Bell,
   Menu,
+  Send,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -47,6 +48,8 @@ export default function AdminDashboard() {
   const [testingNotification, setTestingNotification] = useState(false);
   const [testingRealNotification, setTestingRealNotification] = useState(false);
   const [testingDaily, setTestingDaily] = useState(false);
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [testEmailAddress, setTestEmailAddress] = useState('');
 
   const testRealNotification = async () => {
     setTestingRealNotification(true);
@@ -113,6 +116,42 @@ This is exactly what you'll get every day at 8 AM UTC!`);
     }
   };
 
+  const testEmail = async () => {
+    if (!testEmailAddress) {
+      alert('Please enter an email address to test');
+      return;
+    }
+
+    setTestingEmail(true);
+    try {
+      const response = await fetch('/api/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: testEmailAddress }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(
+          `✅ Test email sent successfully!\n\nTo: ${result.details.to}\nFrom: ${result.details.from}\nMessage ID: ${result.details.emailId || 'N/A'}\n\nCheck your inbox (and spam folder) for the test email.`,
+        );
+      } else {
+        alert(
+          `❌ Email test failed: ${result.error}\n\nTroubleshooting:\n${result.troubleshooting?.commonIssues?.join('\n') || result.details || 'Check server logs'}`,
+        );
+      }
+    } catch (error) {
+      alert(
+        `❌ Error testing email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    } finally {
+      setTestingEmail(false);
+    }
+  };
+
   const adminTools: AdminTool[] = [
     // Content Management
     {
@@ -127,7 +166,7 @@ This is exactly what you'll get every day at 8 AM UTC!`);
     {
       title: 'Newsletter Manager',
       description:
-        'Manage email subscribers and send weekly newsletters with Resend bulk API',
+        'Manage email subscribers and send weekly newsletters with Brevo',
       href: '/admin/newsletter-manager',
       icon: <Mail className='h-5 w-5' />,
       category: 'content',
@@ -219,6 +258,39 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       href: '/admin/analytics',
       icon: <Activity className='h-5 w-5' />,
       category: 'monitoring',
+      status: 'new',
+    },
+    {
+      title: 'A/B Testing',
+      description: 'Analyze experiments with AI-powered insights',
+      href: '/admin/ab-testing',
+      icon: <Sparkles className='h-5 w-5' />,
+      category: 'monitoring',
+      status: 'new',
+    },
+    {
+      title: 'AI Conversion Optimizer',
+      description: 'AI-powered conversion optimization tools',
+      href: '/admin/ai-conversion',
+      icon: <Zap className='h-5 w-5' />,
+      category: 'monitoring',
+      status: 'new',
+    },
+    {
+      title: 'Social Media Posts',
+      description: 'AI-powered social media post generator for marketing',
+      href: '/admin/social-posts',
+      icon: <Send className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
+      title: 'Post Approval Queue',
+      description:
+        'Review and approve generated posts before sending to Succulent',
+      href: '/admin/social-posts/approve',
+      icon: <Bell className='h-5 w-5' />,
+      category: 'content',
       status: 'new',
     },
   ];
@@ -419,6 +491,49 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                   </div>
                 </div>
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Email Testing */}
+        <Card className='mb-6 md:mb-8 lg:mb-10 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <Mail className='h-5 w-5 md:h-6 md:w-6' />
+              Email Testing (Brevo)
+            </CardTitle>
+            <CardDescription className='text-sm md:text-base text-zinc-400'>
+              Test email sending with Brevo
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-4'>
+              <div className='flex flex-col md:flex-row gap-4'>
+                <input
+                  type='email'
+                  placeholder='Enter your email address'
+                  value={testEmailAddress}
+                  onChange={(e) => setTestEmailAddress(e.target.value)}
+                  className='flex-1 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500'
+                  disabled={testingEmail}
+                />
+                <Button
+                  onClick={testEmail}
+                  disabled={testingEmail || !testEmailAddress}
+                  variant='outline'
+                  className='h-auto px-6 py-2 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white transition-all disabled:opacity-50'
+                >
+                  <Send className='h-4 w-4 mr-2' />
+                  {testingEmail ? 'Sending...' : 'Send Test Email'}
+                </Button>
+              </div>
+              <p className='text-xs text-zinc-500'>
+                Make sure BREVO_API_KEY is set in your environment variables.
+                The email will be sent from{' '}
+                <code className='bg-zinc-800 px-2 py-1 rounded text-zinc-300'>
+                  cosmic@lunary.app
+                </code>
+              </p>
             </div>
           </CardContent>
         </Card>
