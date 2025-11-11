@@ -33,8 +33,13 @@ export const getGeneralTarotReading = (): GeneralTarotReading => {
 
   // Create seeds for consistent daily cards with more variation
   const dailySeed = `cosmic-${today.format('YYYY-MM-DD')}-${dayOfYear}-energy`;
-  const weekNumber = today.isoWeek();
-  const weeklySeed = `universal-${today.format('YYYY')}-W${weekNumber}-${today.format('YYYY')}-guidance`;
+
+  // Calculate week start for stable weekly seed (same for entire week)
+  const weekStart = today.startOf('isoWeek');
+  const weekNumber = weekStart.isoWeek();
+  const weekYear = weekStart.year();
+  const weekStartDate = weekStart.format('YYYY-MM-DD');
+  const weeklySeed = `universal-${weekYear}-W${weekNumber}-${weekStartDate}-guidance`;
 
   // Get cards using the existing tarot system
   const dailyCard = getTarotCard(dailySeed, 'cosmic-daily-energy');
