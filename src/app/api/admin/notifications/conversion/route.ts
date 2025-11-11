@@ -3,7 +3,16 @@ import { sendPushoverNotification } from '../../../../../../utils/notifications/
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Handle empty body gracefully
+    const bodyText = await request.text();
+    if (!bodyText || bodyText.trim() === '') {
+      return NextResponse.json(
+        { success: false, error: 'Request body is required' },
+        { status: 400 },
+      );
+    }
+
+    const body = JSON.parse(bodyText);
     const { eventType, userId, userEmail, planType, metadata } = body;
 
     let title = '';
@@ -12,10 +21,11 @@ export async function POST(request: NextRequest) {
 
     switch (eventType) {
       case 'signup':
-        title = '🎉 New User Signup';
-        message = `New user registered: ${userEmail || 'Unknown email'}`;
-        priority = 0;
-        break;
+        // Skip signup notifications - too noisy, only notify on conversions
+        return NextResponse.json({
+          success: true,
+          message: 'Signup event logged (notification skipped)',
+        });
 
       case 'trial_started':
         title = '✨ Free Trial Started';

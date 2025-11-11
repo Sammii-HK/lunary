@@ -73,7 +73,16 @@ export async function GET(request: NextRequest) {
 // Function to get trial period for a specific price ID
 export async function POST(request: NextRequest) {
   try {
-    const { priceId } = await request.json();
+    // Handle empty body gracefully
+    const body = await request.text();
+    if (!body || body.trim() === '') {
+      return NextResponse.json(
+        { error: 'Request body is required' },
+        { status: 400 },
+      );
+    }
+
+    const { priceId } = JSON.parse(body);
 
     if (!priceId) {
       return NextResponse.json(

@@ -3,7 +3,16 @@ import { sql } from '@vercel/postgres';
 
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    // Handle empty body gracefully
+    const bodyText = await request.text();
+    if (!bodyText || bodyText.trim() === '') {
+      return NextResponse.json(
+        { error: 'Request body is required' },
+        { status: 400 },
+      );
+    }
+
+    const data = JSON.parse(bodyText);
 
     const {
       event,
