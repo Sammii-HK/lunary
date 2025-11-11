@@ -29,10 +29,7 @@ export async function GET(request: NextRequest) {
     // Generate comprehensive weekly content
     const weeklyData = await generateWeeklyContent(startDate);
 
-    // Validate crystal recommendations were generated
-    console.log(
-      `[API Blog Weekly] Generated ${weeklyData.crystalRecommendations?.length || 0} crystal recommendations`,
-    );
+    // Validate crystal recommendations were generated (only log warnings)
     if (
       !weeklyData.crystalRecommendations ||
       weeklyData.crystalRecommendations.length === 0

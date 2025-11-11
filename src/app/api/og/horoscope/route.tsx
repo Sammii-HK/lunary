@@ -2,6 +2,7 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 86400; // Cache for 24 hours (content updates daily)
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

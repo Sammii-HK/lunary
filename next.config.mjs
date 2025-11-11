@@ -40,6 +40,9 @@ const nextConfig = {
   // Transpile packages for better compatibility
   transpilePackages: ['jazz-tools'],
 
+  // Compression and optimization
+  compress: true,
+
   // PWA Configuration
   async headers() {
     return [
@@ -62,6 +65,36 @@ const nextConfig = {
       },
       {
         source: '/manifest.json',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache OG images for 24 hours (content updates daily)
+        source: '/api/og/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=86400, stale-while-revalidate=172800',
+          },
+        ],
+      },
+      {
+        // Cache static assets aggressively
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache images
+        source: '/icons/:path*',
         headers: [
           {
             key: 'Cache-Control',

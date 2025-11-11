@@ -1571,9 +1571,7 @@ function generateWeeklyCrystalGuide(
         intention,
       });
 
-      console.log(
-        `[Crystal Guide] Added crystal for ${crystalDate.toDateString()}: ${selectedCrystal.name} (date type: ${forecast.date instanceof Date ? 'Date' : typeof forecast.date})`,
-      );
+      // Removed verbose logging - only log summary at end
     } catch (error) {
       console.error(
         'Error generating crystal guide for forecast:',
@@ -1584,9 +1582,12 @@ function generateWeeklyCrystalGuide(
     }
   });
 
-  console.log(
-    `[Crystal Guide] Generated ${crystalGuide.length} crystal recommendations`,
-  );
+  // Only log summary in development or if there's an issue
+  if (process.env.NODE_ENV === 'development' && crystalGuide.length === 0) {
+    console.warn(
+      `[Crystal Guide] WARNING: No crystal recommendations generated`,
+    );
+  }
   return crystalGuide;
 }
 

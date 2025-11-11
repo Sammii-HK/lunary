@@ -4,6 +4,7 @@ import { getGeneralCrystalRecommendation } from '../../../../../utils/crystals/g
 import { getCrystalOGProperties } from '../../../../../src/constants/grimoire/crystals';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 86400; // Cache for 24 hours (content updates daily)
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

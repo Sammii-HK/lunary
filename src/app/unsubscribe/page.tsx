@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Mail, CheckCircle, XCircle } from 'lucide-react';
 
@@ -12,16 +12,7 @@ export default function UnsubscribePage() {
   );
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    if (email) {
-      unsubscribe();
-    } else {
-      setStatus('error');
-      setMessage('No email address provided');
-    }
-  }, [email]);
-
-  const unsubscribe = async () => {
+  const unsubscribe = useCallback(async () => {
     if (!email) return;
 
     try {
@@ -46,7 +37,16 @@ export default function UnsubscribePage() {
       setStatus('error');
       setMessage('An error occurred. Please try again later.');
     }
-  };
+  }, [email]);
+
+  useEffect(() => {
+    if (email) {
+      unsubscribe();
+    } else {
+      setStatus('error');
+      setMessage('No email address provided');
+    }
+  }, [email, unsubscribe]);
 
   return (
     <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4'>
