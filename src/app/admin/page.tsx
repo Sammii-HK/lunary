@@ -213,6 +213,14 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       icon: <Bell className='h-5 w-5' />,
       category: 'monitoring',
     },
+    {
+      title: 'Conversion Analytics',
+      description: 'Track user conversions, trials, and subscription metrics',
+      href: '/admin/analytics',
+      icon: <Activity className='h-5 w-5' />,
+      category: 'monitoring',
+      status: 'new',
+    },
   ];
 
   const categories = {

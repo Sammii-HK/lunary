@@ -2,7 +2,7 @@ import { sql } from '@vercel/postgres';
 
 async function setupDatabase() {
   try {
-    console.log('🔧 Setting up push notifications database...');
+    console.log('🔧 Setting up database tables...');
 
     // Create the push_subscriptions table
     await sql`
@@ -61,7 +61,7 @@ async function setupDatabase() {
     await sql`
       DROP TRIGGER IF EXISTS update_push_subscriptions_updated_at ON push_subscriptions
     `;
-    
+
     await sql`
       CREATE TRIGGER update_push_subscriptions_updated_at
           BEFORE UPDATE ON push_subscriptions
@@ -69,9 +69,50 @@ async function setupDatabase() {
           EXECUTE FUNCTION update_push_subscriptions_updated_at()
     `;
 
-    console.log('✅ Push notifications database setup complete!');
-    console.log('📊 Database ready for push subscriptions');
+    console.log('✅ Push subscriptions table created');
 
+    // Create the conversion_events table
+    await sql`
+      CREATE TABLE IF NOT EXISTS conversion_events (
+        id SERIAL PRIMARY KEY,
+        
+        -- Event identification
+        event_type TEXT NOT NULL,
+        
+        -- User identification
+        user_id TEXT,
+        user_email TEXT,
+        
+        -- Subscription context
+        plan_type TEXT,
+        trial_days_remaining INTEGER,
+        
+        -- Feature context
+        feature_name TEXT,
+        page_path TEXT,
+        
+        -- Additional metadata
+        metadata JSONB,
+        
+        -- Timestamp
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    // Create indexes for conversion_events
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_event_type ON conversion_events(event_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_id ON conversion_events(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_email ON conversion_events(user_email)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_created_at ON conversion_events(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_plan_type ON conversion_events(plan_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_event ON conversion_events(user_id, event_type, created_at)`;
+
+    console.log('✅ Conversion events table created');
+
+    console.log('✅ Database setup complete!');
+    console.log(
+      '📊 Database ready for push subscriptions and conversion tracking',
+    );
   } catch (error) {
     console.error('❌ Database setup failed:', error);
     throw error;

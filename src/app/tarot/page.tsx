@@ -13,6 +13,11 @@ import { hasBirthChartAccess } from '../../../utils/pricing';
 import { Check, ChevronDown, ChevronRight, Sparkles } from 'lucide-react';
 import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
+import { FeatureGate } from '@/components/FeatureGate';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
+import { TrialReminder } from '@/components/TrialReminder';
+import { conversionTracking } from '@/lib/analytics';
+import { useEffect } from 'react';
 
 const TarotReadings = () => {
   const { me } = useAccount();
@@ -91,6 +96,12 @@ const TarotReadings = () => {
     });
   }, [hasChartAccess, userName, userBirthday]);
 
+  useEffect(() => {
+    if (hasChartAccess && personalizedReading && me?.id) {
+      conversionTracking.tarotViewed(me.id);
+    }
+  }, [hasChartAccess, personalizedReading, me?.id]);
+
   if (!me) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
@@ -107,6 +118,7 @@ const TarotReadings = () => {
 
     return (
       <div className='min-h-screen space-y-6 pb-20 px-4'>
+        <TrialReminder variant='banner' />
         <div className='pt-6'>
           <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
             Your Tarot Readings
@@ -286,6 +298,13 @@ const TarotReadings = () => {
             </div>
           </div>
         </div>
+        <UpgradePrompt
+          variant='card'
+          featureName='personalized_tarot'
+          title='Unlock Personalized Tarot Readings'
+          description='Get tarot readings based on your name and birthday, plus discover your personal tarot patterns'
+          className='max-w-2xl mx-auto'
+        />
       </div>
     );
   }
@@ -303,6 +322,7 @@ const TarotReadings = () => {
 
   return (
     <div className='min-h-screen space-y-6 pb-20 px-4'>
+      <TrialReminder variant='banner' />
       <div className='pt-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           {userName ? `${userName}'s Tarot Readings` : 'Your Tarot Readings'}

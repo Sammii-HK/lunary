@@ -26,6 +26,9 @@ import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { SignOutButton } from '@/components/SignOutButton';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
+import { TrialReminder } from '@/components/TrialReminder';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
+import { conversionTracking } from '@/lib/analytics';
 
 export default function ProfilePage() {
   // Hooks must be called unconditionally - handle errors inside the hook or in the component
@@ -179,6 +182,13 @@ export default function ProfilePage() {
         }
 
         setIsEditing(false);
+
+        if (birthday) {
+          conversionTracking.birthdayEntered(authState.user?.id);
+        }
+        if (name && birthday) {
+          conversionTracking.profileCompleted(authState.user?.id);
+        }
       } catch (error) {
         console.error('Error saving profile:', error);
       }
@@ -197,6 +207,8 @@ export default function ProfilePage() {
 
   return (
     <div className='flex flex-col items-center gap-6 py-8'>
+      <TrialReminder variant='banner' className='w-full max-w-md' />
+
       <div className='flex items-center justify-between w-full max-w-md'>
         <h1 className='text-2xl font-bold text-white text-center'>
           Your Profile

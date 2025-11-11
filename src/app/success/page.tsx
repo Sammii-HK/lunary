@@ -7,6 +7,7 @@ import { useAccount } from 'jazz-tools/react';
 import { useSubscriptionSync } from '../../hooks/useSubscriptionSync';
 import { createTrialSubscriptionInProfile } from '../../../utils/subscription';
 import { syncSubscriptionAfterCheckout } from '../../../utils/productionSubscriptionSync';
+import { conversionTracking } from '@/lib/analytics';
 
 interface CheckoutSession {
   id: string;
@@ -72,6 +73,26 @@ export default function SuccessPage() {
           if (syncResult.success) {
             setTrialCreated(true);
             console.log('✅ Subscription synced successfully after checkout');
+
+            const planType =
+              session.subscription?.metadata?.planType || 'monthly';
+            const isTrial =
+              session.subscription?.trial_end &&
+              session.subscription.trial_end > Date.now() / 1000;
+
+            if (isTrial) {
+              conversionTracking.trialStarted(
+                me?.id,
+                session.customer_email,
+                planType as 'monthly' | 'yearly',
+              );
+            } else {
+              conversionTracking.subscriptionStarted(
+                me?.id,
+                session.customer_email,
+                planType as 'monthly' | 'yearly',
+              );
+            }
           } else {
             console.error('Subscription sync failed:', syncResult.message);
             // Try the old method as fallback
@@ -110,6 +131,7 @@ export default function SuccessPage() {
     if (session && !trialCreated) {
       createTrial();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, profile, trialCreated, sessionId]);
 
   // Create a mock sync result for the UI

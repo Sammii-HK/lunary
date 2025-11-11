@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAccount } from 'jazz-tools/react';
 import { useAuthStatus } from './AuthStatus';
+import { conversionTracking } from '@/lib/analytics';
 
 interface AuthFormData {
   email: string;
@@ -84,6 +85,11 @@ export function AuthComponent({
 
         if (result.error) {
           throw new Error(result.error.message || 'Signup failed');
+        }
+
+        const user = result.data?.user;
+        if (user) {
+          conversionTracking.signup(user.id, formData.email);
         }
 
         setSuccess('Account created successfully! You are now signed in.');

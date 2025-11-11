@@ -1,0 +1,164 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const timeRange = searchParams.get('timeRange') || '30d';
+
+    let dateFilter = '';
+    switch (timeRange) {
+      case '7d':
+        dateFilter = "created_at >= NOW() - INTERVAL '7 days'";
+        break;
+      case '30d':
+        dateFilter = "created_at >= NOW() - INTERVAL '30 days'";
+        break;
+      case '90d':
+        dateFilter = "created_at >= NOW() - INTERVAL '90 days'";
+        break;
+      default:
+        dateFilter = '1=1';
+    }
+
+    const signups = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type = 'signup' AND ${sql.raw(dateFilter)}
+    `;
+
+    const trials = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type = 'trial_started' AND ${sql.raw(dateFilter)}
+    `;
+
+    const conversions = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type IN ('trial_converted', 'subscription_started') AND ${sql.raw(dateFilter)}
+    `;
+
+    const trialConversions = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type = 'trial_converted' AND ${sql.raw(dateFilter)}
+    `;
+
+    const totalSignups = parseInt(signups.rows[0]?.count || '0');
+    const trialStarted = parseInt(trials.rows[0]?.count || '0');
+    const subscriptionStarted = parseInt(conversions.rows[0]?.count || '0');
+    const trialConverted = parseInt(trialConversions.rows[0]?.count || '0');
+
+    const conversionRate =
+      totalSignups > 0 ? (subscriptionStarted / totalSignups) * 100 : 0;
+    const trialConversionRate =
+      trialStarted > 0 ? (trialConverted / trialStarted) * 100 : 0;
+
+    const timeToConvert = await sql`
+      SELECT 
+        AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
+      FROM conversion_events t1
+      JOIN conversion_events t2 ON t1.user_id = t2.user_id
+      WHERE t1.event_type = 'trial_started'
+        AND t2.event_type IN ('trial_converted', 'subscription_started')
+        AND t2.created_at > t1.created_at
+        AND ${sql.raw(dateFilter.replace('created_at', 't1.created_at'))}
+    `;
+
+    const avgTimeToConvert =
+      parseFloat(timeToConvert.rows[0]?.avg_days || '0') || 0;
+
+    const activeSubscriptions = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type IN ('subscription_started', 'trial_converted')
+        AND ${sql.raw(dateFilter)}
+    `;
+
+    const monthlySubscriptions = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type IN ('subscription_started', 'trial_converted')
+        AND plan_type = 'monthly'
+        AND ${sql.raw(dateFilter)}
+    `;
+
+    const yearlySubscriptions = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type IN ('subscription_started', 'trial_converted')
+        AND plan_type = 'yearly'
+        AND ${sql.raw(dateFilter)}
+    `;
+
+    const monthlyCount = parseInt(monthlySubscriptions.rows[0]?.count || '0');
+    const yearlyCount = parseInt(yearlySubscriptions.rows[0]?.count || '0');
+
+    const mrr = monthlyCount * 4.99 + (yearlyCount * 39.99) / 12;
+    const revenue =
+      mrr *
+      (timeRange === '7d'
+        ? 7 / 30
+        : timeRange === '30d'
+          ? 1
+          : timeRange === '90d'
+            ? 3
+            : 12);
+
+    const events = await sql`
+      SELECT 
+        event_type,
+        COUNT(*) as count
+      FROM conversion_events
+      WHERE ${sql.raw(dateFilter)}
+      GROUP BY event_type
+      ORDER BY count DESC
+    `;
+
+    const totalEvents = events.rows.reduce(
+      (sum, row) => sum + parseInt(row.count || '0'),
+      0,
+    );
+
+    const eventsWithPercentage = events.rows.map((row) => ({
+      event_type: row.event_type,
+      count: parseInt(row.count || '0'),
+      percentage:
+        totalEvents > 0 ? (parseInt(row.count || '0') / totalEvents) * 100 : 0,
+    }));
+
+    return NextResponse.json({
+      success: true,
+      metrics: {
+        totalSignups,
+        trialStarted,
+        trialConverted,
+        subscriptionStarted,
+        conversionRate,
+        trialConversionRate,
+        avgTimeToConvert,
+        revenue,
+        mrr,
+      },
+      funnel: {
+        signups: totalSignups,
+        trials: trialStarted,
+        conversions: subscriptionStarted,
+        activeSubscriptions: parseInt(
+          activeSubscriptions.rows[0]?.count || '0',
+        ),
+      },
+      events: eventsWithPercentage,
+    });
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
+  }
+}

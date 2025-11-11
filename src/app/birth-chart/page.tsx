@@ -12,6 +12,11 @@ import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 import Link from 'next/link';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
+import { TrialReminder } from '@/components/TrialReminder';
+import { FeatureGate } from '@/components/FeatureGate';
+import { conversionTracking } from '@/lib/analytics';
+import { useEffect } from 'react';
 
 // Function to generate concise planetary interpretations
 const getPlanetaryInterpretation = (planet: BirthChartData): string => {
@@ -797,6 +802,12 @@ const BirthChartPage = () => {
 
   const hasChartAccess = hasBirthChartAccess(subscription.status);
 
+  useEffect(() => {
+    if (hasChartAccess && hasBirthChart(me?.profile)) {
+      conversionTracking.birthChartViewed(me?.id);
+    }
+  }, [hasChartAccess, me?.profile, me?.id]);
+
   if (!me) {
     return (
       <div className='h-[91vh] flex items-center justify-center'>
@@ -811,26 +822,36 @@ const BirthChartPage = () => {
   // Check subscription access first
   if (!hasChartAccess) {
     return (
-      <div className='h-[91vh] flex items-center justify-center'>
-        <div className='text-center max-w-lg px-4'>
-          <h1 className='text-3xl font-bold text-white mb-6'>
-            🌟 Your Birth Chart Awaits
-          </h1>
-          <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-6 border border-purple-500/30 mb-6'>
-            <p className='text-zinc-300 mb-4'>
-              Unlock your complete cosmic blueprint with a detailed birth chart
-              analysis. Discover your planetary positions, aspects, and the
-              deeper meaning behind your astrological profile.
-            </p>
-            <ul className='text-sm text-zinc-400 space-y-2 mb-6 text-left'>
-              <li>✨ Complete planetary positions at your birth</li>
-              <li>🌙 Sun, Moon, and Rising sign analysis</li>
-              <li>⭐ Cosmic aspects and their interpretations</li>
-              <li>🎯 Personality insights and guidance</li>
-            </ul>
+      <div className='min-h-screen space-y-6 pb-20 px-4'>
+        <TrialReminder variant='banner' />
+        <div className='flex items-center justify-center min-h-[60vh]'>
+          <div className='text-center max-w-lg px-4'>
+            <h1 className='text-3xl font-bold text-white mb-6'>
+              🌟 Your Birth Chart Awaits
+            </h1>
+            <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-6 border border-purple-500/30 mb-6'>
+              <p className='text-zinc-300 mb-4'>
+                Unlock your complete cosmic blueprint with a detailed birth
+                chart analysis. Discover your planetary positions, aspects, and
+                the deeper meaning behind your astrological profile.
+              </p>
+              <ul className='text-sm text-zinc-400 space-y-2 mb-6 text-left'>
+                <li>✨ Complete planetary positions at your birth</li>
+                <li>🌙 Sun, Moon, and Rising sign analysis</li>
+                <li>⭐ Cosmic aspects and their interpretations</li>
+                <li>🎯 Personality insights and guidance</li>
+              </ul>
+            </div>
+            <SmartTrialButton size='lg' />
           </div>
-          <SmartTrialButton size='lg' />
         </div>
+        <UpgradePrompt
+          variant='card'
+          featureName='birth_chart'
+          title='Unlock Your Complete Birth Chart'
+          description='Get detailed planetary positions, aspects, and cosmic patterns unique to your birth time'
+          className='max-w-2xl mx-auto'
+        />
       </div>
     );
   }
@@ -889,6 +910,7 @@ const BirthChartPage = () => {
 
   return (
     <div className='h-[91vh] space-y-6 pb-4 overflow-auto'>
+      <TrialReminder variant='banner' />
       <BirthChart
         birthChart={birthChartData}
         userName={userName}

@@ -16,11 +16,14 @@ import { Check, Star, Zap } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
+import { useConversionTracking } from '@/hooks/useConversionTracking';
+import { conversionTracking } from '@/lib/analytics';
 
 export default function PricingPage() {
   const { me } = useAccount();
   const subscription = useSubscription();
   const authState = useAuthStatus();
+  const { trackEvent } = useConversionTracking();
   const [loading, setLoading] = useState<string | null>(null);
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
@@ -48,6 +51,11 @@ export default function PricingPage() {
     if (!priceId) return;
 
     setLoading(planId);
+
+    conversionTracking.upgradeClicked(
+      planId === 'monthly' ? 'monthly_plan' : 'yearly_plan',
+      '/pricing',
+    );
 
     try {
       const { sessionId } = await createCheckoutSession(
