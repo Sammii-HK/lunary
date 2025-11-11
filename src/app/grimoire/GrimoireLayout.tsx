@@ -19,6 +19,10 @@ import { tarotSuits, tarotSpreads } from '@/constants/tarot';
 import { spells } from '@/constants/spells';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { chakras } from '@/constants/chakras';
+import {
+  crystalCategories,
+  getCrystalsByCategory,
+} from '@/constants/grimoire/crystals';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import {
   MonthlyMoonPhase,
@@ -484,73 +488,26 @@ export default function GrimoireLayout({
       }
     });
 
-    // Search crystals (from crystal categories)
-    const crystalCategories = [
-      {
-        name: 'Protection & Grounding',
-        crystals: [
-          'Black Tourmaline',
-          'Obsidian',
-          'Hematite',
-          'Smoky Quartz',
-          'Shungite',
-          'Red Jasper',
-          'Garnet',
-          'Onyx',
-          'Apache Tear',
-          'Fire Agate',
-          'Jet',
-          'Bloodstone',
-        ],
-      },
-      {
-        name: 'Love & Heart Healing',
-        crystals: [
-          'Rose Quartz',
-          'Green Aventurine',
-          'Rhodonite',
-          'Morganite',
-          'Pink Tourmaline',
-          'Emerald',
-          'Prehnite',
-          'Kunzite',
-          'Green Calcite',
-          'Chrysoprase',
-          'Unakite',
-          'Amazonite',
-        ],
-      },
-      {
-        name: 'Spiritual & Intuitive',
-        crystals: [
-          'Amethyst',
-          'Labradorite',
-          'Moonstone',
-          'Celestite',
-          'Selenite',
-          'Lapis Lazuli',
-          'Iolite',
-          'Kyanite',
-          'Fluorite',
-          'Moldavite',
-          'Angelite',
-          'Azurite',
-          'Charoite',
-        ],
-      },
-    ];
-    crystalCategories.forEach((category) => {
-      category.crystals.forEach((crystal) => {
+    // Search crystals (from crystal database - SSOT)
+    crystalCategories.forEach((categoryName) => {
+      const crystals = getCrystalsByCategory(categoryName);
+      crystals.forEach((crystal) => {
         if (
-          crystal.toLowerCase().includes(query) ||
-          category.name.toLowerCase().includes(query)
+          crystal.name.toLowerCase().includes(query) ||
+          crystal.alternativeNames?.some((name) =>
+            name.toLowerCase().includes(query),
+          ) ||
+          crystal.properties.some((prop) =>
+            prop.toLowerCase().includes(query),
+          ) ||
+          categoryName.toLowerCase().includes(query)
         ) {
           results.push({
             type: 'crystal',
-            title: `Crystal - ${crystal}`,
+            title: `Crystal - ${crystal.name}`,
             section: 'crystals',
             href: '/grimoire/crystals#crystal-categories',
-            match: `Category: ${category.name}`,
+            match: `Category: ${categoryName}`,
           });
         }
       });

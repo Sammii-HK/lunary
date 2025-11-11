@@ -3,6 +3,12 @@ import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { getAstrologicalChart } from '../astrology/astrology';
 import { Observer } from 'astronomy-engine';
 import { getMoonPhase } from '../moon/moonPhases';
+import {
+  crystalDatabase,
+  getCrystalsByZodiacSign,
+  getCrystalsByMoonPhase,
+  getCrystalByName,
+} from '../../src/constants/grimoire/crystals';
 
 dayjs.extend(dayOfYear);
 
@@ -14,89 +20,10 @@ export type GeneralCrystalRecommendation = {
   moonPhaseAlignment: string;
 };
 
-const CRYSTALS_BY_SIGN = {
-  Aries: ['Carnelian', 'Red Jasper', 'Hematite', 'Bloodstone'],
-  Taurus: ['Rose Quartz', 'Green Aventurine', 'Emerald', 'Malachite'],
-  Gemini: ['Citrine', 'Agate', 'Clear Quartz', "Tiger's Eye"],
-  Cancer: ['Moonstone', 'Pearl', 'Selenite', 'Aquamarine'],
-  Leo: ['Sunstone', 'Citrine', 'Amber', 'Pyrite'],
-  Virgo: ['Amazonite', 'Moss Agate', 'Peridot', 'Sapphire'],
-  Libra: ['Lapis Lazuli', 'Opal', 'Jade', 'Lepidolite'],
-  Scorpio: ['Obsidian', 'Garnet', 'Labradorite', 'Malachite'],
-  Sagittarius: ['Turquoise', 'Sodalite', 'Amethyst', 'Lapis Lazuli'],
-  Capricorn: ['Garnet', 'Black Tourmaline', 'Fluorite', 'Onyx'],
-  Aquarius: ['Amethyst', 'Aquamarine', 'Fluorite', 'Labradorite'],
-  Pisces: ['Amethyst', 'Aquamarine', 'Moonstone', 'Fluorite'],
-};
-
-const CRYSTAL_PROPERTIES = {
-  Amethyst: ['intuition', 'spiritual growth', 'calming', 'protection'],
-  'Rose Quartz': [
-    'love',
-    'emotional healing',
-    'self-compassion',
-    'relationships',
-  ],
-  'Clear Quartz': ['amplification', 'clarity', 'energy', 'manifestation'],
-  Citrine: ['abundance', 'creativity', 'confidence', 'joy'],
-  'Black Tourmaline': [
-    'protection',
-    'grounding',
-    'energy cleansing',
-    'stability',
-  ],
-  Moonstone: [
-    'intuition',
-    'feminine energy',
-    'emotional balance',
-    'new beginnings',
-  ],
-  Carnelian: ['courage', 'motivation', 'creativity', 'vitality'],
-  Labradorite: ['transformation', 'intuition', 'magic', 'psychic abilities'],
-  Selenite: ['cleansing', 'clarity', 'peace', 'spiritual connection'],
-  Hematite: ['grounding', 'focus', 'protection', 'strength'],
-  'Green Aventurine': ['luck', 'opportunity', 'heart healing', 'growth'],
-  Sodalite: ['truth', 'communication', 'wisdom', 'emotional balance'],
-  "Tiger's Eye": ['confidence', 'protection', 'mental clarity', 'good luck'],
-  Fluorite: ['mental clarity', 'focus', 'learning', 'decision making'],
-  Malachite: ['transformation', 'protection', 'healing', 'emotional release'],
-  Garnet: ['passion', 'energy', 'strength', 'commitment'],
-  Aquamarine: ['communication', 'courage', 'clarity', 'emotional healing'],
-  Bloodstone: ['courage', 'vitality', 'grounding', 'decision making'],
-  Sunstone: ['leadership', 'vitality', 'creativity', 'optimism'],
-  'Lapis Lazuli': ['wisdom', 'truth', 'communication', 'spiritual insight'],
-  Obsidian: ['protection', 'grounding', 'truth', 'emotional healing'],
-  Jade: ['harmony', 'prosperity', 'protection', 'wisdom'],
-  Amazonite: ['communication', 'truth', 'courage', 'emotional balance'],
-  Opal: ['creativity', 'inspiration', 'emotional healing', 'intuition'],
-  Emerald: ['love', 'abundance', 'healing', 'growth'],
-  Peridot: ['abundance', 'protection', 'emotional healing', 'growth'],
-  Pyrite: ['abundance', 'confidence', 'manifestation', 'protection'],
-  Onyx: ['strength', 'protection', 'grounding', 'self-control'],
-  Agate: ['stability', 'grounding', 'protection', 'balance'],
-  Amber: ['healing', 'purification', 'vitality', 'manifestation'],
-  Lepidolite: ['peace', 'emotional balance', 'stress relief', 'transition'],
-  Pearl: ['wisdom', 'purity', 'emotional healing', 'intuition'],
-  'Red Jasper': ['strength', 'vitality', 'grounding', 'courage'],
-  'Moss Agate': [
-    'growth',
-    'abundance',
-    'connection to nature',
-    'emotional balance',
-  ],
-  Sapphire: ['wisdom', 'truth', 'spiritual insight', 'mental clarity'],
-  Turquoise: ['protection', 'healing', 'communication', 'spiritual connection'],
-};
-
-const MOON_PHASE_CRYSTALS = {
-  'New Moon': ['Moonstone', 'Clear Quartz', 'Selenite', 'Amethyst'],
-  'Waxing Crescent': ['Citrine', 'Green Aventurine', 'Carnelian', 'Sunstone'],
-  'First Quarter': ["Tiger's Eye", 'Hematite', 'Fluorite', 'Garnet'],
-  'Waxing Gibbous': ['Rose Quartz', 'Amazonite', 'Jade', 'Peridot'],
-  'Full Moon': ['Moonstone', 'Labradorite', 'Selenite', 'Amethyst'],
-  'Waning Gibbous': ['Lepidolite', 'Sodalite', 'Aquamarine', 'Blue Lace Agate'],
-  'Third Quarter': ['Black Tourmaline', 'Obsidian', 'Hematite', 'Onyx'],
-  'Waning Crescent': ['Amethyst', 'Fluorite', 'Selenite', 'Clear Quartz'],
+// Get crystal properties from database (SSOT)
+const getCrystalProperties = (crystalName: string): string[] => {
+  const crystal = getCrystalByName(crystalName);
+  return crystal?.properties || ['balance', 'harmony', 'energy', 'healing'];
 };
 
 const getDominantEnergy = (currentChart: any[]): string => {
@@ -131,23 +58,25 @@ const getDominantEnergy = (currentChart: any[]): string => {
 };
 
 const getElementalCrystals = (element: string): string[] => {
-  const elementalCrystals = {
-    fire: ['Carnelian', 'Red Jasper', 'Sunstone', 'Citrine', 'Garnet'],
-    earth: [
-      'Hematite',
-      'Black Tourmaline',
-      'Green Aventurine',
-      'Moss Agate',
-      'Emerald',
-    ],
-    air: ['Clear Quartz', 'Fluorite', 'Sodalite', 'Lapis Lazuli', 'Aquamarine'],
-    water: ['Moonstone', 'Amethyst', 'Rose Quartz', 'Aquamarine', 'Pearl'],
+  // Use the crystal database instead of hardcoded lists
+  const elementMap: Record<string, string[]> = {
+    fire: ['Fire'],
+    earth: ['Earth'],
+    air: ['Air'],
+    water: ['Water'],
   };
 
-  return (
-    elementalCrystals[element as keyof typeof elementalCrystals] ||
-    elementalCrystals.air
+  const elementName = elementMap[element]?.[0] || 'Air';
+
+  // Get crystals from database that match this element
+  const matchingCrystals = crystalDatabase.filter(
+    (crystal) =>
+      crystal.elements.includes(elementName) ||
+      crystal.elements.includes('All Elements'),
   );
+
+  // Return crystal names
+  return matchingCrystals.map((c) => c.name);
 };
 
 const getCrystalGuidance = (
@@ -155,9 +84,7 @@ const getCrystalGuidance = (
   moonPhase: string,
   dominantElement: string,
 ): string => {
-  const properties = CRYSTAL_PROPERTIES[
-    crystal as keyof typeof CRYSTAL_PROPERTIES
-  ] || ['balance', 'harmony'];
+  const properties = getCrystalProperties(crystal);
   const primaryProperty = properties[0];
 
   const guidanceTemplates = [
@@ -205,16 +132,16 @@ export const getGeneralCrystalRecommendation = (
   const sun = currentChart.find((p) => p.body === 'Sun');
   const moon = currentChart.find((p) => p.body === 'Moon');
 
-  // Create pools of crystals from different sources
+  // Create pools of crystals from different sources using the database
   const sunCrystals = sun
-    ? CRYSTALS_BY_SIGN[sun.sign as keyof typeof CRYSTALS_BY_SIGN] || []
+    ? getCrystalsByZodiacSign(sun.sign).map((c) => c.name)
     : [];
   const moonCrystals = moon
-    ? CRYSTALS_BY_SIGN[moon.sign as keyof typeof CRYSTALS_BY_SIGN] || []
+    ? getCrystalsByZodiacSign(moon.sign).map((c) => c.name)
     : [];
-  const moonPhaseCrystals =
-    MOON_PHASE_CRYSTALS[moonPhase as keyof typeof MOON_PHASE_CRYSTALS] ||
-    MOON_PHASE_CRYSTALS['New Moon'];
+  const moonPhaseCrystals = getCrystalsByMoonPhase(moonPhase).map(
+    (c) => c.name,
+  );
   const elementalCrystals = getElementalCrystals(dominantElement);
 
   // Combine all crystal options and remove duplicates
@@ -256,9 +183,7 @@ export const getGeneralCrystalRecommendation = (
   return {
     name: selectedCrystal,
     reason,
-    properties: CRYSTAL_PROPERTIES[
-      selectedCrystal as keyof typeof CRYSTAL_PROPERTIES
-    ] || ['balance', 'harmony', 'energy', 'healing'],
+    properties: getCrystalProperties(selectedCrystal),
     guidance: getCrystalGuidance(selectedCrystal, moonPhase, dominantElement),
     moonPhaseAlignment: getMoonPhaseGuidance(moonPhase, selectedCrystal),
   };
