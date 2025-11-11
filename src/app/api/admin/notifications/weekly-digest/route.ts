@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { sendPushoverNotification } from '../../../../../utils/notifications/pushNotifications';
+import { sendPushoverNotification } from '../../../../../../utils/notifications/pushNotifications';
 
 export async function POST(request: NextRequest) {
   try {
