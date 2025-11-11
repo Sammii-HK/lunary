@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       FROM conversion_events
       WHERE metadata->>'abTest' = ${testName}
       AND metadata->>'abVariant' = 'A'
-      AND ${sql.raw(dateFilter)}
+      AND ${(sql as any).raw(dateFilter)}
       GROUP BY event_type
       ORDER BY count DESC
     `;
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       FROM conversion_events
       WHERE metadata->>'abTest' = ${testName}
       AND metadata->>'abVariant' = 'B'
-      AND ${sql.raw(dateFilter)}
+      AND ${(sql as any).raw(dateFilter)}
       GROUP BY event_type
       ORDER BY count DESC
     `;
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       FROM conversion_events
       WHERE metadata->>'abTest' = ${testName}
       AND metadata->>'abVariant' = 'A'
-      AND ${sql.raw(dateFilter)}
+      AND ${(sql as any).raw(dateFilter)}
     `;
 
     const journeysB = await sql`
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       FROM conversion_events
       WHERE metadata->>'abTest' = ${testName}
       AND metadata->>'abVariant' = 'B'
-      AND ${sql.raw(dateFilter)}
+      AND ${(sql as any).raw(dateFilter)}
     `;
 
     // Generate AI insights

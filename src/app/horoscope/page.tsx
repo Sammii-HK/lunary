@@ -19,9 +19,12 @@ export default function HoroscopePage() {
 
   useEffect(() => {
     if (hasChartAccess) {
-      conversionTracking.horoscopeViewed(me?.id);
+      const userId = (me as any)?.id;
+      if (userId) {
+        conversionTracking.horoscopeViewed(userId);
+      }
     }
-  }, [hasChartAccess, me?.id]);
+  }, [hasChartAccess, me]);
 
   if (!me) {
     return (

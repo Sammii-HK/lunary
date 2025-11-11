@@ -98,13 +98,17 @@ export function PWAReadyChecker() {
       }
     }, 2000);
 
+    return () => clearInterval(interval);
+  }, [isReady, checks.serviceWorker, checks.serviceWorkerControlling]);
+
+  useEffect(() => {
     // If service worker is registered but not controlling after 5 seconds, suggest reload
     if (
       checks.serviceWorker &&
       !checks.serviceWorkerControlling &&
       typeof window !== 'undefined'
     ) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         if (
           checks.serviceWorker &&
           !checks.serviceWorkerControlling &&
@@ -116,10 +120,10 @@ export function PWAReadyChecker() {
           );
         }
       }, 5000);
-    }
 
-    return () => clearInterval(interval);
-  }, [isReady]);
+      return () => clearTimeout(timeout);
+    }
+  }, [checks.serviceWorker, checks.serviceWorkerControlling]);
 
   if (isReady) {
     return null; // Hide when ready

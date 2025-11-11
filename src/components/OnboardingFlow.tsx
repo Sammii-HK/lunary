@@ -57,7 +57,10 @@ export function OnboardingFlow() {
       (me.profile as any).$jazz.set('birthday', birthday);
 
       // Track birth data submission
-      conversionTracking.birthDataSubmitted(me?.id);
+      const userId = (me as any)?.id;
+      if (userId) {
+        conversionTracking.birthDataSubmitted(userId);
+      }
 
       // Generate birth chart immediately after birthday is saved
       try {

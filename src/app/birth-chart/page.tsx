@@ -804,9 +804,12 @@ const BirthChartPage = () => {
 
   useEffect(() => {
     if (hasChartAccess && hasBirthChart(me?.profile)) {
-      conversionTracking.birthChartViewed(me?.id);
+      const userId = (me as any)?.id;
+      if (userId) {
+        conversionTracking.birthChartViewed(userId);
+      }
     }
-  }, [hasChartAccess, me?.profile, me?.id]);
+  }, [hasChartAccess, me?.profile, me]);
 
   if (!me) {
     return (

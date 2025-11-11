@@ -24,25 +24,25 @@ export async function GET(request: NextRequest) {
     const signups = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'signup' AND ${sql.raw(dateFilter)}
+      WHERE event_type = 'signup' AND ${(sql as any).raw(dateFilter)}
     `;
 
     const trials = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'trial_started' AND ${sql.raw(dateFilter)}
+      WHERE event_type = 'trial_started' AND ${(sql as any).raw(dateFilter)}
     `;
 
     const conversions = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type IN ('trial_converted', 'subscription_started') AND ${sql.raw(dateFilter)}
+      WHERE event_type IN ('trial_converted', 'subscription_started') AND ${(sql as any).raw(dateFilter)}
     `;
 
     const trialConversions = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'trial_converted' AND ${sql.raw(dateFilter)}
+      WHERE event_type = 'trial_converted' AND ${(sql as any).raw(dateFilter)}
     `;
 
     const totalSignups = parseInt(signups.rows[0]?.count || '0');
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       WHERE t1.event_type = 'trial_started'
         AND t2.event_type IN ('trial_converted', 'subscription_started')
         AND t2.created_at > t1.created_at
-        AND ${sql.raw(dateFilter.replace('created_at', 't1.created_at'))}
+        AND ${(sql as any).raw(dateFilter.replace('created_at', 't1.created_at'))}
     `;
 
     const avgTimeToConvert =
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
       WHERE event_type IN ('subscription_started', 'trial_converted')
-        AND ${sql.raw(dateFilter)}
+        AND ${(sql as any).raw(dateFilter)}
     `;
 
     const monthlySubscriptions = await sql`
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type IN ('subscription_started', 'trial_converted')
         AND plan_type = 'monthly'
-        AND ${sql.raw(dateFilter)}
+        AND ${(sql as any).raw(dateFilter)}
     `;
 
     const yearlySubscriptions = await sql`
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type IN ('subscription_started', 'trial_converted')
         AND plan_type = 'yearly'
-        AND ${sql.raw(dateFilter)}
+        AND ${(sql as any).raw(dateFilter)}
     `;
 
     const monthlyCount = parseInt(monthlySubscriptions.rows[0]?.count || '0');
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
         event_type,
         COUNT(*) as count
       FROM conversion_events
-      WHERE ${sql.raw(dateFilter)}
+      WHERE ${(sql as any).raw(dateFilter)}
       GROUP BY event_type
       ORDER BY count DESC
     `;
@@ -131,31 +131,31 @@ export async function GET(request: NextRequest) {
     const birthDataSubmitted = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'birth_data_submitted' AND ${sql.raw(dateFilter)}
+      WHERE event_type = 'birth_data_submitted' AND ${(sql as any).raw(dateFilter)}
     `;
 
     const onboardingCompleted = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'onboarding_completed' AND ${sql.raw(dateFilter)}
+      WHERE event_type = 'onboarding_completed' AND ${(sql as any).raw(dateFilter)}
     `;
 
     const pricingPageViews = await sql`
       SELECT COUNT(*) as count
       FROM conversion_events
-      WHERE event_type = 'pricing_page_viewed' AND ${sql.raw(dateFilter)}
+      WHERE event_type = 'pricing_page_viewed' AND ${(sql as any).raw(dateFilter)}
     `;
 
     const upgradeClicks = await sql`
       SELECT COUNT(*) as count
       FROM conversion_events
-      WHERE event_type = 'upgrade_clicked' AND ${sql.raw(dateFilter)}
+      WHERE event_type = 'upgrade_clicked' AND ${(sql as any).raw(dateFilter)}
     `;
 
     const featureGated = await sql`
       SELECT COUNT(*) as count
       FROM conversion_events
-      WHERE event_type = 'feature_gated' AND ${sql.raw(dateFilter)}
+      WHERE event_type = 'feature_gated' AND ${(sql as any).raw(dateFilter)}
     `;
 
     const birthDataRate =

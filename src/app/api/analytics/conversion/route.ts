@@ -76,43 +76,80 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId');
     const limit = parseInt(searchParams.get('limit') || '100');
 
-    let query = sql`
-      SELECT 
-        id,
-        event_type,
-        user_id,
-        user_email,
-        plan_type,
-        trial_days_remaining,
-        feature_name,
-        page_path,
-        metadata,
-        created_at
-      FROM conversion_events
-      WHERE 1=1
-    `;
-
-    if (eventType) {
-      query = sql`
-        ${query}
-        AND event_type = ${eventType}
-      `;
-    }
-
-    if (userId) {
-      query = sql`
-        ${query}
+    let result;
+    if (eventType && userId) {
+      result = await sql`
+        SELECT 
+          id,
+          event_type,
+          user_id,
+          user_email,
+          plan_type,
+          trial_days_remaining,
+          feature_name,
+          page_path,
+          metadata,
+          created_at
+        FROM conversion_events
+        WHERE event_type = ${eventType}
         AND user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+    } else if (eventType) {
+      result = await sql`
+        SELECT 
+          id,
+          event_type,
+          user_id,
+          user_email,
+          plan_type,
+          trial_days_remaining,
+          feature_name,
+          page_path,
+          metadata,
+          created_at
+        FROM conversion_events
+        WHERE event_type = ${eventType}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+    } else if (userId) {
+      result = await sql`
+        SELECT 
+          id,
+          event_type,
+          user_id,
+          user_email,
+          plan_type,
+          trial_days_remaining,
+          feature_name,
+          page_path,
+          metadata,
+          created_at
+        FROM conversion_events
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+    } else {
+      result = await sql`
+        SELECT 
+          id,
+          event_type,
+          user_id,
+          user_email,
+          plan_type,
+          trial_days_remaining,
+          feature_name,
+          page_path,
+          metadata,
+          created_at
+        FROM conversion_events
+        ORDER BY created_at DESC
+        LIMIT ${limit}
       `;
     }
-
-    query = sql`
-      ${query}
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-    `;
-
-    const result = await query;
 
     return NextResponse.json({
       success: true,

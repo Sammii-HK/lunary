@@ -149,7 +149,7 @@ export function PWAHandler() {
       );
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, []);
+  }, [deferredPrompt]);
 
   const handleInstallClick = async () => {
     // Android/Desktop: Use programmatic install

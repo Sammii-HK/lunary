@@ -15,10 +15,11 @@ export function ReferralProgram() {
   const [loading, setLoading] = useState(true);
 
   const loadReferralData = useCallback(async () => {
-    if (!me?.id) return;
+    const userId = (me as any)?.id;
+    if (!userId) return;
 
     try {
-      const response = await fetch(`/api/referrals/stats?userId=${me.id}`);
+      const response = await fetch(`/api/referrals/stats?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
         setReferralCode(data.code);
@@ -28,7 +29,7 @@ export function ReferralProgram() {
         });
       } else {
         // Generate code if doesn't exist
-        const newCode = await generateReferralCode(me.id);
+        const newCode = await generateReferralCode(userId);
         setReferralCode(newCode);
       }
     } catch (error) {
@@ -36,15 +37,16 @@ export function ReferralProgram() {
     } finally {
       setLoading(false);
     }
-  }, [me?.id]);
+  }, [me]);
 
   useEffect(() => {
-    if (authState.isAuthenticated && me?.id) {
+    const userId = (me as any)?.id;
+    if (authState.isAuthenticated && userId) {
       loadReferralData();
     } else {
       setLoading(false);
     }
-  }, [authState.isAuthenticated, me?.id, loadReferralData]);
+  }, [authState.isAuthenticated, me, loadReferralData]);
 
   const handleCopy = async () => {
     if (!referralCode) return;

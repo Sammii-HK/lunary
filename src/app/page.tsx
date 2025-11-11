@@ -22,12 +22,13 @@ export default function Home() {
 
   useEffect(() => {
     // Track app opened event
-    if (authState.isAuthenticated && me?.id) {
-      conversionTracking.appOpened(me.id, '/');
+    if (authState.isAuthenticated) {
+      const userId = (me as any)?.id;
+      conversionTracking.appOpened(userId, '/');
     } else if (!authState.loading) {
       conversionTracking.appOpened(undefined, '/');
     }
-  }, [authState.isAuthenticated, authState.loading, me?.id]);
+  }, [authState.isAuthenticated, authState.loading, me]);
 
   return (
     <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl mx-auto px-4'>

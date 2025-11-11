@@ -1,7 +1,7 @@
 'use client';
 
 import { useAccount } from 'jazz-tools/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Mail, CheckCircle, XCircle } from 'lucide-react';
 
 export function EmailSubscriptionSettings() {
@@ -11,15 +11,7 @@ export function EmailSubscriptionSettings() {
   const [updating, setUpdating] = useState(false);
   const userEmail = (me?.profile as any)?.email || (me as any)?.email;
 
-  useEffect(() => {
-    if (userEmail) {
-      checkSubscriptionStatus();
-    } else {
-      setLoading(false);
-    }
-  }, [userEmail]);
-
-  const checkSubscriptionStatus = async () => {
+  const checkSubscriptionStatus = useCallback(async () => {
     if (!userEmail) return;
 
     try {
@@ -38,7 +30,15 @@ export function EmailSubscriptionSettings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userEmail]);
+
+  useEffect(() => {
+    if (userEmail) {
+      checkSubscriptionStatus();
+    } else {
+      setLoading(false);
+    }
+  }, [userEmail, checkSubscriptionStatus]);
 
   const toggleSubscription = async () => {
     if (!userEmail) {

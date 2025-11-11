@@ -42,7 +42,7 @@ export async function trackConversion(
       ...data,
     };
 
-    track(event, eventData);
+    track(event, eventData as Record<string, any>);
 
     const [analyticsResponse, notificationResponse] = await Promise.allSettled([
       fetch('/api/analytics/conversion', {

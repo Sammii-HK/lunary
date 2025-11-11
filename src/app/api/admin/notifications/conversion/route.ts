@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         priority = 0;
     }
 
-    const priorityMap: Record<number, 'low' | 'normal' | 'high' | 'emergency'> =
+    const priorityMap: Record<string, 'low' | 'normal' | 'high' | 'emergency'> =
       {
         '-1': 'low',
         '0': 'normal',
@@ -52,9 +52,7 @@ export async function POST(request: NextRequest) {
     const result = await sendPushoverNotification({
       title,
       message,
-      priority:
-        priorityMap[priority.toString() as keyof typeof priorityMap] ||
-        'normal',
+      priority: priorityMap[priority.toString()] || 'normal',
       sound:
         eventType.includes('converted') || eventType.includes('subscription')
           ? 'cashregister'

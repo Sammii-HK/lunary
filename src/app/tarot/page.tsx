@@ -97,10 +97,13 @@ const TarotReadings = () => {
   }, [hasChartAccess, userName, userBirthday]);
 
   useEffect(() => {
-    if (hasChartAccess && personalizedReading && me?.id) {
-      conversionTracking.tarotViewed(me.id);
+    if (hasChartAccess && personalizedReading) {
+      const userId = (me as any)?.id;
+      if (userId) {
+        conversionTracking.tarotViewed(userId);
+      }
     }
-  }, [hasChartAccess, personalizedReading, me?.id]);
+  }, [hasChartAccess, personalizedReading, me]);
 
   if (!me) {
     return (

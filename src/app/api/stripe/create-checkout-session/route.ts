@@ -108,9 +108,14 @@ export async function POST(request: NextRequest) {
     // Handle discount codes (for trial expired users - legacy)
     if (discountCode && !promoCode) {
       try {
-        const coupons = await stripe.coupons.list({ code: discountCode });
-        if (coupons.data.length > 0) {
-          sessionConfig.discounts = [{ coupon: coupons.data[0].id }];
+        const promotionCodes = await stripe.promotionCodes.list({
+          code: discountCode,
+          limit: 1,
+        });
+        if (promotionCodes.data.length > 0) {
+          sessionConfig.discounts = [
+            { promotion_code: promotionCodes.data[0].id },
+          ];
         }
       } catch (error) {
         console.error('Failed to apply discount code:', error);
@@ -128,7 +133,7 @@ export async function POST(request: NextRequest) {
           sessionConfig.metadata = {
             ...sessionConfig.metadata,
             referralCode,
-            referrerUserId: validation.userId,
+            referrerUserId: validation.userId || null,
           };
         }
       } catch (error) {

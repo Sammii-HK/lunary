@@ -75,7 +75,7 @@ export default function SuccessPage() {
             console.log('✅ Subscription synced successfully after checkout');
 
             const planType =
-              session.subscription?.metadata?.planType || 'monthly';
+              (session.subscription as any)?.metadata?.planType || 'monthly';
             const isTrial =
               session.subscription?.trial_end &&
               session.subscription.trial_end > Date.now() / 1000;

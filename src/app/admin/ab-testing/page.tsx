@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -45,12 +45,7 @@ export default function ABTestingPage() {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [applyingChanges, setApplyingChanges] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadABTests();
-    loadAutoSuggestions();
-  }, [timeRange]);
-
-  const loadAutoSuggestions = async () => {
+  const loadAutoSuggestions = useCallback(async () => {
     setLoadingSuggestions(true);
     try {
       const response = await fetch(
@@ -65,7 +60,29 @@ export default function ABTestingPage() {
     } finally {
       setLoadingSuggestions(false);
     }
-  };
+  }, [timeRange]);
+
+  const loadABTests = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/admin/ab-testing?timeRange=${timeRange}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setTests(data.tests || []);
+      }
+    } catch (error) {
+      console.error('Failed to load A/B tests:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [timeRange]);
+
+  useEffect(() => {
+    loadABTests();
+    loadAutoSuggestions();
+  }, [loadABTests, loadAutoSuggestions]);
 
   const applyChanges = async (suggestion: any) => {
     if (
@@ -99,23 +116,6 @@ export default function ABTestingPage() {
       alert('Failed to apply changes');
     } finally {
       setApplyingChanges(null);
-    }
-  };
-
-  const loadABTests = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/admin/ab-testing?timeRange=${timeRange}`,
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setTests(data.tests || []);
-      }
-    } catch (error) {
-      console.error('Failed to load A/B tests:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
