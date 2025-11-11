@@ -276,28 +276,40 @@ export async function GET(
       ].join('\n');
     })(),
     snippetShort: (() => {
-      // Use the same crystal recommendation from above (for target date)
       const crystalRec = getGeneralCrystalRecommendation(targetDate);
-      const parts = [
-        (highlights?.[0] || 'Daily cosmic guidance').substring(0, 100),
-        `Crystal: ${crystalRec.guidance.substring(0, 70)}...`,
-        `Tarot: ${getGeneralTarotReading().guidance.dailyMessage.substring(0, 70)}...`,
-        'lunary.app',
-      ].filter(Boolean);
+      const tarotReading = getGeneralTarotReading().guidance.dailyMessage;
 
-      let snippet = parts.join(' ');
+      // Create a flowing, cohesive paragraph
+      const primaryEvent = highlights?.[0] || 'Daily cosmic guidance';
+
+      // Clean up crystal text - remove repetitive prefixes
+      let crystalText = crystalRec.guidance
+        .replace(/^The cosmic energies favor /i, '')
+        .replace(/^Work with /i, '')
+        .replace(/^Today's energies favor /i, '')
+        .trim();
+
+      // Clean up tarot text - remove repetitive prefixes
+      let tarotText = tarotReading
+        .replace(/^Today's cosmic energy through /i, '')
+        .replace(/^The universe encourages you to /i, '')
+        .trim();
+
+      // Build natural flowing paragraph
+      let snippet = `${primaryEvent}. `;
+      snippet += `Today's energies favor ${crystalText.toLowerCase()}. `;
+      snippet += `Tarot guidance suggests ${tarotText.toLowerCase()}. `;
+      snippet += 'Get personalized daily cosmic guidance at lunary.app';
 
       // Ensure it's 280 characters or less for Twitter
       if (snippet.length > 280) {
-        // Find the last sentence-ending punctuation before 280 chars
-        const maxLength = 280;
+        const maxLength = 275;
         let cutPoint = maxLength;
 
-        // Look for sentence endings (. ! ?) in reverse order
+        // Look for sentence endings in reverse order
         const sentenceEnders = ['.', '!', '?'];
         for (let i = maxLength - 1; i >= Math.max(0, maxLength - 50); i--) {
           if (sentenceEnders.includes(snippet[i])) {
-            // Check if it's followed by a space or end of string
             if (i === snippet.length - 1 || snippet[i + 1] === ' ') {
               cutPoint = i + 1;
               break;
@@ -305,7 +317,7 @@ export async function GET(
           }
         }
 
-        // If no sentence ender found, try to break at last space
+        // If no sentence ender found, break at last space
         if (cutPoint === maxLength) {
           const lastSpace = snippet.lastIndexOf(' ', maxLength);
           if (lastSpace > maxLength - 50) {
@@ -314,6 +326,13 @@ export async function GET(
         }
 
         snippet = snippet.substring(0, cutPoint).trim();
+        if (
+          !snippet.endsWith('.') &&
+          !snippet.endsWith('!') &&
+          !snippet.endsWith('?')
+        ) {
+          snippet += '...';
+        }
       }
 
       return snippet;
