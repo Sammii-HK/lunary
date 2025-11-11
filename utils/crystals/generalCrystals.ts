@@ -217,7 +217,7 @@ export const getGeneralCrystalRecommendation = (
     MOON_PHASE_CRYSTALS['New Moon'];
   const elementalCrystals = getElementalCrystals(dominantElement);
 
-  // Combine all crystal options
+  // Combine all crystal options and remove duplicates
   const allCrystals = [
     ...sunCrystals,
     ...moonCrystals,
@@ -225,9 +225,27 @@ export const getGeneralCrystalRecommendation = (
     ...elementalCrystals,
   ];
 
+  // Remove duplicates while preserving order (first occurrence wins)
+  const uniqueCrystals = Array.from(new Set(allCrystals));
+
+  // If we have duplicates, prefer crystals that appear in multiple categories
+  // This gives more variety and better matches cosmic energy
+  const crystalFrequency = new Map<string, number>();
+  allCrystals.forEach((crystal) => {
+    crystalFrequency.set(crystal, (crystalFrequency.get(crystal) || 0) + 1);
+  });
+
+  // Sort by frequency (most common first) then by original order
+  const sortedCrystals = uniqueCrystals.sort((a, b) => {
+    const freqA = crystalFrequency.get(a) || 0;
+    const freqB = crystalFrequency.get(b) || 0;
+    if (freqA !== freqB) return freqB - freqA; // Higher frequency first
+    return uniqueCrystals.indexOf(a) - uniqueCrystals.indexOf(b); // Preserve order
+  });
+
   // Select crystal based on current day to ensure consistency
   const dayOfYear = today.dayOfYear();
-  const selectedCrystal = allCrystals[dayOfYear % allCrystals.length];
+  const selectedCrystal = sortedCrystals[dayOfYear % sortedCrystals.length];
 
   // Generate reason
   let reason = `Based on today's cosmic energy`;

@@ -205,13 +205,17 @@ export async function GET(
     },
     highlights,
     horoscopeSnippet,
-    crystalRecommendation: {
-      name: getGeneralCrystalRecommendation().name,
-      reason: getGeneralCrystalRecommendation().reason,
-      properties: getGeneralCrystalRecommendation().properties,
-      guidance: getGeneralCrystalRecommendation().guidance,
-      moonPhaseAlignment: getGeneralCrystalRecommendation().moonPhaseAlignment,
-    },
+    crystalRecommendation: (() => {
+      // Get crystal recommendation for the target date (not today!)
+      const crystalRec = getGeneralCrystalRecommendation(targetDate);
+      return {
+        name: crystalRec.name,
+        reason: crystalRec.reason,
+        properties: crystalRec.properties,
+        guidance: crystalRec.guidance,
+        moonPhaseAlignment: crystalRec.moonPhaseAlignment,
+      };
+    })(),
     ingressEvents: ingresses,
     aspectEvents: aspects,
     seasonalEvents: seasonalEvents,
@@ -256,21 +260,27 @@ export async function GET(
       reading: getGeneralHoroscope().reading,
       generalAdvice: getGeneralHoroscope().generalAdvice,
     },
-    snippet: [
-      `Daily cosmic highlights: ${highlights?.[0] || ''}`,
-      ' ',
-      `Crystal: ${getGeneralCrystalRecommendation().guidance}`,
-      ' ',
-      `Tarot: ${getGeneralTarotReading().guidance.dailyMessage}`,
-      ' ',
-      `Horoscope: ${getGeneralHoroscope().reading.slice(0, 150)}...`,
-      ' ',
-      'Get personalised daily cosmic guidance at lunary.app.',
-    ].join('\n'),
+    snippet: (() => {
+      // Use the same crystal recommendation from above (for target date)
+      const crystalRec = getGeneralCrystalRecommendation(targetDate);
+      return [
+        `Daily cosmic highlights: ${highlights?.[0] || ''}`,
+        ' ',
+        `Crystal: ${crystalRec.guidance}`,
+        ' ',
+        `Tarot: ${getGeneralTarotReading().guidance.dailyMessage}`,
+        ' ',
+        `Horoscope: ${getGeneralHoroscope().reading.slice(0, 150)}...`,
+        ' ',
+        'Get personalised daily cosmic guidance at lunary.app.',
+      ].join('\n');
+    })(),
     snippetShort: (() => {
+      // Use the same crystal recommendation from above (for target date)
+      const crystalRec = getGeneralCrystalRecommendation(targetDate);
       const parts = [
         (highlights?.[0] || 'Daily cosmic guidance').substring(0, 100),
-        `Crystal: ${getGeneralCrystalRecommendation().guidance.substring(0, 70)}...`,
+        `Crystal: ${crystalRec.guidance.substring(0, 70)}...`,
         `Tarot: ${getGeneralTarotReading().guidance.dailyMessage.substring(0, 70)}...`,
         'lunary.app',
       ].filter(Boolean);
