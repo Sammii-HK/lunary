@@ -648,6 +648,18 @@ const CandleMagic = () => {
           >
             Herbs & Oils
           </a>
+          <a
+            href='/grimoire/moon#rituals'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Moon Rituals
+          </a>
+          <a
+            href='/grimoire/correspondences#colors'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Color Correspondences
+          </a>
         </div>
       </section>
 

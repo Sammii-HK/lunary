@@ -742,6 +742,39 @@ const BirthChart = () => {
           </p>
         </div>
       </div>
+
+      {/* Related Topics Section */}
+      <section className='mt-12 pt-8 border-t border-zinc-800/50'>
+        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          Related Topics
+        </h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+          <a
+            href='/grimoire/moon'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Moon Phases & Influences
+          </a>
+          <a
+            href='/grimoire/astronomy'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Astronomy & Zodiac
+          </a>
+          <a
+            href='/grimoire/tarot'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Tarot Readings
+          </a>
+          <a
+            href='/grimoire/correspondences#planets'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          >
+            Planetary Correspondences
+          </a>
+        </div>
+      </section>
     </div>
   );
 };
