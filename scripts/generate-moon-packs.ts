@@ -178,6 +178,7 @@ class MoonPackGenerator {
     if (currentMonth >= 7) {
       const targetYear = currentYear + 1;
 
+      // Generate annual moon phases pack
       const packConfig: PackConfig = {
         name: `Moon Phases - Complete ${targetYear} Guide`,
         description: `The ultimate moon phase companion for ${targetYear}. Includes all 13 lunar cycles, seasonal transitions, eclipses, and a complete lunar calendar with spiritual guidance for the entire year.`,
@@ -189,10 +190,57 @@ class MoonPackGenerator {
       };
 
       await this.createPack(packConfig);
+
+      // Also generate cosmic calendar for the year
+      console.log(`📅 Generating cosmic calendar for ${targetYear}...`);
+      await this.createCalendar(targetYear);
     } else {
       console.log(
         `⏰ Skipping yearly pack generation - too early in year (current month: ${currentMonth})`,
       );
+    }
+  }
+
+  private async createCalendar(year: number) {
+    if (this.dryRun) {
+      console.log(`   ✅ [DRY RUN] Calendar for ${year} would be created`);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/shop/calendar/generate-and-sync`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            year,
+            dryRun: false,
+            autoPublish: true,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Calendar generation failed: ${error}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        console.log(`   ✅ Calendar created: ${result.calendar.name}`);
+        this.createdPacks.push({
+          name: result.calendar.name,
+          sku: result.calendar.sku,
+          price: result.calendar.price,
+          stripeProductId: result.stripe.productId,
+        });
+      }
+    } catch (error) {
+      console.error(`   ❌ Failed to create calendar for ${year}:`, error);
+      // Don't throw - calendar is optional
     }
   }
 

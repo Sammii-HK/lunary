@@ -100,6 +100,12 @@ export async function GET(request: NextRequest) {
 // Helper to extract category from product name
 function extractCategoryFromName(name: string): string | null {
   const lowerName = name.toLowerCase();
+  if (
+    lowerName.includes('calendar') ||
+    lowerName.includes('ical') ||
+    lowerName.includes('gcal')
+  )
+    return 'calendar';
   if (lowerName.includes('moon')) return 'moon_phases';
   if (lowerName.includes('crystal')) return 'crystals';
   if (lowerName.includes('spell') || lowerName.includes('ritual'))

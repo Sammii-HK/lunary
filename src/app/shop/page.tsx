@@ -28,6 +28,7 @@ export default function ShopPage() {
   const categories = [
     { id: 'all', name: 'All Products', emoji: '🌟' },
     { id: 'moon_phases', name: 'Moon Phases', emoji: '🌙' },
+    { id: 'calendar', name: 'Calendars', emoji: '📅' },
     { id: 'crystals', name: 'Crystals', emoji: '💎' },
     { id: 'spells', name: 'Spells', emoji: '✨' },
     { id: 'tarot', name: 'Tarot', emoji: '🔮' },
