@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Blog - Lunary',
   description:
-    'Weekly cosmic insights, planetary highlights, moon phases, and astrological guidance. Stay connected to the cosmos with our weekly blog posts.',
+    'Weekly cosmic guidance and planetary insights. Discover how planetary transits, moon phases, and astrological events affect your daily life. Personalized forecasts and cosmic wisdom.',
   openGraph: {
     title: 'Blog - Lunary',
     description:

@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Shop - Lunary',
   description:
-    'Digital grimoire packs, moon phase guides, spell collections, and cosmic resources. Downloadable PDF guides for your spiritual practice.',
+    'Digital grimoire packs, moon phase guides, spell collections, and cosmic resources. Downloadable PDF guides for your spiritual practice. Enhance your magical journey.',
   openGraph: {
     title: 'Shop - Lunary',
     description:

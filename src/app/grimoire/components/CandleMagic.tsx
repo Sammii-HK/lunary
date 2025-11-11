@@ -650,6 +650,74 @@ const CandleMagic = () => {
           </a>
         </div>
       </section>
+
+      {/* HowTo Schema for Simple Intention Candle */}
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'HowTo',
+            name: 'Simple Intention Candle Ritual',
+            description:
+              'Learn how to perform a simple candle magic ritual to set intentions and manifest your desires.',
+            image: 'https://lunary.app/api/og/cosmic',
+            totalTime: 'PT15M',
+            tool: [
+              {
+                '@type': 'HowToTool',
+                name: 'Candle (color matching your intention)',
+              },
+              {
+                '@type': 'HowToTool',
+                name: 'Lighter or matches',
+              },
+              {
+                '@type': 'HowToTool',
+                name: 'Anointing oil (optional)',
+              },
+            ],
+            step: [
+              {
+                '@type': 'HowToStep',
+                position: 1,
+                name: 'Choose a candle color',
+                text: 'Choose a candle color matching your intention (red for love, green for prosperity, etc.)',
+              },
+              {
+                '@type': 'HowToStep',
+                position: 2,
+                name: 'Carve your intention',
+                text: 'Carve your intention or name into the candle from top to bottom',
+              },
+              {
+                '@type': 'HowToStep',
+                position: 3,
+                name: 'Anoint with oil',
+                text: 'Anoint with corresponding oil (optional), visualizing your intention flowing into the candle',
+              },
+              {
+                '@type': 'HowToStep',
+                position: 4,
+                name: 'Light the candle',
+                text: 'Light the candle and focus on your intention, visualizing your desired outcome',
+              },
+              {
+                '@type': 'HowToStep',
+                position: 5,
+                name: 'Let it burn',
+                text: 'Let it burn completely or extinguish and relight daily for 7 days',
+              },
+              {
+                '@type': 'HowToStep',
+                position: 6,
+                name: 'Dispose respectfully',
+                text: 'Dispose of wax remnants respectfully (bury or recycle)',
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 };

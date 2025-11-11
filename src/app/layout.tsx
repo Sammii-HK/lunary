@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${moonSymbol} Lunary`,
     description:
-      'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily insights, and cosmic guidance.',
+      'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily horoscopes, tarot readings, moon phases, and cosmic guidance. Free 7-day trial.',
     manifest: PWA_MANIFEST_URL,
     keywords: [
       'astrology',

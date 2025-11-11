@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Pricing - Lunary',
   description:
-    "Simple, transparent pricing. Start your free trial. No credit card required. Cancel anytime. Experience astrology that's actually about you.",
+    'Simple, transparent pricing for personalized astrology. Start your free 7-day trial, no credit card required. Cancel anytime. Get birth chart analysis, daily horoscopes, and cosmic guidance.',
   openGraph: {
     title: 'Pricing - Lunary',
     description:

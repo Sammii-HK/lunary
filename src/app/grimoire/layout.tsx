@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Grimoire - Lunary',
   description:
-    'Explore mystical knowledge, cosmic wisdom, tarot, crystals, runes, chakras, moon phases, and astrological correspondences in the Lunary Grimoire.',
+    'Explore mystical knowledge, cosmic wisdom, tarot, crystals, runes, chakras, moon phases, and astrological correspondences in the Lunary Grimoire. Complete guides for magical practice.',
   openGraph: {
     title: 'Grimoire - Lunary',
     description:

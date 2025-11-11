@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Lunary - Astrology Based on Real Data',
   description:
-    'Your complete birth chart, calculated with astronomical precision. Daily insights that consider your unique cosmic signature. Real guidance, thoughtfully presented.',
+    'Your complete birth chart, calculated with astronomical precision. Daily insights that consider your unique cosmic signature. Real guidance, thoughtfully presented. Free trial available.',
   openGraph: {
     title: 'Lunary - Astrology Based on Real Data',
     description:
