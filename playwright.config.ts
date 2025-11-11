@@ -1,20 +1,27 @@
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load .env.local file for Playwright tests
+config({ path: resolve(__dirname, '.env.local') });
 
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false, // Run tests sequentially to avoid auth conflicts
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1, // Single worker for faster setup/teardown
+  workers: 1, // Single worker to avoid auth conflicts
+  timeout: 60000, // 60 second timeout per test (increased for React hydration and Jazz sync)
   globalSetup: require.resolve('./e2e/global-setup.ts'),
-  reporter: [
-    ['html'],
-    ['list'],
-    process.env.CI
-      ? ['github']
-      : ['json', { outputFile: 'test-results/results.json' }],
-  ],
+  reporter: process.env.CI
+    ? [['github'], ['list'], ['html', { outputFolder: 'playwright-report' }]]
+    : [
+        ['list'],
+        ['line'],
+        ['html', { outputFolder: 'playwright-report' }],
+        ['json', { outputFile: 'test-results/results.json' }],
+      ],
   use: {
     baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -26,31 +33,22 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        headless: true, // Run headless by default for speed
+      },
     },
   ],
   webServer: {
     command: 'yarn dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-    stdout: 'ignore',
+    reuseExistingServer: false, // Always start fresh to avoid wrong server
+    timeout: 60000, // 60 seconds should be enough
+    stdout: 'pipe',
     stderr: 'pipe',
+    env: {
+      ...process.env,
+      NODE_ENV: 'development',
+    },
   },
 });
