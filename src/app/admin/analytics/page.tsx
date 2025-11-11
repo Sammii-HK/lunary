@@ -31,6 +31,15 @@ interface ConversionMetrics {
   avgTimeToConvert: number;
   revenue: number;
   mrr: number;
+  birthDataSubmitted: number;
+  onboardingCompleted: number;
+  pricingPageViews: number;
+  upgradeClicks: number;
+  featureGated: number;
+  birthDataRate: number;
+  onboardingRate: number;
+  pricingToTrialRate: number;
+  upgradeClickRate: number;
 }
 
 interface ConversionFunnel {
@@ -324,6 +333,30 @@ export default function AnalyticsPage() {
                   <div className='flex items-center justify-between p-4 bg-zinc-900 rounded-lg'>
                     <div>
                       <p className='text-sm text-muted-foreground'>
+                        Birth Data Rate
+                      </p>
+                      <p className='text-2xl font-bold mt-1'>
+                        {formatPercentage(metrics.birthDataRate)}
+                      </p>
+                    </div>
+                    <Target className='h-8 w-8 text-purple-400' />
+                  </div>
+
+                  <div className='flex items-center justify-between p-4 bg-zinc-900 rounded-lg'>
+                    <div>
+                      <p className='text-sm text-muted-foreground'>
+                        Pricing → Trial Rate
+                      </p>
+                      <p className='text-2xl font-bold mt-1'>
+                        {formatPercentage(metrics.pricingToTrialRate)}
+                      </p>
+                    </div>
+                    <ArrowUpRight className='h-8 w-8 text-yellow-400' />
+                  </div>
+
+                  <div className='flex items-center justify-between p-4 bg-zinc-900 rounded-lg'>
+                    <div>
+                      <p className='text-sm text-muted-foreground'>
                         Total Revenue
                       </p>
                       <p className='text-2xl font-bold mt-1'>
@@ -337,42 +370,95 @@ export default function AnalyticsPage() {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Event Breakdown</CardTitle>
-              <CardDescription>
-                Conversion events by type ({timeRange})
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-3'>
-                {events.map((event, index) => (
-                  <div
-                    key={index}
-                    className='flex items-center justify-between p-4 bg-zinc-900 rounded-lg'
-                  >
-                    <div className='flex items-center gap-3'>
-                      <div className='w-3 h-3 bg-purple-500 rounded-full'></div>
-                      <span className='font-medium capitalize'>
-                        {event.event_type.replace(/_/g, ' ')}
-                      </span>
-                    </div>
-                    <div className='flex items-center gap-4'>
-                      <div className='w-32 bg-zinc-800 rounded-full h-2'>
-                        <div
-                          className='bg-purple-500 h-2 rounded-full'
-                          style={{ width: `${event.percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className='text-lg font-bold w-16 text-right'>
-                        {event.count}
-                      </span>
-                    </div>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
+            <Card>
+              <CardHeader>
+                <CardTitle>Engagement Metrics</CardTitle>
+                <CardDescription>User engagement indicators</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-4'>
+                  <div className='flex items-center justify-between p-3 bg-zinc-900 rounded-lg'>
+                    <span className='text-sm text-muted-foreground'>
+                      Birth Data Submitted
+                    </span>
+                    <span className='text-lg font-bold'>
+                      {metrics.birthDataSubmitted}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className='flex items-center justify-between p-3 bg-zinc-900 rounded-lg'>
+                    <span className='text-sm text-muted-foreground'>
+                      Onboarding Completed
+                    </span>
+                    <span className='text-lg font-bold'>
+                      {metrics.onboardingCompleted}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between p-3 bg-zinc-900 rounded-lg'>
+                    <span className='text-sm text-muted-foreground'>
+                      Pricing Page Views
+                    </span>
+                    <span className='text-lg font-bold'>
+                      {metrics.pricingPageViews}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between p-3 bg-zinc-900 rounded-lg'>
+                    <span className='text-sm text-muted-foreground'>
+                      Upgrade Clicks
+                    </span>
+                    <span className='text-lg font-bold'>
+                      {metrics.upgradeClicks}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between p-3 bg-zinc-900 rounded-lg'>
+                    <span className='text-sm text-muted-foreground'>
+                      Feature Gates
+                    </span>
+                    <span className='text-lg font-bold'>
+                      {metrics.featureGated}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Event Breakdown</CardTitle>
+                <CardDescription>
+                  Conversion events by type ({timeRange})
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-3'>
+                  {events.map((event, index) => (
+                    <div
+                      key={index}
+                      className='flex items-center justify-between p-4 bg-zinc-900 rounded-lg'
+                    >
+                      <div className='flex items-center gap-3'>
+                        <div className='w-3 h-3 bg-purple-500 rounded-full'></div>
+                        <span className='font-medium capitalize text-sm'>
+                          {event.event_type.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                      <div className='flex items-center gap-4'>
+                        <div className='w-32 bg-zinc-800 rounded-full h-2'>
+                          <div
+                            className='bg-purple-500 h-2 rounded-full'
+                            style={{ width: `${event.percentage}%` }}
+                          ></div>
+                        </div>
+                        <span className='text-lg font-bold w-16 text-right'>
+                          {event.count}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </>
       )}
     </div>

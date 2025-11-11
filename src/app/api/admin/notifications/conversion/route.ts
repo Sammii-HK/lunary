@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendPushoverNotification } from '@/utils/notifications/pushNotifications';
+import { sendPushoverNotification } from '../../../../../../utils/notifications/pushNotifications';
 
 export async function POST(request: NextRequest) {
   try {

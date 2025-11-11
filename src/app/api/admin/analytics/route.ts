@@ -128,6 +128,58 @@ export async function GET(request: NextRequest) {
         totalEvents > 0 ? (parseInt(row.count || '0') / totalEvents) * 100 : 0,
     }));
 
+    const birthDataSubmitted = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type = 'birth_data_submitted' AND ${sql.raw(dateFilter)}
+    `;
+
+    const onboardingCompleted = await sql`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE event_type = 'onboarding_completed' AND ${sql.raw(dateFilter)}
+    `;
+
+    const pricingPageViews = await sql`
+      SELECT COUNT(*) as count
+      FROM conversion_events
+      WHERE event_type = 'pricing_page_viewed' AND ${sql.raw(dateFilter)}
+    `;
+
+    const upgradeClicks = await sql`
+      SELECT COUNT(*) as count
+      FROM conversion_events
+      WHERE event_type = 'upgrade_clicked' AND ${sql.raw(dateFilter)}
+    `;
+
+    const featureGated = await sql`
+      SELECT COUNT(*) as count
+      FROM conversion_events
+      WHERE event_type = 'feature_gated' AND ${sql.raw(dateFilter)}
+    `;
+
+    const birthDataRate =
+      totalSignups > 0
+        ? (parseInt(birthDataSubmitted.rows[0]?.count || '0') / totalSignups) *
+          100
+        : 0;
+    const onboardingRate =
+      totalSignups > 0
+        ? (parseInt(onboardingCompleted.rows[0]?.count || '0') / totalSignups) *
+          100
+        : 0;
+    const pricingToTrialRate =
+      parseInt(pricingPageViews.rows[0]?.count || '0') > 0
+        ? (trialStarted / parseInt(pricingPageViews.rows[0]?.count || '0')) *
+          100
+        : 0;
+    const upgradeClickRate =
+      parseInt(pricingPageViews.rows[0]?.count || '0') > 0
+        ? (parseInt(upgradeClicks.rows[0]?.count || '0') /
+            parseInt(pricingPageViews.rows[0]?.count || '0')) *
+          100
+        : 0;
+
     return NextResponse.json({
       success: true,
       metrics: {
@@ -140,6 +192,17 @@ export async function GET(request: NextRequest) {
         avgTimeToConvert,
         revenue,
         mrr,
+        birthDataSubmitted: parseInt(birthDataSubmitted.rows[0]?.count || '0'),
+        onboardingCompleted: parseInt(
+          onboardingCompleted.rows[0]?.count || '0',
+        ),
+        pricingPageViews: parseInt(pricingPageViews.rows[0]?.count || '0'),
+        upgradeClicks: parseInt(upgradeClicks.rows[0]?.count || '0'),
+        featureGated: parseInt(featureGated.rows[0]?.count || '0'),
+        birthDataRate,
+        onboardingRate,
+        pricingToTrialRate,
+        upgradeClickRate,
       },
       funnel: {
         signups: totalSignups,
