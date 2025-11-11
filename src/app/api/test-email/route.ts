@@ -17,12 +17,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if email service is configured
-    if (!process.env.RESEND_API_KEY) {
+    if (!process.env.BREVO_API_KEY) {
       return NextResponse.json({
         success: false,
         error: 'Email service not configured',
-        details: 'RESEND_API_KEY environment variable is missing',
-        setup: 'Visit /email-setup for configuration instructions',
+        details: 'BREVO_API_KEY environment variable is missing',
+        setup: 'Add BREVO_API_KEY to your environment variables',
       });
     }
 
@@ -72,10 +72,12 @@ export async function POST(request: NextRequest) {
         details: 'Check server logs for more information',
         troubleshooting: {
           commonIssues: [
-            'Invalid RESEND_API_KEY',
+            'Invalid BREVO_API_KEY',
             'Rate limit exceeded',
             'Invalid email address',
-            'Resend service unavailable',
+            'Brevo service unavailable',
+            'Sender email not verified in Brevo',
+            'Domain not authenticated in Brevo',
           ],
         },
       },

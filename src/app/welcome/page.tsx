@@ -130,7 +130,7 @@ export default function WelcomePage() {
             <div className='pt-6 sm:pt-8 flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-zinc-500'>
               <div className='flex items-center gap-2'>
                 <div className='w-1 h-1 rounded-full bg-zinc-600'></div>
-                <span>No credit card required</span>
+                <span>Credit card required but no payment taken</span>
               </div>
               <div className='flex items-center gap-2'>
                 <div className='w-1 h-1 rounded-full bg-zinc-600'></div>
@@ -408,8 +408,8 @@ export default function WelcomePage() {
             Start your free trial
           </h2>
           <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed px-4'>
-            Experience astrology that's actually about you. No credit card
-            required. Cancel anytime.
+            Experience astrology that's actually about you. Credit card required
+            but no payment taken during trial. Cancel anytime.
           </p>
 
           <div className='pt-2 sm:pt-4'>

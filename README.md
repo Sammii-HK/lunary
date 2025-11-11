@@ -16,7 +16,7 @@ Next.js 15 full-stack application delivering personalized astrological insights,
 
 **Payments**: Stripe
 
-**Services**: Resend, Astronomy Engine, pdf-lib
+**Services**: Brevo (Email), Astronomy Engine, pdf-lib
 
 **Infrastructure**: Vercel, Cloudflare Workers
 

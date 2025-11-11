@@ -3,11 +3,11 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Pricing - Lunary',
   description:
-    'Simple, transparent pricing for personalized astrology. Start your free 7-day trial, no credit card required. Cancel anytime. Get birth chart analysis, daily horoscopes, and cosmic guidance.',
+    'Simple, transparent pricing for personalized astrology. Start your free 7-day trial - credit card required but no payment taken. Cancel anytime. Get birth chart analysis, daily horoscopes, and cosmic guidance.',
   openGraph: {
     title: 'Pricing - Lunary',
     description:
-      'Simple, transparent pricing. Start your free trial. No credit card required. Cancel anytime.',
+      'Simple, transparent pricing. Start your free trial - credit card required but no payment taken. Cancel anytime.',
     url: 'https://lunary.app/pricing',
     siteName: 'Lunary',
     images: [
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Pricing - Lunary',
     description:
-      'Simple, transparent pricing. Start your free trial. No credit card required.',
+      'Simple, transparent pricing. Start your free trial - credit card required but no payment taken.',
     images: ['/api/og/cosmic'],
   },
   alternates: {

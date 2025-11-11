@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
       behind_scenes:
         'Explain the real astronomy: Lunary calculates actual planetary positions from your birth data, then uses that for personalized horoscopes and tarot.',
       promotional:
-        'Highlight free trial (7 days, no credit card), what you get (birth chart, personalized horoscopes, tarot, grimoire), and pricing ($4.99/mo).',
+        'Highlight free trial (7 days - credit card required but no payment taken), what you get (birth chart, personalized horoscopes, tarot, grimoire), and pricing ($4.99/mo).',
       user_story:
         'Show concrete value: users get personalized horoscopes based on their exact chart, not generic zodiac signs. Real astronomical data, not generic predictions.',
     };

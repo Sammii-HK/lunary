@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
+  const hostname = request.headers.get('host') || '';
+
+  // Redirect www to non-www (fix duplicate content issue)
+  if (hostname.startsWith('www.')) {
+    const newHostname = hostname.replace('www.', '');
+    url.hostname = newHostname;
+    return NextResponse.redirect(url, 301);
+  }
 
   // Redirect old query parameter URLs to new static routes
   // Only handle /grimoire?item=... requests
@@ -26,5 +34,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/grimoire',
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|sw.js|manifest.json).*)',
+  ],
 };

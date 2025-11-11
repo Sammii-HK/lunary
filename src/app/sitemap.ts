@@ -68,6 +68,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/comparison`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/comparison/lunary-vs-moonly`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/comparison/lunary-vs-lunar-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/comparison/best-personalized-astrology-apps`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
   ];
 
   // Generate all blog week posts (from start of 2025 to current week)

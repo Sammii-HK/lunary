@@ -98,7 +98,7 @@ export default function PricingPage() {
     {
       question: "What's included in the free trial?",
       answer:
-        'Get full access to all personalized features including your complete birth chart analysis, personalized daily horoscopes, tarot patterns, and cosmic insights. No credit card required to start.',
+        'Get full access to all personalized features including your complete birth chart analysis, personalized daily horoscopes, tarot patterns, and cosmic insights. Credit card required but no payment taken during trial.',
     },
     {
       question: 'Can I cancel anytime?',
@@ -185,8 +185,8 @@ export default function PricingPage() {
                 const ctaVariant = getABTestVariant(AB_TESTS.PRICING_CTA);
                 const ctaText =
                   ctaVariant === 'A'
-                    ? 'Start your free trial. No credit card required. Cancel anytime.'
-                    : 'Unlock your cosmic blueprint. Start free trial, no credit card needed.';
+                    ? 'Start your free trial - credit card required but no payment taken. Cancel anytime.'
+                    : 'Unlock your cosmic blueprint. Start free trial - credit card required but no charge during trial.';
 
                 return (
                   <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
@@ -380,8 +380,8 @@ export default function PricingPage() {
                 <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
                   Get full access to all personalized features including your
                   complete birth chart analysis, personalized daily horoscopes,
-                  tarot patterns, and cosmic insights. No credit card required
-                  to start.
+                  tarot patterns, and cosmic insights. Credit card required but
+                  no payment taken during trial to start.
                 </p>
               </div>
 
@@ -453,8 +453,8 @@ export default function PricingPage() {
               Ready to discover your cosmic blueprint?
             </h2>
             <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
-              Experience astrology that's actually about you. No credit card
-              required. Cancel anytime.
+              Experience astrology that's actually about you. Credit card
+              required but no payment taken during trial. Cancel anytime.
             </p>
 
             <div className='pt-4'>
