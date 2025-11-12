@@ -44,7 +44,9 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [openSettingsSections, setOpenSettingsSections] = useState<string[]>([]);
+  const [openSettingsSections, setOpenSettingsSections] = useState<string[]>(
+    [],
+  );
 
   // Check if user can collect birthday data
   const canCollectBirthdayData = canCollectBirthday(subscription.status);
@@ -312,8 +314,8 @@ export default function ProfilePage() {
                       {canCollectBirthdayData
                         ? name || 'Add your name'
                         : authState.isAuthenticated
-                        ? name || 'Locked until upgrade'
-                        : 'Sign in to personalise'}
+                          ? name || 'Locked until upgrade'
+                          : 'Sign in to personalise'}
                     </span>
                   </div>
                   <span className='hidden text-zinc-600 sm:inline'>•</span>
@@ -325,8 +327,8 @@ export default function ProfilePage() {
                       {birthday
                         ? new Date(birthday).toLocaleDateString()
                         : canCollectBirthdayData
-                        ? 'Add your birthday'
-                        : 'Premium feature'}
+                          ? 'Add your birthday'
+                          : 'Premium feature'}
                     </span>
                   </div>
                 </div>
@@ -393,10 +395,8 @@ export default function ProfilePage() {
                 <div className='space-y-3 rounded-md border-2 border-dashed border-purple-500/30 bg-gradient-to-r from-purple-900/20 to-pink-900/20 py-4 text-center'>
                   <p className='text-sm text-zinc-300'>
                     👋 Welcome{' '}
-                    {authState.user?.name ||
-                      authState.profile?.name ||
-                      'User'}
-                    ! Upgrade to unlock Personalised Features
+                    {authState.user?.name || authState.profile?.name || 'User'}!
+                    Upgrade to unlock Personalised Features
                   </p>
                   <div className='flex justify-center gap-2'>
                     <a
@@ -483,14 +483,16 @@ export default function ProfilePage() {
                       .map((bodyName) =>
                         birthChartData.find(
                           (planet) =>
-                            planet.body.toLowerCase() === bodyName.toLowerCase(),
+                            planet.body.toLowerCase() ===
+                            bodyName.toLowerCase(),
                         ),
                       )
                       .filter(
                         (
                           planet,
-                        ): planet is NonNullable<(typeof birthChartData)[number]> =>
-                          Boolean(planet),
+                        ): planet is NonNullable<
+                          (typeof birthChartData)[number]
+                        > => Boolean(planet),
                       );
 
                     const remainingPlacements = birthChartData
