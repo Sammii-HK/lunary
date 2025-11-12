@@ -2,21 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
-if (!process.env.STRIPE_WEBHOOK_SECRET_SHOP) {
-  console.warn(
-    'STRIPE_WEBHOOK_SECRET_SHOP is not set - webhook verification disabled',
-  );
+function getWebhookSecret() {
+  return process.env.STRIPE_WEBHOOK_SECRET_SHOP;
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_SHOP;
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripe();
+    const webhookSecret = getWebhookSecret();
+
     const body = await request.text();
     const headersList = await headers();
     const signature = headersList.get('stripe-signature');
@@ -98,6 +99,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   try {
+    const stripe = getStripe();
     // Get product from Stripe to retrieve Blob URL (SSOT)
     let blobUrl: string | undefined;
     let packName = 'Digital Pack';

@@ -2,16 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import webpush from 'web-push';
 
-// Configure VAPID keys
-webpush.setVapidDetails(
-  'mailto:info@lunary.app',
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+// Lazy initialization of VAPID keys (only when actually needed)
+function ensureVapidConfigured() {
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+
+  if (!publicKey || !privateKey) {
+    throw new Error(
+      'VAPID keys not configured. Please set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in your environment variables.',
+    );
+  }
+
+  webpush.setVapidDetails('mailto:info@lunary.app', publicKey, privateKey);
+}
 
 // This endpoint checks for significant astronomical events and sends notifications
 export async function GET(request: NextRequest) {
   try {
+    // Configure VAPID keys when actually needed (not at module load time)
+    ensureVapidConfigured();
+
     // Verify cron request
     const authHeader = request.headers.get('authorization');
     if (

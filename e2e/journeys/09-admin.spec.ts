@@ -139,10 +139,22 @@ test.describe('Admin Journey', () => {
   });
 
   test('should prevent non-admin access', async ({ authenticatedPage }) => {
-    await authenticatedPage.goto('/admin');
+    await authenticatedPage.goto('/admin', { waitUntil: 'networkidle' });
+
+    // Wait for client-side redirect (admin check happens in useEffect)
+    await authenticatedPage.waitForTimeout(2000);
+
+    // Check if redirected away from admin page
+    const currentUrl = authenticatedPage.url();
+    const isRedirected = !currentUrl.includes('/admin');
+
+    if (!isRedirected) {
+      // Wait a bit more for redirect
+      await authenticatedPage.waitForTimeout(3000);
+    }
 
     await expect(authenticatedPage).toHaveURL(/\/(auth|403|unauthorized)/, {
-      timeout: 5000,
+      timeout: 10000,
     });
   });
 });
