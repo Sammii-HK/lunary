@@ -19,6 +19,14 @@ export async function POST(request: NextRequest) {
     try {
       await sql`
         ALTER TABLE social_posts 
+        ADD COLUMN IF NOT EXISTS rejection_feedback TEXT
+      `;
+    } catch (alterError) {
+      // Column might already exist, that's fine
+    }
+    try {
+      await sql`
+        ALTER TABLE social_posts 
         ADD COLUMN IF NOT EXISTS edited_content TEXT
       `;
     } catch (alterError) {
@@ -33,12 +41,36 @@ export async function POST(request: NextRequest) {
       // Column might already exist, that's fine
     }
 
-    if (action === 'reject' && feedback) {
-      await sql`
-        UPDATE social_posts
-        SET status = ${status}, rejection_feedback = ${feedback}, updated_at = NOW()
-        WHERE id = ${postId}
-      `;
+    if (action === 'reject') {
+      const trimmedFeedback = feedback?.trim();
+      if (trimmedFeedback) {
+        console.log('💾 Saving rejection feedback:', {
+          postId,
+          feedbackLength: trimmedFeedback.length,
+          feedbackPreview: trimmedFeedback.substring(0, 100),
+        });
+        await sql`
+          UPDATE social_posts
+          SET status = ${status}, rejection_feedback = ${trimmedFeedback}, updated_at = NOW()
+          WHERE id = ${postId}
+        `;
+        // Verify it was saved
+        const verify = await sql`
+          SELECT rejection_feedback FROM social_posts WHERE id = ${postId}
+        `;
+        console.log('✅ Rejection feedback saved:', {
+          postId,
+          saved: !!verify.rows[0]?.rejection_feedback,
+          length: verify.rows[0]?.rejection_feedback?.length || 0,
+        });
+      } else {
+        console.warn('⚠️ Rejecting post without feedback:', postId);
+        await sql`
+          UPDATE social_posts
+          SET status = ${status}, updated_at = NOW()
+          WHERE id = ${postId}
+        `;
+      }
     } else if (action === 'approve') {
       // Save edited content and improvement notes if provided
       if (editedContent) {
