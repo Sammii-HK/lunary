@@ -44,7 +44,9 @@ const AUTH_CACHE_TTL = 1000 * 60; // 1 minute
 let cachedAuthContext: AuthContext | null = null;
 let cachedAuthContextAt = 0;
 
-function extractEmailFromMetadata(metadata?: Record<string, any>): string | undefined {
+function extractEmailFromMetadata(
+  metadata?: Record<string, any>,
+): string | undefined {
   if (!metadata) {
     return undefined;
   }
@@ -74,7 +76,7 @@ async function getAuthContext(): Promise<AuthContext> {
       session && typeof session === 'object'
         ? 'user' in session
           ? (session as any).user
-          : (session as any)?.data?.user ?? null
+          : ((session as any)?.data?.user ?? null)
         : null;
 
     cachedAuthContext = user
@@ -102,13 +104,18 @@ function normalizeEmail(email?: string | null): string | undefined {
   return trimmed ? trimmed.toLowerCase() : undefined;
 }
 
-function sanitizeEventPayload(payload: ConversionEventData): Record<string, any> {
-  return Object.entries(payload).reduce<Record<string, any>>((acc, [key, value]) => {
-    if (value !== undefined) {
-      acc[key] = value;
-    }
-    return acc;
-  }, {});
+function sanitizeEventPayload(
+  payload: ConversionEventData,
+): Record<string, any> {
+  return Object.entries(payload).reduce<Record<string, any>>(
+    (acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {},
+  );
 }
 
 export async function trackConversion(

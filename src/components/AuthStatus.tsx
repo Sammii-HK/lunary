@@ -47,7 +47,7 @@ export function useAuthStatus(): AuthState {
           session && typeof session === 'object'
             ? 'user' in session
               ? (session as any).user
-              : (session as any)?.data?.user ?? null
+              : ((session as any)?.data?.user ?? null)
             : null;
 
         if (isMounted) {

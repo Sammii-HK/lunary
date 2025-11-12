@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
       typeof userId === 'string'
         ? userId.trim() || null
         : typeof userId === 'number' || typeof userId === 'bigint'
-        ? String(userId)
-        : null;
+          ? String(userId)
+          : null;
 
     if (normalizedEmail && EXCLUDED_EMAILS.has(normalizedEmail)) {
       console.info(
