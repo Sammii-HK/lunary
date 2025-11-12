@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import { buildLunaryContext } from '@/lib/ai/context';
-import { generateStubbedReply } from '@/lib/ai/responder';
+import { composeAssistantReply } from '@/lib/ai/responder';
 import { enforceIpRateLimit, enforceUserRateLimit } from '@/lib/ai/rate-limit';
 import { resolvePlanId } from '@/lib/ai/plan-resolver';
 import { AI_LIMIT_REACHED_MESSAGE, DAILY_MESSAGE_LIMITS } from '@/lib/ai/plans';
 import { appendToThread } from '@/lib/ai/threads';
 import { estimateTokenCount } from '@/lib/ai/tokenizer';
 import { loadUsage, updateUsage } from '@/lib/ai/usage';
+import { captureMemory } from '@/lib/ai/memory';
+import { saveConversationSnippet } from '@/lib/ai/tool-adapters';
 
 type ChatRequest = {
   message: string;
@@ -86,7 +88,13 @@ export async function POST(request: NextRequest) {
       now,
     });
 
-    const assistantContent = generateStubbedReply(context, body.message);
+    const composed = composeAssistantReply({
+      context,
+      userMessage: body.message,
+      memorySnippets: [],
+    });
+
+    const assistantContent = composed.message;
     const tokensIn = estimateTokenCount(body.message);
     const tokensOut = estimateTokenCount(assistantContent);
 
@@ -121,6 +129,17 @@ export async function POST(request: NextRequest) {
       titleHint: body.message,
     });
 
+    await captureMemory({
+      userId: user.id,
+      planId,
+      messages: thread.messages,
+      usageCount: usageResult.usage.usedMessages,
+      saveSnippet: async ({ userId: id, snippet }) => {
+        await saveConversationSnippet(id, snippet);
+        return { ok: true };
+      },
+    });
+
     return jsonResponse({
       threadId: thread.id,
       response: {
@@ -137,6 +156,8 @@ export async function POST(request: NextRequest) {
           tokensOut: usageResult.usage.tokensOut,
         },
         dailyHighlight,
+        promptSections: composed.promptSections,
+        assist: composed.assistSnippet,
       },
     });
   } catch (error) {
