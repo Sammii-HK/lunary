@@ -249,21 +249,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get rejection feedback to improve tone
-    const rejectionFeedback = await sql`
-      SELECT rejection_feedback, platform, post_type
-      FROM social_posts
-      WHERE status = 'rejected' 
-        AND rejection_feedback IS NOT NULL
-        AND rejection_feedback != ''
-      ORDER BY updated_at DESC
-      LIMIT 10
-    `;
+    // Get rejection feedback and approved edits to improve tone
+    let rejectionFeedback;
+    let approvedEdits;
+    try {
+      rejectionFeedback = await sql`
+        SELECT rejection_feedback, platform, post_type
+        FROM social_posts
+        WHERE status = 'rejected' 
+          AND rejection_feedback IS NOT NULL
+          AND rejection_feedback != ''
+        ORDER BY updated_at DESC
+        LIMIT 10
+      `;
 
-    const feedbackContext =
+      // Get approved posts with edits or improvement notes
+      approvedEdits = await sql`
+        SELECT content, improvement_notes, platform, post_type
+        FROM social_posts
+        WHERE status = 'approved' 
+          AND (improvement_notes IS NOT NULL AND improvement_notes != '')
+        ORDER BY updated_at DESC
+        LIMIT 10
+      `;
+    } catch (queryError) {
+      console.warn('Could not fetch feedback:', queryError);
+      rejectionFeedback = { rows: [] };
+      approvedEdits = { rows: [] };
+    }
+
+    const rejectionContext =
       rejectionFeedback.rows.length > 0
         ? `\n\nIMPORTANT: Previous posts were rejected. Learn from these rejections:\n${rejectionFeedback.rows.map((r: any) => `- ${r.rejection_feedback} (${r.platform}, ${r.post_type})`).join('\n')}\n\nAvoid these issues in new posts.`
         : '';
+
+    const improvementContext =
+      approvedEdits.rows.length > 0
+        ? `\n\nLEARN FROM APPROVED EDITS: These posts were improved and approved. Use these improvements as examples:\n${approvedEdits.rows
+            .map((r: any) => {
+              if (r.improvement_notes) {
+                return `- ${r.improvement_notes} (${r.platform}, ${r.post_type})`;
+              }
+              return null;
+            })
+            .filter(Boolean)
+            .join('\n')}\n\nApply similar improvements to new posts.`
+        : '';
+
+    const feedbackContext = rejectionContext + improvementContext;
 
     const { OpenAI } = await import('openai');
     console.log(

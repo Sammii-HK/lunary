@@ -24,7 +24,13 @@ import {
   ExternalLink,
   Download,
   Maximize2,
+  Edit2,
 } from 'lucide-react';
+import {
+  getRecommendedTimes,
+  getDefaultPostingTime,
+  getPlatformPostingInfo,
+} from '@/utils/posting-times';
 
 interface PendingPost {
   id: string;
@@ -46,6 +52,17 @@ export default function PostApprovalPage() {
   const [rejectionFeedback, setRejectionFeedback] = useState<
     Record<string, string>
   >({});
+  const [editingSchedule, setEditingSchedule] = useState<string | null>(null);
+  const [scheduleDate, setScheduleDate] = useState<string>('');
+  const [scheduleTime, setScheduleTime] = useState<string>('');
+  const [updatingSchedule, setUpdatingSchedule] = useState<string | null>(null);
+  const [editingPost, setEditingPost] = useState<string | null>(null);
+  const [editedContent, setEditedContent] = useState<Record<string, string>>(
+    {},
+  );
+  const [improvementNotes, setImprovementNotes] = useState<
+    Record<string, string>
+  >({});
 
   useEffect(() => {
     loadPendingPosts();
@@ -63,16 +80,36 @@ export default function PostApprovalPage() {
     }
   };
 
+  const handleEditPost = (post: PendingPost) => {
+    setEditedContent({ ...editedContent, [post.id]: post.content });
+    setEditingPost(post.id);
+  };
+
   const handleApprove = async (postId: string) => {
     try {
+      const edited = editedContent[postId];
+      const notes = improvementNotes[postId];
+      const hasEdits =
+        edited && edited !== pendingPosts.find((p) => p.id === postId)?.content;
+      const hasNotes = notes && notes.trim() !== '';
+
       const response = await fetch('/api/admin/social-posts/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId, action: 'approve' }),
+        body: JSON.stringify({
+          postId,
+          action: 'approve',
+          editedContent: hasEdits ? edited : undefined,
+          improvementNotes: hasNotes ? notes : undefined,
+        }),
       });
 
       const data = await response.json();
       if (data.success) {
+        // Clear edit state
+        setEditingPost(null);
+        setEditedContent({ ...editedContent, [postId]: '' });
+        setImprovementNotes({ ...improvementNotes, [postId]: '' });
         loadPendingPosts();
       } else {
         alert(`Failed to approve: ${data.error}`);
@@ -241,6 +278,51 @@ export default function PostApprovalPage() {
     }
   };
 
+  const handleEditSchedule = (post: PendingPost) => {
+    if (post.scheduledDate) {
+      const date = new Date(post.scheduledDate);
+      setScheduleDate(date.toISOString().split('T')[0]);
+      setScheduleTime(
+        `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`,
+      );
+    } else {
+      // Default to today with recommended time
+      const today = new Date();
+      const defaultHour = getDefaultPostingTime(post.platform);
+      setScheduleDate(today.toISOString().split('T')[0]);
+      setScheduleTime(`${String(defaultHour).padStart(2, '0')}:00`);
+    }
+    setEditingSchedule(post.id);
+  };
+
+  const handleSaveSchedule = async (postId: string) => {
+    setUpdatingSchedule(postId);
+    try {
+      const dateTime = new Date(`${scheduleDate}T${scheduleTime}:00`);
+      const response = await fetch('/api/admin/social-posts/update-schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId,
+          scheduledDate: dateTime.toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setEditingSchedule(null);
+        loadPendingPosts();
+      } else {
+        alert(`Failed to update schedule: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+      alert('Failed to update schedule');
+    } finally {
+      setUpdatingSchedule(null);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -340,8 +422,22 @@ export default function PostApprovalPage() {
                       <CardDescription className='text-zinc-400'>
                         {post.topic && `Topic: ${post.topic} • `}
                         Created: {new Date(post.createdAt).toLocaleString()}
-                        {post.scheduledDate &&
-                          ` • Scheduled: ${new Date(post.scheduledDate).toLocaleString()}`}
+                        {post.scheduledDate && (
+                          <>
+                            {' • '}
+                            <span className='inline-flex items-center gap-1'>
+                              Scheduled:{' '}
+                              {new Date(post.scheduledDate).toLocaleString()}
+                              {new Date(post.scheduledDate).getHours() === 0 &&
+                                new Date(post.scheduledDate).getMinutes() ===
+                                  0 && (
+                                  <span className='text-yellow-400 text-xs'>
+                                    (midnight - edit recommended)
+                                  </span>
+                                )}
+                            </span>
+                          </>
+                        )}
                       </CardDescription>
                     </div>
                   </div>
@@ -399,25 +495,80 @@ export default function PostApprovalPage() {
                     )}
 
                     <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
-                      <p className='text-zinc-200 whitespace-pre-wrap'>
-                        {post.content}
-                      </p>
-                      <div className='mt-3 flex items-center gap-2 text-xs text-zinc-500'>
-                        <span>{post.content.length} characters</span>
-                        {post.platform === 'twitter' && (
-                          <span className='text-zinc-600'>
-                            • {280 - post.content.length} remaining
-                          </span>
-                        )}
-                        {post.imageUrl && (
-                          <span className='text-green-400'>
-                            • Image included
-                          </span>
-                        )}
-                      </div>
+                      {editingPost === post.id ? (
+                        <div className='space-y-3'>
+                          <textarea
+                            value={editedContent[post.id] || post.content}
+                            onChange={(e) =>
+                              setEditedContent({
+                                ...editedContent,
+                                [post.id]: e.target.value,
+                              })
+                            }
+                            className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-3 border border-zinc-600 focus:border-blue-500 focus:outline-none resize-y min-h-[120px]'
+                            placeholder='Edit post content...'
+                          />
+                          <textarea
+                            value={improvementNotes[post.id] || ''}
+                            onChange={(e) =>
+                              setImprovementNotes({
+                                ...improvementNotes,
+                                [post.id]: e.target.value,
+                              })
+                            }
+                            className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-3 border border-zinc-600 focus:border-blue-500 focus:outline-none resize-y min-h-[80px] text-sm'
+                            placeholder='What improvements did you make? (Optional - helps AI learn)'
+                          />
+                          <div className='flex gap-2'>
+                            <Button
+                              onClick={() => {
+                                setEditingPost(null);
+                                setEditedContent({
+                                  ...editedContent,
+                                  [post.id]: post.content,
+                                });
+                                setImprovementNotes({
+                                  ...improvementNotes,
+                                  [post.id]: '',
+                                });
+                              }}
+                              variant='outline'
+                              className='flex-1'
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={() => handleApprove(post.id)}
+                              className='flex-1 bg-green-600 hover:bg-green-700 text-white'
+                            >
+                              <Check className='h-4 w-4 mr-2' />
+                              Approve Edits
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className='text-zinc-200 whitespace-pre-wrap'>
+                            {post.content}
+                          </p>
+                          <div className='mt-3 flex items-center gap-2 text-xs text-zinc-500'>
+                            <span>{post.content.length} characters</span>
+                            {post.platform === 'twitter' && (
+                              <span className='text-zinc-600'>
+                                • {280 - post.content.length} remaining
+                              </span>
+                            )}
+                            {post.imageUrl && (
+                              <span className='text-green-400'>
+                                • Image included
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </div>
 
-                    {post.status === 'pending' && (
+                    {post.status === 'pending' && editingPost !== post.id && (
                       <div className='space-y-3'>
                         <div className='flex gap-3'>
                           <Button
@@ -426,6 +577,26 @@ export default function PostApprovalPage() {
                           >
                             <Check className='h-4 w-4 mr-2' />
                             Approve
+                          </Button>
+                          <Button
+                            onClick={() => handleEditPost(post)}
+                            variant='outline'
+                            className='border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10'
+                          >
+                            <svg
+                              className='h-4 w-4 mr-2'
+                              fill='none'
+                              stroke='currentColor'
+                              viewBox='0 0 24 24'
+                            >
+                              <path
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                strokeWidth={2}
+                                d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                              />
+                            </svg>
+                            Edit
                           </Button>
                           <Button
                             onClick={() => handleOpenInApp(post)}

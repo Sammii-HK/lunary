@@ -3,7 +3,8 @@ import { sql } from '@vercel/postgres';
 
 export async function POST(request: NextRequest) {
   try {
-    const { postId, action, feedback } = await request.json();
+    const { postId, action, feedback, editedContent, improvementNotes } =
+      await request.json();
 
     if (!postId || !action) {
       return NextResponse.json(
@@ -14,12 +15,66 @@ export async function POST(request: NextRequest) {
 
     const status = action === 'approve' ? 'approved' : 'rejected';
 
+    // Check if columns exist, if not add them
+    try {
+      await sql`
+        ALTER TABLE social_posts 
+        ADD COLUMN IF NOT EXISTS edited_content TEXT
+      `;
+    } catch (alterError) {
+      // Column might already exist, that's fine
+    }
+    try {
+      await sql`
+        ALTER TABLE social_posts 
+        ADD COLUMN IF NOT EXISTS improvement_notes TEXT
+      `;
+    } catch (alterError) {
+      // Column might already exist, that's fine
+    }
+
     if (action === 'reject' && feedback) {
       await sql`
         UPDATE social_posts
         SET status = ${status}, rejection_feedback = ${feedback}, updated_at = NOW()
         WHERE id = ${postId}
       `;
+    } else if (action === 'approve') {
+      // Save edited content and improvement notes if provided
+      if (editedContent) {
+        if (improvementNotes) {
+          await sql`
+            UPDATE social_posts
+            SET status = ${status}, 
+                content = ${editedContent},
+                improvement_notes = ${improvementNotes},
+                updated_at = NOW()
+            WHERE id = ${postId}
+          `;
+        } else {
+          await sql`
+            UPDATE social_posts
+            SET status = ${status}, 
+                content = ${editedContent},
+                updated_at = NOW()
+            WHERE id = ${postId}
+          `;
+        }
+      } else if (improvementNotes) {
+        await sql`
+          UPDATE social_posts
+          SET status = ${status}, 
+              improvement_notes = ${improvementNotes},
+              updated_at = NOW()
+          WHERE id = ${postId}
+        `;
+      } else {
+        await sql`
+          UPDATE social_posts
+          SET status = ${status}, updated_at = NOW()
+          WHERE id = ${postId}
+        `;
+      }
     } else {
       await sql`
         UPDATE social_posts
