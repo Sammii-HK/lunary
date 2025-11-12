@@ -102,6 +102,11 @@ jobs:
         run: yarn build
         env:
           NODE_ENV: production
+          # Required for Better Auth during build
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-secret-key-for-build-only' }}
+          # VAPID keys optional during build (routes handle missing keys gracefully)
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY || '' }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY || '' }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -159,6 +164,9 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD || 'admin123' }}
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-secret-key-for-e2e-tests-only' }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_mock_key_for_e2e_testing' }}
+          # VAPID keys optional during e2e tests (routes handle missing keys gracefully)
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY || '' }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY || '' }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

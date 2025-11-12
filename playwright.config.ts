@@ -92,6 +92,9 @@ export default defineConfig({
         process.env.BETTER_AUTH_SECRET || 'test-secret-key-for-e2e-tests-only',
       STRIPE_SECRET_KEY:
         process.env.STRIPE_SECRET_KEY || 'sk_test_mock_key_for_e2e_testing',
+      // Admin email for access control
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'admin@lunary.app',
+      NEXT_PUBLIC_ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'admin@lunary.app',
     },
   },
 });
