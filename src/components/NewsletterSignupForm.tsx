@@ -46,7 +46,10 @@ export function NewsletterSignupForm({
           setEmail((current) => current || sessionUser.email);
         }
       } catch (error) {
-        console.warn('Newsletter prefill skipped: unable to fetch session', error);
+        console.warn(
+          'Newsletter prefill skipped: unable to fetch session',
+          error,
+        );
       }
     };
 
@@ -91,7 +94,8 @@ export function NewsletterSignupForm({
 
       if (!response.ok || data?.success !== true) {
         throw new Error(
-          data?.error || 'We could not save your subscription. Please try again.',
+          data?.error ||
+            'We could not save your subscription. Please try again.',
         );
       }
 

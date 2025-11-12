@@ -21,7 +21,10 @@ export function EmailSubscriptionSettings() {
 
       return (sessionUser as any)?.email ?? null;
     } catch (error) {
-      console.error('Error fetching auth session while loading newsletter email', error);
+      console.error(
+        'Error fetching auth session while loading newsletter email',
+        error,
+      );
       return null;
     }
   }, []);
