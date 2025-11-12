@@ -6,12 +6,12 @@ import {
   mapRowToReading,
 } from '../shared';
 
-interface RouteParams {
-  params: { id: string };
-}
+const toTextArrayLiteral = (values: string[]): string =>
+  `{${values.map((value) => `"${value.replace(/"/g, '\\"')}"`).join(',')}}`;
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, context: unknown) {
   try {
+    const { params } = (context || {}) as { params: { id: string } };
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
@@ -59,8 +59,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, context: unknown) {
   try {
+    const { params } = (context || {}) as { params: { id: string } };
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
@@ -113,16 +114,23 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
     }
 
+    const tagsSqlValue =
+      tagsValue === undefined
+        ? undefined
+        : tagsValue === null
+          ? null
+          : toTextArrayLiteral(tagsValue as string[]);
+
     let updateResult;
     if (notesValue !== undefined && tagsValue !== undefined) {
       updateResult = await sql`
-        UPDATE tarot_readings
-        SET notes = ${notesValue},
-            tags = ${tagsValue},
-            updated_at = NOW()
-        WHERE id = ${params.id}
-          AND user_id = ${userId}
-          AND archived_at IS NULL
+          UPDATE tarot_readings
+          SET notes = ${notesValue},
+                tags = ${tagsSqlValue}::text[],
+              updated_at = NOW()
+            WHERE id = ${params.id}
+            AND user_id = ${userId}
+            AND archived_at IS NULL
         RETURNING id,
                   spread_slug,
                   spread_name,
@@ -139,12 +147,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       `;
     } else if (notesValue !== undefined) {
       updateResult = await sql`
-        UPDATE tarot_readings
-        SET notes = ${notesValue},
-            updated_at = NOW()
-        WHERE id = ${params.id}
-          AND user_id = ${userId}
-          AND archived_at IS NULL
+          UPDATE tarot_readings
+          SET notes = ${notesValue},
+              updated_at = NOW()
+            WHERE id = ${params.id}
+            AND user_id = ${userId}
+            AND archived_at IS NULL
         RETURNING id,
                   spread_slug,
                   spread_name,
@@ -161,12 +169,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       `;
     } else {
       updateResult = await sql`
-        UPDATE tarot_readings
-        SET tags = ${tagsValue},
-            updated_at = NOW()
-        WHERE id = ${params.id}
-          AND user_id = ${userId}
-          AND archived_at IS NULL
+          UPDATE tarot_readings
+            SET tags = ${tagsSqlValue}::text[],
+              updated_at = NOW()
+            WHERE id = ${params.id}
+            AND user_id = ${userId}
+            AND archived_at IS NULL
         RETURNING id,
                   spread_slug,
                   spread_name,
@@ -203,8 +211,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, context: unknown) {
   try {
+    const { params } = (context || {}) as { params: { id: string } };
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 

@@ -435,7 +435,7 @@ export const TAROT_SPREADS: TarotSpreadDefinition[] = [
         id: `month-${index + 1}`,
         label: `Month ${index + 1}`,
         prompt: `Key focus for month ${index + 1}.`,
-        axis: 'timeline',
+        axis: 'timeline' as const,
       })),
     ],
   },

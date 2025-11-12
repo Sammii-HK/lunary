@@ -182,7 +182,7 @@ export function TarotSpreadExperience({
     if (!currentReading) return;
     setNotesDraft(currentReading.notes || '');
     setLastSavedNotes(currentReading.notes || '');
-  }, [currentReading?.id]);
+  }, [currentReading]);
 
   useEffect(() => {
     if (!currentReading) return;

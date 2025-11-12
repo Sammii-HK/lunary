@@ -9,6 +9,9 @@ import {
   mapRowToReading,
 } from './shared';
 
+const toTextArrayLiteral = (values: string[]): string =>
+  `{${values.map((value) => `"${value.replace(/"/g, '\\"')}"`).join(',')}}`;
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -37,29 +40,48 @@ export async function GET(request: NextRequest) {
         ? new Date(Date.now() - historyCutoffDays * 24 * 60 * 60 * 1000)
         : null;
 
-    const rows = await sql`
-      SELECT id,
-             spread_slug,
-             spread_name,
-             plan_snapshot,
-             cards,
-             summary,
-             highlights,
-             journaling_prompts,
-             notes,
-             tags,
-             metadata,
-             created_at,
-             updated_at
-      FROM tarot_readings
-      WHERE user_id = ${userId}
-        AND archived_at IS NULL
-        ${spreadSlug ? sql`AND spread_slug = ${spreadSlug}` : sql``}
-        ${cursorDate ? sql`AND created_at < ${cursorDate}` : sql``}
-        ${cutoffDate ? sql`AND created_at >= ${cutoffDate}` : sql``}
-      ORDER BY created_at DESC
-      LIMIT ${limit + 1}
-    `;
+    const values: (string | number | boolean | null | undefined)[] = [userId];
+    const whereClauses = ['user_id = $1', 'archived_at IS NULL'];
+
+    if (spreadSlug) {
+      values.push(spreadSlug);
+      whereClauses.push(`spread_slug = $${values.length}`);
+    }
+
+    if (cursorDate) {
+      values.push(cursorDate.toISOString());
+      whereClauses.push(`created_at < $${values.length}`);
+    }
+
+    if (cutoffDate) {
+      values.push(cutoffDate.toISOString());
+      whereClauses.push(`created_at >= $${values.length}`);
+    }
+
+    values.push(limit + 1);
+    const limitParamIndex = values.length;
+
+    const query = `
+        SELECT id,
+               spread_slug,
+               spread_name,
+               plan_snapshot,
+               cards,
+               summary,
+               highlights,
+               journaling_prompts,
+               notes,
+               tags,
+               metadata,
+               created_at,
+               updated_at
+        FROM tarot_readings
+        WHERE ${whereClauses.join(' AND ')}
+        ORDER BY created_at DESC
+        LIMIT $${limitParamIndex}
+      `;
+
+    const rows = await sql.query(query, values);
 
     const readings = rows.rows.slice(0, limit).map(mapRowToReading);
     const hasMore = rows.rows.length > limit;
@@ -160,6 +182,9 @@ export async function POST(request: NextRequest) {
       insight: item.insight,
     }));
 
+    const tagsSqlValue =
+      Array.isArray(tags) && tags.length > 0 ? toTextArrayLiteral(tags) : null;
+
     const insertResult = await sql`
       INSERT INTO tarot_readings (
         user_id,
@@ -183,7 +208,7 @@ export async function POST(request: NextRequest) {
         ${JSON.stringify(reading.highlights)}::jsonb,
         ${JSON.stringify(reading.journalingPrompts)}::jsonb,
         ${notes || null},
-        ${Array.isArray(tags) && tags.length > 0 ? tags : null},
+        ${tagsSqlValue}::text[],
         ${JSON.stringify(reading.metadata)}::jsonb
       )
       RETURNING id,
