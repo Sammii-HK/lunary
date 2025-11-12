@@ -1,10 +1,9 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import Link from 'next/link';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
 import { getGeneralTarotReading } from '../../../utils/tarot/generalTarot';
@@ -17,13 +16,22 @@ import { FeatureGate } from '@/components/FeatureGate';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TrialReminder } from '@/components/TrialReminder';
 import { conversionTracking } from '@/lib/analytics';
-import { useEffect } from 'react';
+import {
+  SubscriptionStatus,
+  TarotSpreadExperience,
+} from '@/components/tarot/TarotSpreadExperience';
+import type { TarotPlan } from '@/constants/tarotSpreads';
 
 const TarotReadings = () => {
   const { me } = useAccount();
   const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
+  const userId = (me as any)?.id as string | undefined;
+  const tarotPlan = {
+    plan: subscription.plan as TarotPlan,
+    status: subscription.status as SubscriptionStatus,
+  };
   const hasChartAccess = hasBirthChartAccess(subscription.status);
 
   const [timeFrame, setTimeFrame] = useState(30);
@@ -212,6 +220,13 @@ const TarotReadings = () => {
               </div>
             </div>
           </div>
+
+          <TarotSpreadExperience
+            userId={userId}
+            userName={userName}
+            subscriptionPlan={tarotPlan}
+            onCardPreview={(card) => setSelectedCard(card)}
+          />
 
           <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
             <h3 className='text-lg font-medium text-zinc-100 mb-2'>
@@ -422,6 +437,13 @@ const TarotReadings = () => {
             </div>
           </div>
         </div>
+
+        <TarotSpreadExperience
+          userId={userId}
+          userName={userName}
+          subscriptionPlan={tarotPlan}
+          onCardPreview={(card) => setSelectedCard(card)}
+        />
 
         {personalizedReading.trendAnalysis && (
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
