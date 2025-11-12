@@ -1,5 +1,5 @@
 import { chromium, FullConfig } from '@playwright/test';
-import { TEST_USERS } from './fixtures/test-users';
+import { TEST_USERS, ensureTestUser } from './fixtures/test-users';
 
 async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use?.baseURL || 'http://localhost:3000';
@@ -73,95 +73,30 @@ async function globalSetup(config: FullConfig) {
             }
 
             try {
-              // Try to sign in first (user might already exist)
-              await page.goto(`${baseURL}/auth`, {
-                waitUntil: 'networkidle',
-                timeout: 10000,
-              });
-              await page
-                .waitForLoadState('networkidle', { timeout: 5000 })
-                .catch(() => {});
+              // Use the same ensureTestUser function that tests use - ensures consistency
+              if (!isCI) {
+                console.log(
+                  `   → Creating/verifying test user: ${testUser.email}`,
+                );
+              }
 
-              const emailInput = page.locator('#email').first();
-              const passwordInput = page.locator('#password').first();
-              const submitButton = page
-                .locator('button[type="submit"]')
-                .first();
+              const userCreated = await ensureTestUser(page, testUser);
 
-              if (
-                await emailInput.isVisible({ timeout: 5000 }).catch(() => false)
-              ) {
-                await emailInput.fill(testUser.email);
-                await passwordInput.fill(testUser.password);
-                await submitButton.click();
-
-                // Wait for either success or failure
-                await page.waitForTimeout(2000);
-
-                // If still on auth page, try to sign up
-                if (page.url().includes('/auth')) {
-                  if (!isCI) {
-                    console.log(`   → Test user doesn't exist, creating...`);
-                  }
-
-                  const signUpLink = page
-                    .locator(
-                      "text=/sign up|create account|register|don't have/i",
-                    )
-                    .first();
-                  if (
-                    await signUpLink
-                      .isVisible({ timeout: 3000 })
-                      .catch(() => false)
-                  ) {
-                    await signUpLink.click();
-                    await page
-                      .waitForLoadState('networkidle', { timeout: 3000 })
-                      .catch(() => {});
-
-                    const signUpEmailInput = page.locator('#email').first();
-                    const signUpPasswordInput = page
-                      .locator('#password')
-                      .first();
-                    const signUpNameInput = page
-                      .locator('#name, input[name="name"]')
-                      .first();
-                    const signUpSubmitButton = page
-                      .locator('button[type="submit"]')
-                      .first();
-
-                    if (
-                      await signUpEmailInput
-                        .isVisible({ timeout: 5000 })
-                        .catch(() => false)
-                    ) {
-                      await signUpEmailInput.fill(testUser.email);
-                      await signUpPasswordInput.fill(testUser.password);
-                      const nameInputVisible = await signUpNameInput
-                        .isVisible({ timeout: 2000 })
-                        .catch(() => false);
-                      if (nameInputVisible) {
-                        await signUpNameInput.fill(testUser.name);
-                      }
-                      await signUpSubmitButton.click();
-                      await page
-                        .waitForURL((url) => !url.pathname.includes('/auth'), {
-                          timeout: 5000,
-                        })
-                        .catch(() => {});
-
-                      if (!isCI) {
-                        console.log(`   ✅ Test user created successfully`);
-                      }
-                    }
-                  }
+              if (userCreated) {
+                if (!isCI) {
+                  console.log(`   ✅ Test user ready: ${testUser.email}`);
                 } else {
-                  if (!isCI) {
-                    console.log(`   ✅ Test user already exists`);
-                  }
+                  console.log(`   ✅ Test user ready`);
                 }
+              } else {
+                console.error(
+                  `   ❌ Test user creation failed for: ${testUser.email}`,
+                );
+                // Don't throw - tests will try to create user if needed
               }
             } catch (error) {
+              // Always log errors in CI for debugging
+              console.error(`   ❌ Failed to create test user:`, error);
               if (!isCI) {
                 console.warn(`   ⚠️  Could not create test user:`, error);
               }
