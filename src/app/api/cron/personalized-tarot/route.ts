@@ -3,16 +3,26 @@ import { sql } from '@vercel/postgres';
 import webpush from 'web-push';
 import { getTarotCard } from '../../../../../utils/tarot/tarot';
 
-// Configure VAPID keys
-webpush.setVapidDetails(
-  'mailto:info@lunary.app',
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+// Lazy initialization of VAPID keys (only when actually needed)
+function ensureVapidConfigured() {
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+
+  if (!publicKey || !privateKey) {
+    throw new Error(
+      'VAPID keys not configured. Please set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in your environment variables.',
+    );
+  }
+
+  webpush.setVapidDetails('mailto:info@lunary.app', publicKey, privateKey);
+}
 
 // This endpoint sends personalized daily tarot notifications
 export async function GET(request: NextRequest) {
   try {
+    // Configure VAPID keys when actually needed (not at module load time)
+    ensureVapidConfigured();
+
     // Verify cron request
     // Vercel cron jobs send x-vercel-cron header, allow those
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';

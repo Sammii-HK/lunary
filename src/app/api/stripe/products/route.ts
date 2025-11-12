@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function GET(request: NextRequest) {
   try {
+    const stripe = getStripe();
     // Get all products with their prices
     const products = await stripe.products.list({
       active: true,
@@ -73,6 +75,7 @@ export async function GET(request: NextRequest) {
 // Function to get trial period for a specific price ID
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripe();
     // Handle empty body gracefully
     const body = await request.text();
     if (!body || body.trim() === '') {

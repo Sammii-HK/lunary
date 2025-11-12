@@ -3,11 +3,12 @@ import Stripe from 'stripe';
 import { generateCosmicCalendar } from '../../../../../../utils/calendar/cosmicCalendarGenerator';
 import { put } from '@vercel/blob';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const runtime = 'nodejs';
 
@@ -19,6 +20,7 @@ async function createStripeProduct(calendarData: {
   price: number;
   sku: string;
 }) {
+  const stripe = getStripe();
   // Create Stripe product
   const product = await stripe.products.create({
     name: calendarData.name,

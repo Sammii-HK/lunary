@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Helper function to get trial period from Stripe product/price metadata
 async function getTrialPeriodForPrice(priceId: string): Promise<number> {
   try {
+    const stripe = getStripe();
     // Get the price and its associated product
     const price = await stripe.prices.retrieve(priceId, {
       expand: ['product'],
@@ -35,6 +37,7 @@ async function getTrialPeriodForPrice(priceId: string): Promise<number> {
 export async function POST(request: NextRequest) {
   let priceId: string | undefined;
   try {
+    const stripe = getStripe();
     const requestBody = await request.json();
     priceId = requestBody.priceId;
     const { customerId } = requestBody;
