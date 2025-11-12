@@ -302,11 +302,11 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
     timeHours.push((currentHour + i - 12) % 24);
   }
 
-    return (
-      <div className='rounded-lg border border-zinc-700/70 bg-zinc-900/60 p-4'>
+  return (
+    <div className='rounded-lg border border-zinc-700/70 bg-zinc-900/60 p-4'>
       <div className='flex items-center gap-2 mb-4'>
         <Telescope size={14} className='text-purple-400' />
-          <span className='text-sm font-medium text-white'>Night Timeline</span>
+        <span className='text-sm font-medium text-white'>Night Timeline</span>
       </div>
 
       <div
@@ -601,7 +601,9 @@ const SummaryRail = ({
   const StatusBadge = () => {
     if (!summary) {
       return (
-        <span className='text-xs text-zinc-500'>Awaiting observing data...</span>
+        <span className='text-xs text-zinc-500'>
+          Awaiting observing data...
+        </span>
       );
     }
 
@@ -613,7 +615,9 @@ const SummaryRail = ({
     };
 
     return (
-      <span className={`text-sm font-medium ${toneBgMap[summary.darkness.tone]}`}>
+      <span
+        className={`text-sm font-medium ${toneBgMap[summary.darkness.tone]}`}
+      >
         {summary.darkness.label}
       </span>
     );
@@ -646,16 +650,15 @@ const SummaryRail = ({
           ? `${formatShortTime(summary.bestViewingStart, timezone)} onward`
           : 'Awaiting twilight'),
       secondary:
-        summary?.currentVisiblePlanets && summary.currentVisiblePlanets.length > 0
+        summary?.currentVisiblePlanets &&
+        summary.currentVisiblePlanets.length > 0
           ? `Visible now: ${summary.currentVisiblePlanets.join(', ')}`
           : 'Planets rising soon',
     },
     {
       icon: <Compass size={16} className='text-blue-300' />,
       title: 'Next Up',
-      primary: summary?.nextEvent
-        ? summary.nextEvent.label
-        : 'No major events',
+      primary: summary?.nextEvent ? summary.nextEvent.label : 'No major events',
       secondary: summary?.nextEvent
         ? formatShortTime(summary.nextEvent.time, timezone)
         : '--:--',
@@ -818,11 +821,7 @@ const PlanetHighlightsCard = ({
 };
 
 // Enhanced planet card with astronomical details
-const PlanetCard = ({
-  planet,
-  timezone,
-  isDetailed = false,
-}: any) => {
+const PlanetCard = ({ planet, timezone, isDetailed = false }: any) => {
   const now = new Date();
   const currentlyVisible = isBodyVisibleNow(planet.riseSet, now);
 
@@ -1084,19 +1083,27 @@ export default function EphemerisWidget() {
                   <div className='rounded-lg border border-zinc-700/60 bg-zinc-900/60 p-3'>
                     <div className='mb-2 flex items-center gap-2'>
                       <Sun size={14} className='text-yellow-400' />
-                      <span className='text-sm font-medium text-white'>Sun</span>
+                      <span className='text-sm font-medium text-white'>
+                        Sun
+                      </span>
                     </div>
                     <div className='space-y-1 text-xs'>
                       <div className='flex justify-between'>
                         <span className='text-zinc-400'>Rise</span>
                         <span className='text-white'>
-                          {formatTime(ephemerisData.sunMoon.sunrise, location.timezone)}
+                          {formatTime(
+                            ephemerisData.sunMoon.sunrise,
+                            location.timezone,
+                          )}
                         </span>
                       </div>
                       <div className='flex justify-between'>
                         <span className='text-zinc-400'>Set</span>
                         <span className='text-white'>
-                          {formatTime(ephemerisData.sunMoon.sunset, location.timezone)}
+                          {formatTime(
+                            ephemerisData.sunMoon.sunset,
+                            location.timezone,
+                          )}
                         </span>
                       </div>
                       <div className='flex justify-between'>
