@@ -11,6 +11,7 @@ import { estimateTokenCount } from '@/lib/ai/tokenizer';
 import { loadUsage, updateUsage } from '@/lib/ai/usage';
 import { captureMemory } from '@/lib/ai/memory';
 import { saveConversationSnippet } from '@/lib/ai/tool-adapters';
+import { createAssistantStream } from '@/lib/ai/streaming';
 
 type ChatRequest = {
   message: string;
@@ -140,6 +141,42 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const metaPayload = {
+      threadId: thread.id,
+      response: {
+        role: 'assistant',
+        tokens: tokensOut,
+      },
+      planId,
+      usage: {
+        used: usageResult.usage.usedMessages,
+        limit: usageResult.dailyLimit,
+        tokensIn: usageResult.usage.tokensIn,
+        tokensOut: usageResult.usage.tokensOut,
+      },
+      dailyHighlight,
+    };
+
+    const wantsStream =
+      request.headers.get('accept')?.includes('text/event-stream') ||
+      request.nextUrl.searchParams.get('stream') === '1';
+
+    if (wantsStream) {
+      const stream = createAssistantStream({
+        composed,
+        meta: metaPayload,
+      });
+
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+        },
+      });
+    }
+
     return jsonResponse({
       threadId: thread.id,
       response: {
@@ -158,6 +195,7 @@ export async function POST(request: NextRequest) {
         dailyHighlight,
         promptSections: composed.promptSections,
         assist: composed.assistSnippet,
+        reflection: composed.reflection,
       },
     });
   } catch (error) {

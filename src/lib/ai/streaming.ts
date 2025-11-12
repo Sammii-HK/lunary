@@ -1,48 +1,43 @@
 import { ReadableStream } from 'stream/web';
 
-import { composeAssistantReply } from './responder';
-import { buildPromptSections } from './prompt';
-import { LunaryContext } from './types';
+import { ComposedReply } from './responder';
 
 type StreamChunk =
-  | { type: 'prompt'; payload: ReturnType<typeof buildPromptSections> }
-  | { type: 'assist'; payload: string | null }
-  | { type: 'reflection'; payload: string }
-  | { type: 'message'; payload: string }
-  | { type: 'done' };
+  | { event: 'meta'; data: Record<string, unknown> }
+  | { event: 'prompt'; data: ComposedReply['promptSections'] }
+  | { event: 'assist'; data: string | null }
+  | { event: 'reflection'; data: string }
+  | { event: 'message'; data: string }
+  | { event: 'done'; data: null };
 
 const encoder = new TextEncoder();
 
-const formatChunk = (chunk: StreamChunk): string =>
-  JSON.stringify(chunk) + '\n';
+const formatChunk = (chunk: StreamChunk): string => {
+  const data =
+    chunk.data === null ? 'null' : JSON.stringify(chunk.data, null, 0);
+  return `event: ${chunk.event}\ndata: ${data}\n\n`;
+};
 
 export const createAssistantStream = ({
-  context,
-  userMessage,
-  memorySnippets = [],
+  composed,
+  meta,
 }: {
-  context: LunaryContext;
-  userMessage: string;
-  memorySnippets?: string[];
+  composed: ComposedReply;
+  meta?: Record<string, unknown>;
 }): ReadableStream<Uint8Array> => {
-  const composed = composeAssistantReply({
-    context,
-    userMessage,
-    memorySnippets,
-  });
-
   const chunks: StreamChunk[] = [
-    { type: 'prompt', payload: composed.promptSections },
-    { type: 'assist', payload: composed.assistSnippet ?? null },
-    { type: 'reflection', payload: composed.reflection },
+    ...(meta ? [{ event: 'meta', data: meta } as StreamChunk] : []),
+    { event: 'prompt', data: composed.promptSections },
+    { event: 'assist', data: composed.assistSnippet ?? null },
+    { event: 'reflection', data: composed.reflection },
   ];
 
   const paragraphs = composed.message.split('\n\n');
   paragraphs.forEach((paragraph) => {
-    chunks.push({ type: 'message', payload: paragraph });
+    chunks.push({ event: 'message', data: paragraph });
   });
 
-  chunks.push({ type: 'done' });
+  chunks.push({ event: 'done', data: null });
 
   return new ReadableStream<Uint8Array>({
     start(controller) {
