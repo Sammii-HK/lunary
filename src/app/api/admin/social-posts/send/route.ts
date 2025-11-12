@@ -91,20 +91,54 @@ export async function POST(request: NextRequest) {
       };
     }
 
+    // Ensure accountGroupId is a string
+    const accountGroupIdStr = String(accountGroupId).trim();
+    if (!accountGroupIdStr) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid accountGroupId' },
+        { status: 500 },
+      );
+    }
+
+    // Validate platform is a valid string
+    const platformStr = String(platform).toLowerCase().trim();
+    const validPlatforms = [
+      'twitter',
+      'instagram',
+      'facebook',
+      'linkedin',
+      'pinterest',
+      'reddit',
+      'tiktok',
+    ];
+    if (!validPlatforms.includes(platformStr)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Invalid platform: ${platform}. Must be one of: ${validPlatforms.join(', ')}`,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Build media array
+    const mediaArray = actualImageUrl
+      ? [
+          {
+            type: 'image' as const,
+            url: String(actualImageUrl).trim(),
+            alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
+          },
+        ]
+      : [];
+
     const postData: any = {
-      accountGroupId,
-      content: actualContent,
-      platforms,
+      accountGroupId: accountGroupIdStr,
+      name: `Lunary ${platformStr} Post - ${scheduleDate.toISOString().split('T')[0]}`,
+      content: actualContent.trim(),
+      platforms: [platformStr],
       scheduledDate: scheduleDate.toISOString(),
-      media: actualImageUrl
-        ? [
-            {
-              type: 'image',
-              url: actualImageUrl,
-              alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
-            },
-          ]
-        : [],
+      media: mediaArray,
     };
 
     // Add Reddit-specific data if platform is Reddit
