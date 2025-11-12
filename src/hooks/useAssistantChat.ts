@@ -19,7 +19,9 @@ export type AssistantUsage = {
 
 const decoder = new TextDecoder();
 
-const parseSseChunk = (chunk: string): { event: string; data: string } | null => {
+const parseSseChunk = (
+  chunk: string,
+): { event: string; data: string } | null => {
   const lines = chunk.split('\n');
   let event = 'message';
   let data = '';
@@ -36,7 +38,7 @@ const parseSseChunk = (chunk: string): { event: string; data: string } | null =>
   return { event, data };
 };
 
-const safeJsonParse = <T,>(value: string): T | null => {
+const safeJsonParse = <T>(value: string): T | null => {
   try {
     return JSON.parse(value) as T;
   } catch {

@@ -54,10 +54,7 @@ const describeContext = (context: LunaryContext): string => {
           const prunedVal = prune(val);
           return prunedVal !== undefined ? [key, prunedVal] : null;
         })
-        .filter(
-          (entry): entry is [string, unknown] =>
-            Array.isArray(entry) && entry.length === 2,
-        );
+        .filter(Boolean) as [string, unknown][];
 
       if (entries.length === 0) return undefined;
 

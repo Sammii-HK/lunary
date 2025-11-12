@@ -6,8 +6,16 @@ export type AssistCommand =
   | { type: 'explain_energy' }
   | { type: 'none' };
 
-const weekPhrases = ['summarise my week', 'summary of my week', 'recap my week'];
-const tarotPhrases = ['interpret my tarot', 'tarot pull', 'what do my cards mean'];
+const weekPhrases = [
+  'summarise my week',
+  'summary of my week',
+  'recap my week',
+];
+const tarotPhrases = [
+  'interpret my tarot',
+  'tarot pull',
+  'what do my cards mean',
+];
 const energyPhrases = ['explain today', 'today’s energy', "today's energy"];
 
 const normalise = (value: string) => value.trim().toLowerCase();
@@ -56,7 +64,9 @@ const interpretTarot = (context: LunaryContext): string => {
 };
 
 const describeTransit = (transit: TransitRecord): string => {
-  const direction = transit.applying ? 'moving towards exact' : 'softening after exact';
+  const direction = transit.applying
+    ? 'moving towards exact'
+    : 'softening after exact';
   return `${transit.from} ${transit.aspect.toLowerCase()} ${transit.to} is ${direction}, with strength ${transit.strength.toFixed(
     2,
   )}`;
