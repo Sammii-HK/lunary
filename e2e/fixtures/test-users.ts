@@ -81,8 +81,11 @@ export async function ensureTestUser(
       return false;
     }
 
-    // Wait for React hydration
-    await page.waitForTimeout(3000);
+    // Wait for React hydration (reduced from 3000ms)
+    await page
+      .waitForLoadState('networkidle', { timeout: 5000 })
+      .catch(() => {});
+    await page.waitForTimeout(1000);
 
     // Check if already authenticated
     const url = page.url();
@@ -151,20 +154,22 @@ export async function ensureTestUser(
     console.log(`   → Signing in with Better Auth user: ${user.email}`);
     await emailInput.fill(user.email);
     await passwordInput.fill(user.password);
-    await page.waitForTimeout(500);
+
     await submitButton.click();
 
-    // Wait for Jazz sync and redirect
-    await page.waitForTimeout(3000);
-
-    const newUrl = page.url();
-    if (!newUrl.includes('/auth')) {
-      console.log(`   ✅ Sign in successful (redirected to ${newUrl})`);
+    // Wait for navigation - user should already exist from global setup
+    try {
+      await page.waitForURL((url) => !url.pathname.includes('/auth'), {
+        timeout: 10000,
+      });
+      console.log(`   ✅ Sign in successful`);
       return true;
+    } catch {
+      const newUrl = page.url();
+      console.log(`   ✗ Sign in failed (still on ${newUrl})`);
+      console.log(`   → User should have been created in global setup`);
+      return false;
     }
-
-    console.log(`   ✗ Sign in failed (still on ${newUrl})`);
-    return false;
   } catch (error) {
     console.error(`   ✗ Auth error:`, error);
     return false;

@@ -1,9 +1,14 @@
 import { test, expect } from '../fixtures/auth';
 
+const isCI = !!process.env.CI;
+const log = (message: string) => {
+  if (!isCI) console.log(message);
+};
+
 // Quick smoke tests for critical paths
 test.describe('Smoke Tests @smoke', () => {
   test('homepage loads', async ({ page }) => {
-    console.log('\n📄 Testing homepage...');
+    log('\n📄 Testing homepage...');
     const response = await page.goto('/', {
       waitUntil: 'domcontentloaded',
       timeout: 20000,
@@ -15,11 +20,11 @@ test.describe('Smoke Tests @smoke', () => {
 
     const body = page.locator('body');
     await expect(body).toBeVisible({ timeout: 10000 });
-    console.log('✅ Homepage loaded successfully');
+    log('✅ Homepage loaded successfully');
   });
 
   test('auth page loads', async ({ page }) => {
-    console.log('\n📄 Testing auth page...');
+    log('\n📄 Testing auth page...');
 
     const response = await page.goto('/auth', {
       waitUntil: 'domcontentloaded',
@@ -41,14 +46,16 @@ test.describe('Smoke Tests @smoke', () => {
     }
 
     // Wait for React hydration - AuthComponent uses hooks that need time to initialize
-    console.log(
-      '   → Waiting for React hydration and AuthComponent to render...',
-    );
+    log('   → Waiting for React hydration and AuthComponent to render...');
 
     // Wait for the form to be present - this indicates AuthComponent has rendered
-    console.log('   → Looking for auth form...');
+    log('   → Looking for auth form...');
     try {
       await page.waitForSelector('form', { timeout: 15000 });
+      // Wait for network to be idle instead of fixed timeout
+      await page
+        .waitForLoadState('networkidle', { timeout: 5000 })
+        .catch(() => {});
     } catch (error) {
       // If form not found, check if component is still loading
       const hasLunaryText = await page
@@ -61,9 +68,6 @@ test.describe('Smoke Tests @smoke', () => {
         );
       }
     }
-
-    // Wait a bit more for hooks to finish (useAccount, useAuthStatus)
-    await page.waitForTimeout(2000);
 
     // Try multiple selectors for email input - prioritize #email since that's what AuthComponent uses
     console.log('   → Looking for email input...');
@@ -139,8 +143,10 @@ test.describe('Smoke Tests @smoke', () => {
       );
     }
 
-    // Wait for React hydration
-    await page.waitForTimeout(2000);
+    // Wait for React hydration (use networkidle instead of fixed timeout)
+    await page
+      .waitForLoadState('networkidle', { timeout: 5000 })
+      .catch(() => {});
 
     // Look for pricing-related text with multiple fallbacks
     const pricingSelectors = [
