@@ -266,8 +266,8 @@ const TarotReadings = () => {
                 </span>
               </div>
             </div>
-          <div className='relative overflow-hidden'>
-            <div className='filter blur-sm pointer-events-none'>
+            <div className='relative overflow-hidden'>
+              <div className='filter blur-sm pointer-events-none'>
                 {[...Array(7)].map((_, index) => (
                   <div
                     key={index}
@@ -337,360 +337,360 @@ const TarotReadings = () => {
       </div>
 
       <div className='space-y-6'>
-          <HoroscopeSection title='Daily & Weekly Cards' color='purple'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-                <h3 className='text-sm font-medium text-zinc-400 mb-2'>
-                  Daily Card
-                </h3>
-                <p
-                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
-                  onClick={() => {
-                    const card = getTarotCardByName(
-                      personalizedReading.daily.name,
-                    );
-                    if (card) setSelectedCard(card);
-                  }}
-                >
-                  {personalizedReading.daily.name}
-                </p>
-                <p className='text-sm text-zinc-400'>
-                  {personalizedReading.daily.keywords.slice(0, 2).join(', ')}
-                </p>
-              </div>
-
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-                <h3 className='text-sm font-medium text-zinc-400 mb-2'>
-                  Weekly Card
-                </h3>
-                <p
-                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
-                  onClick={() => {
-                    const card = getTarotCardByName(
-                      personalizedReading.weekly.name,
-                    );
-                    if (card) setSelectedCard(card);
-                  }}
-                >
-                  {personalizedReading.weekly.name}
-                </p>
-                <p className='text-sm text-zinc-400'>
-                  {personalizedReading.weekly.keywords.slice(0, 2).join(', ')}
-                </p>
-              </div>
+        <HoroscopeSection title='Daily & Weekly Cards' color='purple'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
+              <h3 className='text-sm font-medium text-zinc-400 mb-2'>
+                Daily Card
+              </h3>
+              <p
+                className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                onClick={() => {
+                  const card = getTarotCardByName(
+                    personalizedReading.daily.name,
+                  );
+                  if (card) setSelectedCard(card);
+                }}
+              >
+                {personalizedReading.daily.name}
+              </p>
+              <p className='text-sm text-zinc-400'>
+                {personalizedReading.daily.keywords.slice(0, 2).join(', ')}
+              </p>
             </div>
-          </HoroscopeSection>
 
-          <HoroscopeSection title='Guidance Highlights' color='indigo'>
-            <div className='space-y-4'>
-              <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-                <h3 className='text-sm font-medium text-purple-300/90 mb-2'>
-                  Daily Message
-                </h3>
-                <p className='text-sm text-zinc-300 leading-relaxed'>
-                  {personalizedReading.guidance.dailyMessage}
-                </p>
-              </div>
-
-              <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                <h3 className='text-sm font-medium text-indigo-300/90 mb-2'>
-                  Weekly Energy
-                </h3>
-                <p className='text-sm text-zinc-300 leading-relaxed'>
-                  {personalizedReading.guidance.weeklyMessage}
-                </p>
-              </div>
-
-              <div className='rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-                <h3 className='text-sm font-medium text-emerald-300/90 mb-2'>
-                  Key Guidance
-                </h3>
-                <ul className='text-sm text-zinc-300 space-y-2'>
-                  {personalizedReading.guidance.actionPoints.map(
-                    (point, index) => (
-                      <li key={index} className='flex items-start gap-2'>
-                        <Check
-                          className='w-4 h-4 text-emerald-400/80 mt-0.5 flex-shrink-0'
-                          strokeWidth={2}
-                        />
-                        <span>{point}</span>
-                      </li>
-                    ),
-                  )}
-                </ul>
-              </div>
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
+              <h3 className='text-sm font-medium text-zinc-400 mb-2'>
+                Weekly Card
+              </h3>
+              <p
+                className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                onClick={() => {
+                  const card = getTarotCardByName(
+                    personalizedReading.weekly.name,
+                  );
+                  if (card) setSelectedCard(card);
+                }}
+              >
+                {personalizedReading.weekly.name}
+              </p>
+              <p className='text-sm text-zinc-400'>
+                {personalizedReading.weekly.keywords.slice(0, 2).join(', ')}
+              </p>
             </div>
-          </HoroscopeSection>
+          </div>
+        </HoroscopeSection>
 
-          {personalizedReading.trendAnalysis && (
-            <HoroscopeSection
-              title={`Your ${timeFrame}-Day Tarot Patterns`}
-              color='zinc'
-            >
-              <div className='flex flex-wrap gap-2 w-full justify-start sm:justify-end mb-4'>
-                {[7, 14, 30, 60, 90].map((days) => (
-                  <button
-                    key={days}
-                    onClick={() => setTimeFrame(days)}
-                    className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                      timeFrame === days
-                        ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
-                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
-                    }`}
-                  >
-                    {days}d
-                  </button>
-                ))}
-              </div>
+        <HoroscopeSection title='Guidance Highlights' color='indigo'>
+          <div className='space-y-4'>
+            <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
+              <h3 className='text-sm font-medium text-purple-300/90 mb-2'>
+                Daily Message
+              </h3>
+              <p className='text-sm text-zinc-300 leading-relaxed'>
+                {personalizedReading.guidance.dailyMessage}
+              </p>
+            </div>
 
-              {personalizedReading.trendAnalysis.dominantThemes.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                    Dominant Themes
-                  </h3>
-                  <div className='flex flex-wrap gap-2'>
-                    {personalizedReading.trendAnalysis.dominantThemes.map(
-                      (theme, index) => (
-                        <span
-                          key={theme}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
-                            index === 0
-                              ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
-                              : index === 1
-                                ? 'bg-purple-500/15 text-purple-300/80 border border-purple-500/20'
-                                : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50'
-                          }`}
-                        >
-                          {theme}
-                        </span>
-                      ),
-                    )}
-                  </div>
-                </div>
-              )}
+            <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
+              <h3 className='text-sm font-medium text-indigo-300/90 mb-2'>
+                Weekly Energy
+              </h3>
+              <p className='text-sm text-zinc-300 leading-relaxed'>
+                {personalizedReading.guidance.weeklyMessage}
+              </p>
+            </div>
 
-              {personalizedReading.trendAnalysis.frequentCards.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                    Card Patterns
-                  </h3>
-                  <div className='space-y-3'>
-                    {personalizedReading.trendAnalysis.frequentCards.map(
-                      (card, index) => (
-                        <div
-                          key={index}
-                          className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'
-                        >
-                          <p
-                            className='font-medium text-zinc-100 mb-1 cursor-pointer hover:text-indigo-300 transition-colors inline-block'
-                            onClick={() => {
-                              const cardData = getTarotCardByName(card.name);
-                              if (cardData) setSelectedCard(cardData);
-                            }}
-                          >
-                            {card.name} ({card.count} times)
-                          </p>
-                          <p className='text-sm text-zinc-400 leading-relaxed'>
-                            {card.reading}
-                          </p>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </div>
-              )}
+            <div className='rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
+              <h3 className='text-sm font-medium text-emerald-300/90 mb-2'>
+                Key Guidance
+              </h3>
+              <ul className='text-sm text-zinc-300 space-y-2'>
+                {personalizedReading.guidance.actionPoints.map(
+                  (point, index) => (
+                    <li key={index} className='flex items-start gap-2'>
+                      <Check
+                        className='w-4 h-4 text-emerald-400/80 mt-0.5 flex-shrink-0'
+                        strokeWidth={2}
+                      />
+                      <span>{point}</span>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          </div>
+        </HoroscopeSection>
 
-              {personalizedReading.trendAnalysis.suitPatterns.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                    Suit Patterns
-                  </h3>
-                  <div className='space-y-3'>
-                    {personalizedReading.trendAnalysis.suitPatterns.map(
-                      (pattern, index) => (
-                        <div
-                          key={index}
-                          className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'
-                        >
-                          <div
-                            className='flex justify-between items-center cursor-pointer'
-                            onClick={() =>
-                              setExpandedSuit(
-                                expandedSuit === pattern.suit
-                                  ? null
-                                  : pattern.suit,
-                              )
-                            }
-                          >
-                            <p className='font-medium text-zinc-100'>
-                              {pattern.suit} ({pattern.count}/
-                              {personalizedReading.trendAnalysis?.timeFrame} days)
-                            </p>
-                            {expandedSuit === pattern.suit ? (
-                              <ChevronDown
-                                className='w-4 h-4 text-zinc-400'
-                                strokeWidth={2}
-                              />
-                            ) : (
-                              <ChevronRight
-                                className='w-4 h-4 text-zinc-400'
-                                strokeWidth={2}
-                              />
-                            )}
-                          </div>
-                          <p className='text-sm text-zinc-400 leading-relaxed mt-2'>
-                            {pattern.reading}
-                          </p>
-
-                          {expandedSuit === pattern.suit && (
-                            <div className='mt-4 pt-4 border-t border-zinc-800/50'>
-                              <p className='text-xs font-medium text-zinc-400 mb-3'>
-                                Individual Cards:
-                              </p>
-                              <div className='grid grid-cols-1 gap-2'>
-                                {pattern.cards.map((card, cardIndex) => (
-                                  <div
-                                    key={cardIndex}
-                                    className='flex justify-between items-center text-sm py-1.5 px-2 rounded bg-zinc-900/50'
-                                  >
-                                    <span className='text-zinc-300'>
-                                      <span
-                                        className='cursor-pointer hover:text-purple-300 transition-colors'
-                                        onClick={() => {
-                                          const cardData = getTarotCardByName(
-                                            card.name,
-                                          );
-                                          if (cardData) setSelectedCard(cardData);
-                                        }}
-                                      >
-                                        {card.name}
-                                      </span>
-                                    </span>
-                                    <span className='text-zinc-500'>
-                                      {card.count}x
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {personalizedReading.trendAnalysis.numberPatterns.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                    Number Patterns
-                  </h3>
-                  <div className='space-y-3'>
-                    {personalizedReading.trendAnalysis.numberPatterns.map(
-                      (pattern, index) => (
-                        <div
-                          key={index}
-                          className='rounded-lg border border-amber-500/20 bg-amber-500/10 p-4'
-                        >
-                          <p className='font-medium text-zinc-100 mb-1'>
-                            {pattern.number}s ({pattern.count} times)
-                          </p>
-                          <p className='text-sm text-zinc-400 leading-relaxed mb-2'>
-                            {pattern.reading}
-                          </p>
-                          <p className='text-xs text-zinc-500'>
-                            Cards:{' '}
-                            {pattern.cards.map((cardName, idx) => (
-                              <span key={idx}>
-                                <span
-                                  className='cursor-pointer hover:text-amber-300 transition-colors'
-                                  onClick={() => {
-                                    const card = getTarotCardByName(cardName);
-                                    if (card) setSelectedCard(card);
-                                  }}
-                                >
-                                  {cardName}
-                                </span>
-                                {idx < pattern.cards.length - 1 && ', '}
-                              </span>
-                            ))}
-                          </p>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {personalizedReading.trendAnalysis.arcanaPatterns.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                    Arcana Balance
-                  </h3>
-                  <div className='space-y-3'>
-                    {personalizedReading.trendAnalysis.arcanaPatterns.map(
-                      (pattern, index) => (
-                        <div
-                          key={index}
-                          className='rounded-lg border border-violet-500/20 bg-violet-500/10 p-4'
-                        >
-                          <p className='font-medium text-zinc-100 mb-1'>
-                            {pattern.type} ({pattern.count}/
-                            {personalizedReading.trendAnalysis?.timeFrame} days)
-                          </p>
-                          <p className='text-sm text-zinc-400 leading-relaxed'>
-                            {pattern.reading}
-                          </p>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </div>
-              )}
-            </HoroscopeSection>
-          )}
-
-          <HoroscopeSection title='Recent Daily Cards' color='zinc'>
-            <div className='space-y-3'>
-              {personalizedPreviousReadings.map((reading) => (
-                <div
-                  key={reading.date}
-                  className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 flex justify-between items-center hover:bg-zinc-900/50 transition-colors'
+        {personalizedReading.trendAnalysis && (
+          <HoroscopeSection
+            title={`Your ${timeFrame}-Day Tarot Patterns`}
+            color='zinc'
+          >
+            <div className='flex flex-wrap gap-2 w-full justify-start sm:justify-end mb-4'>
+              {[7, 14, 30, 60, 90].map((days) => (
+                <button
+                  key={days}
+                  onClick={() => setTimeFrame(days)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                    timeFrame === days
+                      ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
+                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
+                  }`}
                 >
-                  <div>
-                    <span className='font-medium text-zinc-100'>
-                      {reading.day}
-                    </span>{' '}
-                    <span className='text-sm text-zinc-400'>{reading.date}</span>
-                  </div>
-                  <div className='text-right'>
-                    <p
-                      className='font-medium text-zinc-100 cursor-pointer hover:text-purple-300 transition-colors'
-                      onClick={() => {
-                        const card = getTarotCardByName(reading.card.name);
-                        if (card) setSelectedCard(card);
-                      }}
-                    >
-                      {reading.card.name}
-                    </p>
-                    <p className='text-sm text-zinc-400'>
-                      {reading.card.keywords[0]}
-                    </p>
-                  </div>
-                </div>
+                  {days}d
+                </button>
               ))}
             </div>
-          </HoroscopeSection>
-        </div>
 
-        <TarotCardModal
-          card={selectedCard}
-          isOpen={!!selectedCard}
-          onClose={() => setSelectedCard(null)}
-        />
+            {personalizedReading.trendAnalysis.dominantThemes.length > 0 && (
+              <div>
+                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+                  Dominant Themes
+                </h3>
+                <div className='flex flex-wrap gap-2'>
+                  {personalizedReading.trendAnalysis.dominantThemes.map(
+                    (theme, index) => (
+                      <span
+                        key={theme}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+                          index === 0
+                            ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
+                            : index === 1
+                              ? 'bg-purple-500/15 text-purple-300/80 border border-purple-500/20'
+                              : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50'
+                        }`}
+                      >
+                        {theme}
+                      </span>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            {personalizedReading.trendAnalysis.frequentCards.length > 0 && (
+              <div>
+                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+                  Card Patterns
+                </h3>
+                <div className='space-y-3'>
+                  {personalizedReading.trendAnalysis.frequentCards.map(
+                    (card, index) => (
+                      <div
+                        key={index}
+                        className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'
+                      >
+                        <p
+                          className='font-medium text-zinc-100 mb-1 cursor-pointer hover:text-indigo-300 transition-colors inline-block'
+                          onClick={() => {
+                            const cardData = getTarotCardByName(card.name);
+                            if (cardData) setSelectedCard(cardData);
+                          }}
+                        >
+                          {card.name} ({card.count} times)
+                        </p>
+                        <p className='text-sm text-zinc-400 leading-relaxed'>
+                          {card.reading}
+                        </p>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            {personalizedReading.trendAnalysis.suitPatterns.length > 0 && (
+              <div>
+                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+                  Suit Patterns
+                </h3>
+                <div className='space-y-3'>
+                  {personalizedReading.trendAnalysis.suitPatterns.map(
+                    (pattern, index) => (
+                      <div
+                        key={index}
+                        className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'
+                      >
+                        <div
+                          className='flex justify-between items-center cursor-pointer'
+                          onClick={() =>
+                            setExpandedSuit(
+                              expandedSuit === pattern.suit
+                                ? null
+                                : pattern.suit,
+                            )
+                          }
+                        >
+                          <p className='font-medium text-zinc-100'>
+                            {pattern.suit} ({pattern.count}/
+                            {personalizedReading.trendAnalysis?.timeFrame} days)
+                          </p>
+                          {expandedSuit === pattern.suit ? (
+                            <ChevronDown
+                              className='w-4 h-4 text-zinc-400'
+                              strokeWidth={2}
+                            />
+                          ) : (
+                            <ChevronRight
+                              className='w-4 h-4 text-zinc-400'
+                              strokeWidth={2}
+                            />
+                          )}
+                        </div>
+                        <p className='text-sm text-zinc-400 leading-relaxed mt-2'>
+                          {pattern.reading}
+                        </p>
+
+                        {expandedSuit === pattern.suit && (
+                          <div className='mt-4 pt-4 border-t border-zinc-800/50'>
+                            <p className='text-xs font-medium text-zinc-400 mb-3'>
+                              Individual Cards:
+                            </p>
+                            <div className='grid grid-cols-1 gap-2'>
+                              {pattern.cards.map((card, cardIndex) => (
+                                <div
+                                  key={cardIndex}
+                                  className='flex justify-between items-center text-sm py-1.5 px-2 rounded bg-zinc-900/50'
+                                >
+                                  <span className='text-zinc-300'>
+                                    <span
+                                      className='cursor-pointer hover:text-purple-300 transition-colors'
+                                      onClick={() => {
+                                        const cardData = getTarotCardByName(
+                                          card.name,
+                                        );
+                                        if (cardData) setSelectedCard(cardData);
+                                      }}
+                                    >
+                                      {card.name}
+                                    </span>
+                                  </span>
+                                  <span className='text-zinc-500'>
+                                    {card.count}x
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            {personalizedReading.trendAnalysis.numberPatterns.length > 0 && (
+              <div>
+                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+                  Number Patterns
+                </h3>
+                <div className='space-y-3'>
+                  {personalizedReading.trendAnalysis.numberPatterns.map(
+                    (pattern, index) => (
+                      <div
+                        key={index}
+                        className='rounded-lg border border-amber-500/20 bg-amber-500/10 p-4'
+                      >
+                        <p className='font-medium text-zinc-100 mb-1'>
+                          {pattern.number}s ({pattern.count} times)
+                        </p>
+                        <p className='text-sm text-zinc-400 leading-relaxed mb-2'>
+                          {pattern.reading}
+                        </p>
+                        <p className='text-xs text-zinc-500'>
+                          Cards:{' '}
+                          {pattern.cards.map((cardName, idx) => (
+                            <span key={idx}>
+                              <span
+                                className='cursor-pointer hover:text-amber-300 transition-colors'
+                                onClick={() => {
+                                  const card = getTarotCardByName(cardName);
+                                  if (card) setSelectedCard(card);
+                                }}
+                              >
+                                {cardName}
+                              </span>
+                              {idx < pattern.cards.length - 1 && ', '}
+                            </span>
+                          ))}
+                        </p>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            {personalizedReading.trendAnalysis.arcanaPatterns.length > 0 && (
+              <div>
+                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+                  Arcana Balance
+                </h3>
+                <div className='space-y-3'>
+                  {personalizedReading.trendAnalysis.arcanaPatterns.map(
+                    (pattern, index) => (
+                      <div
+                        key={index}
+                        className='rounded-lg border border-violet-500/20 bg-violet-500/10 p-4'
+                      >
+                        <p className='font-medium text-zinc-100 mb-1'>
+                          {pattern.type} ({pattern.count}/
+                          {personalizedReading.trendAnalysis?.timeFrame} days)
+                        </p>
+                        <p className='text-sm text-zinc-400 leading-relaxed'>
+                          {pattern.reading}
+                        </p>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+          </HoroscopeSection>
+        )}
+
+        <HoroscopeSection title='Recent Daily Cards' color='zinc'>
+          <div className='space-y-3'>
+            {personalizedPreviousReadings.map((reading) => (
+              <div
+                key={reading.date}
+                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 flex justify-between items-center hover:bg-zinc-900/50 transition-colors'
+              >
+                <div>
+                  <span className='font-medium text-zinc-100'>
+                    {reading.day}
+                  </span>{' '}
+                  <span className='text-sm text-zinc-400'>{reading.date}</span>
+                </div>
+                <div className='text-right'>
+                  <p
+                    className='font-medium text-zinc-100 cursor-pointer hover:text-purple-300 transition-colors'
+                    onClick={() => {
+                      const card = getTarotCardByName(reading.card.name);
+                      if (card) setSelectedCard(card);
+                    }}
+                  >
+                    {reading.card.name}
+                  </p>
+                  <p className='text-sm text-zinc-400'>
+                    {reading.card.keywords[0]}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </HoroscopeSection>
       </div>
-    );
+
+      <TarotCardModal
+        card={selectedCard}
+        isOpen={!!selectedCard}
+        onClose={() => setSelectedCard(null)}
+      />
+    </div>
+  );
 };
 
 export default TarotReadings;
