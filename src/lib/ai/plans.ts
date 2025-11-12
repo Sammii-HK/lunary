@@ -74,6 +74,33 @@ export const PLAN_LIMITS = {
   requestsPerMinutePerIp: 10,
 };
 
+export const CONTEXT_RULES: Record<
+  AiPlanId,
+  {
+    historyLimit: number;
+    includeMood: boolean;
+  }
+> = {
+  free: {
+    historyLimit: 0,
+    includeMood: false,
+  },
+  lunary_plus: {
+    historyLimit: 4,
+    includeMood: true,
+  },
+  lunary_plus_ai: {
+    historyLimit: 8,
+    includeMood: true,
+  },
+};
+
+export const MEMORY_SNIPPET_LIMITS: Record<AiPlanId, number> = {
+  free: 0,
+  lunary_plus: 2,
+  lunary_plus_ai: 4,
+};
+
 export type PlanUsageSnapshot = {
   userId: string;
   planId: AiPlanId;

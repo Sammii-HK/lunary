@@ -25,6 +25,8 @@ const defaultSaveSnippet: SaveSnippetFn = async () => {
   return { ok: true };
 };
 
+const memorySnippetStore = new Map<string, MemorySnippet[]>();
+
 const summariseMessages = (messages: ThreadMessage[]): string => {
   const recentUser = messages
     .filter((message) => message.role === 'user')
@@ -84,12 +86,14 @@ export const captureMemory = async ({
   messages,
   usageCount,
   saveSnippet = defaultSaveSnippet,
+  snippetLimit = 0,
 }: {
   userId: string;
   planId: AiPlanId;
   messages: ThreadMessage[];
   usageCount: number;
   saveSnippet?: SaveSnippetFn;
+  snippetLimit?: number;
 }): Promise<MemorySnippet | null> => {
   if (!shouldCaptureMemory(planId, usageCount)) {
     return null;
@@ -112,6 +116,20 @@ export const captureMemory = async ({
     createdAt: new Date().toISOString(),
   };
 
+  if (snippetLimit > 0) {
+    const existing = memorySnippetStore.get(userId) ?? [];
+    const nextSnippets = [...existing, snippet].slice(-snippetLimit);
+    memorySnippetStore.set(userId, nextSnippets);
+  } else {
+    memorySnippetStore.delete(userId);
+  }
+
   console.info('[AI Memory] Captured snippet', snippet);
   return snippet;
+};
+
+export const getMemorySnippets = (userId: string, limit: number): string[] => {
+  if (limit <= 0) return [];
+  const existing = memorySnippetStore.get(userId) ?? [];
+  return existing.slice(-limit).map((snippet) => snippet.summary);
 };

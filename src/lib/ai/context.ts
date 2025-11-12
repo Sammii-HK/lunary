@@ -131,15 +131,17 @@ export const buildLunaryContext = async ({
           return null;
         })
       : Promise.resolve(null),
-    deps
-      .getConversationHistory({ userId, limit: historyLimit, now })
-      .catch((error) => {
-        console.error(
-          '[LunaryContext] Failed to fetch conversation history',
-          error,
-        );
-        return { lastMessages: emptyHistory };
-      }),
+    historyLimit > 0
+      ? deps
+          .getConversationHistory({ userId, limit: historyLimit, now })
+          .catch((error) => {
+            console.error(
+              '[LunaryContext] Failed to fetch conversation history',
+              error,
+            );
+            return { lastMessages: emptyHistory };
+          })
+      : Promise.resolve({ lastMessages: emptyHistory }),
   ]);
 
   const context: LunaryContext = {
@@ -156,7 +158,10 @@ export const buildLunaryContext = async ({
       lastReading: tarotReading ?? undefined,
     },
     history: {
-      lastMessages: history?.lastMessages ?? emptyHistory,
+      lastMessages:
+        historyLimit > 0
+          ? (history?.lastMessages?.slice(0, historyLimit) ?? emptyHistory)
+          : emptyHistory,
     },
   };
 

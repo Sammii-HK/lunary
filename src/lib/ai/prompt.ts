@@ -37,26 +37,46 @@ type PromptSections = {
 };
 
 const formatMemory = (entries: string[]): string =>
-  entries.length > 0
-    ? entries.map((entry) => `- ${entry}`).join('\n')
-    : '';
+  entries.length > 0 ? entries.map((entry) => `- ${entry}`).join('\n') : '';
 
 const describeContext = (context: LunaryContext): string => {
+  const prune = (value: unknown): unknown => {
+    if (value === null || value === undefined) return undefined;
+    if (Array.isArray(value)) {
+      const pruned = value
+        .map(prune)
+        .filter((entry): entry is unknown => entry !== undefined);
+      return pruned.length > 0 ? pruned : undefined;
+    }
+    if (typeof value === 'object') {
+      const entries = Object.entries(value as Record<string, unknown>)
+        .map(([key, val]) => {
+          const prunedVal = prune(val);
+          return prunedVal !== undefined ? [key, prunedVal] : null;
+        })
+        .filter(
+          (entry): entry is [string, unknown] =>
+            Array.isArray(entry) && entry.length === 2,
+        );
+
+      if (entries.length === 0) return undefined;
+
+      return Object.fromEntries(entries);
+    }
+    return value;
+  };
+
+  const payload = prune({
+    user: context.user,
+    birthChart: context.birthChart,
+    currentTransits: context.currentTransits,
+    moon: context.moon,
+    tarot: context.tarot,
+    mood: context.mood,
+  });
+
   const parts: string[] = [];
-  parts.push(
-    JSON.stringify(
-      {
-        user: context.user,
-        birthChart: context.birthChart,
-        currentTransits: context.currentTransits,
-        moon: context.moon,
-        tarot: context.tarot,
-        mood: context.mood,
-      },
-      null,
-      2,
-    ),
-  );
+  parts.push(JSON.stringify(payload ?? {}, null, 2));
 
   if (context.history.lastMessages.length > 0) {
     parts.push(
