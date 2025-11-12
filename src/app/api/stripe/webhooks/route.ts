@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+  const stripe = getStripe();
   console.log('Subscription created:', subscription.id);
 
   const { updateUserSubscriptionStatus } = await import(
