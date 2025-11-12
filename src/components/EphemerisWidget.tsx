@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   MapPin,
   Sun,
-  Moon,
-  Clock,
   Eye,
   EyeOff,
   ChevronDown,
@@ -14,7 +12,6 @@ import {
   Navigation,
   Telescope,
   Compass,
-  Zap,
 } from 'lucide-react';
 import { useLocation } from '../hooks/useLocation';
 import {
@@ -22,8 +19,9 @@ import {
   EphemerisData,
   formatTime,
   formatDayLength,
+  RiseSetData,
 } from '../../utils/astrology/ephemeris';
-import { formatLocation } from '../../utils/location';
+import { formatLocation, LocationData } from '../../utils/location';
 
 // Fixed moon phase calculation
 const getMoonPhaseIcon = (illumination: number) => {
@@ -107,10 +105,194 @@ const calculateAltitudeForChart = (riseSet: any, hour: number) => {
   return 0;
 };
 
+const formatShortTime = (date: Date | null, timezone?: string) =>
+  formatTime(date, timezone);
+
+const formatTimeRange = (
+  start: Date | null,
+  end: Date | null,
+  timezone?: string,
+) => {
+  if (!start || !end) return null;
+  const startText = formatShortTime(start, timezone);
+  const endText = formatShortTime(end, timezone);
+  if (!startText || !endText || startText === '--:--' || endText === '--:--')
+    return null;
+  return `${startText} – ${endText}`;
+};
+
+const isBodyVisibleNow = (
+  riseSet: RiseSetData | null | undefined,
+  referenceDate: Date = new Date(),
+) => {
+  if (!riseSet?.rise || !riseSet?.set) return false;
+  const riseTime = riseSet.rise;
+  const setTime = riseSet.set;
+
+  if (setTime < riseTime) {
+    return referenceDate >= riseTime || referenceDate <= setTime;
+  }
+
+  return referenceDate >= riseTime && referenceDate <= setTime;
+};
+
+type DarknessTone = 'excellent' | 'good' | 'fair' | 'challenging';
+
+interface ObservingSummary {
+  sunrise: Date | null;
+  sunset: Date | null;
+  dayLengthHours: number;
+  dayLengthText: string;
+  twilight: {
+    civilEnd: Date | null;
+    nauticalEnd: Date | null;
+    astronomicalEnd: Date | null;
+    astronomicalStart: Date | null;
+  };
+  bestViewingStart: Date | null;
+  bestViewingEnd: Date | null;
+  bestViewingWindowText: string | null;
+  moon: {
+    icon: string;
+    phaseName: string;
+    illumination: number;
+  };
+  darkness: {
+    label: string;
+    tone: DarknessTone;
+  };
+  currentVisiblePlanets: string[];
+  nextEvent: { label: string; time: Date } | null;
+}
+
+const deriveObservingSummary = (
+  ephemerisData: EphemerisData | null,
+  location: LocationData | null,
+): ObservingSummary | null => {
+  if (!ephemerisData || !location) return null;
+
+  const timezone = location.timezone;
+  const now = new Date();
+  const { sunMoon, planets } = ephemerisData;
+
+  const sunset = sunMoon.sunset;
+  const sunrise = sunMoon.sunrise;
+
+  const civilEnd = sunset ? new Date(sunset.getTime() + 30 * 60 * 1000) : null;
+  const nauticalEnd = sunset
+    ? new Date(sunset.getTime() + 50 * 60 * 1000)
+    : null;
+  const astronomicalEnd = sunset
+    ? new Date(sunset.getTime() + 70 * 60 * 1000)
+    : null;
+
+  const astronomicalStart = sunrise
+    ? new Date(sunrise.getTime() - 70 * 60 * 1000)
+    : null;
+
+  let bestViewingStart = astronomicalEnd;
+  let bestViewingEnd = astronomicalStart;
+
+  if (
+    bestViewingStart &&
+    bestViewingEnd &&
+    bestViewingEnd <= bestViewingStart
+  ) {
+    bestViewingStart = null;
+    bestViewingEnd = null;
+  }
+
+  const bestViewingWindowText = formatTimeRange(
+    bestViewingStart,
+    bestViewingEnd,
+    timezone,
+  );
+
+  const illumination = Math.round(sunMoon.moonPhase.illumination);
+  let darknessTone: DarknessTone = 'fair';
+  let darknessLabel = 'Balanced skies';
+
+  if (illumination <= 10) {
+    darknessTone = 'excellent';
+    darknessLabel = 'Prime dark skies';
+  } else if (illumination <= 35) {
+    darknessTone = 'good';
+    darknessLabel = 'Excellent seeing';
+  } else if (illumination <= 65) {
+    darknessTone = 'fair';
+    darknessLabel = 'Fair seeing';
+  } else {
+    darknessTone = 'challenging';
+    darknessLabel = 'Bright moonlight';
+  }
+
+  const currentVisiblePlanets = planets
+    .filter((planet) => isBodyVisibleNow(planet.riseSet, now))
+    .map((planet) => planet.body);
+
+  const upcomingEvents: { label: string; time: Date }[] = [];
+
+  if (sunrise && sunrise > now) {
+    upcomingEvents.push({ label: 'Sunrise', time: sunrise });
+  }
+  if (sunset && sunset > now) {
+    upcomingEvents.push({ label: 'Sunset', time: sunset });
+  }
+  if (sunMoon.moonrise && sunMoon.moonrise > now) {
+    upcomingEvents.push({ label: 'Moonrise', time: sunMoon.moonrise });
+  }
+  if (sunMoon.moonset && sunMoon.moonset > now) {
+    upcomingEvents.push({ label: 'Moonset', time: sunMoon.moonset });
+  }
+
+  planets.forEach((planet) => {
+    if (planet.riseSet.rise && planet.riseSet.rise > now) {
+      upcomingEvents.push({
+        label: `${planet.body} rises`,
+        time: planet.riseSet.rise,
+      });
+    }
+    if (planet.riseSet.set && planet.riseSet.set > now) {
+      upcomingEvents.push({
+        label: `${planet.body} sets`,
+        time: planet.riseSet.set,
+      });
+    }
+  });
+
+  upcomingEvents.sort((a, b) => a.time.getTime() - b.time.getTime());
+
+  return {
+    sunrise,
+    sunset,
+    dayLengthHours: sunMoon.dayLength,
+    dayLengthText: formatDayLength(sunMoon.dayLength),
+    twilight: {
+      civilEnd,
+      nauticalEnd,
+      astronomicalEnd,
+      astronomicalStart,
+    },
+    bestViewingStart,
+    bestViewingEnd,
+    bestViewingWindowText,
+    moon: {
+      icon: getMoonPhaseIcon(illumination),
+      phaseName: getMoonPhaseName(illumination),
+      illumination,
+    },
+    darkness: {
+      label: darknessLabel,
+      tone: darknessTone,
+    },
+    currentVisiblePlanets,
+    nextEvent: upcomingEvents.length > 0 ? upcomingEvents[0] : null,
+  };
+};
+
 // Chart matching the screenshot
 const AltitudeChart = ({ celestialBodies, timezone }: any) => {
   const chartWidth = 320;
-  const chartHeight = 200;
   const bodyHeight = 30;
 
   // Time points every 1 hour from current time
@@ -120,11 +302,11 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
     timeHours.push((currentHour + i - 12) % 24);
   }
 
-  return (
-    <div className='bg-zinc-900/90 rounded-lg p-4 mb-4 border border-zinc-700'>
+    return (
+      <div className='rounded-lg border border-zinc-700/70 bg-zinc-900/60 p-4'>
       <div className='flex items-center gap-2 mb-4'>
         <Telescope size={14} className='text-purple-400' />
-        <span className='text-sm font-medium text-white'>Sky Chart</span>
+          <span className='text-sm font-medium text-white'>Night Timeline</span>
       </div>
 
       <div
@@ -279,25 +461,38 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
   );
 };
 
-// Enhanced astronomical details
-const AstronomicalDetails = ({ ephemerisData, location }: any) => {
-  const now = new Date();
-  const sunsetTime = ephemerisData.sunMoon.sunset;
-  const sunriseTime = ephemerisData.sunMoon.sunrise;
+// Enhanced astronomical details card
+const ObservingConditionsCard = ({
+  summary,
+  timezone,
+}: {
+  summary: ObservingSummary | null;
+  timezone?: string;
+}) => {
+  const toneClassMap: Record<DarknessTone, string> = {
+    excellent: 'text-emerald-300',
+    good: 'text-blue-300',
+    fair: 'text-yellow-300',
+    challenging: 'text-orange-300',
+  };
 
-  // Calculate twilight times
-  const civilTwilight = sunsetTime
-    ? new Date(sunsetTime.getTime() + 30 * 60 * 1000)
-    : null;
-  const nauticalTwilight = sunsetTime
-    ? new Date(sunsetTime.getTime() + 50 * 60 * 1000)
-    : null;
-  const astronomicalTwilight = sunsetTime
-    ? new Date(sunsetTime.getTime() + 70 * 60 * 1000)
-    : null;
+  const DetailRow = ({
+    label,
+    value,
+    valueClass = 'text-zinc-200',
+  }: {
+    label: string;
+    value: string;
+    valueClass?: string;
+  }) => (
+    <div className='flex justify-between'>
+      <span className='text-zinc-400'>{label}</span>
+      <span className={valueClass}>{value}</span>
+    </div>
+  );
 
   return (
-    <div className='bg-zinc-700/30 rounded-lg p-3 mb-4'>
+    <div className='bg-zinc-900/60 rounded-lg p-3 border border-zinc-700/60'>
       <div className='flex items-center gap-2 mb-3'>
         <Navigation size={14} className='text-purple-400' />
         <span className='text-sm font-medium text-white'>
@@ -305,60 +500,200 @@ const AstronomicalDetails = ({ ephemerisData, location }: any) => {
         </span>
       </div>
 
-      <div className='grid grid-cols-2 gap-3 text-xs'>
-        <div className='space-y-1'>
-          <div className='flex justify-between'>
-            <span className='text-zinc-400'>Civil Twilight:</span>
-            <span className='text-orange-300'>
-              {formatTime(civilTwilight, location.timezone)}
-            </span>
+      {summary ? (
+        <div className='space-y-3 text-xs'>
+          <div className='grid grid-cols-2 gap-3'>
+            <div className='space-y-1.5'>
+              <DetailRow
+                label='Civil Twilight'
+                value={formatShortTime(summary.twilight.civilEnd, timezone)}
+                valueClass='text-orange-300'
+              />
+              <DetailRow
+                label='Nautical Twilight'
+                value={formatShortTime(summary.twilight.nauticalEnd, timezone)}
+                valueClass='text-blue-300'
+              />
+              <DetailRow
+                label='Astronomical Dark'
+                value={formatShortTime(
+                  summary.twilight.astronomicalEnd,
+                  timezone,
+                )}
+                valueClass='text-purple-300'
+              />
+            </div>
+            <div className='space-y-1.5'>
+              <DetailRow
+                label='Moon Illumination'
+                value={`${summary.moon.illumination}%`}
+                valueClass='text-blue-300'
+              />
+              <DetailRow
+                label='Moon Phase'
+                value={summary.moon.phaseName}
+                valueClass='text-zinc-200'
+              />
+              <DetailRow
+                label='Darkness Quality'
+                value={summary.darkness.label}
+                valueClass={toneClassMap[summary.darkness.tone]}
+              />
+            </div>
           </div>
-          <div className='flex justify-between'>
-            <span className='text-zinc-400'>Nautical Twilight:</span>
-            <span className='text-blue-300'>
-              {formatTime(nauticalTwilight, location.timezone)}
-            </span>
-          </div>
-          <div className='flex justify-between'>
-            <span className='text-zinc-400'>Astro Twilight:</span>
-            <span className='text-purple-300'>
-              {formatTime(astronomicalTwilight, location.timezone)}
-            </span>
+
+          <div className='space-y-1.5'>
+            <DetailRow
+              label='Best Viewing'
+              value={
+                summary.bestViewingWindowText ??
+                (summary.bestViewingStart
+                  ? `${formatShortTime(
+                      summary.bestViewingStart,
+                      timezone,
+                    )} onward`
+                  : 'Check later tonight')
+              }
+              valueClass='text-green-300'
+            />
+            {summary.twilight.astronomicalStart && (
+              <DetailRow
+                label='Astronomical Dawn'
+                value={formatShortTime(
+                  summary.twilight.astronomicalStart,
+                  timezone,
+                )}
+                valueClass='text-purple-200'
+              />
+            )}
+            <DetailRow
+              label='Next Up'
+              value={
+                summary.nextEvent
+                  ? `${summary.nextEvent.label} @ ${formatShortTime(
+                      summary.nextEvent.time,
+                      timezone,
+                    )}`
+                  : 'No major events soon'
+              }
+              valueClass='text-zinc-200'
+            />
           </div>
         </div>
+      ) : (
+        <div className='text-xs text-zinc-500 italic'>
+          Observing details available once data loads.
+        </div>
+      )}
+    </div>
+  );
+};
 
-        <div className='space-y-1'>
-          <div className='flex justify-between'>
-            <span className='text-zinc-400'>Moon Illumination:</span>
-            <span className='text-blue-300'>
-              {Math.round(ephemerisData.sunMoon.moonPhase.illumination)}%
-            </span>
-          </div>
-          <div className='flex justify-between'>
-            <span className='text-zinc-400'>Darkness Quality:</span>
-            <span
-              className={
-                ephemerisData.sunMoon.moonPhase.illumination < 25
-                  ? 'text-green-300'
-                  : 'text-yellow-300'
-              }
+const SummaryRail = ({
+  summary,
+  timezone,
+  loading,
+}: {
+  summary: ObservingSummary | null;
+  timezone?: string;
+  loading: boolean;
+}) => {
+  const StatusBadge = () => {
+    if (!summary) {
+      return (
+        <span className='text-xs text-zinc-500'>Awaiting observing data...</span>
+      );
+    }
+
+    const toneBgMap: Record<DarknessTone, string> = {
+      excellent: 'text-emerald-300',
+      good: 'text-blue-200',
+      fair: 'text-yellow-200',
+      challenging: 'text-orange-200',
+    };
+
+    return (
+      <span className={`text-sm font-medium ${toneBgMap[summary.darkness.tone]}`}>
+        {summary.darkness.label}
+      </span>
+    );
+  };
+
+  const summaryItems = [
+    {
+      icon: <Sun size={16} className='text-yellow-300' />,
+      title: 'Sunlight',
+      primary: summary
+        ? `${formatShortTime(summary.sunrise, timezone)} → ${formatShortTime(
+            summary.sunset,
+            timezone,
+          )}`
+        : '--:--',
+      secondary: summary ? summary.dayLengthText : '—',
+    },
+    {
+      icon: <span className='text-lg'>{summary?.moon.icon ?? '🌙'}</span>,
+      title: 'Moon',
+      primary: summary ? summary.moon.phaseName : 'Loading phase',
+      secondary: summary ? `${summary.moon.illumination}% illuminated` : '—',
+    },
+    {
+      icon: <Telescope size={16} className='text-purple-300' />,
+      title: 'Best Viewing',
+      primary:
+        summary?.bestViewingWindowText ??
+        (summary?.bestViewingStart
+          ? `${formatShortTime(summary.bestViewingStart, timezone)} onward`
+          : 'Awaiting twilight'),
+      secondary:
+        summary?.currentVisiblePlanets && summary.currentVisiblePlanets.length > 0
+          ? `Visible now: ${summary.currentVisiblePlanets.join(', ')}`
+          : 'Planets rising soon',
+    },
+    {
+      icon: <Compass size={16} className='text-blue-300' />,
+      title: 'Next Up',
+      primary: summary?.nextEvent
+        ? summary.nextEvent.label
+        : 'No major events',
+      secondary: summary?.nextEvent
+        ? formatShortTime(summary.nextEvent.time, timezone)
+        : '--:--',
+    },
+  ];
+
+  return (
+    <div className='bg-zinc-900/60 border border-zinc-700/70 rounded-lg px-4 py-3'>
+      <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
+        <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 flex-1'>
+          {summaryItems.map((item) => (
+            <div
+              key={item.title}
+              className='flex items-center gap-3 rounded-md border border-zinc-800/80 bg-zinc-800/40 px-3 py-2'
             >
-              {ephemerisData.sunMoon.moonPhase.illumination < 25
-                ? 'Excellent'
-                : 'Good'}
-            </span>
-          </div>
-          <div className='flex justify-between'>
-            <span className='text-zinc-400'>Best Viewing:</span>
-            <span className='text-green-300'>
-              {astronomicalTwilight
-                ? `${formatTime(
-                    astronomicalTwilight,
-                    location.timezone,
-                  )} - ${formatTime(new Date(sunriseTime.getTime() - 70 * 60 * 1000), location.timezone)}`
-                : 'N/A'}
-            </span>
-          </div>
+              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900/80'>
+                {item.icon}
+              </div>
+              <div className='space-y-0.5'>
+                <div className='text-[10px] uppercase tracking-wide text-zinc-500'>
+                  {item.title}
+                </div>
+                <div className='text-sm font-medium text-white'>
+                  {item.primary}
+                </div>
+                <div className='text-xs text-zinc-400'>{item.secondary}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className='flex items-center justify-between gap-3 md:w-auto'>
+          <StatusBadge />
+          {loading && (
+            <div className='flex items-center gap-2 text-xs text-zinc-400'>
+              <div className='h-4 w-4 animate-spin rounded-full border-2 border-purple-400 border-t-transparent'></div>
+              Updating
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -415,25 +750,101 @@ const MoonDisplay = ({ sunMoon, timezone }: any) => {
   );
 };
 
+const PlanetHighlightsCard = ({
+  planets,
+  timezone,
+  showAll,
+  toggleShowAll,
+  summary,
+}: {
+  planets: any[];
+  timezone?: string;
+  showAll: boolean;
+  toggleShowAll: () => void;
+  summary: ObservingSummary | null;
+}) => {
+  const displayedPlanets = showAll ? planets : planets.slice(0, 4);
+
+  return (
+    <div className='bg-zinc-900/60 rounded-lg p-3 border border-zinc-700/60'>
+      <div className='mb-3 flex items-center justify-between'>
+        <h4 className='flex items-center gap-2 text-sm font-medium text-zinc-300'>
+          <Telescope size={14} />
+          Planet Highlights
+        </h4>
+        {planets.length > 4 && (
+          <button
+            onClick={toggleShowAll}
+            className='flex items-center gap-1 text-xs text-zinc-400 transition-colors hover:text-purple-400'
+          >
+            {showAll ? <EyeOff size={12} /> : <Eye size={12} />}
+            {showAll ? 'Show less' : 'Show all'}
+          </button>
+        )}
+      </div>
+
+      <div className='mb-3 space-y-2 text-xs text-zinc-400'>
+        <div className='flex items-center justify-between gap-2'>
+          <span className='text-zinc-500'>Visible now</span>
+          <span className='text-zinc-300'>
+            {summary?.currentVisiblePlanets.length
+              ? summary.currentVisiblePlanets.join(', ')
+              : 'None'}
+          </span>
+        </div>
+        {summary?.nextEvent && (
+          <div className='flex items-center justify-between gap-2'>
+            <span className='text-zinc-500'>Next change</span>
+            <span className='text-zinc-300'>
+              {summary.nextEvent.label} @{' '}
+              {formatShortTime(summary.nextEvent.time, timezone)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className='grid grid-cols-1 gap-2'>
+        {displayedPlanets.map((planet) => (
+          <PlanetCard
+            key={planet.body}
+            planet={planet}
+            timezone={timezone}
+            isDetailed={showAll}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Enhanced planet card with astronomical details
 const PlanetCard = ({
   planet,
   timezone,
-  location,
   isDetailed = false,
 }: any) => {
-  const isCurrentlyVisible = () => {
-    const now = new Date();
-    if (!planet.riseSet.rise || !planet.riseSet.set) return false;
-    return now >= planet.riseSet.rise && now <= planet.riseSet.set;
-  };
+  const now = new Date();
+  const currentlyVisible = isBodyVisibleNow(planet.riseSet, now);
 
   const getVisibilityStatus = () => {
-    if (isCurrentlyVisible())
-      return { text: 'Visible Now', color: 'text-green-400' };
-    if (planet.riseSet.isVisible)
-      return { text: 'Rises Today', color: 'text-yellow-400' };
-    return { text: 'Below Horizon', color: 'text-zinc-500' };
+    if (currentlyVisible)
+      return { text: 'Visible now', color: 'text-green-400' };
+
+    if (planet.riseSet.rise && planet.riseSet.rise > now) {
+      return {
+        text: `Rises @ ${formatShortTime(planet.riseSet.rise, timezone)}`,
+        color: 'text-yellow-400',
+      };
+    }
+
+    if (planet.riseSet.set && planet.riseSet.set > now) {
+      return {
+        text: `Sets @ ${formatShortTime(planet.riseSet.set, timezone)}`,
+        color: 'text-zinc-400',
+      };
+    }
+
+    return { text: 'Below horizon', color: 'text-zinc-500' };
   };
 
   const status = getVisibilityStatus();
@@ -569,21 +980,23 @@ export default function EphemerisWidget() {
     return () => clearInterval(interval);
   }, [location]);
 
-  const visiblePlanets = showAllPlanets
-    ? ephemerisData?.planets || []
-    : ephemerisData?.planets.slice(0, 4) || [];
+  const observingSummary = useMemo(
+    () => deriveObservingSummary(ephemerisData, location),
+    [ephemerisData, location],
+  );
+  const planets = ephemerisData?.planets || [];
 
   if (!location || locationLoading) {
     return (
-      <div className='w-full h-full bg-zinc-800 rounded-lg p-4 border border-zinc-700 flex flex-col'>
-        <div className='flex items-center justify-center gap-2 mb-3'>
+      <div className='flex h-full w-full flex-col rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
+        <div className='mb-3 flex items-center justify-center gap-2'>
           <MapPin size={16} className='text-purple-400' />
           <h3 className='text-lg font-semibold text-white'>Sky Tonight</h3>
         </div>
 
-        <div className='text-center text-zinc-400 flex-1 flex items-center justify-center'>
+        <div className='flex flex-1 items-center justify-center text-center text-zinc-400'>
           <div>
-            <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400 mx-auto mb-2'></div>
+            <div className='mx-auto mb-2 h-6 w-6 animate-spin rounded-full border-b-2 border-purple-400'></div>
             <p className='text-sm'>Getting your location...</p>
           </div>
         </div>
@@ -592,111 +1005,102 @@ export default function EphemerisWidget() {
   }
 
   return (
-    <div className='w-full h-full bg-zinc-800 rounded-lg p-4 border border-zinc-700 flex flex-col'>
-      <div className='flex items-center justify-between mb-4'>
+    <div className='flex h-full w-full flex-col gap-4 rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
+      <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <MapPin size={16} className='text-purple-400' />
           <h3 className='text-lg font-semibold text-white'>Sky Tonight</h3>
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className='ml-2 text-zinc-400 hover:text-purple-400 transition-colors'
+            className='ml-2 text-zinc-400 transition-colors hover:text-purple-400'
           >
             {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </button>
         </div>
         <button
           onClick={requestLocation}
-          className='text-xs text-zinc-400 hover:text-purple-400 transition-colors'
+          className='text-xs text-zinc-400 transition-colors hover:text-purple-400'
         >
           📍 {formatLocation(location)}
         </button>
       </div>
 
-      <div className='flex-1 flex flex-col'>
-        {!isCollapsed && (
-          <>
-            {loading && (
-              <div className='text-center py-4'>
-                <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400 mx-auto mb-2'></div>
-                <p className='text-sm text-zinc-400'>
-                  Calculating celestial events...
-                </p>
-              </div>
-            )}
+      <SummaryRail
+        summary={observingSummary}
+        timezone={location.timezone}
+        loading={loading}
+      />
 
-            {error && (
-              <div className='bg-red-900/50 border border-red-500 text-red-300 px-3 py-2 rounded text-sm mb-4'>
-                {error}
-              </div>
-            )}
+      {error && (
+        <div className='rounded border border-red-500 bg-red-900/40 px-3 py-2 text-sm text-red-200'>
+          {error}
+        </div>
+      )}
 
-            {ephemerisData && (
-              <div className='space-y-4'>
-                {/* Chart matching the screenshot */}
-                <AltitudeChart
-                  celestialBodies={[
-                    {
-                      name: 'Sun',
-                      riseSet: {
-                        rise: ephemerisData.sunMoon.sunrise,
-                        set: ephemerisData.sunMoon.sunset,
-                        isVisible: true,
-                        altitude: 45,
-                      },
+      {!isCollapsed && (
+        <div className='flex-1'>
+          {loading && !ephemerisData ? (
+            <div className='flex h-full flex-col items-center justify-center gap-3 text-sm text-zinc-400'>
+              <div className='h-8 w-8 animate-spin rounded-full border-2 border-purple-400 border-t-transparent'></div>
+              Calculating celestial events...
+            </div>
+          ) : ephemerisData ? (
+            <div className='flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]'>
+              <AltitudeChart
+                celestialBodies={[
+                  {
+                    name: 'Sun',
+                    riseSet: {
+                      rise: ephemerisData.sunMoon.sunrise,
+                      set: ephemerisData.sunMoon.sunset,
+                      isVisible: true,
+                      altitude: 45,
                     },
-                    {
-                      name: 'Moon',
-                      riseSet: {
-                        rise: ephemerisData.sunMoon.moonrise,
-                        set: ephemerisData.sunMoon.moonset,
-                        isVisible: true,
-                        altitude: 40,
-                      },
+                  },
+                  {
+                    name: 'Moon',
+                    riseSet: {
+                      rise: ephemerisData.sunMoon.moonrise,
+                      set: ephemerisData.sunMoon.moonset,
+                      isVisible: true,
+                      altitude: 40,
                     },
-                    ...ephemerisData.planets
-                      .slice(0, 4)
-                      .map((p) => ({ name: p.body, riseSet: p.riseSet })),
-                  ]}
+                  },
+                  ...planets.slice(0, 4).map((p) => ({
+                    name: p.body,
+                    riseSet: p.riseSet,
+                  })),
+                ]}
+                timezone={location.timezone}
+              />
+
+              <div className='flex flex-col gap-4'>
+                <ObservingConditionsCard
+                  summary={observingSummary}
                   timezone={location.timezone}
                 />
 
-                {/* Astronomical Conditions */}
-                <AstronomicalDetails
-                  ephemerisData={ephemerisData}
-                  location={location}
-                />
-
-                {/* Sun & Moon */}
-                <div className='grid grid-cols-2 gap-3'>
-                  <div className='bg-zinc-700/50 rounded-lg p-3'>
-                    <div className='flex items-center gap-2 mb-2'>
+                <div className='grid gap-3 sm:grid-cols-2'>
+                  <div className='rounded-lg border border-zinc-700/60 bg-zinc-900/60 p-3'>
+                    <div className='mb-2 flex items-center gap-2'>
                       <Sun size={14} className='text-yellow-400' />
-                      <span className='font-medium text-white text-sm'>
-                        Sun
-                      </span>
+                      <span className='text-sm font-medium text-white'>Sun</span>
                     </div>
-
                     <div className='space-y-1 text-xs'>
                       <div className='flex justify-between'>
-                        <span className='text-zinc-400'>Rise:</span>
+                        <span className='text-zinc-400'>Rise</span>
                         <span className='text-white'>
-                          {formatTime(
-                            ephemerisData.sunMoon.sunrise,
-                            location.timezone,
-                          )}
+                          {formatTime(ephemerisData.sunMoon.sunrise, location.timezone)}
                         </span>
                       </div>
                       <div className='flex justify-between'>
-                        <span className='text-zinc-400'>Set:</span>
+                        <span className='text-zinc-400'>Set</span>
                         <span className='text-white'>
-                          {formatTime(
-                            ephemerisData.sunMoon.sunset,
-                            location.timezone,
-                          )}
+                          {formatTime(ephemerisData.sunMoon.sunset, location.timezone)}
                         </span>
                       </div>
                       <div className='flex justify-between'>
-                        <span className='text-zinc-400'>Length:</span>
+                        <span className='text-zinc-400'>Day Length</span>
                         <span className='text-yellow-300'>
                           {formatDayLength(ephemerisData.sunMoon.dayLength)}
                         </span>
@@ -710,79 +1114,33 @@ export default function EphemerisWidget() {
                   />
                 </div>
 
-                {/* Enhanced Planets Section */}
-                {visiblePlanets.length > 0 && (
-                  <div>
-                    <div className='flex items-center justify-between mb-3'>
-                      <h4 className='text-sm font-medium text-zinc-300 flex items-center gap-2'>
-                        <Telescope size={14} />
-                        Planets ({visiblePlanets.length})
-                      </h4>
-                      <button
-                        onClick={() => setShowAllPlanets(!showAllPlanets)}
-                        className='flex items-center gap-1 text-xs text-zinc-400 hover:text-purple-400 transition-colors'
-                      >
-                        {showAllPlanets ? (
-                          <EyeOff size={12} />
-                        ) : (
-                          <Eye size={12} />
-                        )}
-                        {showAllPlanets ? 'Show less' : 'Show all'}
-                      </button>
-                    </div>
-
-                    <div className='grid grid-cols-1 gap-2'>
-                      {visiblePlanets.map((planet) => (
-                        <PlanetCard
-                          key={planet.body}
-                          planet={planet}
-                          timezone={location.timezone}
-                          location={location}
-                          isDetailed={showAllPlanets}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Footer */}
-                <div className='text-center text-xs text-zinc-500 flex items-center justify-center gap-2'>
-                  <Circle size={8} className='text-green-400 animate-pulse' />
-                  Updated:{' '}
-                  {ephemerisData.date.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: location.timezone,
-                  })}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Collapsed state summary */}
-        {isCollapsed && ephemerisData && (
-          <div className='text-center text-sm text-zinc-400 flex-1 flex items-center justify-center'>
-            <div className='flex items-center justify-center gap-4'>
-              <div className='flex items-center gap-1'>
-                <Sun size={12} className='text-yellow-400' />
-                <span>
-                  {formatTime(ephemerisData.sunMoon.sunrise, location.timezone)}
-                </span>
-              </div>
-              <div className='flex items-center gap-1'>
-                {getMoonPhaseIcon(
-                  Math.round(ephemerisData.sunMoon.moonPhase.illumination),
-                )}
-                <span>
-                  {getMoonPhaseName(
-                    Math.round(ephemerisData.sunMoon.moonPhase.illumination),
-                  )}
-                </span>
+                <PlanetHighlightsCard
+                  planets={planets}
+                  timezone={location.timezone}
+                  showAll={showAllPlanets}
+                  toggleShowAll={() => setShowAllPlanets((prev) => !prev)}
+                  summary={observingSummary}
+                />
               </div>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className='flex h-full items-center justify-center rounded-lg border border-dashed border-zinc-700 bg-zinc-800/40 text-xs text-zinc-500'>
+              Ephemeris data will appear once calculations complete.
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className='mt-auto flex items-center justify-center gap-2 text-xs text-zinc-500'>
+        <Circle size={8} className='animate-pulse text-green-400' />
+        Updated:{' '}
+        {ephemerisData?.date
+          ? ephemerisData.date.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: location.timezone,
+            })
+          : '--:--'}
       </div>
     </div>
   );
