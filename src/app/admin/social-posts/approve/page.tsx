@@ -63,6 +63,13 @@ export default function PostApprovalPage() {
   const [improvementNotes, setImprovementNotes] = useState<
     Record<string, string>
   >({});
+  const [sendingAll, setSendingAll] = useState(false);
+  const [sendAllProgress, setSendAllProgress] = useState<{
+    current: number;
+    total: number;
+    success: number;
+    failed: number;
+  } | null>(null);
 
   useEffect(() => {
     loadPendingPosts();
@@ -191,6 +198,102 @@ export default function PostApprovalPage() {
     } finally {
       setSending(null);
     }
+  };
+
+  const handleSendAllApproved = async () => {
+    const approvedPosts = pendingPosts.filter((p) => p.status === 'approved');
+
+    if (approvedPosts.length === 0) {
+      alert('No approved posts to send');
+      return;
+    }
+
+    if (
+      !confirm(
+        `Send ${approvedPosts.length} approved post${approvedPosts.length > 1 ? 's' : ''} to Succulent?`,
+      )
+    ) {
+      return;
+    }
+
+    setSendingAll(true);
+    setSendAllProgress({
+      current: 0,
+      total: approvedPosts.length,
+      success: 0,
+      failed: 0,
+    });
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (let i = 0; i < approvedPosts.length; i++) {
+      const post = approvedPosts[i];
+      setSendAllProgress({
+        current: i + 1,
+        total: approvedPosts.length,
+        success: successCount,
+        failed: failedCount,
+      });
+
+      try {
+        const response = await fetch('/api/admin/social-posts/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            postId: post.id,
+            content: post.content,
+            platform: post.platform,
+            scheduledDate: post.scheduledDate,
+            imageUrl: post.imageUrl,
+            postType: post.postType,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          successCount++;
+        } else {
+          failedCount++;
+          console.error(`Failed to send post ${post.id}:`, data.error);
+        }
+      } catch (error) {
+        failedCount++;
+        console.error(`Error sending post ${post.id}:`, error);
+      }
+
+      // Small delay between requests to avoid rate limiting
+      if (i < approvedPosts.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+
+    setSendAllProgress({
+      current: approvedPosts.length,
+      total: approvedPosts.length,
+      success: successCount,
+      failed: failedCount,
+    });
+
+    // Show summary alert
+    if (failedCount === 0) {
+      alert(
+        `✅ Successfully sent all ${successCount} post${successCount > 1 ? 's' : ''} to Succulent!`,
+      );
+    } else {
+      alert(
+        `⚠️ Sent ${successCount} post${successCount > 1 ? 's' : ''} successfully, ${failedCount} failed. Check console for details.`,
+      );
+    }
+
+    // Reload posts to update status
+    await loadPendingPosts();
+
+    // Reset after a short delay
+    setTimeout(() => {
+      setSendingAll(false);
+      setSendAllProgress(null);
+    }, 2000);
   };
 
   const handleOpenInApp = async (post: PendingPost) => {
@@ -374,7 +477,7 @@ export default function PostApprovalPage() {
               Review and approve AI-generated social media posts
             </p>
           </div>
-          <div className='flex gap-4'>
+          <div className='flex gap-4 items-center'>
             <div className='text-center px-4 py-2 bg-zinc-900 rounded-lg border border-zinc-800'>
               <div className='text-2xl font-bold text-yellow-400'>
                 {pendingCount}
@@ -387,8 +490,70 @@ export default function PostApprovalPage() {
               </div>
               <div className='text-xs text-zinc-400'>Approved</div>
             </div>
+            {approvedCount > 0 && (
+              <Button
+                onClick={handleSendAllApproved}
+                disabled={sendingAll}
+                className='bg-purple-600 hover:bg-purple-700 text-white'
+              >
+                {sendingAll ? (
+                  <>
+                    <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                    Sending...
+                    {sendAllProgress && (
+                      <span className='ml-2 text-xs'>
+                        ({sendAllProgress.current}/{sendAllProgress.total})
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Send className='h-4 w-4 mr-2' />
+                    Send All Approved ({approvedCount})
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
+
+        {sendAllProgress && (
+          <Card className='bg-zinc-900 border-zinc-800'>
+            <CardContent className='py-4'>
+              <div className='flex items-center justify-between mb-2'>
+                <div className='flex items-center gap-2'>
+                  <Loader2 className='h-4 w-4 animate-spin text-purple-400' />
+                  <span className='text-sm font-medium'>
+                    Sending posts to Succulent...
+                  </span>
+                </div>
+                <span className='text-xs text-zinc-400'>
+                  {sendAllProgress.current} / {sendAllProgress.total}
+                </span>
+              </div>
+              <div className='w-full bg-zinc-800 rounded-full h-2 overflow-hidden'>
+                <div
+                  className='bg-purple-600 h-full transition-all duration-300'
+                  style={{
+                    width: `${
+                      (sendAllProgress.current / sendAllProgress.total) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+              <div className='flex gap-4 mt-2 text-xs'>
+                <span className='text-green-400'>
+                  ✅ {sendAllProgress.success} sent
+                </span>
+                {sendAllProgress.failed > 0 && (
+                  <span className='text-red-400'>
+                    ❌ {sendAllProgress.failed} failed
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {pendingPosts.length === 0 ? (
           <Card className='bg-zinc-900 border-zinc-800'>
