@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Image from 'next/image';
 // Temporarily disabled MDX runtime due to build issues
 // Will re-enable when working on blog functionality
 
@@ -47,10 +48,16 @@ const components = {
     />
   ),
   img: (props: any) => (
-    <img
-      className='max-w-full h-auto rounded-lg mb-4'
+    <Image
+      src={props.src || ''}
       alt={props.alt || ''}
-      {...props}
+      width={props.width || 800}
+      height={props.height || 600}
+      className='max-w-full h-auto rounded-lg mb-4'
+      unoptimized
+      {...(props.width && props.height
+        ? {}
+        : { style: { width: 'auto', height: 'auto' } })}
     />
   ),
   hr: (props: any) => <hr className='my-8 border-gray-300' {...props} />,

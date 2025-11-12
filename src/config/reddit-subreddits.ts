@@ -92,3 +92,64 @@ export function getSubredditsByContentType(
 ): SubredditConfig[] {
   return REDDIT_SUBREDDITS.filter((sub) => sub.contentType === contentType);
 }
+
+/**
+ * Maps post types to appropriate subreddit content types
+ * Ensures posts go to subreddits that allow that type of content
+ */
+export function getSubredditsForPostType(postType: string): SubredditConfig[] {
+  switch (postType) {
+    case 'educational':
+    case 'behind_scenes':
+      // Educational content goes to educational subreddits
+      return getSubredditsByContentType('educational');
+
+    case 'promotional':
+    case 'benefit':
+    case 'feature':
+      // Promotional content only goes to subreddits that allow self-promotion
+      return REDDIT_SUBREDDITS.filter((sub) => sub.allowsSelfPromotion);
+
+    case 'inspirational':
+    case 'user_story':
+      // Community-focused content goes to community subreddits
+      return getSubredditsByContentType('community');
+
+    default:
+      // Default: educational subreddits (safest, most likely to be accepted)
+      return getSubredditsByContentType('educational');
+  }
+}
+
+/**
+ * Selects the best subreddit for a post type, considering rules and member count
+ */
+export function selectSubredditForPostType(postType: string): SubredditConfig {
+  const suitableSubreddits = getSubredditsForPostType(postType);
+
+  if (suitableSubreddits.length === 0) {
+    // Fallback: use educational subreddits if no suitable ones found
+    const educational = getSubredditsByContentType('educational');
+    if (educational.length > 0) {
+      return educational[0];
+    }
+    // Last resort: return first subreddit
+    return REDDIT_SUBREDDITS[0];
+  }
+
+  // Prefer larger communities, but prioritize those that allow self-promotion for promotional posts
+  if (
+    postType === 'promotional' ||
+    postType === 'benefit' ||
+    postType === 'feature'
+  ) {
+    // For promotional posts, prefer the one that explicitly allows self-promotion
+    const promotional = suitableSubreddits.find(
+      (sub) => sub.allowsSelfPromotion,
+    );
+    if (promotional) return promotional;
+  }
+
+  // Sort by member count (largest first) and return the first
+  return suitableSubreddits.sort((a, b) => b.memberCount - a.memberCount)[0];
+}

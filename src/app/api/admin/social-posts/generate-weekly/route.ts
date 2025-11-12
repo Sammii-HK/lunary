@@ -5,6 +5,7 @@ import { join } from 'path';
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
 let cachedPostingStrategy: string | null = null;
+let cachedCompetitorContext: string | null = null;
 
 function getSocialMediaContext(): string {
   if (cachedSocialContext) return cachedSocialContext;
@@ -42,9 +43,42 @@ function getAIContext(): string {
   }
 }
 
+function getCompetitorContext(): string {
+  if (cachedCompetitorContext) return cachedCompetitorContext;
+  try {
+    const contextPath = join(process.cwd(), 'docs', 'BEAT_COMPETITORS_SEO.md');
+    const fullContent = readFileSync(contextPath, 'utf-8');
+
+    // Extract strengths and reframe positively - focus on what Lunary does best
+    cachedCompetitorContext = `## What Makes Lunary Best:
+
+1. **Real Astronomical Data** - Lunary uses actual astronomical calculations based on real planetary positions. Every calculation is precise and scientifically accurate.
+
+2. **Personalized to Exact Birth Chart** - Lunary personalizes everything to YOUR exact birth time, date, and location. Not generic zodiac signs - your unique cosmic blueprint.
+
+3. **Comprehensive Grimoire** - Lunary includes a complete digital grimoire with spells, rituals, crystal guides, and magical correspondences. Rich, detailed content.
+
+4. **Free Trial** - Lunary offers a 7-day free trial (credit card required but no payment taken). Try before you commit.
+
+When creating posts, emphasize these strengths naturally. Focus on what Lunary does exceptionally well, not comparisons to others.`;
+    return cachedCompetitorContext;
+  } catch (error) {
+    // Fallback: key strengths (positive framing)
+    cachedCompetitorContext = `## What Makes Lunary Best:
+1. Real Astronomical Data - Uses actual astronomical calculations based on real planetary positions
+2. Personalized to Exact Birth Chart - Everything personalized to YOUR exact birth time, date, location
+3. Comprehensive Grimoire - Complete digital grimoire with spells, rituals, crystal guides
+4. Free Trial - 7-day trial, credit card required but no payment taken
+
+Focus on these strengths naturally. Emphasize what Lunary does exceptionally well.`;
+    return cachedCompetitorContext;
+  }
+}
+
 const SOCIAL_CONTEXT = getSocialMediaContext();
 const AI_CONTEXT = getAIContext();
 const POSTING_STRATEGY = getPostingStrategy();
+const COMPETITOR_CONTEXT = getCompetitorContext();
 
 export async function POST(request: NextRequest) {
   try {
@@ -386,7 +420,7 @@ Return JSON: {"posts": ["Post content"]}`;
         messages: [
           {
             role: 'system',
-            content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Follow the Lunary Orbit strategy. Create natural, engaging posts that convert. Return only valid JSON.`,
+            content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Follow the Lunary Orbit strategy. Emphasize what Lunary does best - focus on strengths and unique value, not competitor comparisons. Create natural, engaging posts that convert. Return only valid JSON.`,
           },
           { role: 'user', content: prompt },
         ],

@@ -25,20 +25,41 @@ This file contains essential context for generating social media posts about Lun
 
 ## Key Features
 
-- Birth chart analysis (Sun, Moon, Rising, all planets)
-- Personalized daily horoscopes
-- Tarot card readings (personalized patterns)
-- Moon phase guidance
-- Crystal recommendations
-- Transit calendars
-- Retrograde tracking
-- Digital grimoire (spells, rituals, crystals)
+**Free Plan (Cosmic Explorer):**
+
+- Daily moon phases & basic insights
+- General tarot card of the day
+- Basic lunar calendar
+- Sun sign horoscope
+- Access to grimoire knowledge
+
+**Paid Plans (Cosmic Guide & Cosmic Master):**
+
+- Complete birth chart analysis (Sun, Moon, Rising, all planets)
+- Personalized daily horoscopes (based on YOUR exact birth chart)
+- Personal tarot card & guidance (personalized patterns)
+- Daily transit calendar
+- Tarot pattern analysis
+- Crystal & herb recommendations
+- Solar return insights
+- Unlimited cosmic profile access
+
+**Yearly Plan (Cosmic Master) Additional:**
+
+- Priority access to new features
+- Advanced pattern analysis
+- Yearly cosmic forecast
+- Export your cosmic data
+- Email support
 
 ## Pricing
 
-- **Free Trial** - 7 days (monthly) or 14 days (yearly), no credit card required
-- **Monthly**: $4.99/month
-- **Yearly**: $39.99/year ($3.33/month) - Best value
+- **Free Trial** - Credit card required but no payment taken during trial:
+  - Monthly plan: 7-day free trial
+  - Yearly plan: 14-day free trial
+- **Cosmic Guide (Monthly)**: $4.99/month
+- **Cosmic Master (Yearly)**: $39.99/year (Save 33%) - Best value
+- **Cosmic Explorer**: Free plan with basic features
 
 ## Key Messaging Themes & USPs
 
@@ -57,7 +78,7 @@ This file contains essential context for generating social media posts about Lun
 - "Real astronomical calculations" - Uses actual planetary positions, not generic predictions
 - "Your cosmic blueprint" - Complete birth chart analysis (Sun, Moon, Rising, all planets)
 - "Personalized daily insights" - Horoscopes and tarot based on YOUR chart
-- "Free 7-day trial" - No credit card required to try
+- "Free 7-day trial" - Credit card required but no payment taken
 - "Cross-device sync" - Access your chart and insights anywhere
 - "Digital grimoire included" - Spells, rituals, crystals, magical knowledge
 
@@ -119,6 +140,6 @@ This file contains essential context for generating social media posts about Lun
 ## Examples of Good Posts (Focus on USPs)
 
 - "Lunary generates your complete birth chart from your exact birth time, date, and location. Then it gives you personalized daily horoscopes based on YOUR chart—not generic zodiac signs. Try free for 7 days."
-- "Most horoscopes are generic. Lunary calculates everything from YOUR exact birth chart using real astronomical data. Get personalized insights daily. Free trial, no credit card."
-- "Your birth chart shows where every planet was when you were born. Lunary uses that to give you personalized horoscopes, tarot readings, and cosmic guidance. Plus a digital grimoire with spells and rituals. Start your free trial."
+- "Most horoscopes are generic. Lunary calculates everything from YOUR exact birth chart using real astronomical data. Get personalized insights daily. Free 7-day trial - credit card required but no payment taken."
+- "Your birth chart shows where every planet was when you were born. Lunary uses that to give you personalized horoscopes, tarot readings, and cosmic guidance. Plus a digital grimoire with spells and rituals. Start your free trial - credit card required but no charge during trial."
 - "Lunary does three things: 1) Generates your complete birth chart 2) Gives you daily horoscopes personalized to YOUR chart 3) Includes a digital grimoire with spells, rituals, and crystals. All based on real astronomy. Try free."

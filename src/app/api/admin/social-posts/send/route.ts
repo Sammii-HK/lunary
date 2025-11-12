@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 
 export async function POST(request: NextRequest) {
   try {
-    const { postId, content, platform, scheduledDate, imageUrl } =
+    const { postId, content, platform, scheduledDate, imageUrl, postType } =
       await request.json();
 
     if (!postId || !content || !platform) {
@@ -11,6 +12,15 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'Missing required fields' },
         { status: 400 },
       );
+    }
+
+    // Get post type from database if not provided
+    let actualPostType = postType;
+    if (!actualPostType) {
+      const postData = await sql`
+        SELECT post_type FROM social_posts WHERE id = ${postId}
+      `;
+      actualPostType = postData.rows[0]?.post_type || 'benefit';
     }
 
     const apiKey = process.env.SUCCULENT_SECRET_KEY;
@@ -33,7 +43,21 @@ export async function POST(request: NextRequest) {
       ? new Date(scheduledDate)
       : new Date(Date.now() + 15 * 60 * 1000);
 
-    const postData = {
+    // Select appropriate Reddit subreddit if platform is Reddit
+    let redditData: { title?: string; subreddit?: string } | undefined;
+    if (platform === 'reddit') {
+      const selectedSubreddit = selectSubredditForPostType(actualPostType);
+      // Generate a Reddit-friendly title from content (first sentence or first 100 chars)
+      const redditTitle =
+        content.match(/^[^.!?]+[.!?]/)?.[0] ||
+        content.substring(0, 100).replace(/\n/g, ' ').trim();
+      redditData = {
+        title: redditTitle,
+        subreddit: selectedSubreddit.name,
+      };
+    }
+
+    const postData: any = {
       accountGroupId,
       content,
       platforms,
@@ -48,6 +72,11 @@ export async function POST(request: NextRequest) {
           ]
         : [],
     };
+
+    // Add Reddit-specific data if platform is Reddit
+    if (redditData) {
+      postData.reddit = redditData;
+    }
 
     const succulentApiUrl = 'https://app.succulent.social/api/posts';
 

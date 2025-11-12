@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import {
+  selectSubredditForPostType,
+  getSubredditsForPostType,
+} from '@/config/reddit-subreddits';
 
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
 let cachedPostingStrategy: string | null = null;
+let cachedCompetitorContext: string | null = null;
 
 function getSocialMediaContext(): string {
   if (cachedSocialContext) {
@@ -51,9 +56,46 @@ function getAIContext(): string {
   }
 }
 
+function getCompetitorContext(): string {
+  if (cachedCompetitorContext) {
+    return cachedCompetitorContext;
+  }
+
+  try {
+    const contextPath = join(process.cwd(), 'docs', 'BEAT_COMPETITORS_SEO.md');
+    const fullContent = readFileSync(contextPath, 'utf-8');
+
+    // Extract just the competitive advantages section and reframe positively
+    // Focus on what Lunary does best, not direct competitor comparisons
+    cachedCompetitorContext = `## What Makes Lunary Best:
+
+1. **Real Astronomical Data** - Lunary uses actual astronomical calculations based on real planetary positions. Every calculation is precise and scientifically accurate.
+
+2. **Personalized to Exact Birth Chart** - Lunary personalizes everything to YOUR exact birth time, date, and location. Not generic zodiac signs - your unique cosmic blueprint.
+
+3. **Comprehensive Grimoire** - Lunary includes a complete digital grimoire with spells, rituals, crystal guides, and magical correspondences. Rich, detailed content.
+
+4. **Free Trial** - Lunary offers a 7-day free trial (credit card required but no payment taken). Try before you commit.
+
+When creating posts, emphasize these strengths naturally. Focus on what Lunary does exceptionally well, not comparisons to others.`;
+    return cachedCompetitorContext;
+  } catch (error) {
+    // Fallback: key strengths (positive framing)
+    cachedCompetitorContext = `## What Makes Lunary Best:
+1. Real Astronomical Data - Uses actual astronomical calculations based on real planetary positions
+2. Personalized to Exact Birth Chart - Everything personalized to YOUR exact birth time, date, location
+3. Comprehensive Grimoire - Complete digital grimoire with spells, rituals, crystal guides
+4. Free Trial - 7-day trial, credit card required but no payment taken
+
+Focus on these strengths naturally. Emphasize what Lunary does exceptionally well.`;
+    return cachedCompetitorContext;
+  }
+}
+
 const SOCIAL_CONTEXT = getSocialMediaContext();
 const AI_CONTEXT = getAIContext();
 const POSTING_STRATEGY = getPostingStrategy();
+const COMPETITOR_CONTEXT = getCompetitorContext();
 
 export async function POST(request: NextRequest) {
   // Trim whitespace from API key (common issue with .env files)
@@ -210,6 +252,23 @@ export async function POST(request: NextRequest) {
     const { OpenAI } = await import('openai');
     const openai = new OpenAI({ apiKey });
 
+    // Get Reddit subreddit info if platform is Reddit
+    let redditSubreddit: {
+      name: string;
+      allowsSelfPromotion: boolean;
+      notes?: string;
+    } | null = null;
+    if (platform === 'reddit') {
+      const selectedSubreddit = selectSubredditForPostType(
+        postType || 'benefit',
+      );
+      redditSubreddit = {
+        name: selectedSubreddit.name,
+        allowsSelfPromotion: selectedSubreddit.allowsSelfPromotion,
+        notes: selectedSubreddit.notes,
+      };
+    }
+
     const platformGuidelines: Record<string, string> = {
       instagram:
         '125-150 chars optimal. Engaging, visual-focused. Use line breaks for readability.',
@@ -218,7 +277,9 @@ export async function POST(request: NextRequest) {
       facebook: '40-80 chars optimal. Conversational, community-focused.',
       linkedin: '150-300 chars. Professional but warm. Focus on value.',
       pinterest: 'Descriptive, keyword-rich. Include call-to-action.',
-      reddit: 'Natural, community-focused. No salesy language.',
+      reddit: redditSubreddit
+        ? `Natural, community-focused. Posting to r/${redditSubreddit.name}. ${redditSubreddit.allowsSelfPromotion ? 'Self-promotion allowed, but keep it subtle and valuable.' : 'NO self-promotion - focus on educational value, community discussion, or helpful insights. Do NOT mention Lunary directly or include links/CTAs.'} ${redditSubreddit.notes ? `Note: ${redditSubreddit.notes}` : ''}`
+        : 'Natural, community-focused. No salesy language.',
     };
 
     const postTypeGuidelines: Record<string, string> = {
@@ -241,24 +302,52 @@ export async function POST(request: NextRequest) {
     const prompt = `Generate ${count} social media posts for Lunary.
 
 Platform: ${platform || 'general'}
+${platform === 'reddit' && redditSubreddit ? `Target Subreddit: r/${redditSubreddit.name}` : ''}
 Type: ${postType || 'benefit'}
 ${topic ? `Topic: ${topic}` : ''}
 ${tone ? `Tone: ${tone}` : 'Natural, cosmic, warm'}
 ${includeCTA ? 'Include CTA: Yes' : 'Include CTA: No'}
+${platform === 'reddit' && redditSubreddit && !redditSubreddit.allowsSelfPromotion ? 'CRITICAL: This subreddit does NOT allow self-promotion. Do NOT mention Lunary, do NOT include links, do NOT include CTAs. Focus purely on educational value or community discussion.' : ''}
 
 Platform Guidelines: ${platformGuidelines[platform || 'general'] || 'Natural, engaging'}
 Post Type Guidelines: ${postTypeGuidelines[postType || 'benefit'] || 'Natural, valuable'}
 
 Requirements:
 - Use sentence case (capitalize first letter of sentences)
-- Clearly explain what Lunary DOES (birth chart generation, personalized horoscopes, tarot, grimoire)
-- Highlight specific USPs: personalized to exact birth chart, real astronomical calculations, free trial
+${
+  platform === 'reddit' &&
+  redditSubreddit &&
+  !redditSubreddit.allowsSelfPromotion
+    ? '- DO NOT mention Lunary, app name, or include any links/CTAs'
+    : '- Clearly explain what Lunary DOES (birth chart generation, personalized horoscopes, tarot, grimoire)'
+}
+${
+  platform === 'reddit' &&
+  redditSubreddit &&
+  !redditSubreddit.allowsSelfPromotion
+    ? '- Focus purely on educational value, cosmic insights, or community discussion'
+    : '- Highlight specific USPs: personalized to exact birth chart, real astronomical calculations, free trial'
+}
 - Be concrete about features, not just poetic about astrology
 - Natural and conversational but informative
-- Conversion-focused but not salesy
+${
+  platform === 'reddit' &&
+  redditSubreddit &&
+  !redditSubreddit.allowsSelfPromotion
+    ? '- Community-focused, helpful, educational tone'
+    : '- Conversion-focused but not salesy'
+}
 - Keep within platform character limits
 - Include emojis sparingly (🌙 ✨ 🔮)
-${includeCTA ? '- Include clear but natural CTA' : '- No explicit CTA needed'}
+${
+  platform === 'reddit' &&
+  redditSubreddit &&
+  !redditSubreddit.allowsSelfPromotion
+    ? '- NO CTAs, NO links, NO self-promotion'
+    : includeCTA
+      ? '- Include clear but natural CTA'
+      : '- No explicit CTA needed'
+}
 
 Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
 
@@ -268,7 +357,7 @@ Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
       messages: [
         {
           role: 'system',
-          content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Follow the Lunary Orbit strategy. Create natural, engaging posts that convert. Return only valid JSON.`,
+          content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Follow the Lunary Orbit strategy. Emphasize what Lunary does best - focus on strengths and unique value, not competitor comparisons. Create natural, engaging posts that convert. Return only valid JSON.`,
         },
         { role: 'user', content: prompt },
       ],

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface DigitalPack {
   id: string;
@@ -199,12 +200,13 @@ export default function ShopPage() {
             >
               {/* Pack Image */}
               {pack.imageUrl && (
-                <div className='aspect-square bg-slate-900 flex items-center justify-center'>
-                  <img
+                <div className='aspect-square bg-slate-900 flex items-center justify-center relative'>
+                  <Image
                     src={pack.imageUrl}
                     alt={pack.name}
-                    className='w-full h-full object-cover'
-                    loading='lazy'
+                    fill
+                    className='object-cover'
+                    unoptimized
                   />
                 </div>
               )}

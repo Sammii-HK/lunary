@@ -23,22 +23,46 @@ This file contains essential context about Lunary for AI-powered conversion opti
 
 ## Key Features
 
-- Birth chart analysis (Sun, Moon, Rising, all planets)
-- Personalized daily horoscopes
-- Tarot card readings (personalized patterns)
-- Moon phase guidance
-- Crystal recommendations
-- Transit calendars
-- Retrograde tracking
-- Digital grimoire (spells, rituals)
+**Free Plan (Cosmic Explorer):**
+
+- Daily moon phases & basic insights
+- General tarot card of the day
+- Basic lunar calendar
+- Sun sign horoscope
+- Access to grimoire knowledge
+
+**Paid Plans (Cosmic Guide & Cosmic Master):**
+
+- Complete birth chart analysis (Sun, Moon, Rising, all planets)
+- Personalized daily horoscopes (based on YOUR exact birth chart)
+- Personal tarot card & guidance (personalized patterns)
+- Daily transit calendar
+- Tarot pattern analysis
+- Crystal & herb recommendations
+- Solar return insights
+- Unlimited cosmic profile access
+
+**Yearly Plan (Cosmic Master) Additional Features:**
+
+- Priority access to new features
+- Advanced pattern analysis
+- Yearly cosmic forecast
+- Export your cosmic data
+- Email support
 
 ## User Segments
 
-1. **Free Users** - Access general content, limited personalization
-2. **Trial Users** - 7-day (monthly) or 14-day (yearly) free trial
-3. **Paid Subscribers** - Full access to personalized features
-   - Monthly: $4.99/month
-   - Yearly: $39.99/year ($3.33/month)
+1. **Free Users (Cosmic Explorer)** - Access to basic features (see Key Features above)
+
+2. **Trial Users** - Free trial with credit card required (no payment taken):
+
+   - Monthly plan: 7-day free trial
+   - Yearly plan: 14-day free trial
+   - Full access to personalized features during trial
+
+3. **Paid Subscribers** - Full access to personalized features:
+   - **Cosmic Guide (Monthly)**: $4.99/month
+   - **Cosmic Master (Yearly)**: $39.99/year (Save 33%)
 
 ## Conversion Goals
 
@@ -66,10 +90,13 @@ Tertiary: Reduce churn, increase retention
 
 ## Pricing Strategy
 
-- **Free Trial** - No credit card required
+- **Free Trial** - Credit card required but no payment taken during trial
+  - Monthly: 7-day free trial
+  - Yearly: 14-day free trial
 - **Transparent Pricing** - Simple, clear pricing
 - **Value Focus** - Emphasize personalization and accuracy
 - **Cancel Anytime** - Low commitment, high value
+- **Plan Names**: Cosmic Explorer (free), Cosmic Guide (monthly), Cosmic Master (yearly)
 
 ## Conversion Optimization Priorities
 
@@ -83,7 +110,7 @@ Tertiary: Reduce churn, increase retention
 
 - "Is this accurate?" → Emphasize real astronomical calculations
 - "Too expensive" → Frame as less than a coffee, emphasize value
-- "Not sure if it's for me" → Free trial, no credit card
+- "Not sure if it's for me" → Free trial, credit card required but no payment taken
 - "Generic astrology" → Highlight personalization to exact birth chart
 
 ## Email Types

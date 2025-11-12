@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import {
   Card,
   CardContent,
@@ -136,6 +137,7 @@ export default function PostApprovalPage() {
           platform: post.platform,
           scheduledDate: post.scheduledDate,
           imageUrl: post.imageUrl,
+          postType: post.postType,
         }),
       });
 
@@ -349,11 +351,14 @@ export default function PostApprovalPage() {
                     {/* Display image for Instagram posts */}
                     {post.imageUrl && post.platform === 'instagram' && (
                       <div className='relative w-full max-w-md mx-auto group'>
-                        <img
+                        <Image
                           src={post.imageUrl}
                           alt='Post image'
+                          width={800}
+                          height={800}
                           className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90 transition-opacity'
                           onClick={() => window.open(post.imageUrl, '_blank')}
+                          unoptimized
                         />
                         <div className='absolute top-2 right-2 flex gap-2'>
                           <a
