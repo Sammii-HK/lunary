@@ -169,3 +169,102 @@ export const buildLunaryContext = async ({
     dailyHighlight: dailyHighlight ?? null,
   };
 };
+
+export type ContextStream = AsyncGenerator<LunaryContext, void, unknown>;
+
+export const streamLunaryContext = async function* ({
+  userId,
+  tz,
+  locale,
+  displayName,
+  deps: dependencyOverrides,
+  now = new Date(),
+}: {
+  userId: string;
+  tz: string;
+  locale: string;
+  displayName?: string;
+  deps?: Partial<LunaryContextDependencies>;
+  now?: Date;
+}): ContextStream {
+  const deps = mergeDeps(dependencyOverrides);
+
+  const baseContext: LunaryContext = {
+    user: {
+      id: userId,
+      tz,
+      locale,
+      displayName,
+    },
+    birthChart: null,
+    currentTransits: [],
+    moon: null,
+    tarot: {},
+    history: { lastMessages: [] },
+  };
+
+  yield baseContext;
+
+  const birthChart = await deps.getBirthChart({ userId }).catch((error) => {
+    console.error(
+      '[LunaryContext] (stream) Failed to fetch birth chart',
+      error,
+    );
+    return null;
+  });
+
+  yield {
+    ...baseContext,
+    birthChart,
+  };
+
+  const currentTransits = await deps
+    .getCurrentTransits({ userId, now })
+    .catch((error) => {
+      console.error('[LunaryContext] (stream) Failed to fetch transits', error);
+      return { transits: [], moon: null };
+    });
+
+  yield {
+    ...baseContext,
+    birthChart,
+    currentTransits: currentTransits?.transits ?? [],
+    moon: currentTransits?.moon ?? null,
+  };
+
+  const tarotReading = await deps
+    .getTarotLastReading({ userId, now })
+    .catch((error) => {
+      console.error('[LunaryContext] (stream) Failed to fetch tarot', error);
+      return null;
+    });
+
+  yield {
+    ...baseContext,
+    birthChart,
+    currentTransits: currentTransits?.transits ?? [],
+    moon: currentTransits?.moon ?? null,
+    tarot: { lastReading: tarotReading ?? undefined },
+  };
+
+  const history = await deps
+    .getConversationHistory({ userId, limit: 10, now })
+    .catch((error) => {
+      console.error(
+        '[LunaryContext] (stream) Failed to fetch conversation history',
+        error,
+      );
+      return { lastMessages: [] };
+    });
+
+  yield {
+    ...baseContext,
+    birthChart,
+    currentTransits: currentTransits?.transits ?? [],
+    moon: currentTransits?.moon ?? null,
+    tarot: { lastReading: tarotReading ?? undefined },
+    history: {
+      lastMessages: history?.lastMessages ?? [],
+    },
+  };
+};
