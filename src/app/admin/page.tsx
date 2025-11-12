@@ -1,7 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAccount } from 'jazz-tools/react';
+import { betterAuthClient } from '@/lib/auth-client';
 import {
   Card,
   CardContent,
@@ -46,11 +49,68 @@ interface AdminTool {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter();
+  const { me } = useAccount();
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [testingNotification, setTestingNotification] = useState(false);
   const [testingRealNotification, setTestingRealNotification] = useState(false);
   const [testingDaily, setTestingDaily] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
   const [testEmailAddress, setTestEmailAddress] = useState('');
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      try {
+        // Get admin email from environment (client-side check)
+        const adminEmail =
+          process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@lunary.app';
+
+        // Check Better Auth session
+        const session = await betterAuthClient.getSession().catch(() => null);
+        const userEmail =
+          session?.data?.user?.email || (me?.profile as any)?.email;
+
+        if (!userEmail) {
+          // Not authenticated, redirect to auth
+          router.push('/auth');
+          return;
+        }
+
+        // Check if user email matches admin email
+        if (userEmail.toLowerCase() !== adminEmail.toLowerCase()) {
+          // Not admin, redirect to unauthorized or home
+          router.push('/auth');
+          return;
+        }
+
+        // User is admin
+        setIsAuthorized(true);
+      } catch (error) {
+        console.error('Admin access check failed:', error);
+        router.push('/auth');
+      }
+    };
+
+    checkAdminAccess();
+  }, [router, me]);
+
+  // Show loading state while checking authorization
+  if (isAuthorized === null) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4'></div>
+          <p className='text-zinc-400'>Checking authorization...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authorized (will redirect)
+  if (!isAuthorized) {
+    return null;
+  }
 
   const testRealNotification = async () => {
     setTestingRealNotification(true);

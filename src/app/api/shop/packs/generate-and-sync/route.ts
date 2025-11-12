@@ -4,11 +4,12 @@ import { put } from '@vercel/blob';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import crypto from 'crypto';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -317,6 +318,7 @@ async function generateGrimoirePackWithNaming(
 
 // Create Stripe product with comprehensive metadata
 async function createStripeProduct(packData: any) {
+  const stripe = getStripe();
   const productName =
     packData.fullName || packData.name || packData.title || 'Grimoire Pack';
   console.log(`🛍️ Creating Stripe product: ${productName}`);

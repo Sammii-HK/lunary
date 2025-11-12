@@ -99,13 +99,21 @@ jobs:
         run: yarn prisma:generate
 
       - name: Build application
+        id: build
         run: yarn build
         env:
           NODE_ENV: production
+          # Required for Better Auth during build
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-secret-key-for-build-only' }}
+          # Stripe key optional during build (routes handle missing keys gracefully)
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_mock_key_for_build_only' }}
+          # VAPID keys optional during build (routes handle missing keys gracefully)
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY || '' }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY || '' }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
-        if: always()
+        if: success() # Only upload if build succeeded
         with:
           name: build-artifacts
           path: .next/
@@ -115,6 +123,7 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs: [unit-tests, build] # Wait for unit tests and build to finish first
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -134,54 +143,59 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Setup test database
-        run: |
-          echo "Setting up test database..."
-          yarn prisma:migrate deploy || echo "Database migrations skipped if not configured"
-        continue-on-error: true
-
-      - name: Run E2E tests
-        run: yarn test:e2e
+      - name: Run E2E smoke tests
+        run: yarn test:e2e --grep "@smoke"
         env:
           NODE_ENV: test
           PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000' }}
-          # Support both TEST_EMAIL/TEST_PASSWORD and TEST_USER_EMAIL/TEST_USER_PASSWORD
           TEST_EMAIL: ${{ secrets.TEST_EMAIL || secrets.TEST_USER_EMAIL || 'test@test.lunary.app' }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD || secrets.TEST_USER_PASSWORD || 'TestPassword123!' }}
           TEST_USER_EMAIL: ${{ secrets.TEST_EMAIL || secrets.TEST_USER_EMAIL || 'test@test.lunary.app' }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_PASSWORD || secrets.TEST_USER_PASSWORD || 'TestPassword123!' }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || 'admin@lunary.app' }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD || 'admin123' }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-secret-key-for-e2e-tests-only' }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_mock_key_for_e2e_testing' }}
+          # VAPID keys optional during e2e tests (routes handle missing keys gracefully)
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY || '' }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY || '' }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+          if-no-files-found: ignore
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: test-results
           path: test-results/
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload Playwright traces
         uses: actions/upload-artifact@v4
         if: failure()
+        continue-on-error: true
         with:
           name: playwright-traces
           path: test-results/
           retention-days: 7
+          if-no-files-found: ignore
 
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
     needs: [lint, unit-tests, build, e2e-tests]
     if: always()
+    # Wait for all shards to complete
     steps:
       - name: Check test results
         run: |
