@@ -52,6 +52,16 @@ export async function POST(request: NextRequest) {
 
     // Trim whitespace from API key (common issue with .env files)
     const apiKey = process.env.OPENAI_API_KEY?.trim();
+    const rawKey = process.env.OPENAI_API_KEY;
+
+    // Check for all OpenAI-related env vars
+    const allOpenAIVars = Object.keys(process.env)
+      .filter((key) => key.toLowerCase().includes('openai'))
+      .map((key) => ({
+        key,
+        exists: !!process.env[key],
+        length: process.env[key]?.length || 0,
+      }));
 
     // Debug logging (only first 8 chars for security)
     console.log('🔑 Weekly API Key check:', {
@@ -60,15 +70,34 @@ export async function POST(request: NextRequest) {
       prefix: apiKey ? `${apiKey.substring(0, 8)}...` : 'missing',
       startsWithSk: apiKey?.startsWith('sk-') || false,
       firstChars: apiKey ? apiKey.substring(0, 20) : 'none',
-      originalLength: process.env.OPENAI_API_KEY?.length || 0,
+      originalLength: rawKey?.length || 0,
       trimmedLength: apiKey?.length || 0,
+      nodeEnv: process.env.NODE_ENV,
+      vercelEnv: process.env.VERCEL_ENV,
+      allOpenAIVars,
+      // Check if raw value exists but is empty/whitespace
+      rawExists: !!rawKey,
+      rawIsEmpty: rawKey === '',
+      rawIsWhitespace: rawKey?.trim() === '',
     });
 
     if (!apiKey) {
+      const isProduction =
+        process.env.NODE_ENV === 'production' ||
+        process.env.VERCEL_ENV === 'production';
       return NextResponse.json(
         {
           error: 'OpenAI API key not configured',
-          hint: 'Set OPENAI_API_KEY in your .env.local file and restart your dev server',
+          hint: isProduction
+            ? 'Set OPENAI_API_KEY in Vercel Dashboard > Settings > Environment Variables > Production. After adding, redeploy the project.'
+            : 'Set OPENAI_API_KEY in your .env.local file and restart your dev server',
+          debug: {
+            nodeEnv: process.env.NODE_ENV,
+            vercelEnv: process.env.VERCEL_ENV,
+            allOpenAIVars,
+            rawKeyExists: !!rawKey,
+            rawKeyLength: rawKey?.length || 0,
+          },
         },
         { status: 400 },
       );

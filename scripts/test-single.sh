@@ -76,3 +76,4 @@ REMAINING_ARGS="$@"
 # Run the test with remaining arguments
 npx playwright test "$TEST_FILE" $REMAINING_ARGS --reporter=list,line
 
+
