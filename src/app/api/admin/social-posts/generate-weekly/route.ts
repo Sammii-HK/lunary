@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import {
+  PLATFORM_POSTING_TIMES,
+  getDefaultPostingTime,
+} from '@/utils/posting-times';
 
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
@@ -305,114 +309,155 @@ export async function POST(request: NextRequest) {
     );
     const openai = new OpenAI({ apiKey });
 
-    // Generate posts for the week based on posting strategy
+    // Available topics for variety
+    const topics = [
+      'Birth Charts',
+      'Personalized Horoscopes',
+      'Daily Horoscopes',
+      'Tarot Readings',
+      'Digital Grimoire',
+      'Astronomical Calculations',
+      'Moon Phases',
+      'Planetary Positions',
+      'Cosmic Insights',
+      'Astrology Basics',
+      'Birth Chart Interpretation',
+      'Spiritual Guidance',
+      'Crystal Correspondences',
+      'Magical Practices',
+    ];
+
+    // Available post types
+    const postTypes = [
+      'feature',
+      'benefit',
+      'educational',
+      'inspirational',
+      'behind_scenes',
+      'promotional',
+      'user_story',
+    ];
+
+    // Platform-specific posting days and frequencies
+    const platformPlan = {
+      instagram: { days: ['Tuesday', 'Thursday', 'Sunday'], count: 3 },
+      twitter: {
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        count: 5,
+      },
+      facebook: { days: ['Tuesday', 'Thursday', 'Sunday'], count: 3 },
+      linkedin: { days: ['Tuesday', 'Wednesday', 'Thursday'], count: 3 },
+      pinterest: { days: ['Saturday', 'Sunday'], count: 2 },
+      reddit: {
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        count: 5,
+      },
+      tiktok: {
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+        count: 4,
+      },
+    };
+
+    // Build comprehensive weekly post plan
     const weeklyPosts: Array<{
       platform: string;
       postType: string;
-      count: number;
+      topic: string;
       day: string;
       dayOffset: number;
-    }> = [
-      {
-        platform: 'instagram',
-        postType: 'benefit',
-        count: 1,
-        day: 'Monday',
-        dayOffset: 0,
-      },
-      {
-        platform: 'twitter',
-        postType: 'educational',
-        count: 1,
-        day: 'Monday',
-        dayOffset: 0,
-      },
-      {
-        platform: 'instagram',
-        postType: 'inspirational',
-        count: 1,
-        day: 'Tuesday',
-        dayOffset: 1,
-      },
-      {
-        platform: 'twitter',
-        postType: 'behind_scenes',
-        count: 1,
-        day: 'Tuesday',
-        dayOffset: 1,
-      },
-      {
-        platform: 'instagram',
-        postType: 'feature',
-        count: 1,
-        day: 'Wednesday',
-        dayOffset: 2,
-      },
-      {
-        platform: 'twitter',
-        postType: 'educational',
-        count: 1,
-        day: 'Wednesday',
-        dayOffset: 2,
-      },
-      {
-        platform: 'instagram',
-        postType: 'inspirational',
-        count: 1,
-        day: 'Thursday',
-        dayOffset: 3,
-      },
-      {
-        platform: 'twitter',
-        postType: 'benefit',
-        count: 1,
-        day: 'Thursday',
-        dayOffset: 3,
-      },
-      {
-        platform: 'instagram',
-        postType: 'benefit',
-        count: 1,
-        day: 'Friday',
-        dayOffset: 4,
-      },
-      {
-        platform: 'twitter',
-        postType: 'inspirational',
-        count: 1,
-        day: 'Friday',
-        dayOffset: 4,
-      },
-      {
-        platform: 'instagram',
-        postType: 'inspirational',
-        count: 1,
-        day: 'Sunday',
-        dayOffset: 6,
-      },
-      {
-        platform: 'twitter',
-        postType: 'inspirational',
-        count: 1,
-        day: 'Sunday',
-        dayOffset: 6,
-      },
-    ];
+      hour: number;
+      subreddit?: string;
+    }> = [];
+
+    let topicIndex = 0;
+    let postTypeIndex = 0;
+
+    // Generate posts for each platform
+    for (const [platform, plan] of Object.entries(platformPlan)) {
+      const platformInfo = PLATFORM_POSTING_TIMES[platform];
+      const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
+
+      for (let i = 0; i < plan.count; i++) {
+        const dayName = plan.days[i % plan.days.length];
+        const dayOffset = dayNames.indexOf(dayName);
+
+        // Get optimal posting time for this platform
+        const optimalTimes =
+          platformInfo?.recommendedTimes.filter((t) => t.isOptimal) || [];
+        const timeIndex = i % optimalTimes.length;
+        const hour =
+          optimalTimes[timeIndex]?.hour || getDefaultPostingTime(platform);
+
+        // Select topic and post type with variety
+        const topic = topics[topicIndex % topics.length];
+        const postType = postTypes[postTypeIndex % postTypes.length];
+
+        topicIndex++;
+        postTypeIndex++;
+
+        // For Reddit, select appropriate subreddit based on post type
+        let subreddit: string | undefined;
+        if (platform === 'reddit') {
+          const { selectSubredditForPostType } = await import(
+            '@/config/reddit-subreddits'
+          );
+          const selectedSubreddit = selectSubredditForPostType(postType);
+          subreddit = selectedSubreddit.name;
+        }
+
+        weeklyPosts.push({
+          platform,
+          postType,
+          topic,
+          day: dayName,
+          dayOffset,
+          hour,
+          subreddit,
+        });
+      }
+    }
+
+    // Sort by day offset and hour for better distribution
+    weeklyPosts.sort((a, b) => {
+      if (a.dayOffset !== b.dayOffset) return a.dayOffset - b.dayOffset;
+      return a.hour - b.hour;
+    });
 
     const allGeneratedPosts: Array<{
       content: string;
       platform: string;
       postType: string;
+      topic: string;
       day: string;
       dayOffset: number;
+      hour: number;
+      subreddit?: string;
     }> = [];
 
     for (const postPlan of weeklyPosts) {
       const platformGuidelines: Record<string, string> = {
         instagram:
-          '125-150 chars optimal. Engaging, visual-focused. Use line breaks for readability.',
+          '125-150 chars optimal. Engaging, visual-focused. Use line breaks for readability. Hashtags: 5-10 relevant ones.',
         twitter:
-          '280 chars max. Concise, punchy. Use hashtags sparingly (1-2 max).',
+          '280 chars max. Concise, punchy. Use hashtags sparingly (1-2 max). Thread-friendly format.',
+        facebook:
+          '200-300 chars optimal. Community-focused, conversational. Can be longer-form.',
+        linkedin:
+          'Professional tone, 150-300 chars. Focus on value and insights. Less emojis, more substance.',
+        pinterest:
+          'Descriptive, keyword-rich. 100-200 chars. Focus on visual appeal and searchability.',
+        reddit:
+          'Educational or community-focused. No self-promotion unless subreddit allows. Natural discussion tone.',
+        tiktok:
+          'Short, catchy, hook-focused. 100-150 chars. Trend-aware and engaging.',
       };
 
       const postTypeGuidelines: Record<string, string> = {
@@ -420,31 +465,60 @@ export async function POST(request: NextRequest) {
           'Highlight a specific feature naturally. Show value, not just features.',
         benefit: 'Focus on user benefits and outcomes. What do users gain?',
         educational:
-          'Teach something about astrology or astronomy. Be informative.',
+          'Teach something about astrology or astronomy. Be informative and valuable.',
         inspirational: 'Cosmic wisdom and guidance. Uplifting and empowering.',
         behind_scenes: 'How the app works. Show the real astronomy behind it.',
+        promotional:
+          'Highlight free trial, pricing, or special offers. Clear but not pushy.',
+        user_story:
+          'Show real value through user perspective. Authentic and relatable.',
       };
+
+      // Reddit-specific guidelines
+      let redditGuidelines = '';
+      if (postPlan.platform === 'reddit' && postPlan.subreddit) {
+        const { getSubredditByName } = await import(
+          '@/config/reddit-subreddits'
+        );
+        const subredditInfo = getSubredditByName(postPlan.subreddit);
+        if (subredditInfo) {
+          redditGuidelines = `\n\nREDDIT SUBREDDIT: r/${postPlan.subreddit}
+- Description: ${subredditInfo.description}
+- Content Type: ${subredditInfo.contentType}
+- Allows Self-Promotion: ${subredditInfo.allowsSelfPromotion ? 'YES' : 'NO'}
+- Notes: ${subredditInfo.notes || 'None'}
+
+CRITICAL: ${subredditInfo.allowsSelfPromotion ? 'You can mention Lunary and include links/CTAs.' : 'DO NOT mention Lunary, app name, or include any links/CTAs. Focus purely on educational value or community discussion that relates to the topic.'}`;
+        }
+      }
 
       const prompt = `Generate 1 social media post for Lunary.
 
 Platform: ${postPlan.platform}
 Type: ${postPlan.postType}
+Topic: ${postPlan.topic}
 Day: ${postPlan.day}
+Scheduled Time: ${postPlan.hour}:00 UTC
 Week: ${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}
+${postPlan.subreddit ? `Target Subreddit: r/${postPlan.subreddit}` : ''}
 
-Platform Guidelines: ${platformGuidelines[postPlan.platform]}
-Post Type Guidelines: ${postTypeGuidelines[postPlan.postType]}
+Platform Guidelines: ${platformGuidelines[postPlan.platform] || 'Natural, engaging'}
+Post Type Guidelines: ${postTypeGuidelines[postPlan.postType] || 'Natural, valuable'}
+${redditGuidelines}
 
 Requirements:
 - Use sentence case (capitalize first letter of sentences)
-- Clearly explain what Lunary DOES (birth chart generation, personalized horoscopes, tarot, grimoire)
-- Highlight specific USPs: personalized to exact birth chart, real astronomical calculations, free trial
+- Focus on the topic: ${postPlan.topic}
+${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- DO NOT mention Lunary, app name, or include any links/CTAs. Focus purely on educational value or community discussion.' : '- Clearly explain what Lunary DOES (birth chart generation, personalized horoscopes, tarot, grimoire)'}
+${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- Focus purely on educational value, cosmic insights, or community discussion' : '- Highlight specific USPs: personalized to exact birth chart, real astronomical calculations, free trial'}
 - Be concrete about features, not just poetic about astrology
 - Natural and conversational but informative
-- Conversion-focused but not salesy
+${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- Community-focused, helpful, educational tone' : '- Conversion-focused but not salesy'}
 - Keep within platform character limits
-- Include emojis sparingly (🌙 ✨ 🔮)
+- Include emojis sparingly (🌙 ✨ 🔮) - ${postPlan.platform === 'linkedin' ? 'minimal emojis' : 'use naturally'}
+${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- NO CTAs, NO links, NO self-promotion' : postPlan.postType === 'promotional' ? '- Include clear but natural CTA' : '- No explicit CTA needed'}
 - Match the day's energy (${postPlan.day})
+- Vary content from other posts - be unique and fresh
 
 Return JSON: {"posts": ["Post content"]}`;
 
@@ -473,8 +547,11 @@ Return JSON: {"posts": ["Post content"]}`;
           content: postContent,
           platform: postPlan.platform,
           postType: postPlan.postType,
+          topic: postPlan.topic,
           day: postPlan.day,
           dayOffset: postPlan.dayOffset,
+          hour: postPlan.hour,
+          subreddit: postPlan.subreddit,
         });
       }
     }
@@ -495,7 +572,7 @@ Return JSON: {"posts": ["Post content"]}`;
       if (platform !== 'instagram') return '';
 
       try {
-        const quotePrompt = `Generate 5 catchy, standalone quote options for an Instagram image card based on this social media post:
+        const quotePrompt = `Generate 5 catchy, standalone quote options for an Instagram image card. IMPORTANT: Prioritize famous quotes and cosmic wisdom over brand quotes.
 
 Post content: "${postContent}"
 Post type: ${postType}
@@ -504,47 +581,49 @@ Requirements for quotes:
 - Each quote should be standalone and shareable (works without context)
 - 60-100 characters max (short and punchy)
 - Catchy, memorable, and inspiring
-- Should highlight Lunary's value: personalized birth charts, real astronomy, cosmic insights
 - Can be a question, statement, or insight
 - Natural and authentic, not salesy
 - Use sentence case
 
-INSPIRATION: Mix Lunary's own brand quotes with quotes inspired by famous scientists, astronomers, astrologers, and philosophers who spoke about the cosmos, stars, and celestial wisdom.
+QUOTE DISTRIBUTION (IMPORTANT):
+- At least 3 out of 5 quotes should be inspired by or adapted from famous scientists, astronomers, astrologers, and philosophers
+- Only 1-2 quotes should be Lunary brand quotes
+- Mix the order - don't put all Lunary quotes first
 
-Lunary Brand Quotes (use these or create similar):
-- "Discover the universe within you, one star at a time"
-- "Your birth chart is your cosmic blueprint"
-- "The stars remember when you were born"
-- "Personalized insights from the cosmos, just for you"
-- "Your cosmic story begins with your exact moment of birth"
-- "Real astronomy meets personal insight"
-- "The universe wrote your story in the stars"
+Famous Quotes to Inspire From (adapt these themes or create similar style):
+- "We are made of star-stuff" - Carl Sagan
+- "The cosmos is within us" - Carl Sagan
+- "Look up at the stars and not down at your feet" - Stephen Hawking
+- "The stars are the land-marks of the universe" - Sir John Herschel
+- "Astronomy compels the soul to look upward" - Plato
+- "The universe is not only stranger than we imagine, it is stranger than we can imagine" - J.B.S. Haldane
+- "In the cosmos, there are no absolute up or down" - Stephen Hawking
+- "The cosmos is all that is or ever was or ever will be" - Carl Sagan
+- "The universe is a pretty big place. If it's just us, seems like an awful waste of space." - Carl Sagan
+- "Somewhere, something incredible is waiting to be known." - Carl Sagan
+- "The cosmos is within us. We are made of star-stuff. We are a way for the universe to know itself." - Carl Sagan
+- "The stars are the land-marks of the universe." - Sir John Herschel
+- "Astronomy compels the soul to look upward and leads us from this world to another." - Plato
 
-Famous Quotes (adapt these themes or use similar style):
-- "We are made of star-stuff" (Carl Sagan)
-- "The cosmos is within us" (Carl Sagan)
-- "Look up at the stars and not down at your feet" (Stephen Hawking)
-- "The stars are the land-marks of the universe" (Sir John Herschel)
-- "Astronomy compels the soul to look upward" (Plato)
-- "The universe is not only stranger than we imagine, it is stranger than we can imagine" (J.B.S. Haldane)
-- "In the cosmos, there are no absolute up or down" (Stephen Hawking)
-- "The cosmos is all that is or ever was or ever will be" (Carl Sagan)
+Lunary Brand Quotes (use sparingly - only 1-2 max):
+- "Discover the universe within you, one star at a time" - Lunary
+- "Your birth chart is your cosmic blueprint" - Lunary
+- "The stars remember when you were born" - Lunary
 
-Mix Lunary's own quotes with famous quotes. Create quotes that feel profound, cosmic, and connected to astrology/astronomy. When using Lunary quotes, attribute to "Lunary". When adapting famous quotes, you can attribute to the original author or create new quotes in their style.
-
-Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}`;
+Return JSON with quotes in this format: {"quotes": ["Quote 1 with attribution", "Quote 2 with attribution", "Quote 3 with attribution", "Quote 4 with attribution", "Quote 5 with attribution"]}
+Include attribution like "- Author Name" or "- Lunary" at the end of each quote.`;
 
         const quoteCompletion = await openai.chat.completions.create({
           model: 'gpt-4o-mini',
           messages: [
             {
               role: 'system',
-              content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\nYou are a quote writer for Lunary. Create catchy, shareable quotes inspired by famous scientists, astronomers, astrologers, and philosophers. The quotes should be cosmic, celestial, and profound - similar to quotes from Carl Sagan, Stephen Hawking, Plato, and other great minds who spoke about the cosmos. Return only valid JSON.`,
+              content: `You are a quote curator for Instagram. Your job is to find and adapt profound, cosmic quotes from famous scientists, astronomers, astrologers, and philosophers. Prioritize famous quotes (Carl Sagan, Stephen Hawking, Plato, etc.) over brand quotes. Create quotes that are shareable, inspiring, and cosmic. Mix famous quotes with occasional brand quotes. Return only valid JSON.`,
             },
             { role: 'user', content: quotePrompt },
           ],
           response_format: { type: 'json_object' },
-          max_tokens: 400,
+          max_tokens: 500,
           temperature: 0.9,
         });
 
@@ -552,9 +631,25 @@ Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}
           quoteCompletion.choices[0]?.message?.content || '{}',
         );
         const quotes = quoteResult.quotes || [];
-        // Return the first (best) quote, or fallback to extracting from post
-        if (quotes.length > 0 && quotes[0]) {
-          return quotes[0];
+
+        // Prefer quotes that are NOT Lunary quotes (more variety)
+        const nonLunaryQuotes = quotes.filter(
+          (q: string) =>
+            !q.toLowerCase().includes('lunary') &&
+            !q.toLowerCase().includes('birth chart') &&
+            !q.toLowerCase().includes('cosmic blueprint'),
+        );
+
+        // Return a non-Lunary quote if available, otherwise random from all quotes
+        if (nonLunaryQuotes.length > 0) {
+          return nonLunaryQuotes[
+            Math.floor(Math.random() * nonLunaryQuotes.length)
+          ];
+        }
+
+        // Fallback: return random quote from all quotes
+        if (quotes.length > 0) {
+          return quotes[Math.floor(Math.random() * quotes.length)];
         }
       } catch (error) {
         console.warn('Failed to generate catchy quote, using fallback:', error);
@@ -577,9 +672,10 @@ Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}
       const post = allGeneratedPosts[i];
       const postPlan = weeklyPosts[i];
 
-      // Calculate the date for this post (weekStartDate + dayOffset)
+      // Calculate the date for this post (weekStartDate + dayOffset + hour)
       const postDate = new Date(weekStartDate);
-      postDate.setDate(weekStartDate.getDate() + postPlan.dayOffset);
+      postDate.setDate(weekStartDate.getDate() + post.dayOffset);
+      postDate.setHours(post.hour, 0, 0, 0); // Use the optimal hour for this platform
 
       const quote = await generateCatchyQuote(
         post.content,
@@ -592,8 +688,8 @@ Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}
 
       try {
         const result = await sql`
-          INSERT INTO social_posts (content, platform, post_type, status, image_url, scheduled_date, created_at)
-          VALUES (${post.content}, ${post.platform}, ${post.postType}, 'pending', ${imageUrl || null}, ${postDate.toISOString()}, NOW())
+          INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, created_at)
+          VALUES (${post.content}, ${post.platform}, ${post.postType}, ${post.topic || null}, 'pending', ${imageUrl || null}, ${postDate.toISOString()}, NOW())
           RETURNING id
         `;
         savedPostIds.push(result.rows[0].id);

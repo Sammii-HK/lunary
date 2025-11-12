@@ -388,6 +388,7 @@ ${imageUrls.map((url, i) => `• ${['Cosmic', 'Crystal', 'Tarot', 'Moon', 'Horos
     weekNumber: number,
     highlights: any[],
     blogPreviewUrl?: string,
+    socialPostsCount?: number,
   ) => {
     const baseUrl =
       process.env.NODE_ENV === 'production'
@@ -398,7 +399,7 @@ ${imageUrls.map((url, i) => `• ${['Cosmic', 'Crystal', 'Tarot', 'Moon', 'Horos
       title: '📝 Weekly Content Generated',
       message: `<b>"${title}"</b>
 
-📅 <b>Week ${weekNumber}</b> blog post and newsletter ready
+📅 <b>Week ${weekNumber}</b> content ready
 
 🌟 <b>This Week's Highlights:</b>
 ${highlights
@@ -408,9 +409,12 @@ ${highlights
 
 📧 <b>Newsletter:</b> Sent to subscribers
 📝 <b>Blog:</b> Ready for publication
+${socialPostsCount ? `\n📱 <b>Social Posts:</b> ${socialPostsCount} posts ready for approval\n⏰ <b>Schedule:</b> Week starting in 7 days` : ''}
 
-<i>Tap to review content</i>`,
-      url: `${baseUrl}/admin/blog-manager`,
+<i>Tap to review and approve posts</i>`,
+      url: socialPostsCount
+        ? `${baseUrl}/admin/social-posts/approve`
+        : `${baseUrl}/admin/blog-manager`,
       priority: 'normal' as const,
       image:
         blogPreviewUrl ||

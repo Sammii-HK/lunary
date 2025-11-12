@@ -614,7 +614,7 @@ async function runWeeklyTasks(request: NextRequest) {
       : new Date().toISOString().split('T')[0];
     const blogPreviewUrl = `${baseUrl}/api/og/cosmic/${weekStartDate}`;
 
-    // Send push notification for weekly content with blog preview
+    // Send push notification for weekly content with blog preview and social posts info
     try {
       await sendAdminNotification(
         NotificationTemplates.weeklyContentGenerated(
@@ -622,9 +622,12 @@ async function runWeeklyTasks(request: NextRequest) {
           blogData.data?.weekNumber || 0,
           blogData.data?.planetaryHighlights || [],
           blogPreviewUrl,
+          socialPostsResult?.savedIds?.length || 0,
         ),
       );
-      console.log('✅ Weekly blog notification sent with preview image');
+      console.log(
+        `✅ Weekly notification sent: ${socialPostsResult?.savedIds?.length || 0} social posts ready for approval`,
+      );
     } catch (notificationError) {
       console.warn('📱 Weekly notification failed:', notificationError);
     }
