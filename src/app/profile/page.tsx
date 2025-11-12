@@ -535,14 +535,32 @@ export default function ProfilePage() {
         />
       )}
 
-      <div className='w-full max-w-md'>
-        <div className='text-sm text-zinc-400 text-center max-w-md'>
+      <div className='w-full max-w-md space-y-4 text-center'>
+        <div className='text-sm text-zinc-400'>
           <p>
             Your cosmic profile information is stored securely and encrypted.
             This includes your personal tarot card and birth chart data, which
             create a personalized spiritual experience with custom readings and
             insights.
           </p>
+        </div>
+
+        <div className='flex flex-col items-center gap-2 text-sm'>
+          <span className='text-zinc-500'>Looking for more?</span>
+          <div className='flex flex-wrap justify-center gap-3'>
+            <a
+              href='/shop'
+              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-purple-500/60 hover:text-purple-200'
+            >
+              Browse Shop
+            </a>
+            <a
+              href='/blog'
+              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-purple-500/60 hover:text-purple-200'
+            >
+              Read the Blog
+            </a>
+          </div>
         </div>
       </div>
 
