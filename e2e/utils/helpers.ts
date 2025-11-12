@@ -379,6 +379,28 @@ export async function signIn(page: Page, email: string, password: string) {
   await emailInput.fill(email);
   await passwordInput.fill(password);
 
+  // Listen for API response to detect sign-in errors
+  let signInFailed = false;
+  let errorMessage = '';
+  const responseListener = (response: any) => {
+    if (response.url().includes('/api/auth/sign-in')) {
+      const status = response.status();
+      if (status === 400 || status === 401) {
+        signInFailed = true;
+        response
+          .json()
+          .then((data: any) => {
+            errorMessage =
+              data?.message || `Sign-in failed with status ${status}`;
+          })
+          .catch(() => {
+            errorMessage = `Sign-in failed with status ${status}`;
+          });
+      }
+    }
+  };
+  page.on('response', responseListener);
+
   const submitButton = page.locator('button[type="submit"]').first();
   await page.waitForTimeout(500);
   await submitButton.click();
@@ -388,19 +410,44 @@ export async function signIn(page: Page, email: string, password: string) {
 
   try {
     await Promise.race([
-      page.waitForURL(/\/(welcome|profile|birth-chart|home|\/)/, {
-        timeout: 20000,
+      page.waitForURL((url) => !url.pathname.includes('/auth'), {
+        timeout: 15000,
       }),
       page.waitForSelector('text=/success|welcome|signed in/i', {
-        timeout: 20000,
+        timeout: 15000,
       }),
     ]);
-  } catch {
+    page.off('response', responseListener);
+
+    const currentUrl = page.url();
+    if (!currentUrl.includes('/auth')) {
+      console.log(`   ✅ Sign in completed (redirected to ${currentUrl})`);
+      return;
+    }
+  } catch (error) {
+    page.off('response', responseListener);
+
     // Check if we're already redirected
     const currentUrl = page.url();
     if (!currentUrl.includes('/auth')) {
-      console.log(`   → Sign in completed (redirected to ${currentUrl})`);
+      console.log(`   ✅ Sign in completed (redirected to ${currentUrl})`);
       return;
+    }
+
+    // Check for sign-in error
+    if (signInFailed) {
+      throw new Error(
+        `Sign-in failed: ${errorMessage || 'Invalid credentials or user does not exist'}`,
+      );
+    }
+
+    // Wait a bit more and check again
+    await page.waitForTimeout(2000);
+    const finalUrl = page.url();
+    if (finalUrl.includes('/auth')) {
+      throw new Error(
+        `Sign-in failed - still on auth page after ${finalUrl}. User may not exist. Check that test user was created in global setup.`,
+      );
     }
   }
 

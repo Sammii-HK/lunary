@@ -1,6 +1,15 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 
+// Set default environment variables for tests
+if (!process.env.BETTER_AUTH_SECRET) {
+  process.env.BETTER_AUTH_SECRET = 'test-secret-key-for-jest-tests-only';
+}
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  process.env.STRIPE_SECRET_KEY = 'sk_test_mock_key_for_testing';
+}
+
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 

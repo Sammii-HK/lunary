@@ -2,6 +2,60 @@ import { test as base, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { ensureTestUser, TEST_USERS } from './test-users';
 
+// Reusable browser context for authenticated tests (shared across tests)
+let authContext: any = null;
+
+// Cleanup function for auth context
+export async function cleanupAuthContext() {
+  if (authContext) {
+    await authContext.close();
+    authContext = null;
+  }
+}
+
+// Setup route blocking for faster tests
+async function setupRouteBlocking(page: Page) {
+  await page.route('**/*', (route) => {
+    const resourceType = route.request().resourceType();
+    const url = route.request().url();
+
+    // Block images (unless needed for visual tests)
+    if (
+      resourceType === 'image' &&
+      !url.includes('og-image') &&
+      !url.includes('og/')
+    ) {
+      route.abort();
+      return;
+    }
+
+    // Block fonts (use system fonts)
+    if (resourceType === 'font') {
+      route.abort();
+      return;
+    }
+
+    // Block media files
+    if (resourceType === 'media') {
+      route.abort();
+      return;
+    }
+
+    // Block external stylesheets
+    if (
+      resourceType === 'stylesheet' &&
+      (url.includes('fonts.googleapis.com') ||
+        url.includes('cdn.jsdelivr.net') ||
+        url.includes('unpkg.com'))
+    ) {
+      route.abort();
+      return;
+    }
+
+    route.continue();
+  });
+}
+
 type AuthFixtures = {
   authenticatedPage: Page;
   adminPage: Page;
@@ -36,8 +90,51 @@ export const test = base.extend<AuthFixtures>({
     });
   },
 
-  authenticatedPage: async ({ page, baseURL, testUser }, use, testInfo) => {
+  authenticatedPage: async ({ browser, baseURL, testUser }, use, testInfo) => {
     const testBaseURL = baseURL || 'http://localhost:3000';
+
+    // Reuse authenticated context if available
+    if (!authContext) {
+      authContext = await browser.newContext({
+        viewport: { width: 1280, height: 720 },
+        ignoreHTTPSErrors: true,
+      });
+
+      // Setup route blocking for faster tests
+      await authContext.route('**/*', (route) => {
+        const resourceType = route.request().resourceType();
+        const url = route.request().url();
+
+        if (
+          resourceType === 'image' &&
+          !url.includes('og-image') &&
+          !url.includes('og/')
+        ) {
+          route.abort();
+          return;
+        }
+        if (resourceType === 'font') {
+          route.abort();
+          return;
+        }
+        if (resourceType === 'media') {
+          route.abort();
+          return;
+        }
+        if (
+          resourceType === 'stylesheet' &&
+          (url.includes('fonts.googleapis.com') ||
+            url.includes('cdn.jsdelivr.net') ||
+            url.includes('unpkg.com'))
+        ) {
+          route.abort();
+          return;
+        }
+        route.continue();
+      });
+    }
+
+    const page = await authContext.newPage();
 
     console.log(`\n🔐 Authenticating user for test: ${testInfo.title}`);
     console.log(`   Email: ${testUser.email}`);
@@ -61,6 +158,7 @@ export const test = base.extend<AuthFixtures>({
     await page.waitForTimeout(1000);
 
     await use(page);
+    await page.close();
   },
 
   adminPage: async ({ page, baseURL }, use, testInfo) => {

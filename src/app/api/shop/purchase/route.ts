@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import crypto from 'crypto';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 function generateRandomToken(): string {
   return crypto.randomBytes(32).toString('hex');
@@ -18,6 +19,7 @@ function generateRandomId(): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripe();
     const body = await request.json();
     const { packId, userId, stripePriceId } = body;
 
@@ -81,6 +83,7 @@ export async function POST(request: NextRequest) {
 // Handle successful payment completion
 export async function GET(request: NextRequest) {
   try {
+    const stripe = getStripe();
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('session_id');
 
