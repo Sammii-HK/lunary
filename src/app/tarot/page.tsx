@@ -427,7 +427,7 @@ const TarotReadings = () => {
               title={`Your ${timeFrame}-Day Tarot Patterns`}
               color='zinc'
             >
-              <div className='flex flex-wrap gap-2 justify-start md:justify-end mb-4'>
+              <div className='flex flex-wrap gap-2 w-full justify-start sm:justify-end mb-4'>
                 {[7, 14, 30, 60, 90].map((days) => (
                   <button
                     key={days}
