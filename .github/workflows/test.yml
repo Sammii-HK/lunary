@@ -55,6 +55,9 @@ jobs:
           TEST_USER_PASSWORD: ${{ secrets.TEST_PASSWORD || secrets.TEST_USER_PASSWORD || 'TestPassword123!' }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || 'admin@lunary.app' }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD || 'admin123' }}
+          # Required for Next.js server startup during e2e tests
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-secret-key-for-e2e-tests-only' }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_mock_key_for_e2e_testing' }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

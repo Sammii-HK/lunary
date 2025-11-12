@@ -17,7 +17,11 @@ export const auth = betterAuth({
       process.env.JAZZ_WORKER_SECRET ||
       'sealerSecret_z6j9dtYQev5cMjaKKncXQRMxpa23ppGDencCFwH2Bf4Jm/signerSecret_z3t4A4AbNMp3GSf7YP7Mc2nmuB3yJfYNLEUWDTqE1r6cV',
   }),
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret:
+    process.env.BETTER_AUTH_SECRET ||
+    (process.env.NODE_ENV === 'test'
+      ? 'test-secret-key-for-jest-tests-only'
+      : undefined),
 
   // Email and password authentication
   emailAndPassword: {

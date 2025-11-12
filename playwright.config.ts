@@ -49,6 +49,11 @@ export default defineConfig({
     env: {
       ...process.env,
       NODE_ENV: 'development',
+      // Set default test values if not provided
+      BETTER_AUTH_SECRET:
+        process.env.BETTER_AUTH_SECRET || 'test-secret-key-for-e2e-tests-only',
+      STRIPE_SECRET_KEY:
+        process.env.STRIPE_SECRET_KEY || 'sk_test_mock_key_for_e2e_testing',
     },
   },
 });
