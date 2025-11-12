@@ -425,17 +425,50 @@ export default function PostApprovalPage() {
                         {post.scheduledDate && (
                           <>
                             {' • '}
-                            <span className='inline-flex items-center gap-1'>
-                              Scheduled:{' '}
-                              {new Date(post.scheduledDate).toLocaleString()}
-                              {new Date(post.scheduledDate).getHours() === 0 &&
-                                new Date(post.scheduledDate).getMinutes() ===
-                                  0 && (
-                                  <span className='text-yellow-400 text-xs'>
-                                    (midnight - edit recommended)
+                            <span className='inline-flex items-center gap-2'>
+                              {editingSchedule === post.id ? (
+                                <span className='text-blue-400 text-sm'>
+                                  Editing schedule...
+                                </span>
+                              ) : (
+                                <>
+                                  <span>
+                                    Scheduled:{' '}
+                                    {new Date(
+                                      post.scheduledDate,
+                                    ).toLocaleString()}
+                                    {new Date(post.scheduledDate).getHours() ===
+                                      0 &&
+                                      new Date(
+                                        post.scheduledDate,
+                                      ).getMinutes() === 0 && (
+                                        <span className='text-yellow-400 text-xs ml-1'>
+                                          (midnight - edit recommended)
+                                        </span>
+                                      )}
                                   </span>
-                                )}
+                                  {post.status === 'pending' && (
+                                    <button
+                                      onClick={() => handleEditSchedule(post)}
+                                      className='text-blue-400 hover:text-blue-300 text-xs underline'
+                                    >
+                                      Edit
+                                    </button>
+                                  )}
+                                </>
+                              )}
                             </span>
+                          </>
+                        )}
+                        {!post.scheduledDate && post.status === 'pending' && (
+                          <>
+                            {' • '}
+                            <button
+                              onClick={() => handleEditSchedule(post)}
+                              className='text-blue-400 hover:text-blue-300 text-xs underline'
+                            >
+                              Set Schedule
+                            </button>
                           </>
                         )}
                       </CardDescription>
@@ -567,6 +600,86 @@ export default function PostApprovalPage() {
                         </>
                       )}
                     </div>
+
+                    {editingSchedule === post.id && (
+                      <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 space-y-3'>
+                        <div className='flex gap-3'>
+                          <div className='flex-1'>
+                            <label className='block text-xs text-zinc-400 mb-1'>
+                              Date
+                            </label>
+                            <input
+                              type='date'
+                              value={scheduleDate}
+                              onChange={(e) => setScheduleDate(e.target.value)}
+                              className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-2 border border-zinc-600 focus:border-blue-500 focus:outline-none'
+                            />
+                          </div>
+                          <div className='flex-1'>
+                            <label className='block text-xs text-zinc-400 mb-1'>
+                              Time (UTC)
+                            </label>
+                            <input
+                              type='time'
+                              value={scheduleTime}
+                              onChange={(e) => setScheduleTime(e.target.value)}
+                              className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-2 border border-zinc-600 focus:border-blue-500 focus:outline-none'
+                            />
+                          </div>
+                        </div>
+                        {getPlatformPostingInfo(post.platform) && (
+                          <p className='text-xs text-zinc-500'>
+                            Recommended:{' '}
+                            {getPlatformPostingInfo(
+                              post.platform,
+                            )?.bestDays.join(', ')}{' '}
+                            at{' '}
+                            {getPlatformPostingInfo(post.platform)
+                              ?.recommendedTimes.filter((t) => t.isOptimal)
+                              .map((t) => t.label)
+                              .join(', ')}{' '}
+                            UTC
+                            {getPlatformPostingInfo(post.platform)?.note && (
+                              <>
+                                {' '}
+                                • {getPlatformPostingInfo(post.platform)?.note}
+                              </>
+                            )}
+                          </p>
+                        )}
+                        <div className='flex gap-2'>
+                          <Button
+                            onClick={() => {
+                              setEditingSchedule(null);
+                              setScheduleDate('');
+                              setScheduleTime('');
+                            }}
+                            variant='outline'
+                            className='flex-1'
+                            disabled={updatingSchedule === post.id}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={() => handleSaveSchedule(post.id)}
+                            className='flex-1 bg-blue-600 hover:bg-blue-700 text-white'
+                            disabled={updatingSchedule === post.id}
+                          >
+                            {updatingSchedule === post.id ? (
+                              <>
+                                <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <Check className='h-4 w-4 mr-2' />
+                                Save Schedule
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
 
                     {post.status === 'pending' && editingPost !== post.id && (
                       <div className='space-y-3'>
