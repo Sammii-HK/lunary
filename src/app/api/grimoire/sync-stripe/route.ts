@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Sync grimoire packs with Stripe products as SSOT
 export async function POST(request: NextRequest) {
@@ -34,6 +35,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function createStripeProduct(pack: any) {
+  const stripe = getStripe();
   console.log(`🛍️ Creating Stripe product for grimoire pack: ${pack.title}`);
 
   // Create Stripe product with grimoire pack metadata
@@ -107,6 +109,7 @@ async function createStripeProduct(pack: any) {
 }
 
 async function updateStripeProduct(pack: any) {
+  const stripe = getStripe();
   if (!pack.stripeProductId) {
     throw new Error('Pack must have stripeProductId to update');
   }
@@ -144,6 +147,7 @@ async function updateStripeProduct(pack: any) {
 }
 
 async function syncAllProducts() {
+  const stripe = getStripe();
   console.log('🔄 Syncing all Stripe products with grimoire data...');
 
   // Get all Stripe products with grimoire metadata
@@ -196,6 +200,7 @@ async function syncAllProducts() {
 }
 
 async function getStripeProducts() {
+  const stripe = getStripe();
   // Get all active shop products from Stripe (grimoire packs + moon packs)
   const products = await stripe.products.list({
     active: true,

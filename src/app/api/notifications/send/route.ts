@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 
-// Configure VAPID keys from environment variables
-webpush.setVapidDetails(
-  'mailto:info@lunary.app',
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+// Lazy initialization of VAPID keys (only when actually needed)
+function ensureVapidConfigured() {
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+
+  if (!publicKey || !privateKey) {
+    throw new Error(
+      'VAPID keys not configured. Please set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in your environment variables.',
+    );
+  }
+
+  webpush.setVapidDetails('mailto:info@lunary.app', publicKey, privateKey);
+}
 
 interface NotificationPayload {
   type:
@@ -51,6 +58,9 @@ async function checkAstronomicalEvents(
 
 export async function POST(request: NextRequest) {
   try {
+    // Configure VAPID keys when actually needed (not at module load time)
+    ensureVapidConfigured();
+
     const { payload }: { payload: NotificationPayload } = await request.json();
 
     // Get all subscriptions from database that want this type of notification
