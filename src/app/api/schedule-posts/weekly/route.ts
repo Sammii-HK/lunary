@@ -102,12 +102,25 @@ export async function POST(request: NextRequest) {
       const scheduledDateTime = new Date(currentDate);
       scheduledDateTime.setHours(13, 0, 0, 0); // 1 PM
 
+      // Format readable date
+      const formattedDate = scheduledDateTime.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+      const formattedTime = scheduledDateTime.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+      const readableDate = `${formattedDate} at ${formattedTime}`;
+
       // Ensure image URL uses the correct base URL
       const imageUrl = `${baseUrl}/api/og/cosmic/${dateStr}`;
 
       const postData: SucculentPostData = {
         accountGroupId,
-        name: `Cosmic Post ${dateStr}`,
+        name: `Cosmic Post - ${readableDate}`,
         content: socialContent,
         platforms: ['instagram', 'x', 'facebook', 'linkedin'],
         scheduledDate: scheduledDateTime.toISOString(),

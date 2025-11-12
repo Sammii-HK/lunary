@@ -132,9 +132,22 @@ export async function POST(request: NextRequest) {
         ]
       : [];
 
+    // Format date for readable title (e.g., "Nov 23, 2025 at 2:00 PM")
+    const formattedDate = scheduleDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const formattedTime = scheduleDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+    const readableDate = `${formattedDate} at ${formattedTime}`;
+
     const postData: any = {
       accountGroupId: accountGroupIdStr,
-      name: `Lunary ${platformStr} Post - ${scheduleDate.toISOString().split('T')[0]}`,
+      name: `Lunary ${platformStr.charAt(0).toUpperCase() + platformStr.slice(1)} Post - ${readableDate}`,
       content: actualContent.trim(),
       platforms: [platformStr],
       scheduledDate: scheduleDate.toISOString(),

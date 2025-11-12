@@ -399,11 +399,28 @@ async function runDailyPosts(dateStr: string) {
   const apiKey = process.env.SUCCULENT_SECRET_KEY;
   const postResults: any[] = [];
 
+  // Helper function to format readable date
+  const formatReadableDate = (dateStr: string, scheduledDate: string) => {
+    const date = new Date(scheduledDate);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const formattedTime = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+    return `${formattedDate} at ${formattedTime}`;
+  };
+
   for (const post of posts) {
     try {
+      const readableDate = formatReadableDate(dateStr, post.scheduledDate);
       const postData = {
         accountGroupId: process.env.SUCCULENT_ACCOUNT_GROUP_ID,
-        name: post.name || `Cosmic Post ${dateStr}`,
+        name: post.name || `Cosmic Post - ${readableDate}`,
         content: post.content,
         platforms: post.platforms,
         scheduledDate: post.scheduledDate,
