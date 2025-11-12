@@ -2,7 +2,8 @@ import { test, expect } from '../fixtures/auth';
 import { signUp, signIn } from '../utils/helpers';
 import { testUserData } from '../fixtures/test-data';
 
-test.describe('Authentication Journey', () => {
+// Authentication tests should run sequentially to avoid conflicts
+test.describe.serial('Authentication Journey', () => {
   test('should display auth page', async ({ page }) => {
     console.log('\n📄 Testing auth page display...');
     const response = await page.goto('/auth', {

@@ -2,7 +2,8 @@ import { test, expect } from '../fixtures/auth';
 import { signUp, fillBirthData, waitForPageLoad } from '../utils/helpers';
 import { testBirthData } from '../fixtures/test-data';
 
-test.describe('Complete User Flow - Video Walkthrough', () => {
+// This test must run sequentially as it tests the complete flow
+test.describe.serial('Complete User Flow - Video Walkthrough', () => {
   test('complete onboarding and feature exploration', async ({ page }) => {
     const email = `walkthrough-${Date.now()}@test.lunary.app`;
     const password = 'TestPassword123!';
