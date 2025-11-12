@@ -42,7 +42,13 @@ export function useAuthStatus(): AuthState {
         });
 
         const session = await Promise.race([sessionPromise, timeoutPromise]);
-        const user = session?.data?.user || null;
+
+        const user =
+          session && typeof session === 'object'
+            ? 'user' in session
+              ? (session as any).user
+              : (session as any)?.data?.user ?? null
+            : null;
 
         if (isMounted) {
           setAuthState({

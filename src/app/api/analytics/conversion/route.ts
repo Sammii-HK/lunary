@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+const EXCLUDED_EMAILS = new Set(['kellow.sammii@gmail.com']);
+
+function normalizeEmail(email: unknown): string | undefined {
+  if (typeof email !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = email.trim();
+  return trimmed ? trimmed.toLowerCase() : undefined;
+}
+
+function extractEmailFromMetadata(metadata: unknown): string | undefined {
+  if (metadata && typeof metadata === 'object') {
+    const candidate =
+      (metadata as Record<string, unknown>).userEmail ||
+      (metadata as Record<string, unknown>).email ||
+      (metadata as Record<string, unknown>).customerEmail ||
+      (metadata as Record<string, unknown>).customer_email;
+
+    return normalizeEmail(candidate);
+  }
+
+  return undefined;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Handle empty body gracefully
@@ -25,6 +50,29 @@ export async function POST(request: NextRequest) {
       metadata,
     } = data;
 
+    const normalizedEmail =
+      normalizeEmail(userEmail) ?? extractEmailFromMetadata(metadata);
+    const safeUserId =
+      typeof userId === 'string'
+        ? userId.trim() || null
+        : typeof userId === 'number' || typeof userId === 'bigint'
+        ? String(userId)
+        : null;
+
+    if (normalizedEmail && EXCLUDED_EMAILS.has(normalizedEmail)) {
+      console.info(
+        `[analytics] Skipping conversion event "${event}" for excluded user ${normalizedEmail}`,
+      );
+      return NextResponse.json(
+        {
+          success: true,
+          skipped: true,
+          reason: 'Excluded user',
+        },
+        { status: 200 },
+      );
+    }
+
     await sql`
       INSERT INTO conversion_events (
         event_type,
@@ -38,8 +86,8 @@ export async function POST(request: NextRequest) {
         created_at
       ) VALUES (
         ${event},
-        ${userId || null},
-        ${userEmail || null},
+        ${safeUserId},
+        ${normalizedEmail || null},
         ${planType || null},
         ${trialDaysRemaining || null},
         ${featureName || null},
