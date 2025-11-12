@@ -104,6 +104,8 @@ jobs:
           NODE_ENV: production
           # Required for Better Auth during build
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-secret-key-for-build-only' }}
+          # Stripe key optional during build (routes handle missing keys gracefully)
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_mock_key_for_build_only' }}
           # VAPID keys optional during build (routes handle missing keys gracefully)
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY || '' }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY || '' }}
