@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
+import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import {
   PRICING_PLANS,
   getPricingPlansWithStripeData,
@@ -357,6 +358,21 @@ export default function PricingPage() {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Newsletter CTA */}
+        <section className='py-12 sm:py-16 md:py-20 border-b border-zinc-800/50'>
+          <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
+            <NewsletterSignupForm
+              align='center'
+              source='pricing_page_section'
+              className='border-zinc-800/60 bg-zinc-950/50 shadow-none'
+              headline='Stay in the loop with Lunary'
+              description='Not ready to upgrade yet? Get weekly product updates, cosmic reports, and special offers delivered to your inbox.'
+              ctaLabel='Subscribe to updates'
+              successMessage='Welcome aboard! Check your inbox to confirm your subscription.'
+            />
           </div>
         </section>
 
