@@ -141,16 +141,13 @@ const describeContext = (context: LunaryContext): string => {
   }
 
   // Birth chart - only key placements (not full JSON)
-  if (context.birthChart) {
-    const placements: string[] = [];
-    if (context.birthChart.sun)
-      placements.push(`Sun: ${context.birthChart.sun}`);
-    if (context.birthChart.moon)
-      placements.push(`Moon: ${context.birthChart.moon}`);
-    if (context.birthChart.rising)
-      placements.push(`Rising: ${context.birthChart.rising}`);
-    if (placements.length > 0) {
-      parts.push(`BIRTH CHART: ${placements.join(', ')}`);
+  if (context.birthChart && context.birthChart.placements) {
+    const keyPlacements = context.birthChart.placements
+      .filter((p) => ['Sun', 'Moon', 'Ascendant'].includes(p.planet))
+      .map((p) => `${p.planet}: ${p.sign}`)
+      .slice(0, 3);
+    if (keyPlacements.length > 0) {
+      parts.push(`BIRTH CHART: ${keyPlacements.join(', ')}`);
     }
   }
 
