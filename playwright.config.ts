@@ -76,7 +76,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'yarn dev',
+    command: 'pnpm dev',
     url: 'http://localhost:3000',
     reuseExistingServer: false, // Always start fresh to avoid wrong server
     timeout: 60000, // 60 seconds should be enough
