@@ -1,4 +1,5 @@
 import { sql } from '@vercel/postgres';
+import Stripe from 'stripe';
 import {
   FREE_PLAN_HISTORY_RETENTION_DAYS,
   FREE_PLAN_MONTHLY_READING_LIMIT,
@@ -68,6 +69,126 @@ export const getSubscription = async (
         ORDER BY created_at DESC
         LIMIT 1
       `;
+    }
+
+    // Fallback: if no subscription in DB, try fetching from Stripe by email
+    if (result.rows.length === 0 && userEmail) {
+      console.log(
+        `[tarot/readings] No subscription in DB, attempting Stripe lookup for email: ${userEmail}`,
+      );
+      try {
+        if (!process.env.STRIPE_SECRET_KEY) {
+          throw new Error('STRIPE_SECRET_KEY not configured');
+        }
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+        // Find customer by email
+        const customers = await stripe.customers.list({
+          email: userEmail,
+          limit: 1,
+        });
+
+        if (customers.data.length > 0) {
+          const customer = customers.data[0];
+          const customerId = customer.id;
+
+          // Fetch subscriptions for this customer
+          const subscriptions = await stripe.subscriptions.list({
+            customer: customerId,
+            status: 'all',
+            limit: 10,
+          });
+
+          if (subscriptions.data.length > 0) {
+            // Get the most recent active/trial subscription, or most recent
+            const activeSub = subscriptions.data.find((sub) =>
+              ['active', 'trialing'].includes(sub.status),
+            );
+            const stripeSub = activeSub || subscriptions.data[0];
+
+            const planType =
+              stripeSub.items.data[0]?.price?.recurring?.interval === 'month'
+                ? 'monthly'
+                : 'yearly';
+            const mappedStatus =
+              stripeSub.status === 'trialing'
+                ? 'trial'
+                : stripeSub.status === 'active'
+                  ? 'active'
+                  : stripeSub.status === 'canceled'
+                    ? 'cancelled'
+                    : stripeSub.status === 'past_due'
+                      ? 'past_due'
+                      : 'free';
+
+            // Write to database for future lookups
+            try {
+              const trialEndsAt = stripeSub.trial_end
+                ? new Date(stripeSub.trial_end * 1000).toISOString()
+                : null;
+              const currentPeriodEnd = (stripeSub as any).current_period_end
+                ? new Date(
+                    (stripeSub as any).current_period_end * 1000,
+                  ).toISOString()
+                : null;
+
+              await sql`
+                INSERT INTO subscriptions (
+                  user_id,
+                  user_email,
+                  status,
+                  plan_type,
+                  stripe_customer_id,
+                  stripe_subscription_id,
+                  trial_ends_at,
+                  current_period_end
+                ) VALUES (
+                  ${userId},
+                  ${userEmail},
+                  ${mappedStatus},
+                  ${planType},
+                  ${customerId},
+                  ${stripeSub.id},
+                  ${trialEndsAt},
+                  ${currentPeriodEnd}
+                )
+                ON CONFLICT (user_id) DO UPDATE SET
+                  status = EXCLUDED.status,
+                  plan_type = EXCLUDED.plan_type,
+                  stripe_customer_id = EXCLUDED.stripe_customer_id,
+                  stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+                  trial_ends_at = EXCLUDED.trial_ends_at,
+                  current_period_end = EXCLUDED.current_period_end,
+                  user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+                  updated_at = NOW()
+              `;
+              console.log(
+                `✅ Synced subscription from Stripe to database for user ${userId}`,
+              );
+
+              return {
+                plan: normalizePlan(planType, mappedStatus),
+                status: mappedStatus as SubscriptionStatus,
+              };
+            } catch (dbError) {
+              console.error(
+                '[tarot/readings] Failed to write synced subscription to DB:',
+                dbError,
+              );
+              // Still return the subscription even if DB write fails
+              return {
+                plan: normalizePlan(planType, mappedStatus),
+                status: mappedStatus as SubscriptionStatus,
+              };
+            }
+          }
+        }
+      } catch (stripeError) {
+        console.error(
+          '[tarot/readings] Failed to fetch subscription from Stripe:',
+          stripeError,
+        );
+      }
     }
 
     if (result.rows.length === 0) {
