@@ -3,20 +3,73 @@
 import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect, useCallback } from 'react';
 import { Mail, CheckCircle, XCircle } from 'lucide-react';
+import { betterAuthClient } from '@/lib/auth-client';
 
 export function EmailSubscriptionSettings() {
   const { me } = useAccount();
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const userEmail = (me?.profile as any)?.email || (me as any)?.email;
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
-  const checkSubscriptionStatus = useCallback(async () => {
-    if (!userEmail) return;
+  const resolveSessionEmail = useCallback(async () => {
+    try {
+      const session = await betterAuthClient.getSession();
+      const sessionUser =
+        (session as any)?.data?.user || (session as any)?.user || null;
+
+      return (sessionUser as any)?.email ?? null;
+    } catch (error) {
+      console.error(
+        'Error fetching auth session while loading newsletter email',
+        error,
+      );
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const resolveEmail = async () => {
+      const profileEmail =
+        ((me?.profile as any)?.email as string | undefined) ||
+        ((me as any)?.email as string | undefined) ||
+        null;
+
+      if (profileEmail) {
+        if (isMounted) {
+          setUserEmail(profileEmail);
+          setAuthChecked(true);
+        }
+        return;
+      }
+
+      const sessionEmail = await resolveSessionEmail();
+
+      if (isMounted) {
+        setUserEmail(sessionEmail);
+        setAuthChecked(true);
+      }
+    };
+
+    setUserEmail(null);
+    setAuthChecked(false);
+
+    resolveEmail();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [me, resolveSessionEmail]);
+
+  const checkSubscriptionStatus = useCallback(async (email: string) => {
+    setLoading(true);
 
     try {
       const response = await fetch(
-        `/api/newsletter/subscribers/${encodeURIComponent(userEmail)}`,
+        `/api/newsletter/subscribers/${encodeURIComponent(email)}`,
       );
       if (response.ok) {
         const data = await response.json();
@@ -30,15 +83,15 @@ export function EmailSubscriptionSettings() {
     } finally {
       setLoading(false);
     }
-  }, [userEmail]);
+  }, []);
 
   useEffect(() => {
     if (userEmail) {
-      checkSubscriptionStatus();
-    } else {
+      checkSubscriptionStatus(userEmail);
+    } else if (authChecked) {
       setLoading(false);
     }
-  }, [userEmail, checkSubscriptionStatus]);
+  }, [userEmail, authChecked, checkSubscriptionStatus]);
 
   const toggleSubscription = async () => {
     if (!userEmail) {

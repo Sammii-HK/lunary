@@ -1,10 +1,12 @@
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import utc from 'dayjs/plugin/utc';
 import { getTarotCard } from './tarot';
 
 dayjs.extend(dayOfYear);
 dayjs.extend(isoWeek);
+dayjs.extend(utc);
 
 export type GeneralTarotReading = {
   daily: {
@@ -22,31 +24,72 @@ export type GeneralTarotReading = {
   };
 };
 
+type GeneralTarotCacheEntry = {
+  dailySeed: string;
+  weeklySeed: string;
+  reading: GeneralTarotReading;
+};
+
+const CACHE_KEY = 'general-tarot-reading:v1';
+let memoryCache: GeneralTarotCacheEntry | null = null;
+
+const readCache = (): GeneralTarotCacheEntry | null => {
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = window.localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        memoryCache = JSON.parse(cached) as GeneralTarotCacheEntry;
+      }
+    } catch {
+      // Ignore storage errors silently to avoid hard crashes in restricted environments
+    }
+  }
+  return memoryCache;
+};
+
+const writeCache = (entry: GeneralTarotCacheEntry) => {
+  memoryCache = entry;
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.setItem(CACHE_KEY, JSON.stringify(entry));
+    } catch {
+      // Ignore storage errors silently to avoid hard crashes in restricted environments
+    }
+  }
+};
+
 // Daily tarot selection based on cosmic energy (not personal data)
 export const getGeneralTarotReading = (): GeneralTarotReading => {
-  const today = dayjs();
+  const nowLocal = dayjs();
+  const nowUtc = nowLocal.utc();
 
-  // Use the day of year and cosmic factors for card selection
-  const dayOfYear = today.dayOfYear();
-  const dayOfWeek = today.day(); // 0 = Sunday, 1 = Monday, etc.
-  const monthDay = today.date();
+  // Use UTC based seeds so server/client renders stay in sync, while local time drives messaging
+  const dayOfYearUtc = nowUtc.dayOfYear();
+  const dayOfWeekLocal = nowLocal.day(); // 0 = Sunday, 1 = Monday, etc.
 
-  // Create seeds for consistent daily cards with more variation
-  const dailySeed = `cosmic-${today.format('YYYY-MM-DD')}-${dayOfYear}-energy`;
+  const dailySeed = `cosmic-${nowUtc.format('YYYY-MM-DD')}-${dayOfYearUtc}-energy`;
 
-  // Calculate week start for stable weekly seed (same for entire week)
-  const weekStart = today.startOf('isoWeek');
-  const weekNumber = weekStart.isoWeek();
-  const weekYear = weekStart.year();
-  const weekStartDate = weekStart.format('YYYY-MM-DD');
+  const weekStartUtc = nowUtc.startOf('isoWeek');
+  const weekNumber = weekStartUtc.isoWeek();
+  const weekYear = weekStartUtc.year();
+  const weekStartDate = weekStartUtc.format('YYYY-MM-DD');
   const weeklySeed = `universal-${weekYear}-W${weekNumber}-${weekStartDate}-guidance`;
+
+  const cached = readCache();
+  if (
+    cached &&
+    cached.dailySeed === dailySeed &&
+    cached.weeklySeed === weeklySeed
+  ) {
+    return cached.reading;
+  }
 
   // Get cards using the existing tarot system
   const dailyCard = getTarotCard(dailySeed, 'cosmic-daily-energy');
   const weeklyCard = getTarotCard(weeklySeed, 'universal-weekly-guidance');
 
   // Generate guidance based on cosmic themes
-  const dailyMessage = `Today's cosmic energy through ${dailyCard.name} suggests ${getDailyTheme(dayOfWeek)}. The universe encourages you to ${getActionTheme(dailyCard.keywords)}.`;
+  const dailyMessage = `Today's cosmic energy through ${dailyCard.name} suggests ${getDailyTheme(dayOfWeekLocal)}. The universe encourages you to ${getActionTheme(dailyCard.keywords)}.`;
 
   const weeklyMessage = `This week's energy through ${weeklyCard.name} highlights themes of ${weeklyCard.keywords.slice(0, 2).join(' and ')}. Focus on ${getWeeklyFocus(weeklyCard.keywords)}.`;
 
@@ -56,7 +99,7 @@ export const getGeneralTarotReading = (): GeneralTarotReading => {
     `Reflect on the cosmic message of ${dailyCard.name}`,
   ];
 
-  return {
+  const reading: GeneralTarotReading = {
     daily: {
       name: dailyCard.name,
       keywords: dailyCard.keywords,
@@ -71,6 +114,14 @@ export const getGeneralTarotReading = (): GeneralTarotReading => {
       actionPoints,
     },
   };
+
+  writeCache({
+    dailySeed,
+    weeklySeed,
+    reading,
+  });
+
+  return reading;
 };
 
 const getDailyTheme = (dayOfWeek: number): string => {
