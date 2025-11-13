@@ -342,3 +342,129 @@ Manage Preferences: ${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/p
 © ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.
   `.trim();
 }
+
+export function generatePasswordResetEmailHTML(
+  resetUrl: string,
+  userEmail: string,
+): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Reset Your Password - Lunary</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #0b0b12;
+          }
+          .container {
+            background: #101020;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 45px rgba(106, 90, 205, 0.25);
+            border: 1px solid rgba(147, 112, 219, 0.2);
+            color: #f1f1ff;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 32px;
+          }
+          .moon {
+            font-size: 48px;
+            margin-bottom: 12px;
+          }
+          h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #a78bfa;
+          }
+          p {
+            color: #d1c4ff;
+            margin: 16px 0;
+          }
+          .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 16px 32px;
+            text-decoration: none;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            margin: 20px 0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.35);
+          }
+          .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 40px rgba(99, 102, 241, 0.45);
+          }
+          .fallback {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            word-break: break-word;
+            font-size: 14px;
+            border: 1px dashed rgba(167, 139, 250, 0.35);
+            color: #e1d9ff;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 13px;
+            color: #9ca3af;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="moon">🌙</div>
+            <h1>Reset your cosmic password</h1>
+            <p>We received a request to reset the password for <strong style="color:#f9fafb;">${userEmail}</strong>.</p>
+          </div>
+          <p>Click the secure link below to choose a new password. This link will expire in one hour for your protection.</p>
+          <div style="text-align:center;">
+            <a href="${resetUrl}" class="button">Reset Password</a>
+          </div>
+          <p>If clicking the button doesn’t work, copy and paste this URL into your browser:</p>
+          <div class="fallback">${resetUrl}</div>
+          <p>If you didn’t request this change, you can safely ignore this email—your password will remain the same.</p>
+          <div class="footer">
+            <p>Need help? Reply to this email or visit our support page.</p>
+            <p>© ${new Date().getFullYear()} Lunary. Guided by the stars, powered by magic.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+export function generatePasswordResetEmailText(
+  resetUrl: string,
+  userEmail: string,
+): string {
+  return `
+Reset Your Password - Lunary
+
+We received a request to reset the password for ${userEmail}.
+
+Click the secure link below to set a new password. This link will expire in one hour:
+
+${resetUrl}
+
+If you didn't request this change, you can safely ignore this email and your password will stay the same.
+
+Need help? Reply to this email or visit our support page.
+
+© ${new Date().getFullYear()} Lunary. Guided by the stars, powered by magic.
+  `.trim();
+}

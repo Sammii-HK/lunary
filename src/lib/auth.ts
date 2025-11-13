@@ -5,7 +5,10 @@ import {
   sendEmail,
   generateVerificationEmailHTML,
   generateVerificationEmailText,
+  generatePasswordResetEmailHTML,
+  generatePasswordResetEmailText,
 } from './email';
+import { getAllowedOrigins } from './origin-validation';
 
 // Better Auth server configuration with Jazz database adapter
 export const auth = betterAuth({
@@ -21,12 +24,35 @@ export const auth = betterAuth({
     process.env.BETTER_AUTH_SECRET ||
     (process.env.NODE_ENV === 'test'
       ? 'test-secret-key-for-jest-tests-only'
-      : undefined),
+      : process.env.NODE_ENV === 'development'
+        ? 'dev-secret-key-for-local-development-only-change-in-production'
+        : undefined),
 
   // Email and password authentication
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // Disabled - free users don't need verification
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
+    revokeSessionsOnPasswordReset: true,
+    async sendResetPassword({ user, url }, _request) {
+      try {
+        const html = generatePasswordResetEmailHTML(url, user.email);
+        const text = generatePasswordResetEmailText(url, user.email);
+
+        await sendEmail({
+          to: user.email,
+          subject: '🔐 Reset Your Lunary Password',
+          html,
+          text,
+        });
+
+        console.log(`🔐 Password reset email sent to ${user.email}`);
+      } catch (error) {
+        console.error('Failed to send password reset email:', error);
+        throw error;
+      }
+    },
     // Email verification will be required when subscribing or accessing personalized features
   },
 
@@ -70,31 +96,20 @@ export const auth = betterAuth({
     },
   },
 
+  // Base URL configuration
+  baseURL:
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
+      : 'https://lunary.app'),
+
   // CORS and security settings
-  // Support both static origins and dynamic Vercel preview URLs
-  trustedOrigins: (request: Request) => {
-    const staticOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://lunary.app',
-      'https://www.lunary.app',
-    ];
-
-    // Add NEXT_PUBLIC_APP_URL if set
-    if (process.env.NEXT_PUBLIC_APP_URL) {
-      staticOrigins.push(process.env.NEXT_PUBLIC_APP_URL);
-    }
-
-    // Get origin from request headers or URL
-    const origin = request.headers.get('origin') || new URL(request.url).origin;
-
-    // If origin is a Vercel preview deployment, add it dynamically
-    if (origin && origin.endsWith('.vercel.app')) {
-      return [...staticOrigins, origin];
-    }
-
-    return staticOrigins;
-  },
+  // Better Auth's trustedOrigins includes runtime VERCEL_URL if it matches
+  // our security patterns. This ensures each deployment includes its own URL
+  // in the trusted origins list. Additional dynamic validation happens in
+  // route handlers via our CORS wrapper for defense in depth.
+  trustedOrigins: getAllowedOrigins(),
 
   // Add the Jazz plugin for integration
   plugins: [jazzPlugin()],
