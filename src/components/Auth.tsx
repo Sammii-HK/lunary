@@ -252,7 +252,7 @@ export function AuthComponent({
               required={isSignUp}
               value={formData.name}
               onChange={handleInputChange}
-              className={`w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2 text-sm' : 'px-4 py-3'}`}
+              className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
               placeholder='Enter your name'
             />
           </div>
@@ -272,7 +272,7 @@ export function AuthComponent({
             required
             value={formData.email}
             onChange={handleInputChange}
-            className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
             placeholder='Enter your email'
           />
         </div>
@@ -291,7 +291,7 @@ export function AuthComponent({
             required
             value={formData.password}
             onChange={handleInputChange}
-            className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
             placeholder='Enter your password'
             minLength={6}
           />
