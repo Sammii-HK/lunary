@@ -12,11 +12,13 @@ Next.js 15 full-stack application delivering personalized astrological insights,
 
 **Frontend**: Tailwind CSS, Radix UI, Service Workers, Web Push API, Satori
 
-**Backend**: Better Auth, PostgreSQL, Vercel Blob Storage
+**Backend**: Better Auth, PostgreSQL, Vercel Blob Storage, Prisma ORM
 
 **Payments**: Stripe
 
 **Services**: Brevo (Email), Astronomy Engine, pdf-lib
+
+**AI**: OpenAI GPT-4o-mini (chat, content generation, conversion optimization)
 
 **Infrastructure**: Vercel, Cloudflare Workers
 
@@ -30,6 +32,8 @@ Next.js 15 full-stack application delivering personalized astrological insights,
 
 **Content**: Comprehensive grimoire library (crystals, spells, numerology, chakras, runes), weekly blog with planetary highlights, newsletter subscriptions
 
+**AI Chat**: Personalized astro-tarot companion ("Book of Shadows") with context-aware responses, conversation history persistence, streaming responses, plan-based usage limits, memory system for long-term context
+
 **Commerce**: Digital product shop with secure token-based downloads, PWA with offline support, push notifications for cosmic events (retrogrades, ingresses, moon phases)
 
 ### Admin Features
@@ -39,6 +43,8 @@ Next.js 15 full-stack application delivering personalized astrological insights,
 **Shop Management**: Programmatic pack generation (PDF + OG images), automatic Stripe product creation and sync, scheduled moon pack generation (monthly/quarterly/yearly)
 
 **Automation**: Multi-frequency cron jobs with execution deduplication, cosmic event detection and notification dispatch
+
+**AI Tools**: Conversion optimization with personalized CTAs, churn prediction, A/B test insights, email copy optimization, funnel analysis
 
 ## Technical Implementation
 
@@ -111,6 +117,28 @@ Real-time planetary position calculations using Astronomy Engine with ecliptic c
 - Sends batch notifications with retry logic
 
 **Execution Safety**: Atomic check-and-set operations prevent duplicate cron execution, in-memory tracking with automatic cleanup (7-day retention).
+
+### AI Chat System
+
+**Architecture**: Server-side streaming with Server-Sent Events (SSE), context-aware responses using user's birth chart, transits, tarot history, and mood data.
+
+**Features**:
+
+- **Streaming Responses**: Real-time token streaming via SSE for responsive UX
+- **Context Building**: Dynamically assembles astrological context (birth chart, current transits, moon phase, tarot readings, mood history)
+- **Conversation Threads**: Persistent thread storage in PostgreSQL with user-specific localStorage keys
+- **Memory System**: Long-term memory snippets for personalized responses across conversations
+- **Plan-Based Limits**: Tiered daily message limits (free: 3, Lunary+: 50, Lunary+ AI: 300)
+- **Rate Limiting**: IP and user-level rate limiting to prevent abuse
+- **Assist Commands**: Special commands for specific actions (e.g., `/horoscope`, `/transits`)
+
+**Database Schema**:
+
+- `ai_threads`: Stores conversation threads with JSONB messages
+- `ai_usage`: Tracks daily usage per user with token counting
+- Automatic table creation via setup script
+
+**Security**: User authentication required, thread ownership validation, debounced input handling (500ms), prevents duplicate sends during streaming.
 
 ## Security
 
