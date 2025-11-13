@@ -8,20 +8,24 @@ import {
   isSpreadAccessible,
   mapRowToReading,
 } from './shared';
+import { auth } from '@/lib/auth';
 
 const toTextArrayLiteral = (values: string[]): string =>
   `{${values.map((value) => `"${value.replace(/"/g, '\\"')}"`).join(',')}}`;
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    if (!userId) {
+    const session = await auth.api.getSession({ headers: request.headers });
+
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 },
+        { error: 'Authentication required' },
+        { status: 401 },
       );
     }
+
+    const userId = session.user.id;
+    const { searchParams } = new URL(request.url);
 
     const spreadSlug = searchParams.get('spread');
     const limit = Math.min(parseInt(searchParams.get('limit') || '10', 10), 50);
@@ -112,6 +116,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth.api.getSession({ headers: request.headers });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 },
+      );
+    }
+
+    const userId = session.user.id;
+
     const bodyText = await request.text();
     if (!bodyText) {
       return NextResponse.json(
@@ -121,11 +136,11 @@ export async function POST(request: NextRequest) {
     }
 
     const data = JSON.parse(bodyText);
-    const { userId, spreadSlug, userName, seed, notes, tags } = data;
+    const { spreadSlug, userName, seed, notes, tags } = data;
 
-    if (!userId || !spreadSlug) {
+    if (!spreadSlug) {
       return NextResponse.json(
-        { error: 'userId and spreadSlug are required' },
+        { error: 'spreadSlug is required' },
         { status: 400 },
       );
     }

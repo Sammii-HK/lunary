@@ -122,18 +122,15 @@ export function TarotSpreadExperience({
   );
 
   const refreshReadings = useCallback(async () => {
-    if (!userId) return;
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/tarot/readings?userId=${encodeURIComponent(userId)}&limit=20`,
-        {
-          method: 'GET',
-          cache: 'no-store',
-        },
-      );
+      const response = await fetch(`/api/tarot/readings?limit=20`, {
+        method: 'GET',
+        cache: 'no-store',
+        credentials: 'include',
+      });
 
       if (!response.ok) {
         throw new Error('Failed to load saved spreads');
@@ -172,7 +169,7 @@ export function TarotSpreadExperience({
     } finally {
       setIsLoading(false);
     }
-  }, [selectedSpreadSlug, subscriptionPlan.plan, userId]);
+  }, [selectedSpreadSlug, subscriptionPlan.plan]);
 
   useEffect(() => {
     refreshReadings();
@@ -194,10 +191,11 @@ export function TarotSpreadExperience({
       try {
         setIsSavingNotes(true);
         const response = await fetch(
-          `/api/tarot/readings/${currentReading.id}?userId=${encodeURIComponent(userId)}`,
+          `/api/tarot/readings/${currentReading.id}`,
           {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({
               notes: notesDraft.trim() === '' ? null : notesDraft,
             }),
@@ -248,7 +246,7 @@ export function TarotSpreadExperience({
   };
 
   const handleGenerateReading = async () => {
-    if (!userId || !selectedSpread) return;
+    if (!selectedSpread) return;
     if (!unlockedSpreads.has(selectedSpread.slug)) {
       if (onRequireUpgrade) {
         onRequireUpgrade(selectedSpread.minimumPlan);
@@ -263,8 +261,8 @@ export function TarotSpreadExperience({
       const response = await fetch('/api/tarot/readings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          userId,
           userName,
           spreadSlug: selectedSpread.slug,
         }),
@@ -307,14 +305,11 @@ export function TarotSpreadExperience({
   };
 
   const handleArchive = async (readingId: string) => {
-    if (!userId) return;
     try {
-      const response = await fetch(
-        `/api/tarot/readings/${readingId}?userId=${encodeURIComponent(userId)}`,
-        {
-          method: 'DELETE',
-        },
-      );
+      const response = await fetch(`/api/tarot/readings/${readingId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
 
       if (!response.ok) {
         throw new Error('Failed to remove reading');
@@ -463,7 +458,6 @@ export function TarotSpreadExperience({
                 disabled={
                   isGenerating ||
                   isLoading ||
-                  !userId ||
                   !unlockedSpreads.has(selectedSpread.slug)
                 }
                 className={clsx(
