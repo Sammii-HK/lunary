@@ -11,7 +11,6 @@ import {
   Circle,
   Navigation,
   Telescope,
-  Compass,
 } from 'lucide-react';
 import { useLocation } from '../hooks/useLocation';
 import {
@@ -105,8 +104,27 @@ const calculateAltitudeForChart = (riseSet: any, hour: number) => {
   return 0;
 };
 
-const formatShortTime = (date: Date | null, timezone?: string) =>
-  formatTime(date, timezone);
+const formatShortTime = (date: Date | null, timezone?: string) => {
+  if (!date) return '--:--';
+
+  const timeText = formatTime(date, timezone);
+
+  const now = new Date();
+  const sameDay = timezone
+    ? date.toLocaleDateString([], { timeZone: timezone }) ===
+      now.toLocaleDateString([], { timeZone: timezone })
+    : date.toDateString() === now.toDateString();
+
+  if (!sameDay) {
+    const weekday = date.toLocaleDateString([], {
+      weekday: 'short',
+      timeZone: timezone,
+    });
+    return `${weekday} ${timeText}`;
+  }
+
+  return timeText;
+};
 
 const formatTimeRange = (
   start: Date | null,
@@ -143,6 +161,8 @@ interface ObservingSummary {
   sunset: Date | null;
   dayLengthHours: number;
   dayLengthText: string;
+  moonrise: Date | null;
+  moonset: Date | null;
   twilight: {
     civilEnd: Date | null;
     nauticalEnd: Date | null;
@@ -157,6 +177,7 @@ interface ObservingSummary {
     phaseName: string;
     illumination: number;
   };
+  moonAge: number;
   darkness: {
     label: string;
     tone: DarknessTone;
@@ -281,6 +302,9 @@ const deriveObservingSummary = (
       phaseName: getMoonPhaseName(illumination),
       illumination,
     },
+    moonrise: sunMoon.moonrise,
+    moonset: sunMoon.moonset,
+    moonAge: sunMoon.moonPhase.age,
     darkness: {
       label: darknessLabel,
       tone: darknessTone,
@@ -535,6 +559,11 @@ const ObservingConditionsCard = ({
                 valueClass='text-zinc-200'
               />
               <DetailRow
+                label='Moon Age'
+                value={`${Math.round(summary.moonAge)} days`}
+                valueClass='text-zinc-200'
+              />
+              <DetailRow
                 label='Darkness Quality'
                 value={summary.darkness.label}
                 valueClass={toneClassMap[summary.darkness.tone]}
@@ -598,155 +627,167 @@ const SummaryRail = ({
   timezone?: string;
   loading: boolean;
 }) => {
+  const toneClassMap: Record<DarknessTone, string> = {
+    excellent: 'text-emerald-300',
+    good: 'text-blue-200',
+    fair: 'text-yellow-200',
+    challenging: 'text-orange-200',
+  };
+
   const StatusBadge = () => {
     if (!summary) {
       return (
-        <span className='text-xs text-zinc-500'>
-          Awaiting observing data...
+        <span className='text-xs uppercase tracking-wide text-zinc-500'>
+          Observing | calibrating
         </span>
       );
     }
 
-    const toneBgMap: Record<DarknessTone, string> = {
-      excellent: 'text-emerald-300',
-      good: 'text-blue-200',
-      fair: 'text-yellow-200',
-      challenging: 'text-orange-200',
-    };
-
     return (
       <span
-        className={`text-sm font-medium ${toneBgMap[summary.darkness.tone]}`}
+        className={`text-xs font-semibold uppercase tracking-wide ${toneClassMap[summary.darkness.tone]}`}
       >
-        {summary.darkness.label}
+        Observing | {summary.darkness.label}
       </span>
     );
   };
 
   const summaryItems = [
     {
-      icon: <Sun size={16} className='text-yellow-300' />,
-      title: 'Sunlight',
-      primary: summary
-        ? `${formatShortTime(summary.sunrise, timezone)} → ${formatShortTime(
-            summary.sunset,
-            timezone,
-          )}`
-        : '--:--',
-      secondary: summary ? summary.dayLengthText : '—',
+      icon: <Sun size={18} className='text-yellow-300' />,
+      title: 'Sun',
+      rows: summary
+        ? [
+            {
+              label: 'Rise',
+              value: formatShortTime(summary.sunrise, timezone),
+            },
+            {
+              label: 'Set',
+              value: formatShortTime(summary.sunset, timezone),
+            },
+            {
+              label: 'Daylight',
+              value: summary.dayLengthText,
+            },
+          ]
+        : [
+            { label: 'Rise', value: '--:--' },
+            { label: 'Set', value: '--:--' },
+            { label: 'Daylight', value: '--h --m' },
+          ],
     },
     {
-      icon: <span className='text-lg'>{summary?.moon.icon ?? '🌙'}</span>,
+      icon: (
+        <span className='text-xl leading-none'>
+          {summary?.moon.icon ?? '🌙'}
+        </span>
+      ),
       title: 'Moon',
-      primary: summary ? summary.moon.phaseName : 'Loading phase',
-      secondary: summary ? `${summary.moon.illumination}% illuminated` : '—',
+      rows: summary
+        ? [
+            {
+              label: 'Phase',
+              value: `${summary.moon.phaseName} (${summary.moon.illumination}% lit)`,
+            },
+            {
+              label: 'Rise',
+              value: formatShortTime(summary.moonrise, timezone),
+            },
+            {
+              label: 'Set',
+              value: formatShortTime(summary.moonset, timezone),
+            },
+          ]
+        : [
+            { label: 'Phase', value: 'Loading...' },
+            { label: 'Rise', value: '--:--' },
+            { label: 'Set', value: '--:--' },
+          ],
     },
     {
       icon: <Telescope size={16} className='text-purple-300' />,
-      title: 'Best Viewing',
-      primary:
-        summary?.bestViewingWindowText ??
-        (summary?.bestViewingStart
-          ? `${formatShortTime(summary.bestViewingStart, timezone)} onward`
-          : 'Awaiting twilight'),
-      secondary:
-        summary?.currentVisiblePlanets &&
-        summary.currentVisiblePlanets.length > 0
-          ? `Visible now: ${summary.currentVisiblePlanets.join(', ')}`
-          : 'Planets rising soon',
-    },
-    {
-      icon: <Compass size={16} className='text-blue-300' />,
-      title: 'Next Up',
-      primary: summary?.nextEvent ? summary.nextEvent.label : 'No major events',
-      secondary: summary?.nextEvent
-        ? formatShortTime(summary.nextEvent.time, timezone)
-        : '--:--',
+      title: 'Observing',
+      rows: summary
+        ? [
+            {
+              label: 'Window',
+              value:
+                summary.bestViewingWindowText ??
+                (summary.bestViewingStart
+                  ? `${formatShortTime(summary.bestViewingStart, timezone)} onward`
+                  : 'Check later tonight'),
+            },
+            {
+              label: 'Darkness',
+              value: summary.darkness.label,
+              valueClass: toneClassMap[summary.darkness.tone],
+            },
+            {
+              label: 'Next',
+              value: summary.nextEvent
+                ? `${summary.nextEvent.label} @ ${formatShortTime(
+                    summary.nextEvent.time,
+                    timezone,
+                  )}`
+                : 'No major events soon',
+            },
+          ]
+        : [
+            { label: 'Window', value: 'Loading...' },
+            { label: 'Darkness', value: '--' },
+            { label: 'Next', value: '--' },
+          ],
     },
   ];
 
   return (
-    <div className='bg-zinc-900/60 border border-zinc-700/70 rounded-lg px-4 py-3'>
-      <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
-        <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 flex-1'>
+    <div className='rounded-lg border border-zinc-700/70 bg-zinc-900/60 px-4 py-4'>
+      <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
+        <div className='grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3'>
           {summaryItems.map((item) => (
             <div
               key={item.title}
-              className='flex items-center gap-3 rounded-md border border-zinc-800/80 bg-zinc-800/40 px-3 py-2'
+              className='rounded-md border border-zinc-800/80 bg-zinc-800/40 px-3 py-3'
             >
-              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900/80'>
-                {item.icon}
-              </div>
-              <div className='space-y-0.5'>
-                <div className='text-[10px] uppercase tracking-wide text-zinc-500'>
-                  {item.title}
+              <div className='flex items-start gap-3'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900/80'>
+                  {item.icon}
                 </div>
-                <div className='text-sm font-medium text-white'>
-                  {item.primary}
+                <div className='flex-1 space-y-1'>
+                  <div className='text-[10px] font-semibold uppercase tracking-wide text-zinc-500'>
+                    {item.title}
+                  </div>
+                  <div className='space-y-1 text-xs'>
+                    {item.rows.map((row) => (
+                      <div
+                        key={`${item.title}-${row.label}`}
+                        className='flex justify-between gap-3'
+                      >
+                        <span className='text-zinc-500'>{row.label}</span>
+                        <span
+                          className={`text-right text-zinc-200 ${
+                            row.valueClass ?? ''
+                          }`}
+                        >
+                          {row.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className='text-xs text-zinc-400'>{item.secondary}</div>
               </div>
             </div>
           ))}
         </div>
-        <div className='flex items-center justify-between gap-3 md:w-auto'>
+        <div className='flex items-center justify-between gap-3 lg:flex-col lg:items-end lg:gap-2'>
           <StatusBadge />
           {loading && (
-            <div className='flex items-center gap-2 text-xs text-zinc-400'>
+            <div className='flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-400'>
               <div className='h-4 w-4 animate-spin rounded-full border-2 border-purple-400 border-t-transparent'></div>
               Updating
             </div>
           )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Fixed moon display
-const MoonDisplay = ({ sunMoon, timezone }: any) => {
-  const illumination = Math.round(sunMoon.moonPhase.illumination);
-  const phaseIcon = getMoonPhaseIcon(illumination);
-  const phaseName = getMoonPhaseName(illumination);
-
-  return (
-    <div className='bg-zinc-700/50 rounded-lg p-3'>
-      <div className='flex items-center gap-2 mb-2'>
-        <div className='text-lg'>{phaseIcon}</div>
-        <span className='font-medium text-white text-sm'>Moon</span>
-      </div>
-
-      <div className='space-y-2'>
-        <div className='flex items-center gap-2'>
-          <div className='w-8 h-8 bg-zinc-600 rounded-full relative overflow-hidden'>
-            <div
-              className='absolute right-0 top-0 h-full bg-gray-300 rounded-full transition-all duration-300'
-              style={{ width: `${illumination}%` }}
-            ></div>
-          </div>
-          <div className='text-xs'>
-            <div className='text-blue-300 font-medium'>{phaseName}</div>
-            <div className='text-zinc-400'>{illumination}% illuminated</div>
-          </div>
-        </div>
-
-        <div className='grid grid-cols-2 gap-2 text-xs'>
-          <div className='flex justify-between'>
-            <span className='text-zinc-400'>Rise:</span>
-            <span className='text-white'>
-              {formatTime(sunMoon.moonrise, timezone)}
-            </span>
-          </div>
-          <div className='flex justify-between'>
-            <span className='text-zinc-400'>Set:</span>
-            <span className='text-white'>
-              {formatTime(sunMoon.moonset, timezone)}
-            </span>
-          </div>
-        </div>
-
-        <div className='text-xs text-zinc-400'>
-          Age: {Math.round(sunMoon.moonPhase.age)} days
         </div>
       </div>
     </div>
@@ -1044,7 +1085,7 @@ export default function EphemerisWidget() {
               Calculating celestial events...
             </div>
           ) : ephemerisData ? (
-            <div className='flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]'>
+            <div className='flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6'>
               <AltitudeChart
                 celestialBodies={[
                   {
@@ -1078,48 +1119,6 @@ export default function EphemerisWidget() {
                   summary={observingSummary}
                   timezone={location.timezone}
                 />
-
-                <div className='grid gap-3 sm:grid-cols-2'>
-                  <div className='rounded-lg border border-zinc-700/60 bg-zinc-900/60 p-3'>
-                    <div className='mb-2 flex items-center gap-2'>
-                      <Sun size={14} className='text-yellow-400' />
-                      <span className='text-sm font-medium text-white'>
-                        Sun
-                      </span>
-                    </div>
-                    <div className='space-y-1 text-xs'>
-                      <div className='flex justify-between'>
-                        <span className='text-zinc-400'>Rise</span>
-                        <span className='text-white'>
-                          {formatTime(
-                            ephemerisData.sunMoon.sunrise,
-                            location.timezone,
-                          )}
-                        </span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-zinc-400'>Set</span>
-                        <span className='text-white'>
-                          {formatTime(
-                            ephemerisData.sunMoon.sunset,
-                            location.timezone,
-                          )}
-                        </span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-zinc-400'>Day Length</span>
-                        <span className='text-yellow-300'>
-                          {formatDayLength(ephemerisData.sunMoon.dayLength)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <MoonDisplay
-                    sunMoon={ephemerisData.sunMoon}
-                    timezone={location.timezone}
-                  />
-                </div>
 
                 <PlanetHighlightsCard
                   planets={planets}
