@@ -116,8 +116,8 @@ function formatMoonPhaseCalculations(phases: any[]): string {
       const moonPhase = MoonPhase(time);
 
       output += `**${phase.phase} - ${date.toLocaleDateString()}**\n`;
-      output += `- Illumination: ${(illumination.phase * 100).toFixed(1)}%\n`;
-      output += `- Phase Angle: ${illumination.angle.toFixed(2)}°\n`;
+      output += `- Illumination: ${(illumination.phase_fraction * 100).toFixed(1)}%\n`;
+      output += `- Phase Angle: ${illumination.phase_angle.toFixed(2)}°\n`;
       output += `- Calculated Phase: ${moonPhase}\n`;
       output += `- Moon Sign: ${phase.sign}\n\n`;
     } catch (error) {
@@ -172,7 +172,7 @@ function getPlanetPosition(
     const ecliptic = Ecliptic(vector);
 
     return {
-      longitude: ecliptic.lon * (180 / Math.PI),
+      longitude: ecliptic.elon * (180 / Math.PI),
     };
   } catch (error) {
     return null;

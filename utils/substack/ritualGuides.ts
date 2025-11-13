@@ -97,7 +97,7 @@ function findBestDaysForPhase(
   const matchingDays: string[] = [];
 
   Object.entries(bestDays).forEach(([activity, guidance]) => {
-    const hasMatch = guidance.dates.some((date) => {
+    const hasMatch = guidance.dates.some((date: Date) => {
       return (
         date.toDateString() === phaseDate.toDateString() ||
         Math.abs(date.getTime() - phaseDate.getTime()) < 24 * 60 * 60 * 1000
