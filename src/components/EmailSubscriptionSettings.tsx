@@ -14,22 +14,31 @@ export function EmailSubscriptionSettings() {
   const [updating, setUpdating] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const resolveSessionEmail = useCallback(async () => {
+  const resolveSessionIdentity = useCallback(async () => {
     try {
       const session = await betterAuthClient.getSession();
       const sessionUser =
         (session as any)?.data?.user || (session as any)?.user || null;
 
-      return (sessionUser as any)?.email ?? null;
+      return {
+        email: (sessionUser as any)?.email ?? null,
+        id: (sessionUser as any)?.id ?? null,
+      };
     } catch (error) {
       console.error(
-        'Error fetching auth session while loading newsletter email',
+        'Error fetching auth session while loading newsletter preferences',
         error,
       );
-      return null;
+      return { email: null, id: null };
     }
   }, []);
+
+  const authUserId =
+    ((authState.user as any)?.id as string | undefined) ?? null;
+  const authProfileId =
+    ((authState.profile as any)?.id as string | undefined) ?? null;
 
   useEffect(() => {
     let isMounted = true;
@@ -39,32 +48,37 @@ export function EmailSubscriptionSettings() {
         ((me?.profile as any)?.email as string | undefined) ||
         ((me as any)?.email as string | undefined) ||
         null;
+      const profileUserId =
+        ((me as any)?.id as string | undefined) || authUserId || null;
 
       if (profileEmail) {
         if (isMounted) {
           setUserEmail(profileEmail);
+          setUserId(profileUserId);
           setAuthChecked(true);
         }
         return;
       }
 
-      const sessionEmail = await resolveSessionEmail();
+      const sessionIdentity = await resolveSessionIdentity();
 
       if (isMounted) {
-        setUserEmail(sessionEmail);
+        setUserEmail(sessionIdentity.email ?? null);
+        setUserId(sessionIdentity.id ?? profileUserId ?? authProfileId ?? null);
         setAuthChecked(true);
       }
     };
 
     setUserEmail(null);
     setAuthChecked(false);
+    setUserId(null);
 
     resolveEmail();
 
     return () => {
       isMounted = false;
     };
-  }, [me, resolveSessionEmail]);
+  }, [me, authUserId, authProfileId, resolveSessionIdentity]);
 
   const checkSubscriptionStatus = useCallback(async (email: string) => {
     setLoading(true);
@@ -108,22 +122,26 @@ export function EmailSubscriptionSettings() {
     setUpdating(true);
     try {
       const newStatus = !isSubscribed;
+      const resolvedUserId =
+        userId || ((me as any)?.id as string | undefined) || authUserId || null;
 
       if (newStatus) {
+        const payload = {
+          email: userEmail,
+          preferences: {
+            weeklyNewsletter: true,
+            blogUpdates: true,
+            productUpdates: false,
+            cosmicAlerts: false,
+          },
+          source: 'profile_settings',
+          ...(resolvedUserId ? { userId: resolvedUserId } : {}),
+        };
+
         const response = await fetch('/api/newsletter/subscribers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: userEmail,
-            userId,
-            preferences: {
-              weeklyNewsletter: true,
-              blogUpdates: true,
-              productUpdates: false,
-              cosmicAlerts: false,
-            },
-            source: 'profile_settings',
-          }),
+          body: JSON.stringify(payload),
         });
 
         if (response.ok) {
