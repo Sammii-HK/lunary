@@ -90,9 +90,7 @@ const NavLink = ({ href, icon: Icon, label, activePath }: NavLinkProps) => {
     <Link
       href={href}
       className={`flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-xs transition ${
-        active
-          ? 'text-purple-300'
-          : 'text-zinc-400 hover:text-zinc-200 focus:text-zinc-100'
+        active ? 'text-zinc-200' : 'text-zinc-400 hover:text-zinc-200'
       }`}
     >
       <Icon className='h-5 w-5' />
@@ -118,13 +116,13 @@ const PrimaryNavLink = ({
       <div
         className={`flex h-16 w-16 items-center justify-center rounded-full border-2 shadow-lg transition ${
           active
-            ? 'border-purple-400/80 bg-purple-600 text-white shadow-purple-900/30'
-            : 'border-zinc-700/80 bg-zinc-900/95 text-zinc-200 group-hover:border-purple-500/60 group-hover:text-white'
+            ? 'border-zinc-600 bg-zinc-800 text-white'
+            : 'border-zinc-700 bg-zinc-900 text-zinc-300 group-hover:border-zinc-600 group-hover:text-white'
         }`}
       >
-        <Icon className='h-7 w-7' />
+        <Icon className='h-7 w-7 text-purple-200' />
       </div>
-      <span className='absolute -bottom-6 whitespace-nowrap text-[11px] uppercase tracking-wide text-purple-200'>
+      <span className='absolute -bottom-6 whitespace-nowrap text-[11px] uppercase tracking-wide text-zinc-400'>
         {label}
       </span>
     </Link>

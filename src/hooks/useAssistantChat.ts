@@ -119,6 +119,7 @@ export const useAssistantChat = () => {
               'Content-Type': 'application/json',
               Accept: 'text/event-stream',
             },
+            credentials: 'include',
             body: JSON.stringify({
               message: content,
               threadId,
@@ -126,8 +127,18 @@ export const useAssistantChat = () => {
           },
         );
 
-        if (!response.ok || !response.body) {
-          throw new Error('Failed to stream response');
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Unauthorized - Please sign in to use the AI chat');
+          }
+          const errorText = await response.text().catch(() => 'Unknown error');
+          throw new Error(
+            `Failed to stream response: ${response.status} ${errorText}`,
+          );
+        }
+
+        if (!response.body) {
+          throw new Error('Failed to stream response: No response body');
         }
 
         const reader = response.body.getReader();
