@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userId = session.user.id;
+    const userEmail = session.user.email;
     const { searchParams } = new URL(request.url);
 
     const spreadSlug = searchParams.get('spread');
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
         ? new Date(cursorParam)
         : null;
 
-    const subscription = await getSubscription(userId);
+    const subscription = await getSubscription(userId, userEmail);
     const usage = await computeUsageSnapshot(userId, subscription);
 
     const historyCutoffDays = usage.historyWindowDays;
@@ -126,6 +127,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = session.user.id;
+    const userEmail = session.user.email;
 
     const bodyText = await request.text();
     if (!bodyText) {
@@ -153,7 +155,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const subscription = await getSubscription(userId);
+    const subscription = await getSubscription(userId, userEmail);
 
     if (!isSpreadAccessible(spreadSlug, subscription.plan)) {
       return NextResponse.json(
