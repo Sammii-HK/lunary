@@ -1,4 +1,22 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
 import { sql } from '@vercel/postgres';
+
+// Load environment variables (try .env.local first, then .env)
+config({ path: resolve(process.cwd(), '.env.local') });
+config({ path: resolve(process.cwd(), '.env') });
+
+// Check if POSTGRES_URL is set
+if (
+  !process.env.POSTGRES_URL &&
+  !process.env.POSTGRES_PRISMA_URL &&
+  !process.env.POSTGRES_URL_NON_POOLING
+) {
+  console.error('❌ POSTGRES_URL environment variable not found');
+  console.error('   Make sure you have .env.local with POSTGRES_URL set');
+  console.error('   Or pull from Vercel: vercel env pull .env.local');
+  process.exit(1);
+}
 
 async function setupDatabase() {
   try {
