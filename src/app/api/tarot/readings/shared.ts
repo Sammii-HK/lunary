@@ -62,7 +62,7 @@ export const getSubscription = async (
         `[tarot/readings] No subscription found for user_id ${userId}, trying email lookup: ${userEmail}`,
       );
       result = await sql`
-        SELECT plan_type, status
+        SELECT plan_type, status, stripe_customer_id
         FROM subscriptions
         WHERE user_email = ${userEmail}
         ORDER BY created_at DESC

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { TAROT_SPREAD_MAP } from '@/constants/tarotSpreads';
+import { TAROT_SPREAD_MAP, TarotPlan } from '@/constants/tarotSpreads';
 import { generateSpreadReading } from '@/utils/tarot/spreadReading';
 import {
   computeUsageSnapshot,
@@ -190,12 +190,23 @@ export async function POST(request: NextRequest) {
 
     const subscription = await getSubscription(userId, userEmail);
 
+    console.log(`[tarot/readings] POST subscription check:`, {
+      userId,
+      userEmail,
+      subscription_plan: subscription.plan,
+      subscription_status: subscription.status,
+      spreadSlug,
+      spread_minimumPlan: spread.minimumPlan,
+      isAccessible: isSpreadAccessible(spreadSlug, subscription.plan),
+    });
+
     if (!isSpreadAccessible(spreadSlug, subscription.plan)) {
       return NextResponse.json(
         {
           error: 'This spread is locked for your current plan.',
           code: 'spread_locked',
           requiredPlan: spread.minimumPlan,
+          currentPlan: subscription.plan,
         },
         { status: 403 },
       );

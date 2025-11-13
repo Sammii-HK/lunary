@@ -101,7 +101,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       ? 'monthly'
       : 'yearly';
 
-  // Get customer to retrieve user_id and email
+  // Get customer to retrieve user_id and email for database sync
   let userId: string | null = null;
   let userEmail: string | null = null;
   try {
@@ -132,7 +132,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     }
   }
 
-  // Write to database subscriptions table
+  // Write subscription to database for API access
   if (userId || userEmail) {
     try {
       const mappedStatus =
@@ -190,7 +190,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
           `✅ Subscription written to database for user_id: ${userId}`,
         );
       } else if (userEmail) {
-        // Try to find existing subscription by email and update it
+        // Update by email if user_id not available
         await sql`
           UPDATE subscriptions
           SET
@@ -241,7 +241,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       ? 'monthly'
       : 'yearly';
 
-  // Get customer to retrieve user_id and email
+  // Get customer to retrieve user_id and email for database sync
   let userId: string | null = null;
   let userEmail: string | null = null;
   try {
@@ -252,7 +252,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     console.error('Failed to retrieve customer:', error);
   }
 
-  // Update database subscriptions table
+  // Update subscription in database
   if (userId || userEmail) {
     try {
       const mappedStatus =
