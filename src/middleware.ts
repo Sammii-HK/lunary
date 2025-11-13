@@ -25,11 +25,11 @@ export function middleware(request: NextRequest) {
     url.pathname.startsWith(prefix),
   );
 
-    if (!isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
-      return NextResponse.rewrite(new URL('/404', request.url));
-    }
+  if (!isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
 
-    if (isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
+  if (isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
     const trimmedPath = url.pathname.slice(adminPrefix.length) || '/';
     const cleanPath =
       trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`;
