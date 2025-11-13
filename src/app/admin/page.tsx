@@ -62,9 +62,16 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
-        // Get admin email from environment (client-side check)
-        const adminEmail =
-          process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@lunary.app';
+        // Get admin emails from environment (client-side check)
+        const adminEmailsEnv =
+          process.env.NEXT_PUBLIC_ADMIN_EMAILS ||
+          process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+          'admin@lunary.app';
+
+        const adminEmails = adminEmailsEnv
+          .split(',')
+          .map((email) => email.trim().toLowerCase())
+          .filter(Boolean);
 
         // Check Better Auth session
         const session = await betterAuthClient.getSession().catch(() => null);
@@ -77,8 +84,8 @@ export default function AdminDashboard() {
           return;
         }
 
-        // Check if user email matches admin email
-        if (userEmail.toLowerCase() !== adminEmail.toLowerCase()) {
+        // Check if user email is in admin list
+        if (!adminEmails.includes(userEmail.toLowerCase())) {
           // Not admin, redirect to unauthorized or home
           router.push('/auth');
           return;

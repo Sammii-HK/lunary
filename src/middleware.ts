@@ -2,19 +2,44 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
+  const hostname =
+    request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
 
-  // Protect admin routes - check if user is admin
+  const configuredAdminHosts = [
+    process.env.ADMIN_DASHBOARD_HOST,
+    process.env.ADMIN_APP_HOST,
+    process.env.NEXT_PUBLIC_ADMIN_APP_HOST,
+  ]
+    .filter(Boolean)
+    .map((host) => host!.toLowerCase());
+
+  const isAdminSubdomain =
+    hostname.startsWith('admin.') || configuredAdminHosts.includes(hostname);
+
+  const skipAdminRewritePrefixes = ['/auth'];
+  let shouldRewrite = false;
+
+  if (
+    isAdminSubdomain &&
+    !url.pathname.startsWith('/admin') &&
+    !skipAdminRewritePrefixes.some((prefix) =>
+      url.pathname.startsWith(prefix),
+    )
+  ) {
+    url.pathname =
+      url.pathname === '/' ? '/admin' : `/admin${url.pathname}`;
+    shouldRewrite = true;
+  }
+
+  const isProductionLike =
+    process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'production';
+
   if (url.pathname.startsWith('/admin')) {
-    // Get admin email from environment
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@lunary.app';
-
-    // Check for admin session cookie or header
-    // Better Auth stores session in cookies
+    // Check for admin session cookie (Better Auth stores session in cookies)
     const authCookie = request.cookies.get('better-auth.session_token');
 
-    // In test/dev, allow access if authenticated (client-side will check admin status)
-    // In production, require authentication
-    if (process.env.NODE_ENV === 'production' && !authCookie) {
+    if (isProductionLike && !authCookie) {
       // Redirect to auth page if not authenticated
       return NextResponse.redirect(new URL('/auth', request.url));
     }
@@ -40,6 +65,10 @@ export function middleware(request: NextRequest) {
         new URL(`/grimoire/${slug}${hash}`, request.url),
       );
     }
+  }
+
+  if (shouldRewrite) {
+    return NextResponse.rewrite(url);
   }
 
   return NextResponse.next();
