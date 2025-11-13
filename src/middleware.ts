@@ -16,18 +16,26 @@ export function middleware(request: NextRequest) {
   const isAdminSubdomain =
     hostname.startsWith('admin.') || configuredAdminHosts.includes(hostname);
 
+  const adminPrefix = '/admin';
   const skipAdminRewritePrefixes = ['/auth'];
   let shouldRewrite = false;
 
-  if (
-    isAdminSubdomain &&
-    !url.pathname.startsWith('/admin') &&
-    !skipAdminRewritePrefixes.some((prefix) =>
-      url.pathname.startsWith(prefix),
-    )
-  ) {
+  const hasAdminPrefix = url.pathname.startsWith(adminPrefix);
+  const shouldSkip = skipAdminRewritePrefixes.some((prefix) =>
+    url.pathname.startsWith(prefix),
+  );
+
+  if (isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
+    const trimmedPath = url.pathname.slice(adminPrefix.length) || '/';
+    const cleanPath =
+      trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`;
+    const redirectUrl = new URL(cleanPath, request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (isAdminSubdomain && !hasAdminPrefix && !shouldSkip) {
     url.pathname =
-      url.pathname === '/' ? '/admin' : `/admin${url.pathname}`;
+      url.pathname === '/' ? adminPrefix : `${adminPrefix}${url.pathname}`;
     shouldRewrite = true;
   }
 
@@ -35,7 +43,7 @@ export function middleware(request: NextRequest) {
     process.env.NODE_ENV === 'production' ||
     process.env.VERCEL_ENV === 'production';
 
-  if (url.pathname.startsWith('/admin')) {
+  if (url.pathname.startsWith(adminPrefix)) {
     // Check for admin session cookie (Better Auth stores session in cookies)
     const authCookie = request.cookies.get('better-auth.session_token');
 
