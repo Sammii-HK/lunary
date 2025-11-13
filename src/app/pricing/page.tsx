@@ -71,15 +71,18 @@ export default function PricingPage() {
       planId === 'monthly' ? 'monthly_plan' : 'yearly_plan',
       '/pricing',
     );
-
     try {
       // Get referral code from localStorage if present
       const storedReferralCode = localStorage.getItem('lunary_referral_code');
+      const currentUserId =
+        authState.user?.id || ((me as any)?.id as string | undefined);
 
       const { sessionId } = await createCheckoutSession(
         priceId,
         subscription.customerId,
         storedReferralCode || undefined,
+        undefined,
+        currentUserId,
       );
 
       const stripe = await stripePromise;

@@ -108,7 +108,15 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     try {
       // Get the new user's ID from customer metadata or lookup
       const customer = await stripe.customers.retrieve(customerId);
-      const newUserId = (customer as any).metadata?.userId;
+      const subscriptionUserId =
+        typeof subscription.metadata?.userId === 'string'
+          ? subscription.metadata.userId
+          : undefined;
+      const customerUserId =
+        typeof (customer as any).metadata?.userId === 'string'
+          ? (customer as any).metadata.userId
+          : undefined;
+      const newUserId = subscriptionUserId || customerUserId;
 
       if (newUserId) {
         const { processReferralCode, applyReferralCouponToSubscription } =

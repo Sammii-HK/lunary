@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
     const requestBody = await request.json();
     priceId = requestBody.priceId;
-    const { customerId } = requestBody;
+    const { customerId, userId } = requestBody;
 
     if (!priceId) {
       return NextResponse.json(
@@ -60,6 +60,15 @@ export async function POST(request: NextRequest) {
     // Fetch trial period from Stripe product/price metadata
     const trialDays = await getTrialPeriodForPrice(priceId);
 
+    const planType = isMonthly ? 'monthly' : 'yearly';
+    const metadata: Record<string, string> = {
+      planType,
+    };
+
+    if (typeof userId === 'string' && userId.trim().length > 0) {
+      metadata.userId = userId;
+    }
+
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -73,13 +82,9 @@ export async function POST(request: NextRequest) {
       cancel_url: `${baseUrl}/pricing`,
       subscription_data: {
         trial_period_days: trialDays,
-        metadata: {
-          planType: isMonthly ? 'monthly' : 'yearly',
-        },
+        metadata,
       },
-      metadata: {
-        planType: isMonthly ? 'monthly' : 'yearly',
-      },
+      metadata,
       // Enable promo codes in Stripe Checkout
       allow_promotion_codes: true,
     };
@@ -133,11 +138,10 @@ export async function POST(request: NextRequest) {
         const validation = await validateReferralCode(referralCode);
         if (validation.valid) {
           // Store referral code in metadata to process after successful checkout
-          sessionConfig.metadata = {
-            ...sessionConfig.metadata,
-            referralCode,
-            referrerUserId: validation.userId || null,
-          };
+          metadata.referralCode = referralCode;
+          if (validation.userId) {
+            metadata.referrerUserId = validation.userId;
+          }
         }
       } catch (error) {
         console.error('Failed to validate referral code:', error);
