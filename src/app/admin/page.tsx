@@ -387,6 +387,15 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       status: 'new',
     },
     {
+      title: 'Substack Manager',
+      description:
+        'Generate and publish weekly Substack posts (Free: newsletter content, Paid: $3/month enhanced)',
+      href: '/admin/substack',
+      icon: <Send className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
       title: 'Grimoire Packs',
       description:
         'Create magical packs using grimoire database with proper naming',
