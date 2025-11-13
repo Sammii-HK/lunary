@@ -82,8 +82,11 @@ export async function generateMetadata({
   const variantRaw = toStringParam(searchParams.variant);
   const variant = variantRaw ? variantRaw.toLowerCase() : undefined;
   const timeframeRaw =
-    toStringParam(searchParams.timeframe) ?? (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
-  const timeframe = toTitleCase(timeframeRaw) ?? (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
+    toStringParam(searchParams.timeframe) ??
+    (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
+  const timeframe =
+    toTitleCase(timeframeRaw) ??
+    (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
   const nameRaw = toStringParam(searchParams.name);
   const name = nameRaw ? toTitleCase(nameRaw) : undefined;
   const isPattern = variant === 'pattern';
@@ -93,9 +96,10 @@ export async function generateMetadata({
       ? `Themes: ${keywords.join(' • ')}`
       : `A ${timeframe.toLowerCase()} tarot ${isPattern ? 'pattern insight' : 'card insight'} from Lunary.`);
 
-  const patternLabel = timeframe.endsWith('Pattern') || timeframe.endsWith('Patterns')
-    ? timeframe
-    : `${timeframe}${isPattern ? ' Tarot Patterns' : ''}`;
+  const patternLabel =
+    timeframe.endsWith('Pattern') || timeframe.endsWith('Patterns')
+      ? timeframe
+      : `${timeframe}${isPattern ? ' Tarot Patterns' : ''}`;
   const title = isPattern
     ? name
       ? `${name}'s ${patternLabel}`
@@ -105,15 +109,20 @@ export async function generateMetadata({
       : `${timeframe} Tarot Spotlight: ${card}`;
 
   const urlParams = new URLSearchParams();
-  if (searchParams.card) urlParams.set('card', toStringParam(searchParams.card)!);
+  if (searchParams.card)
+    urlParams.set('card', toStringParam(searchParams.card)!);
   if (searchParams.keywords)
     urlParams.set('keywords', parseKeywords(searchParams.keywords).join(','));
   if (searchParams.timeframe)
     urlParams.set('timeframe', toStringParam(searchParams.timeframe)!);
-  if (searchParams.name) urlParams.set('name', toStringParam(searchParams.name)!);
-  if (searchParams.date) urlParams.set('date', toStringParam(searchParams.date)!);
-  if (searchParams.text) urlParams.set('text', toStringParam(searchParams.text)!);
-  if (searchParams.variant) urlParams.set('variant', toStringParam(searchParams.variant)!);
+  if (searchParams.name)
+    urlParams.set('name', toStringParam(searchParams.name)!);
+  if (searchParams.date)
+    urlParams.set('date', toStringParam(searchParams.date)!);
+  if (searchParams.text)
+    urlParams.set('text', toStringParam(searchParams.text)!);
+  if (searchParams.variant)
+    urlParams.set('variant', toStringParam(searchParams.variant)!);
 
   const canonical = `${APP_URL}/share/tarot${
     urlParams.toString() ? `?${urlParams.toString()}` : ''
@@ -159,23 +168,25 @@ export async function generateMetadata({
   };
 }
 
-export default function ShareTarotPage({
-  searchParams,
-}: ShareTarotPageProps) {
+export default function ShareTarotPage({ searchParams }: ShareTarotPageProps) {
   const card = toStringParam(searchParams.card) ?? 'Your Tarot Card';
   const keywords = parseKeywords(searchParams.keywords);
   const variantRaw = toStringParam(searchParams.variant);
   const variant = variantRaw ? variantRaw.toLowerCase() : undefined;
   const timeframeBase =
-    toStringParam(searchParams.timeframe) ?? (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
-  const timeframe = toTitleCase(timeframeBase) ?? (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
+    toStringParam(searchParams.timeframe) ??
+    (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
+  const timeframe =
+    toTitleCase(timeframeBase) ??
+    (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
   const name = toTitleCase(toStringParam(searchParams.name));
   const shareDate = toStringParam(searchParams.date);
   const text = truncate(toStringParam(searchParams.text));
   const isPattern = variant === 'pattern';
-  const patternLabel = timeframe.endsWith('Pattern') || timeframe.endsWith('Patterns')
-    ? timeframe
-    : `${timeframe}${isPattern ? ' Tarot Patterns' : ''}`;
+  const patternLabel =
+    timeframe.endsWith('Pattern') || timeframe.endsWith('Patterns')
+      ? timeframe
+      : `${timeframe}${isPattern ? ' Tarot Patterns' : ''}`;
   const shareTitle = isPattern
     ? name
       ? `${name}'s ${patternLabel}`
@@ -196,7 +207,9 @@ export default function ShareTarotPage({
             {shareTitle}
           </h1>
           <p className='mt-2 text-sm text-purple-200/80'>
-            {variantLabel ? `${variantLabel} guidance` : 'Personal cosmic insight'}
+            {variantLabel
+              ? `${variantLabel} guidance`
+              : 'Personal cosmic insight'}
             {shareDate ? ` · ${shareDate}` : null}
           </p>
 
@@ -221,9 +234,9 @@ export default function ShareTarotPage({
 
           <div className='mt-12 space-y-4 text-sm text-zinc-200/80'>
             <p>
-              Ready to explore your own tarot journey? Lunary creates personalized
-              readings using real astronomical data and your unique cosmic
-              signature.
+              Ready to explore your own tarot journey? Lunary creates
+              personalized readings using real astronomical data and your unique
+              cosmic signature.
             </p>
             <p>
               Discover daily guidance, pattern insights, and shareable cosmic

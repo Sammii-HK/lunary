@@ -814,6 +814,111 @@ const BirthChartPage = () => {
     return `${value.slice(0, limit - 1).trimEnd()}…`;
   }, []);
 
+  const hasBirthChartData = hasBirthChart(me.profile);
+  const birthChartData =
+    hasBirthChartData && me?.profile
+      ? getBirthChartFromProfile(me.profile)
+      : null;
+
+  const birthChartShare = useMemo(() => {
+    if (!birthChartData) return null;
+
+    try {
+      const sunSign =
+        birthChartData.find((planet) => planet.body === 'Sun')?.sign ?? null;
+      const moonSign =
+        birthChartData.find((planet) => planet.body === 'Moon')?.sign ?? null;
+      const risingSign =
+        birthChartData.find((planet) => planet.body === 'Ascendant')?.sign ??
+        null;
+
+      const shareKeywords = [
+        sunSign ? `Sun ${sunSign}` : null,
+        moonSign ? `Moon ${moonSign}` : null,
+        risingSign ? `Rising ${risingSign}` : null,
+      ].filter(Boolean) as string[];
+
+      const url = new URL('/share/birth-chart', shareOrigin);
+      url.searchParams.set('variant', 'birth-chart');
+      if (firstName) url.searchParams.set('name', firstName);
+      if (userBirthday) url.searchParams.set('date', userBirthday);
+      if (sunSign) url.searchParams.set('sun', sunSign);
+      if (moonSign) url.searchParams.set('moon', moonSign);
+      if (risingSign) url.searchParams.set('rising', risingSign);
+      if (shareKeywords.length) {
+        url.searchParams.set('keywords', shareKeywords.join(','));
+      }
+
+      const { elements, modalities } = getElementModality(birthChartData);
+      const dominantElement = [...elements].sort(
+        (a, b) => b.count - a.count,
+      )[0];
+      const dominantModality = [...modalities].sort(
+        (a, b) => b.count - a.count,
+      )[0];
+
+      if (dominantElement?.count) {
+        url.searchParams.set('element', dominantElement.name);
+      }
+      if (dominantModality?.count) {
+        url.searchParams.set('modality', dominantModality.name);
+      }
+
+      const topInsight = getChartAnalysis(birthChartData)[0]?.insight;
+      if (topInsight) {
+        url.searchParams.set('insight', topInsight);
+      }
+
+      return {
+        url: url.toString(),
+        title: `${firstName ? `${firstName}'s` : 'My'} Birth Chart Highlights`,
+        text: truncate(topInsight),
+      };
+    } catch (error) {
+      console.error('Failed to build birth chart share URL:', error);
+      return null;
+    }
+  }, [birthChartData, shareOrigin, firstName, userBirthday, truncate]);
+
+  const handleShareClick = useCallback(
+    async ({
+      id,
+      title,
+      url,
+      text,
+    }: {
+      id: string;
+      title: string;
+      url: string;
+      text?: string;
+    }) => {
+      const sharePayload = {
+        title,
+        text: text || title,
+        url,
+      };
+
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        try {
+          await navigator.share(sharePayload);
+          setSharePopover(null);
+          return;
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+            return;
+          }
+          console.error(
+            'Web Share API failed, falling back to share buttons:',
+            error,
+          );
+        }
+      }
+
+      setSharePopover((prev) => (prev === id ? null : id));
+    },
+    [setSharePopover],
+  );
+
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location?.origin) {
       setShareOrigin(window.location.origin);
@@ -899,12 +1004,6 @@ const BirthChartPage = () => {
     );
   }
 
-  // Check if user has birth chart data (but they still need subscription to view it)
-  const hasBirthChartData = hasBirthChart(me.profile);
-  const birthChartData = hasBirthChartData
-    ? getBirthChartFromProfile(me.profile)
-    : null;
-
   // Note: Even if birth chart exists, user still can't access it without subscription
   // This preserves data for users who had trial/paid but keeps paywall intact
   if (!hasBirthChartData || !birthChartData) {
@@ -928,100 +1027,6 @@ const BirthChartPage = () => {
       </div>
     );
   }
-
-  const birthChartShare = useMemo(() => {
-    if (!birthChartData) return null;
-
-    try {
-      const sunSign =
-        birthChartData.find((planet) => planet.body === 'Sun')?.sign ?? null;
-      const moonSign =
-        birthChartData.find((planet) => planet.body === 'Moon')?.sign ?? null;
-      const risingSign =
-        birthChartData.find((planet) => planet.body === 'Ascendant')?.sign ?? null;
-
-      const shareKeywords = [
-        sunSign ? `Sun ${sunSign}` : null,
-        moonSign ? `Moon ${moonSign}` : null,
-        risingSign ? `Rising ${risingSign}` : null,
-      ].filter(Boolean) as string[];
-
-      const url = new URL('/share/birth-chart', shareOrigin);
-      url.searchParams.set('variant', 'birth-chart');
-      if (firstName) url.searchParams.set('name', firstName);
-      if (userBirthday) url.searchParams.set('date', userBirthday);
-      if (sunSign) url.searchParams.set('sun', sunSign);
-      if (moonSign) url.searchParams.set('moon', moonSign);
-      if (risingSign) url.searchParams.set('rising', risingSign);
-      if (shareKeywords.length) {
-        url.searchParams.set('keywords', shareKeywords.join(','));
-      }
-
-      const { elements, modalities } = getElementModality(birthChartData);
-      const dominantElement = [...elements].sort((a, b) => b.count - a.count)[0];
-      const dominantModality = [...modalities].sort((a, b) => b.count - a.count)[0];
-
-      if (dominantElement?.count) {
-        url.searchParams.set('element', dominantElement.name);
-      }
-      if (dominantModality?.count) {
-        url.searchParams.set('modality', dominantModality.name);
-      }
-
-      const topInsight = getChartAnalysis(birthChartData)[0]?.insight;
-      if (topInsight) {
-        url.searchParams.set('insight', topInsight);
-      }
-
-      return {
-        url: url.toString(),
-        title: `${firstName ? `${firstName}'s` : 'My'} Birth Chart Highlights`,
-        text: truncate(topInsight),
-      };
-    } catch (error) {
-      console.error('Failed to build birth chart share URL:', error);
-      return null;
-    }
-  }, [birthChartData, shareOrigin, firstName, userBirthday, truncate]);
-
-  const handleShareClick = useCallback(
-    async ({
-      id,
-      title,
-      url,
-      text,
-    }: {
-      id: string;
-      title: string;
-      url: string;
-      text?: string;
-    }) => {
-      const sharePayload = {
-        title,
-        text: text || title,
-        url,
-      };
-
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        try {
-          await navigator.share(sharePayload);
-          setSharePopover(null);
-          return;
-        } catch (error) {
-          if (error instanceof Error && error.name === 'AbortError') {
-            return;
-          }
-          console.error(
-            'Web Share API failed, falling back to share buttons:',
-            error,
-          );
-        }
-      }
-
-      setSharePopover((prev) => (prev === id ? null : id));
-    },
-    [setSharePopover],
-  );
 
   return (
     <div className='h-[91vh] space-y-6 pb-4 overflow-auto'>

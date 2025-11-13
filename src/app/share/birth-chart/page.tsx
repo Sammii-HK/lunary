@@ -152,10 +152,14 @@ export default function ShareBirthChartPage({
             Shared from Lunary
           </p>
           <h1 className='mt-6 text-2xl font-light text-white sm:text-3xl'>
-            {name ? `${name}'s Birth Chart Highlights` : 'Birth Chart Highlights'}
+            {name
+              ? `${name}'s Birth Chart Highlights`
+              : 'Birth Chart Highlights'}
           </h1>
           <p className='mt-2 text-sm text-blue-200/80'>
-            {date ? `Generated for ${new Date(date).toLocaleDateString('en-US')}` : 'Personalized cosmic profile'}
+            {date
+              ? `Generated for ${new Date(date).toLocaleDateString('en-US')}`
+              : 'Personalized cosmic profile'}
           </p>
 
           <div className='mt-10 grid gap-4 sm:grid-cols-3'>
@@ -169,13 +173,17 @@ export default function ShareBirthChartPage({
               <p className='text-[0.7rem] uppercase tracking-[0.3em] text-purple-100/70'>
                 Moon
               </p>
-              <p className='mt-2 text-xl font-light text-white'>{moon ?? '—'}</p>
+              <p className='mt-2 text-xl font-light text-white'>
+                {moon ?? '—'}
+              </p>
             </div>
             <div className='rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4'>
               <p className='text-[0.7rem] uppercase tracking-[0.3em] text-indigo-100/70'>
                 Rising
               </p>
-              <p className='mt-2 text-xl font-light text-white'>{rising ?? '—'}</p>
+              <p className='mt-2 text-xl font-light text-white'>
+                {rising ?? '—'}
+              </p>
             </div>
           </div>
 
@@ -216,19 +224,22 @@ export default function ShareBirthChartPage({
               <p className='text-sm font-semibold text-blue-100 uppercase tracking-[0.3em] mb-2'>
                 Signature Insight
               </p>
-              <p className='text-sm leading-relaxed text-zinc-100/90'>{insight}</p>
+              <p className='text-sm leading-relaxed text-zinc-100/90'>
+                {insight}
+              </p>
             </div>
           )}
 
           <div className='mt-12 space-y-4 text-sm text-zinc-200/80'>
             <p>
-              Your birth chart is a cosmic snapshot of the skies when you were born.
-              Lunary combines real astronomical data with modern guidance to surface
-              the placements and patterns that define your path.
+              Your birth chart is a cosmic snapshot of the skies when you were
+              born. Lunary combines real astronomical data with modern guidance
+              to surface the placements and patterns that define your path.
             </p>
             <p>
-              Ready to explore your chart in depth? Generate detailed planetary insights,
-              pattern analysis, and guidance tailored to your cosmic blueprint.
+              Ready to explore your chart in depth? Generate detailed planetary
+              insights, pattern analysis, and guidance tailored to your cosmic
+              blueprint.
             </p>
           </div>
 

@@ -14,7 +14,9 @@ const loadRobotoMono = async (request: Request) => {
     const fontUrl = new URL('/fonts/RobotoMono-Regular.ttf', request.url);
     robotoMonoPromise = fetch(fontUrl, { cache: 'force-cache' }).then((res) => {
       if (!res.ok) {
-        throw new Error(`Roboto Mono font fetch failed with status ${res.status}`);
+        throw new Error(
+          `Roboto Mono font fetch failed with status ${res.status}`,
+        );
       }
       return res.arrayBuffer();
     });
@@ -29,12 +31,30 @@ const sanitize = (value: string | null, limit = 80) => {
   return trimmed.length > limit ? `${trimmed.slice(0, limit - 1)}…` : trimmed;
 };
 
-const gradientsByElement: Record<string, { background: string; accent: string }> = {
-  Fire: { background: 'linear-gradient(135deg, #2b0b0b, #a23030)', accent: '#ffd6a3' },
-  Earth: { background: 'linear-gradient(135deg, #0f1f17, #2d6a4f)', accent: '#b7f4c3' },
-  Air: { background: 'linear-gradient(135deg, #091d2c, #3a6ea5)', accent: '#c3e3ff' },
-  Water: { background: 'linear-gradient(135deg, #0b1029, #3048a2)', accent: '#d4dfff' },
-  default: { background: 'linear-gradient(135deg, #14151f, #433878)', accent: '#f3d4ff' },
+const gradientsByElement: Record<
+  string,
+  { background: string; accent: string }
+> = {
+  Fire: {
+    background: 'linear-gradient(135deg, #2b0b0b, #a23030)',
+    accent: '#ffd6a3',
+  },
+  Earth: {
+    background: 'linear-gradient(135deg, #0f1f17, #2d6a4f)',
+    accent: '#b7f4c3',
+  },
+  Air: {
+    background: 'linear-gradient(135deg, #091d2c, #3a6ea5)',
+    accent: '#c3e3ff',
+  },
+  Water: {
+    background: 'linear-gradient(135deg, #0b1029, #3048a2)',
+    accent: '#d4dfff',
+  },
+  default: {
+    background: 'linear-gradient(135deg, #14151f, #433878)',
+    accent: '#f3d4ff',
+  },
 };
 
 export async function GET(request: NextRequest) {
@@ -66,11 +86,26 @@ export async function GET(request: NextRequest) {
           fontFamily: 'Roboto Mono',
         }}
       >
-        <div style={{ fontSize: 26, letterSpacing: 6, textTransform: 'uppercase', opacity: 0.85 }}>
+        <div
+          style={{
+            fontSize: 26,
+            letterSpacing: 6,
+            textTransform: 'uppercase',
+            opacity: 0.85,
+          }}
+        >
           Shared from Lunary
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', justifyContent: 'center', flexGrow: 1 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px',
+            justifyContent: 'center',
+            flexGrow: 1,
+          }}
+        >
           <div style={{ fontSize: 48, fontWeight: 300, opacity: 0.92 }}>
             {name ? `${name}'s Birth Chart` : 'Birth Chart Highlights'}
           </div>
@@ -109,7 +144,9 @@ export async function GET(request: NextRequest) {
                 >
                   {placement.label}
                 </div>
-                <div style={{ fontSize: 32, fontWeight: 400 }}>{placement.value}</div>
+                <div style={{ fontSize: 32, fontWeight: 400 }}>
+                  {placement.value}
+                </div>
               </div>
             ))}
           </div>

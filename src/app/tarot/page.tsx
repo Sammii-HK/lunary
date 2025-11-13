@@ -10,7 +10,13 @@ import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
 import { getGeneralTarotReading } from '../../../utils/tarot/generalTarot';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
-import { Check, ChevronDown, ChevronRight, Sparkles, Share2 } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Sparkles,
+  Share2,
+} from 'lucide-react';
 import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
@@ -549,33 +555,33 @@ const TarotReadings = () => {
                 {personalizedReading.daily.keywords.slice(0, 2).join(', ')}
               </p>
 
-                {personalizedDailyShare && (
-                  <div className='mt-3'>
-                    <button
-                      type='button'
-                      onClick={() =>
-                        handleShareClick({
-                          id: 'tarot-personal-daily',
-                          title: personalizedDailyShare.title,
-                          url: personalizedDailyShare.url,
-                          text: personalizedDailyShare.text,
-                        })
-                      }
-                      className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
-                    >
-                      <Share2 className='w-4 h-4' />
-                      Share daily card
-                    </button>
-                    {sharePopover === 'tarot-personal-daily' && (
-                      <div className='mt-3'>
-                        <SocialShareButtons
-                          url={personalizedDailyShare.url}
-                          title={personalizedDailyShare.title}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+              {personalizedDailyShare && (
+                <div className='mt-3'>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      handleShareClick({
+                        id: 'tarot-personal-daily',
+                        title: personalizedDailyShare.title,
+                        url: personalizedDailyShare.url,
+                        text: personalizedDailyShare.text,
+                      })
+                    }
+                    className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
+                  >
+                    <Share2 className='w-4 h-4' />
+                    Share daily card
+                  </button>
+                  {sharePopover === 'tarot-personal-daily' && (
+                    <div className='mt-3'>
+                      <SocialShareButtons
+                        url={personalizedDailyShare.url}
+                        title={personalizedDailyShare.title}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
@@ -647,49 +653,49 @@ const TarotReadings = () => {
           >
             <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4'>
               <div className='flex flex-wrap gap-2'>
-                  {[7, 14, 30, 60, 90].map((days) => (
-                    <button
-                      key={days}
-                      onClick={() => setTimeFrame(days)}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                        timeFrame === days
-                          ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
-                          : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
-                      }`}
-                    >
-                      {days}d
-                    </button>
-                  ))}
-                </div>
-
-                {patternShare && (
-                  <div className='sm:text-right'>
-                    <button
-                      type='button'
-                      onClick={() =>
-                        handleShareClick({
-                          id: 'tarot-personal-patterns',
-                          title: patternShare.title,
-                          url: patternShare.url,
-                          text: patternShare.text,
-                        })
-                      }
-                      className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
-                    >
-                      <Share2 className='w-4 h-4' />
-                      Share your patterns
-                    </button>
-                    {sharePopover === 'tarot-personal-patterns' && (
-                      <div className='mt-3 sm:flex sm:justify-end'>
-                        <SocialShareButtons
-                          url={patternShare.url}
-                          title={patternShare.title}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+                {[7, 14, 30, 60, 90].map((days) => (
+                  <button
+                    key={days}
+                    onClick={() => setTimeFrame(days)}
+                    className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                      timeFrame === days
+                        ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
+                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
+                    }`}
+                  >
+                    {days}d
+                  </button>
+                ))}
               </div>
+
+              {patternShare && (
+                <div className='sm:text-right'>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      handleShareClick({
+                        id: 'tarot-personal-patterns',
+                        title: patternShare.title,
+                        url: patternShare.url,
+                        text: patternShare.text,
+                      })
+                    }
+                    className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
+                  >
+                    <Share2 className='w-4 h-4' />
+                    Share your patterns
+                  </button>
+                  {sharePopover === 'tarot-personal-patterns' && (
+                    <div className='mt-3 sm:flex sm:justify-end'>
+                      <SocialShareButtons
+                        url={patternShare.url}
+                        title={patternShare.title}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {personalizedReading.trendAnalysis.dominantThemes.length > 0 && (
               <div>

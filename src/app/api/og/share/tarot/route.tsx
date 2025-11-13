@@ -14,7 +14,9 @@ const loadRobotoMono = async (request: Request) => {
     const fontUrl = new URL('/fonts/RobotoMono-Regular.ttf', request.url);
     robotoMonoPromise = fetch(fontUrl, { cache: 'force-cache' }).then((res) => {
       if (!res.ok) {
-        throw new Error(`Roboto Mono font fetch failed with status ${res.status}`);
+        throw new Error(
+          `Roboto Mono font fetch failed with status ${res.status}`,
+        );
       }
       return res.arrayBuffer();
     });
@@ -39,17 +41,35 @@ const parseKeywords = (value: string | null) =>
     : [];
 
 const gradients = [
-  { background: 'linear-gradient(135deg, #11001c, #4e1a7a)', accent: '#f3c5ff' },
-  { background: 'linear-gradient(135deg, #091128, #2e4a7f)', accent: '#b2d2ff' },
-  { background: 'linear-gradient(135deg, #1a1a1a, #533736)', accent: '#ffcea2' },
-  { background: 'linear-gradient(135deg, #101820, #1e485e)', accent: '#9ee6ff' },
-  { background: 'linear-gradient(135deg, #1a1423, #3f3058)', accent: '#f8d6ff' },
+  {
+    background: 'linear-gradient(135deg, #11001c, #4e1a7a)',
+    accent: '#f3c5ff',
+  },
+  {
+    background: 'linear-gradient(135deg, #091128, #2e4a7f)',
+    accent: '#b2d2ff',
+  },
+  {
+    background: 'linear-gradient(135deg, #1a1a1a, #533736)',
+    accent: '#ffcea2',
+  },
+  {
+    background: 'linear-gradient(135deg, #101820, #1e485e)',
+    accent: '#9ee6ff',
+  },
+  {
+    background: 'linear-gradient(135deg, #1a1423, #3f3058)',
+    accent: '#f8d6ff',
+  },
 ];
 
 const pickGradient = (seed: string) => {
   const hash = seed
     .split('')
-    .reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) % gradients.length, 0);
+    .reduce(
+      (acc, char) => (acc * 31 + char.charCodeAt(0)) % gradients.length,
+      0,
+    );
   return gradients[Math.abs(hash) % gradients.length];
 };
 
@@ -98,13 +118,47 @@ export async function GET(request: NextRequest) {
           padding: '60px 80px',
         }}
       >
-        <div style={{ fontFamily: 'Roboto Mono', fontSize: 28, letterSpacing: 4, textTransform: 'uppercase', opacity: 0.8 }}>
+        <div
+          style={{
+            fontFamily: 'Roboto Mono',
+            fontSize: 28,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            opacity: 0.8,
+          }}
+        >
           Shared from Lunary
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', flexGrow: 1, justifyContent: 'center' }}>
-          <div style={{ fontFamily: 'Roboto Mono', fontSize: 48, fontWeight: 300, opacity: 0.9 }}>{headline}</div>
-          <div style={{ fontFamily: 'Roboto Mono', fontSize: 80, fontWeight: 500, letterSpacing: 4 }}>{card}</div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px',
+            flexGrow: 1,
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontSize: 48,
+              fontWeight: 300,
+              opacity: 0.9,
+            }}
+          >
+            {headline}
+          </div>
+          <div
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontSize: 80,
+              fontWeight: 500,
+              letterSpacing: 4,
+            }}
+          >
+            {card}
+          </div>
 
           {keywords.length > 0 && (
             <div
@@ -121,7 +175,15 @@ export async function GET(request: NextRequest) {
           )}
 
           {text && (
-            <div style={{ fontFamily: 'Roboto Mono', fontSize: 26, lineHeight: 1.6, maxWidth: '70%', opacity: 0.92 }}>
+            <div
+              style={{
+                fontFamily: 'Roboto Mono',
+                fontSize: 26,
+                lineHeight: 1.6,
+                maxWidth: '70%',
+                opacity: 0.92,
+              }}
+            >
               {text}
             </div>
           )}
@@ -139,7 +201,14 @@ export async function GET(request: NextRequest) {
         >
           <div>{date || 'Generated just now'}</div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '999px', backgroundColor: theme.accent }} />
+            <span
+              style={{
+                width: '10px',
+                height: '10px',
+                borderRadius: '999px',
+                backgroundColor: theme.accent,
+              }}
+            />
             <span>lunary.app/tarot</span>
           </div>
         </div>
