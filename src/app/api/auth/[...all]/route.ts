@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   const response = await auth.handler(request);
 
   // Add CORS headers if origin is allowed (Better Auth should handle this, but we ensure it)
-  if (isOriginAllowed(origin)) {
+  if (origin && isOriginAllowed(origin)) {
     const headers = new Headers(response.headers);
     headers.set('Access-Control-Allow-Origin', origin);
     headers.set('Access-Control-Allow-Credentials', 'true');
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   const response = await auth.handler(request);
 
   // Add CORS headers if origin is allowed
-  if (isOriginAllowed(origin)) {
+  if (origin && isOriginAllowed(origin)) {
     const headers = new Headers(response.headers);
     headers.set('Access-Control-Allow-Origin', origin);
     headers.set('Access-Control-Allow-Credentials', 'true');
@@ -54,11 +54,11 @@ export async function POST(request: Request) {
 export async function OPTIONS(request: Request) {
   const origin = request.headers.get('origin');
 
-  if (isOriginAllowed(origin)) {
+  if (origin && isOriginAllowed(origin)) {
     return new Response(null, {
       status: 204,
       headers: {
-        'Access-Control-Allow-Origin': origin!,
+        'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
