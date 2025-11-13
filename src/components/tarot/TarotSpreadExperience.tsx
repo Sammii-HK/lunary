@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import {
   TAROT_SPREADS,
   TAROT_SPREAD_MAP,
+  PLAN_RANK,
   TarotPlan,
 } from '@/constants/tarotSpreads';
 import { TarotCard } from '@/components/TarotCard';
@@ -133,7 +134,37 @@ export function TarotSpreadExperience({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load saved spreads');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[TarotSpreadExperience] API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        });
+
+        // Even if the request fails, try to get spreadsUnlocked from error response
+        // or use fallback based on subscription plan
+        const errorUnlocked = errorData.spreadsUnlocked || [];
+        if (errorUnlocked.length > 0) {
+          const unlocked = new Set<string>(errorUnlocked);
+          setUnlockedSpreadSlugs(unlocked);
+        } else {
+          // Fallback: unlock spreads based on subscription plan
+          const fallbackUnlocked = Object.keys(TAROT_SPREAD_MAP).filter(
+            (slug) => {
+              const spread = TAROT_SPREAD_MAP[slug];
+              if (!spread) return false;
+              const planRank = PLAN_RANK[subscriptionPlan.plan];
+              const spreadRank = PLAN_RANK[spread.minimumPlan];
+              return planRank >= spreadRank;
+            },
+          );
+          setUnlockedSpreadSlugs(new Set(fallbackUnlocked));
+        }
+
+        throw new Error(
+          errorData.error ||
+            `Failed to load saved spreads (${response.status})`,
+        );
       }
 
       const data = await response.json();
@@ -144,6 +175,12 @@ export function TarotSpreadExperience({
 
       const unlocked = new Set<string>(data.spreadsUnlocked || []);
       setUnlockedSpreadSlugs(unlocked);
+
+      console.log('[TarotSpreadExperience] Loaded spreads:', {
+        readingsCount: fetchedReadings.length,
+        unlockedCount: unlocked.size,
+        subscriptionPlan: subscriptionPlan.plan,
+      });
 
       if (fetchedReadings.length > 0) {
         setCurrentReading(fetchedReadings[0]);

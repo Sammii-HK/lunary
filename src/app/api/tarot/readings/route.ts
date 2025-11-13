@@ -95,20 +95,53 @@ export async function GET(request: NextRequest) {
       ? new Date(nextCursorRow.created_at).toISOString()
       : null;
 
+    const spreadsUnlocked = Object.keys(TAROT_SPREAD_MAP).filter((slug) =>
+      isSpreadAccessible(slug, subscription.plan),
+    );
+
+    console.log(`[tarot/readings] GET response for user ${userId}:`, {
+      subscription_plan: subscription.plan,
+      subscription_status: subscription.status,
+      spreads_unlocked_count: spreadsUnlocked.length,
+      total_spreads: Object.keys(TAROT_SPREAD_MAP).length,
+      usage_limit: usage.monthlyLimit,
+      usage_used: usage.monthlyUsed,
+    });
+
     return NextResponse.json({
       readings,
       usage,
       hasMore,
       nextCursor,
-      spreadsUnlocked: Object.keys(TAROT_SPREAD_MAP).filter((slug) =>
-        isSpreadAccessible(slug, subscription.plan),
-      ),
+      spreadsUnlocked,
     });
   } catch (error) {
     console.error('[tarot/readings] GET failed', error);
+
+    // Try to return spreadsUnlocked even on error, based on subscription if available
+    let spreadsUnlocked: string[] = [];
+    try {
+      const session = await auth.api.getSession({ headers: request.headers });
+      if (session?.user) {
+        const userId = session.user.id;
+        const userEmail = session.user.email;
+        const subscription = await getSubscription(userId, userEmail);
+        spreadsUnlocked = Object.keys(TAROT_SPREAD_MAP).filter((slug) =>
+          isSpreadAccessible(slug, subscription.plan),
+        );
+      }
+    } catch (subError) {
+      console.error(
+        '[tarot/readings] Failed to get subscription for error response',
+        subError,
+      );
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to load tarot readings',
+        errorDetails: error instanceof Error ? error.message : 'Unknown error',
+        spreadsUnlocked,
       },
       { status: 500 },
     );

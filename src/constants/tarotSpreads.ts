@@ -406,7 +406,7 @@ export const TAROT_SPREADS: TarotSpreadDefinition[] = [
     cardCount: 15,
     estimatedTime: '35 minutes',
     bestFor: ['Birthday portals', 'New Year rituals', 'Business planning'],
-    minimumPlan: 'yearly',
+    minimumPlan: 'monthly',
     recommendedCadence:
       'Use once per year, ideally at a pivotal turning point.',
     journalPrompts: [
