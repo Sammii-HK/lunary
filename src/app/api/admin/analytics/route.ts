@@ -180,6 +180,93 @@ export async function GET(request: NextRequest) {
           100
         : 0;
 
+    let dau = 0;
+    let wau = 0;
+    let stickiness = 0;
+
+    try {
+      const dauResult = await sql`
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM user_sessions
+        WHERE session_date = CURRENT_DATE
+      `;
+      dau = parseInt(dauResult.rows[0]?.count || '0');
+
+      const wauResult = await sql`
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM user_sessions
+        WHERE session_timestamp >= NOW() - INTERVAL '7 days'
+      `;
+      wau = parseInt(wauResult.rows[0]?.count || '0');
+
+      stickiness = wau > 0 ? (dau / wau) * 100 : 0;
+    } catch (error) {
+      console.warn(
+        'Error calculating DAU/WAU (table may not exist yet):',
+        error,
+      );
+    }
+
+    let tiktokVisitors = 0;
+    let tiktokSignups = 0;
+    let tiktokConversionRate = 0;
+
+    try {
+      const tiktokVisits = await sql`
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM conversion_events
+        WHERE (
+          metadata->>'utm_source' = 'tiktok'
+          OR metadata->>'referrer' LIKE '%tiktok.com%'
+        )
+        AND ${(sql as any).raw(dateFilter)}
+      `;
+      tiktokVisitors = parseInt(tiktokVisits.rows[0]?.count || '0');
+
+      const tiktokSignupsResult = await sql`
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM conversion_events
+        WHERE event_type = 'signup'
+        AND (
+          metadata->>'utm_source' = 'tiktok'
+          OR metadata->>'referrer' LIKE '%tiktok.com%'
+        )
+        AND ${(sql as any).raw(dateFilter)}
+      `;
+      tiktokSignups = parseInt(tiktokSignupsResult.rows[0]?.count || '0');
+
+      tiktokConversionRate =
+        tiktokVisitors > 0 ? (tiktokSignups / tiktokVisitors) * 100 : 0;
+    } catch (error) {
+      console.warn('Error calculating TikTok metrics:', error);
+    }
+
+    let aiUsageCount = 0;
+    let aiUsagePercent = 0;
+
+    try {
+      const aiUsers = await sql`
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM conversion_events
+        WHERE event_type IN ('personalized_tarot_viewed', 'personalized_horoscope_viewed', 'birth_chart_viewed', 'crystal_recommendations_viewed')
+        AND ${(sql as any).raw(dateFilter)}
+      `;
+      aiUsageCount = parseInt(aiUsers.rows[0]?.count || '0');
+
+      const activeUsers = await sql`
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM conversion_events
+        WHERE event_type IN ('app_opened', 'horoscope_viewed', 'tarot_viewed', 'birth_chart_viewed')
+        AND ${(sql as any).raw(dateFilter)}
+      `;
+      const activeUsersCount = parseInt(activeUsers.rows[0]?.count || '0');
+
+      aiUsagePercent =
+        activeUsersCount > 0 ? (aiUsageCount / activeUsersCount) * 100 : 0;
+    } catch (error) {
+      console.warn('Error calculating AI usage:', error);
+    }
+
     return NextResponse.json({
       success: true,
       metrics: {
@@ -203,6 +290,14 @@ export async function GET(request: NextRequest) {
         onboardingRate,
         pricingToTrialRate,
         upgradeClickRate,
+        dau,
+        wau,
+        stickiness,
+        tiktokVisitors,
+        tiktokSignups,
+        tiktokConversionRate,
+        aiUsageCount,
+        aiUsagePercent,
       },
       funnel: {
         signups: totalSignups,
