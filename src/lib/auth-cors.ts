@@ -28,6 +28,12 @@ export async function withCors(
   }
 
   try {
+    console.log('🔍 withCors: Calling auth handler', {
+      method: request.method,
+      url: request.url,
+      origin,
+    });
+
     const validatedRequest = createRequestWithValidatedOrigin(request, origin);
     const response = await handler(validatedRequest);
 
@@ -37,6 +43,8 @@ export async function withCors(
       const responseText = await clonedResponse.text();
       console.error('❌ Auth handler returned error:', {
         status: response.status,
+        method: request.method,
+        url: request.url,
         origin,
         responseText: responseText.substring(0, 500),
       });
@@ -49,6 +57,18 @@ export async function withCors(
         console.error(
           '💡 Solution: Set BETTER_AUTH_SECRET in .env.local to match the secret used to encrypt existing credentials',
         );
+      }
+
+      // Log 405 errors specifically
+      if (response.status === 405) {
+        console.error(
+          '⚠️ Method Not Allowed (405) - Better Auth handler rejected the HTTP method',
+        );
+        console.error('Request details:', {
+          method: request.method,
+          url: request.url,
+          headers: Object.fromEntries(request.headers.entries()),
+        });
       }
     }
 
@@ -81,6 +101,14 @@ export async function withCors(
       headers: newHeaders,
     });
   } catch (error) {
+    console.error('❌ Error in withCors wrapper:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      method: request.method,
+      url: request.url,
+      origin,
+    });
+
     if (error instanceof Response) {
       const newHeaders = new Headers(error.headers);
       if (isValidOrigin(origin)) {
@@ -97,6 +125,23 @@ export async function withCors(
         headers: newHeaders,
       });
     }
-    throw error;
+
+    // Return proper error response instead of throwing
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    return new Response(
+      JSON.stringify({
+        error: 'Internal server error',
+        message:
+          process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(isValidOrigin(origin) ? getCorsHeaders(origin) : {}),
+        },
+      },
+    );
   }
 }
