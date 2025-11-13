@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
+import { sql } from '@vercel/postgres';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -100,31 +101,112 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       ? 'monthly'
       : 'yearly';
 
+  // Get customer to retrieve user_id and email
+  let userId: string | null = null;
+  let userEmail: string | null = null;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    userId = (customer as any).metadata?.userId || null;
+    userEmail = (customer as any).email || null;
+    console.log('Customer data:', { customerId, userId, userEmail });
+  } catch (error) {
+    console.error('Failed to retrieve customer:', error);
+  }
+
   // Process referral code if present
   const referralCode = subscription.metadata?.referralCode;
   const referrerUserId = subscription.metadata?.referrerUserId;
 
-  if (referralCode && referrerUserId) {
+  if (referralCode && referrerUserId && userId) {
     try {
-      // Get the new user's ID from customer metadata or lookup
-      const customer = await stripe.customers.retrieve(customerId);
-      const newUserId = (customer as any).metadata?.userId;
+      const { processReferralCode } = await import('@/lib/referrals');
+      const result = await processReferralCode(referralCode, userId);
 
-      if (newUserId) {
-        const { processReferralCode } = await import('@/lib/referrals');
-        const result = await processReferralCode(referralCode, newUserId);
-
-        if (result.success) {
-          console.log(
-            `✅ Referral processed: ${referralCode} by user ${newUserId}`,
-          );
-        } else {
-          console.error(`Failed to process referral: ${result.error}`);
-        }
+      if (result.success) {
+        console.log(`✅ Referral processed: ${referralCode} by user ${userId}`);
+      } else {
+        console.error(`Failed to process referral: ${result.error}`);
       }
     } catch (error) {
       console.error('Failed to process referral in webhook:', error);
-      // Don't fail subscription creation if referral processing fails
+    }
+  }
+
+  // Write to database subscriptions table
+  if (userId || userEmail) {
+    try {
+      const mappedStatus =
+        status === 'trialing'
+          ? 'trial'
+          : status === 'active'
+            ? 'active'
+            : status === 'canceled' || status === 'cancelled'
+              ? 'cancelled'
+              : status === 'past_due'
+                ? 'past_due'
+                : 'free';
+
+      const trialEndsAt = subscription.trial_end
+        ? new Date(subscription.trial_end * 1000).toISOString()
+        : null;
+      const currentPeriodEnd = subscription.current_period_end
+        ? new Date(subscription.current_period_end * 1000).toISOString()
+        : null;
+
+      if (userId) {
+        await sql`
+          INSERT INTO subscriptions (
+            user_id,
+            user_email,
+            status,
+            plan_type,
+            stripe_customer_id,
+            stripe_subscription_id,
+            trial_ends_at,
+            current_period_end
+          ) VALUES (
+            ${userId},
+            ${userEmail},
+            ${mappedStatus},
+            ${planType},
+            ${customerId},
+            ${subscription.id},
+            ${trialEndsAt},
+            ${currentPeriodEnd}
+          )
+          ON CONFLICT (user_id) DO UPDATE SET
+            status = EXCLUDED.status,
+            plan_type = EXCLUDED.plan_type,
+            stripe_customer_id = EXCLUDED.stripe_customer_id,
+            stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+            trial_ends_at = EXCLUDED.trial_ends_at,
+            current_period_end = EXCLUDED.current_period_end,
+            user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+            updated_at = NOW()
+        `;
+        console.log(
+          `✅ Subscription written to database for user_id: ${userId}`,
+        );
+      } else if (userEmail) {
+        // Try to find existing subscription by email and update it
+        await sql`
+          UPDATE subscriptions
+          SET
+            status = ${mappedStatus},
+            plan_type = ${planType},
+            stripe_customer_id = ${customerId},
+            stripe_subscription_id = ${subscription.id},
+            trial_ends_at = ${trialEndsAt},
+            current_period_end = ${currentPeriodEnd},
+            updated_at = NOW()
+          WHERE user_email = ${userEmail}
+        `;
+        console.log(
+          `✅ Subscription updated in database for email: ${userEmail}`,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to write subscription to database:', error);
     }
   }
 
@@ -149,12 +231,78 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     '../../../../../utils/subscription'
   );
 
+  const stripe = getStripe();
   const customerId = subscription.customer as string;
   const status = subscription.status;
   const planType =
     subscription.items.data[0]?.price?.recurring?.interval === 'month'
       ? 'monthly'
       : 'yearly';
+
+  // Get customer to retrieve user_id and email
+  let userId: string | null = null;
+  let userEmail: string | null = null;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    userId = (customer as any).metadata?.userId || null;
+    userEmail = (customer as any).email || null;
+  } catch (error) {
+    console.error('Failed to retrieve customer:', error);
+  }
+
+  // Update database subscriptions table
+  if (userId || userEmail) {
+    try {
+      const mappedStatus =
+        status === 'trialing'
+          ? 'trial'
+          : status === 'active'
+            ? 'active'
+            : status === 'canceled' || status === 'cancelled'
+              ? 'cancelled'
+              : status === 'past_due'
+                ? 'past_due'
+                : 'free';
+
+      const trialEndsAt = subscription.trial_end
+        ? new Date(subscription.trial_end * 1000).toISOString()
+        : null;
+      const currentPeriodEnd = subscription.current_period_end
+        ? new Date(subscription.current_period_end * 1000).toISOString()
+        : null;
+
+      if (userId) {
+        await sql`
+          UPDATE subscriptions
+          SET
+            status = ${mappedStatus},
+            plan_type = ${planType},
+            stripe_customer_id = ${customerId},
+            stripe_subscription_id = ${subscription.id},
+            trial_ends_at = ${trialEndsAt},
+            current_period_end = ${currentPeriodEnd},
+            user_email = COALESCE(${userEmail}, subscriptions.user_email),
+            updated_at = NOW()
+          WHERE user_id = ${userId}
+        `;
+      } else if (userEmail) {
+        await sql`
+          UPDATE subscriptions
+          SET
+            status = ${mappedStatus},
+            plan_type = ${planType},
+            stripe_customer_id = ${customerId},
+            stripe_subscription_id = ${subscription.id},
+            trial_ends_at = ${trialEndsAt},
+            current_period_end = ${currentPeriodEnd},
+            updated_at = NOW()
+          WHERE user_email = ${userEmail}
+        `;
+      }
+    } catch (error) {
+      console.error('Failed to update subscription in database:', error);
+    }
+  }
 
   const result = await updateUserSubscriptionStatus(customerId, {
     id: subscription.id,
