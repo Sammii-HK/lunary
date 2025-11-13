@@ -127,9 +127,7 @@ const generateMoodTrend = (seed: number, now: Date): MoodTrendEntry[] => {
   });
 };
 
-export type BirthChartProviderParams = {
-  userId: string;
-};
+export type BirthChartProviderParams = { userId: string };
 
 export const getBirthChart = async ({
   userId,
@@ -150,26 +148,13 @@ export const getBirthChart = async ({
     lon: BASE_LON,
     placements,
     aspects: [
-      {
-        a: 'Sun',
-        b: 'Moon',
-        type: 'Trine',
-        orb: 1.4,
-      },
-      {
-        a: 'Venus',
-        b: 'Mars',
-        type: 'Conjunction',
-        orb: 3.2,
-      },
+      { a: 'Sun', b: 'Moon', type: 'Trine', orb: 1.4 },
+      { a: 'Venus', b: 'Mars', type: 'Conjunction', orb: 3.2 },
     ],
   };
 };
 
-export type CurrentTransitsProviderParams = {
-  userId: string;
-  now?: Date;
-};
+export type CurrentTransitsProviderParams = { userId: string; now?: Date };
 
 export type CurrentTransitsResponse = {
   transits: TransitRecord[];
@@ -212,16 +197,10 @@ export const getCurrentTransits = async ({
     };
   })();
 
-  return {
-    transits,
-    moon,
-  };
+  return { transits, moon };
 };
 
-export type TarotProviderParams = {
-  userId: string;
-  now?: Date;
-};
+export type TarotProviderParams = { userId: string; now?: Date };
 
 export const getTarotLastReading = async ({
   userId,
@@ -297,10 +276,7 @@ const analyzeTarotTrends = (
       userName,
       userBirthday,
     );
-    pastReadings.push({
-      date: date.format('YYYY-MM-DD'),
-      card,
-    });
+    pastReadings.push({ date: date.format('YYYY-MM-DD'), card });
   }
 
   // Analyze card frequency
@@ -358,11 +334,7 @@ const analyzeTarotTrends = (
     );
   }
 
-  return {
-    dominantThemes,
-    cardFrequency,
-    patternInsights,
-  };
+  return { dominantThemes, cardFrequency, patternInsights };
 };
 
 export const getTarotPatternAnalysis = async ({
@@ -448,10 +420,7 @@ export const getTarotPatternAnalysis = async ({
   }
 };
 
-export type DailyHighlightProviderParams = {
-  userId: string;
-  now?: Date;
-};
+export type DailyHighlightProviderParams = { userId: string; now?: Date };
 
 export const getDailyHighlight = async ({
   userId,
@@ -465,10 +434,7 @@ export const getDailyHighlight = async ({
   };
 };
 
-export type MoodHistoryProviderParams = {
-  userId: string;
-  now?: Date;
-};
+export type MoodHistoryProviderParams = { userId: string; now?: Date };
 
 export const getMoodHistory = async ({
   userId,
@@ -505,7 +471,5 @@ export const getConversationHistory = async ({
     messages.push({ role, ts, tokens });
   }
 
-  return {
-    lastMessages: messages,
-  };
+  return { lastMessages: messages };
 };
