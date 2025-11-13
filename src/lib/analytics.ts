@@ -1,6 +1,7 @@
 'use client';
 
 import { track } from '@vercel/analytics';
+import { betterAuthClient } from '@/lib/auth-client';
 
 export type ConversionEvent =
   | 'app_opened'
@@ -32,6 +33,91 @@ export interface ConversionEventData {
   metadata?: Record<string, any>;
 }
 
+type AuthContext = {
+  userId?: string;
+  userEmail?: string;
+};
+
+const EXCLUDED_EMAILS = new Set(['kellow.sammii@gmail.com']);
+const AUTH_CACHE_TTL = 1000 * 60; // 1 minute
+
+let cachedAuthContext: AuthContext | null = null;
+let cachedAuthContextAt = 0;
+
+function extractEmailFromMetadata(
+  metadata?: Record<string, any>,
+): string | undefined {
+  if (!metadata) {
+    return undefined;
+  }
+
+  const candidate =
+    metadata.userEmail ||
+    metadata.email ||
+    metadata.customerEmail ||
+    metadata.customer_email;
+
+  if (typeof candidate === 'string') {
+    return candidate;
+  }
+
+  return undefined;
+}
+
+async function getAuthContext(): Promise<AuthContext> {
+  const now = Date.now();
+  if (cachedAuthContext && now - cachedAuthContextAt < AUTH_CACHE_TTL) {
+    return cachedAuthContext;
+  }
+
+  try {
+    const session = await betterAuthClient.getSession();
+    const user =
+      session && typeof session === 'object'
+        ? 'user' in session
+          ? (session as any).user
+          : ((session as any)?.data?.user ?? null)
+        : null;
+
+    cachedAuthContext = user
+      ? {
+          userId: user.id,
+          userEmail: typeof user.email === 'string' ? user.email : undefined,
+        }
+      : {};
+  } catch (error) {
+    console.warn('Unable to load auth context for analytics tracking:', error);
+    cachedAuthContext = {};
+  } finally {
+    cachedAuthContextAt = now;
+  }
+
+  return cachedAuthContext;
+}
+
+function normalizeEmail(email?: string | null): string | undefined {
+  if (!email || typeof email !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = email.trim();
+  return trimmed ? trimmed.toLowerCase() : undefined;
+}
+
+function sanitizeEventPayload(
+  payload: ConversionEventData,
+): Record<string, any> {
+  return Object.entries(payload).reduce<Record<string, any>>(
+    (acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {},
+  );
+}
+
 export async function trackConversion(
   event: ConversionEvent,
   data?: Partial<ConversionEventData>,
@@ -42,7 +128,36 @@ export async function trackConversion(
       ...data,
     };
 
-    track(event, eventData as Record<string, any>);
+    const metadataEmail = extractEmailFromMetadata(eventData.metadata);
+    if (metadataEmail && !eventData.userEmail) {
+      eventData.userEmail = metadataEmail;
+    }
+
+    const authContext = await getAuthContext();
+
+    if (!eventData.userId && authContext.userId) {
+      eventData.userId = authContext.userId;
+    }
+
+    if (!eventData.userEmail && authContext.userEmail) {
+      eventData.userEmail = authContext.userEmail;
+    }
+
+    const normalizedEmail = normalizeEmail(eventData.userEmail);
+    if (normalizedEmail) {
+      eventData.userEmail = normalizedEmail;
+    }
+
+    if (normalizedEmail && EXCLUDED_EMAILS.has(normalizedEmail)) {
+      console.info(
+        `[analytics] Skipping conversion event "${event}" for excluded user ${normalizedEmail}`,
+      );
+      return;
+    }
+
+    const payload = sanitizeEventPayload(eventData);
+
+    track(event, payload);
 
     const [analyticsResponse, notificationResponse] = await Promise.allSettled([
       fetch('/api/analytics/conversion', {
@@ -50,7 +165,7 @@ export async function trackConversion(
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(eventData),
+        body: JSON.stringify(payload),
       }),
       fetch('/api/admin/notifications/conversion', {
         method: 'POST',
@@ -59,10 +174,10 @@ export async function trackConversion(
         },
         body: JSON.stringify({
           eventType: event,
-          userId: data?.userId,
-          userEmail: data?.userEmail,
-          planType: data?.planType,
-          metadata: data?.metadata,
+          userId: eventData.userId,
+          userEmail: eventData.userEmail,
+          planType: eventData.planType,
+          metadata: eventData.metadata,
         }),
       }),
     ]);
@@ -71,6 +186,13 @@ export async function trackConversion(
       console.error(
         'Failed to track conversion event:',
         analyticsResponse.reason,
+      );
+    }
+
+    if (notificationResponse.status === 'rejected') {
+      console.error(
+        'Failed to send conversion notification:',
+        notificationResponse.reason,
       );
     }
   } catch (error) {

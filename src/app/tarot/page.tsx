@@ -1,10 +1,9 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import Link from 'next/link';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
 import { getGeneralTarotReading } from '../../../utils/tarot/generalTarot';
@@ -17,13 +16,23 @@ import { FeatureGate } from '@/components/FeatureGate';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TrialReminder } from '@/components/TrialReminder';
 import { conversionTracking } from '@/lib/analytics';
-import { useEffect } from 'react';
+import {
+  SubscriptionStatus,
+  TarotSpreadExperience,
+} from '@/components/tarot/TarotSpreadExperience';
+import type { TarotPlan } from '@/constants/tarotSpreads';
+import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
 
 const TarotReadings = () => {
   const { me } = useAccount();
   const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
+  const userId = (me as any)?.id as string | undefined;
+  const tarotPlan = {
+    plan: subscription.plan as TarotPlan,
+    status: subscription.status as SubscriptionStatus,
+  };
   const hasChartAccess = hasBirthChartAccess(subscription.status);
 
   const [timeFrame, setTimeFrame] = useState(30);
@@ -213,6 +222,13 @@ const TarotReadings = () => {
             </div>
           </div>
 
+          <TarotSpreadExperience
+            userId={userId}
+            userName={userName}
+            subscriptionPlan={tarotPlan}
+            onCardPreview={(card) => setSelectedCard(card)}
+          />
+
           <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
             <h3 className='text-lg font-medium text-zinc-100 mb-2'>
               Unlock Personal Tarot Patterns
@@ -265,7 +281,7 @@ const TarotReadings = () => {
                 </span>
               </div>
             </div>
-            <div className='relative'>
+            <div className='relative overflow-hidden'>
               <div className='filter blur-sm pointer-events-none'>
                 {[...Array(7)].map((_, index) => (
                   <div
@@ -336,11 +352,7 @@ const TarotReadings = () => {
       </div>
 
       <div className='space-y-6'>
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
-          <h2 className='text-xl font-medium text-zinc-100'>
-            Your Personal Reading
-          </h2>
-
+        <HoroscopeSection title='Daily & Weekly Cards' color='purple'>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
               <h3 className='text-sm font-medium text-zinc-400 mb-2'>
@@ -382,8 +394,10 @@ const TarotReadings = () => {
               </p>
             </div>
           </div>
+        </HoroscopeSection>
 
-          <div className='space-y-4 pt-4 border-t border-zinc-800/50'>
+        <HoroscopeSection title='Guidance Highlights' color='indigo'>
+          <div className='space-y-4'>
             <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
               <h3 className='text-sm font-medium text-purple-300/90 mb-2'>
                 Daily Message
@@ -421,29 +435,34 @@ const TarotReadings = () => {
               </ul>
             </div>
           </div>
-        </div>
+        </HoroscopeSection>
+
+        <TarotSpreadExperience
+          userId={userId}
+          userName={userName}
+          subscriptionPlan={tarotPlan}
+          onCardPreview={(card) => setSelectedCard(card)}
+        />
 
         {personalizedReading.trendAnalysis && (
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
-            <div className='flex justify-between items-center'>
-              <h2 className='text-xl font-medium text-zinc-100'>
-                Your {timeFrame}-Day Tarot Patterns
-              </h2>
-              <div className='flex gap-2'>
-                {[7, 14, 30, 60, 90].map((days) => (
-                  <button
-                    key={days}
-                    onClick={() => setTimeFrame(days)}
-                    className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                      timeFrame === days
-                        ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
-                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
-                    }`}
-                  >
-                    {days}d
-                  </button>
-                ))}
-              </div>
+          <HoroscopeSection
+            title={`Your ${timeFrame}-Day Tarot Patterns`}
+            color='zinc'
+          >
+            <div className='flex flex-wrap gap-2 w-full justify-start sm:justify-end mb-4'>
+              {[7, 14, 30, 60, 90].map((days) => (
+                <button
+                  key={days}
+                  onClick={() => setTimeFrame(days)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                    timeFrame === days
+                      ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
+                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
+                  }`}
+                >
+                  {days}d
+                </button>
+              ))}
             </div>
 
             {personalizedReading.trendAnalysis.dominantThemes.length > 0 && (
@@ -651,13 +670,10 @@ const TarotReadings = () => {
                 </div>
               </div>
             )}
-          </div>
+          </HoroscopeSection>
         )}
 
-        <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
-            Recent Daily Cards
-          </h2>
+        <HoroscopeSection title='Recent Daily Cards' color='zinc'>
           <div className='space-y-3'>
             {personalizedPreviousReadings.map((reading) => (
               <div
@@ -687,7 +703,7 @@ const TarotReadings = () => {
               </div>
             ))}
           </div>
-        </div>
+        </HoroscopeSection>
       </div>
 
       <TarotCardModal

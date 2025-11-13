@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { AuthButtons } from '@/components/AuthButtons';
+import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import {
   Sparkles,
   BarChart3,
@@ -137,6 +138,18 @@ export default function WelcomePage() {
                 <div className='w-1 h-1 rounded-full bg-zinc-600'></div>
                 <span>Cancel anytime</span>
               </div>
+            </div>
+
+            <div className='pt-8'>
+              <NewsletterSignupForm
+                align='center'
+                source='welcome_page_hero'
+                className='border-zinc-800/60 bg-zinc-950/60 shadow-none'
+                headline='Prefer to start with cosmic updates?'
+                description='Subscribe to our weekly newsletter to get lunar weather, curated rituals, and announcements before anyone else.'
+                ctaLabel='Send me the newsletter'
+                successMessage='You are all set! Check your inbox to confirm and start receiving our weekly cosmic digest.'
+              />
             </div>
           </div>
         </div>
