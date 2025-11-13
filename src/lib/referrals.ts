@@ -1,4 +1,5 @@
 import { sql } from '@vercel/postgres';
+import Stripe from 'stripe';
 
 export interface ReferralCode {
   code: string;
@@ -6,6 +7,105 @@ export interface ReferralCode {
   createdAt: Date;
   uses: number;
   maxUses?: number;
+}
+
+let stripeClient: Stripe | null = null;
+
+function getStripeClient(): Stripe | null {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.warn(
+      '[Referral] STRIPE_SECRET_KEY is not configured. Skipping Stripe reward handling.',
+    );
+    return null;
+  }
+
+  if (!stripeClient) {
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-09-30' as Stripe.LatestApiVersion,
+    });
+  }
+
+  return stripeClient;
+}
+
+type ReferralCouponContext = 'referrer' | 'referred-user';
+
+async function applyCouponToStripeSubscription(
+  stripeSubscriptionId: string,
+  context: ReferralCouponContext,
+): Promise<boolean> {
+  const couponId = process.env.STRIPE_REFERRAL_COUPON_ID;
+  if (!couponId) {
+    console.warn(
+      `[Referral] STRIPE_REFERRAL_COUPON_ID is not set. Skipping coupon application for ${context}.`,
+    );
+    return false;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    return false;
+  }
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(
+      stripeSubscriptionId,
+      { expand: ['discounts'] },
+    );
+
+    const discounts = Array.isArray(subscription.discounts)
+      ? subscription.discounts
+      : [];
+
+    let alreadyApplied = false;
+    const retainedDiscounts: Stripe.SubscriptionUpdateParams.Discount[] = [];
+
+    for (const discount of discounts) {
+      if (typeof discount === 'string') {
+        retainedDiscounts.push({ discount });
+        continue;
+      }
+
+      if (discount?.coupon?.id === couponId) {
+        alreadyApplied = true;
+      }
+
+      if (discount?.id) {
+        retainedDiscounts.push({ discount: discount.id });
+      }
+    }
+
+    if (alreadyApplied) {
+      console.log(
+        `[Referral] Coupon already applied to subscription ${stripeSubscriptionId} (${context}).`,
+      );
+      return false;
+    }
+
+    retainedDiscounts.push({ coupon: couponId });
+
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      discounts: retainedDiscounts,
+      proration_behavior: 'none',
+    });
+
+    console.log(
+      `[Referral] Applied coupon ${couponId} to subscription ${stripeSubscriptionId} (${context}).`,
+    );
+    return true;
+  } catch (error) {
+    console.error(
+      `[Referral] Failed to apply coupon to subscription ${stripeSubscriptionId} (${context}):`,
+      error,
+    );
+    return false;
+  }
+}
+
+export async function applyReferralCouponToSubscription(
+  stripeSubscriptionId: string,
+): Promise<void> {
+  await applyCouponToStripeSubscription(stripeSubscriptionId, 'referred-user');
 }
 
 export async function generateReferralCode(userId: string): Promise<string> {
@@ -127,15 +227,36 @@ export async function processReferralCode(
 
 async function grantReferralReward(userId: string): Promise<void> {
   try {
-    // Check if user has active subscription
     const subscription = await sql`
-      SELECT status FROM subscriptions
+      SELECT status, stripe_subscription_id
+      FROM subscriptions
       WHERE user_id = ${userId}
       AND status IN ('active', 'trial')
+      LIMIT 1
     `;
 
-    if (subscription.rows.length > 0) {
-      // Extend subscription by 1 month
+    const subscriptionRow = subscription.rows[0] as
+      | {
+          status: string;
+          stripe_subscription_id: string | null;
+        }
+      | undefined;
+
+    if (
+      subscriptionRow?.stripe_subscription_id &&
+      subscriptionRow.status === 'active'
+    ) {
+      const applied = await applyCouponToStripeSubscription(
+        subscriptionRow.stripe_subscription_id,
+        'referrer',
+      );
+
+      if (applied) {
+        return;
+      }
+    }
+
+    if (subscriptionRow) {
       await sql`
         UPDATE subscriptions
         SET 
@@ -144,28 +265,26 @@ async function grantReferralReward(userId: string): Promise<void> {
         WHERE user_id = ${userId}
         AND status = 'active'
       `;
-    } else {
-      // Create a 1-month free trial
-      // Note: user_email and user_name are set to NULL here as they're not available in this context
-      // They should be populated when subscriptions are created from Stripe webhooks or other sources
-      await sql`
-        INSERT INTO subscriptions (user_id, status, plan_type, trial_ends_at, current_period_end, user_email, user_name)
-        VALUES (
-          ${userId},
-          'trial',
-          'monthly',
-          NOW() + INTERVAL '30 days',
-          NOW() + INTERVAL '30 days',
-          NULL,
-          NULL
-        )
-        ON CONFLICT (user_id) DO UPDATE SET
-          status = 'trial',
-          trial_ends_at = NOW() + INTERVAL '30 days',
-          current_period_end = NOW() + INTERVAL '30 days',
-          updated_at = NOW()
-      `;
+      return;
     }
+
+    await sql`
+      INSERT INTO subscriptions (user_id, status, plan_type, trial_ends_at, current_period_end, user_email, user_name)
+      VALUES (
+        ${userId},
+        'trial',
+        'monthly',
+        NOW() + INTERVAL '30 days',
+        NOW() + INTERVAL '30 days',
+        NULL,
+        NULL
+      )
+      ON CONFLICT (user_id) DO UPDATE SET
+        status = 'trial',
+        trial_ends_at = NOW() + INTERVAL '30 days',
+        current_period_end = NOW() + INTERVAL '30 days',
+        updated_at = NOW()
+    `;
   } catch (error) {
     console.error('Failed to grant referral reward:', error);
   }

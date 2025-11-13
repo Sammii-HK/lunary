@@ -111,13 +111,16 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       const newUserId = (customer as any).metadata?.userId;
 
       if (newUserId) {
-        const { processReferralCode } = await import('@/lib/referrals');
+        const { processReferralCode, applyReferralCouponToSubscription } =
+          await import('@/lib/referrals');
         const result = await processReferralCode(referralCode, newUserId);
 
         if (result.success) {
           console.log(
             `✅ Referral processed: ${referralCode} by user ${newUserId}`,
           );
+
+          await applyReferralCouponToSubscription(subscription.id);
         } else {
           console.error(`Failed to process referral: ${result.error}`);
         }
