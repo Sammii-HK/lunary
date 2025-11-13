@@ -66,7 +66,7 @@ export default function AdminDashboard() {
         const adminEmailsEnv =
           process.env.NEXT_PUBLIC_ADMIN_EMAILS ||
           process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-          'admin@lunary.app';
+          '';
 
         const adminEmails = adminEmailsEnv
           .split(',')
@@ -78,8 +78,8 @@ export default function AdminDashboard() {
         const userEmail =
           session?.data?.user?.email || (me?.profile as any)?.email;
 
-        if (!userEmail) {
-          // Not authenticated, redirect to auth
+        if (!userEmail || adminEmails.length === 0) {
+          // Not authenticated or no admin configured, redirect to auth
           router.push('/auth');
           return;
         }

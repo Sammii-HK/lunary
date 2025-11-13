@@ -3,18 +3,6 @@ const require = createRequire(import.meta.url);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    NEXT_PUBLIC_ADMIN_EMAILS:
-      process.env.ADMIN_EMAILS ||
-      process.env.NEXT_PUBLIC_ADMIN_EMAILS ||
-      process.env.ADMIN_EMAIL ||
-      process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-      'admin@lunary.app',
-    NEXT_PUBLIC_ADMIN_EMAIL:
-      process.env.ADMIN_EMAIL ||
-      process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-      'admin@lunary.app',
-  },
   webpack: (config, { isServer }) => {
     // Enable WebAssembly experiments
     config.experiments = {
