@@ -3,18 +3,20 @@ import Link from 'next/link';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
 
+type ShareBirthChartSearchParams = {
+  name?: string | string[];
+  sun?: string | string[];
+  moon?: string | string[];
+  rising?: string | string[];
+  element?: string | string[];
+  modality?: string | string[];
+  insight?: string | string[];
+  keywords?: string | string[];
+  date?: string | string[];
+};
+
 type ShareBirthChartPageProps = {
-  searchParams: {
-    name?: string | string[];
-    sun?: string | string[];
-    moon?: string | string[];
-    rising?: string | string[];
-    element?: string | string[];
-    modality?: string | string[];
-    insight?: string | string[];
-    keywords?: string | string[];
-    date?: string | string[];
-  };
+  searchParams: Promise<ShareBirthChartSearchParams>;
 };
 
 const toStringParam = (value?: string | string[]) => {
@@ -49,15 +51,16 @@ const buildOgImageUrl = (params: Record<string, string | undefined>) => {
 export async function generateMetadata({
   searchParams,
 }: ShareBirthChartPageProps): Promise<Metadata> {
-  const name = toStringParam(searchParams.name);
-  const sun = toStringParam(searchParams.sun);
-  const moon = toStringParam(searchParams.moon);
-  const rising = toStringParam(searchParams.rising);
-  const element = toStringParam(searchParams.element);
-  const modality = toStringParam(searchParams.modality);
-  const insight = truncate(toStringParam(searchParams.insight));
-  const keywords = parseKeywords(searchParams.keywords);
-  const date = toStringParam(searchParams.date);
+  const resolvedSearchParams = await searchParams;
+  const name = toStringParam(resolvedSearchParams.name);
+  const sun = toStringParam(resolvedSearchParams.sun);
+  const moon = toStringParam(resolvedSearchParams.moon);
+  const rising = toStringParam(resolvedSearchParams.rising);
+  const element = toStringParam(resolvedSearchParams.element);
+  const modality = toStringParam(resolvedSearchParams.modality);
+  const insight = truncate(toStringParam(resolvedSearchParams.insight));
+  const keywords = parseKeywords(resolvedSearchParams.keywords);
+  const date = toStringParam(resolvedSearchParams.date);
 
   const placements = [
     sun ? `Sun ${sun}` : null,
@@ -131,18 +134,19 @@ export async function generateMetadata({
   };
 }
 
-export default function ShareBirthChartPage({
+export default async function ShareBirthChartPage({
   searchParams,
 }: ShareBirthChartPageProps) {
-  const name = toStringParam(searchParams.name);
-  const sun = toStringParam(searchParams.sun);
-  const moon = toStringParam(searchParams.moon);
-  const rising = toStringParam(searchParams.rising);
-  const element = toStringParam(searchParams.element);
-  const modality = toStringParam(searchParams.modality);
-  const insight = truncate(toStringParam(searchParams.insight));
-  const keywords = parseKeywords(searchParams.keywords);
-  const date = toStringParam(searchParams.date);
+  const resolvedSearchParams = await searchParams;
+  const name = toStringParam(resolvedSearchParams.name);
+  const sun = toStringParam(resolvedSearchParams.sun);
+  const moon = toStringParam(resolvedSearchParams.moon);
+  const rising = toStringParam(resolvedSearchParams.rising);
+  const element = toStringParam(resolvedSearchParams.element);
+  const modality = toStringParam(resolvedSearchParams.modality);
+  const insight = truncate(toStringParam(resolvedSearchParams.insight));
+  const keywords = parseKeywords(resolvedSearchParams.keywords);
+  const date = toStringParam(resolvedSearchParams.date);
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-blue-950 to-indigo-900 text-white'>

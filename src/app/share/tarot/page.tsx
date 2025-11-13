@@ -3,16 +3,18 @@ import Link from 'next/link';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
 
+type ShareTarotSearchParams = {
+  card?: string | string[];
+  keywords?: string | string[];
+  timeframe?: string | string[];
+  name?: string | string[];
+  date?: string | string[];
+  text?: string | string[];
+  variant?: string | string[];
+};
+
 type ShareTarotPageProps = {
-  searchParams: {
-    card?: string | string[];
-    keywords?: string | string[];
-    timeframe?: string | string[];
-    name?: string | string[];
-    date?: string | string[];
-    text?: string | string[];
-    variant?: string | string[];
-  };
+  searchParams: Promise<ShareTarotSearchParams>;
 };
 
 const toStringParam = (value?: string | string[]) => {
@@ -77,21 +79,22 @@ const buildOgImageUrl = ({
 export async function generateMetadata({
   searchParams,
 }: ShareTarotPageProps): Promise<Metadata> {
-  const card = toStringParam(searchParams.card) ?? 'Your Tarot Card';
-  const keywords = parseKeywords(searchParams.keywords);
-  const variantRaw = toStringParam(searchParams.variant);
+  const resolvedSearchParams = await searchParams;
+  const card = toStringParam(resolvedSearchParams.card) ?? 'Your Tarot Card';
+  const keywords = parseKeywords(resolvedSearchParams.keywords);
+  const variantRaw = toStringParam(resolvedSearchParams.variant);
   const variant = variantRaw ? variantRaw.toLowerCase() : undefined;
   const timeframeRaw =
-    toStringParam(searchParams.timeframe) ??
+    toStringParam(resolvedSearchParams.timeframe) ??
     (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
   const timeframe =
     toTitleCase(timeframeRaw) ??
     (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
-  const nameRaw = toStringParam(searchParams.name);
+  const nameRaw = toStringParam(resolvedSearchParams.name);
   const name = nameRaw ? toTitleCase(nameRaw) : undefined;
   const isPattern = variant === 'pattern';
   const descriptionText =
-    truncate(toStringParam(searchParams.text)) ||
+    truncate(toStringParam(resolvedSearchParams.text)) ||
     (keywords.length
       ? `Themes: ${keywords.join(' • ')}`
       : `A ${timeframe.toLowerCase()} tarot ${isPattern ? 'pattern insight' : 'card insight'} from Lunary.`);
@@ -109,20 +112,23 @@ export async function generateMetadata({
       : `${timeframe} Tarot Spotlight: ${card}`;
 
   const urlParams = new URLSearchParams();
-  if (searchParams.card)
-    urlParams.set('card', toStringParam(searchParams.card)!);
-  if (searchParams.keywords)
-    urlParams.set('keywords', parseKeywords(searchParams.keywords).join(','));
-  if (searchParams.timeframe)
-    urlParams.set('timeframe', toStringParam(searchParams.timeframe)!);
-  if (searchParams.name)
-    urlParams.set('name', toStringParam(searchParams.name)!);
-  if (searchParams.date)
-    urlParams.set('date', toStringParam(searchParams.date)!);
-  if (searchParams.text)
-    urlParams.set('text', toStringParam(searchParams.text)!);
-  if (searchParams.variant)
-    urlParams.set('variant', toStringParam(searchParams.variant)!);
+  if (resolvedSearchParams.card)
+    urlParams.set('card', toStringParam(resolvedSearchParams.card)!);
+  if (resolvedSearchParams.keywords)
+    urlParams.set(
+      'keywords',
+      parseKeywords(resolvedSearchParams.keywords).join(','),
+    );
+  if (resolvedSearchParams.timeframe)
+    urlParams.set('timeframe', toStringParam(resolvedSearchParams.timeframe)!);
+  if (resolvedSearchParams.name)
+    urlParams.set('name', toStringParam(resolvedSearchParams.name)!);
+  if (resolvedSearchParams.date)
+    urlParams.set('date', toStringParam(resolvedSearchParams.date)!);
+  if (resolvedSearchParams.text)
+    urlParams.set('text', toStringParam(resolvedSearchParams.text)!);
+  if (resolvedSearchParams.variant)
+    urlParams.set('variant', toStringParam(resolvedSearchParams.variant)!);
 
   const canonical = `${APP_URL}/share/tarot${
     urlParams.toString() ? `?${urlParams.toString()}` : ''
@@ -133,9 +139,9 @@ export async function generateMetadata({
     keywords,
     timeframe: isPattern ? patternLabel : timeframe,
     name,
-    date: toStringParam(searchParams.date),
-    text: toStringParam(searchParams.text),
-    variant: toStringParam(searchParams.variant),
+    date: toStringParam(resolvedSearchParams.date),
+    text: toStringParam(resolvedSearchParams.text),
+    variant: toStringParam(resolvedSearchParams.variant),
   });
 
   return {
@@ -168,20 +174,23 @@ export async function generateMetadata({
   };
 }
 
-export default function ShareTarotPage({ searchParams }: ShareTarotPageProps) {
-  const card = toStringParam(searchParams.card) ?? 'Your Tarot Card';
-  const keywords = parseKeywords(searchParams.keywords);
-  const variantRaw = toStringParam(searchParams.variant);
+export default async function ShareTarotPage({
+  searchParams,
+}: ShareTarotPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const card = toStringParam(resolvedSearchParams.card) ?? 'Your Tarot Card';
+  const keywords = parseKeywords(resolvedSearchParams.keywords);
+  const variantRaw = toStringParam(resolvedSearchParams.variant);
   const variant = variantRaw ? variantRaw.toLowerCase() : undefined;
   const timeframeBase =
-    toStringParam(searchParams.timeframe) ??
+    toStringParam(resolvedSearchParams.timeframe) ??
     (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
   const timeframe =
     toTitleCase(timeframeBase) ??
     (variant === 'pattern' ? 'Tarot Pattern' : 'Daily');
-  const name = toTitleCase(toStringParam(searchParams.name));
-  const shareDate = toStringParam(searchParams.date);
-  const text = truncate(toStringParam(searchParams.text));
+  const name = toTitleCase(toStringParam(resolvedSearchParams.name));
+  const shareDate = toStringParam(resolvedSearchParams.date);
+  const text = truncate(toStringParam(resolvedSearchParams.text));
   const isPattern = variant === 'pattern';
   const patternLabel =
     timeframe.endsWith('Pattern') || timeframe.endsWith('Patterns')

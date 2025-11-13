@@ -814,11 +814,11 @@ const BirthChartPage = () => {
     return `${value.slice(0, limit - 1).trimEnd()}…`;
   }, []);
 
-  const hasBirthChartData = hasBirthChart(me.profile);
-  const birthChartData =
-    hasBirthChartData && me?.profile
-      ? getBirthChartFromProfile(me.profile)
-      : null;
+  const profile = me?.profile;
+  const hasBirthChartData = profile ? hasBirthChart(profile) : false;
+  const birthChartData = hasBirthChartData
+    ? getBirthChartFromProfile(profile)
+    : null;
 
   const birthChartShare = useMemo(() => {
     if (!birthChartData) return null;
