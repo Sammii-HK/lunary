@@ -5,6 +5,8 @@ import {
   sendEmail,
   generateVerificationEmailHTML,
   generateVerificationEmailText,
+  generatePasswordResetEmailHTML,
+  generatePasswordResetEmailText,
 } from './email';
 
 // Better Auth server configuration with Jazz database adapter
@@ -27,6 +29,27 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // Disabled - free users don't need verification
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
+    revokeSessionsOnPasswordReset: true,
+    async sendResetPassword({ user, url }, _request) {
+      try {
+        const html = generatePasswordResetEmailHTML(url, user.email);
+        const text = generatePasswordResetEmailText(url, user.email);
+
+        await sendEmail({
+          to: user.email,
+          subject: '🔐 Reset Your Lunary Password',
+          html,
+          text,
+        });
+
+        console.log(`🔐 Password reset email sent to ${user.email}`);
+      } catch (error) {
+        console.error('Failed to send password reset email:', error);
+        throw error;
+      }
+    },
     // Email verification will be required when subscribing or accessing personalized features
   },
 
