@@ -78,11 +78,15 @@ export const auth = betterAuth({
       'http://localhost:3001',
       'https://lunary.app',
       'https://www.lunary.app',
-      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     ];
 
-    // Get origin from request
-    const origin = request.headers.get('origin');
+    // Add NEXT_PUBLIC_APP_URL if set
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+      staticOrigins.push(process.env.NEXT_PUBLIC_APP_URL);
+    }
+
+    // Get origin from request headers or URL
+    const origin = request.headers.get('origin') || new URL(request.url).origin;
 
     // If origin is a Vercel preview deployment, add it dynamically
     if (origin && origin.endsWith('.vercel.app')) {
