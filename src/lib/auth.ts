@@ -10,12 +10,31 @@ import {
 // Better Auth server configuration with Jazz database adapter
 export const auth = betterAuth({
   database: JazzBetterAuthDatabaseAdapter({
-    syncServer: `wss://cloud.jazz.tools/?key=sam@lunary.com`,
-    accountID:
-      process.env.JAZZ_WORKER_ACCOUNT || 'co_zQcie5b9JeVB3go2xcpitCuPPUK',
-    accountSecret:
-      process.env.JAZZ_WORKER_SECRET ||
-      'sealerSecret_z6j9dtYQev5cMjaKKncXQRMxpa23ppGDencCFwH2Bf4Jm/signerSecret_z3t4A4AbNMp3GSf7YP7Mc2nmuB3yJfYNLEUWDTqE1r6cV',
+    syncServer:
+      process.env.JAZZ_SYNC_SERVER ||
+      `wss://cloud.jazz.tools/?key=${process.env.JAZZ_SYNC_KEY || ''}`,
+    accountID: (() => {
+      const accountId = process.env.JAZZ_WORKER_ACCOUNT;
+      if (
+        !accountId &&
+        process.env.NODE_ENV !== 'development' &&
+        process.env.NODE_ENV !== 'test'
+      ) {
+        throw new Error('JAZZ_WORKER_ACCOUNT environment variable is required');
+      }
+      return accountId;
+    })(),
+    accountSecret: (() => {
+      const secret = process.env.JAZZ_WORKER_SECRET;
+      if (
+        !secret &&
+        process.env.NODE_ENV !== 'development' &&
+        process.env.NODE_ENV !== 'test'
+      ) {
+        throw new Error('JAZZ_WORKER_SECRET environment variable is required');
+      }
+      return secret;
+    })(),
   }),
   secret: (() => {
     const secret = process.env.BETTER_AUTH_SECRET?.trim();
