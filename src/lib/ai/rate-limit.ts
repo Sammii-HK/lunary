@@ -33,6 +33,11 @@ export const enforceUserRateLimit = (
   userId: string,
   now = Date.now(),
 ): RateLimitCheck => {
+  // Bypass rate limiting in development
+  if (process.env.NODE_ENV === 'development') {
+    return { ok: true };
+  }
+
   const existing = userRateMap.get(userId);
   if (!existing) {
     userRateMap.set(userId, {
@@ -68,6 +73,11 @@ export const enforceIpRateLimit = (
   ipHeader?: string | null,
   now = Date.now(),
 ): RateLimitCheck => {
+  // Bypass IP rate limiting in development
+  if (process.env.NODE_ENV === 'development') {
+    return { ok: true };
+  }
+
   const ip = extractFirstIp(ipHeader);
   if (!ip) return { ok: true };
 

@@ -17,11 +17,25 @@ export const auth = betterAuth({
       process.env.JAZZ_WORKER_SECRET ||
       'sealerSecret_z6j9dtYQev5cMjaKKncXQRMxpa23ppGDencCFwH2Bf4Jm/signerSecret_z3t4A4AbNMp3GSf7YP7Mc2nmuB3yJfYNLEUWDTqE1r6cV',
   }),
-  secret:
-    process.env.BETTER_AUTH_SECRET ||
-    (process.env.NODE_ENV === 'test'
-      ? 'test-secret-key-for-jest-tests-only'
-      : undefined),
+  secret: (() => {
+    const secret = process.env.BETTER_AUTH_SECRET?.trim();
+    if (!secret && process.env.NODE_ENV !== 'test') {
+      console.warn(
+        '⚠️ BETTER_AUTH_SECRET is not set. Auth may not work properly.',
+      );
+      // Use a fallback for local dev only
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('⚠️ Using fallback secret for local development');
+        return 'local-dev-secret-key-change-in-production';
+      }
+    }
+    return (
+      secret ||
+      (process.env.NODE_ENV === 'test'
+        ? 'test-secret-key-for-jest-tests-only'
+        : undefined)
+    );
+  })(),
 
   // Email and password authentication
   emailAndPassword: {

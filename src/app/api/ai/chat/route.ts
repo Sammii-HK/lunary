@@ -89,7 +89,16 @@ export async function POST(request: NextRequest) {
     const dailyLimit = DAILY_MESSAGE_LIMITS[planId];
 
     if (usageSnapshot.usedMessages >= dailyLimit) {
-      return jsonResponse({ error: AI_LIMIT_REACHED_MESSAGE }, 429);
+      return jsonResponse(
+        {
+          error: AI_LIMIT_REACHED_MESSAGE,
+          message: AI_LIMIT_REACHED_MESSAGE,
+          limitExceeded: true,
+          used: usageSnapshot.usedMessages,
+          limit: dailyLimit,
+        },
+        429,
+      );
     }
 
     const { historyLimit, includeMood } =
@@ -100,6 +109,7 @@ export async function POST(request: NextRequest) {
       tz: user.timezone ?? 'Europe/London',
       locale: user.locale ?? 'en-GB',
       displayName: user.displayName,
+      userBirthday: user.birthday,
       historyLimit,
       includeMood,
       now,
@@ -237,11 +247,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const composed = composeAssistantReply({
-      context,
-      userMessage: body.message,
-      memorySnippets,
-    });
+    let composed;
+    try {
+      composed = await composeAssistantReply({
+        context,
+        userMessage: body.message,
+        memorySnippets,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'AI service is temporarily unavailable. Please try again later.';
+      console.error('[AI Chat] Failed to compose reply:', error);
+      return jsonResponse(
+        {
+          error: errorMessage,
+          message:
+            "I apologize, but I'm having trouble connecting right now. Please try again in a moment.",
+        },
+        503,
+      );
+    }
 
     const assistantContent = composed.message;
     const tokensIn = estimateTokenCount(body.message);

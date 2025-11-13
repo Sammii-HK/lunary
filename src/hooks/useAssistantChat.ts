@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAuthStatus } from '@/components/AuthStatus';
+import { AI_LIMIT_REACHED_MESSAGE } from '@/lib/ai/plans';
 
 export type AssistantRole = 'user' | 'assistant';
 
@@ -72,12 +73,14 @@ export const useAssistantChat = () => {
   const [planId, setPlanId] = useState<string | null>(null);
   const [dailyHighlight, setDailyHighlight] = useState<any>(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
   const previousUserIdRef = useRef<string | null>(null);
 
   const loadThreadHistory = useCallback(
     async (id: string) => {
       try {
+        console.log('[AssistantChat] Loading thread history:', id);
         setIsLoadingHistory(true);
         const response = await fetch(`/api/ai/thread?threadId=${id}`, {
           credentials: 'include',
@@ -85,6 +88,10 @@ export const useAssistantChat = () => {
 
         if (response.ok) {
           const thread = await response.json();
+          console.log('[AssistantChat] Thread loaded:', {
+            threadId: id,
+            messageCount: thread.messages?.length || 0,
+          });
           if (thread.messages && Array.isArray(thread.messages)) {
             const loadedMessages: AssistantMessage[] = thread.messages.map(
               (msg: any, index: number) => ({
@@ -96,11 +103,19 @@ export const useAssistantChat = () => {
             setMessages(loadedMessages);
           }
         } else if (response.status === 404) {
+          console.log(
+            '[AssistantChat] Thread not found (404), clearing localStorage',
+          );
           const storageKey = getThreadStorageKey(userId);
           if (storageKey && typeof window !== 'undefined') {
             localStorage.removeItem(storageKey);
           }
           setThreadId(null);
+        } else {
+          console.error(
+            '[AssistantChat] Failed to load thread:',
+            response.status,
+          );
         }
       } catch (error) {
         console.error('[AssistantChat] Failed to load thread history', error);
@@ -110,6 +125,12 @@ export const useAssistantChat = () => {
     },
     [userId],
   );
+
+  // Stable reference for loadThreadHistory to prevent useEffect loops
+  const loadThreadHistoryRef = useRef(loadThreadHistory);
+  useEffect(() => {
+    loadThreadHistoryRef.current = loadThreadHistory;
+  }, [loadThreadHistory]);
 
   useEffect(() => {
     if (!userId) {
@@ -128,13 +149,19 @@ export const useAssistantChat = () => {
     const storedThreadId =
       typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
 
+    console.log('[AssistantChat] Loading thread on mount:', {
+      userId,
+      storageKey,
+      storedThreadId,
+    });
+
     if (storedThreadId) {
       setThreadId(storedThreadId);
-      loadThreadHistory(storedThreadId);
+      loadThreadHistoryRef.current(storedThreadId);
     } else {
       setIsLoadingHistory(false);
     }
-  }, [userId, loadThreadHistory]);
+  }, [userId]); // Removed loadThreadHistory from dependencies to prevent loops
 
   useEffect(() => {
     if (previousUserIdRef.current && previousUserIdRef.current !== userId) {
@@ -215,10 +242,28 @@ export const useAssistantChat = () => {
           if (response.status === 401) {
             throw new Error('Unauthorized - Please sign in to use the AI chat');
           }
+          if (response.status === 429) {
+            const errorData = await response.json().catch(() => ({}));
+            const limitMessage =
+              errorData.message || errorData.error || AI_LIMIT_REACHED_MESSAGE;
+            throw new Error(limitMessage);
+          }
+          if (response.status === 503) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+              errorData.message ||
+                'AI service is temporarily unavailable. Please try again in a moment.',
+            );
+          }
           const errorText = await response.text().catch(() => 'Unknown error');
-          throw new Error(
-            `Failed to stream response: ${response.status} ${errorText}`,
-          );
+          let errorMessage = `Failed to stream response: ${response.status}`;
+          try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.message || errorJson.error || errorMessage;
+          } catch {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         if (!response.body) {
@@ -254,10 +299,18 @@ export const useAssistantChat = () => {
                 }>(data);
 
                 if (payload?.threadId) {
-                  setThreadId(payload.threadId);
+                  const newThreadId = payload.threadId;
+                  setThreadId(newThreadId);
                   const storageKey = getThreadStorageKey(userId);
                   if (storageKey && typeof window !== 'undefined') {
-                    localStorage.setItem(storageKey, payload.threadId);
+                    localStorage.setItem(storageKey, newThreadId);
+                    console.log(
+                      '[AssistantChat] Saved threadId to localStorage:',
+                      {
+                        threadId: newThreadId,
+                        storageKey,
+                      },
+                    );
                   }
                 }
                 if (payload?.usage) {
@@ -305,6 +358,13 @@ export const useAssistantChat = () => {
         }
       } catch (error) {
         console.error('[AssistantChat] Streaming error', error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to send message. Please try again.';
+        setError(errorMessage);
+        // Remove the user message if there was an error
+        setMessages((prev) => prev.slice(0, -1));
       } finally {
         setIsStreaming(false);
         streamingMessageIdRef.current = null;
@@ -325,6 +385,8 @@ export const useAssistantChat = () => {
       dailyHighlight,
       isLoadingHistory,
       threadId,
+      error,
+      clearError: () => setError(null),
     }),
     [
       messages,
@@ -337,6 +399,7 @@ export const useAssistantChat = () => {
       dailyHighlight,
       isLoadingHistory,
       threadId,
+      error,
     ],
   );
 

@@ -51,6 +51,17 @@ export type TarotReading = {
   timestamp: string;
 };
 
+export type TarotPatternAnalysis = {
+  daily?: TarotCard;
+  weekly?: TarotCard;
+  personal?: TarotCard;
+  trends?: {
+    dominantThemes: string[];
+    frequentCards: Array<{ name: string; count: number }>;
+    patternInsights: string[];
+  };
+};
+
 export type MoodTrendEntry = {
   date: string;
   tag: string;
@@ -78,6 +89,14 @@ export type LunaryContext = {
   moon: MoonSnapshot | null;
   tarot: {
     lastReading?: TarotReading;
+    daily?: TarotCard;
+    weekly?: TarotCard;
+    personal?: TarotCard;
+    patternAnalysis?: {
+      dominantThemes: string[];
+      frequentCards: Array<{ name: string; count: number }>;
+      patternInsights: string[];
+    };
   };
   mood?: MoodHistory;
   history: {

@@ -1,6 +1,6 @@
 import { detectAssistCommand, runAssistCommand } from './assist';
 import { buildReflectionPrompt } from './reflection';
-import { buildPromptSections } from './prompt';
+import { buildPromptSections, SYSTEM_PROMPT } from './prompt';
 import { LunaryContext } from './types';
 
 const describeMoon = (context: LunaryContext): string | null => {
@@ -48,11 +48,11 @@ export type ComposedReply = {
   promptSections: ReturnType<typeof buildPromptSections>;
 };
 
-export const composeAssistantReply = ({
+export const composeAssistantReply = async ({
   context,
   userMessage,
   memorySnippets = [],
-}: ComposeReplyParams): ComposedReply => {
+}: ComposeReplyParams): Promise<ComposedReply> => {
   const promptSections = buildPromptSections({
     context,
     memorySnippets,
@@ -63,16 +63,96 @@ export const composeAssistantReply = ({
   const assistSnippet = runAssistCommand(assistCommand, context);
   const reflection = buildReflectionPrompt(context, userMessage);
 
-  const cosmicParagraph = weaveCosmicParagraph(context);
+  // Don't include generic cosmic paragraph - let AI generate personalized response
+  const cosmicParagraph = null;
 
-  const responseParts = [cosmicParagraph, assistSnippet, reflection].filter(
-    Boolean,
-  );
+  // Check if OpenAI is configured
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error(
+      'AI service is temporarily unavailable. Please try again later.',
+    );
+  }
 
-  return {
-    message: responseParts.join('\n\n'),
-    assistSnippet: assistSnippet ?? null,
-    reflection,
-    promptSections,
-  };
+  // Call OpenAI for personalized response
+  try {
+    const { OpenAI } = await import('openai');
+    const openai = new OpenAI({ apiKey });
+
+    const messages: Array<{
+      role: 'system' | 'user' | 'assistant';
+      content: string;
+    }> = [
+      {
+        role: 'system',
+        content: promptSections.system,
+      },
+    ];
+
+    if (promptSections.memory) {
+      messages.push({
+        role: 'system',
+        content: promptSections.memory,
+      });
+    }
+
+    messages.push({
+      role: 'system',
+      content: promptSections.context,
+    });
+
+    // Don't include conversation history to avoid repetition - each response should be fresh
+    // The current user message is enough context
+
+    messages.push({
+      role: 'user',
+      content: userMessage,
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages,
+      max_tokens: 500,
+      temperature: 0.9, // Increased from 0.7 to 0.9 for more varied responses
+    });
+
+    const aiResponse = completion.choices[0]?.message?.content || '';
+
+    if (!aiResponse || aiResponse.trim().length === 0) {
+      throw new Error(
+        'AI service returned an empty response. Please try again later.',
+      );
+    }
+
+    // Clean up AI response - remove any journal prompts it might have added
+    const cleanedResponse = aiResponse
+      .replace(/You could journal on.*?\./gi, '')
+      .replace(/\n\n+/g, '\n\n')
+      .trim();
+
+    // Only include AI response and assist/reflection - no generic cosmic paragraph
+    // Only add reflection if it's meaningful (has moon or tarot context)
+    const responseParts = [
+      cleanedResponse,
+      assistSnippet,
+      reflection &&
+      (context.moon || context.tarot.daily || context.tarot.lastReading)
+        ? reflection
+        : null,
+    ].filter(Boolean);
+
+    return {
+      message: responseParts.join('\n\n'),
+      assistSnippet: assistSnippet ?? null,
+      reflection,
+      promptSections,
+    };
+  } catch (error) {
+    console.error('[AI Responder] OpenAI error:', error);
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'AI service is temporarily unavailable. Please try again later.';
+    throw new Error(errorMessage);
+  }
 };

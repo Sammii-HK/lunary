@@ -151,8 +151,8 @@ Real-time planetary position calculations using Astronomy Engine with ecliptic c
 ## Development
 
 ```bash
-yarn install
-yarn dev
+pnpm install
+pnpm dev
 ```
 
 **Code Quality**: TypeScript strict mode, ESLint + Prettier, Husky pre-commit hooks

@@ -66,6 +66,19 @@ export const loadUsage = async ({
 }: UsageContext): Promise<PlanUsageSnapshot> => {
   const todayKey = serialiseDay(now);
 
+  // In development, allow unlimited usage for testing
+  if (process.env.NODE_ENV === 'development') {
+    const memory = loadUsageFromMemory(userId, todayKey);
+    if (memory) {
+      // Reset usage count in dev but keep the snapshot structure
+      return {
+        ...memory,
+        usedMessages: 0,
+      };
+    }
+    return saveUsageToMemory(initialUsageSnapshot(userId, planId, now));
+  }
+
   const memory = loadUsageFromMemory(userId, todayKey);
   if (memory) {
     return memory;
@@ -162,6 +175,29 @@ export const updateUsage = async ({
 }: UsageIncrement): Promise<UsageResult> => {
   const current = await loadUsage({ userId, planId, now });
   const limit = DAILY_MESSAGE_LIMITS[planId];
+
+  // In development, bypass usage limits
+  if (process.env.NODE_ENV === 'development') {
+    const updated: PlanUsageSnapshot = {
+      ...current,
+      usedMessages: current.usedMessages + messageDelta,
+      tokensIn: current.tokensIn + tokensIn,
+      tokensOut: current.tokensOut + tokensOut,
+    };
+
+    saveUsageToMemory(updated);
+    // Still persist to database for testing, but don't enforce limits
+    await persistUsage(updated).catch(() => {
+      // Ignore persistence errors in dev
+    });
+
+    return {
+      usage: updated,
+      dailyLimit: limit,
+      limitExceeded: false,
+      message: null,
+    };
+  }
 
   if (current.usedMessages + messageDelta > limit) {
     return {

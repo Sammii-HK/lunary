@@ -32,7 +32,7 @@ model SocialPost {
 
 model AiThread {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String   @map("user_id")
   title     String?
   messages  Json
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -44,7 +44,7 @@ model AiThread {
 
 model AiUsage {
   id        String   @id @default(cuid())
-  userId    String   @unique
+  userId    String   @unique @map("user_id")
   day       DateTime @default(now()) @db.Timestamptz(6)
   count     Int      @default(0)
   tokensIn  Int      @default(0) @map("tokens_in")

@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
@@ -44,10 +44,21 @@ export default function BookOfShadowsPage() {
     usage,
     planId,
     dailyHighlight,
+    error,
+    clearError,
   } = useAssistantChat();
   const [input, setInput] = useState('');
   const lastSendTimeRef = useRef<number>(0);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const DEBOUNCE_MS = 500;
+
+  // Auto-scroll to bottom when messages change or streaming
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isStreaming]);
 
   const attemptSend = () => {
     const now = Date.now();
@@ -61,6 +72,7 @@ export default function BookOfShadowsPage() {
     if (!trimmed || isStreaming) return;
 
     lastSendTimeRef.current = now;
+    clearError?.(); // Clear any previous errors
     sendMessage(trimmed);
     setInput('');
   };
@@ -110,22 +122,42 @@ export default function BookOfShadowsPage() {
 
         <main className='flex flex-1 flex-col gap-4'>
           <section className='flex flex-1 flex-col gap-4 overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur'>
-            <div className='flex-1 overflow-y-auto px-4 py-6 md:px-6'>
+            <div
+              ref={messagesContainerRef}
+              className='flex-1 overflow-y-auto px-4 py-6 md:px-6'
+            >
               <div className='mx-auto flex max-w-2xl flex-col gap-4 md:gap-6'>
                 {messages.length === 0 ? (
                   <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
-                    Begin by sharing how you’re feeling, what you’re exploring,
-                    or what guidance you’re seeking. I’ll answer with gentle,
+                    Begin by sharing how you're feeling, what you're exploring,
+                    or what guidance you're seeking. I'll answer with gentle,
                     grounded insight.
                   </div>
                 ) : (
-                  messages.map((message) => (
-                    <MessageBubble
-                      key={message.id}
-                      role={message.role}
-                      content={message.content}
-                    />
-                  ))
+                  <>
+                    {messages.map((message) => (
+                      <MessageBubble
+                        key={message.id}
+                        role={message.role}
+                        content={message.content}
+                      />
+                    ))}
+                    {error && (
+                      <div className='rounded-2xl border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm text-red-200 md:px-6 md:py-4'>
+                        <p className='font-semibold text-red-300/90 mb-1'>
+                          Something went wrong
+                        </p>
+                        <p>{error}</p>
+                        <button
+                          onClick={clearError}
+                          className='mt-2 text-xs text-red-300/70 hover:text-red-300 underline'
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </>
                 )}
               </div>
             </div>

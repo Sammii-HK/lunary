@@ -5,6 +5,7 @@ import {
   LunaryContext,
   MoodHistory,
   MoonSnapshot,
+  TarotCard,
   TarotReading,
   TransitRecord,
 } from './types';
@@ -17,6 +18,7 @@ import {
   getDailyHighlight as defaultGetDailyHighlight,
   getMoodHistory as defaultGetMoodHistory,
   getTarotLastReading as defaultGetTarotLastReading,
+  getTarotPatternAnalysis as defaultGetTarotPatternAnalysis,
 } from './providers';
 
 export type LunaryContextDependencies = {
@@ -31,6 +33,21 @@ export type LunaryContextDependencies = {
     userId: string;
     now?: Date;
   }) => Promise<TarotReading | null>;
+  getTarotPatternAnalysis: (params: {
+    userId: string;
+    userName?: string;
+    userBirthday?: string;
+    now?: Date;
+  }) => Promise<{
+    daily: TarotCard;
+    weekly: TarotCard;
+    personal: TarotCard;
+    trends: {
+      dominantThemes: string[];
+      frequentCards: Array<{ name: string; count: number }>;
+      patternInsights: string[];
+    };
+  } | null>;
   getDailyHighlight: (params: {
     userId: string;
     now?: Date;
@@ -50,6 +67,7 @@ const defaultDependencies: LunaryContextDependencies = {
   getBirthChart: defaultGetBirthChart,
   getCurrentTransits: defaultGetCurrentTransits,
   getTarotLastReading: defaultGetTarotLastReading,
+  getTarotPatternAnalysis: defaultGetTarotPatternAnalysis,
   getDailyHighlight: defaultGetDailyHighlight,
   getMoodHistory: defaultGetMoodHistory,
   getConversationHistory: defaultGetConversationHistory,
@@ -60,6 +78,7 @@ export type BuildLunaryContextParams = {
   tz: string;
   locale: string;
   displayName?: string;
+  userBirthday?: string;
   historyLimit?: number;
   includeMood?: boolean;
   deps?: Partial<LunaryContextDependencies>;
@@ -91,6 +110,7 @@ export const buildLunaryContext = async ({
   tz,
   locale,
   displayName,
+  userBirthday,
   historyLimit = 10,
   includeMood = true,
   deps: dependencyOverrides,
@@ -102,6 +122,7 @@ export const buildLunaryContext = async ({
     birthChart,
     currentTransits,
     tarotReading,
+    tarotPatternAnalysis,
     dailyHighlight,
     mood,
     history,
@@ -121,6 +142,20 @@ export const buildLunaryContext = async ({
       console.error('[LunaryContext] Failed to fetch tarot reading', error);
       return null;
     }),
+    deps
+      .getTarotPatternAnalysis({
+        userId,
+        userName: displayName,
+        userBirthday,
+        now,
+      })
+      .catch((error) => {
+        console.error(
+          '[LunaryContext] Failed to fetch tarot pattern analysis',
+          error,
+        );
+        return null;
+      }),
     deps.getDailyHighlight({ userId, now }).catch((error) => {
       console.error('[LunaryContext] Failed to fetch daily highlight', error);
       return null;
@@ -156,6 +191,10 @@ export const buildLunaryContext = async ({
     moon: currentTransits?.moon ?? null,
     tarot: {
       lastReading: tarotReading ?? undefined,
+      daily: tarotPatternAnalysis?.daily,
+      weekly: tarotPatternAnalysis?.weekly,
+      personal: tarotPatternAnalysis?.personal,
+      patternAnalysis: tarotPatternAnalysis?.trends,
     },
     history: {
       lastMessages:

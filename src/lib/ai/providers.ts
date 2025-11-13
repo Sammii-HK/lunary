@@ -227,14 +227,223 @@ export const getTarotLastReading = async ({
   userId,
   now = new Date(),
 }: TarotProviderParams): Promise<TarotReading | null> => {
-  const seed = hashStringToNumber(userId || 'lunary');
-  const cards = generateTarotSpread(seed);
+  try {
+    const { sql } = await import('@vercel/postgres');
+
+    // Fetch the most recent tarot reading from database
+    const result = await sql`
+      SELECT cards, spread_name, created_at
+      FROM tarot_readings
+      WHERE user_id = ${userId}
+        AND archived_at IS NULL
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+
+    if (result.rows.length > 0) {
+      const row = result.rows[0];
+      const cards = Array.isArray(row.cards)
+        ? row.cards
+        : JSON.parse(row.cards || '[]');
+
+      return {
+        spread: row.spread_name || 'Three Card Insight',
+        cards: cards.map((card: any) => ({
+          name: card.name || card.cardName,
+          position: card.position,
+          reversed: card.reversed || false,
+        })),
+        timestamp: row.created_at || dayjs(now).toISOString(),
+      };
+    }
+  } catch (error) {
+    console.error('[Tarot Provider] Failed to fetch from database:', error);
+  }
+
+  // Fallback: return null if no reading found (don't generate mock data)
+  return null;
+};
+
+export type TarotPatternAnalysisParams = {
+  userId: string;
+  userName?: string;
+  userBirthday?: string;
+  now?: Date;
+};
+
+// Server-safe tarot trend analysis (duplicated from client-side version)
+const analyzeTarotTrends = (
+  getTarotCard: (
+    date: string,
+    userName?: string,
+    userBirthday?: string,
+  ) => TarotCard,
+  userName?: string,
+  days: number = 30,
+  userBirthday?: string,
+): {
+  dominantThemes: string[];
+  cardFrequency: { [key: string]: number };
+  patternInsights: string[];
+} => {
+  const pastReadings: { date: string; card: TarotCard }[] = [];
+  const today = dayjs();
+
+  // Collect past readings
+  for (let i = 0; i < days; i++) {
+    const date = today.subtract(i, 'day');
+    const card = getTarotCard(
+      date.toDate().toDateString(),
+      userName,
+      userBirthday,
+    );
+    pastReadings.push({
+      date: date.format('YYYY-MM-DD'),
+      card,
+    });
+  }
+
+  // Analyze card frequency
+  const cardFrequency: { [key: string]: number } = {};
+  const keywordCounts: { [key: string]: number } = {};
+
+  pastReadings.forEach((reading) => {
+    cardFrequency[reading.card.name] =
+      (cardFrequency[reading.card.name] || 0) + 1;
+
+    reading.card.keywords.forEach((keyword) => {
+      keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+    });
+  });
+
+  // Find dominant themes (top 5 keywords)
+  const dominantThemes = Object.entries(keywordCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([keyword]) => keyword);
+
+  // Generate pattern insights
+  const patternInsights: string[] = [];
+
+  // Check for frequently appearing cards
+  const frequentCards = Object.entries(cardFrequency)
+    .filter(([, count]) => count >= 3)
+    .sort(([, a], [, b]) => b - a);
+
+  if (frequentCards.length > 0) {
+    const [cardName, count] = frequentCards[0];
+    patternInsights.push(
+      `"${cardName}" has appeared ${count} times in ${days} days, suggesting this theme is particularly relevant to your current life path.`,
+    );
+  }
+
+  // Check for theme patterns
+  if (keywordCounts['Love'] && keywordCounts['Love'] >= 5) {
+    patternInsights.push(
+      'Love and relationship themes have been prominent, indicating a focus on heart matters and connections.',
+    );
+  }
+
+  if (keywordCounts['Transformation'] && keywordCounts['Transformation'] >= 3) {
+    patternInsights.push(
+      "Transformation energies suggest you're in a significant period of personal growth and change.",
+    );
+  }
+
+  if (keywordCounts['Wisdom'] && keywordCounts['Wisdom'] >= 4) {
+    patternInsights.push(
+      "Wisdom themes indicate you're being called to integrate important life lessons.",
+    );
+  }
 
   return {
-    spread: 'Three Card Insight',
-    cards,
-    timestamp: dayjs(now).subtract(2, 'day').toISOString(),
+    dominantThemes,
+    cardFrequency,
+    patternInsights,
   };
+};
+
+export const getTarotPatternAnalysis = async ({
+  userId,
+  userName,
+  userBirthday,
+  now = new Date(),
+}: TarotPatternAnalysisParams): Promise<{
+  daily: TarotCard;
+  weekly: TarotCard;
+  personal: TarotCard;
+  trends: {
+    dominantThemes: string[];
+    frequentCards: Array<{ name: string; count: number }>;
+    patternInsights: string[];
+  };
+} | null> => {
+  try {
+    const { getTarotCard } = await import('../../../utils/tarot/tarot');
+
+    const today = new Date();
+    const todayString = today.toDateString();
+
+    // Calculate weekly seed
+    const weekStart = new Date(today);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekStartYear = weekStart.getFullYear();
+    const weekStartMonth = weekStart.getMonth() + 1;
+    const weekStartDate = weekStart.getDate();
+    const dayOfYear = Math.floor(
+      (weekStart.getTime() - new Date(weekStartYear, 0, 0).getTime()) /
+        86400000,
+    );
+    const weekNumber = Math.floor(dayOfYear / 7);
+    const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
+
+    // Get daily card
+    const daily = getTarotCard(`daily-${todayString}`, userName, userBirthday);
+
+    // Get weekly card
+    const weekly = getTarotCard(weeklySeed, userName, userBirthday);
+
+    // Get personal card (based on birthday)
+    const currentMonth = new Date().getMonth().toString();
+    const personalSeed = userBirthday
+      ? userBirthday + currentMonth
+      : currentMonth;
+    const personal = getTarotCard(personalSeed, userName, userBirthday);
+
+    // Analyze trends using server-safe function
+    const trendAnalysis = analyzeTarotTrends(
+      getTarotCard,
+      userName,
+      30,
+      userBirthday,
+    );
+
+    // Convert cardFrequency object to array
+    const frequentCards = trendAnalysis.cardFrequency
+      ? Object.entries(trendAnalysis.cardFrequency)
+          .map(([name, count]) => ({ name, count }))
+          .filter(({ count }) => count >= 2)
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5)
+      : [];
+
+    return {
+      daily,
+      weekly,
+      personal,
+      trends: {
+        dominantThemes: trendAnalysis.dominantThemes || [],
+        frequentCards,
+        patternInsights: trendAnalysis.patternInsights || [],
+      },
+    };
+  } catch (error) {
+    console.error(
+      '[Tarot Provider] Failed to generate pattern analysis:',
+      error,
+    );
+    return null;
+  }
 };
 
 export type DailyHighlightProviderParams = {

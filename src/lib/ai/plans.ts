@@ -111,4 +111,4 @@ export type PlanUsageSnapshot = {
 };
 
 export const AI_LIMIT_REACHED_MESSAGE =
-  "You've reached your AI limit. Upgrade to continue.";
+  "You've reached your daily message limit. Your limit will reset tomorrow, or upgrade your plan for more messages.";
