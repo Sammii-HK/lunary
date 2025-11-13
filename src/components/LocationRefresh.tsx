@@ -9,7 +9,9 @@ type LocationRefreshProps = {
   variant?: 'card' | 'settings';
 };
 
-export default function LocationRefresh({ variant = 'card' }: LocationRefreshProps) {
+export default function LocationRefresh({
+  variant = 'card',
+}: LocationRefreshProps) {
   const { location, requestLocation, loading, error, isLoggedIn } =
     useLocation();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -45,10 +47,14 @@ export default function LocationRefresh({ variant = 'card' }: LocationRefreshPro
       : 'mb-1 block text-xs font-medium uppercase tracking-wide text-zinc-400';
 
   const coordinatesClasses =
-    variant === 'card' ? 'text-sm text-white' : 'text-sm font-medium text-white';
+    variant === 'card'
+      ? 'text-sm text-white'
+      : 'text-sm font-medium text-white';
 
   const descriptionClasses =
-    variant === 'card' ? 'mt-1 text-xs text-zinc-400' : 'mt-1 text-xs text-zinc-500';
+    variant === 'card'
+      ? 'mt-1 text-xs text-zinc-400'
+      : 'mt-1 text-xs text-zinc-500';
 
   const infoTextClasses =
     variant === 'card'
