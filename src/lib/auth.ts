@@ -95,8 +95,10 @@ export const auth = betterAuth({
   },
 
   // CORS and security settings
-  // Note: Better Auth's trustedOrigins doesn't support wildcards, so we use
-  // static origins here and handle dynamic validation in route handlers
+  // Better Auth's trustedOrigins includes runtime VERCEL_URL if it matches
+  // our security patterns. This ensures each deployment includes its own URL
+  // in the trusted origins list. Additional dynamic validation happens in
+  // route handlers via our CORS wrapper for defense in depth.
   trustedOrigins: getAllowedOrigins(),
 
   // Add the Jazz plugin for integration

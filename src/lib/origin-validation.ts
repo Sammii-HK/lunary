@@ -8,8 +8,28 @@ const normalizeOrigin = (value?: string | null) => {
   return `https://${trimmed.replace(/\/+$/, '')}`;
 };
 
+const originPatterns = [
+  /^https:\/\/[a-z0-9][a-z0-9-]*-sammiis-projects\.vercel\.app$/i,
+  /^https:\/\/[a-z0-9][a-z0-9-]*--[a-z0-9][a-z0-9-]*-sammiis-projects\.vercel\.app$/i,
+  /^https:\/\/[a-z0-9][a-z0-9-]*\.vercel\.app$/i,
+  /^https:\/\/[a-z0-9][a-z0-9-]*--[a-z0-9][a-z0-9-]*\.vercel\.app$/i,
+  /^https:\/\/[a-z0-9][a-z0-9-]*\.lunary\.app$/i,
+  /^https:\/\/[a-z0-9][a-z0-9-]*--lunary\.app$/i,
+];
+
+function matchesOriginPattern(origin: string): boolean {
+  return originPatterns.some((pattern) => pattern.test(origin));
+}
+
+function isValidOriginPattern(origin: string | null | undefined): boolean {
+  if (!origin) return false;
+  const normalized = normalizeOrigin(origin);
+  if (!normalized) return false;
+  return matchesOriginPattern(normalized);
+}
+
 const getStaticOrigins = (): string[] => {
-  return [
+  const origins: string[] = [
     'http://localhost:3000',
     'http://localhost:3001',
     'https://lunary.app',
@@ -24,20 +44,29 @@ const getStaticOrigins = (): string[] => {
     process.env.NEXT_PUBLIC_VERCEL_URL
       ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
       : undefined,
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
   ]
     .map(normalizeOrigin)
     .filter(Boolean) as string[];
+
+  const vercelUrl = process.env.VERCEL_URL
+    ? normalizeOrigin(`https://${process.env.VERCEL_URL}`)
+    : null;
+
+  if (vercelUrl && isValidOriginPattern(vercelUrl)) {
+    origins.push(vercelUrl);
+  }
+
+  return origins;
 };
 
-const originPatterns = [
-  /^https:\/\/[a-z0-9][a-z0-9-]*-sammiis-projects\.vercel\.app$/i,
-  /^https:\/\/[a-z0-9][a-z0-9-]*--[a-z0-9][a-z0-9-]*-sammiis-projects\.vercel\.app$/i,
-  /^https:\/\/[a-z0-9][a-z0-9-]*\.vercel\.app$/i,
-  /^https:\/\/[a-z0-9][a-z0-9-]*--[a-z0-9][a-z0-9-]*\.vercel\.app$/i,
-  /^https:\/\/[a-z0-9][a-z0-9-]*\.lunary\.app$/i,
-  /^https:\/\/[a-z0-9][a-z0-9-]*--lunary\.app$/i,
-];
+let cachedAllowedOrigins: string[] | null = null;
+
+export function getAllowedOrigins(): string[] {
+  if (cachedAllowedOrigins === null) {
+    cachedAllowedOrigins = getStaticOrigins();
+  }
+  return cachedAllowedOrigins;
+}
 
 export function isValidOrigin(origin: string | null | undefined): boolean {
   if (!origin) return false;
@@ -45,12 +74,12 @@ export function isValidOrigin(origin: string | null | undefined): boolean {
   const normalized = normalizeOrigin(origin);
   if (!normalized) return false;
 
-  const staticOrigins = getStaticOrigins();
+  const staticOrigins = getAllowedOrigins();
   if (staticOrigins.includes(normalized)) {
     return true;
   }
 
-  return originPatterns.some((pattern) => pattern.test(normalized));
+  return matchesOriginPattern(normalized);
 }
 
 export function getCorsHeaders(origin: string | null | undefined): HeadersInit {
@@ -65,8 +94,4 @@ export function getCorsHeaders(origin: string | null | undefined): HeadersInit {
     'Access-Control-Allow-Headers':
       'Content-Type, Authorization, X-Requested-With',
   };
-}
-
-export function getAllowedOrigins(): string[] {
-  return getStaticOrigins();
 }
