@@ -406,7 +406,7 @@ export const TAROT_SPREADS: TarotSpreadDefinition[] = [
     cardCount: 15,
     estimatedTime: '35 minutes',
     bestFor: ['Birthday portals', 'New Year rituals', 'Business planning'],
-    minimumPlan: 'yearly',
+    minimumPlan: 'monthly',
     recommendedCadence:
       'Use once per year, ideally at a pivotal turning point.',
     journalPrompts: [
@@ -534,5 +534,6 @@ export const TAROT_SPREAD_MAP = Object.fromEntries(
 );
 
 export const FREE_PLAN_MONTHLY_READING_LIMIT = 2;
+export const MONTHLY_PLAN_MONTHLY_READING_LIMIT = 10;
 export const FREE_PLAN_HISTORY_RETENTION_DAYS = 7;
 export const SUBSCRIBER_HISTORY_RETENTION_DAYS = 365;

@@ -21,6 +21,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     features: [
       'Daily moon phases & basic insights',
       'General tarot card of the day',
+      '2 tarot spreads per month',
       'Basic lunar calendar',
       'Sun sign horoscope',
       'Access to grimoire knowledge',
@@ -38,6 +39,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Complete birth chart analysis',
       'Personalized daily horoscopes',
       'Personal tarot card & guidance',
+      '10 tarot spreads per month',
       'Daily transit calendar',
       'Tarot pattern analysis',
       'Crystal & herb recommendations',
@@ -56,6 +58,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     savings: 'Save 33%',
     features: [
       'Everything in Cosmic Guide',
+      'Unlimited tarot spreads',
       'Priority access to new features',
       'Advanced pattern analysis',
       'Yearly cosmic forecast',

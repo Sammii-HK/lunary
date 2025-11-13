@@ -35,7 +35,9 @@
     "test:e2e:smoke": "playwright test --grep '@smoke'",
     "test:e2e:shard": "playwright test --shard=$SHARD_ID/$TOTAL_SHARDS",
     "test:single": "bash scripts/test-single.sh",
-    "test:all": "pnpm test && pnpm test:e2e"
+    "test:all": "pnpm test && pnpm test:e2e",
+    "test:cors": "tsx scripts/test-cors.ts",
+    "test:middleware": "tsx scripts/test-middleware.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

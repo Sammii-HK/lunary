@@ -5,22 +5,24 @@ import {
   getSubscription,
   mapRowToReading,
 } from '../shared';
+import { auth } from '@/lib/auth';
 
 const toTextArrayLiteral = (values: string[]): string =>
   `{${values.map((value) => `"${value.replace(/"/g, '\\"')}"`).join(',')}}`;
 
 export async function GET(request: NextRequest, context: unknown) {
   try {
-    const { params } = (context || {}) as { params: { id: string } };
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const session = await auth.api.getSession({ headers: request.headers });
 
-    if (!userId) {
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 },
+        { error: 'Authentication required' },
+        { status: 401 },
       );
     }
+
+    const userId = session.user.id;
+    const { params } = (context || {}) as { params: { id: string } };
 
     const result = await sql`
       SELECT id,
@@ -61,16 +63,17 @@ export async function GET(request: NextRequest, context: unknown) {
 
 export async function PATCH(request: NextRequest, context: unknown) {
   try {
-    const { params } = (context || {}) as { params: { id: string } };
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const session = await auth.api.getSession({ headers: request.headers });
 
-    if (!userId) {
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 },
+        { error: 'Authentication required' },
+        { status: 401 },
       );
     }
+
+    const userId = session.user.id;
+    const { params } = (context || {}) as { params: { id: string } };
 
     const bodyText = await request.text();
     if (!bodyText) {
@@ -213,16 +216,17 @@ export async function PATCH(request: NextRequest, context: unknown) {
 
 export async function DELETE(request: NextRequest, context: unknown) {
   try {
-    const { params } = (context || {}) as { params: { id: string } };
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const session = await auth.api.getSession({ headers: request.headers });
 
-    if (!userId) {
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 },
+        { error: 'Authentication required' },
+        { status: 401 },
       );
     }
+
+    const userId = session.user.id;
+    const { params } = (context || {}) as { params: { id: string } };
 
     const result = await sql`
       UPDATE tarot_readings

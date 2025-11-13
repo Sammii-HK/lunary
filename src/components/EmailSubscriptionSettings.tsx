@@ -3,31 +3,42 @@
 import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect, useCallback } from 'react';
 import { Mail, CheckCircle, XCircle } from 'lucide-react';
+import { useAuthStatus } from './AuthStatus';
 import { betterAuthClient } from '@/lib/auth-client';
 
 export function EmailSubscriptionSettings() {
   const { me } = useAccount();
+  const authState = useAuthStatus();
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const resolveSessionEmail = useCallback(async () => {
+  const resolveSessionIdentity = useCallback(async () => {
     try {
       const session = await betterAuthClient.getSession();
       const sessionUser =
         (session as any)?.data?.user || (session as any)?.user || null;
 
-      return (sessionUser as any)?.email ?? null;
+      return {
+        email: (sessionUser as any)?.email ?? null,
+        id: (sessionUser as any)?.id ?? null,
+      };
     } catch (error) {
       console.error(
-        'Error fetching auth session while loading newsletter email',
+        'Error fetching auth session while loading newsletter preferences',
         error,
       );
-      return null;
+      return { email: null, id: null };
     }
   }, []);
+
+  const authUserId =
+    ((authState.user as any)?.id as string | undefined) ?? null;
+  const authProfileId =
+    ((authState.profile as any)?.id as string | undefined) ?? null;
 
   useEffect(() => {
     let isMounted = true;
@@ -37,32 +48,37 @@ export function EmailSubscriptionSettings() {
         ((me?.profile as any)?.email as string | undefined) ||
         ((me as any)?.email as string | undefined) ||
         null;
+      const profileUserId =
+        ((me as any)?.id as string | undefined) || authUserId || null;
 
       if (profileEmail) {
         if (isMounted) {
           setUserEmail(profileEmail);
+          setUserId(profileUserId);
           setAuthChecked(true);
         }
         return;
       }
 
-      const sessionEmail = await resolveSessionEmail();
+      const sessionIdentity = await resolveSessionIdentity();
 
       if (isMounted) {
-        setUserEmail(sessionEmail);
+        setUserEmail(sessionIdentity.email ?? null);
+        setUserId(sessionIdentity.id ?? profileUserId ?? authProfileId ?? null);
         setAuthChecked(true);
       }
     };
 
     setUserEmail(null);
     setAuthChecked(false);
+    setUserId(null);
 
     resolveEmail();
 
     return () => {
       isMounted = false;
     };
-  }, [me, resolveSessionEmail]);
+  }, [me, authUserId, authProfileId, resolveSessionIdentity]);
 
   const checkSubscriptionStatus = useCallback(async (email: string) => {
     setLoading(true);
@@ -95,30 +111,37 @@ export function EmailSubscriptionSettings() {
 
   const toggleSubscription = async () => {
     if (!userEmail) {
-      alert('Please sign in to manage email subscriptions');
+      if (!authState.isAuthenticated) {
+        alert('Please sign in to manage email subscriptions');
+      } else {
+        alert('We could not find an email for your account yet.');
+      }
       return;
     }
 
     setUpdating(true);
     try {
       const newStatus = !isSubscribed;
+      const resolvedUserId =
+        userId || ((me as any)?.id as string | undefined) || authUserId || null;
 
       if (newStatus) {
-        // Subscribe
+        const payload = {
+          email: userEmail,
+          preferences: {
+            weeklyNewsletter: true,
+            blogUpdates: true,
+            productUpdates: false,
+            cosmicAlerts: false,
+          },
+          source: 'profile_settings',
+          ...(resolvedUserId ? { userId: resolvedUserId } : {}),
+        };
+
         const response = await fetch('/api/newsletter/subscribers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: userEmail,
-            userId: (me as any)?.id,
-            preferences: {
-              weeklyNewsletter: true,
-              blogUpdates: true,
-              productUpdates: false,
-              cosmicAlerts: false,
-            },
-            source: 'profile_settings',
-          }),
+          body: JSON.stringify(payload),
         });
 
         if (response.ok) {
@@ -127,7 +150,6 @@ export function EmailSubscriptionSettings() {
           throw new Error('Failed to subscribe');
         }
       } else {
-        // Unsubscribe
         const response = await fetch(
           `/api/newsletter/subscribers/${encodeURIComponent(userEmail)}`,
           {
@@ -153,9 +175,9 @@ export function EmailSubscriptionSettings() {
 
   if (loading) {
     return (
-      <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+      <div className='w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
         <div className='flex items-center justify-center py-4'>
-          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400'></div>
+          <div className='h-6 w-6 animate-spin rounded-full border-b-2 border-purple-400'></div>
         </div>
       </div>
     );
@@ -163,13 +185,15 @@ export function EmailSubscriptionSettings() {
 
   if (!userEmail) {
     return (
-      <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
-        <h3 className='text-lg font-semibold text-white mb-3 flex items-center gap-2'>
+      <div className='w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
+        <h3 className='mb-3 flex items-center gap-2 text-lg font-semibold text-white'>
           <Mail className='h-5 w-5' />
           Email Newsletter
         </h3>
         <p className='text-sm text-zinc-400'>
-          Sign in to manage your email subscriptions.
+          {authState.isAuthenticated
+            ? 'Add an email address to your profile to manage subscriptions.'
+            : 'Sign in to manage your email subscriptions.'}
         </p>
       </div>
     );

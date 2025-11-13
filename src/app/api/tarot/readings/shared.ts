@@ -1,7 +1,9 @@
 import { sql } from '@vercel/postgres';
+import Stripe from 'stripe';
 import {
   FREE_PLAN_HISTORY_RETENTION_DAYS,
   FREE_PLAN_MONTHLY_READING_LIMIT,
+  MONTHLY_PLAN_MONTHLY_READING_LIMIT,
   PLAN_RANK,
   SUBSCRIBER_HISTORY_RETENTION_DAYS,
   TAROT_SPREAD_MAP,
@@ -37,21 +39,162 @@ const normalizePlan = (
   if (planType === 'yearly') return 'yearly';
   if (planType === 'monthly') return 'monthly';
   if (status === 'trial') return 'monthly';
+  if (status === 'active' && planType) {
+    return planType as TarotPlan;
+  }
   return 'free';
 };
 
 export const getSubscription = async (
   userId: string,
+  userEmail?: string | null,
 ): Promise<SubscriptionSnapshot> => {
   try {
-    const result = await sql`
+    let result = await sql`
       SELECT plan_type, status
       FROM subscriptions
       WHERE user_id = ${userId}
       LIMIT 1
     `;
 
+    // Fallback: if no subscription found by user_id, try looking up by email
+    if (result.rows.length === 0 && userEmail) {
+      console.log(
+        `[tarot/readings] No subscription found for user_id ${userId}, trying email lookup: ${userEmail}`,
+      );
+      result = await sql`
+        SELECT plan_type, status, stripe_customer_id
+        FROM subscriptions
+        WHERE user_email = ${userEmail}
+        ORDER BY created_at DESC
+        LIMIT 1
+      `;
+    }
+
+    // Fallback: if no subscription in DB, try fetching from Stripe by email
+    if (result.rows.length === 0 && userEmail) {
+      console.log(
+        `[tarot/readings] No subscription in DB, attempting Stripe lookup for email: ${userEmail}`,
+      );
+      try {
+        if (!process.env.STRIPE_SECRET_KEY) {
+          throw new Error('STRIPE_SECRET_KEY not configured');
+        }
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+        // Find customer by email
+        const customers = await stripe.customers.list({
+          email: userEmail,
+          limit: 1,
+        });
+
+        if (customers.data.length > 0) {
+          const customer = customers.data[0];
+          const customerId = customer.id;
+
+          // Fetch subscriptions for this customer
+          const subscriptions = await stripe.subscriptions.list({
+            customer: customerId,
+            status: 'all',
+            limit: 10,
+          });
+
+          if (subscriptions.data.length > 0) {
+            // Get the most recent active/trial subscription, or most recent
+            const activeSub = subscriptions.data.find((sub) =>
+              ['active', 'trialing'].includes(sub.status),
+            );
+            const stripeSub = activeSub || subscriptions.data[0];
+
+            const planType =
+              stripeSub.items.data[0]?.price?.recurring?.interval === 'month'
+                ? 'monthly'
+                : 'yearly';
+            const mappedStatus =
+              stripeSub.status === 'trialing'
+                ? 'trial'
+                : stripeSub.status === 'active'
+                  ? 'active'
+                  : stripeSub.status === 'canceled'
+                    ? 'cancelled'
+                    : stripeSub.status === 'past_due'
+                      ? 'past_due'
+                      : 'free';
+
+            // Write to database for future lookups
+            try {
+              const trialEndsAt = stripeSub.trial_end
+                ? new Date(stripeSub.trial_end * 1000).toISOString()
+                : null;
+              const currentPeriodEnd = (stripeSub as any).current_period_end
+                ? new Date(
+                    (stripeSub as any).current_period_end * 1000,
+                  ).toISOString()
+                : null;
+
+              await sql`
+                INSERT INTO subscriptions (
+                  user_id,
+                  user_email,
+                  status,
+                  plan_type,
+                  stripe_customer_id,
+                  stripe_subscription_id,
+                  trial_ends_at,
+                  current_period_end
+                ) VALUES (
+                  ${userId},
+                  ${userEmail},
+                  ${mappedStatus},
+                  ${planType},
+                  ${customerId},
+                  ${stripeSub.id},
+                  ${trialEndsAt},
+                  ${currentPeriodEnd}
+                )
+                ON CONFLICT (user_id) DO UPDATE SET
+                  status = EXCLUDED.status,
+                  plan_type = EXCLUDED.plan_type,
+                  stripe_customer_id = EXCLUDED.stripe_customer_id,
+                  stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+                  trial_ends_at = EXCLUDED.trial_ends_at,
+                  current_period_end = EXCLUDED.current_period_end,
+                  user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+                  updated_at = NOW()
+              `;
+              console.log(
+                `✅ Synced subscription from Stripe to database for user ${userId}`,
+              );
+
+              return {
+                plan: normalizePlan(planType, mappedStatus),
+                status: mappedStatus as SubscriptionStatus,
+              };
+            } catch (dbError) {
+              console.error(
+                '[tarot/readings] Failed to write synced subscription to DB:',
+                dbError,
+              );
+              // Still return the subscription even if DB write fails
+              return {
+                plan: normalizePlan(planType, mappedStatus),
+                status: mappedStatus as SubscriptionStatus,
+              };
+            }
+          }
+        }
+      } catch (stripeError) {
+        console.error(
+          '[tarot/readings] Failed to fetch subscription from Stripe:',
+          stripeError,
+        );
+      }
+    }
+
     if (result.rows.length === 0) {
+      console.log(
+        `[tarot/readings] No subscription found for user ${userId}${userEmail ? ` (email: ${userEmail})` : ''}, defaulting to free`,
+      );
       return {
         plan: 'free',
         status: 'free',
@@ -59,12 +202,23 @@ export const getSubscription = async (
     }
 
     const row = result.rows[0] as { plan_type?: string; status?: string };
+    const plan = normalizePlan(row.plan_type, row.status);
+    const subscriptionStatus = (row.status || 'free') as SubscriptionStatus;
+
+    console.log(`[tarot/readings] Subscription lookup for user ${userId}:`, {
+      plan_type: row.plan_type,
+      status: row.status,
+      normalized_plan: plan,
+      normalized_status: subscriptionStatus,
+      found_by_email: result.rows.length > 0 && !result.rows[0]?.user_id,
+    });
+
     return {
-      plan: normalizePlan(row.plan_type, row.status),
-      status: (row.status || 'free') as SubscriptionStatus,
+      plan,
+      status: subscriptionStatus,
     };
   } catch (error) {
-    console.warn(
+    console.error(
       '[tarot/readings] Failed to load subscription snapshot, defaulting to free.',
       error,
     );
@@ -97,7 +251,11 @@ export const computeUsageSnapshot = async (
   }
 
   const monthlyLimit =
-    subscription.plan === 'free' ? FREE_PLAN_MONTHLY_READING_LIMIT : null;
+    subscription.plan === 'free'
+      ? FREE_PLAN_MONTHLY_READING_LIMIT
+      : subscription.plan === 'monthly'
+        ? MONTHLY_PLAN_MONTHLY_READING_LIMIT
+        : null; // Yearly: unlimited
   const monthlyRemaining =
     monthlyLimit !== null ? Math.max(monthlyLimit - monthlyUsed, 0) : null;
 
@@ -121,6 +279,12 @@ export const isSpreadAccessible = (
   const spread = TAROT_SPREAD_MAP[spreadSlug];
   if (!spread) {
     return false;
+  }
+
+  // Monthly and yearly have the same access for tarot pulls
+  // Both can access all spreads (monthly users can access yearly spreads)
+  if (plan === 'monthly' || plan === 'yearly') {
+    return true;
   }
 
   return PLAN_RANK[plan] >= PLAN_RANK[spread.minimumPlan];
