@@ -9,18 +9,28 @@ export interface ReferralCode {
 }
 
 export async function generateReferralCode(userId: string): Promise<string> {
+  const existingCode = await getReferralCode(userId);
+  if (existingCode) {
+    return existingCode;
+  }
+
   // Generate a unique referral code (8 characters, alphanumeric)
   const code = Math.random().toString(36).substring(2, 10).toUpperCase();
 
   try {
-    await sql`
+    const result = await sql`
       INSERT INTO referral_codes (code, user_id, created_at, uses)
       VALUES (${code}, ${userId}, NOW(), 0)
       ON CONFLICT (code) DO NOTHING
+      RETURNING code
     `;
 
-    return code;
+    return result.rows[0]?.code || code;
   } catch (error) {
+    const fallbackCode = await getReferralCode(userId);
+    if (fallbackCode) {
+      return fallbackCode;
+    }
     console.error('Failed to generate referral code:', error);
     throw error;
   }
@@ -182,8 +192,13 @@ export async function getUserReferralStats(userId: string): Promise<{
       `,
     ]);
 
+    let code = codeResult;
+    if (!code) {
+      code = await generateReferralCode(userId);
+    }
+
     return {
-      code: codeResult,
+      code,
       totalReferrals: parseInt(statsResult.rows[0]?.total || '0'),
       activeReferrals: parseInt(statsResult.rows[0]?.active || '0'),
     };
