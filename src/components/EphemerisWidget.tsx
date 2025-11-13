@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   MapPin,
   Sun,
@@ -316,8 +316,23 @@ const deriveObservingSummary = (
 
 // Chart matching the screenshot
 const AltitudeChart = ({ celestialBodies, timezone }: any) => {
-  const chartWidth = 320;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(360);
   const bodyHeight = 30;
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setChartWidth(Math.max(containerRef.current.clientWidth, 320));
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const plotWidth = chartWidth - 80;
 
   // Time points every 1 hour from current time
   const currentHour = new Date().getHours();
@@ -327,8 +342,11 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
   }
 
   return (
-    <div className='rounded-lg border border-zinc-700/70 bg-zinc-900/60 p-4'>
-      <div className='flex items-center gap-2 mb-4'>
+    <div
+      ref={containerRef}
+      className='overflow-hidden rounded-lg border border-zinc-700/70 bg-zinc-900/60 p-4'
+    >
+      <div className='mb-4 flex items-center gap-2'>
         <Telescope size={14} className='text-purple-400' />
         <span className='text-sm font-medium text-white'>Night Timeline</span>
       </div>
@@ -338,7 +356,7 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
         style={{ height: celestialBodies.length * bodyHeight + 40 }}
       >
         {/* Background grid */}
-        <div className='absolute inset-0 bg-gradient-to-r from-zinc-800/30 via-zinc-700/20 to-zinc-800/30 rounded'></div>
+        <div className='absolute inset-0 rounded bg-gradient-to-r from-zinc-800/30 via-zinc-700/20 to-zinc-800/30'></div>
 
         {/* Time grid lines */}
         {timeHours.map((hour, index) => (
@@ -346,7 +364,7 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
             key={hour}
             className='absolute top-0 bottom-8 w-px bg-zinc-600/30'
             style={{
-              left: `${(index / (timeHours.length - 1)) * (chartWidth - 80) + 60}px`,
+              left: `${(index / (timeHours.length - 1 || 1)) * plotWidth + 60}px`,
             }}
           />
         ))}
@@ -362,22 +380,18 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
               style={{ top: y, left: 0, right: 0 }}
             >
               {/* Body name */}
-              <div className='w-14 text-sm text-white font-medium'>
+              <div className='w-14 text-sm font-medium text-white'>
                 {body.name}
               </div>
 
               {/* Altitude curve */}
-              <div className='relative flex-1 h-6'>
-                <svg
-                  width={chartWidth - 80}
-                  height={24}
-                  className='absolute top-0'
-                >
+              <div className='relative h-6 flex-1'>
+                <svg width={plotWidth} height={24} className='absolute top-0'>
                   {/* Generate curve points */}
                   {(() => {
                     const points = [];
-                    for (let x = 0; x < chartWidth - 80; x += 2) {
-                      const timeProgress = x / (chartWidth - 80);
+                    for (let x = 0; x < plotWidth; x += 2) {
+                      const timeProgress = x / Math.max(plotWidth, 1);
                       const hour = timeProgress * 24;
                       const altitude = calculateAltitudeForChart(
                         body.riseSet,
@@ -415,13 +429,13 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
                         body.riseSet.set.getHours() +
                         body.riseSet.set.getMinutes() / 60;
 
-                      const riseX = (riseHour / 24) * (chartWidth - 80);
-                      const setX = (setHour / 24) * (chartWidth - 80);
+                      const riseX = (riseHour / 24) * plotWidth;
+                      const setX = (setHour / 24) * plotWidth;
 
                       return (
                         <>
                           {/* Rise time label */}
-                          {riseX >= 0 && riseX <= chartWidth - 80 && (
+                          {riseX >= 0 && riseX <= plotWidth && (
                             <text
                               x={riseX}
                               y='8'
@@ -438,23 +452,21 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
                           )}
 
                           {/* Set time label */}
-                          {setX >= 0 &&
-                            setX <= chartWidth - 80 &&
-                            setX !== riseX && (
-                              <text
-                                x={setX}
-                                y='8'
-                                fill={getPlanetColor(body.name)}
-                                fontSize='10'
-                                textAnchor='middle'
-                                className='opacity-75'
-                              >
-                                {formatTime(body.riseSet.set, timezone).replace(
-                                  /:\d{2}$/,
-                                  '',
-                                )}
-                              </text>
-                            )}
+                          {setX >= 0 && setX <= plotWidth && setX !== riseX && (
+                            <text
+                              x={setX}
+                              y='8'
+                              fill={getPlanetColor(body.name)}
+                              fontSize='10'
+                              textAnchor='middle'
+                              className='opacity-75'
+                            >
+                              {formatTime(body.riseSet.set, timezone).replace(
+                                /:\d{2}$/,
+                                '',
+                              )}
+                            </text>
+                          )}
                         </>
                       );
                     })()}
@@ -473,12 +485,12 @@ const AltitudeChart = ({ celestialBodies, timezone }: any) => {
 
         {/* Current time indicator */}
         <div
-          className='absolute top-0 bottom-8 w-0.5 bg-red-400 z-10'
+          className='absolute top-0 bottom-8 z-10 w-0.5 bg-red-400'
           style={{
-            left: `${(new Date().getHours() / 24) * (chartWidth - 80) + 60}px`,
+            left: `${(new Date().getHours() / 24) * plotWidth + 60}px`,
           }}
         >
-          <div className='absolute -top-1 -left-1 w-2 h-2 bg-red-400 rounded-full'></div>
+          <div className='absolute -top-1 -left-1 h-2 w-2 rounded-full bg-red-400'></div>
         </div>
       </div>
     </div>
@@ -767,53 +779,53 @@ const SummaryRail = ({
   ];
 
   return (
-    <div className='rounded-lg border border-zinc-700/70 bg-zinc-900/60 px-4 py-4'>
-      <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
-        <div className='grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3'>
-          {summaryItems.map((item) => (
-            <div
-              key={item.title}
-              className='rounded-md border border-zinc-800/80 bg-zinc-800/40 px-3 py-3'
-            >
-              <div className='flex items-start gap-3'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900/80'>
-                  {item.icon}
+    <div className='rounded-lg border border-zinc-700/70 bg-zinc-900/60 px-4 py-5'>
+      <div className='mb-3 flex items-center justify-between'>
+        <span className='text-[10px] font-semibold uppercase tracking-wide text-zinc-500'>
+          Observing overview
+        </span>
+        {loading && (
+          <div className='flex items-center gap-2 text-[10px] uppercase tracking-wide text-zinc-400'>
+            <div className='h-4 w-4 animate-spin rounded-full border-2 border-purple-400 border-t-transparent'></div>
+            Updating
+          </div>
+        )}
+      </div>
+      <div className='grid grid-cols-1 gap-3 md:grid-cols-3'>
+        {summaryItems.map((item) => (
+          <div
+            key={item.title}
+            className='rounded-md border border-zinc-800/80 bg-zinc-800/40 px-3 py-3'
+          >
+            <div className='flex items-start gap-3'>
+              <div className='flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900/80'>
+                {item.icon}
+              </div>
+              <div className='flex-1 space-y-1'>
+                <div className='text-[10px] font-semibold uppercase tracking-wide text-zinc-500'>
+                  {item.title}
                 </div>
-                <div className='flex-1 space-y-1'>
-                  <div className='text-[10px] font-semibold uppercase tracking-wide text-zinc-500'>
-                    {item.title}
-                  </div>
-                  <div className='space-y-1 text-xs'>
-                    {item.rows.map((row) => (
-                      <div
-                        key={`${item.title}-${row.label}`}
-                        className='flex justify-between gap-3'
+                <div className='space-y-1 text-xs'>
+                  {item.rows.map((row) => (
+                    <div
+                      key={`${item.title}-${row.label}`}
+                      className='flex justify-between gap-3'
+                    >
+                      <span className='text-zinc-500'>{row.label}</span>
+                      <span
+                        className={`text-right text-zinc-200 ${
+                          row.valueClass ?? ''
+                        }`}
                       >
-                        <span className='text-zinc-500'>{row.label}</span>
-                        <span
-                          className={`text-right text-zinc-200 ${
-                            row.valueClass ?? ''
-                          }`}
-                        >
-                          {row.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                        {row.value}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-        <div className='flex items-center justify-between gap-3 lg:flex-col lg:items-end lg:gap-2'>
-          <StatusBadge />
-          {loading && (
-            <div className='flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-400'>
-              <div className='h-4 w-4 animate-spin rounded-full border-2 border-purple-400 border-t-transparent'></div>
-              Updating
-            </div>
-          )}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
