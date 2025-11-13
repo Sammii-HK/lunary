@@ -13,65 +13,65 @@ export const auth = betterAuth({
       const accountId = process.env.JAZZ_WORKER_ACCOUNT;
       const isBuildPhase = !!process.env.NEXT_PHASE;
 
-      // Allow empty only during build phase
+      // If we have a value, use it (even during build)
+      if (accountId && accountId.trim() !== '') {
+        return accountId.trim();
+      }
+
+      // Only allow empty during build phase if env var is truly missing
       if (isBuildPhase) {
-        return accountId || '';
+        return '';
       }
 
-      // In runtime, env var must be set
-      if (!accountId || accountId.trim() === '') {
-        throw new Error(
-          'JAZZ_WORKER_ACCOUNT environment variable is required and cannot be empty',
-        );
-      }
-
-      return accountId;
+      // In runtime, env var must be set and non-empty
+      throw new Error(
+        'JAZZ_WORKER_ACCOUNT environment variable is required and cannot be empty',
+      );
     })(),
     accountSecret: (() => {
       const secret = process.env.JAZZ_WORKER_SECRET;
       const isBuildPhase = !!process.env.NEXT_PHASE;
 
-      // Allow empty only during build phase
+      // If we have a value, use it (even during build)
+      if (secret && secret.trim() !== '') {
+        return secret.trim();
+      }
+
+      // Only allow empty during build phase if env var is truly missing
       if (isBuildPhase) {
-        return secret || '';
+        return '';
       }
 
-      // In runtime, env var must be set
-      if (!secret || secret.trim() === '') {
-        throw new Error(
-          'JAZZ_WORKER_SECRET environment variable is required and cannot be empty',
-        );
-      }
-
-      return secret;
+      // In runtime, env var must be set and non-empty
+      throw new Error(
+        'JAZZ_WORKER_SECRET environment variable is required and cannot be empty',
+      );
     })(),
   }),
   secret: (() => {
     const secret = process.env.BETTER_AUTH_SECRET?.trim();
     const isBuildPhase = !!process.env.NEXT_PHASE;
 
+    // If we have a value, use it (even during build)
+    if (secret && secret !== '') {
+      return secret;
+    }
+
     // Allow missing secret only during build phase or in test
     if (isBuildPhase || process.env.NODE_ENV === 'test') {
-      return secret || 'test-secret-key-for-jest-tests-only';
+      return 'test-secret-key-for-jest-tests-only';
     }
 
     // In development, use fallback if missing
     if (process.env.NODE_ENV === 'development') {
-      if (!secret) {
-        console.warn('⚠️ BETTER_AUTH_SECRET not set, using dev fallback');
-        return 'local-dev-secret-key-change-in-production';
-      }
-      return secret;
+      console.warn('⚠️ BETTER_AUTH_SECRET not set, using dev fallback');
+      return 'local-dev-secret-key-change-in-production';
     }
 
     // In production, secret must be set
-    if (!secret || secret === '') {
-      throw new Error(
-        'BETTER_AUTH_SECRET environment variable is required in production and cannot be empty',
-      );
-    }
-
-    return secret;
+    throw new Error(
+      'BETTER_AUTH_SECRET environment variable is required in production and cannot be empty',
+    );
   })(),
 
   // Email and password authentication
@@ -83,11 +83,12 @@ export const auth = betterAuth({
     revokeSessionsOnPasswordReset: true,
     async sendResetPassword({ user, url }, _request) {
       try {
-        const {
-          sendEmail,
-          generatePasswordResetEmailHTML,
-          generatePasswordResetEmailText,
-        } = await import('./email');
+        const emailModule = await import('./email');
+        const sendEmail = emailModule.sendEmail;
+        const generatePasswordResetEmailHTML = (emailModule as any)
+          .generatePasswordResetEmailHTML;
+        const generatePasswordResetEmailText = (emailModule as any)
+          .generatePasswordResetEmailText;
 
         const html = generatePasswordResetEmailHTML(url, user.email);
         const text = generatePasswordResetEmailText(url, user.email);
