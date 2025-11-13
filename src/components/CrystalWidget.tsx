@@ -3,6 +3,7 @@
 import { useAccount } from 'jazz-tools/react';
 import { useMemo, useState, useEffect } from 'react';
 import { SmartTrialButton } from './SmartTrialButton';
+import { conversionTracking } from '../lib/analytics';
 import {
   getBirthChartFromProfile,
   hasBirthChart,
@@ -920,6 +921,15 @@ export const CrystalWidget = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [todayDateString, userBirthday, observer, JSON.stringify(birthChart)]);
+
+  useEffect(() => {
+    if (crystalData && hasChartAccess) {
+      const userId = (me as any)?.id;
+      if (userId) {
+        conversionTracking.crystalRecommendationsViewed(userId);
+      }
+    }
+  }, [crystalData, hasChartAccess, me]);
 
   // If user doesn't have birth chart access, show general crystal recommendation
   if (!hasChartAccess) {
