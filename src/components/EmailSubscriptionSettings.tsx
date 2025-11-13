@@ -3,13 +3,19 @@
 import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect, useCallback } from 'react';
 import { Mail, CheckCircle, XCircle } from 'lucide-react';
+import { useAuthStatus } from './AuthStatus';
 
 export function EmailSubscriptionSettings() {
   const { me } = useAccount();
+  const authState = useAuthStatus();
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const userEmail = (me?.profile as any)?.email || (me as any)?.email;
+  const profileEmail = (me?.profile as any)?.email;
+  const accountEmail = (me as any)?.email;
+  const authEmail = authState.user?.email || authState.profile?.email;
+  const userEmail = profileEmail || accountEmail || authEmail || null;
+  const userId = (me as any)?.id || authState.user?.id;
 
   const checkSubscriptionStatus = useCallback(async () => {
     if (!userEmail) return;
@@ -42,7 +48,11 @@ export function EmailSubscriptionSettings() {
 
   const toggleSubscription = async () => {
     if (!userEmail) {
-      alert('Please sign in to manage email subscriptions');
+      if (!authState.isAuthenticated) {
+        alert('Please sign in to manage email subscriptions');
+      } else {
+        alert('We could not find an email for your account yet.');
+      }
       return;
     }
 
@@ -51,13 +61,12 @@ export function EmailSubscriptionSettings() {
       const newStatus = !isSubscribed;
 
       if (newStatus) {
-        // Subscribe
         const response = await fetch('/api/newsletter/subscribers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: userEmail,
-            userId: (me as any)?.id,
+            userId,
             preferences: {
               weeklyNewsletter: true,
               blogUpdates: true,
@@ -74,7 +83,6 @@ export function EmailSubscriptionSettings() {
           throw new Error('Failed to subscribe');
         }
       } else {
-        // Unsubscribe
         const response = await fetch(
           `/api/newsletter/subscribers/${encodeURIComponent(userEmail)}`,
           {
@@ -100,9 +108,9 @@ export function EmailSubscriptionSettings() {
 
   if (loading) {
     return (
-      <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+      <div className='w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
         <div className='flex items-center justify-center py-4'>
-          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400'></div>
+          <div className='h-6 w-6 animate-spin rounded-full border-b-2 border-purple-400'></div>
         </div>
       </div>
     );
@@ -110,13 +118,15 @@ export function EmailSubscriptionSettings() {
 
   if (!userEmail) {
     return (
-      <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
-        <h3 className='text-lg font-semibold text-white mb-3 flex items-center gap-2'>
+      <div className='w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
+        <h3 className='mb-3 flex items-center gap-2 text-lg font-semibold text-white'>
           <Mail className='h-5 w-5' />
           Email Newsletter
         </h3>
         <p className='text-sm text-zinc-400'>
-          Sign in to manage your email subscriptions.
+          {authState.isAuthenticated
+            ? 'Add an email address to your profile to manage subscriptions.'
+            : 'Sign in to manage your email subscriptions.'}
         </p>
       </div>
     );

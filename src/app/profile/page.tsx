@@ -26,7 +26,6 @@ import { ReferralProgram } from '../../components/ReferralProgram';
 import { AuthComponent } from '@/components/Auth';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { SignOutButton } from '@/components/SignOutButton';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { TrialReminder } from '@/components/TrialReminder';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
@@ -207,6 +206,14 @@ export default function ProfilePage() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await betterAuthClient.signOut();
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
+
   const toggleSettingsSection = (sectionId: string) => {
     setOpenSettingsSections((prev) =>
       prev.includes(sectionId)
@@ -218,7 +225,33 @@ export default function ProfilePage() {
   const isSettingsSectionOpen = (sectionId: string) =>
     openSettingsSections.includes(sectionId);
 
+  const nameDisplay = canCollectBirthdayData
+    ? name || 'Add your name'
+    : authState.isAuthenticated
+      ? name || 'Locked until upgrade'
+      : 'Sign in to personalise';
+
+  const nameLabel = name ? 'Preferred Name' : 'Name';
+  const isNamePlaceholder = !name;
+
+  const birthdayDisplay = birthday
+    ? new Date(birthday).toLocaleDateString()
+    : canCollectBirthdayData
+      ? 'Add your birthday'
+      : authState.isAuthenticated
+        ? 'Premium feature'
+        : 'Sign in to personalise';
+
+  const birthdayLabel = birthday ? 'Birthdate' : 'DOB';
+  const isBirthdayPlaceholder = !birthday;
+
   const settingsSections = [
+    {
+      id: 'location',
+      title: 'Location',
+      description: 'Keep your coordinates current for precise readings.',
+      content: <LocationRefresh variant='settings' />,
+    },
     {
       id: 'email',
       title: 'Email Preferences',
@@ -300,48 +333,51 @@ export default function ProfilePage() {
                   horoscopes, and cosmic insights.
                 </p>
               </>
-            ) : (
-              <div className='flex flex-wrap items-center justify-between gap-3'>
-                <div className='flex flex-wrap items-center gap-3 text-sm text-white sm:text-base'>
-                  <span className='text-[11px] uppercase tracking-[0.3em] text-purple-200/80'>
-                    Profile Snapshot
-                  </span>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
-                      Name
-                    </span>
-                    <span className='font-medium'>
-                      {canCollectBirthdayData
-                        ? name || 'Add your name'
-                        : authState.isAuthenticated
-                          ? name || 'Locked until upgrade'
-                          : 'Sign in to personalise'}
-                    </span>
+              ) : (
+                <div className='flex flex-wrap items-center justify-between gap-3'>
+                  <div className='flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white sm:text-base'>
+                    <div className='flex items-center gap-2'>
+                      <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                        {nameLabel}
+                      </span>
+                      <span
+                        className={`font-medium ${isNamePlaceholder ? 'text-zinc-400' : ''}`}
+                      >
+                        {nameDisplay}
+                      </span>
+                    </div>
+                    <span className='hidden text-zinc-600 sm:inline'>•</span>
+                    <div className='flex items-center gap-2'>
+                      <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                        {birthdayLabel}
+                      </span>
+                      <span
+                        className={`font-medium ${isBirthdayPlaceholder ? 'text-zinc-400' : ''}`}
+                      >
+                        {birthdayDisplay}
+                      </span>
+                    </div>
                   </div>
-                  <span className='hidden text-zinc-600 sm:inline'>•</span>
                   <div className='flex items-center gap-2'>
-                    <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
-                      Birthday
-                    </span>
-                    <span className='font-medium'>
-                      {birthday
-                        ? new Date(birthday).toLocaleDateString()
-                        : canCollectBirthdayData
-                          ? 'Add your birthday'
-                          : 'Premium feature'}
-                    </span>
+                    {canEditProfile && (
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className='rounded-full bg-blue-600/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500'
+                      >
+                        Edit details
+                      </button>
+                    )}
+                    {authState.isAuthenticated && (
+                      <button
+                        onClick={handleSignOut}
+                        className='rounded-full border border-zinc-600 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500 hover:text-white'
+                      >
+                        Sign out
+                      </button>
+                    )}
                   </div>
                 </div>
-                {canEditProfile && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className='rounded-full bg-blue-600/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500'
-                  >
-                    Edit details
-                  </button>
-                )}
-              </div>
-            )}
+              )}
 
             {canEditProfile && isEditing && (
               <div className='flex flex-wrap items-center justify-end gap-2'>
@@ -375,64 +411,35 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {authState.isAuthenticated ? (
-              canCollectBirthdayData ? (
-                <div className='flex justify-end'>
+              {!authState.isAuthenticated ? (
+                <div className='space-y-3 rounded-md border-2 border-dashed border-zinc-600 py-4 text-center'>
+                  <p className='text-sm text-zinc-400'>
+                    Sign in to save your profile and unlock cosmic insights
+                  </p>
                   <button
-                    onClick={async () => {
-                      try {
-                        await betterAuthClient.signOut();
-                      } catch (error) {
-                        console.error('Sign out failed:', error);
-                      }
-                    }}
-                    className='px-4 py-2 text-sm text-red-400 transition-colors hover:text-red-300'
+                    onClick={() => setShowAuthModal(true)}
+                    className='rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700'
                   >
-                    Sign Out
+                    Sign In or Create Account
                   </button>
                 </div>
-              ) : (
+              ) : !canCollectBirthdayData ? (
                 <div className='space-y-3 rounded-md border-2 border-dashed border-purple-500/30 bg-gradient-to-r from-purple-900/20 to-pink-900/20 py-4 text-center'>
                   <p className='text-sm text-zinc-300'>
                     👋 Welcome{' '}
                     {authState.user?.name || authState.profile?.name || 'User'}!
                     Upgrade to unlock Personalised Features
                   </p>
-                  <div className='flex justify-center gap-2'>
+                  <div className='flex justify-center'>
                     <a
                       href='/pricing'
                       className='rounded-md bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:from-purple-700 hover:to-pink-700'
                     >
                       Upgrade to Premium
                     </a>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await betterAuthClient.signOut();
-                        } catch (error) {
-                          console.error('Sign out failed:', error);
-                        }
-                      }}
-                      className='px-4 py-2 text-sm text-red-400 transition-colors hover:text-red-300'
-                    >
-                      Sign Out
-                    </button>
                   </div>
                 </div>
-              )
-            ) : (
-              <div className='space-y-3 rounded-md border-2 border-dashed border-zinc-600 py-4 text-center'>
-                <p className='text-sm text-zinc-400'>
-                  Sign in to save your profile and unlock cosmic insights
-                </p>
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className='rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700'
-                >
-                  Sign In or Create Account
-                </button>
-              </div>
-            )}
+              ) : null}
           </div>
         </div>
       </div>
@@ -514,29 +521,33 @@ export default function ProfilePage() {
                     return (
                       <>
                         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-                          {displayPlacements.map((planet) => (
-                            <div
-                              key={`${planet.body}-${planet.sign}`}
-                              className='rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm'
-                            >
-                              <div className='flex items-center justify-between'>
-                                <span className='text-sm font-semibold text-white'>
-                                  {planet.body}
-                                </span>
-                                {planet.retrograde && (
-                                  <span className='text-xs uppercase tracking-wide text-amber-300'>
-                                    Retrograde
-                                  </span>
-                                )}
+                            {displayPlacements.map((planet) => (
+                              <div
+                                key={`${planet.body}-${planet.sign}`}
+                                className='rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm'
+                              >
+                                <div className='flex items-start justify-between gap-4'>
+                                  <div>
+                                    <p className='text-sm font-semibold text-white'>
+                                      {planet.body}
+                                    </p>
+                                    <p className='text-xs text-purple-200/80'>
+                                      {planet.degree}° {planet.minute}'
+                                    </p>
+                                  </div>
+                                  <div className='flex items-center gap-2'>
+                                    <span className='text-lg font-medium text-purple-100'>
+                                      {planet.sign}
+                                    </span>
+                                    {planet.retrograde && (
+                                      <span className='rounded-full border border-amber-300/60 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wide text-amber-200'>
+                                        Retrograde
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                              <div className='mt-2 text-lg font-medium text-purple-100'>
-                                {planet.sign}
-                              </div>
-                              <div className='text-xs text-purple-200/80'>
-                                {planet.degree}° {planet.minute}'
-                              </div>
-                            </div>
-                          ))}
+                            ))}
                         </div>
                         <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 px-4 py-3 text-sm text-purple-100'>
                           Ground yourself in these placements to understand the
@@ -615,13 +626,6 @@ export default function ProfilePage() {
             </div>
           </>
         )}
-
-      {authState.isAuthenticated && !isEditing && (
-        <div className='w-full max-w-3xl'>
-          <LocationRefresh />
-        </div>
-      )}
-
       {authState.isAuthenticated && !isEditing && (
         <div className='w-full max-w-3xl space-y-3'>
           <h2 className='text-lg font-semibold text-white'>Settings</h2>
