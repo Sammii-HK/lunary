@@ -62,8 +62,13 @@ export async function POST(request: Request) {
       {
         status: true,
         message:
-          response?.message ||
-          'If this email exists in our system, look for a reset link shortly.',
+          response &&
+          typeof response === 'object' &&
+          response !== null &&
+          'message' in response &&
+          typeof (response as any).message === 'string'
+            ? (response as any).message
+            : 'If this email exists in our system, look for a reset link shortly.',
       },
       { status: 200 },
     );
