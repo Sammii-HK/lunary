@@ -11,55 +11,67 @@ export const auth = betterAuth({
       `wss://cloud.jazz.tools/?key=${process.env.JAZZ_SYNC_KEY || ''}`,
     accountID: (() => {
       const accountId = process.env.JAZZ_WORKER_ACCOUNT;
-      // Allow empty during build - Next.js evaluates modules during build
-      // but these env vars are only needed at runtime when auth is actually used
-      // During build, NEXT_PHASE is set, so we can detect that
       const isBuildPhase = !!process.env.NEXT_PHASE;
-      if (
-        !accountId &&
-        !isBuildPhase &&
-        process.env.NODE_ENV !== 'development' &&
-        process.env.NODE_ENV !== 'test'
-      ) {
-        throw new Error('JAZZ_WORKER_ACCOUNT environment variable is required');
+
+      // Allow empty only during build phase
+      if (isBuildPhase) {
+        return accountId || '';
       }
-      return accountId || '';
+
+      // In runtime, env var must be set
+      if (!accountId || accountId.trim() === '') {
+        throw new Error(
+          'JAZZ_WORKER_ACCOUNT environment variable is required and cannot be empty',
+        );
+      }
+
+      return accountId;
     })(),
     accountSecret: (() => {
       const secret = process.env.JAZZ_WORKER_SECRET;
-      // Allow empty during build - Next.js evaluates modules during build
-      // but these env vars are only needed at runtime when auth is actually used
-      // During build, NEXT_PHASE is set, so we can detect that
       const isBuildPhase = !!process.env.NEXT_PHASE;
-      if (
-        !secret &&
-        !isBuildPhase &&
-        process.env.NODE_ENV !== 'development' &&
-        process.env.NODE_ENV !== 'test'
-      ) {
-        throw new Error('JAZZ_WORKER_SECRET environment variable is required');
+
+      // Allow empty only during build phase
+      if (isBuildPhase) {
+        return secret || '';
       }
-      return secret || '';
+
+      // In runtime, env var must be set
+      if (!secret || secret.trim() === '') {
+        throw new Error(
+          'JAZZ_WORKER_SECRET environment variable is required and cannot be empty',
+        );
+      }
+
+      return secret;
     })(),
   }),
   secret: (() => {
     const secret = process.env.BETTER_AUTH_SECRET?.trim();
-    if (!secret && process.env.NODE_ENV !== 'test') {
-      console.warn(
-        '⚠️ BETTER_AUTH_SECRET is not set. Auth may not work properly.',
-      );
-      // Use a fallback for local dev only
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('⚠️ Using fallback secret for local development');
+    const isBuildPhase = !!process.env.NEXT_PHASE;
+
+    // Allow missing secret only during build phase or in test
+    if (isBuildPhase || process.env.NODE_ENV === 'test') {
+      return secret || 'test-secret-key-for-jest-tests-only';
+    }
+
+    // In development, use fallback if missing
+    if (process.env.NODE_ENV === 'development') {
+      if (!secret) {
+        console.warn('⚠️ BETTER_AUTH_SECRET not set, using dev fallback');
         return 'local-dev-secret-key-change-in-production';
       }
+      return secret;
     }
-    return (
-      secret ||
-      (process.env.NODE_ENV === 'test'
-        ? 'test-secret-key-for-jest-tests-only'
-        : undefined)
-    );
+
+    // In production, secret must be set
+    if (!secret || secret === '') {
+      throw new Error(
+        'BETTER_AUTH_SECRET environment variable is required in production and cannot be empty',
+      );
+    }
+
+    return secret;
   })(),
 
   // Email and password authentication
