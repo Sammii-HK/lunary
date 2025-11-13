@@ -155,7 +155,7 @@ const describeContext = (context: LunaryContext): string => {
   if (context.mood?.last7d && context.mood.last7d.length > 0) {
     const recentMoods = context.mood.last7d
       .slice(-3)
-      .map((m) => m.mood)
+      .map((m) => m.tag)
       .join(', ');
     parts.push(`MOOD: ${recentMoods}`);
   }

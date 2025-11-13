@@ -41,6 +41,8 @@ export type MoonSnapshot = {
 
 export type TarotCard = {
   name: string;
+  keywords?: string[];
+  information?: string;
   position?: string;
   reversed?: boolean;
 };

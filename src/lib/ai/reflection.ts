@@ -45,7 +45,7 @@ const describeTarot = (context: LunaryContext): string | null => {
     const cards = context.tarot.lastReading?.cards;
     if (cards && Array.isArray(cards) && cards.length > 0) {
       const validCards = cards
-        .map((card) => card?.name || card?.cardName)
+        .map((card) => card?.name)
         .filter((name): name is string => !!name && name.trim().length > 0)
         .slice(0, 2);
       cardNames.push(...validCards);

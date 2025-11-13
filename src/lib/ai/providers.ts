@@ -249,7 +249,7 @@ export const getTarotLastReading = async ({
       return {
         spread: row.spread_name || 'Three Card Insight',
         cards: cards.map((card: any) => ({
-          name: card.name || card.cardName,
+          name: card.name,
           position: card.position,
           reversed: card.reversed || false,
         })),
@@ -311,9 +311,11 @@ const analyzeTarotTrends = (
     cardFrequency[reading.card.name] =
       (cardFrequency[reading.card.name] || 0) + 1;
 
-    reading.card.keywords.forEach((keyword) => {
-      keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-    });
+    if (reading.card.keywords && Array.isArray(reading.card.keywords)) {
+      reading.card.keywords.forEach((keyword) => {
+        keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+      });
+    }
   });
 
   // Find dominant themes (top 5 keywords)
