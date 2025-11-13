@@ -9,6 +9,34 @@ import {
   generatePasswordResetEmailText,
 } from './email';
 
+const normalizeOrigin = (value?: string | null) => {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed.replace(/\/+$/, '');
+  }
+  return `https://${trimmed.replace(/\/+$/, '')}`;
+};
+
+const dynamicOrigins = Array.from(
+  new Set(
+    [
+      process.env.NEXT_PUBLIC_APP_URL,
+      process.env.NEXT_PUBLIC_ADMIN_APP_URL,
+      process.env.ADMIN_APP_HOST,
+      process.env.ADMIN_DASHBOARD_HOST,
+      process.env.NEXT_PUBLIC_ADMIN_APP_HOST,
+      process.env.NEXT_PUBLIC_VERCEL_URL
+        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+        : undefined,
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+    ]
+      .map(normalizeOrigin)
+      .filter(Boolean),
+  ),
+) as string[];
+
 // Better Auth server configuration with Jazz database adapter
 export const auth = betterAuth({
   database: JazzBetterAuthDatabaseAdapter({
@@ -94,14 +122,16 @@ export const auth = betterAuth({
   },
 
   // CORS and security settings
-  trustedOrigins: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://lunary.app',
-    'https://www.lunary.app',
-    'https://admin.lunary.app',
-    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  ],
+  trustedOrigins: Array.from(
+    new Set([
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://lunary.app',
+      'https://www.lunary.app',
+      'https://admin.lunary.app',
+      ...dynamicOrigins,
+    ]),
+  ),
 
   // Add the Jazz plugin for integration
   plugins: [jazzPlugin()],
