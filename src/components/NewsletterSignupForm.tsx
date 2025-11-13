@@ -93,7 +93,7 @@ export function NewsletterSignupForm({
             weeklyNewsletter: true,
             blogUpdates: true,
             productUpdates: false,
-            cosmicAlerts: true,
+            cosmicAlerts: false,
           },
         }),
       });
