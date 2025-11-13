@@ -19,8 +19,12 @@ function getRequiredEnvVar(name: string, allowEmptyInBuild = false): string {
   }
 
   // At runtime, env var must be set and non-empty
+  const deploymentUrl =
+    process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL;
   throw new Error(
-    `${name} environment variable is required and cannot be empty`,
+    `${name} environment variable is required and cannot be empty. ` +
+      `Please set this in your Vercel project settings${deploymentUrl ? ` (current deployment: ${deploymentUrl})` : ''}. ` +
+      `This variable is needed for Better Auth to connect to Jazz database.`,
   );
 }
 
@@ -38,6 +42,21 @@ function initializeAuth() {
     hasAuthSecret: !!process.env.BETTER_AUTH_SECRET,
     isBuildPhase: !!process.env.NEXT_PHASE,
     nodeEnv: process.env.NODE_ENV,
+    vercelEnv: process.env.VERCEL_ENV,
+    jazzAccountLength: process.env.JAZZ_WORKER_ACCOUNT?.length || 0,
+    jazzSecretLength: process.env.JAZZ_WORKER_SECRET?.length || 0,
+    jazzAccountFirstChars:
+      process.env.JAZZ_WORKER_ACCOUNT?.substring(0, 3) || 'N/A',
+    jazzSecretFirstChars:
+      process.env.JAZZ_WORKER_SECRET?.substring(0, 3) || 'N/A',
+    allEnvKeys: Object.keys(process.env)
+      .filter(
+        (key) =>
+          key.includes('JAZZ') ||
+          key.includes('AUTH') ||
+          key.includes('VERCEL'),
+      )
+      .sort(),
   });
 
   try {
@@ -258,13 +277,22 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
             '❌ Auth handler called but initialization failed:',
             errorMessage,
           );
+
+          // Provide helpful error message in development/preview
+          const isDevOrPreview =
+            process.env.NODE_ENV === 'development' ||
+            process.env.VERCEL_ENV === 'preview' ||
+            process.env.VERCEL_ENV === 'development';
+
           return new Response(
             JSON.stringify({
               error: 'Authentication service unavailable',
-              message:
-                process.env.NODE_ENV === 'development'
-                  ? errorMessage
-                  : undefined,
+              message: isDevOrPreview
+                ? errorMessage
+                : 'Authentication service is not configured. Please contact support.',
+              ...(isDevOrPreview && {
+                hint: 'Make sure JAZZ_WORKER_ACCOUNT and JAZZ_WORKER_SECRET are set in Vercel environment variables.',
+              }),
             }),
             { status: 500, headers: { 'Content-Type': 'application/json' } },
           );
