@@ -22,6 +22,7 @@ const normalizeOrigin = (value?: string | null) => {
 const dynamicOrigins = Array.from(
   new Set(
     [
+      process.env.NEXT_PUBLIC_BASE_URL,
       process.env.NEXT_PUBLIC_APP_URL,
       process.env.NEXT_PUBLIC_ADMIN_APP_URL,
       process.env.ADMIN_APP_HOST,
@@ -31,6 +32,9 @@ const dynamicOrigins = Array.from(
         ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
         : undefined,
       process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+      'https://*.vercel.app',
+      'https://*.lunary.app',
+      'https://*--lunary.app',
     ]
       .map(normalizeOrigin)
       .filter(Boolean),
