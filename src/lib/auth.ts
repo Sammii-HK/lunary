@@ -8,38 +8,7 @@ import {
   generatePasswordResetEmailHTML,
   generatePasswordResetEmailText,
 } from './email';
-
-const normalizeOrigin = (value?: string | null) => {
-  if (!value) return undefined;
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed.replace(/\/+$/, '');
-  }
-  return `https://${trimmed.replace(/\/+$/, '')}`;
-};
-
-const dynamicOrigins = Array.from(
-  new Set(
-    [
-      process.env.NEXT_PUBLIC_BASE_URL,
-      process.env.NEXT_PUBLIC_APP_URL,
-      process.env.NEXT_PUBLIC_ADMIN_APP_URL,
-      process.env.ADMIN_APP_HOST,
-      process.env.ADMIN_DASHBOARD_HOST,
-      process.env.NEXT_PUBLIC_ADMIN_APP_HOST,
-      process.env.NEXT_PUBLIC_VERCEL_URL
-        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-        : undefined,
-      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-      'https://*.vercel.app',
-      'https://*.lunary.app',
-      'https://*--lunary.app',
-    ]
-      .map(normalizeOrigin)
-      .filter(Boolean),
-  ),
-) as string[];
+import { getAllowedOrigins } from './origin-validation';
 
 // Better Auth server configuration with Jazz database adapter
 export const auth = betterAuth({
@@ -126,16 +95,9 @@ export const auth = betterAuth({
   },
 
   // CORS and security settings
-  trustedOrigins: Array.from(
-    new Set([
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://lunary.app',
-      'https://www.lunary.app',
-      'https://admin.lunary.app',
-      ...dynamicOrigins,
-    ]),
-  ),
+  // Note: Better Auth's trustedOrigins doesn't support wildcards, so we use
+  // static origins here and handle dynamic validation in route handlers
+  trustedOrigins: getAllowedOrigins(),
 
   // Add the Jazz plugin for integration
   plugins: [jazzPlugin()],

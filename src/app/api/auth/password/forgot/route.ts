@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
+import { getCorsHeaders, isValidOrigin } from '@/lib/origin-validation';
 
 const requestSchema = z.object({
   email: z.string().email(),
@@ -23,6 +24,9 @@ const ensureTrailingPath = (base: string, path: string) => {
 };
 
 export async function POST(request: Request) {
+  const origin = request.headers.get('origin');
+  const corsHeaders = isValidOrigin(origin) ? getCorsHeaders(origin) : {};
+
   try {
     const json = await request.json();
     const { email, redirectTo } = requestSchema.parse(json);
@@ -70,7 +74,7 @@ export async function POST(request: Request) {
             ? (response as any).message
             : 'If this email exists in our system, look for a reset link shortly.',
       },
-      { status: 200 },
+      { status: 200, headers: corsHeaders },
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -80,7 +84,7 @@ export async function POST(request: Request) {
           error: 'INVALID_REQUEST',
           details: error.flatten(),
         },
-        { status: 400 },
+        { status: 400, headers: corsHeaders },
       );
     }
 
@@ -89,7 +93,15 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { status: false, error: 'RESET_FAILED', message },
-      { status: 500 },
+      { status: 500, headers: corsHeaders },
     );
   }
+}
+
+export async function OPTIONS(request: Request) {
+  const origin = request.headers.get('origin');
+  return new Response(null, {
+    status: 204,
+    headers: getCorsHeaders(origin),
+  });
 }
