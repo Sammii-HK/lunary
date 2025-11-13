@@ -4,16 +4,21 @@ import { JazzBetterAuthDatabaseAdapter } from 'jazz-tools/better-auth/database-a
 import { getAllowedOrigins } from './origin-validation';
 
 // Helper to safely get env var with validation
-function getRequiredEnvVar(name: string): string {
+function getRequiredEnvVar(name: string, allowEmptyInBuild = false): string {
   const value = process.env[name];
+  const isBuildPhase = !!process.env.NEXT_PHASE;
 
-  // If we have a value, use it
+  // If we have a value, use it (even during build)
   if (value && value.trim() !== '') {
     return value.trim();
   }
 
-  // Never allow empty strings - Better Auth will fail with empty strings
-  // If env var is missing, throw error immediately
+  // Only allow empty during build phase if explicitly allowed
+  if (isBuildPhase && allowEmptyInBuild) {
+    return '';
+  }
+
+  // At runtime, env var must be set and non-empty
   throw new Error(
     `${name} environment variable is required and cannot be empty`,
   );
@@ -27,14 +32,32 @@ function initializeAuth() {
     return authInstance;
   }
 
+  console.log('🔍 Initializing Better Auth...', {
+    hasJazzAccount: !!process.env.JAZZ_WORKER_ACCOUNT,
+    hasJazzSecret: !!process.env.JAZZ_WORKER_SECRET,
+    hasAuthSecret: !!process.env.BETTER_AUTH_SECRET,
+    isBuildPhase: !!process.env.NEXT_PHASE,
+    nodeEnv: process.env.NODE_ENV,
+  });
+
   try {
+    const accountID = getRequiredEnvVar('JAZZ_WORKER_ACCOUNT', true);
+    const accountSecret = getRequiredEnvVar('JAZZ_WORKER_SECRET', true);
+
+    console.log('🔍 Got env vars:', {
+      accountIDLength: accountID?.length || 0,
+      accountSecretLength: accountSecret?.length || 0,
+      accountIDEmpty: accountID === '',
+      accountSecretEmpty: accountSecret === '',
+    });
+
     authInstance = betterAuth({
       database: JazzBetterAuthDatabaseAdapter({
         syncServer:
           process.env.JAZZ_SYNC_SERVER ||
           `wss://cloud.jazz.tools/?key=${process.env.JAZZ_SYNC_KEY || ''}`,
-        accountID: getRequiredEnvVar('JAZZ_WORKER_ACCOUNT'),
-        accountSecret: getRequiredEnvVar('JAZZ_WORKER_SECRET'),
+        accountID: accountID,
+        accountSecret: accountSecret,
       }),
       secret: (() => {
         const secret = process.env.BETTER_AUTH_SECRET?.trim();
@@ -173,9 +196,17 @@ function initializeAuth() {
       advanced: { database: { generateId: () => crypto.randomUUID() } },
     });
 
+    console.log('✅ Better Auth initialized successfully');
     return authInstance;
   } catch (error) {
-    console.error('❌ Failed to initialize Better Auth:', error);
+    console.error('❌ Failed to initialize Better Auth:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      hasJazzAccount: !!process.env.JAZZ_WORKER_ACCOUNT,
+      hasJazzSecret: !!process.env.JAZZ_WORKER_SECRET,
+      hasAuthSecret: !!process.env.BETTER_AUTH_SECRET,
+      isBuildPhase: !!process.env.NEXT_PHASE,
+    });
     throw error;
   }
 }
@@ -195,18 +226,52 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
     }
 
     // At runtime, initialize and return the actual value
-    const instance = initializeAuth();
-    const value = instance[prop as keyof typeof instance];
+    try {
+      const instance = initializeAuth();
+      const value = instance[prop as keyof typeof instance];
 
-    // If accessing the handler, return it directly (already initialized)
-    if (prop === 'handler') {
+      // If accessing the handler, return it directly (already initialized)
+      if (prop === 'handler') {
+        return value;
+      }
+
+      // For other properties, return the value from the initialized instance
+      if (typeof value === 'function') {
+        return value.bind(instance);
+      }
       return value;
-    }
+    } catch (error) {
+      console.error('❌ Failed to access auth property:', {
+        prop,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
 
-    // For other properties, return the value from the initialized instance
-    if (typeof value === 'function') {
-      return value.bind(instance);
+      // If accessing handler and initialization failed, return error handler
+      if (prop === 'handler') {
+        return async (request: Request) => {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : 'Auth initialization failed';
+          console.error(
+            '❌ Auth handler called but initialization failed:',
+            errorMessage,
+          );
+          return new Response(
+            JSON.stringify({
+              error: 'Authentication service unavailable',
+              message:
+                process.env.NODE_ENV === 'development'
+                  ? errorMessage
+                  : undefined,
+            }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
+          );
+        };
+      }
+
+      throw error;
     }
-    return value;
   },
 });
