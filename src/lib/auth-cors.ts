@@ -1,5 +1,27 @@
 import { getCorsHeaders, isValidOrigin } from './origin-validation';
 
+function createRequestWithValidatedOrigin(
+  request: Request,
+  origin: string | null,
+): Request {
+  if (!origin || !isValidOrigin(origin)) {
+    return request;
+  }
+
+  const url = new URL(request.url);
+  const headers = new Headers(request.headers);
+
+  const normalizedOrigin = origin.replace(/\/+$/, '');
+  headers.set('origin', normalizedOrigin);
+
+  return new Request(url.toString(), {
+    method: request.method,
+    headers,
+    body: request.body,
+    redirect: request.redirect,
+  });
+}
+
 export async function withCors(
   request: Request,
   handler: (request: Request) => Promise<Response>,
@@ -15,7 +37,18 @@ export async function withCors(
   }
 
   try {
-    const response = await handler(request);
+    const validatedRequest = createRequestWithValidatedOrigin(request, origin);
+    const response = await handler(validatedRequest);
+
+    if (response.status === 403 && isValidOrigin(origin)) {
+      const clonedResponse = response.clone();
+      const responseText = await clonedResponse.text();
+      if (responseText.includes('Invalid origin')) {
+        console.warn(
+          `⚠️ Better Auth rejected valid origin: ${origin}. Check if it's in trustedOrigins.`,
+        );
+      }
+    }
 
     if (!isValidOrigin(origin)) {
       return response;

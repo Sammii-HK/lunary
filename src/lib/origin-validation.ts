@@ -52,11 +52,19 @@ const getStaticOrigins = (): string[] => {
     ? normalizeOrigin(`https://${process.env.VERCEL_URL}`)
     : null;
 
-  if (vercelUrl && isValidOriginPattern(vercelUrl)) {
-    origins.push(vercelUrl);
+  if (vercelUrl) {
+    if (isValidOriginPattern(vercelUrl)) {
+      origins.push(vercelUrl);
+    }
   }
 
-  return origins;
+  const uniqueOrigins = Array.from(new Set(origins));
+
+  if (process.env.NODE_ENV !== 'production' || process.env.VERCEL) {
+    console.log('🔐 Better Auth trustedOrigins:', uniqueOrigins);
+  }
+
+  return uniqueOrigins;
 };
 
 let cachedAllowedOrigins: string[] | null = null;
