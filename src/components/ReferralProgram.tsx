@@ -17,7 +17,10 @@ export function ReferralProgram() {
   const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+    if (
+      typeof navigator !== 'undefined' &&
+      typeof navigator.share === 'function'
+    ) {
       setCanShare(true);
     }
   }, []);
@@ -37,7 +40,8 @@ export function ReferralProgram() {
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(
-          data.error || 'We could not load your referral information. Please try again.',
+          data.error ||
+            'We could not load your referral information. Please try again.',
         );
       }
 
@@ -81,7 +85,9 @@ export function ReferralProgram() {
       setError(null);
     } catch (copyError) {
       console.error('Failed to copy referral link:', copyError);
-      setError('We could not copy the link automatically. Try copying it manually.');
+      setError(
+        'We could not copy the link automatically. Try copying it manually.',
+      );
     }
   };
 
@@ -110,7 +116,9 @@ export function ReferralProgram() {
         const err = shareError as Error;
         if (err.name !== 'AbortError') {
           console.error('Failed to share referral link:', shareError);
-          setError('We could not open the share dialog. Try copying the link instead.');
+          setError(
+            'We could not open the share dialog. Try copying the link instead.',
+          );
         }
       }
     } else {
@@ -137,7 +145,8 @@ export function ReferralProgram() {
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(
-          data.error || 'We could not create your referral link. Please try again.',
+          data.error ||
+            'We could not create your referral link. Please try again.',
         );
       }
 
@@ -188,7 +197,8 @@ export function ReferralProgram() {
               Refer friends, unlock a free month
             </h3>
             <p className='text-sm text-zinc-200/80'>
-              Share your link. When a friend starts their Lunary trial through it, both of you receive 30 days of premium access automatically.
+              Share your link. When a friend starts their Lunary trial through
+              it, both of you receive 30 days of premium access automatically.
             </p>
           </div>
 
@@ -269,7 +279,9 @@ export function ReferralProgram() {
                 </p>
                 <ol className='space-y-1 text-xs text-zinc-300'>
                   <li>1. Send your unique link to a friend.</li>
-                  <li>2. They create their Lunary account and start a trial.</li>
+                  <li>
+                    2. They create their Lunary account and start a trial.
+                  </li>
                   <li>3. Both accounts receive 30 bonus days automatically.</li>
                 </ol>
               </div>
@@ -285,15 +297,20 @@ export function ReferralProgram() {
           ) : (
             <div className='space-y-3 rounded-lg border border-purple-400/30 bg-purple-500/10 p-4 text-sm text-purple-100'>
               <p className='text-sm'>
-                You don&apos;t have a referral link yet. Generate one to start sharing Lunary and earn free premium time.
+                You don&apos;t have a referral link yet. Generate one to start
+                sharing Lunary and earn free premium time.
               </p>
               <button
                 onClick={handleCreateLink}
                 disabled={isGenerating}
                 className='flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-purple-600/60'
               >
-                {isGenerating && <span className='h-3 w-3 animate-spin rounded-full border border-white/60 border-t-transparent' />}
-                {isGenerating ? 'Creating link...' : 'Generate my referral link'}
+                {isGenerating && (
+                  <span className='h-3 w-3 animate-spin rounded-full border border-white/60 border-t-transparent' />
+                )}
+                {isGenerating
+                  ? 'Creating link...'
+                  : 'Generate my referral link'}
               </button>
             </div>
           )}
