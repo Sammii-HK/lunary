@@ -8,18 +8,9 @@ function createRequestWithValidatedOrigin(
     return request;
   }
 
-  const url = new URL(request.url);
-  const headers = new Headers(request.headers);
-
-  const normalizedOrigin = origin.replace(/\/+$/, '');
-  headers.set('origin', normalizedOrigin);
-
-  return new Request(url.toString(), {
-    method: request.method,
-    headers,
-    body: request.body,
-    redirect: request.redirect,
-  });
+  // Better Auth handles origin validation internally, so we don't need to modify the request
+  // Just pass it through - the origin header is already set by the browser
+  return request;
 }
 
 export async function withCors(
@@ -39,6 +30,27 @@ export async function withCors(
   try {
     const validatedRequest = createRequestWithValidatedOrigin(request, origin);
     const response = await handler(validatedRequest);
+
+    // Log if we get an error response
+    if (response.status >= 400) {
+      const clonedResponse = response.clone();
+      const responseText = await clonedResponse.text();
+      console.error('❌ Auth handler returned error:', {
+        status: response.status,
+        origin,
+        responseText: responseText.substring(0, 500),
+      });
+
+      // If it's a 500 error with "invalid tag", it's likely a secret mismatch
+      if (response.status === 500 && responseText.includes('invalid tag')) {
+        console.error(
+          '⚠️ Encryption error detected - BETTER_AUTH_SECRET mismatch',
+        );
+        console.error(
+          '💡 Solution: Set BETTER_AUTH_SECRET in .env.local to match the secret used to encrypt existing credentials',
+        );
+      }
+    }
 
     if (response.status === 403 && isValidOrigin(origin)) {
       const clonedResponse = response.clone();

@@ -99,9 +99,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <body
         className={`${inter.className} w-full h-screen flex flex-col align-middle items-center bg-zinc-950 text-white`}
+        suppressHydrationWarning
       >
         <StructuredData />
         <ErrorBoundaryWrapper>

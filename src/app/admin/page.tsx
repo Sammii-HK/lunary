@@ -62,6 +62,15 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
+        // Wait a bit for session to be established after sign-in
+        // Longer wait if we just came from auth page
+        const cameFromAuth =
+          document.referrer.includes('/auth') ||
+          window.location.search.includes('signedIn');
+        await new Promise((resolve) =>
+          setTimeout(resolve, cameFromAuth ? 1500 : 500),
+        );
+
         // Get admin emails from environment (client-side check)
         const adminEmailsEnv =
           process.env.NEXT_PUBLIC_ADMIN_EMAILS ||
@@ -73,29 +82,147 @@ export default function AdminDashboard() {
           .map((email) => email.trim().toLowerCase())
           .filter(Boolean);
 
-        // Check Better Auth session
-        const session = await betterAuthClient.getSession().catch(() => null);
-        const userEmail =
-          session?.data?.user?.email || (me?.profile as any)?.email;
+        console.log('🔐 Admin access check:', {
+          adminEmailsEnv: adminEmailsEnv ? 'SET' : 'NOT SET',
+          adminEmailsCount: adminEmails.length,
+          adminEmails: adminEmails,
+          currentUrl: window.location.href,
+        });
 
-        if (!userEmail || adminEmails.length === 0) {
-          // Not authenticated or no admin configured, redirect to auth
-          router.push('/auth');
+        // Try to get session - Better Auth client might return null, so try direct API call
+        let session = null;
+        let userEmail = null;
+
+        // First try Better Auth client
+        try {
+          session = await betterAuthClient.getSession();
+          const user = session?.data?.user;
+          if (user?.email) {
+            userEmail = user.email;
+            console.log('✅ Got email from Better Auth client:', userEmail);
+          }
+        } catch (error) {
+          console.warn('⚠️ Better Auth client failed:', error);
+        }
+
+        // If client failed, try server-side API endpoint
+        // This works on both dev and prod IF BETTER_AUTH_SECRET matches
+        if (!userEmail) {
+          try {
+            console.log(
+              '🔄 Trying server-side API call to /api/auth/get-user-email...',
+            );
+            const response = await fetch('/api/auth/get-user-email', {
+              method: 'GET',
+              credentials: 'include',
+              cache: 'no-store',
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              if (result?.email) {
+                userEmail = result.email;
+                console.log('✅ Got email from server-side API:', userEmail);
+              } else {
+                console.warn('⚠️ Server-side API returned no email:', result);
+                console.warn(
+                  '💡 This usually means BETTER_AUTH_SECRET mismatch. Users may need to sign out and sign back in.',
+                );
+              }
+            } else {
+              console.warn('⚠️ Server-side API call failed:', {
+                status: response.status,
+                statusText: response.statusText,
+              });
+            }
+          } catch (error) {
+            console.warn('⚠️ Server-side API call failed:', error);
+          }
+        }
+
+        // Final fallback: check Jazz profile
+        if (!userEmail && me?.profile) {
+          const profile = me.profile as any;
+          userEmail = profile.email;
+          console.log(
+            '🔍 Checked Jazz profile, email:',
+            userEmail || 'NOT FOUND',
+          );
+        }
+
+        console.log('🔐 Session check:', {
+          hasSession: !!session,
+          userEmail: userEmail || 'NOT FOUND',
+          sessionData: session?.data ? 'EXISTS' : 'MISSING',
+          sessionUser: session?.data?.user
+            ? JSON.stringify(session.data.user, null, 2)
+            : 'MISSING',
+          sessionStructure: session ? Object.keys(session) : 'NO SESSION',
+          meProfile: me?.profile ? 'EXISTS' : 'MISSING',
+          meProfileEmail: (me?.profile as any)?.email || 'NOT FOUND',
+        });
+
+        // Dev-only bypass: if on localhost and Jazz account exists, allow access
+        const isLocalhost =
+          typeof window !== 'undefined' &&
+          (window.location.hostname === 'localhost' ||
+            window.location.hostname === 'admin.localhost');
+
+        if (!userEmail) {
+          const hasJazzAccount = !!me;
+          if (isLocalhost && hasJazzAccount) {
+            console.warn(
+              '⚠️ Dev bypass: Allowing access on localhost with Jazz account',
+              { hasAccount: true },
+            );
+            // Allow access but still log the warning
+            userEmail = 'dev-bypass@localhost';
+          } else {
+            console.warn('⚠️ Admin access denied:', {
+              reason: 'No user email',
+              userEmail,
+              adminEmailsCount: adminEmails.length,
+              isLocalhost,
+              hasJazzAccount,
+              fix: !userEmail
+                ? 'Wait for session to load or check Better Auth session. If on localhost, ensure Jazz account is loaded.'
+                : 'Set NEXT_PUBLIC_ADMIN_EMAILS in .env.local with your email',
+            });
+            setIsAuthorized(false);
+            return;
+          }
+        }
+
+        if (adminEmails.length === 0) {
+          console.warn('⚠️ Admin access denied:', {
+            reason: 'No admin emails configured',
+            userEmail,
+            fix: 'Set NEXT_PUBLIC_ADMIN_EMAILS in .env.local with your email',
+          });
+          setIsAuthorized(false);
           return;
         }
 
-        // Check if user email is in admin list
-        if (!adminEmails.includes(userEmail.toLowerCase())) {
-          // Not admin, redirect to unauthorized or home
-          router.push('/auth');
+        // Check if user email is in admin list (skip check for dev bypass)
+        if (
+          userEmail !== 'dev-bypass@localhost' &&
+          !adminEmails.includes(userEmail.toLowerCase())
+        ) {
+          console.warn('⚠️ Admin access denied:', {
+            reason: 'Email not in admin list',
+            userEmail: userEmail.toLowerCase(),
+            adminEmails,
+            fix: `Add "${userEmail.toLowerCase()}" to NEXT_PUBLIC_ADMIN_EMAILS in .env.local`,
+          });
+          setIsAuthorized(false);
           return;
         }
 
-        // User is admin
+        console.log('✅ Admin access granted:', { userEmail });
         setIsAuthorized(true);
       } catch (error) {
-        console.error('Admin access check failed:', error);
-        router.push('/auth');
+        console.error('❌ Admin access check failed:', error);
+        setIsAuthorized(false);
       }
     };
 
@@ -105,16 +232,35 @@ export default function AdminDashboard() {
   // Show loading state while checking authorization
   if (isAuthorized === null) {
     return (
-      <div className='min-h-screen flex items-center justify-center'>
+      <div className='min-h-screen bg-black text-white flex items-center justify-center'>
         <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4'></div>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4'></div>
           <p className='text-zinc-400'>Checking authorization...</p>
         </div>
       </div>
     );
   }
 
-  // Don't render if not authorized (will redirect)
+  // Show access denied message
+  if (isAuthorized === false) {
+    return (
+      <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
+        <div className='text-center max-w-md'>
+          <h1 className='text-2xl font-bold text-red-400 mb-4'>
+            Access Denied
+          </h1>
+          <p className='text-zinc-400 mb-4'>
+            You don't have permission to access the admin dashboard.
+          </p>
+          <p className='text-sm text-zinc-500'>
+            Check the browser console for details.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authorized
   if (!isAuthorized) {
     return null;
   }

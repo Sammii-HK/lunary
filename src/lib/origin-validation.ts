@@ -32,6 +32,7 @@ const getStaticOrigins = (): string[] => {
   const origins: string[] = [
     'http://localhost:3000',
     'http://localhost:3001',
+    'http://admin.localhost:3000',
     'https://lunary.app',
     'https://www.lunary.app',
     'https://admin.lunary.app',
@@ -70,6 +71,11 @@ const getStaticOrigins = (): string[] => {
 let cachedAllowedOrigins: string[] | null = null;
 
 export function getAllowedOrigins(): string[] {
+  // In development, don't cache to allow hot reloading of origin changes
+  if (process.env.NODE_ENV === 'development') {
+    return getStaticOrigins();
+  }
+
   if (cachedAllowedOrigins === null) {
     cachedAllowedOrigins = getStaticOrigins();
   }

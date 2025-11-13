@@ -2,8 +2,18 @@ import { auth } from '@/lib/auth';
 import { withCors } from '@/lib/auth-cors';
 
 export async function POST(request: Request) {
-  console.log('🔍 POST /api/auth/sign-in/email called');
-  return withCors(request, auth.handler);
+  const origin = request.headers.get('origin');
+  console.log('🔍 POST /api/auth/sign-in/email called', {
+    origin,
+    url: request.url,
+  });
+
+  try {
+    return await withCors(request, auth.handler);
+  } catch (error) {
+    console.error('❌ Error in sign-in handler:', error);
+    throw error;
+  }
 }
 
 export async function OPTIONS(request: Request) {

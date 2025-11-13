@@ -24,7 +24,9 @@ export const auth = betterAuth({
     process.env.BETTER_AUTH_SECRET ||
     (process.env.NODE_ENV === 'test'
       ? 'test-secret-key-for-jest-tests-only'
-      : undefined),
+      : process.env.NODE_ENV === 'development'
+        ? 'dev-secret-key-for-local-development-only-change-in-production'
+        : undefined),
 
   // Email and password authentication
   emailAndPassword: {
@@ -93,6 +95,14 @@ export const auth = betterAuth({
       maxAge: 60 * 60 * 24 * 7, // 7 days
     },
   },
+
+  // Base URL configuration
+  baseURL:
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
+      : 'https://lunary.app'),
 
   // CORS and security settings
   // Better Auth's trustedOrigins includes runtime VERCEL_URL if it matches

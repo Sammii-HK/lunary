@@ -163,14 +163,50 @@ export function AuthComponent({
         console.log('✅ Sign in result:', result);
 
         if (result.error) {
+          console.error('❌ Sign in error:', result.error);
           throw new Error(result.error.message || 'Sign in failed');
+        }
+
+        if (!result.data) {
+          console.error('❌ Sign in failed - no data returned');
+          throw new Error('Sign in failed - no data returned');
+        }
+
+        console.log('✅ Sign in successful, user:', result.data.user?.email);
+
+        // If on admin subdomain, redirect immediately after successful sign-in
+        if (
+          typeof window !== 'undefined' &&
+          window.location.hostname.startsWith('admin.')
+        ) {
+          console.log('🔄 Redirecting to admin dashboard after sign-in');
+          setSuccess('Signed in successfully! Redirecting...');
+          // Use setTimeout to ensure redirect happens after state update
+          setTimeout(() => {
+            console.log('🔄 Executing redirect to /');
+            window.location.href = '/';
+          }, 500);
+          return;
+        }
+
+        // If on /auth page (not in modal), redirect to home
+        if (
+          typeof window !== 'undefined' &&
+          window.location.pathname === '/auth'
+        ) {
+          console.log('🔄 Redirecting to home after sign-in');
+          setSuccess('Signed in successfully! Redirecting...');
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 500);
+          return;
         }
 
         setSuccess('Signed in successfully!');
         setFormData({ email: '', password: '', name: '' });
 
-        // Brief delay for UI feedback, then proceed
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        // Wait for session to be established
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Call onSuccess callback to close modal and trigger re-render
         if (onSuccess) {
@@ -231,8 +267,15 @@ export function AuthComponent({
     }));
   };
 
-  // If user is authenticated, show sign out option
+  // If user is authenticated and on /auth page, redirect (handled by page component)
+  // If in a modal/compact mode, show sign out option
   if (authState.isAuthenticated) {
+    // If on /auth page (not in modal), let the page component handle redirect
+    if (typeof window !== 'undefined' && window.location.pathname === '/auth') {
+      return null; // Page component will handle redirect
+    }
+
+    // Otherwise show sign out option (for modals)
     return (
       <div className='w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6'>
         <div className='text-center mb-6'>

@@ -16,8 +16,16 @@ export function middleware(request: NextRequest) {
   const isAdminSubdomain =
     hostname.startsWith('admin.') || configuredAdminHosts.includes(hostname);
 
+  console.log('🔍 Middleware check:', {
+    hostname,
+    isAdminSubdomain,
+    pathname: url.pathname,
+    configuredAdminHosts,
+    nodeEnv: process.env.NODE_ENV,
+  });
+
   const adminPrefix = '/admin';
-  const skipAdminRewritePrefixes = ['/auth'];
+  const skipAdminRewritePrefixes = ['/auth', '/api', '/_next'];
   let shouldRewrite = false;
 
   const hasAdminPrefix = url.pathname.startsWith(adminPrefix);
@@ -39,9 +47,17 @@ export function middleware(request: NextRequest) {
   }
 
   if (isAdminSubdomain && !hasAdminPrefix && !shouldSkip) {
-    url.pathname =
+    const newPathname =
       url.pathname === '/' ? adminPrefix : `${adminPrefix}${url.pathname}`;
-    shouldRewrite = true;
+    url.pathname = newPathname;
+
+    console.log('🔄 Rewriting admin subdomain:', {
+      from: request.nextUrl.pathname,
+      to: newPathname,
+      hostname,
+    });
+
+    return NextResponse.rewrite(url);
   }
 
   const isProductionLike =
@@ -78,10 +94,6 @@ export function middleware(request: NextRequest) {
         new URL(`/grimoire/${slug}${hash}`, request.url),
       );
     }
-  }
-
-  if (shouldRewrite) {
-    return NextResponse.rewrite(url);
   }
 
   return NextResponse.next();
