@@ -1,6 +1,8 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { useAuthStatus } from '@/components/AuthStatus';
 
 export type AssistantRole = 'user' | 'assistant';
 
@@ -53,7 +55,14 @@ const makeId = () => {
   return Math.random().toString(36).slice(2);
 };
 
+const getThreadStorageKey = (userId: string | null): string | null => {
+  if (!userId) return null;
+  return `lunary-ai-thread-id-${userId}`;
+};
+
 export const useAssistantChat = () => {
+  const { user } = useAuthStatus();
+  const userId = user?.id || null;
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
@@ -62,7 +71,82 @@ export const useAssistantChat = () => {
   const [usage, setUsage] = useState<AssistantUsage | null>(null);
   const [planId, setPlanId] = useState<string | null>(null);
   const [dailyHighlight, setDailyHighlight] = useState<any>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const streamingMessageIdRef = useRef<string | null>(null);
+  const previousUserIdRef = useRef<string | null>(null);
+
+  const loadThreadHistory = useCallback(
+    async (id: string) => {
+      try {
+        setIsLoadingHistory(true);
+        const response = await fetch(`/api/ai/thread?threadId=${id}`, {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const thread = await response.json();
+          if (thread.messages && Array.isArray(thread.messages)) {
+            const loadedMessages: AssistantMessage[] = thread.messages.map(
+              (msg: any, index: number) => ({
+                id: `${id}-${index}`,
+                role: msg.role,
+                content: msg.content,
+              }),
+            );
+            setMessages(loadedMessages);
+          }
+        } else if (response.status === 404) {
+          const storageKey = getThreadStorageKey(userId);
+          if (storageKey && typeof window !== 'undefined') {
+            localStorage.removeItem(storageKey);
+          }
+          setThreadId(null);
+        }
+      } catch (error) {
+        console.error('[AssistantChat] Failed to load thread history', error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    },
+    [userId],
+  );
+
+  useEffect(() => {
+    if (!userId) {
+      setIsLoadingHistory(false);
+      setMessages([]);
+      setThreadId(null);
+      return;
+    }
+
+    const storageKey = getThreadStorageKey(userId);
+    if (!storageKey) {
+      setIsLoadingHistory(false);
+      return;
+    }
+
+    const storedThreadId =
+      typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
+
+    if (storedThreadId) {
+      setThreadId(storedThreadId);
+      loadThreadHistory(storedThreadId);
+    } else {
+      setIsLoadingHistory(false);
+    }
+  }, [userId, loadThreadHistory]);
+
+  useEffect(() => {
+    if (previousUserIdRef.current && previousUserIdRef.current !== userId) {
+      const oldStorageKey = getThreadStorageKey(previousUserIdRef.current);
+      if (oldStorageKey && typeof window !== 'undefined') {
+        localStorage.removeItem(oldStorageKey);
+      }
+      setMessages([]);
+      setThreadId(null);
+    }
+    previousUserIdRef.current = userId;
+  }, [userId]);
 
   const appendAssistantContent = useCallback((content: string) => {
     if (!streamingMessageIdRef.current) {
@@ -171,6 +255,10 @@ export const useAssistantChat = () => {
 
                 if (payload?.threadId) {
                   setThreadId(payload.threadId);
+                  const storageKey = getThreadStorageKey(userId);
+                  if (storageKey && typeof window !== 'undefined') {
+                    localStorage.setItem(storageKey, payload.threadId);
+                  }
                 }
                 if (payload?.usage) {
                   setUsage(payload.usage);
@@ -235,6 +323,8 @@ export const useAssistantChat = () => {
       usage,
       planId,
       dailyHighlight,
+      isLoadingHistory,
+      threadId,
     }),
     [
       messages,
@@ -245,6 +335,8 @@ export const useAssistantChat = () => {
       usage,
       planId,
       dailyHighlight,
+      isLoadingHistory,
+      threadId,
     ],
   );
 

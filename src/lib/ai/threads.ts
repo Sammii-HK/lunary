@@ -28,7 +28,7 @@ const persistThreadToMemory = (thread: ThreadRecord): ThreadRecord => {
   return thread;
 };
 
-const loadThreadFromDatabase = async (
+export const loadThreadFromDatabase = async (
   threadId: string,
 ): Promise<ThreadRecord | null> => {
   try {
