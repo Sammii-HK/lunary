@@ -180,5 +180,33 @@ function initializeAuth() {
   }
 }
 
-// Export auth instance - initialize on first access
-export const auth = initializeAuth();
+// Export auth with lazy initialization - only initialize at runtime, not during build
+export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
+  get(_target, prop) {
+    // During build phase, return a no-op handler to avoid initialization
+    const isBuildPhase = !!process.env.NEXT_PHASE;
+    if (isBuildPhase) {
+      if (prop === 'handler') {
+        return async () =>
+          new Response('Build phase - handler not available', { status: 503 });
+      }
+      // Return a dummy value for other properties during build
+      return undefined;
+    }
+
+    // At runtime, initialize and return the actual value
+    const instance = initializeAuth();
+    const value = instance[prop as keyof typeof instance];
+
+    // If accessing the handler, return it directly (already initialized)
+    if (prop === 'handler') {
+      return value;
+    }
+
+    // For other properties, return the value from the initialized instance
+    if (typeof value === 'function') {
+      return value.bind(instance);
+    }
+    return value;
+  },
+});
