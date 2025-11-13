@@ -71,13 +71,30 @@ export const auth = betterAuth({
   },
 
   // CORS and security settings
-  trustedOrigins: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://lunary.app',
-    'https://www.lunary.app',
-    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  ],
+  // Support both static origins and dynamic Vercel preview URLs
+  trustedOrigins: (request: Request) => {
+    const staticOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://lunary.app',
+      'https://www.lunary.app',
+    ];
+
+    // Add NEXT_PUBLIC_APP_URL if set
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+      staticOrigins.push(process.env.NEXT_PUBLIC_APP_URL);
+    }
+
+    // Get origin from request headers or URL
+    const origin = request.headers.get('origin') || new URL(request.url).origin;
+
+    // If origin is a Vercel preview deployment, add it dynamically
+    if (origin && origin.endsWith('.vercel.app')) {
+      return [...staticOrigins, origin];
+    }
+
+    return staticOrigins;
+  },
 
   // Add the Jazz plugin for integration
   plugins: [jazzPlugin()],
