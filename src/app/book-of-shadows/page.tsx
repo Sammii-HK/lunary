@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
@@ -46,13 +46,35 @@ export default function BookOfShadowsPage() {
     dailyHighlight,
   } = useAssistantChat();
   const [input, setInput] = useState('');
+  const lastSendTimeRef = useRef<number>(0);
+  const DEBOUNCE_MS = 500;
+
+  const attemptSend = () => {
+    const now = Date.now();
+    const timeSinceLastSend = now - lastSendTimeRef.current;
+
+    if (timeSinceLastSend < DEBOUNCE_MS) {
+      return;
+    }
+
+    const trimmed = input.trim();
+    if (!trimmed || isStreaming) return;
+
+    lastSendTimeRef.current = now;
+    sendMessage(trimmed);
+    setInput('');
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmed = input.trim();
-    if (!trimmed) return;
-    sendMessage(trimmed);
-    setInput('');
+    attemptSend();
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      attemptSend();
+    }
   };
 
   return (
@@ -137,6 +159,7 @@ export default function BookOfShadowsPage() {
                 id='book-of-shadows-message'
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
+                onKeyDown={handleKeyDown}
                 rows={3}
                 placeholder="Write your heart's question…"
                 className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 md:text-base'
