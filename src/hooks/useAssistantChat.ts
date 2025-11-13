@@ -370,7 +370,7 @@ export const useAssistantChat = () => {
         streamingMessageIdRef.current = null;
       }
     },
-    [appendAssistantContent, isStreaming, threadId],
+    [appendAssistantContent, isStreaming, threadId, userId],
   );
 
   const state = useMemo(

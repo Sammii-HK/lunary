@@ -11,8 +11,13 @@ export const auth = betterAuth({
       `wss://cloud.jazz.tools/?key=${process.env.JAZZ_SYNC_KEY || ''}`,
     accountID: (() => {
       const accountId = process.env.JAZZ_WORKER_ACCOUNT;
+      // Allow empty during build - Next.js evaluates modules during build
+      // but these env vars are only needed at runtime when auth is actually used
+      // During build, NEXT_PHASE is set, so we can detect that
+      const isBuildPhase = !!process.env.NEXT_PHASE;
       if (
         !accountId &&
+        !isBuildPhase &&
         process.env.NODE_ENV !== 'development' &&
         process.env.NODE_ENV !== 'test'
       ) {
@@ -22,8 +27,13 @@ export const auth = betterAuth({
     })(),
     accountSecret: (() => {
       const secret = process.env.JAZZ_WORKER_SECRET;
+      // Allow empty during build - Next.js evaluates modules during build
+      // but these env vars are only needed at runtime when auth is actually used
+      // During build, NEXT_PHASE is set, so we can detect that
+      const isBuildPhase = !!process.env.NEXT_PHASE;
       if (
         !secret &&
+        !isBuildPhase &&
         process.env.NODE_ENV !== 'development' &&
         process.env.NODE_ENV !== 'test'
       ) {
