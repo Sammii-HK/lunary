@@ -19,12 +19,29 @@ function getRequiredEnvVar(name: string, allowEmptyInBuild = false): string {
   }
 
   // At runtime, env var must be set and non-empty
+  // Log all env vars for debugging
+  const allEnvKeys = Object.keys(process.env).sort();
+  const matchingKeys = allEnvKeys.filter((key) =>
+    key.toUpperCase().includes(name.toUpperCase().replace(/_/g, '')),
+  );
+
   const deploymentUrl =
     process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL;
+  const vercelEnv = process.env.VERCEL_ENV || 'unknown';
+
+  console.error(`❌ ${name} not found. Debug info:`, {
+    totalEnvVars: allEnvKeys.length,
+    matchingKeys,
+    vercelEnv,
+    deploymentUrl,
+    jazzRelatedKeys: allEnvKeys.filter((k) => k.includes('JAZZ')),
+  });
+
   throw new Error(
     `${name} environment variable is required and cannot be empty. ` +
-      `Please set this in your Vercel project settings${deploymentUrl ? ` (current deployment: ${deploymentUrl})` : ''}. ` +
-      `This variable is needed for Better Auth to connect to Jazz database.`,
+      `Please set this in your Vercel project settings for ${vercelEnv} environment${deploymentUrl ? ` (current deployment: ${deploymentUrl})` : ''}. ` +
+      `This variable is needed for Better Auth to connect to Jazz database. ` +
+      `If you've already set it, make sure it's enabled for Preview/Production and redeploy.`,
   );
 }
 
@@ -192,7 +209,27 @@ function initializeAuth() {
       // our security patterns. This ensures each deployment includes its own URL
       // in the trusted origins list. Additional dynamic validation happens in
       // route handlers via our CORS wrapper for defense in depth.
-      trustedOrigins: getAllowedOrigins(),
+      // Use a function to dynamically include the request origin if it matches patterns
+      trustedOrigins: (request: Request) => {
+        const staticOrigins = getAllowedOrigins();
+        const requestOrigin = request.headers.get('origin');
+
+        // If request has an origin that matches Vercel patterns, include it
+        if (requestOrigin) {
+          const vercelPatterns = [
+            /^https:\/\/[a-z0-9][a-z0-9-]*-sammiis-projects\.vercel\.app$/i,
+            /^https:\/\/[a-z0-9][a-z0-9-]*--[a-z0-9][a-z0-9-]*-sammiis-projects\.vercel\.app$/i,
+            /^https:\/\/[a-z0-9][a-z0-9-]*\.vercel\.app$/i,
+            /^https:\/\/[a-z0-9][a-z0-9-]*--[a-z0-9][a-z0-9-]*\.vercel\.app$/i,
+          ];
+
+          if (vercelPatterns.some((pattern) => pattern.test(requestOrigin))) {
+            return [...staticOrigins, requestOrigin];
+          }
+        }
+
+        return staticOrigins;
+      },
 
       // Add the Jazz plugin for integration
       plugins: [jazzPlugin()],
