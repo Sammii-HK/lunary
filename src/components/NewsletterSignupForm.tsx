@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useId, FormEvent } from 'react';
+import { useState, useEffect, useId, useRef, FormEvent } from 'react';
 import { Mail, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { betterAuthClient } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
@@ -32,6 +32,9 @@ export function NewsletterSignupForm({
   const [status, setStatus] = useState<SignupStatus>('idle');
   const [message, setMessage] = useState<string | null>(null);
   const inputId = useId();
+  const resetStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -57,6 +60,11 @@ export function NewsletterSignupForm({
 
     return () => {
       isMounted = false;
+
+      if (resetStatusTimeoutRef.current !== null) {
+        clearTimeout(resetStatusTimeoutRef.current);
+        resetStatusTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -85,7 +93,7 @@ export function NewsletterSignupForm({
             weeklyNewsletter: true,
             blogUpdates: true,
             productUpdates: false,
-            cosmicAlerts: true,
+            cosmicAlerts: false,
           },
         }),
       });
@@ -111,7 +119,11 @@ export function NewsletterSignupForm({
           : 'Something went wrong. Please try again.',
       );
     } finally {
-      setTimeout(() => {
+      if (resetStatusTimeoutRef.current !== null) {
+        clearTimeout(resetStatusTimeoutRef.current);
+      }
+
+      resetStatusTimeoutRef.current = setTimeout(() => {
         setStatus((current) => (current === 'loading' ? 'idle' : current));
       }, 300);
     }
