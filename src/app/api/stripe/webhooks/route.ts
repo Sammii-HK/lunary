@@ -140,7 +140,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
           ? 'trial'
           : status === 'active'
             ? 'active'
-            : status === 'canceled' || status === 'cancelled'
+            : status === 'canceled'
               ? 'cancelled'
               : status === 'past_due'
                 ? 'past_due'
@@ -149,8 +149,10 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       const trialEndsAt = subscription.trial_end
         ? new Date(subscription.trial_end * 1000).toISOString()
         : null;
-      const currentPeriodEnd = subscription.current_period_end
-        ? new Date(subscription.current_period_end * 1000).toISOString()
+      const currentPeriodEnd = (subscription as any).current_period_end
+        ? new Date(
+            (subscription as any).current_period_end * 1000,
+          ).toISOString()
         : null;
 
       if (userId) {
@@ -258,7 +260,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
           ? 'trial'
           : status === 'active'
             ? 'active'
-            : status === 'canceled' || status === 'cancelled'
+            : status === 'canceled'
               ? 'cancelled'
               : status === 'past_due'
                 ? 'past_due'
@@ -267,8 +269,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       const trialEndsAt = subscription.trial_end
         ? new Date(subscription.trial_end * 1000).toISOString()
         : null;
-      const currentPeriodEnd = subscription.current_period_end
-        ? new Date(subscription.current_period_end * 1000).toISOString()
+      const currentPeriodEnd = (subscription as any).current_period_end
+        ? new Date(
+            (subscription as any).current_period_end * 1000,
+          ).toISOString()
         : null;
 
       if (userId) {
