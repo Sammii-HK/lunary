@@ -525,16 +525,19 @@ const ObservingConditionsCard = ({
       </div>
 
       {summary ? (
-        <div className='space-y-3 text-xs'>
-          <div className='grid grid-cols-2 gap-3'>
-            <div className='space-y-1.5'>
+        <div className='space-y-4 text-xs'>
+          <div>
+            <div className='mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500'>
+              Twilight milestones
+            </div>
+            <div className='grid gap-1.5 sm:grid-cols-2'>
               <DetailRow
-                label='Civil Twilight'
+                label='Civil Dusk'
                 value={formatShortTime(summary.twilight.civilEnd, timezone)}
                 valueClass='text-orange-300'
               />
               <DetailRow
-                label='Nautical Twilight'
+                label='Nautical Dusk'
                 value={formatShortTime(summary.twilight.nauticalEnd, timezone)}
                 valueClass='text-blue-300'
               />
@@ -546,34 +549,22 @@ const ObservingConditionsCard = ({
                 )}
                 valueClass='text-purple-300'
               />
-            </div>
-            <div className='space-y-1.5'>
-              <DetailRow
-                label='Moon Illumination'
-                value={`${summary.moon.illumination}%`}
-                valueClass='text-blue-300'
-              />
-              <DetailRow
-                label='Moon Phase'
-                value={summary.moon.phaseName}
-                valueClass='text-zinc-200'
-              />
-              <DetailRow
-                label='Moon Age'
-                value={`${Math.round(summary.moonAge)} days`}
-                valueClass='text-zinc-200'
-              />
-              <DetailRow
-                label='Darkness Quality'
-                value={summary.darkness.label}
-                valueClass={toneClassMap[summary.darkness.tone]}
-              />
+              {summary.twilight.astronomicalStart && (
+                <DetailRow
+                  label='Astronomical Dawn'
+                  value={formatShortTime(
+                    summary.twilight.astronomicalStart,
+                    timezone,
+                  )}
+                  valueClass='text-purple-200'
+                />
+              )}
             </div>
           </div>
 
-          <div className='space-y-1.5'>
+          <div className='grid gap-3 sm:grid-cols-2'>
             <DetailRow
-              label='Best Viewing'
+              label='Best Viewing Window'
               value={
                 summary.bestViewingWindowText ??
                 (summary.bestViewingStart
@@ -585,18 +576,8 @@ const ObservingConditionsCard = ({
               }
               valueClass='text-green-300'
             />
-            {summary.twilight.astronomicalStart && (
-              <DetailRow
-                label='Astronomical Dawn'
-                value={formatShortTime(
-                  summary.twilight.astronomicalStart,
-                  timezone,
-                )}
-                valueClass='text-purple-200'
-              />
-            )}
             <DetailRow
-              label='Next Up'
+              label='Next Change'
               value={
                 summary.nextEvent
                   ? `${summary.nextEvent.label} @ ${formatShortTime(
@@ -607,7 +588,51 @@ const ObservingConditionsCard = ({
               }
               valueClass='text-zinc-200'
             />
+            <DetailRow
+              label='Darkness Quality'
+              value={summary.darkness.label}
+              valueClass={toneClassMap[summary.darkness.tone]}
+            />
+            <div className='space-y-1'>
+              <span className='text-zinc-400'>Moonlight Impact</span>
+              <div className='flex items-center gap-2'>
+                <div className='h-2 flex-1 overflow-hidden rounded-full bg-zinc-800'>
+                  <div
+                    className='h-full rounded-full bg-blue-400/80'
+                    style={{ width: `${summary.moon.illumination}%` }}
+                  ></div>
+                </div>
+                <span className='text-sm text-zinc-200'>
+                  {summary.moon.illumination}%
+                </span>
+              </div>
+              <span className='text-[11px] text-zinc-500'>
+                {summary.moon.phaseName} • Age {Math.round(summary.moonAge)}{' '}
+                days
+              </span>
+            </div>
           </div>
+
+          {summary.currentVisiblePlanets.length > 0 && (
+            <div>
+              <div className='mb-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-500'>
+                Visible now
+              </div>
+              <div className='flex flex-wrap gap-2'>
+                {summary.currentVisiblePlanets.map((planet) => (
+                  <span
+                    key={planet}
+                    className='flex items-center gap-2 rounded-full border border-zinc-700/70 bg-zinc-800/50 px-2.5 py-1 text-xs text-zinc-200'
+                  >
+                    <span className='text-sm leading-none'>
+                      {getPlanetIcon(planet)}
+                    </span>
+                    {planet}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className='text-xs text-zinc-500 italic'>
@@ -1085,7 +1110,7 @@ export default function EphemerisWidget() {
               Calculating celestial events...
             </div>
           ) : ephemerisData ? (
-            <div className='flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6'>
+            <div className='flex flex-col gap-6'>
               <AltitudeChart
                 celestialBodies={[
                   {
@@ -1114,7 +1139,7 @@ export default function EphemerisWidget() {
                 timezone={location.timezone}
               />
 
-              <div className='flex flex-col gap-4'>
+              <div className='grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]'>
                 <ObservingConditionsCard
                   summary={observingSummary}
                   timezone={location.timezone}
