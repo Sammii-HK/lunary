@@ -14,7 +14,7 @@ type ShareTarotSearchParams = {
 };
 
 type ShareTarotPageProps = {
-  searchParams: Promise<ShareTarotSearchParams>;
+  searchParams?: Promise<ShareTarotSearchParams>;
 };
 
 const toStringParam = (value?: string | string[]) => {
@@ -79,7 +79,9 @@ const buildOgImageUrl = ({
 export async function generateMetadata({
   searchParams,
 }: ShareTarotPageProps): Promise<Metadata> {
-  const resolvedSearchParams = await searchParams;
+  const resolved =
+    (await (searchParams ?? Promise.resolve({}))) ?? ({} as const);
+  const resolvedSearchParams = resolved as ShareTarotSearchParams;
   const card = toStringParam(resolvedSearchParams.card) ?? 'Your Tarot Card';
   const keywords = parseKeywords(resolvedSearchParams.keywords);
   const variantRaw = toStringParam(resolvedSearchParams.variant);
@@ -177,7 +179,9 @@ export async function generateMetadata({
 export default async function ShareTarotPage({
   searchParams,
 }: ShareTarotPageProps) {
-  const resolvedSearchParams = await searchParams;
+  const resolved =
+    (await (searchParams ?? Promise.resolve({}))) ?? ({} as const);
+  const resolvedSearchParams = resolved as ShareTarotSearchParams;
   const card = toStringParam(resolvedSearchParams.card) ?? 'Your Tarot Card';
   const keywords = parseKeywords(resolvedSearchParams.keywords);
   const variantRaw = toStringParam(resolvedSearchParams.variant);

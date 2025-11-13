@@ -16,7 +16,7 @@ type ShareBirthChartSearchParams = {
 };
 
 type ShareBirthChartPageProps = {
-  searchParams: Promise<ShareBirthChartSearchParams>;
+  searchParams?: Promise<ShareBirthChartSearchParams>;
 };
 
 const toStringParam = (value?: string | string[]) => {
@@ -51,7 +51,9 @@ const buildOgImageUrl = (params: Record<string, string | undefined>) => {
 export async function generateMetadata({
   searchParams,
 }: ShareBirthChartPageProps): Promise<Metadata> {
-  const resolvedSearchParams = await searchParams;
+  const resolved =
+    (await (searchParams ?? Promise.resolve({}))) ?? ({} as const);
+  const resolvedSearchParams = resolved as ShareBirthChartSearchParams;
   const name = toStringParam(resolvedSearchParams.name);
   const sun = toStringParam(resolvedSearchParams.sun);
   const moon = toStringParam(resolvedSearchParams.moon);
@@ -137,7 +139,9 @@ export async function generateMetadata({
 export default async function ShareBirthChartPage({
   searchParams,
 }: ShareBirthChartPageProps) {
-  const resolvedSearchParams = await searchParams;
+  const resolved =
+    (await (searchParams ?? Promise.resolve({}))) ?? ({} as const);
+  const resolvedSearchParams = resolved as ShareBirthChartSearchParams;
   const name = toStringParam(resolvedSearchParams.name);
   const sun = toStringParam(resolvedSearchParams.sun);
   const moon = toStringParam(resolvedSearchParams.moon);
