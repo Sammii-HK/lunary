@@ -31,8 +31,9 @@ export function middleware(request: NextRequest) {
 
   if (isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
     const trimmedPath = url.pathname.slice(adminPrefix.length) || '/';
-    const cleanPath =
-      trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`;
+    const cleanPath = trimmedPath.startsWith('/')
+      ? trimmedPath
+      : `/${trimmedPath}`;
     const redirectUrl = new URL(cleanPath, request.url);
     return NextResponse.redirect(redirectUrl);
   }
