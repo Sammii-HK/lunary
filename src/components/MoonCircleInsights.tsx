@@ -1,0 +1,386 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ArrowRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Loader2,
+  MessageCircle,
+  RefreshCcw,
+  SortAsc,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { InsightCard, InsightSource } from '@/components/InsightCard';
+import { ShareInsightForm } from '@/components/ShareInsightForm';
+
+type SortOrder = 'newest' | 'oldest';
+
+interface Insight {
+  id: number;
+  insight_text: string;
+  created_at?: string | null;
+  source?: InsightSource | null;
+}
+
+export interface MoonCircleInsightsProps {
+  moonCircleId: number;
+  moonPhase: string;
+  date?: string | null;
+  insightCount?: number;
+  initialInsights?: Insight[];
+  initialTotal?: number;
+  pageSize?: number;
+  defaultSort?: SortOrder;
+  collapsedByDefault?: boolean;
+  showShareForm?: boolean;
+  autoFocusShareForm?: boolean;
+  autoFetch?: boolean;
+  className?: string;
+}
+
+const formatDate = (value?: string | null) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date);
+};
+
+export function MoonCircleInsights({
+  moonCircleId,
+  moonPhase,
+  date,
+  insightCount,
+  initialInsights = [],
+  initialTotal,
+  pageSize = 3,
+  defaultSort = 'newest',
+  collapsedByDefault = false,
+  showShareForm = true,
+  autoFocusShareForm = false,
+  autoFetch = true,
+  className,
+}: MoonCircleInsightsProps) {
+  const [insights, setInsights] = useState<Insight[]>(initialInsights);
+  const [total, setTotal] = useState<number>(
+    initialTotal ?? insightCount ?? initialInsights.length ?? 0,
+  );
+  const [page, setPage] = useState(0);
+  const [sort, setSort] = useState<SortOrder>(defaultSort);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(collapsedByDefault);
+  const [hasFetched, setHasFetched] = useState(initialInsights.length > 0);
+
+  useEffect(() => {
+    setInsights(initialInsights);
+    setTotal(initialTotal ?? insightCount ?? initialInsights.length ?? 0);
+    setPage(0);
+    setSort(defaultSort);
+    setHasFetched(initialInsights.length > 0);
+  }, [initialInsights, initialTotal, insightCount, defaultSort]);
+
+  const fetchInsights = useCallback(
+    async (overridePage = 0, overrideSort?: SortOrder) => {
+      const sortOrder = overrideSort ?? sort;
+      try {
+        setIsLoading(true);
+        setError(null);
+        const params = new URLSearchParams({
+          limit: String(pageSize),
+          offset: String(overridePage * pageSize),
+          sort: sortOrder,
+        });
+        const response = await fetch(
+          `/api/moon-circles/${moonCircleId}/insights?${params.toString()}`,
+          { cache: 'no-store' },
+        );
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            data?.error ?? 'We could not load community insights right now.',
+          );
+        }
+        setInsights(data.insights ?? []);
+        setTotal(data.total ?? 0);
+        setPage(overridePage);
+        setSort(sortOrder);
+        setHasFetched(true);
+      } catch (fetchError) {
+        console.error('Failed to load insights', fetchError);
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : 'Failed to load insights. Please try again.',
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [moonCircleId, pageSize, sort],
+  );
+
+  useEffect(() => {
+    if (!isCollapsed && autoFetch && !hasFetched) {
+      fetchInsights(0, sort);
+    }
+  }, [autoFetch, fetchInsights, hasFetched, isCollapsed, sort]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ moonCircleId: number }>).detail;
+      if (detail?.moonCircleId === moonCircleId) {
+        fetchInsights(0, 'newest');
+      }
+    };
+    window.addEventListener(
+      'moon-circle-insight:submitted',
+      handler as EventListener,
+    );
+    return () => {
+      window.removeEventListener(
+        'moon-circle-insight:submitted',
+        handler as EventListener,
+      );
+    };
+  }, [fetchInsights, moonCircleId]);
+
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(Math.max(total, 1) / pageSize));
+  }, [pageSize, total]);
+
+  const handlePageChange = (direction: 'next' | 'prev') => {
+    const nextPage =
+      direction === 'next'
+        ? Math.min(page + 1, totalPages - 1)
+        : Math.max(page - 1, 0);
+    if (nextPage !== page) {
+      fetchInsights(nextPage);
+    }
+  };
+
+  const handleSortChange = (nextSort: SortOrder) => {
+    if (nextSort === sort) return;
+    fetchInsights(0, nextSort);
+  };
+
+  const handleToggleCollapse = () => {
+    const nextState = !isCollapsed;
+    setIsCollapsed(nextState);
+    if (!nextState && !hasFetched) {
+      fetchInsights(0, sort);
+    }
+  };
+
+  const handleManualRefresh = () => fetchInsights(page, sort);
+
+  const displayDate = formatDate(date);
+  const displayTotal = total ?? insightCount ?? insights.length ?? 0;
+
+  return (
+    <section
+      className={cn(
+        'rounded-3xl border border-purple-500/30 bg-black/40 p-6 shadow-lg shadow-purple-500/15 backdrop-blur',
+        className,
+      )}
+    >
+      <header className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
+        <div>
+          <p className='text-xs uppercase tracking-[0.2em] text-purple-200/70'>
+            Community reflections
+          </p>
+          <h3 className='text-2xl font-semibold text-white'>
+            {moonPhase} insights
+          </h3>
+          {displayDate && (
+            <p className='text-sm text-purple-100/70'>
+              Shared for {displayDate}
+            </p>
+          )}
+        </div>
+        <div className='flex flex-wrap items-center gap-2'>
+          <span className='rounded-full border border-purple-500/30 px-3 py-1 text-sm text-purple-100'>
+            {displayTotal} insight{displayTotal === 1 ? '' : 's'}
+          </span>
+          <Button
+            type='button'
+            variant='ghost'
+            className='text-sm text-purple-100 hover:bg-purple-500/10'
+            onClick={handleToggleCollapse}
+          >
+            {isCollapsed ? (
+              <span className='flex items-center gap-1'>
+                Expand
+                <ChevronDown className='h-4 w-4' />
+              </span>
+            ) : (
+              <span className='flex items-center gap-1'>
+                Collapse
+                <ChevronUp className='h-4 w-4' />
+              </span>
+            )}
+          </Button>
+        </div>
+      </header>
+
+      {!isCollapsed && (
+        <div className='mt-6 space-y-6'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <div className='flex items-center gap-2 text-sm text-purple-100/80'>
+              <MessageCircle className='h-4 w-4 text-purple-300' />
+              Voices from the circle
+            </div>
+            <div className='flex flex-wrap items-center gap-2'>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => handleSortChange('newest')}
+                className={cn(
+                  'gap-1 text-xs',
+                  sort === 'newest'
+                    ? 'bg-purple-500/10 text-white'
+                    : 'text-purple-100',
+                )}
+              >
+                <SortAsc className='h-4 w-4' />
+                Newest
+              </Button>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => handleSortChange('oldest')}
+                className={cn(
+                  'gap-1 text-xs',
+                  sort === 'oldest'
+                    ? 'bg-purple-500/10 text-white'
+                    : 'text-purple-100',
+                )}
+              >
+                <SortAsc className='h-4 w-4 rotate-180' />
+                Oldest
+              </Button>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={handleManualRefresh}
+                className='gap-1 text-xs text-purple-100 hover:text-white'
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  <RefreshCcw className='h-4 w-4' />
+                )}
+                Refresh
+              </Button>
+            </div>
+          </div>
+
+          {showShareForm && (
+            <ShareInsightForm
+              moonCircleId={moonCircleId}
+              autoFocus={autoFocusShareForm}
+              onSuccess={() => fetchInsights(0, 'newest')}
+            />
+          )}
+
+          {error && (
+            <div className='rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100'>
+              {error}
+            </div>
+          )}
+
+          {isLoading && insights.length === 0 && (
+            <div className='space-y-3'>
+              {[0, 1].map((key) => (
+                <div
+                  key={key}
+                  className='h-24 animate-pulse rounded-2xl bg-purple-500/10'
+                />
+              ))}
+            </div>
+          )}
+
+          {!isLoading && insights.length === 0 && (
+            <div className='rounded-2xl border border-dashed border-purple-500/40 bg-purple-500/5 p-6 text-center text-sm text-purple-100/80'>
+              No insights yet. Be the first to share how this{' '}
+              {moonPhase.toLowerCase()} is showing up for you.
+            </div>
+          )}
+
+          {insights.length > 0 && (
+            <div className='space-y-4'>
+              {insights.map((insight) => (
+                <InsightCard
+                  key={insight.id}
+                  insight={insight}
+                  moonCircle={{ moon_phase: moonPhase, date }}
+                />
+              ))}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className='flex items-center justify-between rounded-2xl border border-purple-500/30 px-4 py-3 text-sm text-purple-100/80'>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => handlePageChange('prev')}
+                disabled={page === 0 || isLoading}
+                className='gap-1 text-purple-100 disabled:opacity-40'
+              >
+                <ChevronLeft className='h-4 w-4' />
+                Newer
+              </Button>
+              <span>
+                Page {page + 1} of {totalPages}
+              </span>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => handlePageChange('next')}
+                disabled={page >= totalPages - 1 || isLoading}
+                className='gap-1 text-purple-100 disabled:opacity-40'
+              >
+                Older
+                <ChevronRight className='h-4 w-4' />
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {isCollapsed && (
+        <div className='mt-4 rounded-2xl border border-dashed border-purple-500/40 bg-purple-500/5 p-4 text-sm text-purple-100/80'>
+          <p>
+            Tap expand to read what others experienced during this{' '}
+            {moonPhase.toLowerCase()} circle.
+          </p>
+          <Button
+            type='button'
+            onClick={handleToggleCollapse}
+            className='mt-3 w-full justify-center gap-2 rounded-2xl bg-purple-500 text-white hover:bg-purple-400'
+          >
+            View insights
+            <ArrowRight className='h-4 w-4' />
+          </Button>
+        </div>
+      )}
+    </section>
+  );
+}
