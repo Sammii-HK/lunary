@@ -1,32 +1,66 @@
 import { betterAuth } from 'better-auth';
 import { jazzPlugin } from 'jazz-tools/better-auth/auth/server';
 import { JazzBetterAuthDatabaseAdapter } from 'jazz-tools/better-auth/database-adapter';
-import {
-  sendEmail,
-  generateVerificationEmailHTML,
-  generateVerificationEmailText,
-  generatePasswordResetEmailHTML,
-  generatePasswordResetEmailText,
-} from './email';
 import { getAllowedOrigins } from './origin-validation';
 
 // Better Auth server configuration with Jazz database adapter
 export const auth = betterAuth({
   database: JazzBetterAuthDatabaseAdapter({
-    syncServer: `wss://cloud.jazz.tools/?key=sam@lunary.com`,
-    accountID:
-      process.env.JAZZ_WORKER_ACCOUNT || 'co_zQcie5b9JeVB3go2xcpitCuPPUK',
-    accountSecret:
-      process.env.JAZZ_WORKER_SECRET ||
-      'sealerSecret_z6j9dtYQev5cMjaKKncXQRMxpa23ppGDencCFwH2Bf4Jm/signerSecret_z3t4A4AbNMp3GSf7YP7Mc2nmuB3yJfYNLEUWDTqE1r6cV',
+    syncServer:
+      process.env.JAZZ_SYNC_SERVER ||
+      `wss://cloud.jazz.tools/?key=${process.env.JAZZ_SYNC_KEY || ''}`,
+    accountID: (() => {
+      const accountId = process.env.JAZZ_WORKER_ACCOUNT;
+      // Allow empty during build - Next.js evaluates modules during build
+      // but these env vars are only needed at runtime when auth is actually used
+      // During build, NEXT_PHASE is set, so we can detect that
+      const isBuildPhase = !!process.env.NEXT_PHASE;
+      if (
+        !accountId &&
+        !isBuildPhase &&
+        process.env.NODE_ENV !== 'development' &&
+        process.env.NODE_ENV !== 'test'
+      ) {
+        throw new Error('JAZZ_WORKER_ACCOUNT environment variable is required');
+      }
+      return accountId || '';
+    })(),
+    accountSecret: (() => {
+      const secret = process.env.JAZZ_WORKER_SECRET;
+      // Allow empty during build - Next.js evaluates modules during build
+      // but these env vars are only needed at runtime when auth is actually used
+      // During build, NEXT_PHASE is set, so we can detect that
+      const isBuildPhase = !!process.env.NEXT_PHASE;
+      if (
+        !secret &&
+        !isBuildPhase &&
+        process.env.NODE_ENV !== 'development' &&
+        process.env.NODE_ENV !== 'test'
+      ) {
+        throw new Error('JAZZ_WORKER_SECRET environment variable is required');
+      }
+      return secret || '';
+    })(),
   }),
-  secret:
-    process.env.BETTER_AUTH_SECRET ||
-    (process.env.NODE_ENV === 'test'
-      ? 'test-secret-key-for-jest-tests-only'
-      : process.env.NODE_ENV === 'development'
-        ? 'dev-secret-key-for-local-development-only-change-in-production'
-        : undefined),
+  secret: (() => {
+    const secret = process.env.BETTER_AUTH_SECRET?.trim();
+    if (!secret && process.env.NODE_ENV !== 'test') {
+      console.warn(
+        '⚠️ BETTER_AUTH_SECRET is not set. Auth may not work properly.',
+      );
+      // Use a fallback for local dev only
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('⚠️ Using fallback secret for local development');
+        return 'local-dev-secret-key-change-in-production';
+      }
+    }
+    return (
+      secret ||
+      (process.env.NODE_ENV === 'test'
+        ? 'test-secret-key-for-jest-tests-only'
+        : undefined)
+    );
+  })(),
 
   // Email and password authentication
   emailAndPassword: {
@@ -37,6 +71,12 @@ export const auth = betterAuth({
     revokeSessionsOnPasswordReset: true,
     async sendResetPassword({ user, url }, _request) {
       try {
+        const {
+          sendEmail,
+          generatePasswordResetEmailHTML,
+          generatePasswordResetEmailText,
+        } = await import('./email');
+
         const html = generatePasswordResetEmailHTML(url, user.email);
         const text = generatePasswordResetEmailText(url, user.email);
 
@@ -129,9 +169,5 @@ export const auth = betterAuth({
   },
 
   // Advanced configuration
-  advanced: {
-    database: {
-      generateId: () => crypto.randomUUID(),
-    },
-  },
+  advanced: { database: { generateId: () => crypto.randomUUID() } },
 });

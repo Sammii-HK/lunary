@@ -7,7 +7,7 @@ import {
   Sparkles,
   BarChart3,
   Calendar,
-  BookOpen,
+  NotebookPen,
   Moon,
   Telescope,
   Heart,
@@ -32,10 +32,10 @@ export default function WelcomePage() {
         'Daily guidance based on current planetary transits to your personal chart. No generic predictions—every insight is yours alone.',
     },
     {
-      icon: BookOpen,
-      title: 'Intelligent Tarot Patterns',
+      icon: NotebookPen,
+      title: 'Book of Shadows Companion',
       description:
-        'Discover recurring themes in your readings and understand how cosmic cycles influence your spiritual journey.',
+        'Have reflective conversations with Lunary’s calm AI—every reply grounded in your birth chart, tarot, and today’s moon.',
     },
     {
       icon: Calendar,
@@ -111,17 +111,14 @@ export default function WelcomePage() {
         <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32'>
           <div className='text-center max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-8'>
             <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-light text-zinc-100 leading-[1.1] tracking-tight px-2'>
-              Astrology based on{' '}
-              <span className='font-normal text-purple-300/80'>real data</span>,
-              <br className='hidden sm:block' />
-              <span className='sm:hidden'> </span>
-              not generic predictions
+              Astrology you can{' '}
+              <span className='font-normal text-purple-300/80'>talk</span> to
             </h1>
 
             <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed font-light px-4'>
-              Your complete birth chart, calculated with astronomical precision.
-              Daily insights that consider your unique cosmic signature. Real
-              guidance, thoughtfully presented.
+              Ask your Book of Shadows for guidance and receive calm, grounded
+              answers powered by real astronomical data, your birth chart, and
+              the day’s cosmic weather.
             </p>
 
             <div className='pt-2 sm:pt-4'>
@@ -431,10 +428,10 @@ export default function WelcomePage() {
 
           <div className='pt-6 sm:pt-8'>
             <Link
-              href='/'
+              href='/book-of-shadows'
               className='text-xs sm:text-sm md:text-base text-zinc-500 hover:text-zinc-400 transition-colors inline-block'
             >
-              Explore daily insights →
+              Open the Book of Shadows →
             </Link>
           </div>
         </div>

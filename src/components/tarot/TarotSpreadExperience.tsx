@@ -148,15 +148,30 @@ export function TarotSpreadExperience({
           const unlocked = new Set<string>(errorUnlocked);
           setUnlockedSpreadSlugs(unlocked);
         } else {
-          // Fallback: unlock spreads based on subscription plan
+          // Fallback: unlock spreads based on subscription plan from frontend
+          console.log(
+            '[TarotSpreadExperience] Using fallback unlock based on subscription plan:',
+            subscriptionPlan.plan,
+          );
           const fallbackUnlocked = Object.keys(TAROT_SPREAD_MAP).filter(
             (slug) => {
               const spread = TAROT_SPREAD_MAP[slug];
               if (!spread) return false;
+              // Monthly and yearly have same access
+              if (
+                subscriptionPlan.plan === 'monthly' ||
+                subscriptionPlan.plan === 'yearly'
+              ) {
+                return true;
+              }
               const planRank = PLAN_RANK[subscriptionPlan.plan];
               const spreadRank = PLAN_RANK[spread.minimumPlan];
               return planRank >= spreadRank;
             },
+          );
+          console.log(
+            '[TarotSpreadExperience] Fallback unlocked spreads:',
+            fallbackUnlocked,
           );
           setUnlockedSpreadSlugs(new Set(fallbackUnlocked));
         }
@@ -173,13 +188,34 @@ export function TarotSpreadExperience({
       setReadings(fetchedReadings);
       setUsage(data.usage || null);
 
-      const unlocked = new Set<string>(data.spreadsUnlocked || []);
+      let unlocked = new Set<string>(data.spreadsUnlocked || []);
+
+      // If API returned wrong data (too few spreads for monthly/yearly), use frontend subscription
+      if (
+        (subscriptionPlan.plan === 'monthly' ||
+          subscriptionPlan.plan === 'yearly') &&
+        unlocked.size < 5
+      ) {
+        console.warn(
+          '[TarotSpreadExperience] API returned only',
+          unlocked.size,
+          'spreads for',
+          subscriptionPlan.plan,
+          'plan. Using frontend subscription to unlock all spreads.',
+        );
+        // Unlock all spreads for monthly/yearly subscribers
+        unlocked = new Set(Object.keys(TAROT_SPREAD_MAP));
+      }
+
       setUnlockedSpreadSlugs(unlocked);
 
       console.log('[TarotSpreadExperience] Loaded spreads:', {
         readingsCount: fetchedReadings.length,
         unlockedCount: unlocked.size,
         subscriptionPlan: subscriptionPlan.plan,
+        subscriptionStatus: subscriptionPlan.status,
+        unlockedSpreads: Array.from(unlocked),
+        apiReturnedCount: data.spreadsUnlocked?.length || 0,
       });
 
       if (fetchedReadings.length > 0) {
@@ -206,7 +242,7 @@ export function TarotSpreadExperience({
     } finally {
       setIsLoading(false);
     }
-  }, [selectedSpreadSlug, subscriptionPlan.plan]);
+  }, [selectedSpreadSlug, subscriptionPlan.plan, subscriptionPlan.status]);
 
   useEffect(() => {
     refreshReadings();
