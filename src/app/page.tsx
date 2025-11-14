@@ -7,6 +7,7 @@ import { PostTrialMessaging } from '@/components/PostTrialMessaging';
 import { useAccount } from 'jazz-tools/react';
 import { conversionTracking } from '@/lib/analytics';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { usePathname } from 'next/navigation';
 
 // Critical widgets loaded immediately
 import { DateWidget } from '@/components/DateWidget';

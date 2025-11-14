@@ -22,6 +22,7 @@ export default function HoroscopePage() {
       const userId = (me as any)?.id;
       if (userId) {
         conversionTracking.horoscopeViewed(userId);
+        conversionTracking.personalizedHoroscopeViewed(userId);
       }
     }
   }, [hasChartAccess, me]);

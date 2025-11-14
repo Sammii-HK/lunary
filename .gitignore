@@ -6,6 +6,10 @@
 .pnp.js
 .yarn/install-state.gz
 
+# lock files (pnpm-lock.yaml should be committed, but ignore others)
+yarn.lock
+package-lock.json
+
 # testing
 /coverage
 .nyc_output/
@@ -46,3 +50,7 @@ data/auth.db
 # Prisma
 prisma/migrations/*/migration.sql.bak
 prisma/migrations/*/migration.sql.tmp
+
+# Substack cookies
+.substack-cookies.json
+.playwright-browser/

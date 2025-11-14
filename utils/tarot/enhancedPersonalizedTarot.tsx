@@ -147,7 +147,7 @@ const getEnhancedPersonalCard = (
 };
 
 // Analyze past tarot readings for trends
-const analyzeTarotTrends = (
+export const analyzeTarotTrends = (
   userName?: string,
   days: number = 30,
   userBirthday?: string,

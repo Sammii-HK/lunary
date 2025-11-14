@@ -14,15 +14,9 @@
 import { config } from 'dotenv';
 import Stripe from 'stripe';
 
-// Load environment variables
-config();
-
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.error('❌ STRIPE_SECRET_KEY is not set');
-  process.exit(1);
+if (require.main === module) {
+  config();
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 interface PackConfig {
@@ -45,14 +39,29 @@ class MoonPackGenerator {
     price: number;
     stripeProductId: string;
   }>;
+  private stripeClient: Stripe | null;
 
   constructor(dryRun = false) {
     this.dryRun = dryRun;
     this.createdPacks = [];
+    this.stripeClient = null;
   }
 
   getCreatedPacks() {
     return this.createdPacks;
+  }
+
+  private getStripe() {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not set');
+    }
+
+    if (!this.stripeClient) {
+      this.stripeClient = new Stripe(secretKey);
+    }
+
+    return this.stripeClient;
   }
 
   async generatePacks(
@@ -342,6 +351,7 @@ class MoonPackGenerator {
   private async packExists(config: PackConfig): Promise<boolean> {
     try {
       // Check Stripe for existing products with matching metadata
+      const stripe = this.getStripe();
       const products = await stripe.products.search({
         query: `metadata['category']:'${config.category}' AND metadata['subcategory']:'${config.subcategory}'`,
         limit: 1,
@@ -362,6 +372,7 @@ class MoonPackGenerator {
       const cutoffDate = new Date();
       cutoffDate.setFullYear(cutoffDate.getFullYear() - 2);
 
+      const stripe = this.getStripe();
       const products = await stripe.products.search({
         query: `metadata['category']:'moon_phases'`,
         limit: 100,
@@ -407,6 +418,13 @@ async function main() {
   const type = typeArg
     ? (typeArg.split('=')[1] as 'monthly' | 'quarterly' | 'yearly' | 'all')
     : 'all';
+
+  config();
+
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error('❌ STRIPE_SECRET_KEY is not set');
+    process.exit(1);
+  }
 
   if (type && !['monthly', 'quarterly', 'yearly', 'all'].includes(type)) {
     console.error('❌ Invalid type. Use: monthly, quarterly, yearly, or all');

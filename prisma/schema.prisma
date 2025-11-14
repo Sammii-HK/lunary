@@ -30,3 +30,29 @@ model SocialPost {
   @@map("social_posts")
 }
 
+model AiThread {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  title     String?
+  messages  Json
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId], name: "idx_ai_threads_user_id")
+  @@map("ai_threads")
+}
+
+model AiUsage {
+  id        String   @id @default(cuid())
+  userId    String   @unique @map("user_id")
+  day       DateTime @default(now()) @db.Timestamptz(6)
+  count     Int      @default(0)
+  tokensIn  Int      @default(0) @map("tokens_in")
+  tokensOut Int      @default(0) @map("tokens_out")
+  plan      String
+  renewedAt DateTime @default(now()) @map("renewed_at") @db.Timestamptz(6)
+
+  @@index([day], name: "idx_ai_usage_day")
+  @@map("ai_usage")
+}
+

@@ -35,7 +35,9 @@
     "test:e2e:smoke": "playwright test --grep '@smoke'",
     "test:e2e:shard": "playwright test --shard=$SHARD_ID/$TOTAL_SHARDS",
     "test:single": "bash scripts/test-single.sh",
-    "test:all": "yarn test && yarn test:e2e"
+    "test:all": "pnpm test && pnpm test:e2e",
+    "test:cors": "tsx scripts/test-cors.ts",
+    "test:middleware": "tsx scripts/test-middleware.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -124,5 +126,5 @@
     "tsx": "^4.19.2",
     "typescript": "^5"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "pnpm@9.15.0"
 }

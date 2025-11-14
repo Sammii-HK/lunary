@@ -23,7 +23,11 @@ export function AuthComponent({
   compact = false,
   defaultToSignUp = false,
 }: AuthComponentProps = {}) {
-  const [isSignUp, setIsSignUp] = useState(defaultToSignUp);
+  const [mode, setMode] = useState<'signIn' | 'signUp' | 'forgot'>(
+    defaultToSignUp ? 'signUp' : 'signIn',
+  );
+  const isSignUp = mode === 'signUp';
+  const isForgot = mode === 'forgot';
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -57,6 +61,46 @@ export function AuthComponent({
           );
         });
       };
+
+      if (isForgot) {
+        if (!formData.email) {
+          throw new Error('Enter the email you use with Lunary.');
+        }
+
+        const redirectTo =
+          typeof window !== 'undefined'
+            ? `${window.location.origin}/auth/reset`
+            : undefined;
+
+        const response = await fetch('/api/auth/password/forgot', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            ...(redirectTo ? { redirectTo } : {}),
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result?.status) {
+          throw new Error(
+            result?.message ||
+              result?.error ||
+              'Unable to send the reset email. Please try again.',
+          );
+        }
+
+        setSuccess(
+          result?.message ||
+            'If that email exists in our system, we just sent a reset link. Check your inbox.',
+        );
+        setMode('signIn');
+        setFormData({ email: '', password: '', name: '' });
+        return;
+      }
 
       if (isSignUp) {
         const signUpPromise = betterAuthClient.signUp.email(
@@ -119,14 +163,50 @@ export function AuthComponent({
         console.log('✅ Sign in result:', result);
 
         if (result.error) {
+          console.error('❌ Sign in error:', result.error);
           throw new Error(result.error.message || 'Sign in failed');
+        }
+
+        if (!result.data) {
+          console.error('❌ Sign in failed - no data returned');
+          throw new Error('Sign in failed - no data returned');
+        }
+
+        console.log('✅ Sign in successful, user:', result.data.user?.email);
+
+        // If on admin subdomain, redirect immediately after successful sign-in
+        if (
+          typeof window !== 'undefined' &&
+          window.location.hostname.startsWith('admin.')
+        ) {
+          console.log('🔄 Redirecting to admin dashboard after sign-in');
+          setSuccess('Signed in successfully! Redirecting...');
+          // Use setTimeout to ensure redirect happens after state update
+          setTimeout(() => {
+            console.log('🔄 Executing redirect to /');
+            window.location.href = '/';
+          }, 500);
+          return;
+        }
+
+        // If on /auth page (not in modal), redirect to home
+        if (
+          typeof window !== 'undefined' &&
+          window.location.pathname === '/auth'
+        ) {
+          console.log('🔄 Redirecting to home after sign-in');
+          setSuccess('Signed in successfully! Redirecting...');
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 500);
+          return;
         }
 
         setSuccess('Signed in successfully!');
         setFormData({ email: '', password: '', name: '' });
 
-        // Brief delay for UI feedback, then proceed
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        // Wait for session to be established
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Call onSuccess callback to close modal and trigger re-render
         if (onSuccess) {
@@ -139,7 +219,9 @@ export function AuthComponent({
       console.error('Authentication error:', err);
 
       // Better error messages
-      let errorMessage = 'Authentication failed. Please try again.';
+      let errorMessage = isForgot
+        ? 'We couldn’t send the reset email. Please try again.'
+        : 'Authentication failed. Please try again.';
 
       if (err.message?.includes('timed out')) {
         errorMessage =
@@ -185,8 +267,15 @@ export function AuthComponent({
     }));
   };
 
-  // If user is authenticated, show sign out option
+  // If user is authenticated and on /auth page, redirect (handled by page component)
+  // If in a modal/compact mode, show sign out option
   if (authState.isAuthenticated) {
+    // If on /auth page (not in modal), let the page component handle redirect
+    if (typeof window !== 'undefined' && window.location.pathname === '/auth') {
+      return null; // Page component will handle redirect
+    }
+
+    // Otherwise show sign out option (for modals)
     return (
       <div className='w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6'>
         <div className='text-center mb-6'>
@@ -218,12 +307,18 @@ export function AuthComponent({
       {!compact && (
         <div className='text-center mb-6'>
           <h2 className='text-2xl font-bold text-white mb-2'>
-            {isSignUp ? 'Create Account' : 'Sign In'}
+            {isSignUp
+              ? 'Create Account'
+              : isForgot
+                ? 'Reset Your Password'
+                : 'Sign In'}
           </h2>
           <p className='text-zinc-400'>
             {isSignUp
               ? 'Join Lunary to sync your cosmic journey'
-              : 'Welcome back to your cosmic journey'}
+              : isForgot
+                ? 'Send yourself a secure password reset link'
+                : 'Welcome back to your cosmic journey'}
           </p>
         </div>
       )}
@@ -231,7 +326,11 @@ export function AuthComponent({
       {compact && (
         <div className='text-center mb-4'>
           <p className='text-sm text-zinc-300'>
-            {isSignUp ? 'Create account to save' : 'Sign in to save'}
+            {isSignUp
+              ? 'Create account to save'
+              : isForgot
+                ? 'Reset your Lunary password'
+                : 'Sign in to save'}
           </p>
         </div>
       )}
@@ -252,7 +351,7 @@ export function AuthComponent({
               required={isSignUp}
               value={formData.name}
               onChange={handleInputChange}
-              className={`w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2 text-sm' : 'px-4 py-3'}`}
+              className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
               placeholder='Enter your name'
             />
           </div>
@@ -272,30 +371,48 @@ export function AuthComponent({
             required
             value={formData.email}
             onChange={handleInputChange}
-            className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
             placeholder='Enter your email'
           />
         </div>
 
-        <div>
-          <label
-            htmlFor='password'
-            className='block text-sm font-medium text-zinc-300 mb-2'
-          >
-            Password
-          </label>
-          <input
-            id='password'
-            name='password'
-            type='password'
-            required
-            value={formData.password}
-            onChange={handleInputChange}
-            className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-            placeholder='Enter your password'
-            minLength={6}
-          />
-        </div>
+        {!isForgot && (
+          <div>
+            <label
+              htmlFor='password'
+              className='block text-sm font-medium text-zinc-300 mb-2'
+            >
+              Password
+            </label>
+            <input
+              id='password'
+              name='password'
+              type='password'
+              required
+              value={formData.password}
+              onChange={handleInputChange}
+              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text base'
+              placeholder='Enter your password'
+              minLength={6}
+            />
+          </div>
+        )}
+
+        {!isForgot && !isSignUp && (
+          <div className='flex justify-end'>
+            <button
+              type='button'
+              onClick={() => {
+                setMode('forgot');
+                setError(null);
+                setSuccess(null);
+              }}
+              className='text-base text-purple-300 hover:text-purple-200 transition-colors'
+            >
+              Forgot password?
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className='bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm'>
@@ -317,10 +434,16 @@ export function AuthComponent({
           {loading ? (
             <>
               <span className='animate-spin mr-2'>⏳</span>
-              {isSignUp ? 'Creating Account...' : 'Signing In...'}
+              {isSignUp
+                ? 'Creating Account...'
+                : isForgot
+                  ? 'Sending Reset Link...'
+                  : 'Signing In...'}
             </>
           ) : isSignUp ? (
             'Create Account'
+          ) : isForgot ? (
+            'Send Reset Link'
           ) : (
             'Sign In'
           )}
@@ -328,19 +451,33 @@ export function AuthComponent({
       </form>
 
       <div className='mt-6 text-center'>
-        <button
-          onClick={() => {
-            setIsSignUp(!isSignUp);
-            setError(null);
-            setSuccess(null);
-            setFormData({ email: '', password: '', name: '' });
-          }}
-          className='text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors'
-        >
-          {isSignUp
-            ? 'Already have an account? Sign in'
-            : "Don't have an account? Sign up"}
-        </button>
+        {isForgot ? (
+          <button
+            onClick={() => {
+              setMode('signIn');
+              setError(null);
+              setSuccess(null);
+              setFormData({ email: '', password: '', name: '' });
+            }}
+            className='text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors'
+          >
+            Remembered your password? Sign in
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              setMode(isSignUp ? 'signIn' : 'signUp');
+              setError(null);
+              setSuccess(null);
+              setFormData({ email: '', password: '', name: '' });
+            }}
+            className='text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors'
+          >
+            {isSignUp
+              ? 'Already have an account? Sign in'
+              : "Don't have an account? Sign up"}
+          </button>
+        )}
       </div>
 
       <div className='mt-4 text-center'>

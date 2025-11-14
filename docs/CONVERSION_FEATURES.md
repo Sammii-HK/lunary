@@ -71,4 +71,27 @@ All conversion events are tracked:
 - `referral_used` - When referral code is used
 - `ab_test_conversion` - A/B test conversions
 
-View in `/admin/analytics`
+### Advanced Metrics Tracking
+
+**Engagement Metrics:**
+
+- **WAU (Weekly Active Users)** - Users active in past 7 days
+- **DAU (Daily Active Users)** - Users active today
+- **Stickiness (DAU/WAU)** - Daily engagement rate (Target: 20%+)
+
+**AI Usage Tracking:**
+
+- `personalized_tarot_viewed` - Personalized tarot reading accessed
+- `personalized_horoscope_viewed` - Personalized horoscope viewed
+- `birth_chart_viewed` - Birth chart analysis viewed
+- `crystal_recommendations_viewed` - AI-powered crystal recommendations
+- **AI Usage %** - % of active users who used AI features
+
+**Attribution Tracking:**
+
+- UTM parameters (source, medium, campaign)
+- TikTok → signup conversion rate
+- Referrer tracking
+- Source attribution for all conversions
+
+View all metrics in `/admin/analytics`

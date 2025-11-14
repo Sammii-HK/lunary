@@ -1,8 +1,29 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
 import { sql } from '@vercel/postgres';
+
+// Load environment variables (try .env.local first, then .env)
+config({ path: resolve(process.cwd(), '.env.local') });
+config({ path: resolve(process.cwd(), '.env') });
+
+// Check if POSTGRES_URL is set
+if (
+  !process.env.POSTGRES_URL &&
+  !process.env.POSTGRES_PRISMA_URL &&
+  !process.env.POSTGRES_URL_NON_POOLING
+) {
+  console.error('❌ POSTGRES_URL environment variable not found');
+  console.error('   Make sure you have .env.local with POSTGRES_URL set');
+  console.error('   Or pull from Vercel: vercel env pull .env.local');
+  process.exit(1);
+}
 
 async function setupDatabase() {
   try {
     console.log('🔧 Setting up database tables...');
+
+    // Ensure cryptographic extension for UUID generation
+    await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
 
     // Create the push_subscriptions table
     await sql`
@@ -233,9 +254,117 @@ async function setupDatabase() {
 
     console.log('✅ Subscriptions table created');
 
+    // Create the tarot_readings table for saved tarot spread experiences
+    await sql`
+        CREATE TABLE IF NOT EXISTS tarot_readings (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id TEXT NOT NULL,
+          spread_slug TEXT NOT NULL,
+          spread_name TEXT NOT NULL,
+          plan_snapshot TEXT NOT NULL DEFAULT 'free',
+          cards JSONB NOT NULL,
+          summary TEXT,
+          highlights JSONB,
+          journaling_prompts JSONB,
+          notes TEXT,
+          tags TEXT[],
+          metadata JSONB,
+          archived_at TIMESTAMP WITH TIME ZONE,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_user ON tarot_readings(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_created ON tarot_readings(created_at DESC)`;
+    await sql`
+        CREATE INDEX IF NOT EXISTS idx_tarot_readings_active
+        ON tarot_readings(user_id, created_at)
+        WHERE archived_at IS NULL
+      `;
+
+    await sql`
+        CREATE OR REPLACE FUNCTION update_tarot_readings_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $$ language 'plpgsql'
+      `;
+
+    await sql`
+        DROP TRIGGER IF EXISTS update_tarot_readings_timestamp ON tarot_readings
+      `;
+
+    await sql`
+        CREATE TRIGGER update_tarot_readings_timestamp
+        BEFORE UPDATE ON tarot_readings
+        FOR EACH ROW
+        EXECUTE FUNCTION update_tarot_readings_updated_at()
+      `;
+
+    console.log('✅ Tarot readings table created');
+
+    // Create the ai_threads table for AI conversation threads
+    await sql`
+        CREATE TABLE IF NOT EXISTS ai_threads (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          title TEXT,
+          messages JSONB NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_threads_user_id ON ai_threads(user_id)`;
+
+    await sql`
+        CREATE OR REPLACE FUNCTION update_ai_threads_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $$ language 'plpgsql'
+      `;
+
+    await sql`
+        DROP TRIGGER IF EXISTS update_ai_threads_timestamp ON ai_threads
+      `;
+
+    await sql`
+        CREATE TRIGGER update_ai_threads_timestamp
+        BEFORE UPDATE ON ai_threads
+        FOR EACH ROW
+        EXECUTE FUNCTION update_ai_threads_updated_at()
+      `;
+
+    console.log('✅ AI threads table created');
+
+    // Create the ai_usage table for tracking AI usage limits
+    await sql`
+        CREATE TABLE IF NOT EXISTS ai_usage (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL UNIQUE,
+          day TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          count INTEGER DEFAULT 0,
+          tokens_in INTEGER DEFAULT 0,
+          tokens_out INTEGER DEFAULT 0,
+          plan TEXT NOT NULL,
+          renewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS ai_usage_user_id_key ON ai_usage(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_usage_day ON ai_usage(day)`;
+
+    console.log('✅ AI usage table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, and subscriptions',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, and AI threads',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);

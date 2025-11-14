@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('🔧 Setting up push notifications database in production...');
+    console.log('🔧 Setting up database tables in production...');
+
+    // Ensure cryptographic extension for UUID generation
+    await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
 
     // Create the push_subscriptions table
     await sql`
@@ -199,12 +202,122 @@ export async function POST(request: NextRequest) {
           EXECUTE FUNCTION update_subscriptions_updated_at()
     `;
 
+    console.log('✅ Subscriptions table created');
+
+    // Create the tarot_readings table for saved tarot spread experiences
+    await sql`
+        CREATE TABLE IF NOT EXISTS tarot_readings (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id TEXT NOT NULL,
+          spread_slug TEXT NOT NULL,
+          spread_name TEXT NOT NULL,
+          plan_snapshot TEXT NOT NULL DEFAULT 'free',
+          cards JSONB NOT NULL,
+          summary TEXT,
+          highlights JSONB,
+          journaling_prompts JSONB,
+          notes TEXT,
+          tags TEXT[],
+          metadata JSONB,
+          archived_at TIMESTAMP WITH TIME ZONE,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_user ON tarot_readings(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_created ON tarot_readings(created_at DESC)`;
+    await sql`
+        CREATE INDEX IF NOT EXISTS idx_tarot_readings_active
+        ON tarot_readings(user_id, created_at)
+        WHERE archived_at IS NULL
+      `;
+
+    await sql`
+        CREATE OR REPLACE FUNCTION update_tarot_readings_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $$ language 'plpgsql'
+      `;
+
+    await sql`
+        DROP TRIGGER IF EXISTS update_tarot_readings_timestamp ON tarot_readings
+      `;
+
+    await sql`
+        CREATE TRIGGER update_tarot_readings_timestamp
+        BEFORE UPDATE ON tarot_readings
+        FOR EACH ROW
+        EXECUTE FUNCTION update_tarot_readings_updated_at()
+      `;
+
+    console.log('✅ Tarot readings table created');
+
+    // Create the ai_threads table for AI conversation threads
+    await sql`
+        CREATE TABLE IF NOT EXISTS ai_threads (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          title TEXT,
+          messages JSONB NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_threads_user_id ON ai_threads(user_id)`;
+
+    await sql`
+        CREATE OR REPLACE FUNCTION update_ai_threads_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $$ language 'plpgsql'
+      `;
+
+    await sql`
+        DROP TRIGGER IF EXISTS update_ai_threads_timestamp ON ai_threads
+      `;
+
+    await sql`
+        CREATE TRIGGER update_ai_threads_timestamp
+        BEFORE UPDATE ON ai_threads
+        FOR EACH ROW
+        EXECUTE FUNCTION update_ai_threads_updated_at()
+      `;
+
+    console.log('✅ AI threads table created');
+
+    // Create the ai_usage table for tracking AI usage limits
+    await sql`
+        CREATE TABLE IF NOT EXISTS ai_usage (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL UNIQUE,
+          day TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          count INTEGER DEFAULT 0,
+          tokens_in INTEGER DEFAULT 0,
+          tokens_out INTEGER DEFAULT 0,
+          plan TEXT NOT NULL,
+          renewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS ai_usage_user_id_key ON ai_usage(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_usage_day ON ai_usage(day)`;
+
+    console.log('✅ AI usage table created');
+
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions)',
+        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
