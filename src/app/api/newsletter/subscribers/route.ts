@@ -141,12 +141,22 @@ export async function POST(request: NextRequest) {
           subscriber.email,
         );
 
-        await sendEmail({
-          to: subscriber.email,
-          subject: '🌙 Confirm Your Email - Lunary Newsletter',
-          html,
-          text,
-        });
+          await sendEmail({
+            to: subscriber.email,
+            subject: '🌙 Confirm Your Email - Lunary Newsletter',
+            html,
+            text,
+            tracking: {
+              userId: subscriber.email,
+              notificationType: 'newsletter_verification',
+              notificationId: `newsletter-verify-${subscriber.email}`,
+              utm: {
+                source: 'email',
+                medium: 'newsletter',
+                campaign: 'newsletter_verification',
+              },
+            },
+          });
 
         console.log(
           `✅ Newsletter verification email sent to ${subscriber.email}`,

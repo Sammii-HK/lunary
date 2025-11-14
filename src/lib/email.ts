@@ -4,6 +4,8 @@ import {
   SendSmtpEmail,
 } from '@getbrevo/brevo';
 
+import { trackNotificationEvent } from '@/lib/analytics/tracking';
+
 let brevoApiInstance: TransactionalEmailsApi | null = null;
 
 function getBrevoClient() {
@@ -20,11 +22,25 @@ function getBrevoClient() {
   return brevoApiInstance;
 }
 
+export interface EmailTrackingOptions {
+  userId?: string;
+  notificationType?: string;
+  notificationId?: string;
+  utm?: {
+    source?: string;
+    medium?: string;
+    campaign?: string;
+    content?: string;
+    term?: string;
+  };
+}
+
 export interface EmailOptions {
   to: string | string[];
   subject: string;
   html?: string;
   text?: string;
+  tracking?: EmailTrackingOptions;
 }
 
 export interface BatchEmailResult {
@@ -46,38 +62,66 @@ const parseFromEmail = (from: string) => {
   return { name: 'Lunary', email: from.replace(/[<>]/g, '') };
 };
 
+const APP_BASE_URL =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.APP_URL ||
+  'https://lunary.app';
+
 export async function sendEmail({
   to,
   subject,
   html,
   text,
+  tracking,
 }: EmailOptions): Promise<{ id: string } | BatchEmailResult> {
   try {
     const brevoClient = getBrevoClient();
     const recipients = Array.isArray(to) ? to : [to];
     const fromInfo = parseFromEmail(getFromEmail());
+    let finalHtml = html || text || 'No content provided';
+
+    if (tracking) {
+      finalHtml = appendTrackingPixel(
+        applyUtmParameters(finalHtml, tracking.utm),
+        tracking,
+      );
+    }
 
     if (recipients.length === 1) {
       const sendSmtpEmail = new SendSmtpEmail();
       sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
-      sendSmtpEmail.to = [{ email: recipients[0] }];
+        sendSmtpEmail.to = [{ email: recipients[0] }];
       sendSmtpEmail.subject = subject;
-      sendSmtpEmail.htmlContent = html || text || 'No content provided';
+        sendSmtpEmail.htmlContent = finalHtml;
       if (text) {
         sendSmtpEmail.textContent = text;
       }
 
       const data = await brevoClient.sendTransacEmail(sendSmtpEmail);
 
-      const messageId = data.body?.messageId || '';
+        const messageId = data.body?.messageId || '';
       console.log('✅ Email sent successfully:', messageId);
+
+        if (tracking?.userId) {
+          await trackNotificationEvent({
+            userId: tracking.userId,
+            notificationType: tracking.notificationType || 'email',
+            eventType: 'sent',
+            notificationId: tracking.notificationId || messageId,
+            metadata: {
+              email: recipients[0],
+              subject,
+            },
+          });
+        }
+
       return { id: messageId };
     }
 
     return await sendBatchEmails(brevoClient, {
       to: recipients,
       subject,
-      html: html || text || 'No content provided',
+        html: finalHtml,
       text,
     });
   } catch (error) {
@@ -122,9 +166,9 @@ async function sendBatchEmails(
       try {
         const sendSmtpEmail = new SendSmtpEmail();
         sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
-        sendSmtpEmail.to = [{ email }];
+          sendSmtpEmail.to = [{ email }];
         sendSmtpEmail.subject = subject;
-        sendSmtpEmail.htmlContent = html;
+          sendSmtpEmail.htmlContent = html;
         if (text) {
           sendSmtpEmail.textContent = text;
         }
@@ -467,4 +511,70 @@ Need help? Reply to this email or visit our support page.
 
 © ${new Date().getFullYear()} Lunary. Guided by the stars, powered by magic.
   `.trim();
+}
+
+function buildTrackingPixelUrl(tracking?: EmailTrackingOptions) {
+  if (!tracking?.userId) {
+    return null;
+  }
+
+  const url = new URL('/api/analytics/track-notification', APP_BASE_URL);
+  url.searchParams.set('user', tracking.userId);
+  url.searchParams.set('event', 'opened');
+
+  if (tracking.notificationType) {
+    url.searchParams.set('type', tracking.notificationType);
+  }
+
+  if (tracking.notificationId) {
+    url.searchParams.set('id', tracking.notificationId);
+  }
+
+  return url.toString();
+}
+
+function appendTrackingPixel(
+  html: string,
+  tracking?: EmailTrackingOptions,
+): string {
+  const pixelUrl = buildTrackingPixelUrl(tracking);
+  if (!pixelUrl) {
+    return html;
+  }
+
+  const pixelTag = `<img src="${pixelUrl}" alt="" width="1" height="1" style="display:none;opacity:0;" />`;
+
+  if (html.includes('</body>')) {
+    return html.replace('</body>', `${pixelTag}</body>`);
+  }
+
+  return `${html}\n${pixelTag}`;
+}
+
+function applyUtmParameters(
+  html: string,
+  utm?: EmailTrackingOptions['utm'],
+): string {
+  if (!utm) {
+    return html;
+  }
+
+  return html.replace(/href="([^"]+)"/g, (match, url) => {
+    if (url.startsWith('mailto:') || url.startsWith('#')) {
+      return match;
+    }
+
+    try {
+      const parsed = new URL(url, APP_BASE_URL);
+      if (utm.source) parsed.searchParams.set('utm_source', utm.source);
+      if (utm.medium) parsed.searchParams.set('utm_medium', utm.medium);
+      if (utm.campaign) parsed.searchParams.set('utm_campaign', utm.campaign);
+      if (utm.content) parsed.searchParams.set('utm_content', utm.content);
+      if (utm.term) parsed.searchParams.set('utm_term', utm.term);
+
+      return `href="${parsed.toString()}"`;
+    } catch {
+      return match;
+    }
+  });
 }

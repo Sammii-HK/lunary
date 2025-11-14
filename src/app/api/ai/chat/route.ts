@@ -20,10 +20,12 @@ import { createAssistantStream } from '@/lib/ai/streaming';
 import { detectAssistCommand, runAssistCommand } from '@/lib/ai/assist';
 import { buildReflectionPrompt } from '@/lib/ai/reflection';
 import { buildPromptSections } from '@/lib/ai/prompt';
+import { recordAiInteraction } from '@/lib/analytics/tracking';
 
 type ChatRequest = {
   message: string;
   threadId?: string;
+  mode?: string;
 };
 
 const jsonResponse = (payload: unknown, status = 200, init?: ResponseInit) =>
@@ -38,13 +40,19 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as ChatRequest;
 
-    if (!body?.message || typeof body.message !== 'string') {
-      return jsonResponse({ error: 'Message is required.' }, 400);
-    }
+      if (!body?.message || typeof body.message !== 'string') {
+        return jsonResponse({ error: 'Message is required.' }, 400);
+      }
 
-    const user = await requireUser(request);
-    const planId = resolvePlanId(user);
-    const assistCommand = detectAssistCommand(body.message);
+      const user = await requireUser(request);
+      const planId = resolvePlanId(user);
+      const assistCommand = detectAssistCommand(body.message);
+      const aiMode =
+        typeof body.mode === 'string' && body.mode.trim().length > 0
+          ? body.mode.trim()
+          : assistCommand.type !== 'none'
+            ? assistCommand.type
+            : 'general';
     const memorySnippetLimit = MEMORY_SNIPPET_LIMITS[planId] ?? 0;
     const memorySnippets = getMemorySnippets(user.id, memorySnippetLimit);
 
@@ -196,7 +204,18 @@ export async function POST(request: NextRequest) {
         memories: updatedMemorySnippets,
       };
 
-      const wantsStream =
+        await recordAiInteraction({
+          userId: user.id,
+          mode: aiMode,
+          tokensIn,
+          tokensOut,
+          metadata: {
+            thread_id: thread.id,
+            assist: assistCommand.type !== 'none' ? assistCommand.type : undefined,
+          },
+        });
+
+        const wantsStream =
         request.headers.get('accept')?.includes('text/event-stream') ||
         request.nextUrl.searchParams.get('stream') === '1';
 
@@ -339,7 +358,18 @@ export async function POST(request: NextRequest) {
       memories: updatedMemorySnippets,
     };
 
-    const wantsStream =
+      await recordAiInteraction({
+        userId: user.id,
+        mode: aiMode,
+        tokensIn,
+        tokensOut,
+        metadata: {
+          thread_id: thread.id,
+          assist: composed.assistSnippet ? 'assist' : undefined,
+        },
+      });
+
+      const wantsStream =
       request.headers.get('accept')?.includes('text/event-stream') ||
       request.nextUrl.searchParams.get('stream') === '1';
 

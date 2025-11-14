@@ -1100,12 +1100,23 @@ Last 30 Days:
             daysRemaining,
           );
 
-          await sendEmail({
-            to: user.email,
-            subject: `⏰ ${daysRemaining} Days Left in Your Trial - Lunary`,
-            html,
-            text,
-          });
+            await sendEmail({
+              to: user.email,
+              subject: `⏰ ${daysRemaining} Days Left in Your Trial - Lunary`,
+              html,
+              text,
+              tracking: {
+                userId: user.user_id,
+                notificationType: 'trial_reminder',
+                notificationId: `trial-3d-${user.user_id}`,
+                utm: {
+                  source: 'email',
+                  medium: 'lifecycle',
+                  campaign: 'trial_reminder',
+                  content: '3_day',
+                },
+              },
+            });
 
           // Mark as sent (using Jazz profile for now, will migrate to PostgreSQL)
           await sql`
@@ -1141,12 +1152,23 @@ Last 30 Days:
             daysRemaining,
           );
 
-          await sendEmail({
-            to: user.email,
-            subject: `⏰ Last Day! Your Trial Ends Tomorrow - Lunary`,
-            html,
-            text,
-          });
+            await sendEmail({
+              to: user.email,
+              subject: `⏰ Last Day! Your Trial Ends Tomorrow - Lunary`,
+              html,
+              text,
+              tracking: {
+                userId: user.user_id,
+                notificationType: 'trial_reminder',
+                notificationId: `trial-1d-${user.user_id}`,
+                utm: {
+                  source: 'email',
+                  medium: 'lifecycle',
+                  campaign: 'trial_reminder',
+                  content: '1_day',
+                },
+              },
+            });
 
           // Mark as sent
           await sql`
@@ -1206,12 +1228,22 @@ Last 30 Days:
             missedInsights,
           );
 
-          await sendEmail({
-            to: user.email,
-            subject: `🌙 Your Trial Has Ended - ${missedInsights} Insights Waiting`,
-            html,
-            text,
-          });
+            await sendEmail({
+              to: user.email,
+              subject: `🌙 Your Trial Has Ended - ${missedInsights} Insights Waiting`,
+              html,
+              text,
+              tracking: {
+                userId: user.user_id,
+                notificationType: 'trial_expired',
+                notificationId: `trial-expired-${user.user_id}`,
+                utm: {
+                  source: 'email',
+                  medium: 'lifecycle',
+                  campaign: 'trial_expired',
+                },
+              },
+            });
 
           // Mark as sent and update status
           await sql`

@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import { sql } from '@vercel/postgres';
 
+import { trackConversionEvent } from '@/lib/analytics/tracking';
+
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY is not set');
@@ -52,10 +54,11 @@ export async function POST(request: NextRequest) {
         );
         break;
 
-      case 'customer.subscription.updated':
-        await handleSubscriptionUpdated(
-          event.data.object as Stripe.Subscription,
-        );
+        case 'customer.subscription.updated':
+          await handleSubscriptionUpdated(
+            event.data.object as Stripe.Subscription,
+            event.data.previous_attributes as Stripe.Subscription | undefined,
+          );
         break;
 
       case 'customer.subscription.deleted':
@@ -212,7 +215,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     }
   }
 
-  const result = await updateUserSubscriptionStatus(customerId, {
+    const result = await updateUserSubscriptionStatus(customerId, {
     id: subscription.id,
     status: status,
     plan: planType,
@@ -224,9 +227,35 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     `Customer ${customerId} subscribed to ${planType} plan - sync result:`,
     result,
   );
+
+  if (userId) {
+    const conversionType =
+      status === 'trialing'
+        ? 'free_to_paid'
+        : status === 'active'
+          ? subscription.trial_end
+            ? 'trial_to_paid'
+            : 'free_to_paid'
+          : 'upgrade';
+
+    await trackConversionEvent({
+      userId,
+      conversionType,
+      fromPlan: 'free',
+      toPlan: planType,
+      triggerFeature: subscription.metadata?.triggerFeature || null,
+      daysToConvert: null,
+      metadata: {
+        stripeSubscriptionId: subscription.id,
+      },
+    });
+  }
 }
 
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+async function handleSubscriptionUpdated(
+  subscription: Stripe.Subscription,
+  previousAttributes?: Stripe.Subscription,
+) {
   console.log('Subscription updated:', subscription.id);
 
   const { updateUserSubscriptionStatus } = await import(
@@ -308,7 +337,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     }
   }
 
-  const result = await updateUserSubscriptionStatus(customerId, {
+    const result = await updateUserSubscriptionStatus(customerId, {
     id: subscription.id,
     status: status,
     plan: planType,
@@ -320,6 +349,35 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     `Customer ${customerId} subscription updated to status: ${status} - sync result:`,
     result,
   );
+
+  if (
+    userId &&
+    status === 'active' &&
+    previousAttributes?.status === 'trialing'
+  ) {
+    const daysToConvert =
+      subscription.trial_start && subscription.trial_start > 0
+        ? Math.max(
+            0,
+            Math.round(
+              (Date.now() - subscription.trial_start * 1000) /
+                (1000 * 60 * 60 * 24),
+            ),
+          )
+        : null;
+
+    await trackConversionEvent({
+      userId,
+      conversionType: 'trial_to_paid',
+      fromPlan: 'trial',
+      toPlan: planType,
+      triggerFeature: subscription.metadata?.triggerFeature || null,
+      daysToConvert,
+      metadata: {
+        stripeSubscriptionId: subscription.id,
+      },
+    });
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
