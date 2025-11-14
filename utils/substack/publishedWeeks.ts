@@ -25,11 +25,11 @@ export async function getPublishedTiers(
 ): Promise<Array<'free' | 'paid'>> {
   await ensureTable();
   const weekStartIso = normalizeWeekStart(weekStart);
-  const result = await sql`
+  const result = await sql<{ tier: 'free' | 'paid' }>`
     SELECT tier FROM substack_published_weeks
     WHERE week_start = ${weekStartIso}
   `;
-  return result.rows.map((row: { tier: 'free' | 'paid' }) => row.tier);
+  return result.rows.map((row) => row.tier);
 }
 
 export async function recordPublishedWeek(
