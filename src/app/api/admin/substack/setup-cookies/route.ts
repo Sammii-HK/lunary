@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chromium } from 'playwright';
 import { sql } from '@vercel/postgres';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const COOKIES_KEY = 'substack_auth_cookies';
 

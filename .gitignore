@@ -53,3 +53,4 @@ prisma/migrations/*/migration.sql.tmp
 
 # Substack cookies
 .substack-cookies.json
+.playwright-browser/
