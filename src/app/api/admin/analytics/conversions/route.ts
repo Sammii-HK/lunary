@@ -13,21 +13,28 @@ export async function GET(request: NextRequest) {
     const range = resolveDateRange(searchParams, 30);
     const conversionType = searchParams.get('conversion_type');
 
-    const filterClause =
-      conversionType && conversionType !== 'all'
-        ? sql`AND conversion_type = ${conversionType}`
-        : sql``;
+    const filterByType = conversionType && conversionType !== 'all';
 
-    const conversionsSummary = await sql`
-      SELECT
-        COUNT(*) AS total_conversions,
-        AVG(days_to_convert) AS avg_days_to_convert
-      FROM analytics_conversions
-      WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-        range.end,
-      )}
-      ${filterClause}
-    `;
+    const conversionsSummary = filterByType
+      ? await sql`
+        SELECT
+          COUNT(*) AS total_conversions,
+          AVG(days_to_convert) AS avg_days_to_convert
+        FROM analytics_conversions
+        WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
+          range.end,
+        )}
+          AND conversion_type = ${conversionType}
+      `
+      : await sql`
+        SELECT
+          COUNT(*) AS total_conversions,
+          AVG(days_to_convert) AS avg_days_to_convert
+        FROM analytics_conversions
+        WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
+          range.end,
+        )}
+      `;
 
     const totalConversions = Number(
       conversionsSummary.rows[0]?.total_conversions || 0,
@@ -48,18 +55,30 @@ export async function GET(request: NextRequest) {
         AND conversion_type = 'trial_to_paid'
     `;
 
-    const triggerBreakdownResult = await sql`
-      SELECT
-        COALESCE(trigger_feature, 'unknown') AS feature,
-        COUNT(*) AS count
-      FROM analytics_conversions
-      WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-        range.end,
-      )}
-      ${filterClause}
-      GROUP BY COALESCE(trigger_feature, 'unknown')
-      ORDER BY count DESC
-    `;
+    const triggerBreakdownResult = filterByType
+      ? await sql`
+        SELECT
+          COALESCE(trigger_feature, 'unknown') AS feature,
+          COUNT(*) AS count
+        FROM analytics_conversions
+        WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
+          range.end,
+        )}
+          AND conversion_type = ${conversionType}
+        GROUP BY COALESCE(trigger_feature, 'unknown')
+        ORDER BY count DESC
+      `
+      : await sql`
+        SELECT
+          COALESCE(trigger_feature, 'unknown') AS feature,
+          COUNT(*) AS count
+        FROM analytics_conversions
+        WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
+          range.end,
+        )}
+        GROUP BY COALESCE(trigger_feature, 'unknown')
+        ORDER BY count DESC
+      `;
 
     const triggerBreakdown = triggerBreakdownResult.rows.map((row) => {
       const count = Number(row.count || 0);
@@ -78,8 +97,8 @@ export async function GET(request: NextRequest) {
       FROM analytics_user_activity
       WHERE activity_type = 'session'
         AND activity_date BETWEEN ${formatDate(range.start)} AND ${formatDate(
-        range.end,
-      )}
+          range.end,
+        )}
     `;
 
     const trialUsersResult = await sql`
@@ -87,8 +106,8 @@ export async function GET(request: NextRequest) {
       FROM subscriptions
       WHERE status = 'trial'
         AND updated_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-        range.end,
-      )}
+          range.end,
+        )}
     `;
 
     const paidUsersResult = await sql`
@@ -96,8 +115,8 @@ export async function GET(request: NextRequest) {
       FROM subscriptions
       WHERE status = 'active'
         AND updated_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-        range.end,
-      )}
+          range.end,
+        )}
     `;
 
     const freeUsers = Number(freeUsersResult.rows[0]?.count || 0);
@@ -107,7 +126,9 @@ export async function GET(request: NextRequest) {
     const trialConversions = Number(trialConversionsResult.rows[0]?.count || 0);
 
     const conversionRate =
-      freeUsers > 0 ? Number(((totalConversions / freeUsers) * 100).toFixed(2)) : 0;
+      freeUsers > 0
+        ? Number(((totalConversions / freeUsers) * 100).toFixed(2))
+        : 0;
 
     const trialConversionRate =
       trialUsers > 0
@@ -119,9 +140,7 @@ export async function GET(request: NextRequest) {
         stage: 'free_to_trial',
         drop_off_rate:
           freeUsers > 0
-            ? Number(
-                (((freeUsers - trialUsers) / freeUsers) * 100).toFixed(2),
-              )
+            ? Number((((freeUsers - trialUsers) / freeUsers) * 100).toFixed(2))
             : 0,
       },
       {

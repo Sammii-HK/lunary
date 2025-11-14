@@ -63,7 +63,11 @@ export async function GET(request: NextRequest) {
         SELECT generate_series(
           ${startDate}::date,
           ${endDate}::date,
-          ${sql.raw(GRANULARITY_STEPS[granularity] || GRANULARITY_STEPS.day)}
+          CASE
+            WHEN ${granularity} = 'week' THEN INTERVAL '7 day'
+            WHEN ${granularity} = 'month' THEN INTERVAL '1 month'
+            ELSE INTERVAL '1 day'
+          END
         ) AS bucket_date
       )
       SELECT

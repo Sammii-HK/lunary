@@ -90,30 +90,30 @@ export async function sendEmail({
     if (recipients.length === 1) {
       const sendSmtpEmail = new SendSmtpEmail();
       sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
-        sendSmtpEmail.to = [{ email: recipients[0] }];
+      sendSmtpEmail.to = [{ email: recipients[0] }];
       sendSmtpEmail.subject = subject;
-        sendSmtpEmail.htmlContent = finalHtml;
+      sendSmtpEmail.htmlContent = finalHtml;
       if (text) {
         sendSmtpEmail.textContent = text;
       }
 
       const data = await brevoClient.sendTransacEmail(sendSmtpEmail);
 
-        const messageId = data.body?.messageId || '';
+      const messageId = data.body?.messageId || '';
       console.log('✅ Email sent successfully:', messageId);
 
-        if (tracking?.userId) {
-          await trackNotificationEvent({
-            userId: tracking.userId,
-            notificationType: tracking.notificationType || 'email',
-            eventType: 'sent',
-            notificationId: tracking.notificationId || messageId,
-            metadata: {
-              email: recipients[0],
-              subject,
-            },
-          });
-        }
+      if (tracking?.userId) {
+        await trackNotificationEvent({
+          userId: tracking.userId,
+          notificationType: tracking.notificationType || 'email',
+          eventType: 'sent',
+          notificationId: tracking.notificationId || messageId,
+          metadata: {
+            email: recipients[0],
+            subject,
+          },
+        });
+      }
 
       return { id: messageId };
     }
@@ -121,7 +121,7 @@ export async function sendEmail({
     return await sendBatchEmails(brevoClient, {
       to: recipients,
       subject,
-        html: finalHtml,
+      html: finalHtml,
       text,
     });
   } catch (error) {
@@ -166,9 +166,9 @@ async function sendBatchEmails(
       try {
         const sendSmtpEmail = new SendSmtpEmail();
         sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
-          sendSmtpEmail.to = [{ email }];
+        sendSmtpEmail.to = [{ email }];
         sendSmtpEmail.subject = subject;
-          sendSmtpEmail.htmlContent = html;
+        sendSmtpEmail.htmlContent = html;
         if (text) {
           sendSmtpEmail.textContent = text;
         }

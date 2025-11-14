@@ -38,14 +38,10 @@ export async function GET(request: NextRequest) {
       ),
     );
     const previousWindowEnd = formatDate(
-      new Date(
-        new Date(recentWindowStart).getTime() - 24 * 60 * 60 * 1000,
-      ),
+      new Date(new Date(recentWindowStart).getTime() - 24 * 60 * 60 * 1000),
     );
     const previousWindowStart = formatDate(
-      new Date(
-        new Date(recentWindowStart).getTime() - 7 * 24 * 60 * 60 * 1000,
-      ),
+      new Date(new Date(recentWindowStart).getTime() - 7 * 24 * 60 * 60 * 1000),
     );
 
     const recentCountsResult = await sql`
@@ -65,7 +61,10 @@ export async function GET(request: NextRequest) {
     `;
 
     const recentCounts = new Map(
-      recentCountsResult.rows.map((row) => [row.activity_type, Number(row.total || 0)]),
+      recentCountsResult.rows.map((row) => [
+        row.activity_type,
+        Number(row.total || 0),
+      ]),
     );
     const previousCounts = new Map(
       previousCountsResult.rows.map((row) => [

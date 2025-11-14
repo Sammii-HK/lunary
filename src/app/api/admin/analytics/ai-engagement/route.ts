@@ -50,7 +50,9 @@ export async function GET(request: NextRequest) {
         mode: modeRow.mode as string,
         count,
         percentage:
-          totalSessions > 0 ? Number(((count / totalSessions) * 100).toFixed(2)) : 0,
+          totalSessions > 0
+            ? Number(((count / totalSessions) * 100).toFixed(2))
+            : 0,
       };
     });
 
@@ -75,7 +77,9 @@ export async function GET(request: NextRequest) {
       avg_tokens_per_user:
         uniqueUsers > 0 ? Number((totalTokens / uniqueUsers).toFixed(2)) : 0,
       avg_messages_per_session:
-        totalSessions > 0 ? Number((totalMessages / totalSessions).toFixed(2)) : 0,
+        totalSessions > 0
+          ? Number((totalMessages / totalSessions).toFixed(2))
+          : 0,
       completion_rate:
         totalSessions > 0
           ? Number(((completedSessions / totalSessions) * 100).toFixed(2))

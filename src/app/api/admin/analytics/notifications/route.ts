@@ -18,25 +18,36 @@ export async function GET(request: NextRequest) {
     const range = resolveDateRange(searchParams, 30);
     const notificationType = searchParams.get('notification_type');
 
-    const filterClause =
-      notificationType && notificationType !== 'all'
-        ? sql`AND notification_type = ${notificationType}`
-        : sql``;
+    const filterByType = notificationType && notificationType !== 'all';
 
-    const rows = await sql`
-      SELECT
-        notification_type,
-        COUNT(*) FILTER (WHERE event_type = 'sent') AS sent,
-        COUNT(*) FILTER (WHERE event_type = 'delivered') AS delivered,
-        COUNT(*) FILTER (WHERE event_type = 'opened') AS opened,
-        COUNT(*) FILTER (WHERE event_type = 'clicked') AS clicked
-      FROM analytics_notification_events
-      WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-        range.end,
-      )}
-      ${filterClause}
-      GROUP BY notification_type
-    `;
+    const rows = filterByType
+      ? await sql`
+          SELECT
+            notification_type,
+            COUNT(*) FILTER (WHERE event_type = 'sent') AS sent,
+            COUNT(*) FILTER (WHERE event_type = 'delivered') AS delivered,
+            COUNT(*) FILTER (WHERE event_type = 'opened') AS opened,
+            COUNT(*) FILTER (WHERE event_type = 'clicked') AS clicked
+          FROM analytics_notification_events
+          WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
+            range.end,
+          )}
+            AND notification_type = ${notificationType}
+          GROUP BY notification_type
+        `
+      : await sql`
+          SELECT
+            notification_type,
+            COUNT(*) FILTER (WHERE event_type = 'sent') AS sent,
+            COUNT(*) FILTER (WHERE event_type = 'delivered') AS delivered,
+            COUNT(*) FILTER (WHERE event_type = 'opened') AS opened,
+            COUNT(*) FILTER (WHERE event_type = 'clicked') AS clicked
+          FROM analytics_notification_events
+          WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
+            range.end,
+          )}
+          GROUP BY notification_type
+        `;
 
     const buckets = new Map<string, NotificationBucket>();
     for (const row of rows.rows) {
@@ -48,10 +59,13 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const responseBuckets: Record<string, NotificationBucket & {
-      open_rate: number;
-      click_through_rate: number;
-    }> = {};
+    const responseBuckets: Record<
+      string,
+      NotificationBucket & {
+        open_rate: number;
+        click_through_rate: number;
+      }
+    > = {};
 
     const allKeys = new Set<string>([
       ...DEFAULT_BUCKETS,
@@ -83,9 +97,13 @@ export async function GET(request: NextRequest) {
     );
 
     const overallOpenRate =
-      totals.sent > 0 ? Number(((totals.opened / totals.sent) * 100).toFixed(2)) : 0;
+      totals.sent > 0
+        ? Number(((totals.opened / totals.sent) * 100).toFixed(2))
+        : 0;
     const overallClickRate =
-      totals.sent > 0 ? Number(((totals.clicked / totals.sent) * 100).toFixed(2)) : 0;
+      totals.sent > 0
+        ? Number(((totals.clicked / totals.sent) * 100).toFixed(2))
+        : 0;
 
     const payload: Record<
       string,
@@ -119,7 +137,12 @@ export async function GET(request: NextRequest) {
 }
 
 const withRates = (
-  metrics: NotificationBucket = { sent: 0, delivered: 0, opened: 0, clicked: 0 },
+  metrics: NotificationBucket = {
+    sent: 0,
+    delivered: 0,
+    opened: 0,
+    clicked: 0,
+  },
 ) => ({
   ...metrics,
   open_rate:

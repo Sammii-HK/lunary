@@ -45,9 +45,7 @@ export function MetricsCard({
           </div>
         )}
       </div>
-      {subtitle && (
-        <div className='mt-2 text-xs text-zinc-500'>{subtitle}</div>
-      )}
+      {subtitle && <div className='mt-2 text-xs text-zinc-500'>{subtitle}</div>}
     </div>
   );
 }

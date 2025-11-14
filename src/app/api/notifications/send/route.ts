@@ -150,13 +150,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-      console.log(`📱 Sending to ${subscriptions.rows.length} subscribers`);
+    console.log(`📱 Sending to ${subscriptions.rows.length} subscribers`);
 
-      // Send notifications using web-push
-      const notificationType =
-        payload.data?.eventType || payload.type || 'notification';
+    // Send notifications using web-push
+    const notificationType =
+      payload.data?.eventType || payload.type || 'notification';
 
-      const sendPromises = subscriptions.rows.map(async (sub: any) => {
+    const sendPromises = subscriptions.rows.map(async (sub: any) => {
       try {
         await webpush.sendNotification(
           {

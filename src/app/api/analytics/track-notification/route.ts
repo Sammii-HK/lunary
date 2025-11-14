@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { trackNotificationEvent } from '@/lib/analytics/tracking';
 
-const PIXEL = Buffer.from('R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==', 'base64');
+const PIXEL = Buffer.from(
+  'R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',
+  'base64',
+);
 
 const VALID_EVENTS = new Set(['opened', 'clicked', 'delivered']);
 
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest) {
         eventType: eventType as 'opened' | 'clicked' | 'delivered',
         notificationId,
         metadata: {
-          ip: request.headers.get('x-forwarded-for') || request.ip || undefined,
+          ip: request.headers.get('x-forwarded-for') || undefined,
           userAgent: request.headers.get('user-agent') || undefined,
           source: 'email_pixel',
         },
@@ -37,18 +40,23 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'image/gif',
         'Content-Length': PIXEL.length.toString(),
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Cache-Control':
+          'no-store, no-cache, must-revalidate, proxy-revalidate',
         Pragma: 'no-cache',
         Expires: '0',
       },
     });
   } catch (error) {
-    console.error('[analytics/track-notification] Failed to track pixel', error);
+    console.error(
+      '[analytics/track-notification] Failed to track pixel',
+      error,
+    );
     return new NextResponse(PIXEL, {
       headers: {
         'Content-Type': 'image/gif',
         'Content-Length': PIXEL.length.toString(),
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Cache-Control':
+          'no-store, no-cache, must-revalidate, proxy-revalidate',
         Pragma: 'no-cache',
         Expires: '0',
       },

@@ -24,7 +24,10 @@ export async function POST(request: NextRequest) {
     const activityType = body.activity_type || body.activityType;
 
     if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'userId is required' },
+        { status: 400 },
+      );
     }
 
     if (!activityType) {

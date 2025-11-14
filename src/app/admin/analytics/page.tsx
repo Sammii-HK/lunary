@@ -70,7 +70,11 @@ type ConversionResponse = {
   conversion_rate: number;
   trial_conversion_rate: number;
   avg_days_to_convert: number;
-  trigger_breakdown: Array<{ feature: string; count: number; percentage: number }>;
+  trigger_breakdown: Array<{
+    feature: string;
+    count: number;
+    percentage: number;
+  }>;
   funnel: {
     free_users: number;
     trial_users: number;
@@ -134,9 +138,8 @@ export default function AnalyticsPage() {
   const [conversions, setConversions] = useState<ConversionResponse | null>(
     null,
   );
-  const [notifications, setNotifications] = useState<NotificationResponse | null>(
-    null,
-  );
+  const [notifications, setNotifications] =
+    useState<NotificationResponse | null>(null);
   const [featureUsage, setFeatureUsage] = useState<FeatureUsageResponse | null>(
     null,
   );
@@ -189,7 +192,9 @@ export default function AnalyticsPage() {
       setFeatureUsage(await featureUsageRes.json());
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Something went wrong loading data',
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong loading data',
       );
     } finally {
       setLoading(false);
@@ -226,7 +231,11 @@ export default function AnalyticsPage() {
 
     if (conversions) {
       rows.push(
-        ['Conversions', 'Total Conversions', String(conversions.total_conversions)],
+        [
+          'Conversions',
+          'Total Conversions',
+          String(conversions.total_conversions),
+        ],
         [
           'Conversions',
           'Conversion Rate',
@@ -296,7 +305,15 @@ export default function AnalyticsPage() {
     });
   }, [featureUsage]);
 
-  const overviewCards = [
+  type OverviewCard = {
+    title: string;
+    value: string | number;
+    subtitle?: string;
+    change?: number;
+    trend?: 'up' | 'down' | 'stable';
+  };
+
+  const overviewCards: OverviewCard[] = [
     {
       title: 'Daily Active Users',
       value: activity?.dau ?? 0,
@@ -347,15 +364,14 @@ export default function AnalyticsPage() {
     .map((key) => ({
       key,
       label: key.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-      data:
-        (notifications?.[key] as NotificationBucket | undefined) ?? {
-          sent: 0,
-          delivered: 0,
-          opened: 0,
-          clicked: 0,
-          open_rate: 0,
-          click_through_rate: 0,
-        },
+      data: (notifications?.[key] as NotificationBucket | undefined) ?? {
+        sent: 0,
+        delivered: 0,
+        opened: 0,
+        clicked: 0,
+        open_rate: 0,
+        click_through_rate: 0,
+      },
     }))
     .filter((item) => item.data);
 
@@ -550,20 +566,24 @@ export default function AnalyticsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
-            {(conversions?.trigger_breakdown ?? []).slice(0, 5).map((trigger) => (
-              <div key={trigger.feature} className='space-y-2'>
-                <div className='flex items-center justify-between text-sm text-zinc-400'>
-                  <span className='capitalize'>{trigger.feature || 'Other'}</span>
-                  <span>{trigger.count.toLocaleString()}</span>
+            {(conversions?.trigger_breakdown ?? [])
+              .slice(0, 5)
+              .map((trigger) => (
+                <div key={trigger.feature} className='space-y-2'>
+                  <div className='flex items-center justify-between text-sm text-zinc-400'>
+                    <span className='capitalize'>
+                      {trigger.feature || 'Other'}
+                    </span>
+                    <span>{trigger.count.toLocaleString()}</span>
+                  </div>
+                  <div className='h-2 w-full rounded-full bg-zinc-800'>
+                    <div
+                      className='h-2 rounded-full bg-gradient-to-r from-purple-400 to-fuchsia-500'
+                      style={{ width: `${trigger.percentage.toFixed(2)}%` }}
+                    />
+                  </div>
                 </div>
-                <div className='h-2 w-full rounded-full bg-zinc-800'>
-                  <div
-                    className='h-2 rounded-full bg-gradient-to-r from-purple-400 to-fuchsia-500'
-                    style={{ width: `${trigger.percentage.toFixed(2)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
           </CardContent>
         </Card>
       </section>
@@ -647,18 +667,14 @@ export default function AnalyticsPage() {
               <MiniStat
                 label='Tokens / User'
                 value={
-                  aiMetrics
-                    ? aiMetrics.avg_tokens_per_user.toFixed(0)
-                    : '—'
+                  aiMetrics ? aiMetrics.avg_tokens_per_user.toFixed(0) : '—'
                 }
                 icon={<Target className='h-5 w-5 text-sky-300' />}
               />
               <MiniStat
                 label='Completion Rate'
                 value={
-                  aiMetrics
-                    ? `${aiMetrics.completion_rate.toFixed(1)}%`
-                    : '—'
+                  aiMetrics ? `${aiMetrics.completion_rate.toFixed(1)}%` : '—'
                 }
                 icon={<Sparkles className='h-5 w-5 text-amber-300' />}
               />
@@ -692,9 +708,7 @@ function MultiLineChart({ data }: { data: ActivityTrend[] }) {
           padding +
           (index / Math.max(data.length - 1, 1)) * (width - padding * 2);
         const y =
-          height -
-          padding -
-          (point[key] / max) * (height - padding * 2);
+          height - padding - (point[key] / max) * (height - padding * 2);
         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
       })
       .join(' ');
@@ -764,7 +778,9 @@ function RetentionCard({
 
   return (
     <div className={`rounded-2xl border px-4 py-3 ${color}`}>
-      <div className='text-xs uppercase tracking-wide text-zinc-400'>{label}</div>
+      <div className='text-xs uppercase tracking-wide text-zinc-400'>
+        {label}
+      </div>
       <div className='text-3xl font-semibold text-white'>
         {value.toFixed(1)}%
       </div>
@@ -806,11 +822,16 @@ function ModeBreakdown({ modes }: { modes: AiMode[] }) {
 function HeatmapGrid({
   data,
 }: {
-  data: Array<{ date: string; entries: Array<{ feature: string; value: number }> }>;
+  data: Array<{
+    date: string;
+    entries: Array<{ feature: string; value: number }>;
+  }>;
 }) {
   if (!data.length) {
     return (
-      <div className='text-sm text-zinc-500'>No feature usage data available.</div>
+      <div className='text-sm text-zinc-500'>
+        No feature usage data available.
+      </div>
     );
   }
 

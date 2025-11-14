@@ -145,16 +145,16 @@ function initializeAuth() {
               subject: '🔐 Reset Your Lunary Password',
               html,
               text,
-                tracking: {
-                  userId: user.id || user.email,
-                  notificationType: 'password_reset',
-                  notificationId: `password-reset-${user.id || user.email}`,
-                  utm: {
-                    source: 'email',
-                    medium: 'auth',
-                    campaign: 'password_reset',
-                  },
+              tracking: {
+                userId: user.id || user.email,
+                notificationType: 'password_reset',
+                notificationId: `password-reset-${user.id || user.email}`,
+                utm: {
+                  source: 'email',
+                  medium: 'auth',
+                  campaign: 'password_reset',
                 },
+              },
             });
 
             console.log(`🔐 Password reset email sent to ${user.email}`);
@@ -186,16 +186,16 @@ function initializeAuth() {
               subject: '✨ Verify Your Email - Lunary',
               html,
               text,
-                tracking: {
-                  userId: user.id || user.email,
-                  notificationType: 'email_verification',
-                  notificationId: `email-verify-${token}`,
-                  utm: {
-                    source: 'email',
-                    medium: 'auth',
-                    campaign: 'email_verification',
-                  },
+              tracking: {
+                userId: user.id || user.email,
+                notificationType: 'email_verification',
+                notificationId: `email-verify-${token}`,
+                utm: {
+                  source: 'email',
+                  medium: 'auth',
+                  campaign: 'email_verification',
                 },
+              },
             });
 
             console.log(`✅ Verification email sent to ${user.email}`);

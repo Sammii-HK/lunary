@@ -509,22 +509,22 @@ async function sendNewsletter(
         ? generateTextNewsletter(weeklyData, unsubscribeUrl)
         : newsletter.text;
 
-        await sendEmail({
-          to: testEmail,
-          subject: newsletter.subject,
-          html: personalizedHtml,
-          text: personalizedText,
-          tracking: {
-            userId: testEmail,
-            notificationType: 'weekly_report',
-            notificationId: `weekly-${sendDate}-test`,
-            utm: {
-              source: 'email',
-              medium: 'newsletter',
-              campaign: 'weekly_report_test',
-            },
+      await sendEmail({
+        to: testEmail,
+        subject: newsletter.subject,
+        html: personalizedHtml,
+        text: personalizedText,
+        tracking: {
+          userId: testEmail,
+          notificationType: 'weekly_report',
+          notificationId: `weekly-${sendDate}-test`,
+          utm: {
+            source: 'email',
+            medium: 'newsletter',
+            campaign: 'weekly_report_test',
           },
-        });
+        },
+      });
       return {
         recipients: 1,
         success: 1,
@@ -593,26 +593,26 @@ async function sendNewsletter(
     });
 
     // Send emails individually to personalize unsubscribe links
-      const results = await Promise.allSettled(
-        personalizedEmails.map(({ email, html, text }) =>
-          sendEmail({
-            to: email,
-            subject: newsletter.subject,
-            html,
-            text,
-            tracking: {
-              userId: email,
-              notificationType: 'weekly_report',
-              notificationId: `weekly-${sendDate}-${email}`,
-              utm: {
-                source: 'email',
-                medium: 'newsletter',
-                campaign: 'weekly_report',
-              },
+    const results = await Promise.allSettled(
+      personalizedEmails.map(({ email, html, text }) =>
+        sendEmail({
+          to: email,
+          subject: newsletter.subject,
+          html,
+          text,
+          tracking: {
+            userId: email,
+            notificationType: 'weekly_report',
+            notificationId: `weekly-${sendDate}-${email}`,
+            utm: {
+              source: 'email',
+              medium: 'newsletter',
+              campaign: 'weekly_report',
             },
-          }),
-        ),
-      );
+          },
+        }),
+      ),
+    );
 
     const success = results.filter((r) => r.status === 'fulfilled').length;
     const failed = results.filter((r) => r.status === 'rejected').length;

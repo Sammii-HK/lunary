@@ -54,11 +54,11 @@ export async function POST(request: NextRequest) {
         );
         break;
 
-        case 'customer.subscription.updated':
-          await handleSubscriptionUpdated(
-            event.data.object as Stripe.Subscription,
-            event.data.previous_attributes as Stripe.Subscription | undefined,
-          );
+      case 'customer.subscription.updated':
+        await handleSubscriptionUpdated(
+          event.data.object as Stripe.Subscription,
+          event.data.previous_attributes as Stripe.Subscription | undefined,
+        );
         break;
 
       case 'customer.subscription.deleted':
@@ -215,7 +215,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     }
   }
 
-    const result = await updateUserSubscriptionStatus(customerId, {
+  const result = await updateUserSubscriptionStatus(customerId, {
     id: subscription.id,
     status: status,
     plan: planType,
@@ -337,7 +337,7 @@ async function handleSubscriptionUpdated(
     }
   }
 
-    const result = await updateUserSubscriptionStatus(customerId, {
+  const result = await updateUserSubscriptionStatus(customerId, {
     id: subscription.id,
     status: status,
     plan: planType,

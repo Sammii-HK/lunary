@@ -266,9 +266,11 @@ export async function trackNotificationEvent({
   }
 }
 
-export async function recordFeatureUsage(options: TrackActivityInput & {
-  feature: string;
-}) {
+export async function recordFeatureUsage(
+  options: TrackActivityInput & {
+    feature: string;
+  },
+) {
   const { feature, ...rest } = options;
   await trackActivity({
     ...rest,
