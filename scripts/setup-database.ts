@@ -306,6 +306,27 @@ async function setupDatabase() {
 
     console.log('✅ Tarot readings table created');
 
+    // Create user_sessions table for DAU/WAU tracking
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_sessions (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        session_date DATE NOT NULL DEFAULT CURRENT_DATE,
+        session_timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        page_path TEXT,
+        feature_name TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_sessions_session_date ON user_sessions(session_date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_sessions_created_at ON user_sessions(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_sessions_user_date ON user_sessions(user_id, session_date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_sessions_user_timestamp ON user_sessions(user_id, session_timestamp)`;
+
+    console.log('✅ User sessions table created');
     // Create the ai_threads table for AI conversation threads
     await sql`
         CREATE TABLE IF NOT EXISTS ai_threads (
