@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { PWAHandler } from '@/components/PWAHandler';
@@ -10,17 +11,36 @@ import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 
 export function AppChrome() {
   const pathname = usePathname();
-  const isAdminRoute = pathname?.startsWith('/admin');
+  const [isAdminHost, setIsAdminHost] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const host = window.location.hostname;
+    const adminHostPatterns = [
+      'admin.lunary.app',
+      'admin.localhost',
+      'admin.127.0.0.1',
+    ];
+
+    const isAdmin =
+      adminHostPatterns.includes(host) ||
+      host.startsWith('admin.') ||
+      host.endsWith('.admin.lunary.app');
+
+    setIsAdminHost(isAdmin);
+  }, []);
+
+  const isAdminSurface = isAdminHost || pathname?.startsWith('/admin');
 
   return (
     <>
-      {!isAdminRoute && <Navbar />}
+      {!isAdminSurface && <Navbar />}
       <ErrorBoundaryWrapper>
         <PWAHandler
-          allowUnauthenticatedInstall={isAdminRoute}
-          silent={isAdminRoute}
+          allowUnauthenticatedInstall={isAdminSurface}
+          silent={isAdminSurface}
         />
-        {!isAdminRoute && (
+        {!isAdminSurface && (
           <>
             <NotificationManager />
             <ExitIntent />

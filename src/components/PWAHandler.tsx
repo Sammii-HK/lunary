@@ -122,6 +122,9 @@ export function PWAHandler({
     // Listen for beforeinstallprompt event (Android/Desktop only)
     // On iOS, this won't fire - users must manually "Add to Home Screen"
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      if (silent) {
+        return;
+      }
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstallPrompt(true);
@@ -147,17 +150,21 @@ export function PWAHandler({
       setDeferredPrompt(null);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    if (!silent) {
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    }
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener(
-        'beforeinstallprompt',
-        handleBeforeInstallPrompt,
-      );
+      if (!silent) {
+        window.removeEventListener(
+          'beforeinstallprompt',
+          handleBeforeInstallPrompt,
+        );
+      }
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, [deferredPrompt]);
+  }, [deferredPrompt, silent]);
 
   const handleInstallClick = async () => {
     // Android/Desktop: Use programmatic install
