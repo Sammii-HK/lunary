@@ -7,6 +7,10 @@ import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
 import { getGeneralTarotReading } from '../../../utils/tarot/generalTarot';
+import {
+  getMoonPhase,
+  type MoonPhaseLabels,
+} from '../../../utils/moon/moonPhases';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 import {
@@ -28,6 +32,121 @@ import {
 } from '@/components/tarot/TarotSpreadExperience';
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
+
+const SUIT_ELEMENTS: Record<string, string> = {
+  Cups: 'Water',
+  Wands: 'Fire',
+  Swords: 'Air',
+  Pentacles: 'Earth',
+  'Major Arcana': 'Spirit',
+};
+
+const MOON_PHASE_TIPS: Record<MoonPhaseLabels, string> = {
+  'New Moon': 'Set intentions and script your next chapter.',
+  'Waxing Crescent': 'Feed tiny habits that support the goal.',
+  'First Quarter': 'Take decisive action even if it feels messy.',
+  'Waxing Gibbous': 'Refine, iterate, and double down on momentum.',
+  'Full Moon': 'Celebrate the insight and share it loudly.',
+  'Waning Gibbous': 'Release excess and honor what was learned.',
+  'Last Quarter': 'Audit systems and trim what isn’t aligned.',
+  'Waning Crescent': 'Rest, dream, and let intuition lead the way.',
+};
+
+type SolarSeason = {
+  sign: string;
+  start: string; // MM-DD
+  end: string; // MM-DD
+  message: string;
+};
+
+const SOLAR_SEASONS: SolarSeason[] = [
+  {
+    sign: 'Capricorn',
+    start: '12-22',
+    end: '01-19',
+    message: 'prioritizes structure and long-term mastery.',
+  },
+  {
+    sign: 'Aquarius',
+    start: '01-20',
+    end: '02-18',
+    message: 'sparks experimentation and community reach.',
+  },
+  {
+    sign: 'Pisces',
+    start: '02-19',
+    end: '03-20',
+    message: 'heightens intuition and dissolves rigid plans.',
+  },
+  {
+    sign: 'Aries',
+    start: '03-21',
+    end: '04-19',
+    message: 'ignites bold moves and rapid acceleration.',
+  },
+  {
+    sign: 'Taurus',
+    start: '04-20',
+    end: '05-20',
+    message: 'grounds desire into repeatable rituals.',
+  },
+  {
+    sign: 'Gemini',
+    start: '05-21',
+    end: '06-20',
+    message: 'amplifies curiosity, content, and conversation.',
+  },
+  {
+    sign: 'Cancer',
+    start: '06-21',
+    end: '07-22',
+    message: 'pulls focus toward emotional safety and home.',
+  },
+  {
+    sign: 'Leo',
+    start: '07-23',
+    end: '08-22',
+    message: 'spotlights creativity, attention, and play.',
+  },
+  {
+    sign: 'Virgo',
+    start: '08-23',
+    end: '09-22',
+    message: 'optimizes workflows and embodied care.',
+  },
+  {
+    sign: 'Libra',
+    start: '09-23',
+    end: '10-22',
+    message: 'balances partnerships, aesthetics, and harmony.',
+  },
+  {
+    sign: 'Scorpio',
+    start: '10-23',
+    end: '11-21',
+    message: 'dives deep into transformation and strategy.',
+  },
+  {
+    sign: 'Sagittarius',
+    start: '11-22',
+    end: '12-21',
+    message: 'opens horizons, publishing, and future plans.',
+  },
+];
+
+const getSolarSeason = (date: dayjs.Dayjs) => {
+  const today = date.format('MM-DD');
+  return (
+    SOLAR_SEASONS.find(({ start, end }) => {
+      if (start <= end) {
+        return today >= start && today <= end;
+      }
+      return today >= start || today <= end;
+    }) || null
+  );
+};
+
+const sanitizeInsightForParam = (value: string) => value.replace(/\|/g, ' / ');
 
 const TarotReadings = () => {
   const { me } = useAccount();
@@ -211,6 +330,39 @@ const TarotReadings = () => {
         trends.frequentCards[0]?.name ||
         trends.suitPatterns[0]?.suit ||
         `${trends.timeFrame}-Day Patterns`;
+      const totalCards = trends.timeFrame;
+      const majorPattern = trends.arcanaPatterns.find(
+        (pattern) => pattern.type === 'Major Arcana',
+      );
+      const minorPattern = trends.arcanaPatterns.find(
+        (pattern) => pattern.type === 'Minor Arcana',
+      );
+      const topSuitPattern = trends.suitPatterns[0];
+      const elementFocus = topSuitPattern
+        ? SUIT_ELEMENTS[topSuitPattern.suit]
+        : undefined;
+      const topNumberPattern = trends.numberPatterns[0];
+      const frequentCard = trends.frequentCards[0];
+      const insightPool = [
+        frequentCard?.reading
+          ? `${frequentCard.name}: ${frequentCard.reading}`
+          : undefined,
+        topSuitPattern?.reading,
+        topNumberPattern?.reading,
+        trends.arcanaPatterns[0]?.reading,
+      ]
+        .map((entry) => (entry ? truncate(entry, 160) : undefined))
+        .filter((entry): entry is string => Boolean(entry))
+        .map(sanitizeInsightForParam)
+        .slice(0, 3);
+      const moonPhase = getMoonPhase(new Date());
+      const moonTip = MOON_PHASE_TIPS[moonPhase] || undefined;
+      const solarSeason = getSolarSeason(dayjs());
+      const transitImpact = solarSeason
+        ? `${firstName ? `${firstName}, ` : ''}${solarSeason.sign} season ${solarSeason.message.replace(/\.$/, '')}${elementFocus ? ` and syncs with your ${elementFocus.toLowerCase()} flow.` : '.'}`
+        : undefined;
+      const actionPrompt =
+        personalizedReading?.guidance?.actionPoints?.[0] || undefined;
 
       const url = new URL('/share/tarot', shareOrigin);
       url.searchParams.set('card', headline);
@@ -222,6 +374,49 @@ const TarotReadings = () => {
       url.searchParams.set('date', shareDate);
       if (firstName) {
         url.searchParams.set('name', firstName);
+      }
+      if (totalCards) {
+        url.searchParams.set('total', String(totalCards));
+      }
+      if (typeof majorPattern?.count === 'number') {
+        url.searchParams.set('major', String(majorPattern.count));
+      }
+      if (typeof minorPattern?.count === 'number') {
+        url.searchParams.set('minor', String(minorPattern.count));
+      }
+      if (topSuitPattern) {
+        url.searchParams.set('topSuit', topSuitPattern.suit);
+        url.searchParams.set('topSuitCount', String(topSuitPattern.count));
+        if (topSuitPattern.reading) {
+          url.searchParams.set(
+            'suitInsight',
+            truncate(topSuitPattern.reading, 160) || topSuitPattern.reading,
+          );
+        }
+      }
+      if (elementFocus) {
+        url.searchParams.set('element', elementFocus);
+      }
+      if (insightPool.length) {
+        url.searchParams.set('insights', insightPool.join('|'));
+      }
+      if (moonPhase) {
+        url.searchParams.set('moonPhase', moonPhase);
+      }
+      if (moonTip) {
+        url.searchParams.set('moonTip', moonTip);
+      }
+      if (transitImpact) {
+        url.searchParams.set(
+          'transit',
+          truncate(transitImpact, 180) || transitImpact,
+        );
+      }
+      if (actionPrompt) {
+        url.searchParams.set(
+          'action',
+          truncate(actionPrompt, 140) || actionPrompt,
+        );
       }
 
       const summary =
