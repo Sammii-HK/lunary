@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     const baseUrl =
       process.env.NODE_ENV === 'production'
-        ? 'https://lunary.app'
+        ? 'https://www.lunary.app'
         : 'http://localhost:3000';
 
     const platforms = [platform];
@@ -121,12 +121,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build media array
+    // Build media array - ensure URLs use canonical www.lunary.app to avoid redirects
     const mediaArray = actualImageUrl
       ? [
           {
             type: 'image' as const,
-            url: String(actualImageUrl).trim(),
+            url: String(actualImageUrl)
+              .trim()
+              .replace(/^https:\/\/lunary\.app\//, 'https://www.lunary.app/'),
             alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
           },
         ]
@@ -157,6 +159,18 @@ export async function POST(request: NextRequest) {
     // Add Reddit-specific data if platform is Reddit
     if (redditData) {
       postData.reddit = redditData;
+    }
+
+    // Add Pinterest-specific options if platform is Pinterest
+    if (platformStr === 'pinterest') {
+      const pinterestBoardId =
+        process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary';
+      const pinterestBoardName =
+        process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary';
+      postData.pinterestOptions = {
+        boardId: pinterestBoardId,
+        boardName: pinterestBoardName,
+      };
     }
 
     const succulentApiUrl = 'https://app.succulent.social/api/posts';
