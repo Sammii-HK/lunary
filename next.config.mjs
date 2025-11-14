@@ -151,6 +151,15 @@ const nextConfig = {
         ],
       },
       {
+        source: '/admin-manifest.json',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
         // Cache OG images for 24 hours (content updates daily)
         source: '/api/og/:path*',
         headers: [

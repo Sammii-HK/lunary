@@ -2,8 +2,11 @@ const CACHE_NAME = 'lunary-v13'; // Ensure start_url cached first for iOS PWA
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json?v=20251103-1',
+  '/admin-manifest.json?v=20251114-1',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
+  '/icons/pwa/icon-192x192.png',
+  '/icons/pwa/icon-512x512.png',
 ];
 
 // Install event - cache static assets
