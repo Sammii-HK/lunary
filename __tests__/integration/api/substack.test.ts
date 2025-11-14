@@ -185,12 +185,15 @@ describe('Substack API Endpoints', () => {
       ];
 
       invalidCookies.forEach((cookie) => {
-        const isValid =
-          cookie &&
-          typeof cookie === 'object' &&
-          'name' in cookie &&
-          'value' in cookie &&
-          'domain' in cookie;
+        const isValid = Boolean(
+          cookie !== null &&
+            cookie !== undefined &&
+            typeof cookie === 'object' &&
+            !Array.isArray(cookie) &&
+            'name' in cookie &&
+            'value' in cookie &&
+            'domain' in cookie,
+        );
         expect(isValid).toBe(false);
       });
     });
