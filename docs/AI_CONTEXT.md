@@ -12,6 +12,10 @@ This file contains essential context about Lunary for AI-powered conversion opti
 2. **Daily Cosmic Insights** - Personalized horoscopes, tarot patterns, and guidance based on user's birth chart
 3. **Astronomical Precision** - Real astronomical calculations, not generic astrology
 4. **Cross-Device Sync** - Access insights anywhere, anytime
+5. **AI-Powered Personalization** - Advanced algorithms personalize tarot, horoscopes, and crystal recommendations
+6. **Automated Content Generation** - Weekly blog posts, newsletters, and social content generated automatically
+7. **Affordable Premium** - $4.99/month vs competitors at $10-15/month
+8. **Proven Engagement Metrics** - High stickiness (DAU/WAU), AI usage %, TikTok conversion tracking
 
 ## Brand Voice & Tone
 
@@ -87,6 +91,29 @@ Tertiary: Reduce churn, increase retention
 - "Discover what the cosmos reveals about you"
 - "Your unique planetary positions"
 - "Tailored to your cosmic signature"
+- "AI-powered personalization with real astronomy"
+- "Most affordable premium astrology app"
+- "Automated weekly cosmic insights"
+- "Proven engagement and value"
+
+## Competitive Positioning vs Arcarae
+
+**Lunary Advantages:**
+
+- **Lower Price**: $4.99/month vs Arcarae's likely $10-15/month
+- **Real Astronomy**: Uses actual astronomical calculations vs generic AI-generated content
+- **Automated Content**: Weekly blog, newsletters, social posts generated automatically
+- **Free Trial**: No credit card charge during trial period
+- **Complete Grimoire**: Educational content built-in (spells, rituals, crystals)
+- **Technical Automation**: Can scale without hiring large content teams
+- **Proven Metrics**: Tracking WAU, stickiness, AI usage %, TikTok conversion
+
+**Key Differentiators:**
+
+- Position as "astronomy-backed astrology" vs "AI self-discovery"
+- Emphasize precision and accuracy
+- Highlight automation and scalability
+- Lower barrier to entry (free trial, lower price)
 
 ## Pricing Strategy
 
@@ -131,10 +158,26 @@ Tertiary: Reduce churn, increase retention
 
 ## Success Metrics
 
-- Signup → Trial conversion rate
-- Trial → Paid conversion rate
+### Conversion Metrics
+
+- Signup → Trial conversion rate (Target: 30%+)
+- Trial → Paid conversion rate (Target: 20%+)
+- Overall conversion % (Signup → Paid, Target: 6%+)
 - Time to first value (birth chart generation)
-- Feature engagement
+
+### Engagement Metrics
+
+- **WAU (Weekly Active Users)** - Users who opened app at least once in past 7 days
+- **DAU (Daily Active Users)** - Users who opened app today
+- **Stickiness (DAU/WAU)** - Daily engagement rate (Target: 20%+)
+- **AI Usage %** - % of users who used personalized features (tarot, horoscope, birth chart)
+- Feature engagement rates
+
+### Acquisition Metrics
+
+- **TikTok → Download Conversion** - % of TikTok visitors who sign up/download
+- UTM parameter tracking (source, medium, campaign)
+- Referral attribution
 - Churn rate
 
 ## Technical Context
@@ -144,3 +187,7 @@ Tertiary: Reduce churn, increase retention
 - PostgreSQL for data
 - Real-time astronomical calculations
 - Personalized content generation
+- Advanced analytics tracking (WAU, DAU, stickiness, AI usage, TikTok conversion)
+- UTM parameter tracking for attribution
+- Session tracking for engagement metrics
+- AI feature usage tracking

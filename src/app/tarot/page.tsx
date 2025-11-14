@@ -80,6 +80,12 @@ const TarotReadings = () => {
     [hasChartAccess, userName, timeFrame, userBirthday],
   );
 
+  useEffect(() => {
+    if (personalizedReading && userId) {
+      conversionTracking.personalizedTarotViewed(userId);
+    }
+  }, [personalizedReading, userId]);
+
   const personalizedPreviousReadings = useMemo(() => {
     if (!hasChartAccess || !userName || !userBirthday) return [];
     const currentDate = dayjs();

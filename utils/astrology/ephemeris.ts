@@ -103,22 +103,29 @@ const MOON_PHASE_NAMES = [
 export const calculateRiseSet = (
   body: Body,
   observer: Observer,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): RiseSetData => {
   const astroTime = new AstroTime(date);
-  
+
   try {
     const riseTime = SearchRiseSet(body, observer, +1, astroTime, 1);
     const setTime = SearchRiseSet(body, observer, -1, astroTime, 1);
-    
+
     let transitTime: Date | null = null;
 
     const horizon = Horizon(astroTime, observer, 0, 0, 'normal');
     const vector = GeoVector(body, astroTime, false);
-    const horizontalCoords = Horizon(astroTime, observer, vector.x, vector.y, 'normal');
-    
-    const illuminationData = body !== Body.Sun ? Illumination(body, astroTime) : null;
-    
+    const horizontalCoords = Horizon(
+      astroTime,
+      observer,
+      vector.x,
+      vector.y,
+      'normal',
+    );
+
+    const illuminationData =
+      body !== Body.Sun ? Illumination(body, astroTime) : null;
+
     return {
       rise: riseTime ? riseTime.date : null,
       set: setTime ? setTime.date : null,
@@ -144,25 +151,23 @@ export const calculateRiseSet = (
 
 export const calculateSunMoon = (
   observer: Observer,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): SunMoonData => {
   const astroTime = new AstroTime(date);
-  
+
   const sunRise = SearchRiseSet(Body.Sun, observer, +1, astroTime, 1);
   const sunSet = SearchRiseSet(Body.Sun, observer, -1, astroTime, 1);
-  
+
   const moonRise = SearchRiseSet(Body.Moon, observer, +1, astroTime, 1);
   const moonSet = SearchRiseSet(Body.Moon, observer, -1, astroTime, 1);
-  
+
   const moonIllumination = Illumination(Body.Moon, astroTime);
   const moonPhaseAngle = moonIllumination.phase_angle;
   const moonAge = (moonPhaseAngle / 360) * 29.53;
-  
-  const phaseIndex = Math.round((moonPhaseAngle / 45)) % 8;
-  
-  const dayLength = sunRise && sunSet 
-    ? (sunSet.ut - sunRise.ut) * 24 
-    : 0;
+
+  const phaseIndex = Math.round(moonPhaseAngle / 45) % 8;
+
+  const dayLength = sunRise && sunSet ? (sunSet.ut - sunRise.ut) * 24 : 0;
 
   // Calculate solar noon as midpoint between sunrise and sunset
   let solarNoon: Date | null = null;
@@ -189,7 +194,7 @@ export const calculateSunMoon = (
 
 export const calculateTwilight = (
   observer: Observer,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): TwilightData => {
   return {
     civilDawn: null,
@@ -203,8 +208,18 @@ export const calculateTwilight = (
 
 export const getZodiacSign = (longitude: number): string => {
   const signs = [
-    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+    'Aries',
+    'Taurus',
+    'Gemini',
+    'Cancer',
+    'Leo',
+    'Virgo',
+    'Libra',
+    'Scorpio',
+    'Sagittarius',
+    'Capricorn',
+    'Aquarius',
+    'Pisces',
   ];
   const index = Math.floor((longitude % 360) / 30);
   return signs[index];
@@ -213,25 +228,35 @@ export const getZodiacSign = (longitude: number): string => {
 export const getConstellation = (ra: number, dec: number): string => {
   // Simple constellation mapping based on ecliptic longitude
   const constellations = [
-    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-    'Libra', 'Scorpius', 'Sagittarius', 'Capricornus', 'Aquarius', 'Pisces'
+    'Aries',
+    'Taurus',
+    'Gemini',
+    'Cancer',
+    'Leo',
+    'Virgo',
+    'Libra',
+    'Scorpius',
+    'Sagittarius',
+    'Capricornus',
+    'Aquarius',
+    'Pisces',
   ];
-  
+
   // Convert to constellation index (simplified)
-  const index = Math.floor(((ra % 360) + 360) % 360 / 30);
+  const index = Math.floor((((ra % 360) + 360) % 360) / 30);
   return constellations[index] || 'Unknown';
 };
 
 export const calculatePlanetEphemeris = (
   observer: Observer,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): PlanetEphemeris[] => {
   const astroTime = new AstroTime(date);
-  
+
   const results = PLANETS.map(({ body, name }) => {
     const riseSet = calculateRiseSet(body, observer, date);
     const vector = GeoVector(body, astroTime, true);
-    
+
     const longitude = Math.atan2(vector.y, vector.x) * (180 / Math.PI);
     const sign = getZodiacSign(longitude);
     const constellation = getConstellation(longitude, 0);
@@ -244,20 +269,20 @@ export const calculatePlanetEphemeris = (
       distance: Math.sqrt(vector.x ** 2 + vector.y ** 2 + vector.z ** 2),
     };
   });
-  
+
   return results;
 };
 
 export const calculateStarEphemeris = (
   observer: Observer,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): StarData[] => {
   return [];
 };
 
 export const calculateFullEphemeris = (
   location: LocationData,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): EphemerisData => {
   const observer = new Observer(location.latitude, location.longitude, 0);
 
@@ -278,7 +303,7 @@ export const calculateFullEphemeris = (
 
 export const formatTime = (date: Date | null, timezone?: string): string => {
   if (!date) return '--:--';
-  
+
   try {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
@@ -297,4 +322,4 @@ export const formatDayLength = (hours: number): string => {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
   return `${h}h ${m}m`;
-}; 
+};

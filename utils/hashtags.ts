@@ -2,7 +2,7 @@
 const hashtagThemes = {
   tarot: [
     '#tarot',
-    '#dailytarot', 
+    '#dailytarot',
     '#tarotreading',
     '#tarotcards',
     '#tarotguidance',
@@ -15,7 +15,7 @@ const hashtagThemes = {
   astrology: [
     '#horoscope',
     '#astrology',
-    '#zodiac', 
+    '#zodiac',
     '#astrologyreading',
     '#cosmicinsight',
     '#planetary',

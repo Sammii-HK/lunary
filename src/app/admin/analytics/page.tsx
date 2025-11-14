@@ -19,6 +19,9 @@ import {
   Activity,
   Target,
   Zap,
+  Calendar,
+  Sparkles,
+  Video,
 } from 'lucide-react';
 
 interface ConversionMetrics {
@@ -40,6 +43,14 @@ interface ConversionMetrics {
   onboardingRate: number;
   pricingToTrialRate: number;
   upgradeClickRate: number;
+  dau: number;
+  wau: number;
+  stickiness: number;
+  tiktokVisitors: number;
+  tiktokSignups: number;
+  tiktokConversionRate: number;
+  aiUsageCount: number;
+  aiUsagePercent: number;
 }
 
 interface ConversionFunnel {
@@ -211,6 +222,117 @@ export default function AnalyticsPage() {
                 </div>
                 <p className='text-xs text-muted-foreground'>
                   Monthly recurring revenue
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>WAU</CardTitle>
+                <Calendar className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>{metrics.wau}</div>
+                <p className='text-xs text-muted-foreground'>
+                  Weekly active users
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>DAU</CardTitle>
+                <Activity className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>{metrics.dau}</div>
+                <p className='text-xs text-muted-foreground'>
+                  Daily active users
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>
+                  Stickiness
+                </CardTitle>
+                <TrendingUp className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {formatPercentage(metrics.stickiness)}
+                </div>
+                <p className='text-xs text-muted-foreground'>DAU/WAU ratio</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>AI Usage</CardTitle>
+                <Sparkles className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {formatPercentage(metrics.aiUsagePercent)}
+                </div>
+                <p className='text-xs text-muted-foreground'>
+                  {metrics.aiUsageCount} users used AI features
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8'>
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>
+                  TikTok Visitors
+                </CardTitle>
+                <Video className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {metrics.tiktokVisitors}
+                </div>
+                <p className='text-xs text-muted-foreground'>
+                  Visitors from TikTok
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>
+                  TikTok Signups
+                </CardTitle>
+                <Users className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {metrics.tiktokSignups}
+                </div>
+                <p className='text-xs text-muted-foreground'>
+                  Signups from TikTok
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>
+                  TikTok Conversion
+                </CardTitle>
+                <Target className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {formatPercentage(metrics.tiktokConversionRate)}
+                </div>
+                <p className='text-xs text-muted-foreground'>
+                  TikTok → Signup rate
                 </p>
               </CardContent>
             </Card>
