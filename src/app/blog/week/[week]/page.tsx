@@ -42,9 +42,7 @@ function parseWeekParam(weekParam: string): WeekInfo {
   const yearToken = numericTokens[1];
   const parsedYear = yearToken ? parseInt(yearToken, 10) : NaN;
   const year =
-    !Number.isNaN(parsedYear) && parsedYear >= 1900
-      ? parsedYear
-      : currentYear;
+    !Number.isNaN(parsedYear) && parsedYear >= 1900 ? parsedYear : currentYear;
 
   if (!Number.isFinite(weekNumber) || weekNumber < 1 || weekNumber > 53) {
     throw new Error(
@@ -292,7 +290,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     const canonicalWeekSlug = weekInfo.slug;
 
     console.log('[BlogPostPage] Starting render for week:', canonicalWeekSlug);
-    console.log('[BlogPostPage] Fetching blog data for week:', canonicalWeekSlug);
+    console.log(
+      '[BlogPostPage] Fetching blog data for week:',
+      canonicalWeekSlug,
+    );
     const blogDataRaw = await getBlogData(weekInfo);
     console.log('[BlogPostPage] Blog data fetched, processing dates...');
 
@@ -887,58 +888,58 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             Related Weekly Forecasts
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              {(() => {
-                const currentWeekNum = blogData.weekNumber || 1;
-                const currentYear = blogData.year || 2025;
-                const relatedWeeks = [
-                  {
-                    week: currentWeekNum - 1,
-                    year: currentYear,
-                    label: 'Previous Week',
-                  },
-                  {
-                    week: currentWeekNum + 1,
-                    year: currentYear,
-                    label: 'Next Week',
-                  },
-                  {
-                    week: currentWeekNum - 4,
-                    year: currentYear,
-                    label: 'Last Month',
-                  },
-                ].filter((w) => w.week > 0);
+            {(() => {
+              const currentWeekNum = blogData.weekNumber || 1;
+              const currentYear = blogData.year || 2025;
+              const relatedWeeks = [
+                {
+                  week: currentWeekNum - 1,
+                  year: currentYear,
+                  label: 'Previous Week',
+                },
+                {
+                  week: currentWeekNum + 1,
+                  year: currentYear,
+                  label: 'Next Week',
+                },
+                {
+                  week: currentWeekNum - 4,
+                  year: currentYear,
+                  label: 'Last Month',
+                },
+              ].filter((w) => w.week > 0);
 
-                return relatedWeeks.map((related) => {
-                  const weekSlug = `${related.week}-${related.year}`;
-                  return (
-                    <Link
-                      key={weekSlug}
-                      href={`/blog/week/${weekSlug}`}
-                      className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
-                    >
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge variant='outline' className='text-xs'>
-                          Week {related.week}
-                        </Badge>
-                        <span className='text-xs text-zinc-500'>
-                          {related.year}
-                        </span>
-                      </div>
-                      <h3 className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-1'>
-                        {related.label}
-                      </h3>
-                      <p className='text-sm text-zinc-400'>
-                        {related.week === currentWeekNum - 1
-                          ? 'Previous cosmic forecast'
-                          : related.week === currentWeekNum + 1
-                            ? 'Upcoming cosmic forecast'
-                            : 'Earlier cosmic forecast'}
-                      </p>
-                    </Link>
-                  );
-                });
-              })()}
-            </div>
+              return relatedWeeks.map((related) => {
+                const weekSlug = `${related.week}-${related.year}`;
+                return (
+                  <Link
+                    key={weekSlug}
+                    href={`/blog/week/${weekSlug}`}
+                    className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+                  >
+                    <div className='flex items-center gap-2 mb-2'>
+                      <Badge variant='outline' className='text-xs'>
+                        Week {related.week}
+                      </Badge>
+                      <span className='text-xs text-zinc-500'>
+                        {related.year}
+                      </span>
+                    </div>
+                    <h3 className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-1'>
+                      {related.label}
+                    </h3>
+                    <p className='text-sm text-zinc-400'>
+                      {related.week === currentWeekNum - 1
+                        ? 'Previous cosmic forecast'
+                        : related.week === currentWeekNum + 1
+                          ? 'Upcoming cosmic forecast'
+                          : 'Earlier cosmic forecast'}
+                    </p>
+                  </Link>
+                );
+              });
+            })()}
+          </div>
           <div className='mt-6'>
             <Link
               href='/blog'
