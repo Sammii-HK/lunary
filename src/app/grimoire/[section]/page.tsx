@@ -1,7 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { grimoire } from '@/constants/grimoire';
-import { slugToSection, isValidGrimoireSection } from '@/utils/grimoire';
+import {
+  slugToSection,
+  isValidGrimoireSection,
+  getAllGrimoireSectionSlugs,
+} from '@/utils/grimoire';
 import GrimoireLayout from '../GrimoireLayout';
 
 const sectionDescriptions: Record<string, string> = {
@@ -99,12 +103,8 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const grimoireItems = Object.keys(grimoire);
-  return grimoireItems.map((item) => ({
-    section: item
-      .replace(/([A-Z])/g, '-$1')
-      .toLowerCase()
-      .replace(/^-/, ''),
+  return getAllGrimoireSectionSlugs().map((slug) => ({
+    section: slug,
   }));
 }
 

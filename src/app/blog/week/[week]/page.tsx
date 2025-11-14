@@ -19,6 +19,46 @@ interface BlogPostPageProps {
   params: Promise<{ week: string }>;
 }
 
+interface WeekInfo {
+  weekNumber: number;
+  year: number;
+  slug: string;
+}
+
+function parseWeekParam(weekParam: string): WeekInfo {
+  if (!weekParam) {
+    throw new Error('Week parameter is required');
+  }
+
+  const numericTokens = weekParam.match(/\d+/g);
+  if (!numericTokens || numericTokens.length === 0) {
+    throw new Error(
+      `Invalid week parameter "${weekParam}". Expected format like "12-2025".`,
+    );
+  }
+
+  const weekNumber = parseInt(numericTokens[0], 10);
+  const currentYear = new Date().getFullYear();
+  const yearToken = numericTokens[1];
+  const parsedYear = yearToken ? parseInt(yearToken, 10) : NaN;
+  const year =
+    !Number.isNaN(parsedYear) && parsedYear >= 1900
+      ? parsedYear
+      : currentYear;
+
+  if (!Number.isFinite(weekNumber) || weekNumber < 1 || weekNumber > 53) {
+    throw new Error(
+      `Invalid week number "${numericTokens[0]}". Use values between 1 and 53.`,
+    );
+  }
+
+  return {
+    weekNumber,
+    year,
+    slug: `${weekNumber}-${year}`,
+  };
+}
+
 function getPlanetColor(planet: string): string {
   const colors: Record<string, string> = {
     Sun: 'text-yellow-400',
@@ -128,12 +168,16 @@ function convertDatesToObjects(obj: any): any {
   return obj;
 }
 
-async function getBlogData(week: string) {
+async function getBlogData(weekInfo: WeekInfo) {
+  const cacheKey = weekInfo.slug;
+
   // Check cache first
-  if (blogDataCache.has(week)) {
-    const cached = await blogDataCache.get(week)!;
+  if (blogDataCache.has(cacheKey)) {
+    const cached = await blogDataCache.get(cacheKey)!;
     console.log(
-      '[getBlogData] Using cached data, crystal count:',
+      '[getBlogData] Using cached data for week:',
+      cacheKey,
+      'crystal count:',
       cached.crystalRecommendations?.length || 0,
     );
     return cached;
@@ -141,34 +185,39 @@ async function getBlogData(week: string) {
 
   // Create promise for this week
   const promise = (async () => {
-    const [weekNumber, year] = week.split('-');
-    const startOfYear = new Date(parseInt(year), 0, 1);
+    const startOfYear = new Date(weekInfo.year, 0, 1);
     const weekStartDate = new Date(startOfYear);
     weekStartDate.setDate(
-      weekStartDate.getDate() + (parseInt(weekNumber) - 1) * 7,
+      weekStartDate.getDate() + (weekInfo.weekNumber - 1) * 7,
     );
 
     try {
       console.log(
         '[getBlogData] Generating weekly content for:',
+        cacheKey,
         weekStartDate.toISOString(),
       );
       const startTime = Date.now();
       // Call the function directly instead of making an HTTP request
       const weeklyData = await generateWeeklyContent(weekStartDate);
       const duration = Date.now() - startTime;
-      console.log(`[getBlogData] Weekly content generated in ${duration}ms`);
+      console.log(
+        `[getBlogData] Weekly content generated for ${cacheKey} in ${duration}ms`,
+      );
       // Dates are already Date objects when calling directly, but ensure they're properly formatted
       // Convert any nested date strings that might exist
       return convertDatesToObjects(weeklyData);
     } catch (error) {
-      console.error('[getBlogData] Error generating blog data:', error);
+      console.error(
+        `[getBlogData] Error generating blog data for ${cacheKey}:`,
+        error,
+      );
       console.error(
         '[getBlogData] Error stack:',
         error instanceof Error ? error.stack : 'No stack',
       );
       // Remove from cache on error
-      blogDataCache.delete(week);
+      blogDataCache.delete(cacheKey);
       throw new Error(
         `Failed to generate blog data: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -176,12 +225,12 @@ async function getBlogData(week: string) {
   })();
 
   // Store in cache
-  blogDataCache.set(week, promise);
+  blogDataCache.set(cacheKey, promise);
 
   // Clean up cache after 1 hour to prevent memory leaks
   setTimeout(
     () => {
-      blogDataCache.delete(week);
+      blogDataCache.delete(cacheKey);
     },
     60 * 60 * 1000,
   );
@@ -233,13 +282,18 @@ function ensureDatesAreObjects(obj: any): any {
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  let week: string | undefined;
+  let rawWeekParam: string | undefined;
+  let weekInfo: WeekInfo | null = null;
+
   try {
     const resolvedParams = await params;
-    week = resolvedParams.week;
-    console.log('[BlogPostPage] Starting render for week:', week);
-    console.log('[BlogPostPage] Fetching blog data for week:', week);
-    const blogDataRaw = await getBlogData(week);
+    rawWeekParam = resolvedParams.week;
+    weekInfo = parseWeekParam(rawWeekParam);
+    const canonicalWeekSlug = weekInfo.slug;
+
+    console.log('[BlogPostPage] Starting render for week:', canonicalWeekSlug);
+    console.log('[BlogPostPage] Fetching blog data for week:', canonicalWeekSlug);
+    const blogDataRaw = await getBlogData(weekInfo);
     console.log('[BlogPostPage] Blog data fetched, processing dates...');
 
     // Ensure all dates are properly converted
@@ -822,7 +876,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <section className='mt-8 pt-8 border-t border-zinc-800'>
           <h2 className='text-xl font-semibold mb-4'>Share This Forecast</h2>
           <SocialShareButtons
-            url={`https://lunary.app/blog/week/${week}`}
+            url={`https://lunary.app/blog/week/${canonicalWeekSlug}`}
             title={blogData.title}
           />
         </section>
@@ -833,58 +887,58 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             Related Weekly Forecasts
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            {(() => {
-              const currentWeekNum = blogData.weekNumber || 1;
-              const currentYear = blogData.year || 2025;
-              const relatedWeeks = [
-                {
-                  week: currentWeekNum - 1,
-                  year: currentYear,
-                  label: 'Previous Week',
-                },
-                {
-                  week: currentWeekNum + 1,
-                  year: currentYear,
-                  label: 'Next Week',
-                },
-                {
-                  week: currentWeekNum - 4,
-                  year: currentYear,
-                  label: 'Last Month',
-                },
-              ].filter((w) => w.week > 0);
+              {(() => {
+                const currentWeekNum = blogData.weekNumber || 1;
+                const currentYear = blogData.year || 2025;
+                const relatedWeeks = [
+                  {
+                    week: currentWeekNum - 1,
+                    year: currentYear,
+                    label: 'Previous Week',
+                  },
+                  {
+                    week: currentWeekNum + 1,
+                    year: currentYear,
+                    label: 'Next Week',
+                  },
+                  {
+                    week: currentWeekNum - 4,
+                    year: currentYear,
+                    label: 'Last Month',
+                  },
+                ].filter((w) => w.week > 0);
 
-              return relatedWeeks.map((related) => {
-                const weekSlug = `week-${related.week}-${related.year}`;
-                return (
-                  <Link
-                    key={weekSlug}
-                    href={`/blog/week/${weekSlug}`}
-                    className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
-                  >
-                    <div className='flex items-center gap-2 mb-2'>
-                      <Badge variant='outline' className='text-xs'>
-                        Week {related.week}
-                      </Badge>
-                      <span className='text-xs text-zinc-500'>
-                        {related.year}
-                      </span>
-                    </div>
-                    <h3 className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-1'>
-                      {related.label}
-                    </h3>
-                    <p className='text-sm text-zinc-400'>
-                      {related.week === currentWeekNum - 1
-                        ? 'Previous cosmic forecast'
-                        : related.week === currentWeekNum + 1
-                          ? 'Upcoming cosmic forecast'
-                          : 'Earlier cosmic forecast'}
-                    </p>
-                  </Link>
-                );
-              });
-            })()}
-          </div>
+                return relatedWeeks.map((related) => {
+                  const weekSlug = `${related.week}-${related.year}`;
+                  return (
+                    <Link
+                      key={weekSlug}
+                      href={`/blog/week/${weekSlug}`}
+                      className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+                    >
+                      <div className='flex items-center gap-2 mb-2'>
+                        <Badge variant='outline' className='text-xs'>
+                          Week {related.week}
+                        </Badge>
+                        <span className='text-xs text-zinc-500'>
+                          {related.year}
+                        </span>
+                      </div>
+                      <h3 className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-1'>
+                        {related.label}
+                      </h3>
+                      <p className='text-sm text-zinc-400'>
+                        {related.week === currentWeekNum - 1
+                          ? 'Previous cosmic forecast'
+                          : related.week === currentWeekNum + 1
+                            ? 'Upcoming cosmic forecast'
+                            : 'Earlier cosmic forecast'}
+                      </p>
+                    </Link>
+                  );
+                });
+              })()}
+            </div>
           <div className='mt-6'>
             <Link
               href='/blog'
@@ -920,7 +974,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   '@type': 'ListItem',
                   position: 3,
                   name: blogData.title,
-                  item: `https://lunary.app/blog/week/${week}`,
+                  item: `https://lunary.app/blog/week/${canonicalWeekSlug}`,
                 },
               ],
             }),
@@ -960,7 +1014,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               },
               mainEntityOfPage: {
                 '@type': 'WebPage',
-                '@id': `https://lunary.app/blog/week/${week}`,
+                '@id': `https://lunary.app/blog/week/${canonicalWeekSlug}`,
               },
               articleSection: 'Weekly Forecast',
               keywords: [
@@ -996,8 +1050,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
     // Log blogData structure if available
     try {
-      if (week) {
-        const blogDataRaw = await getBlogData(week).catch(() => null);
+      if (weekInfo) {
+        const blogDataRaw = await getBlogData(weekInfo).catch(() => null);
         if (blogDataRaw) {
           console.error('[BlogPostPage] Blog data structure:', {
             hasWeekStart: !!blogDataRaw.weekStart,
@@ -1040,7 +1094,8 @@ export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
   const { week } = await params;
-  const blogData = await getBlogData(week);
+  const weekInfo = parseWeekParam(week);
+  const blogData = await getBlogData(weekInfo);
 
   // Ensure weekStart and weekEnd are Date objects before calling toLocaleDateString
   const weekStart =
@@ -1061,7 +1116,7 @@ export async function generateMetadata({
     year: 'numeric',
   })}`;
 
-  const url = `https://lunary.app/blog/week/${week}`;
+  const url = `https://lunary.app/blog/week/${weekInfo.slug}`;
   const ogImage = `https://lunary.app/api/og/cosmic?date=${weekStart.toISOString().split('T')[0]}`;
 
   const keywords = [
