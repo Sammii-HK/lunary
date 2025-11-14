@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
+import { useAuthStatus } from '@/components/AuthStatus';
+import { AuthComponent } from '@/components/Auth';
 
 const MessageBubble = ({
   role,
@@ -35,6 +37,7 @@ const MessageBubble = ({
 };
 
 export default function BookOfShadowsPage() {
+  const authState = useAuthStatus();
   const {
     messages,
     sendMessage,
@@ -48,6 +51,7 @@ export default function BookOfShadowsPage() {
     clearError,
   } = useAssistantChat();
   const [input, setInput] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const lastSendTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -89,6 +93,96 @@ export default function BookOfShadowsPage() {
     }
   };
 
+  useEffect(() => {
+    if (!showAuthModal) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAuthModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showAuthModal]);
+
+  if (authState.loading) {
+    return (
+      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+        <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
+          <div className='text-zinc-400'>Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authState.isAuthenticated) {
+    return (
+      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+        <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
+          <header className='mb-6 space-y-2'>
+            <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
+              Book of Shadows
+            </h1>
+            <p className='text-sm text-zinc-400 md:text-base'>
+              Your calm astro–tarot companion. Share what's stirring and Lunary
+              will gather the sky around you.
+            </p>
+          </header>
+
+          <main className='flex flex-1 flex-col items-center justify-center gap-6'>
+            <div className='rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-8 md:p-12 text-center max-w-lg'>
+              <h2 className='text-2xl font-light text-zinc-50 mb-4'>
+                Sign in to access your Book of Shadows
+              </h2>
+              <p className='text-sm text-zinc-400 mb-6 md:text-base'>
+                Your Book of Shadows is a personal space for your astro–tarot
+                journey. Sign in to begin your conversation with Lunary.
+              </p>
+              <Button
+                onClick={() => setShowAuthModal(true)}
+                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500'
+              >
+                Sign In
+              </Button>
+            </div>
+          </main>
+
+          {showAuthModal && (
+            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
+              <div className='relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl'>
+                <button
+                  onClick={() => setShowAuthModal(false)}
+                  className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-200'
+                  aria-label='Close'
+                >
+                  <svg
+                    className='h-5 w-5'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
+                  </svg>
+                </button>
+                <AuthComponent
+                  onSuccess={() => {
+                    setShowAuthModal(false);
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
       <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
@@ -97,7 +191,7 @@ export default function BookOfShadowsPage() {
             Book of Shadows
           </h1>
           <p className='text-sm text-zinc-400 md:text-base'>
-            Your calm astro–tarot companion. Share what’s stirring and Lunary
+            Your calm astro–tarot companion. Share what's stirring and Lunary
             will gather the sky around you.
           </p>
 

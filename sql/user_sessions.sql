@@ -31,3 +31,20 @@ CREATE INDEX IF NOT EXISTS idx_user_sessions_user_date ON user_sessions(user_id,
 -- Composite index for DAU/WAU queries
 CREATE INDEX IF NOT EXISTS idx_user_sessions_user_timestamp ON user_sessions(user_id, session_timestamp);
 
+-- Example queries:
+-- Get DAU (Daily Active Users) for today
+-- SELECT COUNT(DISTINCT user_id) as dau
+-- FROM user_sessions
+-- WHERE session_date = CURRENT_DATE;
+
+-- Get WAU (Weekly Active Users) for past 7 days
+-- SELECT COUNT(DISTINCT user_id) as wau
+-- FROM user_sessions
+-- WHERE session_timestamp >= NOW() - INTERVAL '7 days';
+
+-- Get stickiness (DAU/WAU)
+-- SELECT 
+--   (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE session_date = CURRENT_DATE)::numeric /
+--   NULLIF((SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE session_timestamp >= NOW() - INTERVAL '7 days'), 0) * 100
+--   as stickiness_percent;
+

@@ -580,7 +580,39 @@ async function runWeeklyTasks(request: NextRequest) {
     const newsletterData = await newsletterResponse.json();
     console.log('📧 Weekly newsletter result:', newsletterData.message);
 
-    // 3. Generate social media posts for the week ahead (7 days in advance)
+    // 3. Publish to Substack (free and paid posts)
+    console.log('📬 Publishing to Substack...');
+    let substackResult = null;
+    try {
+      const substackResponse = await fetch(`${baseUrl}/api/substack/publish`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Lunary-Master-Cron/1.0',
+        },
+        body: JSON.stringify({
+          weekOffset: 0,
+          publishFree: true,
+          publishPaid: true,
+        }),
+      });
+
+      if (substackResponse.ok) {
+        substackResult = await substackResponse.json();
+        console.log(
+          `✅ Substack posts published: Free ${substackResult.results?.free?.success ? '✓' : '✗'}, Paid ${substackResult.results?.paid?.success ? '✓' : '✗'}`,
+        );
+      } else {
+        console.error(
+          '❌ Substack publishing failed:',
+          substackResponse.status,
+        );
+      }
+    } catch (substackError) {
+      console.error('❌ Substack publishing error:', substackError);
+    }
+
+    // 4. Generate social media posts for the week ahead (7 days in advance)
     console.log(
       '📱 Generating social media posts for the week ahead (7 days in advance)...',
     );
@@ -664,6 +696,14 @@ async function runWeeklyTasks(request: NextRequest) {
         ? {
             generated: socialPostsResult.savedIds?.length || 0,
             weekRange: socialPostsResult.weekRange,
+          }
+        : null,
+      substack: substackResult
+        ? {
+            free: substackResult.results?.free?.success || false,
+            paid: substackResult.results?.paid?.success || false,
+            freeUrl: substackResult.results?.free?.postUrl,
+            paidUrl: substackResult.results?.paid?.postUrl,
           }
         : null,
     };

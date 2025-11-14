@@ -50,3 +50,7 @@ data/auth.db
 # Prisma
 prisma/migrations/*/migration.sql.bak
 prisma/migrations/*/migration.sql.tmp
+
+# Substack cookies
+.substack-cookies.json
+.playwright-browser/

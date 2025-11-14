@@ -36,6 +36,8 @@ import {
   Menu,
   Send,
   Download,
+  Eye,
+  Play,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -57,6 +59,10 @@ export default function AdminDashboard() {
   const [testingDaily, setTestingDaily] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
   const [testEmailAddress, setTestEmailAddress] = useState('');
+  const [substackPreview, setSubstackPreview] = useState<any>(null);
+  const [substackLoading, setSubstackLoading] = useState(false);
+  const [substackWeekOffset, setSubstackWeekOffset] = useState(0);
+  const [substackPublishing, setSubstackPublishing] = useState(false);
 
   // Check if user is admin
   useEffect(() => {
@@ -330,6 +336,82 @@ This is exactly what you'll get every day at 8 AM UTC!`);
     }
   };
 
+  const testSubstackPreview = async () => {
+    setSubstackLoading(true);
+    setSubstackPreview(null);
+    try {
+      const response = await fetch(
+        `/api/substack/preview?week=${substackWeekOffset}`,
+      );
+      const result = await response.json();
+
+      if (result.success) {
+        setSubstackPreview(result);
+      } else {
+        alert(`❌ Preview generation failed: ${result.error}`);
+      }
+    } catch (error) {
+      alert('❌ Error generating preview');
+      console.error(error);
+    } finally {
+      setSubstackLoading(false);
+    }
+  };
+
+  const testSubstackPublish = async (tier: 'free' | 'paid' = 'free') => {
+    if (!substackPreview) {
+      alert('Please generate a preview first');
+      return;
+    }
+
+    if (
+      !confirm(
+        `This will publish the ${tier} tier post to Substack. Are you sure?`,
+      )
+    ) {
+      return;
+    }
+
+    setSubstackPublishing(true);
+    try {
+      const response = await fetch('/api/substack/publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          weekOffset: substackWeekOffset,
+          publishFree: tier === 'free',
+          publishPaid: tier === 'paid',
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const postUrl =
+          tier === 'free'
+            ? result.results?.free?.postUrl
+            : result.results?.paid?.postUrl;
+        alert(
+          `✅ Post published successfully!\n\nTier: ${tier}\nPost URL: ${postUrl || 'Check Substack dashboard'}\n\nYou can view it on Substack now.`,
+        );
+        if (postUrl) {
+          window.open(postUrl, '_blank');
+        }
+      } else {
+        alert(
+          `❌ Publishing failed: ${result.error || result.details || 'Unknown error'}`,
+        );
+      }
+    } catch (error) {
+      alert('❌ Error publishing post');
+      console.error(error);
+    } finally {
+      setSubstackPublishing(false);
+    }
+  };
+
   const testEmail = async () => {
     if (!testEmailAddress) {
       alert('Please enter an email address to test');
@@ -383,6 +465,15 @@ This is exactly what you'll get every day at 8 AM UTC!`);
         'Manage email subscribers and send weekly newsletters with Brevo',
       href: '/admin/newsletter-manager',
       icon: <Mail className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
+      title: 'Substack Manager',
+      description:
+        'Generate and publish weekly Substack posts (Free: newsletter content, Paid: $3/month enhanced)',
+      href: '/admin/substack',
+      icon: <Send className='h-5 w-5' />,
       category: 'content',
       status: 'new',
     },
@@ -756,6 +847,161 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                 <code className='bg-zinc-800 px-2 py-1 rounded text-zinc-300'>
                   cosmic@lunary.app
                 </code>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Substack Testing */}
+        <Card className='mb-6 md:mb-8 lg:mb-10 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <FileText className='h-5 w-5 md:h-6 md:w-6' />
+              Substack Post Testing
+            </CardTitle>
+            <CardDescription className='text-sm md:text-base text-zinc-400'>
+              Preview and test Substack posts without publishing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-4'>
+              <div className='flex flex-col sm:flex-row gap-4 items-start sm:items-center'>
+                <div className='flex-1'>
+                  <label className='text-sm text-zinc-400 mb-2 block'>
+                    Week Offset (0 = current week, 1 = next week)
+                  </label>
+                  <input
+                    type='number'
+                    value={substackWeekOffset}
+                    onChange={(e) =>
+                      setSubstackWeekOffset(parseInt(e.target.value) || 0)
+                    }
+                    className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded text-white'
+                    min='0'
+                  />
+                </div>
+                <Button
+                  onClick={testSubstackPreview}
+                  disabled={substackLoading}
+                  variant='outline'
+                  className='h-auto px-6 py-2 bg-purple-600 hover:bg-purple-700 border-purple-500 text-white transition-all disabled:opacity-50 mt-6 sm:mt-0'
+                >
+                  <Eye className='h-4 w-4 mr-2' />
+                  {substackLoading ? 'Generating...' : 'Preview Posts'}
+                </Button>
+              </div>
+
+              {substackPreview && (
+                <div className='mt-6 space-y-6'>
+                  <div className='p-4 bg-zinc-800 rounded border border-zinc-700'>
+                    <div className='flex items-center justify-between mb-4'>
+                      <h3 className='text-lg font-semibold text-white'>
+                        Preview Results
+                      </h3>
+                      <Badge variant='outline' className='text-zinc-300'>
+                        Week {substackPreview.metadata?.weekNumber || 'N/A'}
+                      </Badge>
+                    </div>
+                    <div className='text-sm text-zinc-400 mb-4'>
+                      <p>
+                        Week:{' '}
+                        {substackPreview.metadata?.weekStart
+                          ? new Date(
+                              substackPreview.metadata.weekStart,
+                            ).toLocaleDateString()
+                          : 'N/A'}{' '}
+                        -{' '}
+                        {substackPreview.metadata?.weekEnd
+                          ? new Date(
+                              substackPreview.metadata.weekEnd,
+                            ).toLocaleDateString()
+                          : 'N/A'}
+                      </p>
+                      <p>
+                        Free: {substackPreview.metadata?.freeWordCount || 0}{' '}
+                        words | Paid:{' '}
+                        {substackPreview.metadata?.paidWordCount || 0} words
+                      </p>
+                    </div>
+
+                    {/* Free Post */}
+                    <div className='mb-6'>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <Badge className='bg-green-600'>Free Tier</Badge>
+                        <span className='text-sm text-zinc-400'>
+                          {substackPreview.free?.title || 'No title'}
+                        </span>
+                      </div>
+                      <div className='bg-zinc-900 p-4 rounded border border-zinc-700 max-h-96 overflow-y-auto'>
+                        <h4 className='text-white font-semibold mb-2'>
+                          {substackPreview.free?.title}
+                        </h4>
+                        {substackPreview.free?.subtitle && (
+                          <p className='text-zinc-300 text-sm mb-2 italic'>
+                            {substackPreview.free.subtitle}
+                          </p>
+                        )}
+                        <div className='text-zinc-400 text-sm whitespace-pre-wrap'>
+                          {substackPreview.free?.content || 'No content'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Paid Post */}
+                    <div>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <Badge className='bg-purple-600'>Paid Tier</Badge>
+                        <span className='text-sm text-zinc-400'>
+                          {substackPreview.paid?.title || 'No title'}
+                        </span>
+                      </div>
+                      <div className='bg-zinc-900 p-4 rounded border border-zinc-700 max-h-96 overflow-y-auto'>
+                        <h4 className='text-white font-semibold mb-2'>
+                          {substackPreview.paid?.title}
+                        </h4>
+                        {substackPreview.paid?.subtitle && (
+                          <p className='text-zinc-300 text-sm mb-2 italic'>
+                            {substackPreview.paid.subtitle}
+                          </p>
+                        )}
+                        <div className='text-zinc-400 text-sm whitespace-pre-wrap'>
+                          {substackPreview.paid?.content || 'No content'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Publish Buttons */}
+                  <div className='flex gap-4 pt-4 border-t border-zinc-700'>
+                    <Button
+                      onClick={() => testSubstackPublish('free')}
+                      disabled={substackPublishing || !substackPreview}
+                      variant='outline'
+                      className='flex-1 bg-green-600 hover:bg-green-700 border-green-500 text-white disabled:opacity-50'
+                    >
+                      <Play className='h-4 w-4 mr-2' />
+                      {substackPublishing
+                        ? 'Publishing...'
+                        : 'Publish Free Post'}
+                    </Button>
+                    <Button
+                      onClick={() => testSubstackPublish('paid')}
+                      disabled={substackPublishing || !substackPreview}
+                      variant='outline'
+                      className='flex-1 bg-purple-600 hover:bg-purple-700 border-purple-500 text-white disabled:opacity-50'
+                    >
+                      <Play className='h-4 w-4 mr-2' />
+                      {substackPublishing
+                        ? 'Publishing...'
+                        : 'Publish Paid Post'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <p className='text-xs text-zinc-500'>
+                Preview shows full post content. Use publish buttons to actually
+                post to Substack (opens in new tab when published).
               </p>
             </div>
           </CardContent>
