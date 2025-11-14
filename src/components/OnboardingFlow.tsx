@@ -5,7 +5,7 @@ import { useAccount } from 'jazz-tools/react';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from './SmartTrialButton';
-import { X, Sparkles, Calendar, Star } from 'lucide-react';
+import { X, Sparkles, Calendar, Star, NotebookPen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   generateBirthChart,
@@ -93,7 +93,7 @@ export function OnboardingFlow() {
     localStorage.setItem('lunary_onboarding_seen', 'true');
     setShowOnboarding(false);
     if (subscription.isSubscribed || subscription.isTrialActive) {
-      router.push('/birth-chart');
+      router.push('/book-of-shadows');
     } else {
       router.push('/pricing');
     }
@@ -121,10 +121,11 @@ export function OnboardingFlow() {
                 <Sparkles className='w-8 h-8 text-purple-300' />
               </div>
               <h2 className='text-2xl font-bold text-white mb-2'>
-                Welcome to Lunary!
+                Welcome to your Book of Shadows
               </h2>
               <p className='text-zinc-300'>
-                Let's personalize your cosmic journey
+                Share a few details so Lunary can gather the sky around your
+                words.
               </p>
             </div>
 
@@ -160,14 +161,16 @@ export function OnboardingFlow() {
 
               <div className='flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg'>
                 <div className='flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center'>
-                  <Sparkles className='w-5 h-5 text-purple-300' />
+                  <NotebookPen className='w-5 h-5 text-purple-300' />
                 </div>
                 <div>
                   <h3 className='text-white font-medium mb-1'>
-                    Tarot Patterns
+                    Conversational Book of Shadows
                   </h3>
                   <p className='text-zinc-400 text-sm'>
-                    Discover your personal tarot cards based on your birth date
+                    Chat with Lunary&apos;s calm companion for reflective
+                    guidance, grounded in your birth chart, tarot pulls, and the
+                    current moon.
                   </p>
                 </div>
               </div>

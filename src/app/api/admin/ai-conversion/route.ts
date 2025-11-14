@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
           error: 'Database setup failed',
           details:
             tableError.message || 'Could not create conversion_events table',
-          hint: 'Please run: yarn setup-db or check your database connection',
+          hint: 'Please run: pnpm setup-db or check your database connection',
         },
         { status: 500 },
       );

@@ -686,6 +686,24 @@ export default function ProfilePage() {
             insights.
           </p>
         </div>
+
+        <div className='flex flex-col items-center gap-2 text-sm'>
+          <span className='text-zinc-500'>Looking for more?</span>
+          <div className='flex flex-wrap justify-center gap-3'>
+            <a
+              href='/shop'
+              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-purple-500/60 hover:text-purple-200'
+            >
+              Browse Shop
+            </a>
+            <a
+              href='/blog'
+              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-purple-500/60 hover:text-purple-200'
+            >
+              Read the Blog
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Auth Modal */}

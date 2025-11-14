@@ -9,7 +9,6 @@ on:
 
 env:
   NODE_VERSION: '20'
-  YARN_CACHE_FOLDER: ~/.yarn
 
 jobs:
   lint:
@@ -19,17 +18,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run ESLint
-        run: yarn lint:check
+        run: pnpm lint:check
 
       - name: Type check
         run: npx tsc --noEmit || echo "TypeScript check skipped if not configured"
@@ -41,26 +45,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
-        run: yarn prisma:generate
+        run: pnpm prisma:generate
 
       - name: Run unit tests
-        run: yarn test:unit
+        run: pnpm test:unit
 
       - name: Run integration tests
-        run: yarn test:integration
+        run: pnpm test:integration
 
       - name: Run tests with coverage
-        run: yarn test:coverage
+        run: pnpm test:coverage
         continue-on-error: true
 
       - name: Upload coverage to Codecov
@@ -86,21 +95,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
-        run: yarn prisma:generate
+        run: pnpm prisma:generate
 
       - name: Build application
         id: build
-        run: yarn build
+        run: pnpm build
         env:
           NODE_ENV: production
           # Required for Better Auth during build
@@ -128,23 +142,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
-        run: yarn prisma:generate
+        run: pnpm prisma:generate
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E smoke tests
-        run: yarn test:e2e --grep "@smoke"
+        run: pnpm test:e2e --grep "@smoke"
         env:
           NODE_ENV: test
           PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000' }}

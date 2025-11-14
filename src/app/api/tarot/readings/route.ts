@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { TAROT_SPREAD_MAP } from '@/constants/tarotSpreads';
+import { TAROT_SPREAD_MAP, TarotPlan } from '@/constants/tarotSpreads';
 import { generateSpreadReading } from '@/utils/tarot/spreadReading';
 import {
   computeUsageSnapshot,
@@ -8,20 +8,25 @@ import {
   isSpreadAccessible,
   mapRowToReading,
 } from './shared';
+import { auth } from '@/lib/auth';
 
 const toTextArrayLiteral = (values: string[]): string =>
   `{${values.map((value) => `"${value.replace(/"/g, '\\"')}"`).join(',')}}`;
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    if (!userId) {
+    const session = await auth.api.getSession({ headers: request.headers });
+
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 },
+        { error: 'Authentication required' },
+        { status: 401 },
       );
     }
+
+    const userId = session.user.id;
+    const userEmail = session.user.email;
+    const { searchParams } = new URL(request.url);
 
     const spreadSlug = searchParams.get('spread');
     const limit = Math.min(parseInt(searchParams.get('limit') || '10', 10), 50);
@@ -31,7 +36,7 @@ export async function GET(request: NextRequest) {
         ? new Date(cursorParam)
         : null;
 
-    const subscription = await getSubscription(userId);
+    const subscription = await getSubscription(userId, userEmail);
     const usage = await computeUsageSnapshot(userId, subscription);
 
     const historyCutoffDays = usage.historyWindowDays;
@@ -90,20 +95,53 @@ export async function GET(request: NextRequest) {
       ? new Date(nextCursorRow.created_at).toISOString()
       : null;
 
+    const spreadsUnlocked = Object.keys(TAROT_SPREAD_MAP).filter((slug) =>
+      isSpreadAccessible(slug, subscription.plan),
+    );
+
+    console.log(`[tarot/readings] GET response for user ${userId}:`, {
+      subscription_plan: subscription.plan,
+      subscription_status: subscription.status,
+      spreads_unlocked_count: spreadsUnlocked.length,
+      total_spreads: Object.keys(TAROT_SPREAD_MAP).length,
+      usage_limit: usage.monthlyLimit,
+      usage_used: usage.monthlyUsed,
+    });
+
     return NextResponse.json({
       readings,
       usage,
       hasMore,
       nextCursor,
-      spreadsUnlocked: Object.keys(TAROT_SPREAD_MAP).filter((slug) =>
-        isSpreadAccessible(slug, subscription.plan),
-      ),
+      spreadsUnlocked,
     });
   } catch (error) {
     console.error('[tarot/readings] GET failed', error);
+
+    // Try to return spreadsUnlocked even on error, based on subscription if available
+    let spreadsUnlocked: string[] = [];
+    try {
+      const session = await auth.api.getSession({ headers: request.headers });
+      if (session?.user) {
+        const userId = session.user.id;
+        const userEmail = session.user.email;
+        const subscription = await getSubscription(userId, userEmail);
+        spreadsUnlocked = Object.keys(TAROT_SPREAD_MAP).filter((slug) =>
+          isSpreadAccessible(slug, subscription.plan),
+        );
+      }
+    } catch (subError) {
+      console.error(
+        '[tarot/readings] Failed to get subscription for error response',
+        subError,
+      );
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to load tarot readings',
+        errorDetails: error instanceof Error ? error.message : 'Unknown error',
+        spreadsUnlocked,
       },
       { status: 500 },
     );
@@ -112,6 +150,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth.api.getSession({ headers: request.headers });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 },
+      );
+    }
+
+    const userId = session.user.id;
+    const userEmail = session.user.email;
+
     const bodyText = await request.text();
     if (!bodyText) {
       return NextResponse.json(
@@ -121,11 +171,11 @@ export async function POST(request: NextRequest) {
     }
 
     const data = JSON.parse(bodyText);
-    const { userId, spreadSlug, userName, seed, notes, tags } = data;
+    const { spreadSlug, userName, seed, notes, tags } = data;
 
-    if (!userId || !spreadSlug) {
+    if (!spreadSlug) {
       return NextResponse.json(
-        { error: 'userId and spreadSlug are required' },
+        { error: 'spreadSlug is required' },
         { status: 400 },
       );
     }
@@ -138,7 +188,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const subscription = await getSubscription(userId);
+    const subscription = await getSubscription(userId, userEmail);
+
+    console.log(`[tarot/readings] POST subscription check:`, {
+      userId,
+      userEmail,
+      subscription_plan: subscription.plan,
+      subscription_status: subscription.status,
+      spreadSlug,
+      spread_minimumPlan: spread.minimumPlan,
+      isAccessible: isSpreadAccessible(spreadSlug, subscription.plan),
+    });
 
     if (!isSpreadAccessible(spreadSlug, subscription.plan)) {
       return NextResponse.json(
@@ -146,6 +206,7 @@ export async function POST(request: NextRequest) {
           error: 'This spread is locked for your current plan.',
           code: 'spread_locked',
           requiredPlan: spread.minimumPlan,
+          currentPlan: subscription.plan,
         },
         { status: 403 },
       );

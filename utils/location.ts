@@ -18,24 +18,27 @@ export interface LocationState {
 
 const DEFAULT_LOCATION: LocationData = {
   latitude: 40.7128,
-  longitude: -74.0060,
+  longitude: -74.006,
   city: 'New York',
   country: 'United States',
   timezone: 'America/New_York',
 };
 
-export const getLocationPermissionStatus = async (): Promise<PermissionState> => {
-  if (!navigator.permissions) {
-    return 'prompt';
-  }
-  
-  try {
-    const permission = await navigator.permissions.query({ name: 'geolocation' });
-    return permission.state;
-  } catch {
-    return 'prompt';
-  }
-};
+export const getLocationPermissionStatus =
+  async (): Promise<PermissionState> => {
+    if (!navigator.permissions) {
+      return 'prompt';
+    }
+
+    try {
+      const permission = await navigator.permissions.query({
+        name: 'geolocation',
+      });
+      return permission.state;
+    } catch {
+      return 'prompt';
+    }
+  };
 
 export const requestLocation = (): Promise<LocationData> => {
   return new Promise((resolve, reject) => {
@@ -47,7 +50,7 @@ export const requestLocation = (): Promise<LocationData> => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude, accuracy } = position.coords;
-        
+
         try {
           const locationInfo = await reverseGeocode(latitude, longitude);
           resolve({
@@ -83,32 +86,40 @@ export const requestLocation = (): Promise<LocationData> => {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 300000, // 5 minutes
-      }
+      },
     );
   });
 };
 
-const reverseGeocode = async (lat: number, lng: number): Promise<Partial<LocationData>> => {
+const reverseGeocode = async (
+  lat: number,
+  lng: number,
+): Promise<Partial<LocationData>> => {
   try {
     // Use OpenStreetMap Nominatim API for reverse geocoding
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=en`,
       {
         headers: {
-          'User-Agent': 'Lunary-Astrology-App/1.0'
-        }
-      }
+          'User-Agent': 'Lunary-Astrology-App/1.0',
+        },
+      },
     );
-    
+
     if (response.ok) {
       const data = await response.json();
       const address = data.address || {};
-      
-      const city = address.city || address.town || address.village || address.suburb || address.neighbourhood;
+
+      const city =
+        address.city ||
+        address.town ||
+        address.village ||
+        address.suburb ||
+        address.neighbourhood;
       const country = address.country;
-      
+
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
+
       return {
         city,
         country,
@@ -118,7 +129,7 @@ const reverseGeocode = async (lat: number, lng: number): Promise<Partial<Locatio
   } catch (error) {
     console.warn('Reverse geocoding failed:', error);
   }
-  
+
   // Fallback to just timezone
   try {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -128,12 +139,12 @@ const reverseGeocode = async (lat: number, lng: number): Promise<Partial<Locatio
   }
 };
 
-export const locationToObserver = (location: LocationData): Observer => 
+export const locationToObserver = (location: LocationData): Observer =>
   new Observer(location.latitude, location.longitude, 0);
 
 export const getStoredLocation = (): LocationData | null => {
   if (typeof window === 'undefined') return null;
-  
+
   try {
     const stored = localStorage.getItem('user_location');
     return stored ? JSON.parse(stored) : null;
@@ -144,7 +155,7 @@ export const getStoredLocation = (): LocationData | null => {
 
 export const storeLocation = (location: LocationData): void => {
   if (typeof window === 'undefined') return;
-  
+
   try {
     localStorage.setItem('user_location', JSON.stringify(location));
   } catch {
@@ -154,7 +165,7 @@ export const storeLocation = (location: LocationData): void => {
 
 export const clearStoredLocation = (): void => {
   if (typeof window === 'undefined') return;
-  
+
   try {
     localStorage.removeItem('user_location');
   } catch {
@@ -172,4 +183,4 @@ export const formatLocation = (location: LocationData): string => {
     return location.city;
   }
   return `${location.latitude.toFixed(2)}, ${location.longitude.toFixed(2)}`;
-}; 
+};

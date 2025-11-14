@@ -20,7 +20,10 @@ export type ConversionEvent =
   | 'birthday_entered'
   | 'horoscope_viewed'
   | 'tarot_viewed'
-  | 'birth_chart_viewed';
+  | 'birth_chart_viewed'
+  | 'personalized_tarot_viewed'
+  | 'personalized_horoscope_viewed'
+  | 'crystal_recommendations_viewed';
 
 export interface ConversionEventData {
   event: ConversionEvent;
@@ -118,14 +121,65 @@ function sanitizeEventPayload(
   );
 }
 
+function extractUTMParams(): Record<string, string> {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return {};
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const utmParams: Record<string, string> = {};
+
+  const utmKeys = [
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_term',
+    'utm_content',
+  ];
+
+  for (const key of utmKeys) {
+    const value = params.get(key);
+    if (value) {
+      utmParams[key] = value;
+    }
+  }
+
+  if (document.referrer) {
+    try {
+      const referrerUrl = new URL(document.referrer);
+      if (referrerUrl.hostname.includes('tiktok.com')) {
+        utmParams.utm_source = 'tiktok';
+        utmParams.referrer = document.referrer;
+      }
+    } catch {
+      if (document.referrer.includes('tiktok.com')) {
+        utmParams.utm_source = 'tiktok';
+        utmParams.referrer = document.referrer;
+      }
+    }
+  }
+
+  return utmParams;
+}
+
 export async function trackConversion(
   event: ConversionEvent,
   data?: Partial<ConversionEventData>,
 ): Promise<void> {
   try {
+    const utmParams = extractUTMParams();
+    const existingMetadata = data?.metadata || {};
+
     const eventData: ConversionEventData = {
       event,
       ...data,
+      metadata: {
+        ...existingMetadata,
+        ...utmParams,
+        referrer:
+          (typeof document !== 'undefined' ? document.referrer : undefined) ||
+          existingMetadata.referrer,
+      },
     };
 
     const metadataEmail = extractEmailFromMetadata(eventData.metadata);
@@ -156,6 +210,26 @@ export async function trackConversion(
     }
 
     const payload = sanitizeEventPayload(eventData);
+
+    if (event === 'app_opened' && eventData.userId) {
+      await fetch('/api/analytics/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: eventData.userId,
+          pagePath:
+            eventData.pagePath ||
+            (typeof window !== 'undefined'
+              ? window.location.pathname
+              : undefined),
+          metadata: eventData.metadata,
+        }),
+      }).catch((error) => {
+        console.error('Failed to track session:', error);
+      });
+    }
 
     track(event, payload);
 
@@ -273,4 +347,13 @@ export const conversionTracking = {
 
   trialExpired: (userId?: string, email?: string) =>
     trackConversion('trial_expired', { userId, userEmail: email }),
+
+  personalizedTarotViewed: (userId?: string) =>
+    trackConversion('personalized_tarot_viewed', { userId }),
+
+  personalizedHoroscopeViewed: (userId?: string) =>
+    trackConversion('personalized_horoscope_viewed', { userId }),
+
+  crystalRecommendationsViewed: (userId?: string) =>
+    trackConversion('crystal_recommendations_viewed', { userId }),
 };

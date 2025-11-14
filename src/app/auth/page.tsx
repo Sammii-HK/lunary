@@ -1,6 +1,39 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
 import { AuthComponent } from '@/components/Auth';
+import { useAuthStatus } from '@/components/AuthStatus';
 
 export default function AuthPage() {
+  const authState = useAuthStatus();
+  const redirectExecuted = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!window.location.pathname.includes('/auth')) return;
+    if (redirectExecuted.current) return;
+
+    if (!authState.loading && authState.isAuthenticated) {
+      redirectExecuted.current = true;
+      window.location.replace('/');
+    }
+  }, [authState.isAuthenticated, authState.loading]);
+
+  if (authState.loading) {
+    return (
+      <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4'></div>
+          <p className='text-zinc-400'>Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authState.isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
       <div className='w-full max-w-md'>
