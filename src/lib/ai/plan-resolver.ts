@@ -33,7 +33,10 @@ const NORMALISE = (value?: string | null): string | null => {
     .toLowerCase()
     .replace(/[_-]+/g, ' ')
     .replace(/\s+/g, ' ');
-  const withoutParens = cleaned.replace(/\((.*?)\)/g, '').replace(/\s+/g, ' ').trim();
+  const withoutParens = cleaned
+    .replace(/\((.*?)\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   return withoutParens || cleaned;
 };
 
