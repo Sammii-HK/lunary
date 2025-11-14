@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
 async function runDailyPosts(dateStr: string) {
   console.log('📱 Generating daily social media posts...');
 
-  const productionUrl = 'https://lunary.app';
+  const productionUrl = 'https://www.lunary.app';
 
   // Fetch dynamic content for all post types
   const [cosmicResponse] = await Promise.all([
@@ -418,7 +418,17 @@ async function runDailyPosts(dateStr: string) {
   for (const post of posts) {
     try {
       const readableDate = formatReadableDate(dateStr, post.scheduledDate);
-      const postData = {
+
+      // Add Pinterest options if Pinterest is in platforms
+      const pinterestOptions = post.platforms.includes('pinterest')
+        ? {
+            boardId:
+              process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
+            boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
+          }
+        : undefined;
+
+      const postData: any = {
         accountGroupId: process.env.SUCCULENT_ACCOUNT_GROUP_ID,
         name: post.name || `Cosmic Post - ${readableDate}`,
         content: post.content,
@@ -432,6 +442,10 @@ async function runDailyPosts(dateStr: string) {
         variants: post.variants,
         reddit: post.reddit,
       };
+
+      if (pinterestOptions) {
+        postData.pinterestOptions = pinterestOptions;
+      }
 
       const response = await fetch(succulentApiUrl, {
         method: 'POST',
