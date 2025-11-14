@@ -7,6 +7,7 @@ import { useAccount } from 'jazz-tools/react';
 import { betterAuthClient } from '@/lib/auth-client';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { AdminInstallPrompt } from './components/AdminInstallPrompt';
 import {
   Card,
   CardContent,
@@ -838,6 +839,10 @@ This is exactly what you'll get every day at 8 AM UTC!`);
               </p>
             </div>
           </div>
+        </div>
+
+        <div className='mb-6 md:mb-8 lg:mb-10'>
+          <AdminInstallPrompt />
         </div>
 
         {/* Quick Stats - Responsive Grid */}

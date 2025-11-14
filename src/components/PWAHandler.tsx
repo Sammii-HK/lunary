@@ -18,7 +18,15 @@ declare global {
   }
 }
 
-export function PWAHandler() {
+interface PWAHandlerProps {
+  allowUnauthenticatedInstall?: boolean;
+  silent?: boolean;
+}
+
+export function PWAHandler({
+  allowUnauthenticatedInstall = false,
+  silent = false,
+}: PWAHandlerProps = {}) {
   const authState = useAuthStatus();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -183,13 +191,14 @@ export function PWAHandler() {
     setShowInstallPrompt(false);
   };
 
-  // Only show install prompt if user is authenticated and not installed
-  if (
+  const shouldHideBanner =
+    silent ||
     isInstalled ||
     !showInstallPrompt ||
-    !authState.isAuthenticated ||
-    authState.loading
-  ) {
+    authState.loading ||
+    (!allowUnauthenticatedInstall && !authState.isAuthenticated);
+
+  if (shouldHideBanner) {
     return null;
   }
 

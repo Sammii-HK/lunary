@@ -6,16 +6,12 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 import { getMoonSymbol } from '../../utils/moon/moonPhases';
-import { Navbar } from '@/components/Navbar';
 import { LunaryJazzProvider } from '@/components/JazzProvider';
-import { PWAHandler } from '@/components/PWAHandler';
-import { NotificationManager } from '@/components/NotificationManager';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
 import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
 import { StructuredData } from '@/components/StructuredData';
-import { ExitIntent } from '@/components/ExitIntent';
-import { OnboardingFlow } from '@/components/OnboardingFlow';
+import { AppChrome } from '@/components/AppChrome';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -111,13 +107,7 @@ export default function RootLayout({
               <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
               <Analytics />
             </ConditionalMainWrapper>
-            <Navbar />
-            <ErrorBoundaryWrapper>
-              <PWAHandler />
-              <NotificationManager />
-              <ExitIntent />
-              <OnboardingFlow />
-            </ErrorBoundaryWrapper>
+            <AppChrome />
           </LunaryJazzProvider>
         </ErrorBoundaryWrapper>
       </body>
