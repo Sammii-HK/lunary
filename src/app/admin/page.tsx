@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'jazz-tools/react';
 import { betterAuthClient } from '@/lib/auth-client';
+import { AuthComponent } from '@/components/Auth';
+import { useAuthStatus } from '@/components/AuthStatus';
 import {
   Card,
   CardContent,
@@ -50,9 +52,104 @@ interface AdminTool {
   lastUsed?: string;
 }
 
+type AdminAuthIssueType =
+  | 'none'
+  | 'no-session'
+  | 'not-admin'
+  | 'no-config'
+  | 'error';
+
+interface AdminAuthIssueState {
+  type: AdminAuthIssueType;
+  details?: string;
+}
+
+function LockedAdminBackdrop() {
+  const previewCards = [
+    {
+      title: 'Cron Monitor',
+      metric: 'Next run · 3h',
+      status: 'Stable',
+      icon: Activity,
+      accent: 'text-green-300',
+    },
+    {
+      title: 'Content Pipeline',
+      metric: '8 drafts',
+      status: 'Awaiting review',
+      icon: BookOpen,
+      accent: 'text-blue-300',
+    },
+    {
+      title: 'Notifications',
+      metric: '12.4k subs',
+      status: 'Queued',
+      icon: Bell,
+      accent: 'text-purple-300',
+    },
+    {
+      title: 'Shop Manager',
+      metric: '24 products',
+      status: 'Synced',
+      icon: Store,
+      accent: 'text-emerald-300',
+    },
+    {
+      title: 'Scheduler',
+      metric: '5 campaigns',
+      status: 'Auto',
+      icon: Calendar,
+      accent: 'text-pink-300',
+    },
+    {
+      title: 'Newsletter',
+      metric: 'Weekly drop',
+      status: 'In progress',
+      icon: Mail,
+      accent: 'text-orange-300',
+    },
+  ];
+
+  return (
+    <div className='absolute inset-0 overflow-hidden pointer-events-none select-none'>
+      <div className='absolute inset-0 bg-gradient-to-br from-purple-900/40 via-black to-black opacity-80' />
+      <div className='absolute inset-0'>
+        <div className='h-full w-full bg-[radial-gradient(circle_at_top,_rgba(147,51,234,0.35),_transparent_60%)] opacity-50 blur-3xl' />
+      </div>
+      <div className='absolute inset-0 flex items-center justify-center'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full px-6 blur-2xl opacity-60'>
+          {previewCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <div
+                key={card.title}
+                className='rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-2xl backdrop-blur-xl'
+              >
+                <div
+                  className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 ${card.accent}`}
+                >
+                  <Icon className='h-5 w-5' />
+                </div>
+                <p className='text-sm uppercase tracking-[0.2em] text-white/60'>
+                  {card.title}
+                </p>
+                <p className='mt-2 text-2xl font-semibold text-white/80'>
+                  {card.metric}
+                </p>
+                <p className='mt-1 text-sm text-white/50'>{card.status}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const { me } = useAccount();
+  const authState = useAuthStatus();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [testingNotification, setTestingNotification] = useState(false);
   const [testingRealNotification, setTestingRealNotification] = useState(false);
@@ -63,11 +160,27 @@ export default function AdminDashboard() {
   const [substackLoading, setSubstackLoading] = useState(false);
   const [substackWeekOffset, setSubstackWeekOffset] = useState(0);
   const [substackPublishing, setSubstackPublishing] = useState(false);
+  const [authIssue, setAuthIssue] = useState<AdminAuthIssueState>({
+    type: 'none',
+  });
+
+  const handleAuthSuccess = () => {
+    setAuthIssue({ type: 'none' });
+    setIsAuthorized(null);
+  };
 
   // Check if user is admin
   useEffect(() => {
+    if (authState.loading) {
+      setIsAuthorized(null);
+      return;
+    }
+
     const checkAdminAccess = async () => {
       try {
+        setAuthIssue({ type: 'none' });
+        setIsAuthorized(null);
+
         // Wait a bit for session to be established after sign-in
         // Longer wait if we just came from auth page
         const cameFromAuth =
@@ -194,6 +307,17 @@ export default function AdminDashboard() {
                 ? 'Wait for session to load or check Better Auth session. If on localhost, ensure Jazz account is loaded.'
                 : 'Set NEXT_PUBLIC_ADMIN_EMAILS in .env.local with your email',
             });
+
+            const issueType: AdminAuthIssueType = authState.isAuthenticated
+              ? 'error'
+              : 'no-session';
+            setAuthIssue({
+              type: issueType,
+              details:
+                issueType === 'no-session'
+                  ? 'Sign in with your Lunary admin email to continue.'
+                  : 'We could not verify your admin session. Refresh or sign in again.',
+            });
             setIsAuthorized(false);
             return;
           }
@@ -204,6 +328,11 @@ export default function AdminDashboard() {
             reason: 'No admin emails configured',
             userEmail,
             fix: 'Set NEXT_PUBLIC_ADMIN_EMAILS in .env.local with your email',
+          });
+          setAuthIssue({
+            type: 'no-config',
+            details:
+              'Set NEXT_PUBLIC_ADMIN_EMAILS in .env.local with your approved admin emails.',
           });
           setIsAuthorized(false);
           return;
@@ -220,20 +349,32 @@ export default function AdminDashboard() {
             adminEmails,
             fix: `Add "${userEmail.toLowerCase()}" to NEXT_PUBLIC_ADMIN_EMAILS in .env.local`,
           });
+          setAuthIssue({
+            type: 'not-admin',
+            details: `Add "${userEmail.toLowerCase()}" to NEXT_PUBLIC_ADMIN_EMAILS to enable access.`,
+          });
           setIsAuthorized(false);
           return;
         }
 
         console.log('✅ Admin access granted:', { userEmail });
+        setAuthIssue({ type: 'none' });
         setIsAuthorized(true);
       } catch (error) {
         console.error('❌ Admin access check failed:', error);
+        setAuthIssue({
+          type: 'error',
+          details:
+            error instanceof Error
+              ? error.message
+              : 'Unable to verify admin access.',
+        });
         setIsAuthorized(false);
       }
     };
 
     checkAdminAccess();
-  }, [router, me]);
+  }, [router, me, authState.isAuthenticated, authState.loading]);
 
   // Show loading state while checking authorization
   if (isAuthorized === null) {
@@ -249,17 +390,41 @@ export default function AdminDashboard() {
 
   // Show access denied message
   if (isAuthorized === false) {
+    if (authIssue.type === 'no-session') {
+      return (
+        <div className='min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center px-4 py-10'>
+          <LockedAdminBackdrop />
+          <div className='relative z-10 w-full max-w-xl space-y-6'>
+            <div className='text-center space-y-3'>
+              <p className='text-xs uppercase tracking-[0.4em] text-white/50'>
+                Admin Portal
+              </p>
+              <h1 className='text-3xl font-light tracking-tight'>
+                Sign in to continue
+              </h1>
+              <p className='text-sm text-white/70'>
+                {authIssue.details ||
+                  'Use your Lunary admin credentials to access the dashboard.'}
+              </p>
+            </div>
+            <div className='rounded-3xl border border-white/10 bg-black/70 p-6 shadow-2xl backdrop-blur-2xl'>
+              <AuthComponent onSuccess={handleAuthSuccess} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
-        <div className='text-center max-w-md'>
-          <h1 className='text-2xl font-bold text-red-400 mb-4'>
-            Access Denied
-          </h1>
-          <p className='text-zinc-400 mb-4'>
-            You don't have permission to access the admin dashboard.
+        <div className='text-center max-w-md space-y-4'>
+          <h1 className='text-2xl font-bold text-red-400'>Access Denied</h1>
+          <p className='text-zinc-400'>
+            {authIssue.details ||
+              "You don't have permission to access the admin dashboard."}
           </p>
           <p className='text-sm text-zinc-500'>
-            Check the browser console for details.
+            Check the browser console for details or update your admin settings.
           </p>
         </div>
       </div>
