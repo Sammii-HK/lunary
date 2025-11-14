@@ -1,7 +1,7 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { getTarotCard } from '../../../utils/tarot/tarot';
@@ -9,13 +9,19 @@ import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
 import { getGeneralTarotReading } from '../../../utils/tarot/generalTarot';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
-import { Check, ChevronDown, ChevronRight, Sparkles } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Sparkles,
+  Share2,
+} from 'lucide-react';
 import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
-import { FeatureGate } from '@/components/FeatureGate';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TrialReminder } from '@/components/TrialReminder';
 import { conversionTracking } from '@/lib/analytics';
+import { SocialShareButtons } from '@/components/SocialShareButtons';
 import {
   SubscriptionStatus,
   TarotSpreadExperience,
@@ -35,6 +41,8 @@ const TarotReadings = () => {
   };
   const hasChartAccess = hasBirthChartAccess(subscription.status);
 
+  const [shareOrigin, setShareOrigin] = useState('https://lunary.app');
+  const [sharePopover, setSharePopover] = useState<string | null>(null);
   const [timeFrame, setTimeFrame] = useState(30);
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<{
@@ -48,6 +56,12 @@ const TarotReadings = () => {
     if (hasChartAccess) return null;
     return getGeneralTarotReading();
   }, [hasChartAccess]);
+
+  const shareDate = useMemo(() => dayjs().format('YYYY-MM-DD'), []);
+  const firstName = useMemo(
+    () => (userName ? userName.split(' ')[0] || userName : undefined),
+    [userName],
+  );
 
   const previousReadings = useMemo(() => {
     if (hasChartAccess) return [];
@@ -80,6 +94,39 @@ const TarotReadings = () => {
     [hasChartAccess, userName, timeFrame, userBirthday],
   );
 
+  const truncate = useCallback((value?: string | null, limit = 140) => {
+    if (!value) return undefined;
+    if (value.length <= limit) return value;
+    return `${value.slice(0, limit - 1).trimEnd()}…`;
+  }, []);
+
+  const generalDailyShare = useMemo(() => {
+    if (!generalTarot) return null;
+
+    try {
+      const url = new URL('/share/tarot', shareOrigin);
+      url.searchParams.set('card', generalTarot.daily.name);
+      if (generalTarot.daily.keywords?.length) {
+        url.searchParams.set(
+          'keywords',
+          generalTarot.daily.keywords.slice(0, 3).join(','),
+        );
+      }
+      url.searchParams.set('timeframe', 'Daily');
+      url.searchParams.set('date', shareDate);
+      url.searchParams.set('variant', 'general');
+
+      return {
+        url: url.toString(),
+        title: `Today's Tarot Card: ${generalTarot.daily.name}`,
+        text: truncate(generalTarot.guidance?.dailyMessage),
+      };
+    } catch (error) {
+      console.error('Failed to build general tarot share URL:', error);
+      return null;
+    }
+  }, [generalTarot, shareOrigin, shareDate, truncate]);
+
   useEffect(() => {
     if (personalizedReading && userId) {
       conversionTracking.personalizedTarotViewed(userId);
@@ -110,6 +157,129 @@ const TarotReadings = () => {
       };
     });
   }, [hasChartAccess, userName, userBirthday]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      setShareOrigin(window.location.origin);
+    }
+  }, []);
+
+  const personalizedDailyShare = useMemo(() => {
+    if (!personalizedReading) return null;
+
+    try {
+      const url = new URL('/share/tarot', shareOrigin);
+      url.searchParams.set('card', personalizedReading.daily.name);
+      if (personalizedReading.daily.keywords?.length) {
+        url.searchParams.set(
+          'keywords',
+          personalizedReading.daily.keywords.slice(0, 3).join(','),
+        );
+      }
+      url.searchParams.set('timeframe', 'Daily');
+      url.searchParams.set('date', shareDate);
+      url.searchParams.set('variant', 'personal');
+      if (firstName) {
+        url.searchParams.set('name', firstName);
+      }
+
+      const description =
+        personalizedReading.guidance?.dailyMessage ||
+        personalizedReading.daily.keywords?.slice(0, 3).join(', ');
+
+      return {
+        url: url.toString(),
+        title: `${firstName ? `${firstName}'s` : 'My'} Daily Tarot Card: ${
+          personalizedReading.daily.name
+        }`,
+        text: truncate(description),
+      };
+    } catch (error) {
+      console.error('Failed to build personalized tarot share URL:', error);
+      return null;
+    }
+  }, [personalizedReading, shareOrigin, shareDate, firstName, truncate]);
+
+  const patternShare = useMemo(() => {
+    const trends = personalizedReading?.trendAnalysis;
+    if (!trends) return null;
+
+    try {
+      const themes = trends.dominantThemes.slice(0, 3);
+      const headline =
+        themes[0] ||
+        trends.frequentCards[0]?.name ||
+        trends.suitPatterns[0]?.suit ||
+        `${trends.timeFrame}-Day Patterns`;
+
+      const url = new URL('/share/tarot', shareOrigin);
+      url.searchParams.set('card', headline);
+      if (themes.length) {
+        url.searchParams.set('keywords', themes.join(','));
+      }
+      url.searchParams.set('timeframe', `${trends.timeFrame}-Day`);
+      url.searchParams.set('variant', 'pattern');
+      url.searchParams.set('date', shareDate);
+      if (firstName) {
+        url.searchParams.set('name', firstName);
+      }
+
+      const summary =
+        trends.frequentCards[0]?.reading ||
+        trends.suitPatterns[0]?.reading ||
+        trends.arcanaPatterns[0]?.reading ||
+        trends.numberPatterns[0]?.reading ||
+        (themes.length ? `Dominant themes: ${themes.join(', ')}` : undefined);
+
+      return {
+        url: url.toString(),
+        title: `${firstName ? `${firstName}'s` : 'My'} ${trends.timeFrame}-Day Tarot Patterns`,
+        text: truncate(summary),
+      };
+    } catch (error) {
+      console.error('Failed to build tarot pattern share URL:', error);
+      return null;
+    }
+  }, [personalizedReading, shareOrigin, shareDate, firstName, truncate]);
+
+  const handleShareClick = useCallback(
+    async ({
+      id,
+      title,
+      url,
+      text,
+    }: {
+      id: string;
+      title: string;
+      url: string;
+      text?: string;
+    }) => {
+      const sharePayload = {
+        title,
+        text: text || title,
+        url,
+      };
+
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        try {
+          await navigator.share(sharePayload);
+          setSharePopover(null);
+          return;
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+            return;
+          }
+          console.error(
+            'Web Share API failed, falling back to share buttons:',
+            error,
+          );
+        }
+      }
+
+      setSharePopover((prev) => (prev === id ? null : id));
+    },
+    [setSharePopover],
+  );
 
   useEffect(() => {
     if (hasChartAccess && personalizedReading) {
@@ -169,6 +339,34 @@ const TarotReadings = () => {
                 <p className='text-sm text-zinc-400'>
                   {generalTarot.daily.keywords.slice(0, 2).join(', ')}
                 </p>
+
+                {generalDailyShare && (
+                  <div className='mt-3'>
+                    <button
+                      type='button'
+                      onClick={() =>
+                        handleShareClick({
+                          id: 'tarot-general-daily',
+                          title: generalDailyShare.title,
+                          url: generalDailyShare.url,
+                          text: generalDailyShare.text,
+                        })
+                      }
+                      className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
+                    >
+                      <Share2 className='w-4 h-4' />
+                      Share daily card
+                    </button>
+                    {sharePopover === 'tarot-general-daily' && (
+                      <div className='mt-3'>
+                        <SocialShareButtons
+                          url={generalDailyShare.url}
+                          title={generalDailyShare.title}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
@@ -378,6 +576,34 @@ const TarotReadings = () => {
               <p className='text-sm text-zinc-400'>
                 {personalizedReading.daily.keywords.slice(0, 2).join(', ')}
               </p>
+
+              {personalizedDailyShare && (
+                <div className='mt-3'>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      handleShareClick({
+                        id: 'tarot-personal-daily',
+                        title: personalizedDailyShare.title,
+                        url: personalizedDailyShare.url,
+                        text: personalizedDailyShare.text,
+                      })
+                    }
+                    className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
+                  >
+                    <Share2 className='w-4 h-4' />
+                    Share daily card
+                  </button>
+                  {sharePopover === 'tarot-personal-daily' && (
+                    <div className='mt-3'>
+                      <SocialShareButtons
+                        url={personalizedDailyShare.url}
+                        title={personalizedDailyShare.title}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
@@ -455,20 +681,50 @@ const TarotReadings = () => {
             title={`Your ${timeFrame}-Day Tarot Patterns`}
             color='zinc'
           >
-            <div className='flex flex-wrap gap-2 w-full justify-start sm:justify-end mb-4'>
-              {[7, 14, 30, 60, 90].map((days) => (
-                <button
-                  key={days}
-                  onClick={() => setTimeFrame(days)}
-                  className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                    timeFrame === days
-                      ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
-                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
-                  }`}
-                >
-                  {days}d
-                </button>
-              ))}
+            <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4'>
+              <div className='flex flex-wrap gap-2'>
+                {[7, 14, 30, 60, 90].map((days) => (
+                  <button
+                    key={days}
+                    onClick={() => setTimeFrame(days)}
+                    className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                      timeFrame === days
+                        ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
+                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
+                    }`}
+                  >
+                    {days}d
+                  </button>
+                ))}
+              </div>
+
+              {patternShare && (
+                <div className='sm:text-right'>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      handleShareClick({
+                        id: 'tarot-personal-patterns',
+                        title: patternShare.title,
+                        url: patternShare.url,
+                        text: patternShare.text,
+                      })
+                    }
+                    className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
+                  >
+                    <Share2 className='w-4 h-4' />
+                    Share your patterns
+                  </button>
+                  {sharePopover === 'tarot-personal-patterns' && (
+                    <div className='mt-3 sm:flex sm:justify-end'>
+                      <SocialShareButtons
+                        url={patternShare.url}
+                        title={patternShare.title}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {personalizedReading.trendAnalysis.dominantThemes.length > 0 && (
