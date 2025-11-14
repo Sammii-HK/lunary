@@ -1,6 +1,10 @@
 import { auth } from '@/lib/auth';
 import { withCors } from '@/lib/auth-cors';
 
+export async function GET(request: Request) {
+  return withCors(request, auth.handler);
+}
+
 export async function POST(request: Request) {
   console.log('🔍 POST /api/auth/sign-out called');
   try {
@@ -11,6 +15,14 @@ export async function POST(request: Request) {
     console.error('❌ Sign out error:', error);
     throw error;
   }
+}
+
+export async function PUT(request: Request) {
+  return withCors(request, auth.handler);
+}
+
+export async function DELETE(request: Request) {
+  return withCors(request, auth.handler);
 }
 
 export async function OPTIONS(request: Request) {

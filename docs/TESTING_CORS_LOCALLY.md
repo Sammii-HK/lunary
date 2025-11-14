@@ -151,17 +151,14 @@ curl -X OPTIONS http://localhost:3000/api/auth/get-session \
 If CORS headers aren't appearing:
 
 1. **Check origin validation:**
-
    - Make sure the origin matches one of the patterns
    - Check `src/lib/origin-validation.ts` for the regex patterns
 
 2. **Check server logs:**
-
    - Look for any errors in the terminal running `yarn dev`
    - Check if the request is reaching the handler
 
 3. **Verify route handler:**
-
    - Ensure `withCors` wrapper is being used
    - Check that OPTIONS method is handled
 
