@@ -1,4 +1,3 @@
-import { chromium } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';
 import { config } from 'dotenv';
@@ -71,6 +70,7 @@ async function loadExistingCookies(): Promise<any[] | null> {
 }
 
 async function testCookies(cookies: any[]): Promise<boolean> {
+  const { chromium } = await import('playwright');
   const browser = await chromium.launch({ headless: true });
   try {
     const context = await browser.newContext({

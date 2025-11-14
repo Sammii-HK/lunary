@@ -4,6 +4,31 @@ const require = createRequire(import.meta.url);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer }) => {
+    // Exclude Playwright from bundling (server-only, Node.js runtime)
+    if (isServer) {
+      config.externals = config.externals || [];
+      const playwrightExternals = {
+        playwright: 'commonjs playwright',
+        'playwright-core': 'commonjs playwright-core',
+        chromium: 'commonjs chromium',
+      };
+      
+      // Handle both array and function externals
+      if (Array.isArray(config.externals)) {
+        config.externals.push(playwrightExternals);
+      } else if (typeof config.externals === 'function') {
+        const originalExternals = config.externals;
+        config.externals = (context, request, callback) => {
+          if (request === 'playwright' || request === 'playwright-core' || request === 'chromium') {
+            return callback(null, `commonjs ${request}`);
+          }
+          return originalExternals(context, request, callback);
+        };
+      } else {
+        config.externals = [config.externals, playwrightExternals];
+      }
+    }
+
     // Enable WebAssembly experiments
     config.experiments = {
       ...config.experiments,

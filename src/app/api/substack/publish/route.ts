@@ -4,7 +4,6 @@ import {
   generateFreeSubstackPost,
   generatePaidSubstackPost,
 } from '../../../../../utils/substack/contentFormatter';
-import { publishBothTiers } from '../../../../../utils/substack/publisher';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,22 +34,20 @@ export async function POST(request: NextRequest) {
     const freePost = generateFreeSubstackPost(weeklyData);
     const paidPost = generatePaidSubstackPost(weeklyData);
 
+    const { publishBothTiers, publishToSubstack } = await import(
+      '../../../../../utils/substack/publisher'
+    );
+
     let results;
 
     if (publishFree && publishPaid) {
       results = await publishBothTiers(freePost, paidPost);
     } else if (publishFree) {
-      const { publishToSubstack } = await import(
-        '../../../../../utils/substack/publisher'
-      );
       results = {
         free: await publishToSubstack(freePost, 'free'),
         paid: { success: false, tier: 'paid' as const, error: 'Skipped' },
       };
     } else if (publishPaid) {
-      const { publishToSubstack } = await import(
-        '../../../../../utils/substack/publisher'
-      );
       results = {
         free: { success: false, tier: 'free' as const, error: 'Skipped' },
         paid: await publishToSubstack(paidPost, 'paid'),

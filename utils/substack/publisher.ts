@@ -1,8 +1,9 @@
-import { chromium, Browser, Page, BrowserContext } from 'playwright';
 import { SUBSTACK_CONFIG } from '../../src/config/substack';
 import { SubstackPost } from './contentFormatter';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import type { Browser, Page, BrowserContext } from 'playwright';
 
 export interface PublishResult {
   success: boolean;
@@ -129,7 +130,9 @@ async function authenticateWithCookies(
 
   try {
     await context.addCookies(cookies);
-    await page.goto('https://substack.com/dashboard');
+    await page.goto('https://substack.com/dashboard', {
+      waitUntil: 'domcontentloaded',
+    });
     await page.waitForTimeout(2000);
 
     const currentUrl = page.url();
@@ -181,6 +184,9 @@ export async function publishToSubstack(
   let browser: Browser | null = null;
 
   try {
+    // Dynamic import to avoid bundling Playwright in Next.js build
+    const playwright = await import('playwright');
+    const { chromium } = playwright;
     browser = await chromium.launch({
       headless: true,
     });
