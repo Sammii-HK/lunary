@@ -12,14 +12,18 @@ const nextConfig = {
         'playwright-core': 'commonjs playwright-core',
         chromium: 'commonjs chromium',
       };
-      
+
       // Handle both array and function externals
       if (Array.isArray(config.externals)) {
         config.externals.push(playwrightExternals);
       } else if (typeof config.externals === 'function') {
         const originalExternals = config.externals;
         config.externals = (context, request, callback) => {
-          if (request === 'playwright' || request === 'playwright-core' || request === 'chromium') {
+          if (
+            request === 'playwright' ||
+            request === 'playwright-core' ||
+            request === 'chromium'
+          ) {
             return callback(null, `commonjs ${request}`);
           }
           return originalExternals(context, request, callback);
@@ -163,6 +167,10 @@ const nextConfig = {
         // Cache OG images for 24 hours (content updates daily)
         source: '/api/og/:path*',
         headers: [
+          {
+            key: 'Content-Type',
+            value: 'image/png',
+          },
           {
             key: 'Cache-Control',
             value: 'public, s-maxage=86400, stale-while-revalidate=172800',
