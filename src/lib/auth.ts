@@ -1,7 +1,3 @@
-// This module must run in Node.js runtime only (not Edge)
-// It uses Brevo email client which requires Node.js built-ins
-export const runtime = 'nodejs';
-
 import { betterAuth } from 'better-auth';
 import { jazzPlugin } from 'jazz-tools/better-auth/auth/server';
 import { JazzBetterAuthDatabaseAdapter } from 'jazz-tools/better-auth/database-adapter';
