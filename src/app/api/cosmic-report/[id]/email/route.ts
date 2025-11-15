@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import { sendEmail } from '@/lib/email';
@@ -9,12 +9,9 @@ const emailSchema = z.object({
   make_public: z.boolean().optional(),
 });
 
-interface Params {
-  id: string;
-}
-
-export async function POST(request: Request, { params }: { params: Params }) {
+export async function POST(request: NextRequest, context: any) {
   try {
+    const { params } = context as { params: { id: string } };
     const body = await request.json();
     const parsed = emailSchema.parse(body);
     const id = Number(params.id);

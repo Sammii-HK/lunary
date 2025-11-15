@@ -1,13 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { createShareToken, buildShareUrl } from '@/lib/cosmic-report/share';
 
-interface Params {
-  id: string;
-}
-
-export async function POST(_request: Request, { params }: { params: Params }) {
+export async function POST(_request: NextRequest, context: any) {
   try {
+    const { params } = context as { params: { id: string } };
     const id = Number(params.id);
     if (Number.isNaN(id)) {
       return NextResponse.json(

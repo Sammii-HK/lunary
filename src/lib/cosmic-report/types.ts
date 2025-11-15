@@ -15,8 +15,8 @@ export interface CosmicReportData {
   reportType: CosmicReportType;
   generatedFor?: string;
   dateRange?: {
-    start: string;
-    end: string;
+    start?: string;
+    end?: string;
   };
   sections: CosmicReportSection[];
   metadata?: Record<string, unknown>;

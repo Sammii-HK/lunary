@@ -1,12 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
-interface Params {
-  token: string;
-}
-
-export async function GET(_request: Request, { params }: { params: Params }) {
+export async function GET(_request: NextRequest, context: any) {
   try {
+    const { params } = context as { params: { token: string } };
     const { token } = params;
     if (!token) {
       return NextResponse.json(

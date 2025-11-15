@@ -1,14 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { generateCosmicReportPdf } from '@/lib/cosmic-report/pdf-generator';
 import { CosmicReportData } from '@/lib/cosmic-report/types';
 
-interface Params {
-  id: string;
-}
-
-export async function GET(_request: Request, { params }: { params: Params }) {
+export async function GET(_request: NextRequest, context: any) {
   try {
+    const { params } = context as { params: { id: string } };
     const id = Number(params.id);
     if (Number.isNaN(id)) {
       return NextResponse.json(

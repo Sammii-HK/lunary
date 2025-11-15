@@ -7,11 +7,11 @@ import { CosmicReportSection } from '@/lib/cosmic-report/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
-interface PageProps {
-  params: {
+type PageProps = {
+  params: Promise<{
     token: string;
-  };
-}
+  }>;
+};
 
 async function getReport(token: string) {
   const result = await sql`
@@ -31,7 +31,8 @@ async function getReport(token: string) {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const data = await getReport(params.token);
+  const resolvedParams = await params;
+  const data = await getReport(resolvedParams.token);
 
   if (!data) {
     return {
@@ -45,18 +46,19 @@ export async function generateMetadata({
     openGraph: {
       title: data.report_data.title,
       description: data.report_data.subtitle,
-      url: `${BASE_URL}/cosmic-report/${params.token}`,
+      url: `${BASE_URL}/cosmic-report/${resolvedParams.token}`,
     },
   };
 }
 
 export default async function SharedReportPage({ params }: PageProps) {
-  const report = await getReport(params.token);
+  const resolvedParams = await params;
+  const report = await getReport(resolvedParams.token);
   if (!report) {
     notFound();
   }
 
-  const shareUrl = `${BASE_URL}/cosmic-report/${params.token}`;
+  const shareUrl = `${BASE_URL}/cosmic-report/${resolvedParams.token}`;
 
   return (
     <div className='w-full max-w-4xl space-y-8 px-4 py-10 text-white'>
