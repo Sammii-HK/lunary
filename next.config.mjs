@@ -49,9 +49,22 @@ const nextConfig = {
           request === 'fs' ||
           request === 'path' ||
           request === 'async_hooks' ||
+          request === 'crypto' ||
+          request === 'stream' ||
+          request === 'util' ||
+          request === 'url' ||
           request?.startsWith('node:')
         ) {
           return callback(null, `commonjs ${request}`);
+        }
+        // Prevent auth.ts and email.ts from being bundled in Edge runtime
+        // These modules use Node.js-only dependencies (Brevo, crypto, etc.)
+        if (
+          (typeof request === 'string' && request.includes('/lib/email')) ||
+          (typeof request === 'string' && request.includes('@getbrevo'))
+        ) {
+          // Return empty module for Edge runtime
+          return callback(null, 'commonjs {}');
         }
         if (typeof originalExternals === 'function') {
           return originalExternals({ context, request }, callback);
@@ -88,6 +101,12 @@ const nextConfig = {
         url: false,
         buffer: require.resolve('buffer'),
       };
+    }
+
+    // Edge runtime: Allow buffer but exclude Node.js-only modules
+    if (nextRuntime === 'edge') {
+      // Buffer is available in Edge runtime via Web APIs
+      // Don't exclude it, but ensure Brevo and other Node.js modules are excluded
 
       // Optimize chunk splitting for better tree shaking
       config.optimization = {
