@@ -17,6 +17,12 @@ type NumberPatternBlock = {
   cards?: string[];
 };
 
+type CardPatternBlock = {
+  name: string;
+  count: number;
+  reading?: string;
+};
+
 type ShareTarotSearchParams = {
   card?: string | string[];
   keywords?: string | string[];
@@ -40,6 +46,7 @@ type ShareTarotSearchParams = {
   platform?: string | string[];
   suits?: string | string[];
   numbers?: string | string[];
+  cards?: string | string[];
 };
 
 type ShareTarotPageProps = {
@@ -126,6 +133,7 @@ const buildOgImageUrl = ({
   platform,
   suits,
   numbers,
+  cards,
 }: {
   card?: string;
   keywords: string[];
@@ -149,6 +157,7 @@ const buildOgImageUrl = ({
   platform?: string;
   suits?: SuitPatternBlock[];
   numbers?: NumberPatternBlock[];
+  cards?: CardPatternBlock[];
 }) => {
   const params = new URLSearchParams();
   if (card) params.set('card', card);
@@ -175,6 +184,7 @@ const buildOgImageUrl = ({
   if (platform) params.set('platform', platform);
   if (suits?.length) params.set('suits', JSON.stringify(suits));
   if (numbers?.length) params.set('numbers', JSON.stringify(numbers));
+  if (cards?.length) params.set('cards', JSON.stringify(cards));
 
   return `${APP_URL}/api/og/share/tarot?${params.toString()}`;
 };
@@ -212,6 +222,8 @@ export async function generateMetadata({
     parseJsonParam<SuitPatternBlock[]>(resolvedSearchParams.suits) ?? [];
   const numberBlocksMeta =
     parseJsonParam<NumberPatternBlock[]>(resolvedSearchParams.numbers) ?? [];
+  const cardBlocksMeta =
+    parseJsonParam<CardPatternBlock[]>(resolvedSearchParams.cards) ?? [];
   const moonPhaseRaw = toStringParam(resolvedSearchParams.moonPhase);
   const moonPhase = moonPhaseRaw ? toTitleCase(moonPhaseRaw) : undefined;
   const moonTip = toStringParam(resolvedSearchParams.moonTip);
@@ -318,6 +330,7 @@ export async function generateMetadata({
     platform: platformTag,
     suits: suitBlocksMeta,
     numbers: numberBlocksMeta,
+    cards: cardBlocksMeta,
   });
 
   return {
@@ -396,6 +409,8 @@ export default async function ShareTarotPage({
     parseJsonParam<SuitPatternBlock[]>(resolvedSearchParams.suits) ?? [];
   const numberBlocks =
     parseJsonParam<NumberPatternBlock[]>(resolvedSearchParams.numbers) ?? [];
+  const cardBlocks =
+    parseJsonParam<CardPatternBlock[]>(resolvedSearchParams.cards) ?? [];
   const sharedMoonPhaseRaw = toStringParam(resolvedSearchParams.moonPhase);
   const sharedMoonPhase = sharedMoonPhaseRaw
     ? toTitleCase(sharedMoonPhaseRaw)
@@ -418,6 +433,30 @@ export default async function ShareTarotPage({
       const digits = timeframeBase.match(/\d+/);
       return digits ? Number(digits[0]) : undefined;
     })();
+  const primaryHighlights = [
+    suitBlocks[0]?.reading && {
+      label: `${suitBlocks[0].suit} focus`,
+      text: suitBlocks[0].reading,
+    },
+    numberBlocks[0]?.reading && {
+      label: `${numberBlocks[0].number}s`,
+      text: numberBlocks[0].reading,
+    },
+    cardBlocks[0]?.reading && {
+      label: cardBlocks[0].name,
+      text: cardBlocks[0].reading,
+    },
+  ].filter(Boolean) as Array<{ label: string; text: string }>;
+  const additionalInsights = combinedInsights.filter(
+    (text) => !primaryHighlights.some((highlight) => highlight.text === text),
+  );
+  const orderedSignalHighlights = [
+    ...primaryHighlights,
+    ...additionalInsights.map((text) => ({
+      label: 'Theme',
+      text,
+    })),
+  ];
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-indigo-950 to-purple-900 py-12 text-white sm:py-16'>
@@ -457,6 +496,26 @@ export default async function ShareTarotPage({
 
           {isPattern && (
             <div className='mt-10 space-y-8 text-left'>
+              {orderedSignalHighlights.length > 0 && (
+                <div className='rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-6'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-indigo-200/80'>
+                    Signal Highlights
+                  </p>
+                  <div className='mt-4 space-y-3'>
+                    {orderedSignalHighlights.map((highlight, index) => (
+                      <div key={`${highlight.label}-${index}`}>
+                        <p className='text-xs uppercase tracking-[0.25em] text-indigo-200/70'>
+                          {highlight.label}
+                        </p>
+                        <p className='mt-1 text-base leading-relaxed text-zinc-100/90'>
+                          {highlight.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {(suitBlocks.length > 0 || numberBlocks.length > 0) && (
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-6 space-y-6'>
                   {suitBlocks.length > 0 && (
@@ -528,14 +587,27 @@ export default async function ShareTarotPage({
                 </div>
               )}
 
-              {combinedInsights.length > 0 && (
-                <div className='rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-6'>
-                  <p className='text-xs uppercase tracking-[0.35em] text-indigo-200/80'>
-                    Signal Highlights
+              {cardBlocks.length > 0 && (
+                <div className='rounded-2xl border border-white/10 bg-white/5 p-6'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                    Card Patterns
                   </p>
-                  <div className='mt-4 space-y-3 text-base leading-relaxed text-zinc-100/90'>
-                    {combinedInsights.map((insight, index) => (
-                      <p key={`${insight}-${index}`}>{insight}</p>
+                  <div className='mt-4 space-y-4'>
+                    {cardBlocks.map((pattern) => (
+                      <div
+                        key={pattern.name}
+                        className='rounded-xl border border-white/10 bg-black/30 p-4'
+                      >
+                        <p className='text-sm font-semibold text-white'>
+                          {pattern.name} ({pattern.count}{' '}
+                          {pattern.count === 1 ? 'time' : 'times'})
+                        </p>
+                        {pattern.reading && (
+                          <p className='mt-2 text-sm leading-relaxed text-zinc-300'>
+                            {pattern.reading}
+                          </p>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>

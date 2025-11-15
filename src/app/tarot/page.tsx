@@ -343,12 +343,34 @@ const TarotReadings = () => {
           : trends.timeFrame >= 30
             ? 6
             : trends.suitPatterns.length || trends.numberPatterns.length || 4;
-      const topSuitPattern = trends.suitPatterns[0];
+      const suitBlocks = trends.suitPatterns
+        .slice(0, patternLimit)
+        .map((pattern) => ({
+          suit: pattern.suit,
+          count: pattern.count,
+          reading: pattern.reading,
+        }));
+      const numberBlocks = trends.numberPatterns
+        .slice(0, patternLimit)
+        .map((pattern) => ({
+          number: pattern.number,
+          count: pattern.count,
+          reading: pattern.reading,
+          cards: pattern.cards,
+        }));
+      const cardBlocks = trends.frequentCards
+        .slice(0, patternLimit)
+        .map((card) => ({
+          name: card.name,
+          count: card.count,
+          reading: card.reading,
+        }));
+      const topSuitPattern = suitBlocks[0];
       const elementFocus = topSuitPattern
         ? SUIT_ELEMENTS[topSuitPattern.suit]
         : undefined;
-      const topNumberPattern = trends.numberPatterns[0];
-      const frequentCard = trends.frequentCards[0];
+      const topNumberPattern = numberBlocks[0];
+      const frequentCard = cardBlocks[0];
       const insightPool = [
         frequentCard?.reading
           ? `${frequentCard.name}: ${frequentCard.reading}`
@@ -424,26 +446,14 @@ const TarotReadings = () => {
           truncate(actionPrompt, 140) || actionPrompt,
         );
       }
-      const suitBlocks = trends.suitPatterns
-        .slice(0, patternLimit)
-        .map((pattern) => ({
-          suit: pattern.suit,
-          count: pattern.count,
-          reading: pattern.reading,
-        }));
       if (suitBlocks.length) {
         url.searchParams.set('suits', JSON.stringify(suitBlocks));
       }
-      const numberBlocks = trends.numberPatterns
-        .slice(0, patternLimit)
-        .map((pattern) => ({
-          number: pattern.number,
-          count: pattern.count,
-          reading: pattern.reading,
-          cards: pattern.cards,
-        }));
       if (numberBlocks.length) {
         url.searchParams.set('numbers', JSON.stringify(numberBlocks));
+      }
+      if (cardBlocks.length) {
+        url.searchParams.set('cards', JSON.stringify(cardBlocks));
       }
 
       const summary =

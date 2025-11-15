@@ -84,6 +84,12 @@ type NumberPatternBlock = {
   cards?: string[];
 };
 
+type CardPatternBlock = {
+  name: string;
+  count: number;
+  reading?: string;
+};
+
 const gradients = [
   {
     background: 'linear-gradient(135deg, #11001c, #4e1a7a)',
@@ -140,6 +146,8 @@ export async function GET(request: NextRequest) {
     parseJsonParam<SuitPatternBlock[]>(searchParams.get('suits')) ?? [];
   const numberBlocks =
     parseJsonParam<NumberPatternBlock[]>(searchParams.get('numbers')) ?? [];
+  const cardBlocks =
+    parseJsonParam<CardPatternBlock[]>(searchParams.get('cards')) ?? [];
 
   const baseLabel = (() => {
     if (isPattern) {
@@ -168,6 +176,23 @@ export async function GET(request: NextRequest) {
   ).slice(0, 4);
   const limitedSuitBlocks = suitBlocks.slice(0, 4);
   const limitedNumberBlocks = numberBlocks.slice(0, 4);
+  const limitedCardBlocks = cardBlocks.slice(0, 4);
+  const topHighlights = [
+    limitedSuitBlocks[0]?.reading && {
+      label: `${limitedSuitBlocks[0].suit} focus`,
+      text: limitedSuitBlocks[0].reading,
+    },
+    limitedNumberBlocks[0]?.reading && {
+      label: `${limitedNumberBlocks[0].number}s`,
+      text: limitedNumberBlocks[0].reading,
+    },
+    limitedCardBlocks[0]?.reading && {
+      label: limitedCardBlocks[0].name,
+      text: limitedCardBlocks[0].reading,
+    },
+  ]
+    .filter((entry): entry is { label: string; text: string } => Boolean(entry))
+    .slice(0, 3);
   const robotoMono = await loadRobotoMono(request);
 
   const footerHandles = (
@@ -255,6 +280,53 @@ export async function GET(request: NextRequest) {
                 {card}
               </div>
             </div>
+
+            {topHighlights.length > 0 && (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns:
+                    topHighlights.length > 1
+                      ? 'repeat(2, minmax(0,1fr))'
+                      : '1fr',
+                  gap: '16px',
+                }}
+              >
+                {topHighlights.map((highlight, index) => (
+                  <div
+                    key={`${highlight.label}-${index}`}
+                    style={{
+                      borderRadius: 16,
+                      border: '1px solid rgba(255,255,255,0.25)',
+                      padding: '16px 20px',
+                      backgroundColor: 'rgba(0,0,0,0.25)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: 'Roboto Mono',
+                        fontSize: 18,
+                        letterSpacing: 2,
+                        textTransform: 'uppercase',
+                        opacity: 0.7,
+                      }}
+                    >
+                      {highlight.label}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontFamily: 'Roboto Mono',
+                        fontSize: 22,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {highlight.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {keywords.length > 0 && (
               <div
@@ -448,6 +520,75 @@ export async function GET(request: NextRequest) {
                               Cards: {pattern.cards.join(', ')}
                             </div>
                           ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {limitedCardBlocks.length > 0 && (
+                  <div
+                    style={{
+                      borderRadius: 18,
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      padding: '18px 22px',
+                      backgroundColor: 'rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: 'Roboto Mono',
+                        fontSize: 18,
+                        letterSpacing: 3,
+                        textTransform: 'uppercase',
+                        opacity: 0.7,
+                        marginBottom: 12,
+                      }}
+                    >
+                      Card Patterns
+                    </div>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns:
+                          limitedCardBlocks.length > 2
+                            ? 'repeat(2, minmax(0,1fr))'
+                            : '1fr',
+                        gap: '12px',
+                      }}
+                    >
+                      {limitedCardBlocks.map((pattern) => (
+                        <div
+                          key={pattern.name}
+                          style={{
+                            borderRadius: 14,
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            padding: '14px',
+                            backgroundColor: 'rgba(0,0,0,0.25)',
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontFamily: 'Roboto Mono',
+                              fontSize: 20,
+                              fontWeight: 500,
+                            }}
+                          >
+                            {pattern.name} ({pattern.count}{' '}
+                            {pattern.count === 1 ? 'time' : 'times'})
+                          </div>
+                          {pattern.reading && (
+                            <div
+                              style={{
+                                marginTop: 8,
+                                fontFamily: 'Roboto Mono',
+                                fontSize: 18,
+                                lineHeight: 1.4,
+                                opacity: 0.85,
+                              }}
+                            >
+                              {pattern.reading}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
