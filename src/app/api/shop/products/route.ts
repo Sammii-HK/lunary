@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+export const runtime = 'nodejs';
+export const revalidate = 300; // Cache products for 5 minutes - they don't change frequently
+
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY is not set');
@@ -82,11 +85,21 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Found ${packs.length} active shop products`);
 
-    return NextResponse.json({
-      success: true,
-      packs,
-      total: packs.length,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        packs,
+        total: packs.length,
+      },
+      {
+        headers: {
+          'Cache-Control':
+            'public, s-maxage=300, stale-while-revalidate=150, max-age=300',
+          'CDN-Cache-Control': 'public, s-maxage=300',
+          'Vercel-CDN-Cache-Control': 'public, s-maxage=300',
+        },
+      },
+    );
   } catch (error: any) {
     console.error('❌ Failed to fetch products from Stripe:', error);
     return NextResponse.json(

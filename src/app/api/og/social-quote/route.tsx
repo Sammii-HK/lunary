@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
+export const revalidate = 3600; // Cache for 1 hour - quotes can change but not that frequently
 
 // Cache font loading
 let robotoFontP: Promise<ArrayBuffer> | null = null;

@@ -1,6 +1,30 @@
-import { Observer, AstroTime, Body, GeoVector, Ecliptic, Illumination, MoonPhase } from 'astronomy-engine';
+import {
+  Observer,
+  AstroTime,
+  Body,
+  GeoVector,
+  Ecliptic,
+  Illumination,
+  MoonPhase,
+} from 'astronomy-engine';
 
 const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
+
+// In-memory cache for expensive calculations (round to nearest hour for cache key)
+const positionCache = new Map<string, any>();
+const moonPhaseCache = new Map<string, any>();
+const aspectsCache = new Map<string, any>();
+
+// Cache cleanup - limit size to prevent memory issues
+const MAX_CACHE_SIZE = 1000;
+function cleanupCache(cache: Map<string, any>) {
+  if (cache.size > MAX_CACHE_SIZE) {
+    const firstKey = cache.keys().next().value;
+    if (firstKey) {
+      cache.delete(firstKey);
+    }
+  }
+}
 
 // Get zodiac sign from longitude
 export function getZodiacSign(longitude: number): string {
@@ -27,6 +51,13 @@ export function getRealPlanetaryPositions(
   date: Date,
   observer: Observer = DEFAULT_OBSERVER,
 ) {
+  // Round to nearest hour for caching (positions don't change significantly within an hour)
+  const cacheKey = `${date.getTime() - (date.getTime() % (60 * 60 * 1000))}`;
+
+  if (positionCache.has(cacheKey)) {
+    return positionCache.get(cacheKey);
+  }
+
   const astroTime = new AstroTime(date);
   const astroTimePast = new AstroTime(
     new Date(date.getTime() - 24 * 60 * 60 * 1000),
@@ -67,10 +98,12 @@ export function getRealPlanetaryPositions(
     let newRetrograde = false;
     if (Math.abs(longitude - longitudePast) < 180) {
       retrograde = longitude < longitudePast;
-      newRetrograde = longitude < longitudePast && longitudePast > longitudePastPast;
+      newRetrograde =
+        longitude < longitudePast && longitudePast > longitudePastPast;
     } else {
       retrograde = longitude > longitudePast;
-      newRetrograde = longitude > longitudePast && longitudePast < longitudePastPast;
+      newRetrograde =
+        longitude > longitudePast && longitudePast < longitudePastPast;
     }
 
     positions[name] = {
@@ -81,11 +114,25 @@ export function getRealPlanetaryPositions(
     };
   });
 
+  // Cache the result
+  cleanupCache(positionCache);
+  positionCache.set(cacheKey, positions);
+
   return positions;
 }
 
 // Calculate real aspects between planets (SAME AS POST ROUTE)
 export function calculateRealAspects(positions: any): Array<any> {
+  // Create cache key from positions (use first planet's longitude as identifier)
+  const positionKey = Object.values(positions)
+    .map((p: any) => `${p.longitude.toFixed(1)}`)
+    .join(',');
+  const cacheKey = `aspects:${positionKey}`;
+
+  if (aspectsCache.has(cacheKey)) {
+    return aspectsCache.get(cacheKey);
+  }
+
   const aspects: Array<any> = [];
   const planetNames = Object.keys(positions);
 
@@ -156,7 +203,13 @@ export function calculateRealAspects(positions: any): Array<any> {
     }
   }
 
-  return aspects.sort((a, b) => b.priority - a.priority);
+  const sortedAspects = aspects.sort((a, b) => b.priority - a.priority);
+
+  // Cache the result
+  cleanupCache(aspectsCache);
+  aspectsCache.set(cacheKey, sortedAspects);
+
+  return sortedAspects;
 }
 
 // Helper functions for image display
@@ -214,6 +267,13 @@ export function getAccurateMoonPhase(date: Date): {
   age: number;
   isSignificant: boolean;
 } {
+  // Round to nearest hour for caching
+  const cacheKey = `moon:${date.getTime() - (date.getTime() % (60 * 60 * 1000))}`;
+
+  if (moonPhaseCache.has(cacheKey)) {
+    return moonPhaseCache.get(cacheKey);
+  }
+
   const astroTime = new AstroTime(date);
   const moonIllumination = Illumination(Body.Moon, astroTime);
   const moonPhaseAngle = MoonPhase(date); // This gives us the phase angle in degrees
@@ -225,9 +285,19 @@ export function getAccurateMoonPhase(date: Date): {
   const moonAge = (moonPhaseAngle / 360) * 29.530588853;
 
   // Determine moon phase based on angle with proper tolerances
+  let result: {
+    name: string;
+    energy: string;
+    priority: number;
+    emoji: string;
+    illumination: number;
+    age: number;
+    isSignificant: boolean;
+  };
+
   if (moonPhaseAngle >= 355 || moonPhaseAngle <= 5) {
     // New Moon: 355° - 5° (around 0°)
-    return {
+    result = {
       name: 'New Moon',
       energy: 'New Beginnings',
       priority: 10,
@@ -238,7 +308,7 @@ export function getAccurateMoonPhase(date: Date): {
     };
   } else if (moonPhaseAngle >= 85 && moonPhaseAngle <= 95) {
     // First Quarter: 85° - 95° (around 90°)
-    return {
+    result = {
       name: 'First Quarter',
       energy: 'Action & Decision',
       priority: 10,
@@ -265,7 +335,7 @@ export function getAccurateMoonPhase(date: Date): {
       12: 'Cold Moon',
     };
     const moonName = moonNames[month] || 'Full Moon';
-    return {
+    result = {
       name: moonName,
       energy: 'Peak Power',
       priority: 10,
@@ -276,7 +346,7 @@ export function getAccurateMoonPhase(date: Date): {
     };
   } else if (moonPhaseAngle >= 265 && moonPhaseAngle <= 275) {
     // Third Quarter: 265° - 275° (around 270°)
-    return {
+    result = {
       name: 'Third Quarter',
       energy: 'Release & Letting Go',
       priority: 10,
@@ -288,7 +358,7 @@ export function getAccurateMoonPhase(date: Date): {
   } else {
     // Non-significant phases based on angle ranges
     if (moonPhaseAngle > 5 && moonPhaseAngle < 85) {
-      return {
+      result = {
         name: 'Waxing Crescent',
         energy: 'Growing Energy',
         priority: 2,
@@ -298,7 +368,7 @@ export function getAccurateMoonPhase(date: Date): {
         isSignificant: false,
       };
     } else if (moonPhaseAngle > 95 && moonPhaseAngle < 175) {
-      return {
+      result = {
         name: 'Waxing Gibbous',
         energy: 'Building Power',
         priority: 2,
@@ -308,7 +378,7 @@ export function getAccurateMoonPhase(date: Date): {
         isSignificant: false,
       };
     } else if (moonPhaseAngle > 185 && moonPhaseAngle < 265) {
-      return {
+      result = {
         name: 'Waning Gibbous',
         energy: 'Gratitude & Wisdom',
         priority: 2,
@@ -318,7 +388,7 @@ export function getAccurateMoonPhase(date: Date): {
         isSignificant: false,
       };
     } else {
-      return {
+      result = {
         name: 'Waning Crescent',
         energy: 'Rest & Reflection',
         priority: 2,
@@ -329,6 +399,12 @@ export function getAccurateMoonPhase(date: Date): {
       };
     }
   }
+
+  // Cache the result
+  cleanupCache(moonPhaseCache);
+  moonPhaseCache.set(cacheKey, result);
+
+  return result;
 }
 
 // Check for seasonal events (SAME AS POST ROUTE)
@@ -472,7 +548,6 @@ export function checkRetrogradeIngress(positions: any): Array<any> {
   });
   return retrogradeIngress.sort((a, b) => b.priority - a.priority);
 }
-
 
 // Get descriptive qualities for zodiac signs
 export function getSignDescription(sign: string): string {

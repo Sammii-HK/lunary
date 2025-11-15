@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'; // Required because route uses searchParams
+export const revalidate = 300; // Cache recent insights for 5 minutes - they update periodically
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 50;
@@ -83,19 +84,29 @@ export async function GET(request: NextRequest) {
           LIMIT ${limit}
         `;
 
-    return NextResponse.json({
-      insights: rows.rows.map((row) => ({
-        id: row.id,
-        insight_text: row.insight_text,
-        created_at: toISODate(row.created_at),
-        source: row.source ?? 'app',
-        moon_circle: {
-          id: row.moon_circle_id,
-          moon_phase: row.moon_phase,
-          date: toISODate(row.event_date),
+    return NextResponse.json(
+      {
+        insights: rows.rows.map((row) => ({
+          id: row.id,
+          insight_text: row.insight_text,
+          created_at: toISODate(row.created_at),
+          source: row.source ?? 'app',
+          moon_circle: {
+            id: row.moon_circle_id,
+            moon_phase: row.moon_phase,
+            date: toISODate(row.event_date),
+          },
+        })),
+      },
+      {
+        headers: {
+          'Cache-Control':
+            'public, s-maxage=300, stale-while-revalidate=150, max-age=300',
+          'CDN-Cache-Control': 'public, s-maxage=300',
+          'Vercel-CDN-Cache-Control': 'public, s-maxage=300',
         },
-      })),
-    });
+      },
+    );
   } catch (error) {
     console.error('[moon-circles/insights/recent] GET failed', error);
     return NextResponse.json(

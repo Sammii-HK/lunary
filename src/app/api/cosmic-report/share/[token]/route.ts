@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+export const runtime = 'nodejs';
+export const revalidate = 3600; // Cache shared reports for 1 hour - they don't change frequently
+
 export async function GET(_request: NextRequest, context: any) {
   try {
     const { params } = context as { params: { token: string } };
@@ -28,15 +31,25 @@ export async function GET(_request: NextRequest, context: any) {
 
     const row = result.rows[0];
 
-    return NextResponse.json({
-      success: true,
-      report: {
-        id: row.id,
-        type: row.report_type,
-        data: row.report_data,
-        created_at: row.created_at,
+    return NextResponse.json(
+      {
+        success: true,
+        report: {
+          id: row.id,
+          type: row.report_type,
+          data: row.report_data,
+          created_at: row.created_at,
+        },
       },
-    });
+      {
+        headers: {
+          'Cache-Control':
+            'public, s-maxage=3600, stale-while-revalidate=1800, max-age=3600',
+          'CDN-Cache-Control': 'public, s-maxage=3600',
+          'Vercel-CDN-Cache-Control': 'public, s-maxage=3600',
+        },
+      },
+    );
   } catch (error) {
     console.error('Failed to fetch shared cosmic report:', error);
     return NextResponse.json(

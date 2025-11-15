@@ -1,23 +1,26 @@
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
 import {
-  Observer,
-  AstroTime,
-  Body,
-  GeoVector,
-  Ecliptic,
-  Illumination,
-  MoonPhase,
-} from 'astronomy-engine';
+  getRealPlanetaryPositions,
+  getAccurateMoonPhase,
+  checkSeasonalEvents,
+  calculateRealAspects,
+  getZodiacSymbol,
+  getPlanetSymbol,
+  getAspectGlyph,
+  loadAstronomiconFont,
+  loadGoogleFont,
+} from '../../../../../../utils/astrology/cosmic-og';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs'; // Node.js runtime is faster for CPU-intensive calculations
+export const revalidate = 86400; // Cache for 24 hours - cosmic data for a specific date doesn't change
 
 type Ctx = { params: Promise<{ date: string }> };
 
-// Default observer location (London, UK)
-const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
+// Request deduplication - prevent duplicate calculations for simultaneous requests
+const pendingRequests = new Map<string, Promise<Response>>();
 
-// Get zodiac sign from longitude
+// Helper function to get zodiac sign (simple lookup, no caching needed)
 function getZodiacSign(longitude: number): string {
   const signs = [
     'Aries',
@@ -37,385 +40,10 @@ function getZodiacSign(longitude: number): string {
   return signs[index];
 }
 
-// Get REAL planetary positions using astronomy-engine (SAME AS POST ROUTE)
-function getRealPlanetaryPositions(
-  date: Date,
-  observer: Observer = DEFAULT_OBSERVER,
-) {
-  const astroTime = new AstroTime(date);
-  const astroTimePast = new AstroTime(
-    new Date(date.getTime() - 24 * 60 * 60 * 1000),
-  );
+// All astronomical calculations now use shared utilities with caching
+// Font loading uses shared utilities
 
-  const planets = [
-    { body: Body.Sun, name: 'Sun' },
-    { body: Body.Moon, name: 'Moon' },
-    { body: Body.Mercury, name: 'Mercury' },
-    { body: Body.Venus, name: 'Venus' },
-    { body: Body.Mars, name: 'Mars' },
-    { body: Body.Jupiter, name: 'Jupiter' },
-    { body: Body.Saturn, name: 'Saturn' },
-    { body: Body.Uranus, name: 'Uranus' },
-    { body: Body.Neptune, name: 'Neptune' },
-  ];
-
-  const positions: any = {};
-
-  planets.forEach(({ body, name }) => {
-    const vectorNow = GeoVector(body, astroTime, true);
-    const vectorPast = GeoVector(body, astroTimePast, true);
-
-    const eclipticNow = Ecliptic(vectorNow);
-    const eclipticPast = Ecliptic(vectorPast);
-
-    const longitude = eclipticNow.elon;
-    const longitudePast = eclipticPast.elon;
-
-    // Check for retrograde motion (accounting for 0°/360° wraparound)
-    let retrograde = false;
-    if (Math.abs(longitude - longitudePast) < 180) {
-      retrograde = longitude < longitudePast;
-    } else {
-      retrograde = longitude > longitudePast;
-    }
-
-    positions[name] = {
-      longitude,
-      sign: getZodiacSign(longitude),
-      retrograde,
-    };
-  });
-
-  return positions;
-}
-
-// Calculate real aspects between planets (SAME AS POST ROUTE)
-function calculateRealAspects(positions: any): Array<any> {
-  const aspects: Array<any> = [];
-  const planetNames = Object.keys(positions);
-
-  // Check all planet pairs for aspects
-  for (let i = 0; i < planetNames.length; i++) {
-    for (let j = i + 1; j < planetNames.length; j++) {
-      const planetA = planetNames[i];
-      const planetB = planetNames[j];
-
-      const longA = positions[planetA].longitude;
-      const longB = positions[planetB].longitude;
-
-      // Calculate angular separation
-      let separation = Math.abs(longA - longB);
-      if (separation > 180) {
-        separation = 360 - separation;
-      }
-
-      // Determine aspect type based on separation
-      let aspectType = null;
-      let priority = 0;
-
-      if (separation < 8) {
-        aspectType = 'conjunction';
-        priority =
-          (planetA === 'Jupiter' && planetB === 'Saturn') ||
-          (planetA === 'Saturn' && planetB === 'Jupiter')
-            ? 9
-            : 7;
-      } else if (Math.abs(separation - 60) < 6) {
-        aspectType = 'sextile';
-        priority = 5;
-      } else if (Math.abs(separation - 90) < 8) {
-        aspectType = 'square';
-        priority = 6;
-      } else if (Math.abs(separation - 120) < 8) {
-        aspectType = 'trine';
-        priority = 6;
-      } else if (Math.abs(separation - 180) < 8) {
-        aspectType = 'opposition';
-        priority = 6;
-      }
-
-      if (aspectType) {
-        aspects.push({
-          name: `${planetA}-${planetB} ${aspectType}`,
-          aspect: aspectType,
-          glyph: getAspectGlyph(aspectType),
-          planetA: {
-            name: planetA,
-            symbol: getPlanetSymbol(planetA),
-            planet: planetA.toLowerCase(),
-            constellation: positions[planetA].sign,
-            constellationSymbol: getZodiacSymbol(positions[planetA].sign),
-          },
-          planetB: {
-            name: planetB,
-            symbol: getPlanetSymbol(planetB),
-            planet: planetB.toLowerCase(),
-            constellation: positions[planetB].sign,
-            constellationSymbol: getZodiacSymbol(positions[planetB].sign),
-          },
-          energy: `${planetA} ${aspectType} ${planetB}`,
-          priority,
-          separation: Math.round(separation * 10) / 10,
-        });
-      }
-    }
-  }
-
-  return aspects.sort((a, b) => b.priority - a.priority);
-}
-
-// Helper functions for image display
-function getPlanetSymbol(planetName: string): string {
-  const symbols: { [key: string]: string } = {
-    Sun: 'S',
-    Moon: 'R',
-    Mercury: 'T',
-    Venus: 'Q',
-    Mars: 'U',
-    Jupiter: 'V',
-    Saturn: 'W',
-    Uranus: 'X',
-    Neptune: 'Y',
-  };
-  return symbols[planetName] || 'S';
-}
-
-function getZodiacSymbol(sign: string): string {
-  const symbols: { [key: string]: string } = {
-    Aries: 'A',
-    Taurus: 'B',
-    Gemini: 'C',
-    Cancer: 'D',
-    Leo: 'E',
-    Virgo: 'F',
-    Libra: 'G',
-    Scorpio: 'H',
-    Sagittarius: 'I',
-    Capricorn: 'J',
-    Aquarius: 'K',
-    Pisces: 'L',
-  };
-  return symbols[sign] || 'A';
-}
-
-function getAspectGlyph(aspect: string): string {
-  const glyphs: { [key: string]: string } = {
-    conjunction: '!',
-    sextile: '%',
-    square: '#',
-    trine: '$',
-    opposition: '"',
-  };
-  return glyphs[aspect] || '!';
-}
-
-// Calculate accurate moon phase using proper astronomy-engine functions
-function getAccurateMoonPhase(date: Date): {
-  name: string;
-  energy: string;
-  priority: number;
-  emoji: string;
-  illumination: number;
-  age: number;
-  isSignificant: boolean;
-} {
-  const astroTime = new AstroTime(date);
-  const moonIllumination = Illumination(Body.Moon, astroTime);
-  const moonPhaseAngle = MoonPhase(date); // This gives us the phase angle in degrees
-
-  const illuminationPercent = moonIllumination.phase_fraction * 100;
-
-  // Convert phase angle to moon age (0-29.53 days)
-  // 0° = New Moon, 90° = First Quarter, 180° = Full Moon, 270° = Third Quarter
-  const moonAge = (moonPhaseAngle / 360) * 29.530588853;
-
-  // Determine moon phase based on angle with proper tolerances
-  if (moonPhaseAngle >= 355 || moonPhaseAngle <= 5) {
-    // New Moon: 355° - 5° (around 0°)
-    return {
-      name: 'New Moon',
-      energy: 'New Beginnings',
-      priority: 10,
-      emoji: '🌑',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant: true,
-    };
-  } else if (moonPhaseAngle >= 85 && moonPhaseAngle <= 95) {
-    // First Quarter: 85° - 95° (around 90°)
-    return {
-      name: 'First Quarter',
-      energy: 'Action & Decision',
-      priority: 10,
-      emoji: '🌓',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant: true,
-    };
-  } else if (moonPhaseAngle >= 175 && moonPhaseAngle <= 185) {
-    // Full Moon: 175° - 185° (around 180°)
-    const month = date.getMonth() + 1;
-    const moonNames: { [key: number]: string } = {
-      1: 'Wolf Moon',
-      2: 'Snow Moon',
-      3: 'Worm Moon',
-      4: 'Pink Moon',
-      5: 'Flower Moon',
-      6: 'Strawberry Moon',
-      7: 'Buck Moon',
-      8: 'Sturgeon Moon',
-      9: 'Harvest Moon',
-      10: 'Hunter Moon',
-      11: 'Beaver Moon',
-      12: 'Cold Moon',
-    };
-    const moonName = moonNames[month] || 'Full Moon';
-    return {
-      name: moonName,
-      energy: 'Peak Power',
-      priority: 10,
-      emoji: '🌕',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant: true,
-    };
-  } else if (moonPhaseAngle >= 265 && moonPhaseAngle <= 275) {
-    // Third Quarter: 265° - 275° (around 270°)
-    return {
-      name: 'Third Quarter',
-      energy: 'Release & Letting Go',
-      priority: 10,
-      emoji: '🌗',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant: true,
-    };
-  } else {
-    // Non-significant phases based on angle ranges
-    if (moonPhaseAngle > 5 && moonPhaseAngle < 85) {
-      return {
-        name: 'Waxing Crescent',
-        energy: 'Growing Energy',
-        priority: 2,
-        emoji: '🌒',
-        illumination: illuminationPercent,
-        age: moonAge,
-        isSignificant: false,
-      };
-    } else if (moonPhaseAngle > 95 && moonPhaseAngle < 175) {
-      return {
-        name: 'Waxing Gibbous',
-        energy: 'Building Power',
-        priority: 2,
-        emoji: '🌔',
-        illumination: illuminationPercent,
-        age: moonAge,
-        isSignificant: false,
-      };
-    } else if (moonPhaseAngle > 185 && moonPhaseAngle < 265) {
-      return {
-        name: 'Waning Gibbous',
-        energy: 'Gratitude & Wisdom',
-        priority: 2,
-        emoji: '🌖',
-        illumination: illuminationPercent,
-        age: moonAge,
-        isSignificant: false,
-      };
-    } else {
-      return {
-        name: 'Waning Crescent',
-        energy: 'Rest & Reflection',
-        priority: 2,
-        emoji: '🌘',
-        illumination: illuminationPercent,
-        age: moonAge,
-        isSignificant: false,
-      };
-    }
-  }
-}
-
-// Check for seasonal events (SAME AS POST ROUTE)
-function checkSeasonalEvents(positions: any): Array<any> {
-  const sunLongitude = positions.Sun.longitude;
-  const events: Array<any> = [];
-
-  // Exact seasonal markers (within 1 degree)
-  if (Math.abs(sunLongitude - 0) < 1 || Math.abs(sunLongitude - 360) < 1) {
-    events.push({
-      name: 'Spring Equinox',
-      energy: 'Balance & New Growth',
-      priority: 9, // Higher priority - just under moon phases
-      type: 'seasonal',
-      emoji: '🌸',
-      description: 'Day and night in perfect balance',
-      detail: 'Solar longitude 0° - Spring begins',
-    });
-  } else if (Math.abs(sunLongitude - 90) < 1) {
-    events.push({
-      name: 'Summer Solstice',
-      energy: 'Maximum Solar Power',
-      priority: 9, // Higher priority - just under moon phases
-      type: 'seasonal',
-      emoji: '☀️',
-      description: 'Longest day of the year',
-      detail: 'Solar longitude 90° - Peak solar energy',
-    });
-  } else if (Math.abs(sunLongitude - 180) < 1) {
-    events.push({
-      name: 'Autumn Equinox',
-      energy: 'Harvest & Reflection',
-      priority: 9, // Higher priority - just under moon phases
-      type: 'seasonal',
-      emoji: '🍂',
-      description: 'Day and night in perfect balance',
-      detail: 'Solar longitude 180° - Autumn begins',
-    });
-  } else if (Math.abs(sunLongitude - 270) < 1) {
-    events.push({
-      name: 'Winter Solstice',
-      energy: 'Inner Light & Renewal',
-      priority: 9, // Higher priority - just under moon phases
-      type: 'seasonal',
-      emoji: '❄️',
-      description: 'Longest night of the year',
-      detail: 'Solar longitude 270° - Return of the light',
-    });
-  }
-
-  return events;
-}
-
-// module-scope cache to avoid refetching
-let astroFontP: Promise<ArrayBuffer> | null = null;
-let robotoFontP: Promise<ArrayBuffer> | null = null;
-
-// Font loading functions
-async function loadAstronomiconFont(request: Request) {
-  if (!astroFontP) {
-    const url = new URL('/fonts/Astronomicon.ttf', request.url); // resolves to same-origin /fonts/...
-    astroFontP = fetch(url, { cache: 'force-cache' }).then((r) => {
-      if (!r.ok) throw new Error(`Astronomicon fetch ${r.status}`);
-      return r.arrayBuffer();
-    });
-  }
-  return astroFontP;
-}
-
-async function loadGoogleFont(request: Request) {
-  if (!robotoFontP) {
-    // const url = new URL(`https://fonts.googleapis.com/css2?family=${font}&text=${encodeURIComponent(text)}`, request.url);
-    const url = new URL(`/fonts/RobotoMono-Regular.ttf`, request.url);
-    robotoFontP = fetch(url, { cache: 'force-cache' }).then((r) => {
-      if (!r.ok) throw new Error(`Roboto Mono font fetch ${r.status}`);
-      return r.arrayBuffer();
-    });
-  }
-  return robotoFontP;
-}
-
-export async function GET(req: NextRequest, ctx: Ctx) {
+async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
   const { date } = await ctx.params;
   const fontData = await loadAstronomiconFont(req);
   if (!fontData) throw new Error('Font load returned null');
@@ -1085,4 +713,39 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       })(),
     },
   );
+}
+
+export async function GET(req: NextRequest, ctx: Ctx): Promise<Response> {
+  const { date } = await ctx.params;
+  const cacheKey = `cosmic-og-${date}`;
+
+  // Request deduplication - if same date is being processed, reuse the promise
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey)!;
+  }
+
+  const promise = generateImage(req, ctx)
+    .then((response) => {
+      // Add aggressive caching headers
+      const headers = new Headers(response.headers);
+      headers.set(
+        'Cache-Control',
+        'public, s-maxage=86400, stale-while-revalidate=43200, max-age=86400',
+      );
+      headers.set('CDN-Cache-Control', 'public, s-maxage=86400');
+      headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=86400');
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    })
+    .finally(() => {
+      // Clean up after request completes
+      pendingRequests.delete(cacheKey);
+    });
+
+  pendingRequests.set(cacheKey, promise);
+  return promise;
 }

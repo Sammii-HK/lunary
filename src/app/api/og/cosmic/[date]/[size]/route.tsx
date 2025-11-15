@@ -10,7 +10,8 @@ import {
   getZodiacSymbol,
 } from '../../../../../../../utils/astrology/cosmic-og';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs'; // Node.js runtime is faster for CPU-intensive calculations
+export const revalidate = 86400; // Cache for 24 hours - cosmic data for a specific date doesn't change
 
 type Ctx = { params: Promise<{ date: string; size: string }> };
 

@@ -14,10 +14,16 @@ import { getGeneralCrystalRecommendation } from '../../../../../../utils/crystal
 import { getGeneralTarotReading } from '../../../../../../utils/tarot/generalTarot';
 import { getGeneralHoroscope } from '../../../../../../utils/astrology/generalHoroscope';
 
-export async function GET(
+export const runtime = 'nodejs'; // Node.js runtime is faster for CPU-intensive calculations
+export const revalidate = 86400; // Cache for 24 hours - cosmic data for a specific date doesn't change
+
+// Request deduplication - prevent duplicate calculations for simultaneous requests
+const pendingRequests = new Map<string, Promise<Response>>();
+
+async function generateResponse(
   request: NextRequest,
   { params }: { params: Promise<{ date: string }> },
-) {
+): Promise<Response> {
   const { date: dateParam } = await params;
   const { searchParams } = new URL(request.url);
   // Support both path parameter and query parameter for backward compatibility
@@ -339,5 +345,36 @@ export async function GET(
     })(),
   };
 
-  return NextResponse.json(postContent);
+  return NextResponse.json(postContent, {
+    headers: {
+      'Cache-Control':
+        'public, s-maxage=86400, stale-while-revalidate=43200, max-age=86400',
+      'CDN-Cache-Control': 'public, s-maxage=86400',
+      'Vercel-CDN-Cache-Control': 'public, s-maxage=86400',
+    },
+  });
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ date: string }> },
+): Promise<Response> {
+  const { date: dateParam } = await params;
+  const { searchParams } = new URL(request.url);
+  const dateFromQuery = searchParams.get('date');
+  const dateToUse = dateParam || dateFromQuery;
+  const cacheKey = `cosmic-post-${dateToUse || 'today'}`;
+
+  // Request deduplication - if same date is being processed, reuse the promise
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey)!;
+  }
+
+  const promise = generateResponse(request, { params }).finally(() => {
+    // Clean up after request completes
+    pendingRequests.delete(cacheKey);
+  });
+
+  pendingRequests.set(cacheKey, promise);
+  return promise;
 }
