@@ -199,14 +199,14 @@ export function hasFeatureAccess(
 export function hasBirthChartAccess(
   subscriptionStatus: string | undefined,
 ): boolean {
-  return hasFeatureAccess(subscriptionStatus, 'birth_chart');
+  return hasFeatureAccess(subscriptionStatus, undefined, 'birth_chart');
 }
 
 // Helper function to check if user can collect birthday
 export function canCollectBirthday(
   subscriptionStatus: string | undefined,
 ): boolean {
-  return hasFeatureAccess(subscriptionStatus, 'birthday_collection');
+  return hasFeatureAccess(subscriptionStatus, undefined, 'birthday_collection');
 }
 
 export function getTrialDaysRemaining(trialEndsAt: string | undefined): number {

@@ -86,15 +86,15 @@ export async function GET(request: NextRequest) {
 
     const emailHtml = generateWeeklyReportEmailHTML(
       report,
-      userName,
       baseUrl,
-      userEmailFromDb,
+      userName || undefined,
+      userEmailFromDb || undefined,
     );
     const emailText = generateWeeklyReportEmailText(
       report,
-      userName,
       baseUrl,
-      userEmailFromDb,
+      userName || undefined,
+      userEmailFromDb || undefined,
     );
 
     return NextResponse.json({
