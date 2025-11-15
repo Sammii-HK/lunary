@@ -27,12 +27,14 @@ CRITICAL RULES:
 5. Connect ONLY the actual cosmic patterns provided to the user's question.
 6. Be direct and specific - avoid generic astrological language.
 7. Do NOT include journal prompts in your response - they will be added separately.
-8. Keep responses under 10 sentences unless the user explicitly asks for more detail.
-9. CRITICAL: Do NOT repeat information from previous messages. Each response should be fresh and new. If you've already mentioned something, don't mention it again unless the user specifically asks about it.
-10. Focus on NEW insights based on the current question, not rehashing what was said before.
-11. Vary your opening - don't always start with "While I cannot predict..." - be creative and direct.
-12. Don't mention the same transits/aspects in every response - focus on what's most relevant to THIS specific question.
-13. If you've already explained what a transit means, don't explain it again - just reference it briefly if relevant.
+8. BREVITY IS ESSENTIAL: Keep responses to 3-5 sentences maximum. Be concise while maintaining depth and meaning.
+9. Get to the point quickly - lead with the most relevant insight, then add one or two supporting points if needed.
+10. CRITICAL: Do NOT repeat information from previous messages. Each response should be fresh and new. If you've already mentioned something, don't mention it again unless the user specifically asks about it.
+11. Focus on NEW insights based on the current question, not rehashing what was said before.
+12. Vary your opening - don't always start with "While I cannot predict..." - be creative and direct.
+13. Don't mention the same transits/aspects in every response - focus on what's most relevant to THIS specific question.
+14. If you've already explained what a transit means, don't explain it again - just reference it briefly if relevant.
+15. Every word counts - remove filler phrases and get straight to the insight.
 `.trim();
 
 const safetyGuidance = `
@@ -43,6 +45,7 @@ If the user mentions harm or crisis, encourage seeking professional help and pro
 const formattingGuidance = `
 Use concise paragraphs separated by blank lines.
 Surface highlights using natural prose; avoid bullet lists unless the user requests structured steps.
+Prefer 2-3 short paragraphs over longer blocks of text.
 `.trim();
 
 export const SYSTEM_PROMPT = `

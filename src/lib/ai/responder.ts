@@ -112,8 +112,8 @@ export const composeAssistantReply = async ({
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
-      max_tokens: 500,
-      temperature: 0.9, // Increased from 0.7 to 0.9 for more varied responses
+      max_tokens: 250, // Reduced for shorter, more concise responses
+      temperature: 0.9,
     });
 
     const aiResponse = completion.choices[0]?.message?.content || '';
