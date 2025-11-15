@@ -73,10 +73,10 @@ export const ExploreMenu = () => {
   });
 
   return (
-    <div ref={menuRef} className='relative'>
+    <div ref={menuRef} className='relative md:flex-1 md:min-w-0'>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition ${
+        className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition w-full md:flex-1 ${
           isActive ? 'text-zinc-200' : 'text-zinc-400 hover:text-zinc-200'
         }`}
         aria-label='Explore menu'
@@ -88,7 +88,7 @@ export const ExploreMenu = () => {
             <ChevronDown className='absolute -bottom-1 -right-1 h-3 w-3 text-zinc-500' />
           )}
         </div>
-        <span className='hidden text-[10px] uppercase tracking-wide md:block'>
+        <span className='hidden text-[10px] uppercase tracking-wide md:block md:text-center md:leading-tight md:w-full md:break-words'>
           Explore
         </span>
       </button>
