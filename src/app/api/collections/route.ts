@@ -9,12 +9,12 @@ export async function GET(request: NextRequest) {
 
     // Check subscription access
     const subscriptionResult = await sql`
-      SELECT status, plan FROM subscriptions WHERE user_id = ${user.id} ORDER BY created_at DESC LIMIT 1
+      SELECT status, plan_type FROM subscriptions WHERE user_id = ${user.id} ORDER BY created_at DESC LIMIT 1
     `;
     const subscription = subscriptionResult.rows[0];
     const hasAccess = hasFeatureAccess(
       subscription?.status || 'free',
-      subscription?.plan || undefined,
+      subscription?.plan_type || undefined,
       'collections',
     );
 
@@ -224,12 +224,12 @@ export async function POST(request: NextRequest) {
 
     // Check subscription access
     const subscriptionResult = await sql`
-      SELECT status, plan FROM subscriptions WHERE user_id = ${user.id} ORDER BY created_at DESC LIMIT 1
+      SELECT status, plan_type FROM subscriptions WHERE user_id = ${user.id} ORDER BY created_at DESC LIMIT 1
     `;
     const subscription = subscriptionResult.rows[0];
     const hasAccess = hasFeatureAccess(
       subscription?.status || 'free',
-      subscription?.plan || undefined,
+      subscription?.plan_type || undefined,
       'collections',
     );
 
