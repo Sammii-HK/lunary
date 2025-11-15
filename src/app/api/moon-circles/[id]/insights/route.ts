@@ -54,10 +54,10 @@ const normalizeSort = (value: string | null): SortOrder => {
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } },
+  { params }: { params: { id: string } },
 ) {
   try {
-    const moonCircleId = Number.parseInt(context?.params?.id, 10);
+    const moonCircleId = Number.parseInt(params?.id, 10);
 
     if (!Number.isFinite(moonCircleId) || moonCircleId <= 0) {
       return NextResponse.json(
@@ -150,10 +150,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } },
+  { params }: { params: { id: string } },
 ) {
   try {
-    const moonCircleId = Number.parseInt(context?.params?.id, 10);
+    const moonCircleId = Number.parseInt(params?.id, 10);
 
     if (!Number.isFinite(moonCircleId) || moonCircleId <= 0) {
       return NextResponse.json(
