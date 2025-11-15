@@ -2,7 +2,10 @@
 
 import { useMemo } from 'react';
 import { Share2 } from 'lucide-react';
-import { CosmicReportData, CosmicReportSection } from '@/lib/cosmic-report/types';
+import {
+  CosmicReportData,
+  CosmicReportSection,
+} from '@/lib/cosmic-report/types';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { ReportPDF } from './ReportPDF';
 

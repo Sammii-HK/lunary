@@ -5,7 +5,9 @@ import { sendEmail } from '@/lib/email';
 
 const signupSchema = z.object({
   email: z.string().email(),
-  source: z.enum(['product_hunt', 'launch_page', 'press_kit', 'tiktok']).default('launch_page'),
+  source: z
+    .enum(['product_hunt', 'launch_page', 'press_kit', 'tiktok'])
+    .default('launch_page'),
   metadata: z
     .object({
       name: z.string().optional(),

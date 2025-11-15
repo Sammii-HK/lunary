@@ -11,7 +11,8 @@ export const metadata: Metadata = {
     'Lunary AI blends astronomy data with AI rituals. Explore the Product Hunt launch plan, maker story, testimonials, and launch reminders.',
   openGraph: {
     title: 'Lunary AI on Product Hunt',
-    description: 'Join the launch squad, preview screenshots, and get notified on drop day.',
+    description:
+      'Join the launch squad, preview screenshots, and get notified on drop day.',
     url: 'https://lunary.app/product-hunt',
     images: [
       {
@@ -25,7 +26,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Lunary AI · Product Hunt Launch',
-    description: 'AI + Astronomy for personalized cosmic guidance. Launching soon on PH.',
+    description:
+      'AI + Astronomy for personalized cosmic guidance. Launching soon on PH.',
     images: ['/api/og/cosmic'],
   },
 };
@@ -63,11 +65,14 @@ export default function ProductHuntPage() {
         <p className='text-xs uppercase tracking-[0.4em] text-orange-200'>
           Product Hunt · Coming Soon
         </p>
-        <h1 className='text-4xl font-semibold'>Lunary AI — Personalized Astrology Powered by Real Astronomical Data</h1>
+        <h1 className='text-4xl font-semibold'>
+          Lunary AI — Personalized Astrology Powered by Real Astronomical Data
+        </h1>
         <p className='text-lg text-zinc-200'>
-          AI meets astronomy for personalized cosmic guidance. We combine NASA-grade ephemeris with
-          AI rituals, tarot archetypes, and mood intelligence so you can plan launches, rituals, and
-          creative sprints with confidence.
+          AI meets astronomy for personalized cosmic guidance. We combine
+          NASA-grade ephemeris with AI rituals, tarot archetypes, and mood
+          intelligence so you can plan launches, rituals, and creative sprints
+          with confidence.
         </p>
         <div className='flex flex-wrap gap-3 text-sm text-orange-100'>
           {features.map((feature) => (
@@ -86,10 +91,11 @@ export default function ProductHuntPage() {
         <div className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
           <h2 className='text-2xl font-semibold'>Maker Comment</h2>
           <p className='text-sm text-zinc-300'>
-            &ldquo;I built Lunary because astrology apps felt either too fluffy or too gatekept. We
-            pair real astronomy with human language so modern mystics, founders, and ritual keepers
-            can make confident decisions. Launching on Product Hunt lets us show that spirituality and
-            data can co-exist beautifully.&rdquo;
+            &ldquo;I built Lunary because astrology apps felt either too fluffy
+            or too gatekept. We pair real astronomy with human language so
+            modern mystics, founders, and ritual keepers can make confident
+            decisions. Launching on Product Hunt lets us show that spirituality
+            and data can co-exist beautifully.&rdquo;
           </p>
           <p className='text-xs uppercase tracking-[0.3em] text-zinc-500'>
             — [Founder Name], Builder of Lunary
@@ -108,7 +114,9 @@ export default function ProductHuntPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>Screenshots</p>
+          <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+            Screenshots
+          </p>
           <h2 className='text-3xl font-semibold'>Peek inside Lunary</h2>
         </div>
         <div className='grid gap-4 sm:grid-cols-3'>
@@ -135,7 +143,8 @@ export default function ProductHuntPage() {
       <section className='space-y-3 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <h2 className='text-2xl font-semibold'>Spread the word</h2>
         <p className='text-sm text-zinc-300'>
-          Tweets, LinkedIn posts, TikToks, and Product Hunt comments help us reach the Top 5 goal.
+          Tweets, LinkedIn posts, TikToks, and Product Hunt comments help us
+          reach the Top 5 goal.
         </p>
         <SocialShareButtons
           url='https://lunary.app/product-hunt'

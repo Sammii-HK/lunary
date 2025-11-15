@@ -27,7 +27,7 @@ export function LaunchHero({
   ctaPrimary = { label: 'Start Your Cosmic Journey', href: '/auth' },
   ctaSecondary = { label: 'Explore the Launch Plan', href: '#timeline' },
   stats = defaultStats,
-  }: LaunchHeroProps) {
+}: LaunchHeroProps) {
   return (
     <section className='relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-900 via-indigo-950 to-black p-10 shadow-2xl'>
       <div className='pointer-events-none absolute inset-0 opacity-40'>
@@ -67,7 +67,9 @@ export function LaunchHero({
                 key={stat.label}
                 className='rounded-2xl border border-white/10 bg-black/40 p-4 text-center'
               >
-                <p className='text-2xl font-semibold text-white'>{stat.value}</p>
+                <p className='text-2xl font-semibold text-white'>
+                  {stat.value}
+                </p>
                 <p className='text-xs uppercase tracking-widest text-zinc-400'>
                   {stat.label}
                 </p>
@@ -104,13 +106,17 @@ export function LaunchHero({
                     Cosmic pulse
                   </p>
                   <p className='mt-2 text-lg text-white'>88% aligned</p>
-                  <p className='text-xs text-zinc-400'>High creativity window</p>
+                  <p className='text-xs text-zinc-400'>
+                    High creativity window
+                  </p>
                 </div>
               </div>
 
               <div className='rounded-3xl border border-white/10 bg-white/5 p-4 text-center text-sm text-white'>
                 <p className='font-medium'>Launch day · March 3, 2025</p>
-                <p className='text-xs text-zinc-300'>Product Hunt + Global Livestream</p>
+                <p className='text-xs text-zinc-300'>
+                  Product Hunt + Global Livestream
+                </p>
               </div>
             </div>
           </div>

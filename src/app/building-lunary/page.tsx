@@ -8,7 +8,8 @@ export const metadata: Metadata = {
     'Follow the Building Lunary TikTok series for behind-the-scenes product updates, astronomy explainers, and launch prep.',
   openGraph: {
     title: 'Building Lunary · TikTok Series',
-    description: 'Watch the episode list, get BTS notes, and subscribe for new drops.',
+    description:
+      'Watch the episode list, get BTS notes, and subscribe for new drops.',
     url: 'https://lunary.app/building-lunary',
   },
 };
@@ -34,12 +35,14 @@ const episodes = [
   },
   {
     title: 'Launch Day: What to Expect',
-    description: 'We map the Product Hunt schedule, cosmic report giveaway, and livestream.',
+    description:
+      'We map the Product Hunt schedule, cosmic report giveaway, and livestream.',
     link: 'https://www.tiktok.com/@lunary/video/0004',
   },
   {
     title: 'User Stories: Lunary Changed My Launch',
-    description: 'Spotlight on creators using Lunary to time launches and rituals.',
+    description:
+      'Spotlight on creators using Lunary to time launches and rituals.',
     link: 'https://www.tiktok.com/@lunary/video/0005',
   },
 ];
@@ -53,8 +56,8 @@ export default function BuildingLunaryPage() {
         </p>
         <h1 className='text-4xl font-semibold'>Building Lunary</h1>
         <p className='text-lg text-zinc-200'>
-          A weekly TikTok series documenting how we build the Product Hunt launch, cosmic report
-          generator, and community rituals — in public.
+          A weekly TikTok series documenting how we build the Product Hunt
+          launch, cosmic report generator, and community rituals — in public.
         </p>
         <div className='flex gap-4 text-sm text-purple-100'>
           <Link
@@ -92,7 +95,9 @@ export default function BuildingLunaryPage() {
                 <p className='text-xs uppercase tracking-[0.3em] text-purple-200'>
                   Episode {index + 1}
                 </p>
-                <h3 className='text-xl font-semibold text-white'>{episode.title}</h3>
+                <h3 className='text-xl font-semibold text-white'>
+                  {episode.title}
+                </h3>
                 <p className='text-sm text-zinc-300'>{episode.description}</p>
               </div>
               <Link

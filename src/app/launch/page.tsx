@@ -37,7 +37,8 @@ const timeline = [
   {
     date: 'Now',
     title: 'Launch prep & community seeding',
-    details: 'Collect waitlist signups, ship press kit, publish TikTok builder series.',
+    details:
+      'Collect waitlist signups, ship press kit, publish TikTok builder series.',
   },
   {
     date: 'T-7 days',
@@ -90,8 +91,8 @@ export default function LaunchPage() {
             12k beta users · 140k daily cosmic events tracked
           </h3>
           <p className='mt-2 text-sm text-zinc-300'>
-            Powered by NASA-grade data, verified by mystics, and loved by ritual keepers,
-            founders, and cosmic hobbyists alike.
+            Powered by NASA-grade data, verified by mystics, and loved by ritual
+            keepers, founders, and cosmic hobbyists alike.
           </p>
           <div className='mt-6 space-y-4'>
             {testimonials.map((testimonial) => (
@@ -114,8 +115,9 @@ export default function LaunchPage() {
           <div className='mt-4 rounded-3xl border border-purple-400/20 bg-gradient-to-b from-purple-900/30 to-black/60 p-6'>
             <h4 className='text-2xl font-semibold'>Founding Moon Circle</h4>
             <p className='text-sm text-purple-100'>
-              $29/mo · includes cosmic report generator, Moon Circle templates, and full
-              grimoire access. Annual plan includes a personalized PDF drop.
+              $29/mo · includes cosmic report generator, Moon Circle templates,
+              and full grimoire access. Annual plan includes a personalized PDF
+              drop.
             </p>
             <ul className='mt-4 space-y-2 text-sm text-purple-50'>
               <li>✷ Product Hunt launch-only perks</li>
@@ -132,7 +134,10 @@ export default function LaunchPage() {
         </div>
       </section>
 
-      <section id='timeline' className='space-y-6 rounded-3xl border border-white/10 bg-black/40 p-6'>
+      <section
+        id='timeline'
+        className='space-y-6 rounded-3xl border border-white/10 bg-black/40 p-6'
+      >
         <div>
           <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
             Launch Timeline
@@ -149,7 +154,9 @@ export default function LaunchPage() {
                 <p className='text-sm uppercase tracking-[0.3em] text-purple-300'>
                   {event.date}
                 </p>
-                <h4 className='text-xl font-semibold text-white'>{event.title}</h4>
+                <h4 className='text-xl font-semibold text-white'>
+                  {event.title}
+                </h4>
                 <p className='text-sm text-zinc-300'>{event.details}</p>
               </div>
             </div>
@@ -167,8 +174,8 @@ export default function LaunchPage() {
             Rally your cosmic group chat
           </h3>
           <p className='text-sm text-zinc-300'>
-            Invite fellow builders, astrologers, and ritual keepers to the Product Hunt
-            launch. Every share helps us reach the Top 5 goal.
+            Invite fellow builders, astrologers, and ritual keepers to the
+            Product Hunt launch. Every share helps us reach the Top 5 goal.
           </p>
           <div className='mt-6'>
             <SocialShareButtons

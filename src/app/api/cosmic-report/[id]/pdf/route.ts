@@ -7,10 +7,7 @@ interface Params {
   id: string;
 }
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Params },
-) {
+export async function GET(_request: Request, { params }: { params: Params }) {
   try {
     const id = Number(params.id);
     if (Number.isNaN(id)) {

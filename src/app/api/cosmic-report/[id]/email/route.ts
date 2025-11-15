@@ -13,10 +13,7 @@ interface Params {
   id: string;
 }
 
-export async function POST(
-  request: Request,
-  { params }: { params: Params },
-) {
+export async function POST(request: Request, { params }: { params: Params }) {
   try {
     const body = await request.json();
     const parsed = emailSchema.parse(body);
@@ -57,7 +54,8 @@ export async function POST(
       `;
     }
 
-    const shareUrl = shareToken && isPublic ? buildShareUrl(shareToken) : undefined;
+    const shareUrl =
+      shareToken && isPublic ? buildShareUrl(shareToken) : undefined;
     const pdfUrl = `/api/cosmic-report/${id}/pdf`;
 
     await sendEmail({

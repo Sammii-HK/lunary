@@ -14,9 +14,9 @@ export function LaunchSignupForm({
 }: LaunchSignupFormProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>(
-    'idle',
-  );
+  const [status, setStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle');
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -51,7 +51,9 @@ export function LaunchSignupForm({
     } catch (error) {
       setStatus('error');
       setMessage(
-        error instanceof Error ? error.message : 'Something went wrong. Try again?',
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong. Try again?',
       );
     }
   };
@@ -70,7 +72,8 @@ export function LaunchSignupForm({
         </p>
         <h3 className='text-2xl font-semibold text-white'>Reserve your spot</h3>
         <p className='text-sm text-zinc-300'>
-          Get the Product Hunt reminder, press kit drops, and cosmic report template.
+          Get the Product Hunt reminder, press kit drops, and cosmic report
+          template.
         </p>
       </div>
       <div className='grid gap-3 sm:grid-cols-2'>

@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     'Download Lunary logos, screenshots, founder bios, press release templates, and key stats for coverage.',
   openGraph: {
     title: 'Lunary AI Press Kit',
-    description: 'Company overview, founder bio, statistics, and assets for media partners.',
+    description:
+      'Company overview, founder bio, statistics, and assets for media partners.',
     url: 'https://lunary.app/press-kit',
     images: [
       {
@@ -23,7 +24,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Lunary AI Press Kit',
-    description: 'Download logos, product screenshots, and press release template.',
+    description:
+      'Download logos, product screenshots, and press release template.',
     images: ['/api/og/cosmic'],
   },
 };
@@ -57,12 +59,15 @@ export default function PressKitPage() {
   return (
     <div className='w-full max-w-5xl space-y-10 px-4 py-10 text-white'>
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/50 p-8'>
-        <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>Press Center</p>
+        <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+          Press Center
+        </p>
         <h1 className='text-4xl font-semibold'>Lunary AI · Company Overview</h1>
         <p className='text-lg text-zinc-200'>
-          Lunary is your personalized cosmic companion. We combine NASA-grade astronomy with
-          AI storytelling to deliver real-time rituals, tarot prompts, and cosmic status updates for
-          modern mystics, founders, and community builders.
+          Lunary is your personalized cosmic companion. We combine NASA-grade
+          astronomy with AI storytelling to deliver real-time rituals, tarot
+          prompts, and cosmic status updates for modern mystics, founders, and
+          community builders.
         </p>
         <div className='grid gap-4 sm:grid-cols-4'>
           {stats.map((stat) => (
@@ -83,14 +88,17 @@ export default function PressKitPage() {
         <div>
           <h2 className='text-2xl font-semibold'>Founder Bio</h2>
           <p className='text-sm text-zinc-300'>
-            Lunary was founded by Nova Quinn, a product builder who previously led AI teams at
-            mindful technology startups. She pairs a background in astronomy and ritual facilitation
-            to make cosmic insights more accessible, accurate, and community-driven.
+            Lunary was founded by Nova Quinn, a product builder who previously
+            led AI teams at mindful technology startups. She pairs a background
+            in astronomy and ritual facilitation to make cosmic insights more
+            accessible, accurate, and community-driven.
           </p>
           <ul className='mt-4 list-disc space-y-2 pl-5 text-sm text-zinc-300'>
             <li>Built Lunary after hosting moon circles for over five years</li>
             <li>Graduate of NASA&apos;s community science programs</li>
-            <li>Focused on ethical AI, transparency, and community storytelling</li>
+            <li>
+              Focused on ethical AI, transparency, and community storytelling
+            </li>
           </ul>
           <Link
             href='/press-kit/founder-bio.pdf'
@@ -100,10 +108,12 @@ export default function PressKitPage() {
           </Link>
         </div>
         <div className='space-y-4'>
-          <p className='text-xs uppercase tracking-[0.3em] text-purple-300'>Contact</p>
+          <p className='text-xs uppercase tracking-[0.3em] text-purple-300'>
+            Contact
+          </p>
           <p className='text-sm text-zinc-300'>
-            press@lunary.app · Signal +1 (000) 000-0000 · Available for interviews, demos, and
-            guest content.
+            press@lunary.app · Signal +1 (000) 000-0000 · Available for
+            interviews, demos, and guest content.
           </p>
           <Link
             href='/press-kit/press-release-template.md'
@@ -124,7 +134,10 @@ export default function PressKitPage() {
         <h2 className='text-2xl font-semibold'>Product Screenshots</h2>
         <div className='grid gap-4 md:grid-cols-3'>
           {screenshots.map((shot) => (
-            <div key={shot.title} className='rounded-2xl border border-white/10 bg-white/5 p-3'>
+            <div
+              key={shot.title}
+              className='rounded-2xl border border-white/10 bg-white/5 p-3'
+            >
               <div className='relative mb-3 h-48 w-full overflow-hidden rounded-xl bg-black/40'>
                 <Image
                   src={shot.src}

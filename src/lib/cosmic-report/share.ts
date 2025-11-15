@@ -1,6 +1,7 @@
 import { randomBytes } from 'crypto';
 
-const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+const DEFAULT_BASE_URL =
+  process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
 export function createShareToken() {
   return randomBytes(16).toString('hex');

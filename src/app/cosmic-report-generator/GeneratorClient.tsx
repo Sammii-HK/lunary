@@ -39,7 +39,10 @@ export function GeneratorClient() {
       report_type: reportType,
       date_range:
         dateRange.start || dateRange.end
-          ? { start: dateRange.start || undefined, end: dateRange.end || undefined }
+          ? {
+              start: dateRange.start || undefined,
+              end: dateRange.end || undefined,
+            }
           : undefined,
       include_sections: selectedSections,
       make_public: makePublic,
@@ -68,7 +71,9 @@ export function GeneratorClient() {
       setStatus('Report generated');
     } catch (error) {
       setStatus(
-        error instanceof Error ? error.message : 'Unable to generate report right now.',
+        error instanceof Error
+          ? error.message
+          : 'Unable to generate report right now.',
       );
     } finally {
       setIsGenerating(false);
@@ -96,13 +101,19 @@ export function GeneratorClient() {
       }
       setReport((prev) =>
         prev
-          ? { ...prev, share_url: data.share_url, share_token: data.share_token }
+          ? {
+              ...prev,
+              share_url: data.share_url,
+              share_token: data.share_token,
+            }
           : prev,
       );
       setStatus('Share link ready');
     } catch (error) {
       setStatus(
-        error instanceof Error ? error.message : 'Unable to create share link right now.',
+        error instanceof Error
+          ? error.message
+          : 'Unable to create share link right now.',
       );
     }
   };
@@ -127,8 +138,8 @@ export function GeneratorClient() {
       <section className='rounded-3xl border border-white/10 bg-black/50 p-6'>
         <h1 className='text-4xl font-semibold'>Cosmic Report Generator</h1>
         <p className='text-sm text-zinc-300'>
-          Build launch-ready cosmic briefings with custom sections, optional share links, and PDF
-          exports.
+          Build launch-ready cosmic briefings with custom sections, optional
+          share links, and PDF exports.
         </p>
       </section>
 
@@ -164,7 +175,10 @@ export function GeneratorClient() {
                 type='date'
                 value={dateRange.start}
                 onChange={(event) =>
-                  setDateRange((prev) => ({ ...prev, start: event.target.value }))
+                  setDateRange((prev) => ({
+                    ...prev,
+                    start: event.target.value,
+                  }))
                 }
                 className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white focus:border-purple-400 focus:outline-none'
               />

@@ -94,7 +94,8 @@ export function PressKitAssets() {
         </p>
         <h3 className='text-3xl font-semibold text-white'>Press Kit Assets</h3>
         <p className='text-sm text-zinc-300'>
-          Logos, screenshots, founder portraits, and ready-to-use bios for coverage.
+          Logos, screenshots, founder portraits, and ready-to-use bios for
+          coverage.
         </p>
         <Link
           href='/press-kit/lunary-press-kit.zip'
@@ -107,9 +108,14 @@ export function PressKitAssets() {
 
       <div className='space-y-6'>
         {assetGroups.map((group) => (
-          <div key={group.title} className='space-y-3 rounded-2xl border border-white/10 p-4'>
+          <div
+            key={group.title}
+            className='space-y-3 rounded-2xl border border-white/10 p-4'
+          >
             <div className='flex flex-col gap-1'>
-              <h4 className='text-xl font-semibold text-white'>{group.title}</h4>
+              <h4 className='text-xl font-semibold text-white'>
+                {group.title}
+              </h4>
               <p className='text-sm text-zinc-400'>{group.description}</p>
             </div>
             <div className='grid gap-3 md:grid-cols-2'>
@@ -122,7 +128,9 @@ export function PressKitAssets() {
                     <div>
                       <p className='font-semibold text-white'>{asset.name}</p>
                       {asset.description && (
-                        <p className='text-xs text-zinc-400'>{asset.description}</p>
+                        <p className='text-xs text-zinc-400'>
+                          {asset.description}
+                        </p>
                       )}
                     </div>
                     <span className='text-xs uppercase tracking-[0.3em] text-purple-200'>

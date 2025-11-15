@@ -45,7 +45,10 @@ const SECTION_LIBRARY: Record<
     title: 'Tarot Archetypes',
     summary:
       'AI interprets card archetypes alongside your astrological weather for story-driven insights.',
-    highlights: ['The Star → share progress', 'Four of Cups → audit your inputs'],
+    highlights: [
+      'The Star → share progress',
+      'Four of Cups → audit your inputs',
+    ],
   },
   mood: {
     title: 'Mood + Somatics',

@@ -5,10 +5,7 @@ interface Params {
   token: string;
 }
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Params },
-) {
+export async function GET(_request: Request, { params }: { params: Params }) {
   try {
     const { token } = params;
     if (!token) {

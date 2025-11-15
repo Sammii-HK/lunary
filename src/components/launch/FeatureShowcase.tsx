@@ -1,4 +1,11 @@
-import { Compass, Sparkles, Waves, Zap, Orbit, BookOpenCheck } from 'lucide-react';
+import {
+  Compass,
+  Sparkles,
+  Waves,
+  Zap,
+  Orbit,
+  BookOpenCheck,
+} from 'lucide-react';
 import clsx from 'clsx';
 import type { ComponentType } from 'react';
 
@@ -51,7 +58,8 @@ const defaultFeatures: Feature[] = [
   },
   {
     title: 'Grimoire Library',
-    description: 'Curated spells, tarot spreads, and astro-lesson packs updated weekly.',
+    description:
+      'Curated spells, tarot spreads, and astro-lesson packs updated weekly.',
     icon: BookOpenCheck,
   },
 ];
@@ -68,7 +76,9 @@ export function FeatureShowcase({
         <p className='text-xs uppercase tracking-[0.4em] text-purple-300'>
           Launch Feature Stack
         </p>
-        <h2 className='text-3xl font-semibold text-white sm:text-4xl'>{heading}</h2>
+        <h2 className='text-3xl font-semibold text-white sm:text-4xl'>
+          {heading}
+        </h2>
         <p className='text-base text-zinc-300 sm:text-lg'>{subheading}</p>
       </div>
 

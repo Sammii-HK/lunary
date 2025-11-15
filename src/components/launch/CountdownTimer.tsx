@@ -52,7 +52,9 @@ export function CountdownTimer({
             {label}
           </p>
           <h3 className='text-2xl font-semibold text-white'>
-            {timeLeft.isLive ? 'We are live 🎉' : 'Countdown to Product Hunt launch'}
+            {timeLeft.isLive
+              ? 'We are live 🎉'
+              : 'Countdown to Product Hunt launch'}
           </h3>
           <p className='text-sm text-zinc-300'>
             March 3 · Product Hunt · Global livestream · Press drop
