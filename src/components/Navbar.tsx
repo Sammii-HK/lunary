@@ -7,9 +7,10 @@ import {
   Notebook,
   Sparkles,
   User,
-  Circle,
+  WandSparkles,
 } from 'lucide-react';
 import Link from 'next/link';
+import { ExploreMenu } from './ExploreMenu';
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -35,15 +36,15 @@ export const Navbar = () => {
           activePath={pathname}
         />
         <NavLink
-          href='/book-of-shadows'
-          icon={Notebook}
-          label='Book of Shadows'
+          href='/horoscope'
+          icon={WandSparkles}
+          label='Horoscope'
           activePath={pathname}
         />
         <NavLink
-          href='/horoscope'
-          icon={Circle}
-          label='Horoscope'
+          href='/book-of-shadows'
+          icon={Notebook}
+          label='Book of Shadows'
           activePath={pathname}
         />
         <NavLink
@@ -52,6 +53,7 @@ export const Navbar = () => {
           label='Grimoire'
           activePath={pathname}
         />
+        <ExploreMenu />
         <NavLink
           href='/profile'
           icon={User}

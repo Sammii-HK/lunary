@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --fix",
-    "lint:check": "next lint",
+    "lint": "eslint . --fix --ext .ts,.tsx",
+    "lint:check": "eslint . --ext .ts,.tsx",
     "setup-db": "tsx scripts/setup-database.ts",
     "migrate:subscriptions": "tsx scripts/migrate-subscriptions.ts",
     "migrate:subscriptions:check": "tsx scripts/migrate-subscriptions.ts --check",
@@ -37,7 +37,9 @@
     "test:single": "bash scripts/test-single.sh",
     "test:all": "pnpm test && pnpm test:e2e",
     "test:cors": "tsx scripts/test-cors.ts",
-    "test:middleware": "tsx scripts/test-middleware.ts"
+    "test:middleware": "tsx scripts/test-middleware.ts",
+    "cleanup": "bash scripts/dev-cleanup.sh",
+    "cleanup:port": "bash scripts/cleanup-port-3000.sh"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -49,6 +51,8 @@
     ]
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.67",
+    "@ai-sdk/react": "^2.0.93",
     "@astrodraw/astrochart": "^3.0.2",
     "@base-ui-components/react": "^1.0.0-beta.2",
     "@emotion/react": "^11.13.3",
@@ -69,6 +73,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/blob": "^2.0.0",
     "@vercel/postgres": "^0.10.0",
+    "ai": "^5.0.93",
     "astronomy-engine": "^2.1.19",
     "better-auth": "^1.3.25",
     "better-sqlite3": "^12.4.1",

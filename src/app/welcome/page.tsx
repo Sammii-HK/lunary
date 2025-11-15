@@ -15,6 +15,11 @@ import {
   Smartphone,
   Bell,
   WifiOff,
+  FileText,
+  CircleDot,
+  Store,
+  FolderOpen,
+  Globe,
 } from 'lucide-react';
 
 export default function WelcomePage() {
@@ -67,6 +72,36 @@ export default function WelcomePage() {
       description:
         'Understand your annual solar return and discover patterns in your personal cosmic timeline.',
     },
+    {
+      icon: FileText,
+      title: 'Cosmic Report Generator',
+      description:
+        'Generate personalized PDF reports with transits, moon phases, tarot insights, and rituals. Shareable reports for launches, birthdays, and special moments.',
+    },
+    {
+      icon: CircleDot,
+      title: 'Moon Circles',
+      description:
+        'Join New and Full Moon rituals with guided scripts, altar setups, and community prompts. Track your lunar journey over time.',
+    },
+    {
+      icon: Store,
+      title: 'Shop & Moon Packs',
+      description:
+        'Digital moon phase packs, calendars, crystal guides, and astrological resources. Downloadable content for your cosmic practice.',
+    },
+    {
+      icon: FolderOpen,
+      title: 'Collections',
+      description:
+        'Save and organize your favorite tarot readings, horoscopes, and cosmic insights in personalized collections.',
+    },
+    {
+      icon: Globe,
+      title: 'Cosmic State',
+      description:
+        'View and share your complete astrological snapshot—birth chart placements, current transits, and moon position—all in one place.',
+    },
   ];
 
   return (
@@ -93,6 +128,12 @@ export default function WelcomePage() {
                 className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
               >
                 Pricing
+              </Link>
+              <Link
+                href='/welcome'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Features
               </Link>
               <Link
                 href='/'

@@ -153,6 +153,12 @@ export default function PricingPage() {
                   Blog
                 </Link>
                 <Link
+                  href='/pricing'
+                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+                >
+                  Pricing
+                </Link>
+                <Link
                   href='/welcome'
                   className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
                 >
