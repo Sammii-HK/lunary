@@ -76,10 +76,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev',
+    command: process.env.CI
+      ? 'pnpm dev'
+      : 'rm -rf .next/routes-manifest.json 2>/dev/null || true && pnpm dev', // Clean routes manifest in local dev to force regeneration
     url: 'http://localhost:3000',
-    reuseExistingServer: false, // Always start fresh to avoid wrong server
-    timeout: 60000, // 60 seconds should be enough
+    reuseExistingServer: !process.env.CI, // Reuse existing server in local dev, always start fresh in CI
+    timeout: 120000, // 120 seconds to allow Next.js to compile routes and generate manifest files
     stdout: process.env.CI ? 'ignore' : 'pipe',
     stderr: process.env.CI ? 'ignore' : 'pipe',
     env: {
