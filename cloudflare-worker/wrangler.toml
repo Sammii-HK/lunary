@@ -5,11 +5,11 @@ compatibility_date = "2024-10-30"
 # Multiple cron triggers for different tasks - spread throughout the day
 [triggers]
 crons = [
-  "0 */4 * * *",  # Every 4 hours (0, 4, 8, 12, 16, 20) - cosmic snapshot updates
+  "0 */4 * * *",  # Every 4 hours - handles cosmic snapshot updates and routes to specific tasks based on hour
   "0 8 * * *",    # Daily at 8 AM - cosmic pulse and daily posts
   "0 14 * * *",   # Daily at 2 PM - cosmic changes notification
   "0 20 * * *",   # Daily at 8 PM - moon circles check
-  "0 10 * * 0"    # Sunday at 10 AM - weekly cosmic report
+  "0 10 * * SUN"  # Sunday at 10 AM - weekly cosmic report
 ]
 
 # Environment variables (set these in Cloudflare dashboard)
