@@ -61,10 +61,27 @@ const parseDelimitedList = (
     .slice(0, limit);
 };
 
-type PatternStat = {
-  label: string;
-  value: string;
-  helper?: string;
+const parseJsonParam = <T,>(value: string | null) => {
+  if (!value) return undefined;
+  try {
+    return JSON.parse(value) as T;
+  } catch (error) {
+    console.error('Failed to parse JSON param', error);
+    return undefined;
+  }
+};
+
+type SuitPatternBlock = {
+  suit: string;
+  count: number;
+  reading?: string;
+};
+
+type NumberPatternBlock = {
+  number: string;
+  count: number;
+  reading?: string;
+  cards?: string[];
 };
 
 const gradients = [
@@ -111,10 +128,6 @@ export async function GET(request: NextRequest) {
   const variant = sanitize(searchParams.get('variant'), 16)?.toLowerCase();
   const isPattern = variant === 'pattern';
   const totalCards = parseNumber(searchParams.get('total'));
-  const majorCount = parseNumber(searchParams.get('major'));
-  const minorCount = parseNumber(searchParams.get('minor'));
-  const topSuit = sanitize(searchParams.get('topSuit'), 24);
-  const topSuitCount = parseNumber(searchParams.get('topSuitCount'));
   const suitInsight = sanitize(searchParams.get('suitInsight'), 200);
   const elementFocus = sanitize(searchParams.get('element'), 20);
   const extraInsights = parseDelimitedList(searchParams.get('insights'));
@@ -123,6 +136,10 @@ export async function GET(request: NextRequest) {
   const transitImpact = sanitize(searchParams.get('transit'), 200);
   const actionPrompt = sanitize(searchParams.get('action'), 160);
   const platform = sanitize(searchParams.get('platform'), 20)?.toLowerCase();
+  const suitBlocks =
+    parseJsonParam<SuitPatternBlock[]>(searchParams.get('suits')) ?? [];
+  const numberBlocks =
+    parseJsonParam<NumberPatternBlock[]>(searchParams.get('numbers')) ?? [];
 
   const baseLabel = (() => {
     if (isPattern) {
@@ -149,48 +166,8 @@ export async function GET(request: NextRequest) {
       ),
     ),
   ).slice(0, 4);
-  const patternStats = (
-    [
-      typeof majorCount === 'number'
-        ? {
-            label: 'Major Arcana',
-            value: `${majorCount}${
-              totalCards
-                ? ` (${Math.round((majorCount / totalCards) * 100)}%)`
-                : ''
-            }`,
-            helper: 'Destiny lessons',
-          }
-        : null,
-      typeof minorCount === 'number' && !topSuit
-        ? {
-            label: 'Minor Arcana',
-            value: `${minorCount}${
-              totalCards
-                ? ` (${Math.round((minorCount / totalCards) * 100)}%)`
-                : ''
-            }`,
-            helper: 'Day-to-day focus',
-          }
-        : null,
-      topSuit
-        ? {
-            label: elementFocus
-              ? `${topSuit} · ${elementFocus}`
-              : `${topSuit} focus`,
-            value: topSuitCount
-              ? `${topSuitCount}${
-                  totalCards
-                    ? ` (${Math.round((topSuitCount / totalCards) * 100)}%)`
-                    : ''
-                }`
-              : topSuit,
-            helper: elementFocus ? 'Elemental dominance' : 'Suit dominance',
-          }
-        : null,
-    ] as Array<PatternStat | null>
-  ).filter((stat): stat is PatternStat => Boolean(stat));
-
+  const limitedSuitBlocks = suitBlocks.slice(0, 4);
+  const limitedNumberBlocks = numberBlocks.slice(0, 4);
   const robotoMono = await loadRobotoMono(request);
 
   const footerHandles = (
@@ -306,59 +283,176 @@ export async function GET(request: NextRequest) {
               </div>
             )}
 
-            {patternStats.length > 0 && (
+            {(limitedSuitBlocks.length > 0 ||
+              limitedNumberBlocks.length > 0) && (
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: `repeat(${patternStats.length}, minmax(0, 1fr))`,
+                  display: 'flex',
+                  flexDirection: 'column',
                   gap: '18px',
                 }}
               >
-                {patternStats.map((stat) => (
+                {limitedSuitBlocks.length > 0 && (
                   <div
-                    key={stat.label}
                     style={{
-                      border: `1px solid ${theme.accent}33`,
                       borderRadius: 18,
+                      border: '1px solid rgba(255,255,255,0.15)',
                       padding: '18px 22px',
-                      backgroundColor: 'rgba(0,0,0,0.15)',
-                      minHeight: 120,
+                      backgroundColor: 'rgba(0,0,0,0.2)',
                     }}
                   >
                     <div
                       style={{
                         fontFamily: 'Roboto Mono',
                         fontSize: 18,
-                        letterSpacing: 2,
+                        letterSpacing: 3,
                         textTransform: 'uppercase',
-                        opacity: 0.65,
+                        opacity: 0.7,
+                        marginBottom: 12,
                       }}
                     >
-                      {stat.label}
+                      Suit Patterns
                     </div>
                     <div
                       style={{
-                        fontFamily: 'Roboto Mono',
-                        fontSize: 40,
-                        fontWeight: 500,
-                        marginTop: 6,
+                        display: 'grid',
+                        gridTemplateColumns:
+                          limitedSuitBlocks.length > 2
+                            ? 'repeat(2, minmax(0,1fr))'
+                            : '1fr',
+                        gap: '12px',
                       }}
                     >
-                      {stat.value}
+                      {limitedSuitBlocks.map((pattern) => (
+                        <div
+                          key={pattern.suit}
+                          style={{
+                            borderRadius: 14,
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            padding: '14px',
+                            backgroundColor: 'rgba(0,0,0,0.25)',
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontFamily: 'Roboto Mono',
+                              fontSize: 20,
+                              fontWeight: 500,
+                            }}
+                          >
+                            {pattern.suit}
+                            {typeof totalCards === 'number' ? (
+                              <span style={{ fontSize: 16, opacity: 0.7 }}>
+                                {' '}
+                                ({pattern.count}/{totalCards} days)
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: 16, opacity: 0.7 }}>
+                                {' '}
+                                · {pattern.count} pulls
+                              </span>
+                            )}
+                          </div>
+                          {pattern.reading && (
+                            <div
+                              style={{
+                                marginTop: 8,
+                                fontFamily: 'Roboto Mono',
+                                fontSize: 18,
+                                lineHeight: 1.4,
+                                opacity: 0.85,
+                              }}
+                            >
+                              {pattern.reading}
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                    {stat.helper && (
-                      <div
-                        style={{
-                          fontFamily: 'Roboto Mono',
-                          fontSize: 18,
-                          opacity: 0.65,
-                        }}
-                      >
-                        {stat.helper}
-                      </div>
-                    )}
                   </div>
-                ))}
+                )}
+
+                {limitedNumberBlocks.length > 0 && (
+                  <div
+                    style={{
+                      borderRadius: 18,
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      padding: '18px 22px',
+                      backgroundColor: 'rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: 'Roboto Mono',
+                        fontSize: 18,
+                        letterSpacing: 3,
+                        textTransform: 'uppercase',
+                        opacity: 0.7,
+                        marginBottom: 12,
+                      }}
+                    >
+                      Number Patterns
+                    </div>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns:
+                          limitedNumberBlocks.length > 2
+                            ? 'repeat(2, minmax(0,1fr))'
+                            : '1fr',
+                        gap: '12px',
+                      }}
+                    >
+                      {limitedNumberBlocks.map((pattern) => (
+                        <div
+                          key={pattern.number}
+                          style={{
+                            borderRadius: 14,
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            padding: '14px',
+                            backgroundColor: 'rgba(0,0,0,0.25)',
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontFamily: 'Roboto Mono',
+                              fontSize: 20,
+                              fontWeight: 500,
+                            }}
+                          >
+                            {pattern.number}s ({pattern.count}{' '}
+                            {pattern.count === 1 ? 'time' : 'times'})
+                          </div>
+                          {pattern.reading && (
+                            <div
+                              style={{
+                                marginTop: 8,
+                                fontFamily: 'Roboto Mono',
+                                fontSize: 18,
+                                lineHeight: 1.4,
+                                opacity: 0.85,
+                              }}
+                            >
+                              {pattern.reading}
+                            </div>
+                          )}
+                          {pattern.cards?.length ? (
+                            <div
+                              style={{
+                                marginTop: 8,
+                                fontFamily: 'Roboto Mono',
+                                fontSize: 16,
+                                opacity: 0.7,
+                              }}
+                            >
+                              Cards: {pattern.cards.join(', ')}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

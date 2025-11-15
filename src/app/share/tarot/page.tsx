@@ -4,6 +4,19 @@ import { SOCIAL_TAGS } from '@/constants/socialHandles';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
 
+type SuitPatternBlock = {
+  suit: string;
+  count: number;
+  reading?: string;
+};
+
+type NumberPatternBlock = {
+  number: string;
+  count: number;
+  reading?: string;
+  cards?: string[];
+};
+
 type ShareTarotSearchParams = {
   card?: string | string[];
   keywords?: string | string[];
@@ -25,6 +38,8 @@ type ShareTarotSearchParams = {
   transit?: string | string[];
   action?: string | string[];
   platform?: string | string[];
+  suits?: string | string[];
+  numbers?: string | string[];
 };
 
 type ShareTarotPageProps = {
@@ -77,6 +92,17 @@ const parsePipeList = (value?: string | string[], limit = 4) => {
     .slice(0, limit);
 };
 
+const parseJsonParam = <T,>(value?: string | string[]) => {
+  const raw = toStringParam(value);
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as T;
+  } catch (error) {
+    console.error('Failed to parse JSON param', error);
+    return undefined;
+  }
+};
+
 const buildOgImageUrl = ({
   card,
   keywords,
@@ -98,6 +124,8 @@ const buildOgImageUrl = ({
   transit,
   action,
   platform,
+  suits,
+  numbers,
 }: {
   card?: string;
   keywords: string[];
@@ -119,6 +147,8 @@ const buildOgImageUrl = ({
   transit?: string;
   action?: string;
   platform?: string;
+  suits?: SuitPatternBlock[];
+  numbers?: NumberPatternBlock[];
 }) => {
   const params = new URLSearchParams();
   if (card) params.set('card', card);
@@ -143,6 +173,8 @@ const buildOgImageUrl = ({
   if (transit) params.set('transit', transit);
   if (action) params.set('action', action);
   if (platform) params.set('platform', platform);
+  if (suits?.length) params.set('suits', JSON.stringify(suits));
+  if (numbers?.length) params.set('numbers', JSON.stringify(numbers));
 
   return `${APP_URL}/api/og/share/tarot?${params.toString()}`;
 };
@@ -176,6 +208,10 @@ export async function generateMetadata({
   const elementRaw = toStringParam(resolvedSearchParams.element);
   const element = elementRaw ? toTitleCase(elementRaw) : undefined;
   const sharedInsights = parsePipeList(resolvedSearchParams.insights);
+  const suitBlocksMeta =
+    parseJsonParam<SuitPatternBlock[]>(resolvedSearchParams.suits) ?? [];
+  const numberBlocksMeta =
+    parseJsonParam<NumberPatternBlock[]>(resolvedSearchParams.numbers) ?? [];
   const moonPhaseRaw = toStringParam(resolvedSearchParams.moonPhase);
   const moonPhase = moonPhaseRaw ? toTitleCase(moonPhaseRaw) : undefined;
   const moonTip = toStringParam(resolvedSearchParams.moonTip);
@@ -250,6 +286,10 @@ export async function generateMetadata({
     urlParams.set('action', toStringParam(resolvedSearchParams.action)!);
   if (resolvedSearchParams.platform)
     urlParams.set('platform', toStringParam(resolvedSearchParams.platform)!);
+  if (resolvedSearchParams.suits)
+    urlParams.set('suits', toStringParam(resolvedSearchParams.suits)!);
+  if (resolvedSearchParams.numbers)
+    urlParams.set('numbers', toStringParam(resolvedSearchParams.numbers)!);
 
   const canonical = `${APP_URL}/share/tarot${
     urlParams.toString() ? `?${urlParams.toString()}` : ''
@@ -276,6 +316,8 @@ export async function generateMetadata({
     transit: transitImpact,
     action: actionPrompt,
     platform: platformTag,
+    suits: suitBlocksMeta,
+    numbers: numberBlocksMeta,
   });
 
   return {
@@ -341,18 +383,7 @@ export default async function ShareTarotPage({
       : `${timeframe} Tarot Spotlight`;
   const variantLabel = variant ? toTitleCase(variant) : undefined;
   const sharedCardCount = toNumberParam(resolvedSearchParams.total);
-  const sharedMajor = toNumberParam(resolvedSearchParams.major);
-  const sharedMinor = toNumberParam(resolvedSearchParams.minor);
-  const sharedTopSuitRaw = toStringParam(resolvedSearchParams.topSuit);
-  const sharedTopSuit = sharedTopSuitRaw
-    ? toTitleCase(sharedTopSuitRaw)
-    : undefined;
-  const sharedTopSuitCount = toNumberParam(resolvedSearchParams.topSuitCount);
   const sharedSuitInsight = toStringParam(resolvedSearchParams.suitInsight);
-  const sharedElementRaw = toStringParam(resolvedSearchParams.element);
-  const sharedElement = sharedElementRaw
-    ? toTitleCase(sharedElementRaw)
-    : undefined;
   const sharedInsights = parsePipeList(resolvedSearchParams.insights);
   const combinedInsights = Array.from(
     new Set(
@@ -361,6 +392,10 @@ export default async function ShareTarotPage({
       ),
     ),
   );
+  const suitBlocks =
+    parseJsonParam<SuitPatternBlock[]>(resolvedSearchParams.suits) ?? [];
+  const numberBlocks =
+    parseJsonParam<NumberPatternBlock[]>(resolvedSearchParams.numbers) ?? [];
   const sharedMoonPhaseRaw = toStringParam(resolvedSearchParams.moonPhase);
   const sharedMoonPhase = sharedMoonPhaseRaw
     ? toTitleCase(sharedMoonPhaseRaw)
@@ -377,41 +412,12 @@ export default async function ShareTarotPage({
   const highlightedPlatformLabel = platformTag
     ? SOCIAL_TAGS.find((tag) => tag.platform === platformTag)?.label
     : undefined;
-  const patternStats = [
-    typeof sharedMajor === 'number' && {
-      label: 'Major Arcana',
-      value: `${sharedMajor}`,
-      helper:
-        sharedCardCount && sharedMajor >= 0
-          ? `${Math.round((sharedMajor / sharedCardCount) * 100)}% of pulls`
-          : 'Depth lessons',
-    },
-    typeof sharedMinor === 'number' && {
-      label: 'Minor Arcana',
-      value: `${sharedMinor}`,
-      helper:
-        sharedCardCount && sharedMinor >= 0
-          ? `${Math.round((sharedMinor / sharedCardCount) * 100)}% of pulls`
-          : 'Life logistics',
-    },
-    sharedTopSuit && {
-      label: sharedElement
-        ? `${sharedTopSuit} · ${sharedElement}`
-        : sharedTopSuit,
-      value: sharedTopSuitCount
-        ? `${sharedTopSuitCount}${
-            sharedCardCount
-              ? ` (${Math.round((sharedTopSuitCount / sharedCardCount) * 100)}%)`
-              : ''
-          }`
-        : sharedTopSuit,
-      helper: sharedSuitInsight
-        ? undefined
-        : sharedElement
-          ? 'Elemental dominance'
-          : 'Suit dominance',
-    },
-  ].filter(Boolean) as Array<{ label: string; value: string; helper?: string }>;
+  const timeframeDays =
+    sharedCardCount ??
+    (() => {
+      const digits = timeframeBase.match(/\d+/);
+      return digits ? Number(digits[0]) : undefined;
+    })();
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-indigo-950 to-purple-900 py-12 text-white sm:py-16'>
@@ -451,31 +457,74 @@ export default async function ShareTarotPage({
 
           {isPattern && (
             <div className='mt-10 space-y-8 text-left'>
-              {patternStats.length > 0 && (
-                <div className='rounded-2xl border border-white/10 bg-white/5 p-6'>
-                  <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
-                    Pattern Metrics
-                  </p>
-                  <dl className='mt-5 grid gap-4 sm:grid-cols-2'>
-                    {patternStats.map((stat) => (
-                      <div
-                        key={stat.label}
-                        className='rounded-2xl border border-white/10 bg-black/30 p-4'
-                      >
-                        <dt className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
-                          {stat.label}
-                        </dt>
-                        <dd className='mt-2 text-2xl font-light text-white'>
-                          {stat.value}
-                        </dd>
-                        {stat.helper && (
-                          <p className='mt-1 text-xs text-zinc-400'>
-                            {stat.helper}
-                          </p>
-                        )}
+              {(suitBlocks.length > 0 || numberBlocks.length > 0) && (
+                <div className='rounded-2xl border border-white/10 bg-white/5 p-6 space-y-6'>
+                  {suitBlocks.length > 0 && (
+                    <div>
+                      <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                        Suit Patterns
+                      </p>
+                      <div className='mt-4 space-y-4'>
+                        {suitBlocks.map((pattern) => (
+                          <div
+                            key={pattern.suit}
+                            className='rounded-xl border border-white/10 bg-black/30 p-4'
+                          >
+                            <p className='text-sm font-semibold text-white'>
+                              {pattern.suit}
+                              {timeframeDays ? (
+                                <span className='text-xs text-purple-200/80'>
+                                  {' '}
+                                  ({pattern.count}/{timeframeDays} days)
+                                </span>
+                              ) : (
+                                <span className='text-xs text-purple-200/80'>
+                                  {' '}
+                                  · {pattern.count} pulls
+                                </span>
+                              )}
+                            </p>
+                            {pattern.reading && (
+                              <p className='mt-2 text-sm leading-relaxed text-zinc-300'>
+                                {pattern.reading}
+                              </p>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </dl>
+                    </div>
+                  )}
+
+                  {numberBlocks.length > 0 && (
+                    <div>
+                      <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                        Number Patterns
+                      </p>
+                      <div className='mt-4 space-y-4'>
+                        {numberBlocks.map((pattern) => (
+                          <div
+                            key={pattern.number}
+                            className='rounded-xl border border-white/10 bg-black/30 p-4'
+                          >
+                            <p className='text-sm font-semibold text-white'>
+                              {pattern.number}s ({pattern.count}{' '}
+                              {pattern.count === 1 ? 'time' : 'times'})
+                            </p>
+                            {pattern.reading && (
+                              <p className='mt-2 text-sm leading-relaxed text-zinc-300'>
+                                {pattern.reading}
+                              </p>
+                            )}
+                            {pattern.cards?.length ? (
+                              <p className='mt-2 text-xs text-zinc-400'>
+                                Cards: {pattern.cards.join(', ')}
+                              </p>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -337,6 +337,12 @@ const TarotReadings = () => {
       const minorPattern = trends.arcanaPatterns.find(
         (pattern) => pattern.type === 'Minor Arcana',
       );
+      const patternLimit =
+        trends.timeFrame >= 90
+          ? 8
+          : trends.timeFrame >= 30
+            ? 6
+            : trends.suitPatterns.length || trends.numberPatterns.length || 4;
       const topSuitPattern = trends.suitPatterns[0];
       const elementFocus = topSuitPattern
         ? SUIT_ELEMENTS[topSuitPattern.suit]
@@ -417,6 +423,27 @@ const TarotReadings = () => {
           'action',
           truncate(actionPrompt, 140) || actionPrompt,
         );
+      }
+      const suitBlocks = trends.suitPatterns
+        .slice(0, patternLimit)
+        .map((pattern) => ({
+          suit: pattern.suit,
+          count: pattern.count,
+          reading: pattern.reading,
+        }));
+      if (suitBlocks.length) {
+        url.searchParams.set('suits', JSON.stringify(suitBlocks));
+      }
+      const numberBlocks = trends.numberPatterns
+        .slice(0, patternLimit)
+        .map((pattern) => ({
+          number: pattern.number,
+          count: pattern.count,
+          reading: pattern.reading,
+          cards: pattern.cards,
+        }));
+      if (numberBlocks.length) {
+        url.searchParams.set('numbers', JSON.stringify(numberBlocks));
       }
 
       const summary =
