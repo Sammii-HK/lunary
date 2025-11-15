@@ -493,6 +493,7 @@ async function sendNewsletter(
   console.log(`📧 Sending newsletter: "${newsletter.subject}"`);
   console.log(`📊 HTML length: ${newsletter.html.length} chars`);
   console.log(`📊 Text length: ${newsletter.text.length} chars`);
+  const sendDate = new Date().toISOString().split('T')[0];
 
   // Test email - send to single recipient
   if (testEmail) {
@@ -513,6 +514,16 @@ async function sendNewsletter(
         subject: newsletter.subject,
         html: personalizedHtml,
         text: personalizedText,
+        tracking: {
+          userId: testEmail,
+          notificationType: 'weekly_report',
+          notificationId: `weekly-${sendDate}-test`,
+          utm: {
+            source: 'email',
+            medium: 'newsletter',
+            campaign: 'weekly_report_test',
+          },
+        },
       });
       return {
         recipients: 1,
@@ -589,6 +600,16 @@ async function sendNewsletter(
           subject: newsletter.subject,
           html,
           text,
+          tracking: {
+            userId: email,
+            notificationType: 'weekly_report',
+            notificationId: `weekly-${sendDate}-${email}`,
+            utm: {
+              source: 'email',
+              medium: 'newsletter',
+              campaign: 'weekly_report',
+            },
+          },
         }),
       ),
     );

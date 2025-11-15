@@ -30,6 +30,16 @@ export async function POST(request: NextRequest) {
       subject: '🌙 Welcome to Your Free Trial - Lunary',
       html,
       text,
+      tracking: {
+        userId: email,
+        notificationType: 'trial_welcome',
+        notificationId: `trial-welcome-${email}`,
+        utm: {
+          source: 'email',
+          medium: 'lifecycle',
+          campaign: 'trial_welcome',
+        },
+      },
     });
 
     return NextResponse.json({

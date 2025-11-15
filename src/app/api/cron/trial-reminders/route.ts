@@ -80,6 +80,17 @@ export async function GET(request: NextRequest) {
           subject: `⏰ ${daysRemaining} Days Left in Your Trial - Lunary`,
           html,
           text,
+          tracking: {
+            userId: user.user_id,
+            notificationType: 'trial_reminder',
+            notificationId: `trial-reminder-3d-${user.user_id}`,
+            utm: {
+              source: 'email',
+              medium: 'lifecycle',
+              campaign: 'trial_reminder',
+              content: '3_day',
+            },
+          },
         });
 
         // Mark as sent
@@ -120,6 +131,17 @@ export async function GET(request: NextRequest) {
           subject: `⏰ Last Day! Your Trial Ends Tomorrow - Lunary`,
           html,
           text,
+          tracking: {
+            userId: user.user_id,
+            notificationType: 'trial_reminder',
+            notificationId: `trial-reminder-1d-${user.user_id}`,
+            utm: {
+              source: 'email',
+              medium: 'lifecycle',
+              campaign: 'trial_reminder',
+              content: '1_day',
+            },
+          },
         });
 
         // Mark as sent

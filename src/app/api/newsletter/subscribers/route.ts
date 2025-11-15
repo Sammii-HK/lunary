@@ -146,6 +146,16 @@ export async function POST(request: NextRequest) {
           subject: '🌙 Confirm Your Email - Lunary Newsletter',
           html,
           text,
+          tracking: {
+            userId: subscriber.email,
+            notificationType: 'newsletter_verification',
+            notificationId: `newsletter-verify-${subscriber.email}`,
+            utm: {
+              source: 'email',
+              medium: 'newsletter',
+              campaign: 'newsletter_verification',
+            },
+          },
         });
 
         console.log(

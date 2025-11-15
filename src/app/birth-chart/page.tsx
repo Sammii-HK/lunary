@@ -14,9 +14,10 @@ import { hasBirthChartAccess } from '../../../utils/pricing';
 import Link from 'next/link';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TrialReminder } from '@/components/TrialReminder';
-import { FeatureGate } from '@/components/FeatureGate';
 import { conversionTracking } from '@/lib/analytics';
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Share2 } from 'lucide-react';
+import { SocialShareButtons } from '@/components/SocialShareButtons';
 
 // Function to generate concise planetary interpretations
 const getPlanetaryInterpretation = (planet: BirthChartData): string => {
@@ -801,6 +802,128 @@ const BirthChartPage = () => {
   const userBirthday = (me?.profile as any)?.birthday;
 
   const hasChartAccess = hasBirthChartAccess(subscription.status);
+  const [shareOrigin, setShareOrigin] = useState('https://lunary.app');
+  const [sharePopover, setSharePopover] = useState<string | null>(null);
+  const firstName = useMemo(
+    () => (userName ? userName.split(' ')[0] || userName : undefined),
+    [userName],
+  );
+  const truncate = useCallback((value?: string | null, limit = 160) => {
+    if (!value) return undefined;
+    if (value.length <= limit) return value;
+    return `${value.slice(0, limit - 1).trimEnd()}…`;
+  }, []);
+
+  const profile = me?.profile;
+  const hasBirthChartData = profile ? hasBirthChart(profile) : false;
+  const birthChartData = hasBirthChartData
+    ? getBirthChartFromProfile(profile)
+    : null;
+
+  const birthChartShare = useMemo(() => {
+    if (!birthChartData) return null;
+
+    try {
+      const sunSign =
+        birthChartData.find((planet) => planet.body === 'Sun')?.sign ?? null;
+      const moonSign =
+        birthChartData.find((planet) => planet.body === 'Moon')?.sign ?? null;
+      const risingSign =
+        birthChartData.find((planet) => planet.body === 'Ascendant')?.sign ??
+        null;
+
+      const shareKeywords = [
+        sunSign ? `Sun ${sunSign}` : null,
+        moonSign ? `Moon ${moonSign}` : null,
+        risingSign ? `Rising ${risingSign}` : null,
+      ].filter(Boolean) as string[];
+
+      const url = new URL('/share/birth-chart', shareOrigin);
+      url.searchParams.set('variant', 'birth-chart');
+      if (firstName) url.searchParams.set('name', firstName);
+      if (userBirthday) url.searchParams.set('date', userBirthday);
+      if (sunSign) url.searchParams.set('sun', sunSign);
+      if (moonSign) url.searchParams.set('moon', moonSign);
+      if (risingSign) url.searchParams.set('rising', risingSign);
+      if (shareKeywords.length) {
+        url.searchParams.set('keywords', shareKeywords.join(','));
+      }
+
+      const { elements, modalities } = getElementModality(birthChartData);
+      const dominantElement = [...elements].sort(
+        (a, b) => b.count - a.count,
+      )[0];
+      const dominantModality = [...modalities].sort(
+        (a, b) => b.count - a.count,
+      )[0];
+
+      if (dominantElement?.count) {
+        url.searchParams.set('element', dominantElement.name);
+      }
+      if (dominantModality?.count) {
+        url.searchParams.set('modality', dominantModality.name);
+      }
+
+      const topInsight = getChartAnalysis(birthChartData)[0]?.insight;
+      if (topInsight) {
+        url.searchParams.set('insight', topInsight);
+      }
+
+      return {
+        url: url.toString(),
+        title: `${firstName ? `${firstName}'s` : 'My'} Birth Chart Highlights`,
+        text: truncate(topInsight),
+      };
+    } catch (error) {
+      console.error('Failed to build birth chart share URL:', error);
+      return null;
+    }
+  }, [birthChartData, shareOrigin, firstName, userBirthday, truncate]);
+
+  const handleShareClick = useCallback(
+    async ({
+      id,
+      title,
+      url,
+      text,
+    }: {
+      id: string;
+      title: string;
+      url: string;
+      text?: string;
+    }) => {
+      const sharePayload = {
+        title,
+        text: text || title,
+        url,
+      };
+
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        try {
+          await navigator.share(sharePayload);
+          setSharePopover(null);
+          return;
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+            return;
+          }
+          console.error(
+            'Web Share API failed, falling back to share buttons:',
+            error,
+          );
+        }
+      }
+
+      setSharePopover((prev) => (prev === id ? null : id));
+    },
+    [setSharePopover],
+  );
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      setShareOrigin(window.location.origin);
+    }
+  }, []);
 
   useEffect(() => {
     if (hasChartAccess && hasBirthChart(me?.profile)) {
@@ -881,12 +1004,6 @@ const BirthChartPage = () => {
     );
   }
 
-  // Check if user has birth chart data (but they still need subscription to view it)
-  const hasBirthChartData = hasBirthChart(me.profile);
-  const birthChartData = hasBirthChartData
-    ? getBirthChartFromProfile(me.profile)
-    : null;
-
   // Note: Even if birth chart exists, user still can't access it without subscription
   // This preserves data for users who had trial/paid but keeps paywall intact
   if (!hasBirthChartData || !birthChartData) {
@@ -919,6 +1036,34 @@ const BirthChartPage = () => {
         userName={userName}
         birthDate={userBirthday}
       />
+
+      {birthChartShare && (
+        <div className='flex flex-col items-center gap-3 mt-4'>
+          <button
+            type='button'
+            onClick={() =>
+              handleShareClick({
+                id: 'birth-chart-overview',
+                title: birthChartShare.title,
+                url: birthChartShare.url,
+                text: birthChartShare.text,
+              })
+            }
+            className='inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-xs font-medium text-purple-200 hover:text-purple-100 transition-colors'
+          >
+            <Share2 className='w-4 h-4' />
+            Share your birth chart
+          </button>
+          {sharePopover === 'birth-chart-overview' && (
+            <div className='mt-1'>
+              <SocialShareButtons
+                url={birthChartShare.url}
+                title={birthChartShare.title}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Planetary Interpretations */}
       {birthChartData && (

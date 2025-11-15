@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 
+import { trackNotificationEvent } from '@/lib/analytics/tracking';
+
 // Lazy initialization of VAPID keys (only when actually needed)
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
@@ -151,6 +153,9 @@ export async function POST(request: NextRequest) {
     console.log(`📱 Sending to ${subscriptions.rows.length} subscribers`);
 
     // Send notifications using web-push
+    const notificationType =
+      payload.data?.eventType || payload.type || 'notification';
+
     const sendPromises = subscriptions.rows.map(async (sub: any) => {
       try {
         await webpush.sendNotification(
@@ -170,6 +175,19 @@ export async function POST(request: NextRequest) {
           SET last_notification_sent = NOW() 
           WHERE endpoint = ${sub.endpoint}
         `;
+
+        if (sub.user_id) {
+          await trackNotificationEvent({
+            userId: sub.user_id,
+            notificationType,
+            eventType: 'sent',
+            notificationId: payload.data?.notification_id,
+            metadata: {
+              endpoint: sub.endpoint,
+              delivery: 'push',
+            },
+          });
+        }
 
         return { success: true, endpoint: sub.endpoint };
       } catch (error) {

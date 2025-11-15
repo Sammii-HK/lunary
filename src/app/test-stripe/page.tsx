@@ -24,7 +24,13 @@ export default function TestStripePage() {
 
       setResult('🔄 Creating checkout session...');
 
-      const { sessionId, url } = await createCheckoutSession(monthlyPriceId);
+      const { sessionId, url } = await createCheckoutSession(
+        monthlyPriceId,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      );
 
       if (sessionId && url) {
         setResult(`✅ Stripe setup working! Session ID: ${sessionId}`);

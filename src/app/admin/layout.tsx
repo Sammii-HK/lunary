@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { ADMIN_PWA_MANIFEST_URL } from '@/constants/pwa';
 
 export const metadata: Metadata = {
@@ -38,6 +38,14 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'application-name': 'Lunary Admin',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#0b0b0f',
 };
 
 export default function AdminLayout({

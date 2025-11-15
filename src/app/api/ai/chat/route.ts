@@ -25,10 +25,12 @@ import {
   incrementWeeklyRitualUsage,
   isRitualRequest,
 } from '@/lib/ai/weekly-ritual-usage';
+import { recordAiInteraction } from '@/lib/analytics/tracking';
 
 type ChatRequest = {
   message: string;
   threadId?: string;
+  mode?: string;
 };
 
 const jsonResponse = (payload: unknown, status = 200, init?: ResponseInit) =>
@@ -50,6 +52,10 @@ export async function POST(request: NextRequest) {
     const user = await requireUser(request);
     const planId = resolvePlanId(user);
     const assistCommand = detectAssistCommand(body.message);
+    const aiMode =
+      typeof body.mode === 'string' && body.mode.trim().length > 0
+        ? body.mode.trim()
+        : (assistCommand.type ?? 'general');
     const memorySnippetLimit = MEMORY_SNIPPET_LIMITS[planId] ?? 0;
     const memorySnippets = getMemorySnippets(user.id, memorySnippetLimit);
 
@@ -139,7 +145,7 @@ export async function POST(request: NextRequest) {
       now,
     });
 
-    if (assistCommand.type !== 'none') {
+    if (assistCommand.type) {
       const assistSnippet = runAssistCommand(assistCommand, context);
       const reflection = buildReflectionPrompt(context, body.message);
       const promptSections = buildPromptSections({
@@ -223,6 +229,17 @@ export async function POST(request: NextRequest) {
         dailyHighlight,
         memories: updatedMemorySnippets,
       };
+
+      await recordAiInteraction({
+        userId: user.id,
+        mode: aiMode,
+        tokensIn,
+        tokensOut,
+        metadata: {
+          thread_id: thread.id,
+          assist: assistCommand.type ?? undefined,
+        },
+      });
 
       const wantsStream =
         request.headers.get('accept')?.includes('text/event-stream') ||
@@ -370,6 +387,17 @@ export async function POST(request: NextRequest) {
       dailyHighlight,
       memories: updatedMemorySnippets,
     };
+
+    await recordAiInteraction({
+      userId: user.id,
+      mode: aiMode,
+      tokensIn,
+      tokensOut,
+      metadata: {
+        thread_id: thread.id,
+        assist: composed.assistSnippet ? 'assist' : undefined,
+      },
+    });
 
     const wantsStream =
       request.headers.get('accept')?.includes('text/event-stream') ||
