@@ -383,9 +383,170 @@ async function setupDatabase() {
 
     console.log('✅ AI usage table created');
 
+    // Create the moon_circles table (metadata for each gathering)
+    await sql`
+        CREATE TABLE IF NOT EXISTS moon_circles (
+          id SERIAL PRIMARY KEY,
+          moon_phase TEXT NOT NULL,
+          event_date DATE NOT NULL,
+          title TEXT,
+          theme TEXT,
+          description TEXT,
+          focus_points JSONB DEFAULT '[]'::jsonb,
+          rituals JSONB DEFAULT '[]'::jsonb,
+          journal_prompts JSONB DEFAULT '[]'::jsonb,
+          astrology_highlights JSONB DEFAULT '[]'::jsonb,
+          resource_links JSONB DEFAULT '[]'::jsonb,
+          hero_image_url TEXT,
+          cta_url TEXT,
+          insight_count INTEGER DEFAULT 0,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+    await sql`
+        CREATE INDEX IF NOT EXISTS idx_moon_circles_event_date
+        ON moon_circles(event_date DESC)
+      `;
+
+    await sql`
+        CREATE INDEX IF NOT EXISTS idx_moon_circles_moon_phase
+        ON moon_circles(moon_phase)
+      `;
+
+    await sql`
+        CREATE OR REPLACE FUNCTION update_moon_circles_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $$ language 'plpgsql'
+      `;
+
+    await sql`
+        DROP TRIGGER IF EXISTS update_moon_circles_timestamp ON moon_circles
+      `;
+
+    await sql`
+        CREATE TRIGGER update_moon_circles_timestamp
+            BEFORE UPDATE ON moon_circles
+            FOR EACH ROW
+            EXECUTE FUNCTION update_moon_circles_updated_at()
+      `;
+
+    console.log('✅ Moon circles table created');
+
+    // Safety: ensure insight_count exists on existing deployments
+    await sql`
+        DO $$
+        BEGIN
+          IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'moon_circles' AND column_name = 'insight_count'
+          ) THEN
+            ALTER TABLE moon_circles ADD COLUMN insight_count INTEGER DEFAULT 0;
+          END IF;
+        END $$;
+      `;
+
+    // Create the moon_circle_insights table (community submissions)
+    await sql`
+        CREATE TABLE IF NOT EXISTS moon_circle_insights (
+          id SERIAL PRIMARY KEY,
+          moon_circle_id INTEGER NOT NULL REFERENCES moon_circles(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL,
+          insight_text TEXT NOT NULL,
+          is_anonymous BOOLEAN DEFAULT true,
+          source TEXT DEFAULT 'app',
+          email_thread_id TEXT,
+          is_approved BOOLEAN DEFAULT true,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          CONSTRAINT moon_circle_insights_insight_text_length
+            CHECK (char_length(insight_text) >= 10 AND char_length(insight_text) <= 1000)
+        )
+      `;
+
+    await sql`
+        CREATE INDEX IF NOT EXISTS idx_moon_circle_insights_moon_circle_id
+        ON moon_circle_insights(moon_circle_id)
+      `;
+
+    await sql`
+        CREATE INDEX IF NOT EXISTS idx_moon_circle_insights_user_id
+        ON moon_circle_insights(user_id)
+      `;
+
+    await sql`
+        CREATE INDEX IF NOT EXISTS idx_moon_circle_insights_created_at
+        ON moon_circle_insights(created_at DESC)
+      `;
+
+    await sql`
+        CREATE INDEX IF NOT EXISTS idx_moon_circle_insights_is_approved
+        ON moon_circle_insights(is_approved)
+        WHERE is_approved = true
+      `;
+
+    await sql`
+        CREATE OR REPLACE FUNCTION update_moon_circle_insights_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $$ language 'plpgsql'
+      `;
+
+    await sql`
+        DROP TRIGGER IF EXISTS update_moon_circle_insights_timestamp ON moon_circle_insights
+      `;
+
+    await sql`
+        CREATE TRIGGER update_moon_circle_insights_timestamp
+            BEFORE UPDATE ON moon_circle_insights
+            FOR EACH ROW
+            EXECUTE FUNCTION update_moon_circle_insights_updated_at()
+      `;
+
+    await sql`
+        CREATE OR REPLACE FUNCTION update_moon_circle_insight_count()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            IF TG_OP = 'INSERT' THEN
+                UPDATE moon_circles
+                SET insight_count = insight_count + 1
+                WHERE id = NEW.moon_circle_id;
+                RETURN NEW;
+            ELSIF TG_OP = 'DELETE' THEN
+                UPDATE moon_circles
+                SET insight_count = GREATEST(0, insight_count - 1)
+                WHERE id = OLD.moon_circle_id;
+                RETURN OLD;
+            END IF;
+            RETURN NULL;
+        END;
+        $$ language 'plpgsql'
+      `;
+
+    await sql`
+        DROP TRIGGER IF EXISTS trigger_update_insight_count ON moon_circle_insights
+      `;
+
+    await sql`
+        CREATE TRIGGER trigger_update_insight_count
+            AFTER INSERT OR DELETE ON moon_circle_insights
+            FOR EACH ROW
+            EXECUTE FUNCTION update_moon_circle_insight_count()
+      `;
+
+    console.log('✅ Moon circle insights table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, and AI threads',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, and moon circle insights',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);
