@@ -20,6 +20,11 @@ import { createAssistantStream } from '@/lib/ai/streaming';
 import { detectAssistCommand, runAssistCommand } from '@/lib/ai/assist';
 import { buildReflectionPrompt } from '@/lib/ai/reflection';
 import { buildPromptSections } from '@/lib/ai/prompt';
+import {
+  getWeeklyRitualUsage,
+  incrementWeeklyRitualUsage,
+  isRitualRequest,
+} from '@/lib/ai/weekly-ritual-usage';
 
 type ChatRequest = {
   message: string;
@@ -101,6 +106,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (planId === 'free' && isRitualRequest(body.message)) {
+      const weeklyUsage = await getWeeklyRitualUsage(user.id, now);
+      if (weeklyUsage.used >= weeklyUsage.limit) {
+        return jsonResponse(
+          {
+            error:
+              "You've used your free weekly AI ritual/reading. Upgrade to Lunary+ AI for unlimited access.",
+            message:
+              "You've used your free weekly AI ritual/reading. Upgrade to Lunary+ AI for unlimited access.",
+            limitExceeded: true,
+            used: weeklyUsage.used,
+            limit: weeklyUsage.limit,
+            upgradeUrl: '/pricing',
+          },
+          429,
+        );
+      }
+    }
+
     const { historyLimit, includeMood } =
       CONTEXT_RULES[planId] ?? CONTEXT_RULES.free;
 
@@ -141,6 +165,10 @@ export async function POST(request: NextRequest) {
 
       if (usageResult.limitExceeded) {
         return jsonResponse({ error: usageResult.message }, 429);
+      }
+
+      if (planId === 'free' && isRitualRequest(body.message)) {
+        await incrementWeeklyRitualUsage(user.id, now);
       }
 
       const timestamp = now.toISOString();
@@ -284,6 +312,10 @@ export async function POST(request: NextRequest) {
 
     if (usageResult.limitExceeded) {
       return jsonResponse({ error: usageResult.message }, 429);
+    }
+
+    if (planId === 'free' && isRitualRequest(body.message)) {
+      await incrementWeeklyRitualUsage(user.id, now);
     }
 
     const timestamp = now.toISOString();

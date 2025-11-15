@@ -178,6 +178,26 @@ const nextConfig = {
         ],
       },
       {
+        // Cache global cosmic data API (2 hours)
+        source: '/api/cosmic/global',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=7200, stale-while-revalidate=3600',
+          },
+        ],
+      },
+      {
+        // Cache user cosmic snapshots API (4 hours)
+        source: '/api/cosmic/snapshot',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=14400, stale-while-revalidate=7200',
+          },
+        ],
+      },
+      {
         // Cache static assets aggressively
         source: '/_next/static/:path*',
         headers: [

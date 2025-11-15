@@ -25,15 +25,16 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Basic lunar calendar',
       'Sun sign horoscope',
       'Access to grimoire knowledge',
+      '1 free AI ritual/reading per week',
     ],
   },
   {
-    id: 'monthly',
-    name: 'Cosmic Guide',
-    description: 'Complete personalized cosmic experience',
+    id: 'lunary_plus',
+    name: 'Lunary+',
+    description: 'Rituals, Moon Circles & personalized guidance',
     price: 4.99,
     interval: 'month',
-    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || '',
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID || '',
     popular: true,
     features: [
       'Complete birth chart analysis',
@@ -43,26 +44,48 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Daily transit calendar',
       'Tarot pattern analysis',
       'Crystal & herb recommendations',
-      'Solar return insights',
+      'Moon Circles (New & Full Moon)',
+      'Ritual generator',
       'Unlimited cosmic profile access',
+      'Collections & saved insights',
+      '7-day free trial',
+    ],
+  },
+  {
+    id: 'lunary_plus_ai',
+    name: 'Lunary+ AI',
+    description: 'Everything in Lunary+ plus unlimited AI guidance',
+    price: 8.99,
+    interval: 'month',
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID || '',
+    features: [
+      'Everything in Lunary+',
+      'Unlimited AI chat (Lunary Copilot)',
+      'Deeper tarot readings',
+      'Personalized weekly reports',
+      'Saved chat threads',
+      'Downloadable cosmic reports',
+      'AI ritual & reading generation',
+      'Unlimited collections & folders',
       '7-day free trial',
     ],
   },
   {
     id: 'yearly',
-    name: 'Cosmic Master',
-    description: 'Full year of cosmic wisdom',
-    price: 39.99,
+    name: 'Lunary+ AI Annual',
+    description: 'Full year of cosmic wisdom with AI',
+    price: 79.99,
     interval: 'year',
     stripePriceId: process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID || '',
-    savings: 'Save 33%',
+    savings: 'Save 26%',
     features: [
-      'Everything in Cosmic Guide',
+      'Everything in Lunary+ AI',
       'Unlimited tarot spreads',
       'Priority access to new features',
       'Advanced pattern analysis',
       'Yearly cosmic forecast',
       'Export your cosmic data',
+      'Unlimited collections & folders',
       'Email support',
       '14-day free trial',
     ],
@@ -82,8 +105,9 @@ export const FEATURE_ACCESS = {
     'general_crystal_recommendations',
     'grimoire',
     'lunar_calendar',
+    'weekly_ai_ritual',
   ],
-  trial: [
+  lunary_plus: [
     'birth_chart',
     'birthday_collection',
     'personalized_horoscope',
@@ -93,8 +117,11 @@ export const FEATURE_ACCESS = {
     'tarot_patterns',
     'solar_return',
     'cosmic_profile',
+    'moon_circles',
+    'ritual_generator',
+    'collections',
   ],
-  active: [
+  lunary_plus_ai: [
     'birth_chart',
     'birthday_collection',
     'personalized_horoscope',
@@ -104,7 +131,40 @@ export const FEATURE_ACCESS = {
     'tarot_patterns',
     'solar_return',
     'cosmic_profile',
+    'moon_circles',
+    'ritual_generator',
+    'unlimited_ai_chat',
+    'deeper_readings',
+    'weekly_reports',
+    'saved_chat_threads',
+    'downloadable_reports',
+    'ai_ritual_generation',
+    'collections',
+    'unlimited_collections',
+  ],
+  yearly: [
+    'birth_chart',
+    'birthday_collection',
+    'personalized_horoscope',
+    'personal_tarot',
+    'personalized_crystal_recommendations',
+    'transit_calendar',
+    'tarot_patterns',
+    'solar_return',
+    'cosmic_profile',
+    'moon_circles',
+    'ritual_generator',
+    'collections',
+    'unlimited_collections',
+    'unlimited_ai_chat',
+    'deeper_readings',
+    'weekly_reports',
+    'saved_chat_threads',
+    'downloadable_reports',
+    'ai_ritual_generation',
+    'unlimited_tarot_spreads',
     'advanced_patterns',
+    'yearly_forecast',
     'data_export',
     'priority_support',
   ],
@@ -112,24 +172,23 @@ export const FEATURE_ACCESS = {
 
 export function hasFeatureAccess(
   subscriptionStatus: string | undefined,
+  planType: string | undefined,
   feature: string,
 ): boolean {
   if (!subscriptionStatus || subscriptionStatus === 'free') {
     return FEATURE_ACCESS.free.includes(feature);
   }
 
-  if (subscriptionStatus === 'trial') {
-    return (
-      FEATURE_ACCESS.free.includes(feature) ||
-      FEATURE_ACCESS.trial.includes(feature)
-    );
-  }
+  if (subscriptionStatus === 'trial' || subscriptionStatus === 'active') {
+    const planFeatures =
+      planType === 'lunary_plus_ai'
+        ? FEATURE_ACCESS.lunary_plus_ai
+        : planType === 'yearly'
+          ? FEATURE_ACCESS.yearly
+          : FEATURE_ACCESS.lunary_plus;
 
-  if (subscriptionStatus === 'active') {
     return (
-      FEATURE_ACCESS.free.includes(feature) ||
-      FEATURE_ACCESS.trial.includes(feature) ||
-      FEATURE_ACCESS.active.includes(feature)
+      FEATURE_ACCESS.free.includes(feature) || planFeatures.includes(feature)
     );
   }
 

@@ -13,22 +13,76 @@ export type BirthChartData = {
   retrograde: boolean;
 };
 
-export const generateBirthChart = (
+// Helper to parse location string to coordinates
+// Accepts formats like "London, UK", "51.4769, 0.0005", or "London"
+async function parseLocationToCoordinates(
+  location: string,
+): Promise<{ latitude: number; longitude: number } | null> {
+  // If it's already coordinates (lat, lon)
+  const coordMatch = location.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
+  if (coordMatch) {
+    return {
+      latitude: parseFloat(coordMatch[1]),
+      longitude: parseFloat(coordMatch[2]),
+    };
+  }
+
+  // Try to geocode location string (basic implementation)
+  // In production, you'd use a geocoding service like Google Maps, Mapbox, etc.
+  // For now, return null and use default
+  console.warn('Location geocoding not implemented, using default coordinates');
+  return null;
+}
+
+export const generateBirthChart = async (
   birthDate: string,
+  birthTime?: string,
+  birthLocation?: string,
   observer?: Observer,
-): BirthChartData[] => {
-  console.log('Generating birth chart for date:', birthDate);
+): Promise<BirthChartData[]> => {
+  console.log(
+    'Generating birth chart for date:',
+    birthDate,
+    'time:',
+    birthTime,
+    'location:',
+    birthLocation,
+  );
 
-  // Use default observer if none provided (can be enhanced with birth location later)
-  const defaultObserver = observer || new Observer(51.4769, 0.0005, 0);
-  console.log('Using observer:', defaultObserver);
+  // Parse birth date and time
+  let birthDateTime: Date;
+  if (birthTime) {
+    // Combine date and time
+    birthDateTime = dayjs(`${birthDate} ${birthTime}`).toDate();
+  } else {
+    // Use noon as default (midpoint of day)
+    birthDateTime = dayjs(`${birthDate} 12:00`).toDate();
+  }
+  console.log('Parsed birth date/time:', birthDateTime);
 
-  // Parse birth date
-  const birthDateTime = dayjs(birthDate).toDate();
-  console.log('Parsed birth date:', birthDateTime);
+  // Get observer coordinates
+  let finalObserver: Observer;
+  if (observer) {
+    finalObserver = observer;
+  } else if (birthLocation) {
+    // Try to parse location to coordinates
+    const coords = await parseLocationToCoordinates(birthLocation);
+    if (coords) {
+      finalObserver = new Observer(coords.latitude, coords.longitude, 0);
+    } else {
+      // Default to London if geocoding fails
+      finalObserver = new Observer(51.4769, 0.0005, 0);
+      console.log('Using default coordinates (London)');
+    }
+  } else {
+    // Default to London
+    finalObserver = new Observer(51.4769, 0.0005, 0);
+    console.log('Using default coordinates (London)');
+  }
+  console.log('Using observer:', finalObserver);
 
-  // Calculate astrological chart for birth date
-  const astroChart = getAstrologicalChart(birthDateTime, defaultObserver);
+  // Calculate astrological chart for birth date/time/location
+  const astroChart = getAstrologicalChart(birthDateTime, finalObserver);
   console.log('Generated astro chart:', astroChart);
 
   // Convert to storage format

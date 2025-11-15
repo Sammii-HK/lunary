@@ -31,7 +31,7 @@ export function useSubscription(): SubscriptionStatus {
       trialDaysRemaining: 0,
       plan: 'free',
       status: 'free',
-      hasAccess: (feature) => hasFeatureAccess(feature, 'free'),
+      hasAccess: (feature) => hasFeatureAccess('free', undefined, feature),
       showUpgradePrompt: true,
       loading: false,
     }),
@@ -113,7 +113,7 @@ export function useSubscription(): SubscriptionStatus {
               | 'active'
               | 'cancelled'
               | 'past_due',
-            hasAccess: (feature) => hasFeatureAccess(feature, sub.plan),
+            hasAccess: (feature) => hasFeatureAccess(status, sub.plan, feature),
             showUpgradePrompt: !isSubscribed && status !== 'cancelled',
             customerId: sub.customerId,
             subscriptionId: sub.id,
@@ -178,7 +178,7 @@ export function useSubscription(): SubscriptionStatus {
           | 'active'
           | 'cancelled'
           | 'past_due',
-        hasAccess: (feature) => hasFeatureAccess(feature, plan),
+        hasAccess: (feature) => hasFeatureAccess(status, plan, feature),
         showUpgradePrompt: !isSubscribed && status !== 'cancelled',
         customerId:
           profileSubscription.stripeCustomerId ||

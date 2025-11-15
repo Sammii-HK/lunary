@@ -22,6 +22,8 @@ export function NotificationSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [tarotEnabled, setTarotEnabled] = useState(false);
   const [tarotLoading, setTarotLoading] = useState(false);
+  const [weeklyReportEnabled, setWeeklyReportEnabled] = useState(false);
+  const [weeklyReportLoading, setWeeklyReportLoading] = useState(false);
 
   const checkTarotNotificationStatus = useCallback(async () => {
     if (!subscription) {
@@ -49,6 +51,57 @@ export function NotificationSettings() {
       console.error('Error checking tarot notification status:', error);
     }
   }, [subscription]);
+
+  const checkWeeklyReportStatus = useCallback(async () => {
+    if (!subscription) {
+      setWeeklyReportEnabled(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/notifications/weekly-report?endpoint=${encodeURIComponent(subscription.endpoint)}`,
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setWeeklyReportEnabled(data.enabled || false);
+      }
+    } catch (error) {
+      console.error('Error checking weekly report status:', error);
+    }
+  }, [subscription]);
+
+  const toggleWeeklyReport = useCallback(async () => {
+    if (!subscription) {
+      return;
+    }
+
+    setWeeklyReportLoading(true);
+    try {
+      const newStatus = !weeklyReportEnabled;
+      const response = await fetch('/api/notifications/weekly-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          endpoint: subscription.endpoint,
+          enabled: newStatus,
+        }),
+      });
+
+      if (response.ok) {
+        setWeeklyReportEnabled(newStatus);
+      } else {
+        console.error('Failed to toggle weekly report');
+      }
+    } catch (error) {
+      console.error('Error toggling weekly report:', error);
+    } finally {
+      setWeeklyReportLoading(false);
+    }
+  }, [subscription, weeklyReportEnabled]);
 
   const getExistingSubscription = useCallback(async () => {
     try {
@@ -126,8 +179,9 @@ export function NotificationSettings() {
   useEffect(() => {
     if (subscription) {
       checkTarotNotificationStatus();
+      checkWeeklyReportStatus();
     }
-  }, [subscription, checkTarotNotificationStatus]);
+  }, [subscription, checkTarotNotificationStatus, checkWeeklyReportStatus]);
 
   const toggleTarotNotifications = async () => {
     if (!subscription) {
@@ -636,6 +690,38 @@ export function NotificationSettings() {
                 </button>
               </div>
               {tarotLoading && (
+                <p className='text-xs text-zinc-400'>Updating...</p>
+              )}
+            </div>
+          )}
+
+          {/* Weekly Cosmic Report Toggle */}
+          {(me?.profile as any)?.birthday && (
+            <div className='pt-3 border-t border-zinc-700'>
+              <div className='flex items-center justify-between mb-2'>
+                <div>
+                  <p className='text-sm text-white font-medium'>
+                    📊 Weekly Cosmic Report
+                  </p>
+                  <p className='text-xs text-zinc-400 mt-1'>
+                    Receive a weekly email summary of your cosmic journey
+                  </p>
+                </div>
+                <button
+                  onClick={toggleWeeklyReport}
+                  disabled={weeklyReportLoading}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    weeklyReportEnabled ? 'bg-purple-600' : 'bg-zinc-600'
+                  } disabled:opacity-50`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      weeklyReportEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {weeklyReportLoading && (
                 <p className='text-xs text-zinc-400'>Updating...</p>
               )}
             </div>

@@ -5,7 +5,17 @@ import { useAccount } from 'jazz-tools/react';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from './SmartTrialButton';
-import { X, Sparkles, Calendar, Star, NotebookPen } from 'lucide-react';
+import {
+  X,
+  Sparkles,
+  Calendar,
+  Star,
+  NotebookPen,
+  Eye,
+  Brain,
+  Heart,
+  Zap,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   generateBirthChart,
@@ -20,10 +30,16 @@ export function OnboardingFlow() {
   const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentStep, setCurrentStep] = useState<
-    'welcome' | 'birthday' | 'complete'
+    'welcome' | 'birthday' | 'intention' | 'ai_preview' | 'complete'
   >('welcome');
   const [birthday, setBirthday] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [birthLocation, setBirthLocation] = useState('');
+  const [selectedIntention, setSelectedIntention] = useState<string | null>(
+    null,
+  );
   const [saving, setSaving] = useState(false);
+  const [birthChartPreview, setBirthChartPreview] = useState<any>(null);
 
   useEffect(() => {
     // Only show onboarding for authenticated users without birthday
@@ -62,11 +78,24 @@ export function OnboardingFlow() {
         conversionTracking.birthDataSubmitted(userId);
       }
 
+      // Save birth time and location if provided
+      if (birthTime) {
+        (me.profile as any).$jazz.set('birthTime', birthTime);
+      }
+      if (birthLocation) {
+        (me.profile as any).$jazz.set('birthLocation', birthLocation);
+      }
+
       // Generate birth chart immediately after birthday is saved
       try {
-        const birthChart = generateBirthChart(birthday);
+        const birthChart = await generateBirthChart(
+          birthday,
+          birthTime || undefined,
+          birthLocation || undefined,
+        );
         if (birthChart && me.profile) {
           await saveBirthChartToProfile(me.profile, birthChart);
+          setBirthChartPreview(birthChart);
           console.log('✅ Birth chart generated and saved immediately');
         }
       } catch (chartError) {
@@ -75,7 +104,7 @@ export function OnboardingFlow() {
       }
 
       await new Promise((resolve) => setTimeout(resolve, 500)); // Wait for sync
-      setCurrentStep('complete');
+      setCurrentStep('intention');
     } catch (error) {
       console.error('Failed to save birthday:', error);
       alert('Failed to save birthday. Please try again.');
@@ -204,18 +233,49 @@ export function OnboardingFlow() {
               </p>
             </div>
 
-            <div>
-              <label className='block text-sm font-medium text-zinc-300 mb-2'>
-                Birthday
-              </label>
-              <input
-                type='date'
-                value={birthday}
-                onChange={(e) => setBirthday(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
-                className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500'
-              />
-              <p className='text-xs text-zinc-400 mt-2'>
+            <div className='space-y-4'>
+              <div>
+                <label className='block text-sm font-medium text-zinc-300 mb-2'>
+                  Birthday *
+                </label>
+                <input
+                  type='date'
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500'
+                />
+              </div>
+
+              <div>
+                <label className='block text-sm font-medium text-zinc-300 mb-2'>
+                  Birth Time (optional)
+                </label>
+                <input
+                  type='time'
+                  value={birthTime}
+                  onChange={(e) => setBirthTime(e.target.value)}
+                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500'
+                />
+                <p className='text-xs text-zinc-400 mt-1'>
+                  More precise time = more accurate chart
+                </p>
+              </div>
+
+              <div>
+                <label className='block text-sm font-medium text-zinc-300 mb-2'>
+                  Birth Location (optional)
+                </label>
+                <input
+                  type='text'
+                  value={birthLocation}
+                  onChange={(e) => setBirthLocation(e.target.value)}
+                  placeholder='City, Country'
+                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500'
+                />
+              </div>
+
+              <p className='text-xs text-zinc-400'>
                 We use this to calculate your exact birth chart and planetary
                 positions
               </p>
@@ -231,6 +291,174 @@ export function OnboardingFlow() {
               </button>
               <button
                 onClick={() => setCurrentStep('welcome')}
+                className='w-full text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 'intention' && (
+          <div className='space-y-6'>
+            <div className='text-center'>
+              <h2 className='text-2xl font-bold text-white mb-2'>
+                What brings you here?
+              </h2>
+              <p className='text-zinc-300 text-sm'>
+                Help us personalize your experience
+              </p>
+            </div>
+
+            <div className='grid grid-cols-2 gap-3'>
+              {[
+                { id: 'clarity', label: 'Clarity', icon: Eye, color: 'purple' },
+                {
+                  id: 'confidence',
+                  label: 'Confidence',
+                  icon: Zap,
+                  color: 'yellow',
+                },
+                { id: 'calm', label: 'Calm', icon: Heart, color: 'pink' },
+                { id: 'insight', label: 'Insight', icon: Brain, color: 'blue' },
+              ].map((intention) => {
+                const Icon = intention.icon;
+                const isSelected = selectedIntention === intention.id;
+                return (
+                  <button
+                    key={intention.id}
+                    onClick={() => setSelectedIntention(intention.id)}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      isSelected
+                        ? 'border-purple-500 bg-purple-500/20'
+                        : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                    }`}
+                  >
+                    <Icon
+                      className={`w-6 h-6 mx-auto mb-2 ${
+                        isSelected ? 'text-purple-300' : 'text-zinc-400'
+                      }`}
+                    />
+                    <div
+                      className={`text-sm font-medium ${
+                        isSelected ? 'text-white' : 'text-zinc-300'
+                      }`}
+                    >
+                      {intention.label}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className='pt-4 space-y-3'>
+              <button
+                onClick={() => {
+                  if (selectedIntention) {
+                    conversionTracking.upgradeClicked('onboarding_intention', {
+                      intention: selectedIntention,
+                    });
+                  }
+                  setCurrentStep('ai_preview');
+                }}
+                className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
+              >
+                Continue
+              </button>
+              <button
+                onClick={() => setCurrentStep('birthday')}
+                className='w-full text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 'ai_preview' && (
+          <div className='space-y-6'>
+            <div className='text-center'>
+              <h2 className='text-2xl font-bold text-white mb-2'>
+                Unlock Lunary AI
+              </h2>
+              <p className='text-zinc-300 text-sm'>
+                See what personalized guidance looks like
+              </p>
+            </div>
+
+            {birthChartPreview && birthChartPreview.length > 0 && (
+              <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                <h3 className='text-sm font-medium text-white mb-2'>
+                  Your Birth Chart Preview
+                </h3>
+                <div className='space-y-2 text-xs text-zinc-300'>
+                  {birthChartPreview
+                    .slice(0, 3)
+                    .map((planet: any, idx: number) => (
+                      <div key={idx} className='flex justify-between'>
+                        <span>{planet.body}</span>
+                        <span className='text-purple-300'>{planet.sign}</span>
+                      </div>
+                    ))}
+                  {birthChartPreview.length > 3 && (
+                    <div className='text-zinc-500 text-xs'>
+                      +{birthChartPreview.length - 3} more planets
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className='p-4 bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-lg border border-purple-500/30'>
+              <h3 className='text-sm font-medium text-white mb-2 flex items-center gap-2'>
+                <Sparkles className='w-4 h-4 text-purple-300' />
+                What You Unlock with Lunary AI
+              </h3>
+              <ul className='space-y-2 text-xs text-zinc-300'>
+                <li className='flex items-start gap-2'>
+                  <span className='text-purple-300 mt-0.5'>•</span>
+                  <span>
+                    Unlimited conversations with your cosmic companion
+                  </span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-purple-300 mt-0.5'>•</span>
+                  <span>
+                    Personalized insights based on your exact birth chart
+                  </span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-purple-300 mt-0.5'>•</span>
+                  <span>Ritual suggestions aligned with current transits</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-purple-300 mt-0.5'>•</span>
+                  <span>Deeper tarot interpretations and cosmic guidance</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+              <h3 className='text-sm font-medium text-white mb-2'>
+                Quick Transit Explanation
+              </h3>
+              <p className='text-xs text-zinc-300 leading-relaxed'>
+                Transits are when current planetary positions interact with your
+                birth chart. For example, when Jupiter transits your Sun sign,
+                it brings expansion and growth opportunities. Lunary AI explains
+                these in simple, meaningful ways.
+              </p>
+            </div>
+
+            <div className='pt-4 space-y-3'>
+              <button
+                onClick={() => setCurrentStep('complete')}
+                className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
+              >
+                Start Free Trial
+              </button>
+              <button
+                onClick={() => setCurrentStep('intention')}
                 className='w-full text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
               >
                 Back

@@ -1,36 +1,56 @@
 'use client';
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { AuthComponent } from '@/components/Auth';
+import { CopilotQuickActions } from '@/components/CopilotQuickActions';
+import { SaveToCollection } from '@/components/SaveToCollection';
 
 const MessageBubble = ({
   role,
   content,
+  messageId,
 }: {
   role: 'user' | 'assistant';
   content: string;
+  messageId?: string;
 }) => {
   const isUser = role === 'user';
   return (
     <div
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base`}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
     >
-      <div
-        className={`max-w-[80%] rounded-2xl px-4 py-3 leading-relaxed shadow-sm ${
-          isUser
-            ? 'bg-purple-600/90 text-white'
-            : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
-        }`}
-      >
-        {content.split('\n').map((line, index) => (
-          <p key={index} className='whitespace-pre-wrap'>
-            {line}
-          </p>
-        ))}
+      <div className={`max-w-[80%] ${isUser ? '' : 'flex flex-col gap-2'}`}>
+        <div
+          className={`rounded-2xl px-4 py-3 leading-relaxed shadow-sm ${
+            isUser
+              ? 'bg-purple-600/90 text-white'
+              : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
+          }`}
+        >
+          {content.split('\n').map((line, index) => (
+            <p key={index} className='whitespace-pre-wrap'>
+              {line}
+            </p>
+          ))}
+        </div>
+        {!isUser && (
+          <div className='opacity-0 group-hover:opacity-100 transition-opacity'>
+            <SaveToCollection
+              item={{
+                title: `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}`,
+                description: content.substring(0, 200),
+                category: 'chat',
+                content: { messageId, content, role },
+                tags: ['ai-chat'],
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -38,6 +58,7 @@ const MessageBubble = ({
 
 export default function BookOfShadowsPage() {
   const authState = useAuthStatus();
+  const searchParams = useSearchParams();
   const {
     messages,
     sendMessage,
@@ -52,6 +73,7 @@ export default function BookOfShadowsPage() {
   } = useAssistantChat();
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [promptHandled, setPromptHandled] = useState(false);
   const lastSendTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -63,6 +85,32 @@ export default function BookOfShadowsPage() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isStreaming]);
+
+  // Handle deep link prompt parameter
+  useEffect(() => {
+    if (
+      authState.isAuthenticated &&
+      !authState.loading &&
+      !promptHandled &&
+      messages.length === 0
+    ) {
+      const prompt = searchParams.get('prompt');
+      if (prompt && prompt.trim()) {
+        setPromptHandled(true);
+        const decodedPrompt = decodeURIComponent(prompt);
+        setTimeout(() => {
+          sendMessage(decodedPrompt);
+        }, 500);
+      }
+    }
+  }, [
+    authState.isAuthenticated,
+    authState.loading,
+    promptHandled,
+    messages.length,
+    searchParams,
+    sendMessage,
+  ]);
 
   const attemptSend = () => {
     const now = Date.now();
@@ -222,11 +270,17 @@ export default function BookOfShadowsPage() {
             >
               <div className='mx-auto flex max-w-2xl flex-col gap-4 md:gap-6'>
                 {messages.length === 0 ? (
-                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
-                    Begin by sharing how you're feeling, what you're exploring,
-                    or what guidance you're seeking. I'll answer with gentle,
-                    grounded insight.
-                  </div>
+                  <>
+                    <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                      Begin by sharing how you're feeling, what you're
+                      exploring, or what guidance you're seeking. I'll answer
+                      with gentle, grounded insight.
+                    </div>
+                    <CopilotQuickActions
+                      onActionClick={(prompt) => sendMessage(prompt)}
+                      disabled={isStreaming}
+                    />
+                  </>
                 ) : (
                   <>
                     {messages.map((message) => (
@@ -234,6 +288,7 @@ export default function BookOfShadowsPage() {
                         key={message.id}
                         role={message.role}
                         content={message.content}
+                        messageId={message.id}
                       />
                     ))}
                     {error && (

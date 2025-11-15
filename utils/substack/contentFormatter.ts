@@ -94,11 +94,21 @@ ${Object.entries(data.bestDaysFor)
 
 ---
 
+---
+
+### 🌕 Get Your Personalized Cosmic Profile
+
 **Want your personalized daily horoscope and full week ahead?**
 
-Get complete birth chart analysis, personalized daily horoscopes, and interactive cosmic profile in the [Lunary app](${appUrl}) - just $4.99/month.
+🌕 **[Open Lunary App →](${appUrl}?utm_source=substack&utm_medium=free_post&utm_campaign=cross_platform)**
+
+Get complete birth chart analysis, personalized daily horoscopes, and interactive cosmic profile - just £4.99/month.
 
 *Upgrade from newsletter to full cosmic experience.*
+
+---
+
+**📧 Subscribe to our Substack** for weekly cosmic insights: [lunary.substack.com](https://lunary.substack.com?utm_source=app&utm_medium=cta&utm_campaign=cross_platform)
 `.trim();
 }
 
@@ -151,11 +161,19 @@ ${generateMagicalTimingDeepDive(weeklyData)}
 
 ---
 
-**Ready for personalized cosmic guidance?**
+---
 
-Get your complete birth chart analysis, personalized daily horoscopes, and interactive cosmic profile in the [Lunary app](${appUrl}) - just $4.99/month.
+### 🌕 Ready for Personalized Cosmic Guidance?
+
+🌕 **[Open Lunary App →](${appUrl}?utm_source=substack&utm_medium=paid_post&utm_campaign=cross_platform)**
+
+Get your complete birth chart analysis, personalized daily horoscopes, and interactive cosmic profile - just £4.99/month.
 
 *Upgrade from newsletter to full cosmic experience.*
+
+---
+
+**📖 Read our weekly blog** for more cosmic insights: [lunary.app/blog](https://lunary.app/blog?utm_source=substack&utm_medium=cta&utm_campaign=cross_platform)
 `.trim();
 
   return {

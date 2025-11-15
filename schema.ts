@@ -1,4 +1,3 @@
-
 import { co, z, Group } from 'jazz-tools';
 
 export const NoteItem = co.map({
@@ -24,7 +23,6 @@ export const PushSubscription = co.map({
   }),
 });
 
-
 export const BirthChartPlanet = co.map({
   body: z.string(),
   sign: z.string(),
@@ -34,7 +32,6 @@ export const BirthChartPlanet = co.map({
   retrograde: z.boolean(),
 });
 
-
 export const PersonalCard = co.map({
   name: z.string(),
   keywords: co.list(z.string()),
@@ -43,9 +40,7 @@ export const PersonalCard = co.map({
   reason: z.string(),
 });
 
-
 export const BirthChart = co.list(BirthChartPlanet);
-
 
 export const Subscription = co.map({
   status: z.enum(['free', 'trial', 'active', 'cancelled', 'past_due']),
@@ -76,6 +71,8 @@ export const UserLocation = co.map({
 export const CustomProfile = co.map({
   name: z.string(),
   birthday: z.string(),
+  birthTime: z.string().optional(), // Optional birth time (HH:mm format)
+  birthLocation: z.string().optional(), // Optional birth location (city, country or coordinates)
   birthChart: BirthChart.optional(),
   personalCard: PersonalCard.optional(),
   subscription: Subscription.optional(),
@@ -88,7 +85,14 @@ export const DigitalPack = co.map({
   id: z.string(),
   name: z.string(),
   description: z.string(),
-  category: z.enum(['moon_phases', 'crystals', 'spells', 'tarot', 'astrology', 'seasonal']),
+  category: z.enum([
+    'moon_phases',
+    'crystals',
+    'spells',
+    'tarot',
+    'astrology',
+    'seasonal',
+  ]),
   subcategory: z.string().optional(), // e.g., "2025", "december", "q4"
   price: z.number(), // in cents
   stripeProductId: z.string().optional(),
@@ -99,11 +103,13 @@ export const DigitalPack = co.map({
   isActive: z.boolean().default(true),
   createdAt: z.string(),
   updatedAt: z.string(),
-  metadata: co.map({
-    dateRange: z.string().optional(), // e.g., "2025-01-01 to 2025-12-31"
-    format: z.string().optional(), // e.g., "PDF", "PNG", "ZIP"
-    itemCount: z.number().optional(), // number of items in pack
-  }).optional(),
+  metadata: co
+    .map({
+      dateRange: z.string().optional(), // e.g., "2025-01-01 to 2025-12-31"
+      format: z.string().optional(), // e.g., "PDF", "PNG", "ZIP"
+      itemCount: z.number().optional(), // number of items in pack
+    })
+    .optional(),
 });
 
 export const Purchase = co.map({
@@ -127,50 +133,61 @@ export const ShopRoot = co.map({
   purchases: co.list(Purchase),
 });
 
-export const MyAppAccount = co.account({
-  root: AccountRoot,
-  profile: CustomProfile,
-  shop: ShopRoot.optional(),
-}).withMigration(async (account, migrationInfo) => {
-  // Initialize root data structure if it doesn't exist
-  if (!account.$jazz.has("root")) {
-    console.log("🌟 Initializing new user account root");
-    account.$jazz.set("root", {
-      notes: [],
+export const MyAppAccount = co
+  .account({
+    root: AccountRoot,
+    profile: CustomProfile,
+    shop: ShopRoot.optional(),
+  })
+  .withMigration(async (account, migrationInfo) => {
+    // Initialize root data structure if it doesn't exist
+    if (!account.$jazz.has('root')) {
+      console.log('🌟 Initializing new user account root');
+      account.$jazz.set('root', {
+        notes: [],
+      });
+    }
+
+    // Initialize profile if it doesn't exist (fallback for edge cases)
+    if (!account.$jazz.has('profile')) {
+      console.log('🌟 Initializing new user profile');
+      // Create a group for the profile with public read permissions
+      const profileGroup = Group.create();
+      profileGroup.addMember('everyone', 'reader');
+
+      account.$jazz.set(
+        'profile',
+        CustomProfile.create(
+          {
+            name: 'New User', // Default name - will be updated by Better Auth
+            birthday: '', // Will be set by user later
+          },
+          profileGroup,
+        ),
+      );
+    }
+
+    // Load the root to check for missing fields
+    const { root } = await account.$jazz.ensureLoaded({
+      resolve: { root: true },
     });
-  }
 
-  // Initialize profile if it doesn't exist (fallback for edge cases)
-  if (!account.$jazz.has("profile")) {
-    console.log("🌟 Initializing new user profile");
-    // Create a group for the profile with public read permissions
-    const profileGroup = Group.create();
-    profileGroup.addMember("everyone", "reader");
-    
-    account.$jazz.set("profile", CustomProfile.create({
-      name: "New User", // Default name - will be updated by Better Auth
-      birthday: "", // Will be set by user later
-    }, profileGroup));
-  }
+    // Add new fields to existing accounts (schema evolution)
+    if (root && !root.$jazz.has('notes')) {
+      console.log('🔄 Adding notes field to existing account');
+      root.$jazz.set('notes', []);
+    }
 
-  // Load the root to check for missing fields
-  const { root } = await account.$jazz.ensureLoaded({
-    resolve: { root: true }
+    if (root && !root.$jazz.has('pushSubscriptions')) {
+      console.log('🔄 Adding pushSubscriptions field to existing account');
+      root.$jazz.set('pushSubscriptions', []);
+    }
+
+    // Shop initialization will be handled separately when needed
+    // The shop field is optional and will be created when first accessed
+
+    console.log(
+      '✅ Account migration completed for user:',
+      account.profile?.name || 'Unknown',
+    );
   });
-
-  // Add new fields to existing accounts (schema evolution)
-  if (root && !root.$jazz.has("notes")) {
-    console.log("🔄 Adding notes field to existing account");
-    root.$jazz.set("notes", []);
-  }
-
-  if (root && !root.$jazz.has("pushSubscriptions")) {
-    console.log("🔄 Adding pushSubscriptions field to existing account");
-    root.$jazz.set("pushSubscriptions", []);
-  }
-
-  // Shop initialization will be handled separately when needed
-  // The shop field is optional and will be created when first accessed
-
-  console.log("✅ Account migration completed for user:", account.profile?.name || "Unknown");
-});

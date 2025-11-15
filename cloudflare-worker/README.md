@@ -1,6 +1,6 @@
 # Lunary Cloudflare Worker - Notification Cron
 
-This Cloudflare Worker handles push notifications for astronomical events every 4 hours.
+This Cloudflare Worker handles all scheduled tasks for Lunary, spread throughout the day.
 
 ## 🚀 Setup Instructions
 
@@ -21,7 +21,7 @@ wrangler login
 ```bash
 cd cloudflare-worker
 wrangler secret put CRON_SECRET
-# Enter: eKwpmqza0ldtCaHUSZnsIEzY0w3rV663gPs+rxeDlBw=
+# Enter your CRON_SECRET value (same as Vercel)
 ```
 
 ### 4. Deploy Worker
@@ -30,11 +30,15 @@ wrangler secret put CRON_SECRET
 wrangler deploy
 ```
 
-## ⏰ Schedule
+## ⏰ Schedule (Spread Throughout the Day)
 
-- **Runs**: Every 4 hours (0 _/4 _ \* \*)
-- **Checks**: Astronomical events via lunary.app API
-- **Sends**: Push notifications for significant events
+- **8:00 AM** - Daily cosmic pulse + Daily posts (blog/Substack)
+- **2:00 PM** - Cosmic changes notification
+- **8:00 PM** - Moon circles check
+- **Every 4 hours** (0, 4, 8, 12, 16, 20) - Cosmic snapshot updates
+- **Sunday 10:00 AM** - Weekly cosmic report
+
+All times are UTC.
 
 ## 🧪 Testing
 
@@ -61,13 +65,22 @@ wrangler tail
 ## 💰 Cost
 
 - **Free**: Up to 100,000 requests/day
-- **Your usage**: ~6 requests/day (every 4 hours)
-- **Well within limits**: 99.994% under the free tier
+- **Your usage**: ~10 requests/day (spread across different times)
+- **Well within limits**: 99.99% under the free tier
 
 ## 🔧 Benefits Over Vercel Cron
 
-- ✅ **Multiple crons** without paid plan
+- ✅ **Multiple crons** without paid plan (Vercel free = 1 cron only)
 - ✅ **Global edge network** for reliability
 - ✅ **Better timing** precision
-- ✅ **Separate concerns** (posts vs notifications)
+- ✅ **Spread throughout day** - notifications don't all arrive at once
 - ✅ **Free tier** generous limits
+
+## 📋 All Cron Jobs
+
+1. **Daily Cosmic Pulse** (8 AM) - Personalized daily notifications
+2. **Daily Posts** (8 AM) - Blog/Substack content generation
+3. **Cosmic Changes** (2 PM) - Afternoon notification about cosmic shifts
+4. **Moon Circles** (8 PM) - Evening check for New/Full Moon events
+5. **Cosmic Snapshots** (Every 4 hours) - Update cached cosmic data
+6. **Weekly Report** (Sunday 10 AM) - Weekly email summary

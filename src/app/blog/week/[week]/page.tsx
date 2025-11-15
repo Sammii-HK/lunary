@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
+import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
 
 interface BlogPostPageProps {
   params: Promise<{ week: string }>;
@@ -817,6 +818,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               );
             })()}
         </article>
+
+        {/* App CTA Section */}
+        <section className='mt-8 pt-8 border-t border-zinc-800'>
+          <CrossPlatformCTA variant='app' source='blog_post' />
+        </section>
 
         {/* Social Sharing Section */}
         <section className='mt-8 pt-8 border-t border-zinc-800'>

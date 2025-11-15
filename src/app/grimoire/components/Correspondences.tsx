@@ -326,29 +326,39 @@ const Correspondences = () => {
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
             <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Herb Safety
+              Herb Safety & Disclaimer
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
-              Always research herbs before use, especially if pregnant, nursing,
-              or taking medications. Some herbs have contraindications:
-            </p>
-            <div className='space-y-2 text-sm text-zinc-300'>
-              <div>
-                <strong>Pregnancy:</strong> Avoid mugwort, pennyroyal, rue,
-                tansy
+            <div className='space-y-3 text-sm text-zinc-300'>
+              <p className='leading-relaxed'>
+                The information provided here is for{' '}
+                <strong>magical and spiritual purposes only</strong>. This
+                content is not intended as medical advice, diagnosis, or
+                treatment.
+              </p>
+              <div className='p-3 bg-red-500/10 border border-red-500/30 rounded'>
+                <strong className='text-red-300'>Important Disclaimer:</strong>
+                <ul className='list-disc list-inside mt-2 space-y-1'>
+                  <li>Always research herbs thoroughly before any use</li>
+                  <li>
+                    Consult qualified professionals for any health-related
+                    questions
+                  </li>
+                  <li>
+                    Never ingest herbs without proper knowledge and guidance
+                  </li>
+                  <li>Test small amounts first if using topically</li>
+                  <li>Keep herbs away from children and pets</li>
+                  <li>
+                    Magical use (external, small amounts) differs from medicinal
+                    use
+                  </li>
+                </ul>
               </div>
-              <div>
-                <strong>Blood Pressure:</strong> Use caution with licorice,
-                hawthorn
-              </div>
-              <div>
-                <strong>Medications:</strong> St. John's Wort interacts with
-                many medications
-              </div>
-              <div>
-                <strong>Allergies:</strong> Test a small amount first if
-                sensitive
-              </div>
+              <p className='text-xs text-zinc-400 italic'>
+                For magical purposes, always use herbs responsibly and with
+                respect for their power. When in doubt about safety, consult a
+                qualified practitioner or avoid use.
+              </p>
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
@@ -361,6 +371,312 @@ const Correspondences = () => {
               harvest away from roads and pollution, obtain permission on
               private land, and leave some for wildlife and future growth.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Individual Herb Profiles */}
+      <section id='individual-herbs' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Individual Herb Profiles
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Detailed profiles of common magical herbs, including their
+            properties, uses, and safety information.
+          </p>
+        </div>
+        <div className='space-y-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-green-400 mb-2'>Sage</h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Purification, wisdom, protection,
+                longevity
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Smudging for space cleansing,
+                protection spells, wisdom rituals, memory enhancement
+              </p>
+              <p>
+                <strong>Preparations:</strong> Burn dried leaves for smudging,
+                make tea for purification, use in protection sachets
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. White sage is
+                endangered—use garden sage or other varieties. Always research
+                before any use.
+              </p>
+              <p>
+                <strong>Planet:</strong> Jupiter | <strong>Element:</strong> Air
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+              Rosemary
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Memory, protection, purification,
+                love, mental clarity
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Memory spells, protection
+                rituals, love magic, purification baths, study aids
+              </p>
+              <p>
+                <strong>Preparations:</strong> Burn as incense, add to bath
+                water, use in sachets, make tea for mental clarity
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Always research
+                before any use. Use responsibly.
+              </p>
+              <p>
+                <strong>Planet:</strong> Sun | <strong>Element:</strong> Fire
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-green-400 mb-2'>Basil</h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Protection, prosperity, love,
+                peace, exorcism
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Protection spells, money drawing,
+                love magic, peace rituals, banishing negativity
+              </p>
+              <p>
+                <strong>Preparations:</strong> Carry fresh leaves, add to
+                prosperity sachets, use in protection oils, sprinkle around home
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Always research
+                before any use. Use responsibly.
+              </p>
+              <p>
+                <strong>Planet:</strong> Mars | <strong>Element:</strong> Fire
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-400 mb-2'>
+              Lavender
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Peace, sleep, purification,
+                protection, love, healing
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Sleep spells, peace rituals,
+                purification baths, love magic, protection sachets, dream work
+              </p>
+              <p>
+                <strong>Preparations:</strong> Make tea for sleep, add to bath,
+                use in sachets under pillow, burn as incense
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Always research
+                before any use. Use responsibly.
+              </p>
+              <p>
+                <strong>Planet:</strong> Mercury | <strong>Element:</strong> Air
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-orange-400 mb-2'>
+              Cinnamon
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Prosperity, protection, love,
+                success, passion, psychic ability
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Money spells, protection rituals,
+                love magic, success spells, passion work, psychic development
+              </p>
+              <p>
+                <strong>Preparations:</strong> Burn as incense, add to
+                prosperity sachets, use in love oils, sprinkle on candles
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Always research
+                before any use. May cause skin irritation when applied
+                topically—test small amount first.
+              </p>
+              <p>
+                <strong>Planet:</strong> Sun | <strong>Element:</strong> Fire
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-pink-400 mb-2'>Rose</h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Love, beauty, healing, protection,
+                psychic ability, heart chakra
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Love spells, beauty rituals,
+                emotional healing, protection, heart chakra work, divination
+              </p>
+              <p>
+                <strong>Preparations:</strong> Use petals in baths, make rose
+                water, add to love sachets, use in teas, anoint with rose oil
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Always research
+                before any use. Use responsibly.
+              </p>
+              <p>
+                <strong>Planet:</strong> Venus | <strong>Element:</strong> Water
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-green-400 mb-2'>Mint</h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Prosperity, protection, healing,
+                travel, communication, money
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Money spells, protection rituals,
+                travel safety, healing work, communication spells
+              </p>
+              <p>
+                <strong>Preparations:</strong> Carry fresh leaves, add to
+                prosperity sachets, make tea, use in travel protection charms
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Always research
+                before any use. Use responsibly.
+              </p>
+              <p>
+                <strong>Planet:</strong> Venus | <strong>Element:</strong> Air
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+              Chamomile
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Peace, sleep, healing, protection,
+                prosperity, purification
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Sleep spells, peace rituals,
+                healing work, protection, money drawing, purification baths
+              </p>
+              <p>
+                <strong>Preparations:</strong> Make tea for sleep, add to bath,
+                use in sachets, burn as incense
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Always research
+                before any use. Use responsibly.
+              </p>
+              <p>
+                <strong>Planet:</strong> Sun | <strong>Element:</strong> Water
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-purple-400 mb-2'>
+              Mugwort
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Psychic ability, dreams,
+                protection, astral travel, divination
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Dream work, psychic development,
+                astral travel, divination, protection, moon magic
+              </p>
+              <p>
+                <strong>Preparations:</strong> Place under pillow for dreams,
+                burn as incense, make tea (use caution), use in dream sachets
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Use in small
+                amounts. Always research thoroughly before any use. Use
+                responsibly.
+              </p>
+              <p>
+                <strong>Planet:</strong> Venus, Moon | <strong>Element:</strong>{' '}
+                Earth
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-green-400 mb-2'>Thyme</h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Courage, purification, health,
+                sleep, psychic ability, healing
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Courage spells, purification
+                rituals, healing work, sleep magic, psychic development
+              </p>
+              <p>
+                <strong>Preparations:</strong> Burn as incense, add to bath, use
+                in sachets, make tea for courage
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Always research
+                before any use. Use responsibly.
+              </p>
+              <p>
+                <strong>Planet:</strong> Venus | <strong>Element:</strong> Water
+              </p>
+            </div>
+          </div>
+
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h3 className='text-lg font-medium text-blue-400 mb-2'>
+              Eucalyptus
+            </h3>
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                <strong>Properties:</strong> Healing, protection, purification,
+                clarity, spiritual cleansing
+              </p>
+              <p>
+                <strong>Magical Uses:</strong> Healing spells, protection
+                rituals, purification, mental clarity, spiritual cleansing
+              </p>
+              <p>
+                <strong>Preparations:</strong> Burn leaves as incense, add to
+                healing sachets, use in purification rituals
+              </p>
+              <p>
+                <strong>Safety:</strong> For magical use only. Do not ingest
+                eucalyptus oil. Keep away from children and pets. Always
+                research before any use.
+              </p>
+              <p>
+                <strong>Planet:</strong> Moon | <strong>Element:</strong> Water
+              </p>
+            </div>
           </div>
         </div>
       </section>
