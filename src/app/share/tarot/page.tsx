@@ -302,6 +302,8 @@ export async function generateMetadata({
     urlParams.set('suits', toStringParam(resolvedSearchParams.suits)!);
   if (resolvedSearchParams.numbers)
     urlParams.set('numbers', toStringParam(resolvedSearchParams.numbers)!);
+  if (resolvedSearchParams.cards)
+    urlParams.set('cards', toStringParam(resolvedSearchParams.cards)!);
 
   const canonical = `${APP_URL}/share/tarot${
     urlParams.toString() ? `?${urlParams.toString()}` : ''
@@ -434,29 +436,13 @@ export default async function ShareTarotPage({
       return digits ? Number(digits[0]) : undefined;
     })();
   const primaryHighlights = [
-    suitBlocks[0]?.reading && {
-      label: `${suitBlocks[0].suit} focus`,
-      text: suitBlocks[0].reading,
-    },
-    numberBlocks[0]?.reading && {
-      label: `${numberBlocks[0].number}s`,
-      text: numberBlocks[0].reading,
-    },
-    cardBlocks[0]?.reading && {
-      label: cardBlocks[0].name,
-      text: cardBlocks[0].reading,
-    },
-  ].filter(Boolean) as Array<{ label: string; text: string }>;
-  const additionalInsights = combinedInsights.filter(
-    (text) => !primaryHighlights.some((highlight) => highlight.text === text),
+    suitBlocks[0]?.reading,
+    numberBlocks[0]?.reading,
+    cardBlocks[0]?.reading,
+  ].filter(Boolean) as string[];
+  const orderedSignalHighlights = Array.from(
+    new Set([...primaryHighlights, ...combinedInsights]),
   );
-  const orderedSignalHighlights = [
-    ...primaryHighlights,
-    ...additionalInsights.map((text) => ({
-      label: 'Theme',
-      text,
-    })),
-  ];
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-indigo-950 to-purple-900 py-12 text-white sm:py-16'>
@@ -501,18 +487,14 @@ export default async function ShareTarotPage({
                   <p className='text-xs uppercase tracking-[0.35em] text-indigo-200/80'>
                     Signal Highlights
                   </p>
-                  <div className='mt-4 space-y-3'>
+                  <ul className='mt-4 space-y-2 text-base leading-relaxed text-zinc-100/90'>
                     {orderedSignalHighlights.map((highlight, index) => (
-                      <div key={`${highlight.label}-${index}`}>
-                        <p className='text-xs uppercase tracking-[0.25em] text-indigo-200/70'>
-                          {highlight.label}
-                        </p>
-                        <p className='mt-1 text-base leading-relaxed text-zinc-100/90'>
-                          {highlight.text}
-                        </p>
-                      </div>
+                      <li key={`${highlight}-${index}`} className='flex gap-2'>
+                        <span className='text-indigo-200/80'>•</span>
+                        <span>{highlight}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               )}
 

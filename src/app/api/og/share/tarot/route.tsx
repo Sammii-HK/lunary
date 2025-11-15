@@ -177,22 +177,16 @@ export async function GET(request: NextRequest) {
   const limitedSuitBlocks = suitBlocks.slice(0, 4);
   const limitedNumberBlocks = numberBlocks.slice(0, 4);
   const limitedCardBlocks = cardBlocks.slice(0, 4);
-  const topHighlights = [
-    limitedSuitBlocks[0]?.reading && {
-      label: `${limitedSuitBlocks[0].suit} focus`,
-      text: limitedSuitBlocks[0].reading,
-    },
-    limitedNumberBlocks[0]?.reading && {
-      label: `${limitedNumberBlocks[0].number}s`,
-      text: limitedNumberBlocks[0].reading,
-    },
-    limitedCardBlocks[0]?.reading && {
-      label: limitedCardBlocks[0].name,
-      text: limitedCardBlocks[0].reading,
-    },
-  ]
-    .filter((entry): entry is { label: string; text: string } => Boolean(entry))
-    .slice(0, 3);
+  const topHighlights = Array.from(
+    new Set(
+      [
+        limitedSuitBlocks[0]?.reading,
+        limitedNumberBlocks[0]?.reading,
+        limitedCardBlocks[0]?.reading,
+        ...insights,
+      ].filter((entry): entry is string => Boolean(entry)),
+    ),
+  ).slice(0, 4);
   const robotoMono = await loadRobotoMono(request);
 
   const footerHandles = (
@@ -284,47 +278,44 @@ export async function GET(request: NextRequest) {
             {topHighlights.length > 0 && (
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns:
-                    topHighlights.length > 1
-                      ? 'repeat(2, minmax(0,1fr))'
-                      : '1fr',
-                  gap: '16px',
+                  borderRadius: 18,
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  padding: '18px 22px',
+                  backgroundColor: 'rgba(0,0,0,0.25)',
                 }}
               >
-                {topHighlights.map((highlight, index) => (
-                  <div
-                    key={`${highlight.label}-${index}`}
-                    style={{
-                      borderRadius: 16,
-                      border: '1px solid rgba(255,255,255,0.25)',
-                      padding: '16px 20px',
-                      backgroundColor: 'rgba(0,0,0,0.25)',
-                    }}
-                  >
+                <div
+                  style={{
+                    fontFamily: 'Roboto Mono',
+                    fontSize: 18,
+                    letterSpacing: 3,
+                    textTransform: 'uppercase',
+                    opacity: 0.7,
+                    marginBottom: 12,
+                  }}
+                >
+                  Signal Highlights
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    fontFamily: 'Roboto Mono',
+                    fontSize: 22,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {topHighlights.map((highlight, index) => (
                     <div
-                      style={{
-                        fontFamily: 'Roboto Mono',
-                        fontSize: 18,
-                        letterSpacing: 2,
-                        textTransform: 'uppercase',
-                        opacity: 0.7,
-                      }}
+                      key={`${highlight}-${index}`}
+                      style={{ display: 'flex', gap: '10px' }}
                     >
-                      {highlight.label}
+                      <span style={{ color: theme.accent }}>•</span>
+                      <span>{highlight}</span>
                     </div>
-                    <div
-                      style={{
-                        marginTop: 6,
-                        fontFamily: 'Roboto Mono',
-                        fontSize: 22,
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {highlight.text}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
 
