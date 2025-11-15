@@ -82,19 +82,24 @@ export async function GET(request: NextRequest) {
       intention: moonCircle.intention,
     };
 
-    await sql`
+    const insertResult = await sql`
       INSERT INTO moon_circles (
         moon_phase,
-        moon_sign,
-        circle_date,
-        content
+        event_date,
+        title,
+        theme,
+        description
       ) VALUES (
         ${moonCircle.moonPhase},
-        ${moonCircle.moonSign},
         ${dateStr}::date,
-        ${JSON.stringify(contentJson)}::jsonb
+        ${`Moon Circle: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`},
+        ${moonCircle.moonPhase},
+        ${moonCircle.moonSignInfo}
       )
+      RETURNING id
     `;
+
+    const moonCircleId = insertResult.rows[0]?.id;
 
     console.log(
       `✅ Moon Circle generated: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
@@ -160,18 +165,31 @@ export async function GET(request: NextRequest) {
 
           pushSent++;
 
-          if (userEmail) {
+          if (userEmail && moonCircleId) {
             try {
-              const emailHtml = generateMoonCircleEmailHTML(
-                moonCircle,
-                deepLinkUrl,
-                userName,
-              );
-              const emailText = generateMoonCircleEmailText(
-                moonCircle,
-                deepLinkUrl,
-                userName,
-              );
+              const dateLabel = new Intl.DateTimeFormat('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              }).format(today);
+
+              const emailHtml = generateMoonCircleEmailHTML({
+                moonCircleId,
+                moonPhase: moonCircle.moonPhase,
+                dateLabel,
+                title: `Moon Circle: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
+                summary: moonCircle.moonSignInfo,
+                appUrl: baseUrl,
+              });
+              const emailText = generateMoonCircleEmailText({
+                moonCircleId,
+                moonPhase: moonCircle.moonPhase,
+                dateLabel,
+                title: `Moon Circle: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
+                summary: moonCircle.moonSignInfo,
+                appUrl: baseUrl,
+              });
 
               await sendEmail({
                 to: userEmail,
