@@ -22,6 +22,14 @@ interface MoonCircleDetailRecord {
   insight_count: number | null;
 }
 
+interface MoonCircleSummaryRecord {
+  id: number;
+  moon_phase: string;
+  event_date: string | Date | null;
+  theme: string | null;
+  insight_count: number | null;
+}
+
 const parseStringArray = (value: unknown): string[] => {
   if (Array.isArray(value)) {
     return value
@@ -48,29 +56,27 @@ interface ResourceLink {
   url?: string;
 }
 
+const isResourceLink = (item: ResourceLink | null): item is ResourceLink =>
+  Boolean(item && (item.label?.length || item.url?.length));
+
 const parseResourceLinks = (value: unknown): ResourceLink[] => {
   if (Array.isArray(value)) {
-    return value
-      .map((item) => {
-        if (typeof item === 'object' && item !== null) {
-          const label =
-            'label' in item && typeof item.label === 'string'
-              ? item.label
-              : undefined;
-          const url =
-            'url' in item && typeof item.url === 'string'
-              ? item.url
-              : undefined;
-          if (label || url) return { label, url };
-        }
-        if (typeof item === 'string') {
-          return { label: item, url: item };
-        }
-        return null;
-      })
-      .filter((item): item is ResourceLink =>
-        Boolean(item?.label || item?.url),
-      );
+    const mapped = value.map<ResourceLink | null>((item) => {
+      if (typeof item === 'object' && item !== null) {
+        const label =
+          'label' in item && typeof item.label === 'string'
+            ? item.label
+            : undefined;
+        const url =
+          'url' in item && typeof item.url === 'string' ? item.url : undefined;
+        if (label || url) return { label, url };
+      }
+      if (typeof item === 'string') {
+        return { label: item, url: item };
+      }
+      return null;
+    });
+    return mapped.filter(isResourceLink);
   }
   if (typeof value === 'string') {
     try {
@@ -116,15 +122,18 @@ const mapCircleDetail = (row: MoonCircleDetailRecord) => ({
 });
 
 interface MoonCircleDetailPageProps {
-  params: { id: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function MoonCircleDetailPage({
   params,
   searchParams,
 }: MoonCircleDetailPageProps) {
-  const moonCircleId = Number.parseInt(params.id, 10);
+  const resolvedParams = await params;
+  const resolvedSearch = searchParams ? await searchParams : undefined;
+
+  const moonCircleId = Number.parseInt(resolvedParams.id, 10);
   if (!Number.isFinite(moonCircleId)) {
     notFound();
   }
@@ -152,7 +161,9 @@ export default async function MoonCircleDetailPage({
     notFound();
   }
 
-  const circle = mapCircleDetail(circleResult.rows[0]);
+  const circle = mapCircleDetail(
+    circleResult.rows[0] as MoonCircleDetailRecord,
+  );
 
   const relatedResult = await sql`
     SELECT id, moon_phase, event_date, theme, insight_count
@@ -162,23 +173,26 @@ export default async function MoonCircleDetailPage({
     LIMIT 4
   `;
 
-  const related = relatedResult.rows.map((row) => ({
-    id: row.id,
-    moon_phase: row.moon_phase,
-    event_date:
-      row.event_date instanceof Date
-        ? row.event_date.toISOString()
-        : row.event_date
-          ? new Date(row.event_date).toISOString()
-          : null,
-    theme: row.theme,
-    insight_count: Number(row.insight_count ?? 0),
-  }));
+  const related = relatedResult.rows.map((row) => {
+    const record = row as MoonCircleSummaryRecord;
+    return {
+      id: record.id,
+      moon_phase: record.moon_phase,
+      event_date:
+        record.event_date instanceof Date
+          ? record.event_date.toISOString()
+          : record.event_date
+            ? new Date(record.event_date).toISOString()
+            : null,
+      theme: record.theme,
+      insight_count: Number(record.insight_count ?? 0),
+    };
+  });
 
-  const shouldAutoFocusShare =
-    (Array.isArray(searchParams?.share)
-      ? searchParams?.share[0]
-      : searchParams?.share) === 'true';
+  const shareParam = Array.isArray(resolvedSearch?.share)
+    ? resolvedSearch?.share[0]
+    : resolvedSearch?.share;
+  const shouldAutoFocusShare = shareParam === 'true';
 
   return (
     <div className='space-y-12 py-8'>

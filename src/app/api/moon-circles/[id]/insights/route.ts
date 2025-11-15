@@ -13,7 +13,6 @@ const MAX_INSIGHT_LENGTH = 1000;
 const MAX_INSIGHTS_PER_USER = 3;
 
 type SortOrder = 'newest' | 'oldest';
-type RouteContext = { params: Promise<{ id: string }> };
 
 interface PostInsightPayload {
   insight_text?: string;
@@ -53,10 +52,9 @@ const normalizeSort = (value: string | null): SortOrder => {
   return value === 'oldest' ? 'oldest' : 'newest';
 };
 
-export async function GET(request: NextRequest, { params }: RouteContext) {
+export async function GET(request: NextRequest, context: any) {
   try {
-    const { id } = await params;
-    const moonCircleId = Number.parseInt(id, 10);
+    const moonCircleId = Number.parseInt(context?.params?.id, 10);
 
     if (!Number.isFinite(moonCircleId) || moonCircleId <= 0) {
       return NextResponse.json(
@@ -147,10 +145,9 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
   }
 }
 
-export async function POST(request: NextRequest, { params }: RouteContext) {
+export async function POST(request: NextRequest, context: any) {
   try {
-    const { id } = await params;
-    const moonCircleId = Number.parseInt(id, 10);
+    const moonCircleId = Number.parseInt(context?.params?.id, 10);
 
     if (!Number.isFinite(moonCircleId) || moonCircleId <= 0) {
       return NextResponse.json(

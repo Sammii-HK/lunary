@@ -78,16 +78,17 @@ const mapCircleRow = (row: MoonCircleRecord) => ({
 });
 
 interface MoonCirclesPageProps {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function MoonCirclesPage({
   searchParams,
 }: MoonCirclesPageProps) {
+  const resolvedSearch = searchParams ? await searchParams : undefined;
   const phaseFilter = normalizePhaseFilter(
-    Array.isArray(searchParams?.phase)
-      ? searchParams?.phase[0]
-      : searchParams?.phase,
+    Array.isArray(resolvedSearch?.phase)
+      ? resolvedSearch?.phase[0]
+      : resolvedSearch?.phase,
   );
 
   const circlesResult = phaseFilter
@@ -105,7 +106,9 @@ export default async function MoonCirclesPage({
         LIMIT 8
       `;
 
-  const circles = circlesResult.rows.map(mapCircleRow);
+  const circles = circlesResult.rows.map((row) =>
+    mapCircleRow(row as MoonCircleRecord),
+  );
 
   return (
     <div className='space-y-12 py-8'>
