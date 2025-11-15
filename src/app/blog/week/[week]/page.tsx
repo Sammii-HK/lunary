@@ -108,62 +108,25 @@ function getPlanetBgColor(planet: string): string {
 // Cache for blog data to avoid regenerating for the same week
 const blogDataCache = new Map<string, Promise<any>>();
 
-// Helper function to safely convert any value to string for rendering
-function safeToString(value: any): string {
-  if (value === null || value === undefined) {
-    return '';
-  }
+// Ensure blog data contains only serializable primitives before rendering
+function serializeDates(value: any): any {
   if (value instanceof Date) {
     return value.toISOString();
   }
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-  return String(value);
-}
 
-function convertDatesToObjects(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return obj;
+  if (Array.isArray(value)) {
+    return value.map((item) => serializeDates(item));
   }
 
-  // If it's already a Date object, return it as-is (we'll handle conversion at render time)
-  if (obj instanceof Date) {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(convertDatesToObjects);
-  }
-
-  if (typeof obj === 'object') {
-    const converted: any = {};
-    for (const key in obj) {
-      const value = obj[key];
-      // If it's already a Date object, keep it (we'll convert at render time)
-      if (value instanceof Date) {
-        converted[key] = value;
-      } else if (typeof value === 'string') {
-        // Try to parse as date if it looks like an ISO date string
-        const date = new Date(value);
-        if (
-          !isNaN(date.getTime()) &&
-          (value.includes('T') || value.match(/^\d{4}-\d{2}-\d{2}/))
-        ) {
-          converted[key] = date;
-        } else {
-          converted[key] = value;
-        }
-      } else if (typeof value === 'object' && value !== null) {
-        converted[key] = convertDatesToObjects(value);
-      } else {
-        converted[key] = value;
-      }
+  if (value && typeof value === 'object') {
+    const result: Record<string, any> = {};
+    for (const key in value) {
+      result[key] = serializeDates(value[key]);
     }
-    return converted;
+    return result;
   }
 
-  return obj;
+  return value;
 }
 
 async function getBlogData(weekInfo: WeekInfo) {
@@ -202,9 +165,8 @@ async function getBlogData(weekInfo: WeekInfo) {
       console.log(
         `[getBlogData] Weekly content generated for ${cacheKey} in ${duration}ms`,
       );
-      // Dates are already Date objects when calling directly, but ensure they're properly formatted
-      // Convert any nested date strings that might exist
-      return convertDatesToObjects(weeklyData);
+      // Serialize any Date instances so React never receives raw Date objects
+      return serializeDates(weeklyData);
     } catch (error) {
       console.error(
         `[getBlogData] Error generating blog data for ${cacheKey}:`,
@@ -236,49 +198,6 @@ async function getBlogData(weekInfo: WeekInfo) {
   return promise;
 }
 
-// Helper to ensure all Date objects in nested structures are properly handled
-function ensureDatesAreObjects(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  if (obj instanceof Date) {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(ensureDatesAreObjects);
-  }
-
-  if (typeof obj === 'object') {
-    const result: any = {};
-    for (const key in obj) {
-      const value = obj[key];
-      if (value instanceof Date) {
-        result[key] = value;
-      } else if (
-        typeof value === 'string' &&
-        (value.includes('T') || value.match(/^\d{4}-\d{2}-\d{2}/))
-      ) {
-        // Try to parse as date
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-          result[key] = date;
-        } else {
-          result[key] = value;
-        }
-      } else if (typeof value === 'object' && value !== null) {
-        result[key] = ensureDatesAreObjects(value);
-      } else {
-        result[key] = value;
-      }
-    }
-    return result;
-  }
-
-  return obj;
-}
-
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   let rawWeekParam: string | undefined;
   let weekInfo: WeekInfo | null = null;
@@ -294,11 +213,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       '[BlogPostPage] Fetching blog data for week:',
       canonicalWeekSlug,
     );
-    const blogDataRaw = await getBlogData(weekInfo);
+    const blogData = await getBlogData(weekInfo);
     console.log('[BlogPostPage] Blog data fetched, processing dates...');
-
-    // Ensure all dates are properly converted
-    const blogData = ensureDatesAreObjects(blogDataRaw);
     console.log('[BlogPostPage] Dates processed, rendering page...');
     console.log(
       '[BlogPostPage] crystalRecommendations count:',
