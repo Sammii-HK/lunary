@@ -61,6 +61,12 @@ const parseDelimitedList = (
     .slice(0, limit);
 };
 
+type PatternStat = {
+  label: string;
+  value: string;
+  helper?: string;
+};
+
 const gradients = [
   {
     background: 'linear-gradient(135deg, #11001c, #4e1a7a)',
@@ -139,54 +145,54 @@ export async function GET(request: NextRequest) {
   const insights = [suitInsight, ...extraInsights]
     .filter((entry): entry is string => Boolean(entry))
     .slice(0, 4);
-  const patternStats = [
-    totalCards
-      ? {
-          label: 'Cards tracked',
-          value: `${totalCards}`,
-          helper: timeframe,
-        }
-      : null,
-    typeof majorCount === 'number'
-      ? {
-          label: 'Major Arcana',
-          value: `${majorCount}${
-            totalCards
-              ? ` (${Math.round((majorCount / totalCards) * 100)}%)`
-              : ''
-          }`,
-          helper: 'Destiny lessons',
-        }
-      : null,
-    typeof minorCount === 'number' && !topSuit
-      ? {
-          label: 'Minor Arcana',
-          value: `${minorCount}${
-            totalCards
-              ? ` (${Math.round((minorCount / totalCards) * 100)}%)`
-              : ''
-          }`,
-          helper: 'Day-to-day focus',
-        }
-      : null,
-    topSuit
-      ? {
-          label: elementFocus
-            ? `${topSuit} · ${elementFocus}`
-            : `${topSuit} focus`,
-          value: topSuitCount
-            ? `${topSuitCount}${
-                totalCards
-                  ? ` (${Math.round((topSuitCount / totalCards) * 100)}%)`
-                  : ''
-              }`
-            : topSuit,
-          helper: elementFocus ? 'Elemental dominance' : 'Suit dominance',
-        }
-      : null,
-  ].filter((stat): stat is { label: string; value: string; helper?: string } =>
-    Boolean(stat),
-  );
+  const patternStats = (
+    [
+      totalCards
+        ? {
+            label: 'Cards tracked',
+            value: `${totalCards}`,
+            helper: timeframe,
+          }
+        : null,
+      typeof majorCount === 'number'
+        ? {
+            label: 'Major Arcana',
+            value: `${majorCount}${
+              totalCards
+                ? ` (${Math.round((majorCount / totalCards) * 100)}%)`
+                : ''
+            }`,
+            helper: 'Destiny lessons',
+          }
+        : null,
+      typeof minorCount === 'number' && !topSuit
+        ? {
+            label: 'Minor Arcana',
+            value: `${minorCount}${
+              totalCards
+                ? ` (${Math.round((minorCount / totalCards) * 100)}%)`
+                : ''
+            }`,
+            helper: 'Day-to-day focus',
+          }
+        : null,
+      topSuit
+        ? {
+            label: elementFocus
+              ? `${topSuit} · ${elementFocus}`
+              : `${topSuit} focus`,
+            value: topSuitCount
+              ? `${topSuitCount}${
+                  totalCards
+                    ? ` (${Math.round((topSuitCount / totalCards) * 100)}%)`
+                    : ''
+                }`
+              : topSuit,
+            helper: elementFocus ? 'Elemental dominance' : 'Suit dominance',
+          }
+        : null,
+    ] as Array<PatternStat | null>
+  ).filter((stat): stat is PatternStat => Boolean(stat));
 
   const robotoMono = await loadRobotoMono(request);
 

@@ -347,19 +347,16 @@ export default async function ShareTarotPage({
   const sharedTopSuit = sharedTopSuitRaw
     ? toTitleCase(sharedTopSuitRaw)
     : undefined;
-  const sharedTopSuitCount = toNumberParam(
-    resolvedSearchParams.topSuitCount,
-  );
+  const sharedTopSuitCount = toNumberParam(resolvedSearchParams.topSuitCount);
   const sharedSuitInsight = toStringParam(resolvedSearchParams.suitInsight);
   const sharedElementRaw = toStringParam(resolvedSearchParams.element);
   const sharedElement = sharedElementRaw
     ? toTitleCase(sharedElementRaw)
     : undefined;
   const sharedInsights = parsePipeList(resolvedSearchParams.insights);
-  const combinedInsights = [
-    sharedSuitInsight,
-    ...sharedInsights,
-  ].filter(Boolean) as string[];
+  const combinedInsights = [sharedSuitInsight, ...sharedInsights].filter(
+    Boolean,
+  ) as string[];
   const sharedMoonPhaseRaw = toStringParam(resolvedSearchParams.moonPhase);
   const sharedMoonPhase = sharedMoonPhaseRaw
     ? toTitleCase(sharedMoonPhaseRaw)
@@ -399,7 +396,9 @@ export default async function ShareTarotPage({
           : 'Life logistics',
     },
     sharedTopSuit && {
-      label: sharedElement ? `${sharedTopSuit} · ${sharedElement}` : sharedTopSuit,
+      label: sharedElement
+        ? `${sharedTopSuit} · ${sharedElement}`
+        : sharedTopSuit,
       value: sharedTopSuitCount
         ? `${sharedTopSuitCount}${
             sharedCardCount
@@ -451,91 +450,91 @@ export default async function ShareTarotPage({
             )}
           </div>
 
-            {isPattern && (
-              <div className='mt-10 space-y-8 text-left'>
-                {patternStats.length > 0 && (
-                  <div className='rounded-2xl border border-white/10 bg-white/5 p-6'>
-                    <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
-                      Pattern Metrics
-                    </p>
-                    <dl className='mt-5 grid gap-4 sm:grid-cols-2'>
-                      {patternStats.map((stat) => (
-                        <div
-                          key={stat.label}
-                          className='rounded-2xl border border-white/10 bg-black/30 p-4'
-                        >
-                          <dt className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
-                            {stat.label}
-                          </dt>
-                          <dd className='mt-2 text-2xl font-light text-white'>
-                            {stat.value}
-                          </dd>
-                          {stat.helper && (
-                            <p className='mt-1 text-xs text-zinc-400'>
-                              {stat.helper}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </dl>
-                  </div>
-                )}
-
-                {combinedInsights.length > 0 && (
-                  <div className='rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-6'>
-                    <p className='text-xs uppercase tracking-[0.35em] text-indigo-200/80'>
-                      Signal Highlights
-                    </p>
-                    <div className='mt-4 space-y-3 text-base leading-relaxed text-zinc-100/90'>
-                      {combinedInsights.map((insight, index) => (
-                        <p key={`${insight}-${index}`}>{insight}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {(sharedMoonPhase || sharedMoonTip || sharedTransitImpact) && (
-                  <div className='grid gap-4 md:grid-cols-2'>
-                    {(sharedMoonPhase || sharedMoonTip) && (
-                      <div className='rounded-2xl border border-purple-500/30 bg-purple-500/10 p-6'>
-                        <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
-                          Moon Widget
-                        </p>
-                        <p className='mt-3 text-2xl font-light text-white'>
-                          {sharedMoonPhase ?? 'Current lunar flow'}
-                        </p>
-                        {sharedMoonTip && (
-                          <p className='mt-2 text-sm leading-relaxed text-purple-100/80'>
-                            {sharedMoonTip}
+          {isPattern && (
+            <div className='mt-10 space-y-8 text-left'>
+              {patternStats.length > 0 && (
+                <div className='rounded-2xl border border-white/10 bg-white/5 p-6'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                    Pattern Metrics
+                  </p>
+                  <dl className='mt-5 grid gap-4 sm:grid-cols-2'>
+                    {patternStats.map((stat) => (
+                      <div
+                        key={stat.label}
+                        className='rounded-2xl border border-white/10 bg-black/30 p-4'
+                      >
+                        <dt className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
+                          {stat.label}
+                        </dt>
+                        <dd className='mt-2 text-2xl font-light text-white'>
+                          {stat.value}
+                        </dd>
+                        {stat.helper && (
+                          <p className='mt-1 text-xs text-zinc-400'>
+                            {stat.helper}
                           </p>
                         )}
                       </div>
-                    )}
-                    {sharedTransitImpact && (
-                      <div className='rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6'>
-                        <p className='text-xs uppercase tracking-[0.35em] text-amber-200/80'>
-                          Personal Transit Impact
-                        </p>
-                        <p className='mt-3 text-sm leading-relaxed text-amber-100/90'>
-                          {sharedTransitImpact}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                    ))}
+                  </dl>
+                </div>
+              )}
 
-                {sharedActionPrompt && (
-                  <div className='rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6'>
-                    <p className='text-xs uppercase tracking-[0.35em] text-emerald-200/80'>
-                      Action Prompt
-                    </p>
-                    <p className='mt-3 text-base leading-relaxed text-emerald-50/90'>
-                      {sharedActionPrompt}
-                    </p>
+              {combinedInsights.length > 0 && (
+                <div className='rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-6'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-indigo-200/80'>
+                    Signal Highlights
+                  </p>
+                  <div className='mt-4 space-y-3 text-base leading-relaxed text-zinc-100/90'>
+                    {combinedInsights.map((insight, index) => (
+                      <p key={`${insight}-${index}`}>{insight}</p>
+                    ))}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+
+              {(sharedMoonPhase || sharedMoonTip || sharedTransitImpact) && (
+                <div className='grid gap-4 md:grid-cols-2'>
+                  {(sharedMoonPhase || sharedMoonTip) && (
+                    <div className='rounded-2xl border border-purple-500/30 bg-purple-500/10 p-6'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                        Moon Widget
+                      </p>
+                      <p className='mt-3 text-2xl font-light text-white'>
+                        {sharedMoonPhase ?? 'Current lunar flow'}
+                      </p>
+                      {sharedMoonTip && (
+                        <p className='mt-2 text-sm leading-relaxed text-purple-100/80'>
+                          {sharedMoonTip}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {sharedTransitImpact && (
+                    <div className='rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-amber-200/80'>
+                        Personal Transit Impact
+                      </p>
+                      <p className='mt-3 text-sm leading-relaxed text-amber-100/90'>
+                        {sharedTransitImpact}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {sharedActionPrompt && (
+                <div className='rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-emerald-200/80'>
+                    Action Prompt
+                  </p>
+                  <p className='mt-3 text-base leading-relaxed text-emerald-50/90'>
+                    {sharedActionPrompt}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className='mt-12 space-y-4 text-sm text-zinc-200/80'>
             <p>
@@ -544,41 +543,41 @@ export default async function ShareTarotPage({
               cosmic signature.
             </p>
             <p>
-                Discover daily guidance, pattern insights, moon widgets, and
-                personal transit stories that update in real-time with each
-                shuffle of the universe.
+              Discover daily guidance, pattern insights, moon widgets, and
+              personal transit stories that update in real-time with each
+              shuffle of the universe.
             </p>
           </div>
 
-            <div className='mt-12 rounded-2xl border border-white/10 bg-white/5 p-6 text-left'>
-              <div className='flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between'>
-                <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
-                  Tag us when you post
+          <div className='mt-12 rounded-2xl border border-white/10 bg-white/5 p-6 text-left'>
+            <div className='flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between'>
+              <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                Tag us when you post
+              </p>
+              {highlightedHandle && (
+                <p className='text-xs text-purple-100/80'>
+                  {highlightedPlatformLabel
+                    ? `Posting to ${highlightedPlatformLabel}? Use ${highlightedHandle} so we can reshare.`
+                    : `Use ${highlightedHandle} so we can reshare your spread.`}
                 </p>
-                {highlightedHandle && (
-                  <p className='text-xs text-purple-100/80'>
-                    {highlightedPlatformLabel
-                      ? `Posting to ${highlightedPlatformLabel}? Use ${highlightedHandle} so we can reshare.`
-                      : `Use ${highlightedHandle} so we can reshare your spread.`}
-                  </p>
-                )}
-              </div>
-              <div className='mt-4 grid gap-3 sm:grid-cols-2'>
-                {SOCIAL_TAGS.map((tag) => (
-                  <div
-                    key={tag.platform}
-                    className='rounded-2xl border border-white/10 bg-black/30 p-4 text-left'
-                  >
-                    <p className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
-                      {tag.label}
-                    </p>
-                    <p className='mt-1 text-lg font-semibold text-white'>
-                      {tag.handle}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              )}
             </div>
+            <div className='mt-4 grid gap-3 sm:grid-cols-2'>
+              {SOCIAL_TAGS.map((tag) => (
+                <div
+                  key={tag.platform}
+                  className='rounded-2xl border border-white/10 bg-black/30 p-4 text-left'
+                >
+                  <p className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
+                    {tag.label}
+                  </p>
+                  <p className='mt-1 text-lg font-semibold text-white'>
+                    {tag.handle}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className='mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
             <Link

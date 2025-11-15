@@ -27,9 +27,9 @@ export const SOCIAL_PLATFORM_LABELS: Record<SocialPlatform, string> = {
   pinterest: 'Pinterest',
 };
 
-export const SOCIAL_TAGS = (Object.keys(
-  SOCIAL_HANDLES,
-) as SocialPlatform[]).map((platform) => ({
+export const SOCIAL_TAGS = (
+  Object.keys(SOCIAL_HANDLES) as SocialPlatform[]
+).map((platform) => ({
   platform,
   label: SOCIAL_PLATFORM_LABELS[platform],
   handle: SOCIAL_HANDLES[platform],
