@@ -3,20 +3,39 @@ export type SocialPlatform =
   | 'tiktok'
   | 'twitter'
   | 'threads'
-  | 'pinterest';
+  | 'pinterest'
+  | 'bluesky';
 
-const getEnvHandle = (key: string, fallback: string) => {
-  if (typeof process === 'undefined' || !process.env) return fallback;
-  const value = process.env[key];
-  return value && value.trim().length > 0 ? value.trim() : fallback;
+const normalizeHandle = (value?: string | null) => {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
 };
 
-export const SOCIAL_HANDLES: Record<SocialPlatform, string> = {
+const getEnvHandle = (key: string, fallback?: string) => {
+  const envValue =
+    typeof process !== 'undefined' && process.env
+      ? process.env[key]
+      : undefined;
+  return normalizeHandle(envValue) ?? normalizeHandle(fallback);
+};
+
+const PLATFORM_ORDER: SocialPlatform[] = [
+  'instagram',
+  'twitter',
+  'threads',
+  'bluesky',
+  'pinterest',
+  'tiktok',
+];
+
+export const SOCIAL_HANDLES: Record<SocialPlatform, string | undefined> = {
   instagram: getEnvHandle('NEXT_PUBLIC_INSTAGRAM_HANDLE', '@lunary.app'),
-  tiktok: getEnvHandle('NEXT_PUBLIC_TIKTOK_HANDLE', '@lunaryapp'),
-  twitter: getEnvHandle('NEXT_PUBLIC_TWITTER_HANDLE', '@lunaryapp'),
+  twitter: getEnvHandle('NEXT_PUBLIC_TWITTER_HANDLE', '@lunaryApp'),
   threads: getEnvHandle('NEXT_PUBLIC_THREADS_HANDLE', '@lunary.app'),
+  bluesky: getEnvHandle('NEXT_PUBLIC_BLUESKY_HANDLE', '@lunaryapp.bsky.social'),
   pinterest: getEnvHandle('NEXT_PUBLIC_PINTEREST_HANDLE', '@lunaryapp'),
+  tiktok: getEnvHandle('NEXT_PUBLIC_TIKTOK_HANDLE'),
 };
 
 export const SOCIAL_PLATFORM_LABELS: Record<SocialPlatform, string> = {
@@ -25,21 +44,26 @@ export const SOCIAL_PLATFORM_LABELS: Record<SocialPlatform, string> = {
   twitter: 'X / Twitter',
   threads: 'Threads',
   pinterest: 'Pinterest',
+  bluesky: 'Bluesky',
 };
 
-export const SOCIAL_TAGS = (
-  Object.keys(SOCIAL_HANDLES) as SocialPlatform[]
-).map((platform) => ({
+type SocialTag = {
+  platform: SocialPlatform;
+  label: string;
+  handle: string;
+};
+
+export const SOCIAL_TAGS: SocialTag[] = PLATFORM_ORDER.map((platform) => ({
   platform,
   label: SOCIAL_PLATFORM_LABELS[platform],
-  handle: SOCIAL_HANDLES[platform],
-}));
+  handle: SOCIAL_HANDLES[platform] ?? '',
+})).filter((tag): tag is SocialTag => Boolean(tag.handle));
 
 export const getPrimaryHandle = (platform?: string) => {
-  if (!platform) return SOCIAL_HANDLES.instagram;
-  const normalized = platform.toLowerCase() as SocialPlatform;
-  if (normalized in SOCIAL_HANDLES) {
-    return SOCIAL_HANDLES[normalized];
+  if (platform) {
+    const normalized = platform.toLowerCase() as SocialPlatform;
+    const handle = SOCIAL_HANDLES[normalized];
+    if (handle) return handle;
   }
-  return SOCIAL_HANDLES.instagram;
+  return SOCIAL_TAGS[0]?.handle ?? '@lunary.app';
 };
