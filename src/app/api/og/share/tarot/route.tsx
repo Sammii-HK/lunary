@@ -142,18 +142,15 @@ export async function GET(request: NextRequest) {
   const theme = pickGradient(`${card}-${timeframe}-${name ?? 'general'}`);
   const primaryHandle = getPrimaryHandle(platform);
   const handleBadges = SOCIAL_TAGS.slice(0, 4);
-  const insights = [suitInsight, ...extraInsights]
-    .filter((entry): entry is string => Boolean(entry))
-    .slice(0, 4);
+  const insights = Array.from(
+    new Set(
+      [suitInsight, ...extraInsights].filter((entry): entry is string =>
+        Boolean(entry),
+      ),
+    ),
+  ).slice(0, 4);
   const patternStats = (
     [
-      totalCards
-        ? {
-            label: 'Cards tracked',
-            value: `${totalCards}`,
-            helper: timeframe,
-          }
-        : null,
       typeof majorCount === 'number'
         ? {
             label: 'Major Arcana',

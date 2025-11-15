@@ -354,9 +354,13 @@ export default async function ShareTarotPage({
     ? toTitleCase(sharedElementRaw)
     : undefined;
   const sharedInsights = parsePipeList(resolvedSearchParams.insights);
-  const combinedInsights = [sharedSuitInsight, ...sharedInsights].filter(
-    Boolean,
-  ) as string[];
+  const combinedInsights = Array.from(
+    new Set(
+      [sharedSuitInsight, ...sharedInsights].filter((entry): entry is string =>
+        Boolean(entry),
+      ),
+    ),
+  );
   const sharedMoonPhaseRaw = toStringParam(resolvedSearchParams.moonPhase);
   const sharedMoonPhase = sharedMoonPhaseRaw
     ? toTitleCase(sharedMoonPhaseRaw)
@@ -374,11 +378,6 @@ export default async function ShareTarotPage({
     ? SOCIAL_TAGS.find((tag) => tag.platform === platformTag)?.label
     : undefined;
   const patternStats = [
-    sharedCardCount && {
-      label: 'Cards Tracked',
-      value: `${sharedCardCount}`,
-      helper: timeframe,
-    },
     typeof sharedMajor === 'number' && {
       label: 'Major Arcana',
       value: `${sharedMajor}`,
@@ -415,8 +414,8 @@ export default async function ShareTarotPage({
   ].filter(Boolean) as Array<{ label: string; value: string; helper?: string }>;
 
   return (
-    <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-indigo-950 to-purple-900 text-white'>
-      <div className='mx-auto flex min-h-screen max-w-4xl flex-col items-center px-4 py-16 text-center sm:px-6 lg:px-8'>
+    <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-indigo-950 to-purple-900 py-12 text-white sm:py-16'>
+      <div className='mx-auto flex w-full max-w-4xl flex-col items-center px-4 text-center sm:px-6 lg:px-8'>
         <div className='w-full rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur'>
           <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
             Shared from Lunary
