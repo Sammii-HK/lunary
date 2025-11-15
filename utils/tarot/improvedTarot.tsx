@@ -89,6 +89,8 @@ const getPatternReading = (cardName: string, count: number): string => {
     return `${cardName} appearing ${count} times signals a major theme demanding your attention. This energy is persistently trying to guide you.`;
   } else if (count === 3) {
     return `${cardName} appearing 3 times indicates this lesson is important for your current journey. Pay attention to its message.`;
+  } else if (count === 2) {
+    return `${cardName} showing up twice suggests this archetype wants a response—integrate its lesson before it repeats again.`;
   }
   return '';
 };
@@ -265,15 +267,19 @@ const analyzeTrends = (
     .slice(0, 3)
     .map(([keyword]) => keyword);
 
-  // Find frequent cards with readings (appeared 3+ times)
+  const cardPatternLimit =
+    timeFrameDays >= 90 ? 8 : timeFrameDays >= 30 ? 6 : 4;
+
+  // Find frequent cards with readings (top repeats, including doubles)
   const frequentCards = Object.entries(cardCounts)
-    .filter(([, count]) => count >= 3)
+    .filter(([, count]) => count >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, cardPatternLimit)
     .map(([name, count]) => ({
       name,
       count,
       reading: getPatternReading(name, count),
-    }))
-    .sort((a, b) => b.count - a.count);
+    }));
 
   // Enhanced suit patterns with card breakdown
   const suitPatterns = Object.entries(suitCounts)
