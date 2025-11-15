@@ -2,9 +2,12 @@ name = "lunary-notifications"
 main = "notification-cron.js"
 compatibility_date = "2024-10-30"
 
-# Cron trigger - every 4 hours
+# Multiple cron triggers for different tasks - spread throughout the day
 [triggers]
-crons = ["0 */4 * * *"]
+crons = [
+  "0 * * * *",    # Every hour - routes to specific tasks based on hour (8 AM cosmic pulse, 2 PM changes, 8 PM moon circles, every 4h snapshots)
+  "0 10 * * SUN"  # Sunday at 10 AM - weekly cosmic report
+]
 
 # Environment variables (set these in Cloudflare dashboard)
 [vars]

@@ -6,15 +6,235 @@
 
 export default {
   async scheduled(event, env, ctx) {
+    const now = new Date();
+    const hour = now.getUTCHours();
+    const dayOfWeek = now.getUTCDay();
+    const today = now.toISOString().split('T')[0];
+    const baseUrl = 'https://www.lunary.app';
+
     console.log(
-      '🔔 Cloudflare notification cron started at:',
-      new Date().toISOString(),
+      '🔔 Cloudflare cron started at:',
+      now.toISOString(),
+      'Hour:',
+      hour,
+      'Day:',
+      dayOfWeek,
     );
 
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const baseUrl = 'https://www.lunary.app';
+    // Sunday at 10 AM - weekly cosmic report
+    if (dayOfWeek === 0 && hour === 10) {
+      return await handleWeeklyCosmicReport(baseUrl, env, today);
+    }
 
+    // Daily at 8 AM - cosmic pulse, daily posts, and cosmic snapshot update
+    if (hour === 8) {
+      const results = await Promise.allSettled([
+        handleDailyCosmicPulse(baseUrl, env, today),
+        handleDailyPosts(baseUrl, env, today),
+        handleCosmicSnapshotUpdates(baseUrl, env, today),
+      ]);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          results: results.map((r) =>
+            r.status === 'fulfilled' ? r.value : { error: r.reason },
+          ),
+          timestamp: now.toISOString(),
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    }
+
+    // Daily at 2 PM - cosmic changes notification
+    if (hour === 14) {
+      return await handleCosmicChangesNotification(baseUrl, env, today);
+    }
+
+    // Daily at 8 PM - moon circles check and cosmic snapshot update
+    if (hour === 20) {
+      const results = await Promise.allSettled([
+        handleMoonCircles(baseUrl, env, today),
+        handleCosmicSnapshotUpdates(baseUrl, env, today),
+      ]);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          results: results.map((r) =>
+            r.status === 'fulfilled' ? r.value : { error: r.reason },
+          ),
+          timestamp: now.toISOString(),
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    }
+
+    // Every 4 hours (0, 4, 12, 16) - cosmic snapshot updates
+    // Note: hours 8 and 20 are handled above
+    if ([0, 4, 12, 16].includes(hour)) {
+      return await handleCosmicSnapshotUpdates(baseUrl, env, today);
+    }
+
+    // Fallback for any other times
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: 'No scheduled task for this time',
+        hour,
+        timestamp: now.toISOString(),
+      }),
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  },
+
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const baseUrl = 'https://www.lunary.app';
+    const today = new Date().toISOString().split('T')[0];
+
+    if (url.pathname === '/trigger' && request.method === 'POST') {
+      return await this.scheduled(null, env, ctx);
+    }
+
+    if (url.pathname === '/cosmic-changes' && request.method === 'POST') {
+      return await handleCosmicChangesNotification(baseUrl, env, today);
+    }
+
+    if (url.pathname === '/cosmic-snapshots' && request.method === 'POST') {
+      return await handleCosmicSnapshotUpdates(baseUrl, env, today);
+    }
+
+    if (url.pathname === '/daily-cosmic-pulse' && request.method === 'POST') {
+      return await handleDailyCosmicPulse(baseUrl, env, today);
+    }
+
+    if (url.pathname === '/weekly-report' && request.method === 'POST') {
+      return await handleWeeklyCosmicReport(baseUrl, env, today);
+    }
+
+    if (url.pathname === '/moon-circles' && request.method === 'POST') {
+      return await handleMoonCircles(baseUrl, env, today);
+    }
+
+    if (url.pathname === '/daily-posts' && request.method === 'POST') {
+      return await handleDailyPosts(baseUrl, env, today);
+    }
+
+    return new Response(
+      'Lunary Notification Worker - Use POST /trigger, /cosmic-changes, /cosmic-snapshots, /daily-cosmic-pulse, /weekly-report, /moon-circles, or /daily-posts to test',
+      {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain' },
+      },
+    );
+  },
+};
+
+async function handleCosmicChangesNotification(baseUrl, env, today) {
+  try {
+    console.log('[cosmic-changes] Starting cosmic changes check');
+
+    const response = await fetch(
+      `${baseUrl}/api/cron/cosmic-changes-notification`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${env.CRON_SECRET}`,
+        },
+      },
+    );
+
+    const result = await response.json();
+
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[cosmic-changes] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleCosmicSnapshotUpdates(baseUrl, env, today) {
+  try {
+    console.log('[cosmic-snapshots] Starting snapshot updates');
+
+    const now = new Date();
+    const hour = now.getUTCHours();
+
+    const results = [];
+
+    // Update global cosmic data (every 2 hours, but we run every 4, so check if divisible by 2)
+    if (hour % 2 === 0) {
+      try {
+        const globalResponse = await fetch(
+          `${baseUrl}/api/cron/update-global-cosmic-data`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${env.CRON_SECRET}`,
+            },
+          },
+        );
+        const globalResult = await globalResponse.json();
+        results.push({ task: 'global-cosmic-data', ...globalResult });
+      } catch (error) {
+        console.error('[cosmic-snapshots] Global data update failed:', error);
+      }
+    }
+
+    // Update user snapshots (every 4 hours)
+    try {
+      const snapshotResponse = await fetch(
+        `${baseUrl}/api/cron/update-cosmic-snapshots`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${env.CRON_SECRET}`,
+          },
+        },
+      );
+      const snapshotResult = await snapshotResponse.json();
+      results.push({ task: 'user-snapshots', ...snapshotResult });
+    } catch (error) {
+      console.error('[cosmic-snapshots] User snapshot update failed:', error);
+    }
+
+    // Cleanup old snapshots (every 6 hours, check if divisible by 6)
+    if (hour % 6 === 0) {
+      try {
+        const cleanupResponse = await fetch(
+          `${baseUrl}/api/cron/cleanup-cosmic-snapshots`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${env.CRON_SECRET}`,
+            },
+          },
+        );
+        const cleanupResult = await cleanupResponse.json();
+        results.push({ task: 'cleanup', ...cleanupResult });
+      } catch (error) {
+        console.error('[cosmic-snapshots] Cleanup failed:', error);
+      }
+    }
+
+    // Also run the original notification check
+    try {
       // Get cosmic data to check for events
       const cosmicResponse = await fetch(
         `${baseUrl}/api/og/cosmic-post/${today}`,
@@ -58,129 +278,104 @@ export default {
         return !sentEvents.has(eventKey);
       });
 
-      if (newEvents.length === 0) {
-        console.log('📭 No new events to notify about (already sent)');
-        return new Response(
-          JSON.stringify({
-            success: true,
-            notificationsSent: 0,
-            primaryEvent: cosmicData.primaryEvent?.name || 'none',
-            message: 'No new events (may have already been sent)',
-            checkTime: new Date().toISOString(),
-          }),
-          {
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
-      }
+      if (newEvents.length > 0) {
+        // Only send 1 notification per check (limit spam)
+        const eventToSend = newEvents[0];
 
-      // Only send 1 notification per check (limit spam)
-      const eventToSend = newEvents[0];
+        // Send notification
+        try {
+          const notification = createNotificationFromEvent(
+            eventToSend,
+            cosmicData,
+          );
 
-      // Send notification
-      try {
-        const notification = createNotificationFromEvent(
-          eventToSend,
-          cosmicData,
-        );
-
-        const response = await fetch(`${baseUrl}/api/notifications/send`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${env.CRON_SECRET}`,
-          },
-          body: JSON.stringify({
-            payload: {
-              type: getNotificationType(eventToSend.type),
-              title: notification.title,
-              body: notification.body,
-              data: {
-                date: today,
-                eventName: eventToSend.name,
-                priority: eventToSend.priority,
-                eventType: eventToSend.type,
-                source: 'cloudflare-worker',
-              },
+          const response = await fetch(`${baseUrl}/api/notifications/send`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${env.CRON_SECRET}`,
             },
-          }),
-        });
+            body: JSON.stringify({
+              payload: {
+                type: getNotificationType(eventToSend.type),
+                title: notification.title,
+                body: notification.body,
+                data: {
+                  date: today,
+                  eventName: eventToSend.name,
+                  priority: eventToSend.priority,
+                  eventType: eventToSend.type,
+                  source: 'cloudflare-worker',
+                },
+              },
+            }),
+          });
 
-        const result = await response.json();
+          const result = await response.json();
 
-        // Mark event as sent
-        const eventKey = `${eventToSend.type}-${eventToSend.name}-${eventToSend.priority}`;
-        await fetch(`${baseUrl}/api/notifications/mark-sent`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${env.CRON_SECRET}`,
-          },
-          body: JSON.stringify({
-            date: today,
-            eventKey,
-            type: eventToSend.type,
-            name: eventToSend.name,
-            priority: eventToSend.priority,
-            checkType: '4-hourly',
-          }),
-        });
+          // Mark event as sent
+          const eventKey = `${eventToSend.type}-${eventToSend.name}-${eventToSend.priority}`;
+          await fetch(`${baseUrl}/api/notifications/mark-sent`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${env.CRON_SECRET}`,
+            },
+            body: JSON.stringify({
+              date: today,
+              eventKey,
+              type: eventToSend.type,
+              name: eventToSend.name,
+              priority: eventToSend.priority,
+              checkType: '4-hourly',
+            }),
+          });
 
-        console.log(`✅ Cloudflare notification sent: ${notification.title}`);
-
-        return new Response(
-          JSON.stringify({
-            success: true,
+          console.log(`✅ Cloudflare notification sent: ${notification.title}`);
+          results.push({
+            task: 'cosmic-events',
             notificationsSent: result.recipientCount || 0,
-            primaryEvent: cosmicData.primaryEvent?.name,
             eventSent: eventToSend.name,
-            checkTime: new Date().toISOString(),
-          }),
-          {
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
-      } catch (eventError) {
-        console.error(
-          `Failed to send notification for event ${eventToSend.name}:`,
-          eventError,
-        );
-        throw eventError;
+          });
+        } catch (eventError) {
+          console.error(
+            `Failed to send notification for event ${eventToSend.name}:`,
+            eventError,
+          );
+        }
       }
     } catch (error) {
-      console.error('❌ Cloudflare notification check failed:', error);
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: error.message || 'Unknown error',
-          checkTime: new Date().toISOString(),
-        }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        },
+      console.error(
+        '[cosmic-snapshots] Original notification check failed:',
+        error,
       );
-    }
-  },
-
-  // Handle manual triggers via HTTP
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-
-    if (url.pathname === '/trigger' && request.method === 'POST') {
-      // Manual trigger for testing
-      return this.scheduled(null, env, ctx);
     }
 
     return new Response(
-      'Lunary Notification Worker - Use POST /trigger to test',
+      JSON.stringify({
+        success: true,
+        results,
+        timestamp: new Date().toISOString(),
+      }),
       {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
       },
     );
-  },
-};
+  } catch (error) {
+    console.error('[cosmic-snapshots] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
 
 function getNotificationType(type) {
   const mapping = {
@@ -680,4 +875,116 @@ function getPlanetEmoji(event) {
   }
 
   return '⭐';
+}
+
+async function handleDailyCosmicPulse(baseUrl, env, today) {
+  try {
+    console.log('[daily-cosmic-pulse] Starting daily cosmic pulse');
+    const response = await fetch(`${baseUrl}/api/cron/daily-cosmic-pulse`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[daily-cosmic-pulse] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleWeeklyCosmicReport(baseUrl, env, today) {
+  try {
+    console.log('[weekly-report] Starting weekly cosmic report');
+    const response = await fetch(`${baseUrl}/api/cron/weekly-cosmic-report`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[weekly-report] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleMoonCircles(baseUrl, env, today) {
+  try {
+    console.log('[moon-circles] Starting moon circles check');
+    const response = await fetch(`${baseUrl}/api/cron/moon-circles`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[moon-circles] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleDailyPosts(baseUrl, env, today) {
+  try {
+    console.log('[daily-posts] Starting daily posts');
+    const response = await fetch(`${baseUrl}/api/cron/daily-posts`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[daily-posts] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
 }

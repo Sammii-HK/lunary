@@ -3,7 +3,7 @@ const require = createRequire(import.meta.url);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, nextRuntime }) => {
     // Exclude Playwright from bundling (server-only, Node.js runtime)
     if (isServer) {
       config.externals = config.externals || [];
@@ -31,6 +31,51 @@ const nextConfig = {
       } else {
         config.externals = [config.externals, playwrightExternals];
       }
+    }
+
+    // Exclude Brevo and Node.js built-ins from Edge runtime
+    // Brevo uses Node.js 'http' module which isn't available in Edge runtime
+    if (nextRuntime === 'edge') {
+      const originalExternals = config.externals;
+      config.externals = ({ context, request }, callback) => {
+        // Exclude Brevo package and Node.js built-ins from Edge runtime
+        if (
+          request === '@getbrevo/brevo' ||
+          request?.startsWith('@getbrevo/') ||
+          request === 'http' ||
+          request === 'https' ||
+          request === 'net' ||
+          request === 'tls' ||
+          request === 'fs' ||
+          request === 'path' ||
+          request === 'async_hooks' ||
+          request === 'crypto' ||
+          request === 'stream' ||
+          request === 'util' ||
+          request === 'url' ||
+          request?.startsWith('node:')
+        ) {
+          return callback(null, `commonjs ${request}`);
+        }
+        // Prevent auth.ts and email.ts from being bundled in Edge runtime
+        // These modules use Node.js-only dependencies (Brevo, crypto, etc.)
+        if (
+          (typeof request === 'string' && request.includes('/lib/email')) ||
+          (typeof request === 'string' && request.includes('/lib/auth')) ||
+          (typeof request === 'string' && request.includes('@getbrevo'))
+        ) {
+          // Throw error to prevent bundling - these modules should never be used in Edge runtime
+          return callback(
+            new Error(
+              `${request} cannot be used in Edge runtime. Use Node.js runtime instead.`,
+            ),
+          );
+        }
+        if (typeof originalExternals === 'function') {
+          return originalExternals({ context, request }, callback);
+        }
+        return callback();
+      };
     }
 
     // Enable WebAssembly experiments
@@ -61,6 +106,12 @@ const nextConfig = {
         url: false,
         buffer: require.resolve('buffer'),
       };
+    }
+
+    // Edge runtime: Allow buffer but exclude Node.js-only modules
+    if (nextRuntime === 'edge') {
+      // Buffer is available in Edge runtime via Web APIs
+      // Don't exclude it, but ensure Brevo and other Node.js modules are excluded
 
       // Optimize chunk splitting for better tree shaking
       config.optimization = {
@@ -174,6 +225,26 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, s-maxage=86400, stale-while-revalidate=172800',
+          },
+        ],
+      },
+      {
+        // Cache global cosmic data API (2 hours)
+        source: '/api/cosmic/global',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=7200, stale-while-revalidate=3600',
+          },
+        ],
+      },
+      {
+        // Cache user cosmic snapshots API (4 hours)
+        source: '/api/cosmic/snapshot',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=14400, stale-while-revalidate=7200',
           },
         ],
       },

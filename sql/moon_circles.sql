@@ -40,4 +40,3 @@ CREATE TRIGGER update_moon_circles_timestamp
   BEFORE UPDATE ON moon_circles
   FOR EACH ROW
   EXECUTE FUNCTION update_moon_circles_updated_at();
-

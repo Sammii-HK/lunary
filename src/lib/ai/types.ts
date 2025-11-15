@@ -113,6 +113,7 @@ export type AiPlan = {
   name: string;
   priceGBP: number;
   dailyMessageLimit: number;
+  weeklyRitualLimit?: number;
   memoryTurns: number;
   features: string[];
   addOns?: {

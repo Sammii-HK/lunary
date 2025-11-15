@@ -213,6 +213,61 @@ Tests are configured to run in CI environments:
 - Coverage thresholds enforced
 - Test results reported
 
+## Troubleshooting
+
+### E2E Tests Hanging or Failing to Start
+
+If e2e tests hang or fail to start, it's usually due to port conflicts:
+
+**Symptoms:**
+
+- Tests hang waiting for server
+- Error: "Wrong app detected on port 3000"
+- Tests timeout during global setup
+
+**Solutions:**
+
+1. **Check what's running on port 3000:**
+
+   ```bash
+   lsof -i:3000
+   ```
+
+2. **Kill processes on port 3000 manually:**
+
+   ```bash
+   lsof -ti:3000 | xargs kill -9
+   ```
+
+   Or use the helper script:
+
+   ```bash
+   ./scripts/cleanup-port-3000.sh
+   ```
+
+3. **Kill any hanging Playwright processes:**
+
+   ```bash
+   pkill -9 -f "playwright test"
+   ```
+
+4. **Verify Playwright config:**
+   - Check `playwright.config.ts` has `reuseExistingServer: false`
+   - The webServer command should automatically kill processes on port 3000
+   - If issues persist, manually kill processes before running tests
+
+**Common Causes:**
+
+- Another Next.js app running on port 3000
+- Previous test run didn't clean up properly
+- Development server left running from manual start
+
+**Prevention:**
+
+- Always let Playwright start its own server (don't run `npm run dev` before tests)
+- Use the cleanup script if you've manually started a dev server
+- Check for hanging processes before running tests in CI
+
 ## Video Walkthrough Support
 
 The E2E test suite is designed to support video walkthrough recording:

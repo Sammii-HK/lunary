@@ -13,6 +13,7 @@ import {
   Sparkles,
   ArrowRight,
 } from 'lucide-react';
+import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
 
 interface BlogPost {
   id: string;
@@ -288,6 +289,11 @@ export default function BlogPage() {
             </div>
           )}
         </div>
+
+        {/* App CTA Section */}
+        <section className='mt-12 pt-8 border-t border-zinc-800'>
+          <CrossPlatformCTA variant='app' source='blog_listing' />
+        </section>
       </div>
     </div>
   );

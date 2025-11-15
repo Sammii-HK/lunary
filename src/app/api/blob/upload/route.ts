@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 function generateRandomSlug(): string {
   const array = new Uint8Array(6);

@@ -163,6 +163,54 @@ const describeContext = (context: LunaryContext): string => {
   return parts.join('\n');
 };
 
+const getModeSpecificGuidance = (userMessage: string): string => {
+  const content = userMessage.toLowerCase();
+
+  if (
+    content.includes("tonight's cosmic weather") ||
+    content.includes('cosmic weather')
+  ) {
+    return '\n\nMODE: Cosmic Weather Report\nFocus on describing the current lunar and planetary energies in a clear, accessible way. Help the user understand what cosmic influences are active right now and how they might feel these energies.';
+  }
+
+  if (
+    content.includes('transit feelings') ||
+    content.includes('how might i be feeling')
+  ) {
+    return '\n\nMODE: Transit Emotional Reflection\nFocus on the emotional and psychological impact of current transits. Help the user understand how planetary movements might be affecting their inner experience, mood, and decision-making.';
+  }
+
+  if (
+    content.includes('interpret my last tarot') ||
+    content.includes('interpret my tarot')
+  ) {
+    return "\n\nMODE: Tarot Interpretation\nFocus on interpreting the user's most recent tarot reading. Connect the cards to their current situation and provide meaningful insights. Reference specific cards from their reading.";
+  }
+
+  if (
+    content.includes('ritual') &&
+    (content.includes('moon') || content.includes('tonight'))
+  ) {
+    return '\n\nMODE: Ritual Generation\nProvide a specific, actionable ritual suggestion based on the current moon phase and sign. Include steps, timing, and intention. Make it practical and accessible.';
+  }
+
+  if (
+    content.includes('weekly overview') ||
+    content.includes('summarise my week')
+  ) {
+    return "\n\nMODE: Weekly Overview\nProvide a comprehensive summary of the week's cosmic influences, including moon phases, key transits, and how they relate to the user's journey. Structure it as a weekly forecast.";
+  }
+
+  if (
+    content.includes('journal entry') ||
+    content.includes('format as journal')
+  ) {
+    return '\n\nMODE: Journal Entry Format\nFormat your response as a journal entry with date, cosmic context, and reflective prompts. Use first-person perspective and include space for the user to add their own thoughts.';
+  }
+
+  return '';
+};
+
 export const buildPromptSections = ({
   context,
   memorySnippets,
@@ -177,8 +225,11 @@ export const buildPromptSections = ({
       ? `Long-term memory snippets:\n${formatMemory(memorySnippets)}`
       : null;
 
+  const modeGuidance = getModeSpecificGuidance(userMessage);
+  const systemPrompt = SYSTEM_PROMPT + modeGuidance;
+
   return {
-    system: SYSTEM_PROMPT,
+    system: systemPrompt,
     memory,
     context: `Context data:\n${describeContext(context)}`,
     userMessage,

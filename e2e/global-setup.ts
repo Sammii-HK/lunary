@@ -4,6 +4,11 @@ import { TEST_USERS, ensureTestUser } from './fixtures/test-users';
 async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use?.baseURL || 'http://localhost:3000';
   const isCI = !!process.env.CI;
+  // Check if webServer is configured to start automatically (reuseExistingServer: false means it will start)
+  // webServer config is at root level, not in projects[0].use
+  const webServerConfig = (config as any).webServer;
+  const webServerWillStart =
+    webServerConfig && webServerConfig.reuseExistingServer === false;
 
   if (!isCI) {
     console.log('\n🔧 Playwright Global Setup');
@@ -15,8 +20,11 @@ async function globalSetup(config: FullConfig) {
   const page = await browser.newPage();
 
   let retries = 0;
-  const maxRetries = 30; // 30 retries = ~60 seconds max (increased to allow Next.js route compilation)
+  // If webServer will start automatically and wrong app detected, wait shorter time
+  // Otherwise use full timeout for manual server startup
+  const maxRetries = webServerWillStart ? 10 : 30; // 10 retries = ~20 seconds if webServer starts, 30 = ~60 seconds otherwise
   const retryDelay = 2000; // 2 seconds between retries
+  let wrongAppDetected = false;
 
   while (retries < maxRetries) {
     try {
@@ -42,10 +50,16 @@ async function globalSetup(config: FullConfig) {
           bodyText?.includes('lunary');
 
         if (!isLunary) {
+          wrongAppDetected = true;
           if (!isCI) {
             console.log(
               `⚠️  Wrong app detected on port 3000 (title: "${pageTitle}"), waiting for correct server... (attempt ${retries + 1}/${maxRetries})`,
             );
+            if (webServerWillStart) {
+              console.log(
+                '   ℹ️  WebServer will start automatically - waiting for it to replace the wrong app...',
+              );
+            }
           }
           retries++;
           if (retries < maxRetries) {
@@ -147,8 +161,31 @@ async function globalSetup(config: FullConfig) {
         console.log(
           `⚠️  Server health check failed after ${maxRetries} attempts`,
         );
-        console.log(
-          '⚠️  Tests will proceed but may fail if server is not running\n',
+        if (wrongAppDetected) {
+          console.error(
+            '\n❌ ERROR: Wrong application detected on port 3000 and server never became ready.',
+          );
+          console.error(
+            '   This usually means:\n' +
+              '   1. Another app is running on port 3000 (check with: lsof -i:3000)\n' +
+              '   2. The webServer failed to start (check Playwright output above)\n' +
+              '   3. The server started but is not responding correctly\n',
+          );
+          console.error(
+            '   Solution: Kill the process on port 3000 manually:\n' +
+              '   lsof -ti:3000 | xargs kill -9\n',
+          );
+        } else {
+          console.log(
+            '⚠️  Tests will proceed but may fail if server is not running\n',
+          );
+        }
+      }
+      // In CI, throw error to fail fast
+      if (isCI && wrongAppDetected) {
+        await browser.close();
+        throw new Error(
+          'Server health check failed: Wrong application detected on port 3000',
         );
       }
     }

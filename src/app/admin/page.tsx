@@ -698,6 +698,14 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       category: 'content',
     },
     {
+      title: 'Weekly Report Preview',
+      description: "Preview weekly cosmic reports before they're sent to users",
+      href: '/admin/weekly-report-preview',
+      icon: <Eye className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
       title: 'Substack Manager',
       description:
         'Generate and publish weekly Substack posts (Free: newsletter content, Paid: $3/month enhanced)',

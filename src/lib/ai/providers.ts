@@ -164,41 +164,78 @@ export type CurrentTransitsResponse = {
 export const getCurrentTransits = async ({
   userId,
   now = new Date(),
-}: CurrentTransitsProviderParams): Promise<CurrentTransitsResponse> => {
-  const seed = hashStringToNumber(userId || 'lunary');
-  const exactBase = dayjs(now).startOf('hour');
+  personalizeForNotifications = false,
+  isPayingUser = false,
+}: CurrentTransitsProviderParams & {
+  personalizeForNotifications?: boolean;
+  isPayingUser?: boolean;
+}): Promise<CurrentTransitsResponse> => {
+  const { getGlobalCosmicData } = await import(
+    '../cosmic-snapshot/global-cache'
+  );
+  const globalData = await getGlobalCosmicData(now);
 
-  const transits: TransitRecord[] = [
-    {
-      aspect: 'Trine',
-      from: 'Sun',
-      to: 'Moon',
-      exactUtc: exactBase.add((seed % 6) + 6, 'hour').toISOString(),
-      applying: true,
-      strength: 0.72,
-    },
-    {
-      aspect: 'Square',
-      from: 'Venus',
-      to: 'Saturn',
-      exactUtc: exactBase.add((seed % 4) + 18, 'hour').toISOString(),
-      applying: false,
-      strength: 0.58,
-    },
-  ];
-
-  const moon = (() => {
-    const phaseInfo = pickFromArray(MOON_PHASES, seed);
+  if (!globalData) {
     return {
-      phase: phaseInfo.phase,
-      sign: pickFromArray(ZODIAC_SIGNS, seed, 5),
-      emoji: phaseInfo.emoji,
-      illumination: phaseInfo.illumination,
+      transits: [],
+      moon: null,
     };
-  })();
+  }
 
-  return { transits, moon };
+  const moon: MoonSnapshot = {
+    phase: globalData.moonPhase.name,
+    sign: globalData.planetaryPositions.Moon?.sign || 'Unknown',
+    emoji: globalData.moonPhase.emoji,
+    illumination: globalData.moonPhase.illumination / 100,
+  };
+
+  const transits: TransitRecord[] = globalData.generalTransits
+    .slice(0, 10)
+    .map((transit) => ({
+      aspect: transit.aspect,
+      from: transit.planetA?.name || transit.planetA?.planet || 'Unknown',
+      to: transit.planetB?.name || transit.planetB?.planet || 'Unknown',
+      exactUtc: now.toISOString(),
+      applying: true,
+      strength: Math.min(transit.priority / 10, 1),
+    }));
+
+  if (personalizeForNotifications && isPayingUser) {
+    const birthChart = await getBirthChart({ userId });
+    if (birthChart && transits.length > 0) {
+      const personalizedTransits = personalizeTransits(transits, birthChart);
+      return {
+        transits: personalizedTransits,
+        moon,
+      };
+    }
+  }
+
+  return {
+    transits,
+    moon,
+  };
 };
+
+export function personalizeTransits(
+  transits: TransitRecord[],
+  birthChart: BirthChartSnapshot,
+): TransitRecord[] {
+  return transits.map((transit) => {
+    const natalPlanet = birthChart.placements?.find(
+      (p) => p.planet === transit.from,
+    );
+
+    if (natalPlanet) {
+      return {
+        ...transit,
+        strength: transit.strength * 1.1,
+      };
+    }
+
+    return transit;
+  });
+}
 
 export type TarotProviderParams = { userId: string; now?: Date };
 

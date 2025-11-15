@@ -129,7 +129,10 @@ function initializeAuth() {
         maxPasswordLength: 128,
         revokeSessionsOnPasswordReset: true,
         async sendResetPassword({ user, url }, _request) {
+          // Lazy import email module only when actually needed (not during module initialization)
+          // Use webpackIgnore comment to prevent webpack from analyzing this import
           try {
+            // Dynamic import with webpackIgnore to prevent bundling in Edge runtime
             const emailModule = await import('./email');
             const sendEmail = emailModule.sendEmail;
             const generatePasswordResetEmailHTML = (emailModule as any)

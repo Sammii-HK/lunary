@@ -23,7 +23,13 @@ export type ConversionEvent =
   | 'birth_chart_viewed'
   | 'personalized_tarot_viewed'
   | 'personalized_horoscope_viewed'
-  | 'crystal_recommendations_viewed';
+  | 'crystal_recommendations_viewed'
+  | 'cosmic_pulse_opened'
+  | 'cosmic_pulse_sent'
+  | 'moon_circle_opened'
+  | 'moon_circle_sent'
+  | 'weekly_report_opened'
+  | 'weekly_report_sent';
 
 export interface ConversionEventData {
   event: ConversionEvent;

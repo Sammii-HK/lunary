@@ -17,19 +17,23 @@ Paragraph 4 – Call to action. Invite readers to explore `/launch`, join the Pr
 ---
 
 ### Key Features
+
 - Real ephemeris + astronomy engine powering transit insights
 - AI-personalized rituals, reports, and cosmic pulse notifications
 - Cosmic Report Generator with PDF + shareable cards
 - Moon circles, grimoire library, and TikTok build series
 
 ### Quotes
+
 - **Founder Quote:** “<Insert quote about why Lunary exists and what makes it different>”
 - **User Quote:** “<Insert short testimonial from beta users or community leaders>”
 
 ### About Lunary
+
 Short paragraph summarizing mission, founding year, team, and funding (if applicable).
 
 ### Media Contact
+
 - Name: Lunary Communications
 - Email: press@lunary.app
 - Phone/Signal: +1 (000) 000-0000

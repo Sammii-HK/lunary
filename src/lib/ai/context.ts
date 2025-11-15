@@ -20,6 +20,7 @@ import {
   getTarotLastReading as defaultGetTarotLastReading,
   getTarotPatternAnalysis as defaultGetTarotPatternAnalysis,
 } from './providers';
+import { getCachedSnapshot, saveSnapshot } from '../cosmic-snapshot/cache';
 
 export type LunaryContextDependencies = {
   getBirthChart: (params: {
@@ -115,7 +116,33 @@ export const buildLunaryContext = async ({
   includeMood = true,
   deps: dependencyOverrides,
   now = new Date(),
-}: BuildLunaryContextParams): Promise<BuildLunaryContextResult> => {
+  useCache = true,
+}: BuildLunaryContextParams & {
+  useCache?: boolean;
+}): Promise<BuildLunaryContextResult> => {
+  if (useCache) {
+    try {
+      const cachedSnapshot = await getCachedSnapshot(userId, now);
+      if (cachedSnapshot) {
+        const dailyHighlight = dependencyOverrides?.getDailyHighlight
+          ? await dependencyOverrides
+              .getDailyHighlight({ userId, now })
+              .catch(() => null)
+          : await defaultGetDailyHighlight({ userId, now }).catch(() => null);
+
+        return {
+          context: cachedSnapshot,
+          dailyHighlight,
+        };
+      }
+    } catch (error) {
+      console.error(
+        '[LunaryContext] Cache check failed, building fresh:',
+        error,
+      );
+    }
+  }
+
   const deps = mergeDeps(dependencyOverrides);
 
   const [
@@ -206,6 +233,14 @@ export const buildLunaryContext = async ({
 
   if (mood) {
     context.mood = mood;
+  }
+
+  if (useCache) {
+    try {
+      await saveSnapshot(userId, now, context);
+    } catch (error) {
+      console.error('[LunaryContext] Failed to save snapshot:', error);
+    }
   }
 
   return {

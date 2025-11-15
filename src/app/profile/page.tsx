@@ -40,6 +40,8 @@ export default function ProfilePage() {
   const authState = useAuthStatus();
   const [name, setName] = useState('');
   const [birthday, setBirthday] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [birthLocation, setBirthLocation] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -80,9 +82,13 @@ export default function ProfilePage() {
       try {
         let profileName = (me.profile as any)?.name || '';
         const profileBirthday = (me.profile as any)?.birthday || '';
+        const profileBirthTime = (me.profile as any)?.birthTime || '';
+        const profileBirthLocation = (me.profile as any)?.birthLocation || '';
 
         setName(profileName);
         setBirthday(profileBirthday);
+        setBirthTime(profileBirthTime);
+        setBirthLocation(profileBirthLocation);
         setIsEditing(!profileName && !profileBirthday);
 
         // // Check if we have migrated profile data to restore
@@ -161,6 +167,16 @@ export default function ProfilePage() {
         // Actually save to Jazz profile using correct API
         me.profile.$jazz.set('name', name);
         (me.profile as any).$jazz.set('birthday', birthday);
+        if (birthTime) {
+          (me.profile as any).$jazz.set('birthTime', birthTime);
+        } else {
+          (me.profile as any).$jazz.set('birthTime', undefined);
+        }
+        if (birthLocation) {
+          (me.profile as any).$jazz.set('birthLocation', birthLocation);
+        } else {
+          (me.profile as any).$jazz.set('birthLocation', undefined);
+        }
 
         // Generate and save cosmic data if birthday is provided
         if (birthday) {
@@ -173,12 +189,25 @@ export default function ProfilePage() {
             hasChart: hasExistingChart,
             hasPersonalCard: hasExistingPersonalCard,
             birthday,
+            birthTime,
+            birthLocation,
             name,
           });
 
-          if (!hasExistingChart) {
-            console.log('Generating birth chart...');
-            const birthChart = generateBirthChart(birthday);
+          // Regenerate chart if birthday, time, or location changed
+          const shouldRegenerateChart =
+            !hasExistingChart ||
+            (birthTime && birthTime !== (me.profile as any)?.birthTime) ||
+            (birthLocation &&
+              birthLocation !== (me.profile as any)?.birthLocation);
+
+          if (shouldRegenerateChart) {
+            console.log('Generating birth chart with time/location...');
+            const birthChart = await generateBirthChart(
+              birthday,
+              birthTime || undefined,
+              birthLocation || undefined,
+            );
             await saveBirthChartToProfile(me.profile, birthChart);
           }
 
@@ -297,41 +326,75 @@ export default function ProfilePage() {
           <div className='space-y-4'>
             {canEditProfile && isEditing ? (
               <>
-                <div className='grid gap-4 sm:grid-cols-2'>
-                  <div className='space-y-2'>
-                    <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
-                      Name
-                      <span className='ml-2 text-[10px] font-normal text-purple-400'>
-                        ✨ Personalised Feature
-                      </span>
-                    </label>
-                    <input
-                      type='text'
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      placeholder='Enter your name'
-                    />
+                <div className='space-y-4'>
+                  <div className='grid gap-4 sm:grid-cols-2'>
+                    <div className='space-y-2'>
+                      <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                        Name
+                        <span className='ml-2 text-[10px] font-normal text-purple-400'>
+                          ✨ Personalised Feature
+                        </span>
+                      </label>
+                      <input
+                        type='text'
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        placeholder='Enter your name'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                        Birthday *
+                        <span className='ml-2 text-[10px] font-normal text-purple-400'>
+                          ✨ Personalised Feature
+                        </span>
+                      </label>
+                      <input
+                        type='date'
+                        value={birthday}
+                        onChange={(e) => setBirthday(e.target.value)}
+                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                      />
+                    </div>
                   </div>
-                  <div className='space-y-2'>
-                    <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
-                      Birthday
-                      <span className='ml-2 text-[10px] font-normal text-purple-400'>
-                        ✨ Personalised Feature
-                      </span>
-                    </label>
-                    <input
-                      type='date'
-                      value={birthday}
-                      onChange={(e) => setBirthday(e.target.value)}
-                      className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    />
+                  <div className='grid gap-4 sm:grid-cols-2'>
+                    <div className='space-y-2'>
+                      <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                        Birth Time (optional)
+                        <span className='ml-2 text-[10px] font-normal text-zinc-500'>
+                          More precise = more accurate
+                        </span>
+                      </label>
+                      <input
+                        type='time'
+                        value={birthTime}
+                        onChange={(e) => setBirthTime(e.target.value)}
+                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                        Birth Location (optional)
+                        <span className='ml-2 text-[10px] font-normal text-zinc-500'>
+                          City, Country or coordinates
+                        </span>
+                      </label>
+                      <input
+                        type='text'
+                        value={birthLocation}
+                        onChange={(e) => setBirthLocation(e.target.value)}
+                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        placeholder='e.g., London, UK or 51.4769, 0.0005'
+                      />
+                    </div>
                   </div>
+                  <p className='text-xs text-zinc-400 sm:text-sm'>
+                    Your birthday enables personalized birth chart analysis,
+                    horoscopes, and cosmic insights. Adding birth time and
+                    location makes your chart more accurate.
+                  </p>
                 </div>
-                <p className='text-xs text-zinc-400 sm:text-sm'>
-                  Your birthday enables personalized birth chart analysis,
-                  horoscopes, and cosmic insights.
-                </p>
               </>
             ) : (
               <div className='flex flex-wrap items-center justify-between gap-3'>
@@ -357,6 +420,32 @@ export default function ProfilePage() {
                       {birthdayDisplay}
                     </span>
                   </div>
+                  {birthTime && (
+                    <>
+                      <span className='hidden text-zinc-600 sm:inline'>•</span>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                          Time
+                        </span>
+                        <span className='font-medium text-zinc-300'>
+                          {birthTime}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  {birthLocation && (
+                    <>
+                      <span className='hidden text-zinc-600 sm:inline'>•</span>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                          Location
+                        </span>
+                        <span className='font-medium text-zinc-300'>
+                          {birthLocation}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className='flex items-center gap-2'>
                   {canEditProfile && (
