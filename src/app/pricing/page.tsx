@@ -170,6 +170,12 @@ export default function PricingPage() {
                 >
                   Daily Insights
                 </Link>
+                <Link
+                  href='/help'
+                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+                >
+                  Help
+                </Link>
               </div>
             </div>
           </div>

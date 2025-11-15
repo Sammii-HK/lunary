@@ -19,6 +19,49 @@ function getWebhookSecret() {
   return process.env.STRIPE_WEBHOOK_SECRET;
 }
 
+async function getPlanTypeFromSubscription(
+  subscription: Stripe.Subscription,
+): Promise<string> {
+  // First try to get plan_id from subscription metadata
+  const planIdFromMetadata = subscription.metadata?.plan_id;
+  if (planIdFromMetadata) {
+    return planIdFromMetadata;
+  }
+
+  // Try to get from price metadata
+  const priceId = subscription.items.data[0]?.price?.id;
+  if (priceId) {
+    try {
+      const stripe = getStripe();
+      const price = await stripe.prices.retrieve(priceId, {
+        expand: ['product'],
+      });
+      const product = price.product as Stripe.Product;
+
+      const planIdFromPrice =
+        price.metadata?.plan_id || product.metadata?.plan_id;
+      if (planIdFromPrice) {
+        return planIdFromPrice;
+      }
+
+      // Fallback to price ID mapping
+      const { getPlanIdFromPriceId } = await import(
+        '../../../../utils/pricing'
+      );
+      const mappedPlanId = getPlanIdFromPriceId(priceId);
+      if (mappedPlanId) {
+        return mappedPlanId;
+      }
+    } catch (error) {
+      console.error('Failed to retrieve price metadata:', error);
+    }
+  }
+
+  // Final fallback: use interval-based mapping for backward compatibility
+  const interval = subscription.items.data[0]?.price?.recurring?.interval;
+  return interval === 'month' ? 'monthly' : 'yearly';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe();
@@ -99,10 +142,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 
   const customerId = subscription.customer as string;
   const status = subscription.status;
-  const planType =
-    subscription.items.data[0]?.price?.recurring?.interval === 'month'
-      ? 'monthly'
-      : 'yearly';
+  const planType = await getPlanTypeFromSubscription(subscription);
 
   // Get customer to retrieve user_id and email for database sync
   let userId: string | null = null;
@@ -265,10 +305,7 @@ async function handleSubscriptionUpdated(
   const stripe = getStripe();
   const customerId = subscription.customer as string;
   const status = subscription.status;
-  const planType =
-    subscription.items.data[0]?.price?.recurring?.interval === 'month'
-      ? 'monthly'
-      : 'yearly';
+  const planType = await getPlanTypeFromSubscription(subscription);
 
   // Get customer to retrieve user_id and email for database sync
   let userId: string | null = null;

@@ -55,7 +55,22 @@ if [ -d ".next" ]; then
   echo "✅ Next.js cache cleared"
 fi
 
+# Clear browser cache instructions
 echo ""
 echo "✨ Dev environment cleaned up!"
-echo "💡 Tip: Hard refresh your browser (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows) to clear browser cache"
+echo ""
+echo "📋 Next steps to clear browser cache:"
+echo "   1. Open DevTools (F12 or Cmd+Option+I)"
+echo "   2. Right-click the refresh button → 'Empty Cache and Hard Reload'"
+echo "   3. Or: Application tab → Storage → Clear site data"
+echo "   4. Or: Application tab → Service Workers → Unregister"
+echo ""
+echo "💡 Quick browser cache clear:"
+echo "   - Chrome/Edge: Cmd+Shift+Delete (Mac) or Ctrl+Shift+Delete (Windows)"
+echo "   - Firefox: Cmd+Shift+Delete (Mac) or Ctrl+Shift+Delete (Windows)"
+echo "   - Safari: Cmd+Option+E (empty caches)"
+echo ""
+echo "🔧 To unregister service workers manually:"
+echo "   - Open DevTools → Application → Service Workers → Unregister"
+echo "   - Or visit: http://localhost:3000/pwa-reset"
 

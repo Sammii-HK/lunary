@@ -54,15 +54,27 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || originFromRequest;
 
     // Get the price to determine trial period from Stripe
-    const price = await stripe.prices.retrieve(priceId);
+    const price = await stripe.prices.retrieve(priceId, {
+      expand: ['product'],
+    });
+    const product = price.product as Stripe.Product;
     const isMonthly = price.recurring?.interval === 'month';
 
     // Fetch trial period from Stripe product/price metadata
     const trialDays = await getTrialPeriodForPrice(priceId);
 
-    const planType = isMonthly ? 'monthly' : 'yearly';
+    // Get plan_id from product metadata, price metadata, or price ID mapping
+    const planId =
+      product.metadata?.plan_id ||
+      price.metadata?.plan_id ||
+      (await import('../../../../utils/pricing')).getPlanIdFromPriceId(
+        priceId,
+      ) ||
+      (isMonthly ? 'lunary_plus' : 'lunary_plus_ai_annual');
+
     const metadata: Record<string, string> = {
-      planType,
+      plan_id: planId,
+      planType: isMonthly ? 'monthly' : 'yearly',
     };
 
     if (typeof userId === 'string' && userId.trim().length > 0) {
