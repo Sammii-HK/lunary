@@ -52,8 +52,8 @@ export default {
       return await handleCosmicChangesNotification(baseUrl, env, today);
     }
 
-    // Daily at 8 PM - moon circles check and cosmic snapshot update
-    if (hour === 20) {
+    // Daily at 10 AM - moon circles check and cosmic snapshot update
+    if (hour === 10) {
       const results = await Promise.allSettled([
         handleMoonCircles(baseUrl, env, today),
         handleCosmicSnapshotUpdates(baseUrl, env, today),

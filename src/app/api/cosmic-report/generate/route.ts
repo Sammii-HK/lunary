@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import { createShareToken, buildShareUrl } from '@/lib/cosmic-report/share';
 import { CosmicReportData, COSMIC_SECTIONS } from '@/lib/cosmic-report/types';
 import { sendEmail } from '@/lib/email';
+import { requireUser } from '@/lib/ai/auth';
+import { hasFeatureAccess } from '../../../../../utils/pricing';
 
 const generateSchema = z.object({
   report_type: z.enum(['weekly', 'monthly', 'custom']),
@@ -143,8 +145,39 @@ PDF: ${pdfUrl}`;
   });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const user = await requireUser(request);
+
+    // Check subscription status and feature access
+    const subscriptionResult = await sql`
+      SELECT plan_type, status
+      FROM subscriptions
+      WHERE user_id = ${user.id}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+
+    const subscription = subscriptionResult.rows[0];
+    const subscriptionStatus = subscription?.status || 'free';
+    const planType = subscription?.plan_type;
+
+    // Check if user has access to downloadable_reports feature
+    if (
+      !hasFeatureAccess(subscriptionStatus, planType, 'downloadable_reports')
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            'Cosmic Report Generator is available for Lunary+ AI subscribers. Upgrade to unlock this feature.',
+          requiresUpgrade: true,
+        },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
     const parsed = generateSchema.parse(body);
 
@@ -161,7 +194,7 @@ export async function POST(request: Request) {
     const insertResult = await sql`
       INSERT INTO cosmic_reports (user_id, report_type, report_data, share_token, is_public)
       VALUES (
-        NULL,
+        ${user.id},
         ${parsed.report_type},
         ${JSON.stringify(reportData)},
         ${shareToken},
@@ -199,6 +232,19 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Failed to generate cosmic report:', error);
+
+    // Handle authentication errors
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Please sign in to use the Cosmic Report Generator',
+          requiresAuth: true,
+        },
+        { status: 401 },
+      );
+    }
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, message: 'Invalid payload', issues: error.issues },

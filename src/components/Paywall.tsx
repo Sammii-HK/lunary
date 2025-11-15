@@ -92,6 +92,8 @@ function getFeatureDescription(feature: string): string {
       return 'Discover deep insights through tarot pattern analysis, revealing trends and themes in your cosmic journey over time.';
     case 'crystal_recommendations':
       return 'Receive daily crystal recommendations perfectly aligned with your birth chart and current cosmic energies.';
+    case 'downloadable_reports':
+      return 'Generate personalized PDF cosmic reports with transits, moon phases, tarot insights, and rituals. Create shareable reports for launches, birthdays, and special moments.';
     default:
       return 'This Personalised Feature provides deeper insights into your cosmic profile and personalized guidance.';
   }
