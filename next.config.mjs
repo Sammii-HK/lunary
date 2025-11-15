@@ -61,10 +61,15 @@ const nextConfig = {
         // These modules use Node.js-only dependencies (Brevo, crypto, etc.)
         if (
           (typeof request === 'string' && request.includes('/lib/email')) ||
+          (typeof request === 'string' && request.includes('/lib/auth')) ||
           (typeof request === 'string' && request.includes('@getbrevo'))
         ) {
-          // Return empty module for Edge runtime
-          return callback(null, 'commonjs {}');
+          // Throw error to prevent bundling - these modules should never be used in Edge runtime
+          return callback(
+            new Error(
+              `${request} cannot be used in Edge runtime. Use Node.js runtime instead.`,
+            ),
+          );
         }
         if (typeof originalExternals === 'function') {
           return originalExternals({ context, request }, callback);
