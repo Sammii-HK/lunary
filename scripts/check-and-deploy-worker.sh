@@ -68,26 +68,10 @@ else
       echo "📦 Detected changes in cloudflare-worker/ for branch $BRANCH:"
       echo "$CHANGED_FILES"
       echo ""
-      read -p "🚀 Deploy Cloudflare Worker? (y/N) " -n 1 -r
-      echo
-      if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "⏭️  Skipping deployment"
-        continue
-      fi
-      
-      cd cloudflare-worker
-      
-      # Check if wrangler is available
-      if ! command -v wrangler &> /dev/null; then
-        echo "⚠️  Wrangler CLI not found. Installing..."
-        npm install -g wrangler
-      fi
-      
-      # Deploy the worker
-      npx wrangler deploy
-      
-      echo "✅ Worker deployed successfully!"
-      cd ..
+      echo "⚠️  Cloudflare Worker changes detected. Please deploy manually:"
+      echo "   cd cloudflare-worker && npx wrangler deploy"
+      echo ""
+      echo "⏭️  Continuing with push (worker deployment skipped)"
     fi
   done
 fi
