@@ -1,268 +1,250 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useAccount } from 'jazz-tools/react';
-import { useAuthStatus } from '@/components/AuthStatus';
-import { AuthComponent } from '@/components/Auth';
-import { Button } from '@/components/ui/button';
-import { Calendar, Moon, Sparkles, BookOpen, PenTool } from 'lucide-react';
 import Link from 'next/link';
+import { sql } from '@vercel/postgres';
+import { MoonCircleInsights } from '@/components/MoonCircleInsights';
+import { cn } from '@/lib/utils';
 
-interface MoonCircleData {
+export const revalidate = 300;
+
+type MoonPhaseFilter = 'New Moon' | 'Full Moon' | null;
+
+interface MoonCircleRecord {
   id: number;
-  moonPhase: string;
-  moonSign: string;
-  circleDate: string;
-  content: {
-    guidedRitual: string;
-    journalQuestions: string[];
-    tarotSpreadSuggestion: string;
-    aiDeepDivePrompt: string;
-    moonSignInfo: string;
-    intention: string;
-  };
+  moon_phase: string;
+  event_date: string | Date | null;
+  title: string | null;
+  theme: string | null;
+  description: string | null;
+  focus_points: unknown;
+  insight_count: number | null;
 }
 
-export default function MoonCirclesPage() {
-  const authState = useAuthStatus();
-  const { me } = useAccount();
-  const searchParams = useSearchParams();
-  const [moonCircle, setMoonCircle] = useState<MoonCircleData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+const normalizePhaseFilter = (value?: string | null): MoonPhaseFilter => {
+  if (!value) return null;
+  const normalized = value.toLowerCase();
+  if (normalized === 'new') return 'New Moon';
+  if (normalized === 'full') return 'Full Moon';
+  return null;
+};
 
-  const dateParam = searchParams.get('date');
+const formatReadableDate = (value?: string | Date | null) => {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date);
+};
 
-  useEffect(() => {
-    async function fetchMoonCircle() {
-      try {
-        const date = dateParam || new Date().toISOString().split('T')[0];
-        const response = await fetch(`/api/moon-circles?date=${date}`);
-        if (response.ok) {
-          const data = await response.json();
-          setMoonCircle(data.moonCircle);
-        }
-      } catch (error) {
-        console.error('Failed to fetch moon circle:', error);
-      } finally {
-        setLoading(false);
+const parseFocusPoints = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === 'string' ? item : ''))
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item) => (typeof item === 'string' ? item : ''))
+          .filter(Boolean)
+          .slice(0, 3);
       }
+    } catch {
+      return [];
     }
-
-    fetchMoonCircle();
-  }, [dateParam]);
-
-  if (authState.loading || loading) {
-    return (
-      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-        <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
-          <div className='text-zinc-400'>Loading...</div>
-        </div>
-      </div>
-    );
   }
+  return [];
+};
 
-  if (!authState.isAuthenticated) {
-    return (
-      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-        <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
-          <header className='mb-6 space-y-2'>
-            <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
-              Moon Circles
-            </h1>
-            <p className='text-sm text-zinc-400 md:text-base'>
-              Join our community for New Moon and Full Moon rituals, journaling,
-              and cosmic guidance.
-            </p>
-          </header>
+const mapCircleRow = (row: MoonCircleRecord) => ({
+  id: row.id,
+  moon_phase: row.moon_phase,
+  event_date:
+    row.event_date instanceof Date
+      ? row.event_date.toISOString()
+      : row.event_date
+        ? new Date(row.event_date).toISOString()
+        : null,
+  title: row.title,
+  theme: row.theme,
+  description: row.description,
+  focus_points: parseFocusPoints(row.focus_points),
+  insight_count: Number(row.insight_count ?? 0),
+});
 
-          <main className='flex flex-1 flex-col items-center justify-center gap-6'>
-            <div className='rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-8 md:p-12 text-center max-w-lg'>
-              <h2 className='text-2xl font-light text-zinc-50 mb-4'>
-                Sign in to access Moon Circles
-              </h2>
-              <p className='text-sm text-zinc-400 mb-6 md:text-base'>
-                Join our community for guided rituals, journal prompts, and AI
-                deep-dives during New Moon and Full Moon.
-              </p>
-              <Button
-                onClick={() => setShowAuthModal(true)}
-                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500'
-              >
-                Sign In
-              </Button>
-            </div>
-          </main>
+interface MoonCirclesPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
 
-          {showAuthModal && (
-            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-              <div className='relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl'>
-                <button
-                  onClick={() => setShowAuthModal(false)}
-                  className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-200'
-                  aria-label='Close'
-                >
-                  <svg
-                    className='h-5 w-5'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M6 18L18 6M6 6l12 12'
-                    />
-                  </svg>
-                </button>
-                <AuthComponent
-                  onSuccess={() => {
-                    setShowAuthModal(false);
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+export default async function MoonCirclesPage({
+  searchParams,
+}: MoonCirclesPageProps) {
+  const resolvedSearch = searchParams ? await searchParams : undefined;
+  const phaseFilter = normalizePhaseFilter(
+    Array.isArray(resolvedSearch?.phase)
+      ? resolvedSearch?.phase[0]
+      : resolvedSearch?.phase,
+  );
 
-  if (!moonCircle) {
-    return (
-      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-        <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
-          <header className='mb-6 space-y-2'>
-            <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
-              Moon Circles
-            </h1>
-            <p className='text-sm text-zinc-400 md:text-base'>
-              Join our community for New Moon and Full Moon rituals.
-            </p>
-          </header>
+  const circlesResult = phaseFilter
+    ? await sql`
+        SELECT id, moon_phase, event_date, title, theme, description, focus_points, insight_count
+        FROM moon_circles
+        WHERE moon_phase = ${phaseFilter}
+        ORDER BY event_date DESC
+        LIMIT 8
+      `
+    : await sql`
+        SELECT id, moon_phase, event_date, title, theme, description, focus_points, insight_count
+        FROM moon_circles
+        ORDER BY event_date DESC
+        LIMIT 8
+      `;
 
-          <main className='flex flex-1 flex-col items-center justify-center gap-6'>
-            <div className='rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-8 md:p-12 text-center max-w-lg'>
-              <Moon className='w-16 h-16 text-purple-400 mx-auto mb-4' />
-              <h2 className='text-2xl font-light text-zinc-50 mb-4'>
-                No Moon Circle Today
-              </h2>
-              <p className='text-sm text-zinc-400 mb-6 md:text-base'>
-                Moon Circles are created for New Moon and Full Moon events.
-                Check back soon!
-              </p>
-              <Link
-                href='/grimoire/moon'
-                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500'
-              >
-                Explore Moon Rituals
-              </Link>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  const emoji = moonCircle.moonPhase === 'New Moon' ? '🌑' : '🌕';
-  const deepLinkUrl = `/book-of-shadows?prompt=${encodeURIComponent(moonCircle.content.aiDeepDivePrompt)}`;
+  const circles = circlesResult.rows.map((row) =>
+    mapCircleRow(row as MoonCircleRecord),
+  );
 
   return (
-    <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-      <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
-        <header className='mb-6 space-y-2'>
-          <div className='flex items-center gap-3'>
-            <span className='text-4xl'>{emoji}</span>
-            <div>
-              <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
-                Moon Circle
-              </h1>
-              <p className='text-sm text-zinc-400 md:text-base'>
-                {moonCircle.moonPhase} in {moonCircle.moonSign}
-              </p>
-            </div>
-          </div>
-        </header>
+    <div className='space-y-12 py-8'>
+      <header className='space-y-6 text-center'>
+        <p className='text-xs uppercase tracking-[0.3em] text-purple-200/80'>
+          Moon Circle Community
+        </p>
+        <h1 className='text-4xl font-semibold tracking-tight text-white sm:text-5xl'>
+          Share sacred insights with every moon
+        </h1>
+        <p className='mx-auto max-w-3xl text-base text-purple-100/80 sm:text-lg'>
+          Each new and full moon gathering invites reflection, ritual, and
+          community. Browse past circles, read what others experienced, and
+          anonymously share your own insight after each ceremony.
+        </p>
+        <div className='flex flex-wrap items-center justify-center gap-3'>
+          {[
+            { label: 'All circles', value: null },
+            { label: 'New Moon', value: 'new' },
+            { label: 'Full Moon', value: 'full' },
+          ].map((filter) => {
+            const isActive =
+              (filter.value === null && !phaseFilter) ||
+              (filter.value === 'new' && phaseFilter === 'New Moon') ||
+              (filter.value === 'full' && phaseFilter === 'Full Moon');
+            const href =
+              filter.value === null
+                ? '/moon-circles'
+                : `/moon-circles?phase=${filter.value}`;
+            return (
+              <Link
+                key={filter.label}
+                href={href}
+                className={cn(
+                  'rounded-full border border-purple-500/30 px-4 py-2 text-sm font-medium transition hover:border-purple-300',
+                  isActive
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-transparent text-purple-100',
+                )}
+              >
+                {filter.label}
+              </Link>
+            );
+          })}
+        </div>
+      </header>
 
-        <main className='flex flex-1 flex-col gap-6'>
-          <div className='rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-6 md:p-8 space-y-6'>
-            <div className='space-y-4'>
-              <div className='flex items-start gap-3'>
-                <Moon className='w-5 h-5 text-purple-400 mt-1 flex-shrink-0' />
-                <div>
-                  <h2 className='text-lg font-medium text-zinc-100 mb-2'>
-                    {moonCircle.moonPhase} Energy
-                  </h2>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
-                    {moonCircle.content.moonSignInfo}
-                  </p>
-                </div>
-              </div>
+      {circles.length === 0 && (
+        <div className='rounded-3xl border border-dashed border-purple-500/40 bg-purple-500/5 p-10 text-center text-purple-100/80'>
+          No Moon Circles found yet. Check back soon for upcoming gatherings.
+        </div>
+      )}
 
-              <div className='flex items-start gap-3'>
-                <Sparkles className='w-5 h-5 text-purple-400 mt-1 flex-shrink-0' />
-                <div>
-                  <h2 className='text-lg font-medium text-zinc-100 mb-2'>
-                    Guided Ritual
-                  </h2>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
-                    {moonCircle.content.guidedRitual}
-                  </p>
-                </div>
-              </div>
-
-              <div className='flex items-start gap-3'>
-                <PenTool className='w-5 h-5 text-purple-400 mt-1 flex-shrink-0' />
-                <div>
-                  <h2 className='text-lg font-medium text-zinc-100 mb-2'>
-                    Journal Questions
-                  </h2>
-                  <ul className='space-y-2'>
-                    {moonCircle.content.journalQuestions.map(
-                      (question, index) => (
-                        <li
-                          key={index}
-                          className='text-sm text-zinc-300 leading-relaxed'
-                        >
-                          • {question}
-                        </li>
-                      ),
+      <div className='space-y-10'>
+        {circles.map((circle) => (
+          <section
+            key={circle.id}
+            className='rounded-3xl border border-purple-500/30 bg-black/40 p-6 shadow-lg shadow-purple-500/20 backdrop-blur'
+          >
+            <div className='grid gap-8 lg:grid-cols-[1.2fr_0.8fr]'>
+              <div className='space-y-5'>
+                <div className='flex flex-wrap items-center gap-3'>
+                  <span
+                    className={cn(
+                      'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
+                      circle.moon_phase === 'Full Moon'
+                        ? 'bg-amber-400/20 text-amber-100'
+                        : 'bg-indigo-400/20 text-indigo-100',
                     )}
-                  </ul>
-                </div>
-              </div>
-
-              <div className='flex items-start gap-3'>
-                <BookOpen className='w-5 h-5 text-purple-400 mt-1 flex-shrink-0' />
-                <div>
-                  <h2 className='text-lg font-medium text-zinc-100 mb-2'>
-                    Tarot Spread Suggestion
-                  </h2>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
-                    {moonCircle.content.tarotSpreadSuggestion}
-                  </p>
-                  <Link
-                    href='/tarot'
-                    className='inline-block mt-2 text-sm text-purple-400 hover:text-purple-300 underline'
                   >
-                    Draw cards now →
+                    {circle.moon_phase}
+                  </span>
+                  <span className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'>
+                    {formatReadableDate(circle.event_date)}
+                  </span>
+                  <span className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'>
+                    {circle.insight_count} insight
+                    {circle.insight_count === 1 ? '' : 's'}
+                  </span>
+                </div>
+                <div className='space-y-2'>
+                  <h2 className='text-2xl font-semibold text-white'>
+                    {circle.theme || circle.title || 'Moon Circle'}
+                  </h2>
+                  {circle.description && (
+                    <p className='text-sm text-purple-100/80'>
+                      {circle.description}
+                    </p>
+                  )}
+                </div>
+                {circle.focus_points.length > 0 && (
+                  <div className='space-y-2'>
+                    <p className='text-xs uppercase tracking-[0.2em] text-purple-200/70'>
+                      Focus
+                    </p>
+                    <div className='flex flex-wrap gap-2'>
+                      {circle.focus_points.map((focus) => (
+                        <span
+                          key={focus}
+                          className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'
+                        >
+                          {focus}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className='flex flex-wrap gap-3'>
+                  <Link
+                    href={`/moon-circles/${circle.id}`}
+                    className='inline-flex items-center justify-center rounded-2xl bg-white/90 px-5 py-2.5 text-sm font-semibold text-purple-900 shadow-inner hover:bg-white'
+                  >
+                    View circle details
+                  </Link>
+                  <Link
+                    href={`/moon-circles/${circle.id}?share=true`}
+                    className='inline-flex items-center justify-center rounded-2xl border border-purple-500/40 px-5 py-2.5 text-sm font-semibold text-purple-100 hover:border-purple-300 hover:text-white'
+                  >
+                    Share an insight
                   </Link>
                 </div>
               </div>
-            </div>
 
-            <div className='pt-4 border-t border-zinc-800/60'>
-              <Link
-                href={deepLinkUrl}
-                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500'
-              >
-                Ask Lunary AI for Deep Dive →
-              </Link>
+              <MoonCircleInsights
+                moonCircleId={circle.id}
+                moonPhase={circle.moon_phase}
+                date={circle.event_date}
+                insightCount={circle.insight_count}
+                collapsedByDefault
+                autoFetch={false}
+                pageSize={2}
+                showShareForm={false}
+              />
             </div>
-          </div>
-        </main>
+          </section>
+        ))}
       </div>
     </div>
   );

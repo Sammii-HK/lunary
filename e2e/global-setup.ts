@@ -15,8 +15,8 @@ async function globalSetup(config: FullConfig) {
   const page = await browser.newPage();
 
   let retries = 0;
-  const maxRetries = 15; // 15 retries = ~45 seconds max (reduced from 60)
-  const retryDelay = 2000; // 2 seconds between retries (reduced from 3)
+  const maxRetries = 30; // 30 retries = ~60 seconds max (increased to allow Next.js route compilation)
+  const retryDelay = 2000; // 2 seconds between retries
 
   while (retries < maxRetries) {
     try {
@@ -29,15 +29,22 @@ async function globalSetup(config: FullConfig) {
       const homeStatus = homeResponse?.status();
 
       if (homeStatus === 200) {
-        // Verify it's the correct app by checking page content
+        // Wait for React hydration
+        await page.waitForTimeout(2000);
+
+        // Verify it's the correct app by checking page title (more reliable than body text)
+        const pageTitle = await page.title();
         const bodyText = await page.locator('body').textContent();
         const isLunary =
-          bodyText?.includes('Lunary') || bodyText?.includes('lunary');
+          pageTitle?.includes('Lunary') ||
+          pageTitle?.includes('lunary') ||
+          bodyText?.includes('Lunary') ||
+          bodyText?.includes('lunary');
 
         if (!isLunary) {
           if (!isCI) {
             console.log(
-              `⚠️  Wrong app detected on port 3000, waiting for correct server... (attempt ${retries + 1}/${maxRetries})`,
+              `⚠️  Wrong app detected on port 3000 (title: "${pageTitle}"), waiting for correct server... (attempt ${retries + 1}/${maxRetries})`,
             );
           }
           retries++;
