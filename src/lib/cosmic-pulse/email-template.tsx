@@ -2,8 +2,8 @@ import { CosmicPulseContent } from './generator';
 
 export function generateCosmicPulseEmailHTML(
   content: CosmicPulseContent,
-  userName?: string,
   deepLinkUrl: string,
+  userName?: string,
   userEmail?: string,
 ): string {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
@@ -155,8 +155,8 @@ export function generateCosmicPulseEmailHTML(
 
 export function generateCosmicPulseEmailText(
   content: CosmicPulseContent,
-  userName?: string,
   deepLinkUrl: string,
+  userName?: string,
   userEmail?: string,
 ): string {
   const greeting = userName ? `Hi ${userName},` : 'Hi there,';

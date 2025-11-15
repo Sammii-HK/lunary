@@ -3,8 +3,8 @@ import { WeeklyReport } from '../cosmic-snapshot/reports';
 
 export function generateWeeklyReportEmailHTML(
   report: WeeklyReport,
-  userName?: string,
   appUrl: string,
+  userName?: string,
   userEmail?: string,
 ): string {
   const greeting = userName ? `Hi ${userName},` : 'Hi there,';
@@ -105,8 +105,8 @@ export function generateWeeklyReportEmailHTML(
 
 export function generateWeeklyReportEmailText(
   report: WeeklyReport,
-  userName?: string,
   appUrl: string,
+  userName?: string,
   userEmail?: string,
 ): string {
   const greeting = userName ? `Hi ${userName},` : 'Hi there,';

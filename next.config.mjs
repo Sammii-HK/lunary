@@ -3,7 +3,7 @@ const require = createRequire(import.meta.url);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, nextRuntime }) => {
     // Exclude Playwright from bundling (server-only, Node.js runtime)
     if (isServer) {
       config.externals = config.externals || [];
@@ -31,6 +31,33 @@ const nextConfig = {
       } else {
         config.externals = [config.externals, playwrightExternals];
       }
+    }
+
+    // Exclude Brevo and Node.js built-ins from Edge runtime
+    // Brevo uses Node.js 'http' module which isn't available in Edge runtime
+    if (nextRuntime === 'edge') {
+      const originalExternals = config.externals;
+      config.externals = ({ context, request }, callback) => {
+        // Exclude Brevo package and Node.js built-ins from Edge runtime
+        if (
+          request === '@getbrevo/brevo' ||
+          request?.startsWith('@getbrevo/') ||
+          request === 'http' ||
+          request === 'https' ||
+          request === 'net' ||
+          request === 'tls' ||
+          request === 'fs' ||
+          request === 'path' ||
+          request === 'async_hooks' ||
+          request?.startsWith('node:')
+        ) {
+          return callback(null, `commonjs ${request}`);
+        }
+        if (typeof originalExternals === 'function') {
+          return originalExternals({ context, request }, callback);
+        }
+        return callback();
+      };
     }
 
     // Enable WebAssembly experiments

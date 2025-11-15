@@ -79,47 +79,148 @@ export async function PATCH(
 
     const { title, description, tags, folderId } = body;
 
-    const updates: string[] = [];
-    const values: any[] = [user.id, parseInt(id, 10)];
-    let paramIndex = 3;
-
-    if (title !== undefined) {
-      updates.push(`title = $${paramIndex}`);
-      values.push(title);
-      paramIndex++;
-    }
-
-    if (description !== undefined) {
-      updates.push(`description = $${paramIndex}`);
-      values.push(description);
-      paramIndex++;
-    }
-
-    if (tags !== undefined) {
-      updates.push(`tags = $${paramIndex}`);
-      values.push(tags);
-      paramIndex++;
-    }
-
-    if (folderId !== undefined) {
-      updates.push(`folder_id = $${paramIndex}`);
-      values.push(folderId ? parseInt(folderId, 10) : null);
-      paramIndex++;
-    }
-
-    if (updates.length === 0) {
+    // Build UPDATE query with only provided fields
+    if (
+      title === undefined &&
+      description === undefined &&
+      tags === undefined &&
+      folderId === undefined
+    ) {
       return NextResponse.json(
         { success: false, error: 'No fields to update' },
         { status: 400 },
       );
     }
 
-    const result = await sql`
-      UPDATE collections
-      SET ${sql.raw(updates.join(', '))}, updated_at = NOW()
-      WHERE id = $2 AND user_id = $1
-      RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
-    `;
+    // Build query conditionally based on what's provided
+    let result;
+    if (
+      title !== undefined &&
+      description !== undefined &&
+      tags !== undefined &&
+      folderId !== undefined
+    ) {
+      result = await sql`
+        UPDATE collections
+        SET title = ${title}, description = ${description}, tags = ${tags}, folder_id = ${folderId ? parseInt(folderId, 10) : null}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (
+      title !== undefined &&
+      description !== undefined &&
+      tags !== undefined
+    ) {
+      result = await sql`
+        UPDATE collections
+        SET title = ${title}, description = ${description}, tags = ${tags}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (
+      title !== undefined &&
+      description !== undefined &&
+      folderId !== undefined
+    ) {
+      result = await sql`
+        UPDATE collections
+        SET title = ${title}, description = ${description}, folder_id = ${folderId ? parseInt(folderId, 10) : null}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (
+      title !== undefined &&
+      tags !== undefined &&
+      folderId !== undefined
+    ) {
+      result = await sql`
+        UPDATE collections
+        SET title = ${title}, tags = ${tags}, folder_id = ${folderId ? parseInt(folderId, 10) : null}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (
+      description !== undefined &&
+      tags !== undefined &&
+      folderId !== undefined
+    ) {
+      result = await sql`
+        UPDATE collections
+        SET description = ${description}, tags = ${tags}, folder_id = ${folderId ? parseInt(folderId, 10) : null}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (title !== undefined && description !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET title = ${title}, description = ${description}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (title !== undefined && tags !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET title = ${title}, tags = ${tags}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (title !== undefined && folderId !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET title = ${title}, folder_id = ${folderId ? parseInt(folderId, 10) : null}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (description !== undefined && tags !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET description = ${description}, tags = ${tags}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (description !== undefined && folderId !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET description = ${description}, folder_id = ${folderId ? parseInt(folderId, 10) : null}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (tags !== undefined && folderId !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET tags = ${tags}, folder_id = ${folderId ? parseInt(folderId, 10) : null}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (title !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET title = ${title}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (description !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET description = ${description}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else if (tags !== undefined) {
+      result = await sql`
+        UPDATE collections
+        SET tags = ${tags}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    } else {
+      result = await sql`
+        UPDATE collections
+        SET folder_id = ${folderId ? parseInt(folderId, 10) : null}, updated_at = NOW()
+        WHERE id = ${parseInt(id, 10)} AND user_id = ${user.id}
+        RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at
+      `;
+    }
 
     if (result.rows.length === 0) {
       return NextResponse.json(

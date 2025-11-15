@@ -48,6 +48,13 @@ export async function GET(request: NextRequest) {
           return date;
         })();
 
+    if (!targetUserId) {
+      return NextResponse.json(
+        { error: 'User ID or email is required' },
+        { status: 400 },
+      );
+    }
+
     const report = await generateWeeklyReport(targetUserId, weekStart);
 
     if (!report) {

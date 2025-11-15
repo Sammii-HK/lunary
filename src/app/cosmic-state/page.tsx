@@ -16,13 +16,14 @@ export default function CosmicStatePage() {
 
   useEffect(() => {
     const fetchCosmicState = async () => {
-      if (!me?.id) {
+      const userId = (me as any)?.id;
+      if (!userId) {
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`/api/cosmic/snapshot?userId=${me.id}`);
+        const response = await fetch(`/api/cosmic/snapshot?userId=${userId}`);
         if (response.ok) {
           const data = await response.json();
           setCosmicData(data);
@@ -35,7 +36,7 @@ export default function CosmicStatePage() {
     };
 
     fetchCosmicState();
-  }, [me?.id]);
+  }, [me]);
 
   const isFreeUser =
     !subscription.isSubscribed && subscription.status === 'free';

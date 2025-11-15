@@ -49,15 +49,16 @@ export function SocialShareButtons({
 
   return (
     <div className='flex flex-wrap gap-3'>
-      {navigator.share && (
-        <button
-          onClick={handleNativeShare}
-          className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm'
-        >
-          <Share2 className='w-4 h-4' />
-          Share
-        </button>
-      )}
+      {typeof navigator !== 'undefined' &&
+        typeof navigator.share === 'function' && (
+          <button
+            onClick={handleNativeShare}
+            className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm'
+          >
+            <Share2 className='w-4 h-4' />
+            Share
+          </button>
+        )}
       <a
         href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`}
         target='_blank'

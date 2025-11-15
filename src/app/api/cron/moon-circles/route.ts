@@ -164,13 +164,13 @@ export async function GET(request: NextRequest) {
             try {
               const emailHtml = generateMoonCircleEmailHTML(
                 moonCircle,
-                userName,
                 deepLinkUrl,
+                userName,
               );
               const emailText = generateMoonCircleEmailText(
                 moonCircle,
-                userName,
                 deepLinkUrl,
+                userName,
               );
 
               await sendEmail({

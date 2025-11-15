@@ -19,10 +19,10 @@ export function CrossPlatformCTA({
   const substackUrl = 'https://lunary.substack.com';
 
   const handleClick = (platform: string) => {
-    conversionTracking.upgradeClicked(`cross_platform_${platform}`, {
-      source,
-      variant,
-    });
+    conversionTracking.upgradeClicked(
+      `cross_platform_${platform}`,
+      `${source || 'unknown'}_${variant}`,
+    );
   };
 
   if (variant === 'app') {

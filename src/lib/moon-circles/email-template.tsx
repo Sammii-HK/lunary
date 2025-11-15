@@ -2,8 +2,8 @@ import { MoonCircleContent } from './generator';
 
 export function generateMoonCircleEmailHTML(
   content: MoonCircleContent,
-  userName?: string,
   deepLinkUrl: string,
+  userName?: string,
 ): string {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
   const greeting = userName ? `Hi ${userName},` : 'Hi there,';
@@ -175,8 +175,8 @@ export function generateMoonCircleEmailHTML(
 
 export function generateMoonCircleEmailText(
   content: MoonCircleContent,
-  userName?: string,
   deepLinkUrl: string,
+  userName?: string,
 ): string {
   const greeting = userName ? `Hi ${userName},` : 'Hi there,';
   const emoji = content.moonPhase === 'New Moon' ? '🌑' : '🌕';

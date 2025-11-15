@@ -105,14 +105,14 @@ export async function GET(request: NextRequest) {
 
         const emailHtml = generateWeeklyReportEmailHTML(
           report,
-          userName,
           baseUrl,
+          userName,
           userEmail,
         );
         const emailText = generateWeeklyReportEmailText(
           report,
-          userName,
           baseUrl,
+          userName,
           userEmail,
         );
 

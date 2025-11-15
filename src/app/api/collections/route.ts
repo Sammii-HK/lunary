@@ -53,23 +53,8 @@ export async function GET(request: NextRequest) {
       WHERE c.user_id = ${user.id}
     `;
 
-    const conditions: any[] = [];
-    const values: any[] = [user.id];
-    let paramIndex = 2;
-
-    if (category) {
-      conditions.push(`c.category = $${paramIndex}`);
-      values.push(category);
-      paramIndex++;
-    }
-
-    if (folderId) {
-      conditions.push(`c.folder_id = $${paramIndex}`);
-      values.push(parseInt(folderId, 10));
-      paramIndex++;
-    }
-
-    if (conditions.length > 0) {
+    // Build query with optional filters
+    if (category && folderId) {
       query = sql`
         SELECT 
           c.id,
@@ -87,7 +72,54 @@ export async function GET(request: NextRequest) {
         FROM collections c
         LEFT JOIN collection_folders cf ON c.folder_id = cf.id
         WHERE c.user_id = ${user.id}
-        AND ${sql.raw(conditions.join(' AND '))}
+        AND c.category = ${category}
+        AND c.folder_id = ${parseInt(folderId, 10)}
+        ORDER BY c.created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+    } else if (category) {
+      query = sql`
+        SELECT 
+          c.id,
+          c.title,
+          c.description,
+          c.category,
+          c.content,
+          c.tags,
+          c.folder_id,
+          c.created_at,
+          c.updated_at,
+          cf.name as folder_name,
+          cf.color as folder_color,
+          cf.icon as folder_icon
+        FROM collections c
+        LEFT JOIN collection_folders cf ON c.folder_id = cf.id
+        WHERE c.user_id = ${user.id}
+        AND c.category = ${category}
+        ORDER BY c.created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+    } else if (folderId) {
+      query = sql`
+        SELECT 
+          c.id,
+          c.title,
+          c.description,
+          c.category,
+          c.content,
+          c.tags,
+          c.folder_id,
+          c.created_at,
+          c.updated_at,
+          cf.name as folder_name,
+          cf.color as folder_color,
+          cf.icon as folder_icon
+        FROM collections c
+        LEFT JOIN collection_folders cf ON c.folder_id = cf.id
+        WHERE c.user_id = ${user.id}
+        AND c.folder_id = ${parseInt(folderId, 10)}
         ORDER BY c.created_at DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -118,13 +150,36 @@ export async function GET(request: NextRequest) {
 
     const result = await query;
 
-    const totalResult = await sql`
-      SELECT COUNT(*) as total
-      FROM collections
-      WHERE user_id = ${user.id}
-      ${category ? sql`AND category = ${category}` : sql``}
-      ${folderId ? sql`AND folder_id = ${parseInt(folderId, 10)}` : sql``}
-    `;
+    let totalResult;
+    if (category && folderId) {
+      totalResult = await sql`
+        SELECT COUNT(*) as total
+        FROM collections
+        WHERE user_id = ${user.id}
+        AND category = ${category}
+        AND folder_id = ${parseInt(folderId, 10)}
+      `;
+    } else if (category) {
+      totalResult = await sql`
+        SELECT COUNT(*) as total
+        FROM collections
+        WHERE user_id = ${user.id}
+        AND category = ${category}
+      `;
+    } else if (folderId) {
+      totalResult = await sql`
+        SELECT COUNT(*) as total
+        FROM collections
+        WHERE user_id = ${user.id}
+        AND folder_id = ${parseInt(folderId, 10)}
+      `;
+    } else {
+      totalResult = await sql`
+        SELECT COUNT(*) as total
+        FROM collections
+        WHERE user_id = ${user.id}
+      `;
+    }
 
     const total = parseInt(totalResult.rows[0]?.total || '0', 10);
 
@@ -241,7 +296,7 @@ export async function POST(request: NextRequest) {
         ${description || null},
         ${category},
         ${JSON.stringify(content)}::jsonb,
-        ${tags ? sql`${tags}::text[]` : sql`ARRAY[]::text[]`},
+        ${tags || []}::text[],
         ${folderId ? parseInt(folderId, 10) : null}
       )
       RETURNING id, title, description, category, content, tags, folder_id, created_at, updated_at

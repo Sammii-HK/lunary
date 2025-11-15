@@ -91,9 +91,7 @@ export function SaveToCollection({
       const data = await response.json();
       if (data.success) {
         setIsSaved(true);
-        conversionTracking.upgradeClicked('save_to_collection', {
-          category: item.category,
-        });
+        conversionTracking.upgradeClicked('save_to_collection', item.category);
         onSaved?.();
         setShowFolderDialog(false);
       }

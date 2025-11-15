@@ -355,9 +355,10 @@ export function OnboardingFlow() {
               <button
                 onClick={() => {
                   if (selectedIntention) {
-                    conversionTracking.upgradeClicked('onboarding_intention', {
-                      intention: selectedIntention,
-                    });
+                    conversionTracking.upgradeClicked(
+                      'onboarding_intention',
+                      selectedIntention,
+                    );
                   }
                   setCurrentStep('ai_preview');
                 }}

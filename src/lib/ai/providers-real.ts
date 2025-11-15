@@ -1,7 +1,6 @@
 import { getGlobalCosmicData } from '../cosmic-snapshot/global-cache';
-import { getBirthChart } from './providers';
-import { CurrentTransitsResponse, TransitRecord, MoonSnapshot } from './types';
-import { BirthChartSnapshot } from './types';
+import { getBirthChart, type CurrentTransitsResponse } from './providers';
+import { TransitRecord, MoonSnapshot, BirthChartSnapshot } from './types';
 
 export async function getCurrentTransitsReal({
   userId,

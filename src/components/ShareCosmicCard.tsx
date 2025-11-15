@@ -12,7 +12,8 @@ export function ShareCosmicCard() {
   const [cardData, setCardData] = useState<any>(null);
 
   const generateCard = async () => {
-    if (!me?.id) return;
+    const userId = (me as any)?.id;
+    if (!userId) return;
 
     setLoading(true);
     try {
