@@ -128,9 +128,9 @@ async function getYearOverYearComparison(
 
     const patternInsights: string[] = [];
     if (frequentCards.length > 0) {
-      const [topCard, topCount] = frequentCards[0];
+      const topCard = frequentCards[0];
       patternInsights.push(
-        `"${topCard}" appeared ${topCount} times, indicating a significant theme in your journey.`,
+        `"${topCard.name}" appeared ${topCard.count} times, indicating a significant theme in your journey.`,
       );
     }
 

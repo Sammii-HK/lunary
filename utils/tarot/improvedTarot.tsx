@@ -206,7 +206,7 @@ const analyzeTrends = (
   const pastReadings: TarotCard[] = [];
   const today = dayjs();
 
-  // Collect past readings
+  // Collect past readings - ensure we always have data even if minimal
   for (let i = 1; i <= timeFrameDays; i++) {
     const date = today.subtract(i, 'day');
     const card = getTarotCard(
@@ -215,6 +215,17 @@ const analyzeTrends = (
       userBirthday,
     );
     pastReadings.push(card);
+  }
+
+  // Ensure we have at least some readings to analyze
+  if (pastReadings.length === 0) {
+    // Fallback: use today's card if no past readings
+    const todayCard = getTarotCard(
+      today.toDate().toDateString(),
+      userName,
+      userBirthday,
+    );
+    pastReadings.push(todayCard);
   }
 
   // Count frequencies
@@ -423,9 +434,9 @@ export const getImprovedTarotReading = (
   // Generate guidance
   const guidance = generateClearGuidance(daily, weekly, userName);
 
-  // Get trends if requested
+  // Always generate trends if requested (ensures data is always available)
   let trendAnalysis: TrendAnalysis | undefined;
-  if (includeTrends) {
+  if (includeTrends && userName && userBirthday) {
     trendAnalysis = analyzeTrends(userName, timeFrameDays, userBirthday);
   }
 

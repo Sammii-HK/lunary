@@ -683,7 +683,10 @@ export const HoroscopeWidget = () => {
     };
   });
 
-  const hasChartAccess = hasBirthChartAccess(subscription.status);
+  const hasChartAccess = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
 
   // If user doesn't have birth chart access, show general horoscope
   if (!hasChartAccess) {

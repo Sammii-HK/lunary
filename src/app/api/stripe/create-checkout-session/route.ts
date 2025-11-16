@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const planId =
       product.metadata?.plan_id ||
       price.metadata?.plan_id ||
-      (await import('../../../../utils/pricing')).getPlanIdFromPriceId(
+      (await import('../../../../../utils/pricing')).getPlanIdFromPriceId(
         priceId,
       ) ||
       (isMonthly ? 'lunary_plus' : 'lunary_plus_ai_annual');

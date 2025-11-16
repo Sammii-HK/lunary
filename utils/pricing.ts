@@ -231,8 +231,9 @@ export function hasFeatureAccess(
 // Helper function to check if user has access to birth chart features
 export function hasBirthChartAccess(
   subscriptionStatus: string | undefined,
+  planType?: string | undefined,
 ): boolean {
-  return hasFeatureAccess(subscriptionStatus, undefined, 'birth_chart');
+  return hasFeatureAccess(subscriptionStatus, planType, 'birth_chart');
 }
 
 // Helper function to check if user can collect birthday

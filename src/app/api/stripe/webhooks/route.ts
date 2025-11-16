@@ -46,7 +46,7 @@ async function getPlanTypeFromSubscription(
 
       // Fallback to price ID mapping
       const { getPlanIdFromPriceId } = await import(
-        '../../../../utils/pricing'
+        '../../../../../utils/pricing'
       );
       const mappedPlanId = getPlanIdFromPriceId(priceId);
       if (mappedPlanId) {

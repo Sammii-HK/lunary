@@ -1,7 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loader2, Lock, Sparkles, Trash2 } from 'lucide-react';
+import type { ReactNode } from 'react';
+import {
+  Loader2,
+  Lock,
+  Sparkles,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import clsx from 'clsx';
 import {
   TAROT_SPREADS,
@@ -10,6 +18,7 @@ import {
   TarotPlan,
 } from '@/constants/tarotSpreads';
 import { TarotCard } from '@/components/TarotCard';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 
 export type SubscriptionStatus =
   | 'free'
@@ -73,11 +82,28 @@ type UsageSnapshot = {
   historyWindowDays: number;
 };
 
+// Map TarotPlan (free/monthly/yearly) to actual plan IDs and labels
 const PLAN_LABEL: Record<TarotPlan, string> = {
   free: 'Cosmic Explorer',
-  monthly: 'Cosmic Guide',
-  yearly: 'Cosmic Master',
+  monthly: 'Lunary+',
+  yearly: 'Lunary+ AI Annual',
 };
+
+// Map TarotPlan to actual plan ID for UpgradePrompt
+function mapTarotPlanToPlanId(
+  plan: TarotPlan,
+): 'free' | 'lunary_plus' | 'lunary_plus_ai' | 'lunary_plus_ai_annual' {
+  switch (plan) {
+    case 'free':
+      return 'free';
+    case 'monthly':
+      return 'lunary_plus'; // Default monthly plan
+    case 'yearly':
+      return 'lunary_plus_ai_annual'; // Default yearly plan
+    default:
+      return 'lunary_plus';
+  }
+}
 
 const findFirstUnlockedSpread = (
   unlocked: Set<string>,
@@ -89,6 +115,29 @@ const findFirstUnlockedSpread = (
 
   return defaultSpread.slug;
 };
+
+function CollapsibleSpreadLibrary({ children }: { children: ReactNode }) {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  return (
+    <div className='space-y-2'>
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-3 py-2 text-left transition-colors hover:bg-zinc-900/50'
+      >
+        <span className='text-xs uppercase tracking-wide text-zinc-500'>
+          Spread Library
+        </span>
+        {isCollapsed ? (
+          <ChevronDown className='w-4 h-4 text-zinc-400' />
+        ) : (
+          <ChevronUp className='w-4 h-4 text-zinc-400' />
+        )}
+      </button>
+      {!isCollapsed && <div>{children}</div>}
+    </div>
+  );
+}
 
 export function TarotSpreadExperience({
   userId,
@@ -467,10 +516,7 @@ export function TarotSpreadExperience({
       )}
 
       <div className='space-y-4'>
-        <div className='space-y-2'>
-          <span className='text-xs uppercase tracking-wide text-zinc-500'>
-            Spread Library
-          </span>
+        <CollapsibleSpreadLibrary>
           <div className='grid gap-3 md:grid-cols-2'>
             {Object.entries(groupedSpreads).map(([category, spreads]) => (
               <div
@@ -488,19 +534,43 @@ export function TarotSpreadExperience({
                         key={spread.slug}
                         onClick={() => handleSelectSpread(spread.slug)}
                         className={clsx(
-                          'w-full rounded-lg border px-3 py-2 text-left transition-all',
+                          'w-full rounded-lg border px-3 py-2 text-left transition-all relative',
                           isSelected
-                            ? 'border-purple-500/40 bg-purple-500/10'
-                            : 'border-zinc-800/30 bg-zinc-900/30 hover:border-purple-500/30',
-                          isLocked ? 'opacity-60' : 'opacity-100',
+                            ? isLocked
+                              ? 'border-zinc-700/50 bg-zinc-900/50'
+                              : 'border-purple-500/40 bg-purple-500/10'
+                            : isLocked
+                              ? 'border-zinc-800/30 bg-zinc-900/30 hover:border-zinc-700/50 cursor-not-allowed'
+                              : 'border-zinc-800/30 bg-zinc-900/30 hover:border-purple-500/30',
                         )}
+                        disabled={isLocked && !isSelected}
+                        title={
+                          isLocked
+                            ? `Upgrade to ${PLAN_LABEL[spread.minimumPlan]} to unlock this spread`
+                            : undefined
+                        }
                       >
                         <div className='flex items-center justify-between gap-2'>
-                          <div>
-                            <p className='text-sm font-medium text-zinc-100'>
-                              {spread.name}
-                            </p>
-                            <p className='text-xs text-zinc-400'>
+                          <div className='flex-1'>
+                            <div className='flex items-center gap-2'>
+                              <p
+                                className={clsx(
+                                  'text-sm font-medium',
+                                  isLocked ? 'text-zinc-500' : 'text-zinc-100',
+                                )}
+                              >
+                                {spread.name}
+                              </p>
+                              {isLocked && (
+                                <Lock className='h-3 w-3 text-zinc-600' />
+                              )}
+                            </div>
+                            <p
+                              className={clsx(
+                                'text-xs',
+                                isLocked ? 'text-zinc-600' : 'text-zinc-400',
+                              )}
+                            >
                               {spread.cardCount} cards · {spread.estimatedTime}
                             </p>
                           </div>
@@ -513,10 +583,34 @@ export function TarotSpreadExperience({
               </div>
             ))}
           </div>
-        </div>
+        </CollapsibleSpreadLibrary>
 
         {selectedSpread && (
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3'>
+            {!unlockedSpreads.has(selectedSpread.slug) && (
+              <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 mb-3'>
+                <div className='flex items-start gap-3'>
+                  <Lock className='h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0' />
+                  <div className='flex-1'>
+                    <h4 className='text-sm font-medium text-purple-200 mb-1'>
+                      This spread requires{' '}
+                      {PLAN_LABEL[selectedSpread.minimumPlan]}
+                    </h4>
+                    <p className='text-xs text-purple-300/80 mb-3'>
+                      Upgrade to unlock {selectedSpread.name} and access all
+                      premium tarot spreads.
+                    </p>
+                    <UpgradePrompt
+                      variant='inline'
+                      featureName='tarot_spreads'
+                      requiredPlan={mapTarotPlanToPlanId(
+                        selectedSpread.minimumPlan,
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
               <div>
                 <h3 className='text-lg font-medium text-zinc-100'>
@@ -539,7 +633,7 @@ export function TarotSpreadExperience({
                     ? 'bg-purple-500/10 text-purple-200'
                     : unlockedSpreads.has(selectedSpread.slug)
                       ? 'bg-purple-500/80 text-white hover:bg-purple-500'
-                      : 'bg-zinc-800/80 text-zinc-400',
+                      : 'bg-zinc-800/80 text-zinc-400 cursor-not-allowed',
                 )}
               >
                 {isGenerating ? (
@@ -550,7 +644,9 @@ export function TarotSpreadExperience({
                 ) : (
                   <>
                     <Sparkles className='h-4 w-4' />
-                    Start a reading
+                    {unlockedSpreads.has(selectedSpread.slug)
+                      ? 'Start a reading'
+                      : 'Upgrade to unlock'}
                   </>
                 )}
               </button>
@@ -603,19 +699,21 @@ export function TarotSpreadExperience({
                 <div className='flex items-center justify-between gap-2'>
                   <div>
                     <p className='text-xs uppercase tracking-wider text-purple-300/80'>
-                      {currentReading.spreadName}
+                      {currentReading?.spreadName}
                     </p>
                     <h3 className='text-lg font-medium text-zinc-100'>
-                      {currentReading.summary}
+                      {currentReading?.summary}
                     </h3>
                   </div>
                   <p className='text-xs text-zinc-400'>
                     Saved{' '}
-                    {new Date(currentReading.createdAt).toLocaleDateString()}
+                    {currentReading?.createdAt
+                      ? new Date(currentReading.createdAt).toLocaleDateString()
+                      : ''}
                   </p>
                 </div>
                 <div className='mt-3 flex flex-wrap gap-2'>
-                  {currentReading.highlights.map((highlight) => (
+                  {currentReading?.highlights?.map((highlight) => (
                     <span
                       key={highlight}
                       className='rounded-full bg-zinc-900/60 px-3 py-1 text-xs text-zinc-300'
@@ -627,7 +725,7 @@ export function TarotSpreadExperience({
               </div>
 
               <div className='grid gap-4 md:grid-cols-2'>
-                {currentReading.cards.map((card) => (
+                {currentReading?.cards?.map((card) => (
                   <div
                     key={card.positionId}
                     className='flex h-full flex-col overflow-hidden rounded-lg border border-zinc-800/50 bg-zinc-900/40'
@@ -695,7 +793,7 @@ export function TarotSpreadExperience({
               <p className='text-sm font-medium text-zinc-100'>Saved Spreads</p>
               {usage && usage.plan !== 'free' && (
                 <span className='text-xs text-purple-200'>
-                  History: {usage.historyWindowDays} days
+                  History: {usage?.historyWindowDays ?? 0} days
                 </span>
               )}
             </div>

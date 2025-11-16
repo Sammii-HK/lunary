@@ -40,6 +40,7 @@
     "test:all": "pnpm test && pnpm test:e2e",
     "test:cors": "tsx scripts/test-cors.ts",
     "test:middleware": "tsx scripts/test-middleware.ts",
+    "generate-price-mapping": "tsx scripts/generate-price-mapping.ts",
     "cleanup": "bash scripts/dev-cleanup.sh",
     "cleanup:port": "bash scripts/cleanup-port-3000.sh",
     "clear-cache": "bash scripts/clear-all-cache.sh"

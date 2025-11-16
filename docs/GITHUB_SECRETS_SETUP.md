@@ -69,18 +69,15 @@ Fill in Name and Secret → [Add secret]
 ### Security Best Practices
 
 1. **Never commit secrets to your repository**
-
    - Secrets should only be stored in GitHub Secrets
    - Never put them in `.env.local` files that get committed
    - Never put them in code comments or documentation
 
 2. **Use strong passwords**
-
    - Even for test accounts, use secure passwords
    - Consider using randomly generated passwords
 
 3. **Rotate secrets regularly**
-
    - Change passwords periodically
    - Update GitHub Secrets when you change passwords
 
