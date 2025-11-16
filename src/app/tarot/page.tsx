@@ -945,15 +945,6 @@ const TarotReadings = () => {
           </HoroscopeSection>
         )}
 
-        <CollapsibleSection title='Tarot Spreads' defaultCollapsed={true}>
-          <TarotSpreadExperience
-            userId={userId}
-            userName={userName}
-            subscriptionPlan={tarotPlan}
-            onCardPreview={(card) => setSelectedCard(card)}
-          />
-        </CollapsibleSection>
-
         <HoroscopeSection title='Recent Daily Cards' color='zinc'>
           <div className='space-y-3'>
             {personalizedPreviousReadings.map((reading) => (

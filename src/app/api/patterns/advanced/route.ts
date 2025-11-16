@@ -41,7 +41,7 @@ interface AdvancedPatternAnalysis {
         dominantThemes: string[];
         frequentCards: Array<{ name: string; count: number }>;
       };
-      days90?: {
+      days180?: {
         dominantThemes: string[];
         frequentCards: Array<{ name: string; count: number }>;
       };
@@ -118,12 +118,30 @@ async function getYearOverYearComparison(
         AND created_at < ${thisYearStart.toISOString()}
       ORDER BY created_at DESC
     `;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[getYearOverYearComparison] Historical data query:', {
+        historicalCount: lastYearResult.rows.length,
+        oldestReading:
+          lastYearResult.rows[lastYearResult.rows.length - 1]?.created_at ||
+          'none',
+        newestHistoricalReading: lastYearResult.rows[0]?.created_at || 'none',
+      });
+    }
   }
 
   if (process.env.NODE_ENV === 'development') {
     console.log('[getYearOverYearComparison] Results:', {
       thisYearCount: thisYearResult.rows.length,
       lastYearCount: lastYearResult.rows.length,
+      thisYearDateRange: {
+        from: thisYearStart.toISOString(),
+        to: now.toISOString(),
+      },
+      lastYearDateRange: {
+        from: lastYearStart.toISOString(),
+        to: lastYearEnd.toISOString(),
+      },
     });
   }
 
@@ -213,6 +231,8 @@ async function getYearOverYearComparison(
 async function getEnhancedTarotPatterns(
   userId: string,
   planType: string,
+  userName?: string,
+  userBirthday?: string,
 ): Promise<AdvancedPatternAnalysis['enhancedTarot']> {
   const days = planType === 'lunary_plus_ai_annual' ? 365 : 90;
   const startDate = dayjs().subtract(days, 'day');
@@ -287,12 +307,54 @@ async function getEnhancedTarotPatterns(
 
   // Get timeline analysis
   const timeline: AdvancedPatternAnalysis['enhancedTarot']['timeline'] = {
-    days30: await getTimelineAnalysis(userId, 30),
+    days30: await getTimelineAnalysis(userId, 30, userName, userBirthday),
   };
 
   if (planType === 'lunary_plus_ai_annual') {
-    timeline.days90 = await getTimelineAnalysis(userId, 180); // Changed from 90 to 180
-    timeline.days365 = await getTimelineAnalysis(userId, 365);
+    // Query readings separately to verify date ranges are different
+    const days180Start = dayjs().subtract(180, 'day');
+    const days365Start = dayjs().subtract(365, 'day');
+
+    const days180CountResult = await sql`
+      SELECT COUNT(*) as count, MIN(created_at) as oldest, MAX(created_at) as newest
+      FROM tarot_readings
+      WHERE user_id = ${userId}
+        AND archived_at IS NULL
+        AND created_at >= ${days180Start.toISOString()}
+    `;
+
+    const days365CountResult = await sql`
+      SELECT COUNT(*) as count, MIN(created_at) as oldest, MAX(created_at) as newest
+      FROM tarot_readings
+      WHERE user_id = ${userId}
+        AND archived_at IS NULL
+        AND created_at >= ${days365Start.toISOString()}
+    `;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[getEnhancedTarotPatterns] Reading counts by date range:', {
+        days180: {
+          startDate: days180Start.toISOString(),
+          count: days180CountResult.rows[0]?.count || 0,
+          oldestReading: days180CountResult.rows[0]?.oldest || 'none',
+          newestReading: days180CountResult.rows[0]?.newest || 'none',
+        },
+        days365: {
+          startDate: days365Start.toISOString(),
+          count: days365CountResult.rows[0]?.count || 0,
+          oldestReading: days365CountResult.rows[0]?.oldest || 'none',
+          newestReading: days365CountResult.rows[0]?.newest || 'none',
+        },
+      });
+    }
+
+    const [days180Analysis, days365Analysis] = await Promise.all([
+      getTimelineAnalysis(userId, 180, userName, userBirthday),
+      getTimelineAnalysis(userId, 365, userName, userBirthday),
+    ]);
+
+    timeline.days180 = days180Analysis;
+    timeline.days365 = days365Analysis;
   }
 
   return {
@@ -308,6 +370,8 @@ async function getEnhancedTarotPatterns(
 async function getTimelineAnalysis(
   userId: string,
   days: number,
+  userName?: string,
+  userBirthday?: string,
 ): Promise<{
   dominantThemes: string[];
   frequentCards: Array<{ name: string; count: number }>;
@@ -315,27 +379,86 @@ async function getTimelineAnalysis(
   const startDate = dayjs().subtract(days, 'day');
   if (process.env.NODE_ENV === 'development') {
     console.log(
-      `[getTimelineAnalysis] Querying ${days} days: from ${startDate.toISOString()} to now`,
+      `[getTimelineAnalysis] Analyzing ${days} days: from ${startDate.toISOString()} to now`,
     );
   }
-  const result = await sql`
-    SELECT cards
+
+  const displayName = userName;
+  const birthday = userBirthday;
+
+  // Generate seeded cards for each day in the range
+  const tarotModule = await import('../../../../../utils/tarot/tarot');
+  const getTarotCard = tarotModule.getTarotCard;
+  const cardFrequency: { [key: string]: number } = {};
+  const keywordCounts: { [key: string]: number } = {};
+
+  const now = dayjs();
+  for (let i = 0; i < days; i++) {
+    const date = now.subtract(i, 'day');
+    const dateString = date.toDate().toDateString();
+
+    // Generate daily card for this date
+    const dailyCard = getTarotCard(
+      `daily-${dateString}`,
+      displayName,
+      birthday,
+    );
+    const dailyCardName = dailyCard.name;
+    cardFrequency[dailyCardName] = (cardFrequency[dailyCardName] || 0) + 1;
+    if (dailyCard.keywords) {
+      dailyCard.keywords.forEach((keyword: string) => {
+        keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+      });
+    }
+
+    // Generate weekly card (once per week)
+    if (i % 7 === 0) {
+      const weekStart = date.startOf('week');
+      const weekStartYear = weekStart.year();
+      const weekStartMonth = weekStart.month() + 1;
+      const weekStartDate = weekStart.date();
+      // Calculate day of year manually (dayjs doesn't have dayOfYear by default)
+      const startOfYear = weekStart.startOf('year');
+      const dayOfYear = weekStart.diff(startOfYear, 'day') + 1;
+      const weekNumber = Math.floor(dayOfYear / 7);
+      const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
+      const weeklyCard = getTarotCard(weeklySeed, displayName, birthday);
+      const weeklyCardName = weeklyCard.name;
+      cardFrequency[weeklyCardName] = (cardFrequency[weeklyCardName] || 0) + 1;
+      if (weeklyCard.keywords) {
+        weeklyCard.keywords.forEach((keyword: string) => {
+          keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+        });
+      }
+    }
+
+    // Generate personal card (once per month)
+    if (i % 30 === 0) {
+      const month = date.month().toString();
+      const personalSeed = birthday ? birthday + month : month;
+      const personalCard = getTarotCard(personalSeed, displayName, birthday);
+      const personalCardName = personalCard.name;
+      cardFrequency[personalCardName] =
+        (cardFrequency[personalCardName] || 0) + 1;
+      if (personalCard.keywords) {
+        personalCard.keywords.forEach((keyword: string) => {
+          keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+        });
+      }
+    }
+  }
+
+  // Also include saved readings from this period
+  const savedReadingsResult = await sql`
+    SELECT cards, created_at
     FROM tarot_readings
     WHERE user_id = ${userId}
       AND archived_at IS NULL
       AND created_at >= NOW() - (${days} || ' days')::INTERVAL
+    ORDER BY created_at DESC
   `;
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log(
-      `[getTimelineAnalysis] Found ${result.rows.length} readings for ${days}-day period`,
-    );
-  }
-
-  const cardFrequency: { [key: string]: number } = {};
-  const keywordCounts: { [key: string]: number } = {};
-
-  result.rows.forEach((row) => {
+  savedReadingsResult.rows.forEach((row) => {
     const cards = Array.isArray(row.cards)
       ? row.cards
       : JSON.parse(row.cards || '[]');
@@ -349,6 +472,18 @@ async function getTimelineAnalysis(
       });
     });
   });
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[getTimelineAnalysis] Analysis for ${days}-day period:`, {
+      seededDaysAnalyzed: days,
+      savedReadingsFound: savedReadingsResult.rows.length,
+      uniqueCards: Object.keys(cardFrequency).length,
+      totalCardOccurrences: Object.values(cardFrequency).reduce(
+        (a, b) => a + b,
+        0,
+      ),
+    });
+  }
 
   const dominantThemes = Object.entries(keywordCounts)
     .sort(([, a], [, b]) => b - a)
@@ -504,7 +639,12 @@ export async function GET(request: NextRequest) {
 
     const [yearOverYear, enhancedTarot] = await Promise.all([
       getYearOverYearComparison(user.id, user.displayName, user.birthday),
-      getEnhancedTarotPatterns(user.id, planType),
+      getEnhancedTarotPatterns(
+        user.id,
+        planType,
+        user.displayName,
+        user.birthday,
+      ),
     ]);
 
     const analysis: AdvancedPatternAnalysis = {
@@ -524,17 +664,79 @@ export async function GET(request: NextRequest) {
         });
       }
 
+      // Query readings separately to verify date ranges
+      const sixMonthsStart = dayjs().subtract(sixMonthsDays, 'day');
+      const twelveMonthsStart = dayjs().subtract(twelveMonthsDays, 'day');
+
+      // Get raw reading counts to verify queries are different
+      const sixMonthsCountResult = await sql`
+        SELECT COUNT(*) as count, MIN(created_at) as oldest, MAX(created_at) as newest
+        FROM tarot_readings
+        WHERE user_id = ${user.id}
+          AND archived_at IS NULL
+          AND created_at >= ${sixMonthsStart.toISOString()}
+      `;
+
+      const twelveMonthsCountResult = await sql`
+        SELECT COUNT(*) as count, MIN(created_at) as oldest, MAX(created_at) as newest
+        FROM tarot_readings
+        WHERE user_id = ${user.id}
+          AND archived_at IS NULL
+          AND created_at >= ${twelveMonthsStart.toISOString()}
+      `;
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[patterns/advanced] Reading counts by date range:', {
+          sixMonths: {
+            days: sixMonthsDays,
+            startDate: sixMonthsStart.toISOString(),
+            count: sixMonthsCountResult.rows[0]?.count || 0,
+            oldestReading: sixMonthsCountResult.rows[0]?.oldest || 'none',
+            newestReading: sixMonthsCountResult.rows[0]?.newest || 'none',
+          },
+          twelveMonths: {
+            days: twelveMonthsDays,
+            startDate: twelveMonthsStart.toISOString(),
+            count: twelveMonthsCountResult.rows[0]?.count || 0,
+            oldestReading: twelveMonthsCountResult.rows[0]?.oldest || 'none',
+            newestReading: twelveMonthsCountResult.rows[0]?.newest || 'none',
+          },
+        });
+      }
+
       const [months6, months12] = await Promise.all([
-        getTimelineAnalysis(user.id, sixMonthsDays),
-        getTimelineAnalysis(user.id, twelveMonthsDays),
+        getTimelineAnalysis(
+          user.id,
+          sixMonthsDays,
+          user.displayName,
+          user.birthday,
+        ),
+        getTimelineAnalysis(
+          user.id,
+          twelveMonthsDays,
+          user.displayName,
+          user.birthday,
+        ),
       ]);
 
       if (process.env.NODE_ENV === 'development') {
         console.log('[patterns/advanced] Extended timeline results:', {
-          months6Cards: months6.frequentCards.length,
-          months6Themes: months6.dominantThemes.length,
-          months12Cards: months12.frequentCards.length,
-          months12Themes: months12.dominantThemes.length,
+          months6: {
+            cards: months6.frequentCards.length,
+            themes: months6.dominantThemes.length,
+            topCards: months6.frequentCards
+              .slice(0, 3)
+              .map((c) => `${c.name} (${c.count}x)`),
+            topThemes: months6.dominantThemes.slice(0, 3),
+          },
+          months12: {
+            cards: months12.frequentCards.length,
+            themes: months12.dominantThemes.length,
+            topCards: months12.frequentCards
+              .slice(0, 3)
+              .map((c) => `${c.name} (${c.count}x)`),
+            topThemes: months12.dominantThemes.slice(0, 3),
+          },
         });
       }
 

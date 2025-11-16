@@ -9,6 +9,7 @@ import {
   getTrialDaysRemaining,
   normalizePlanType,
 } from '../../utils/pricing';
+import { syncSubscriptionToProfile } from '../../utils/subscription';
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
@@ -42,6 +43,7 @@ export function useSubscription(): SubscriptionStatus {
   const [subscriptionState, setSubscriptionState] =
     useState<SubscriptionStatus>(defaultState);
   const [hasCheckedStripe, setHasCheckedStripe] = useState(false);
+  const [hasSyncedProfile, setHasSyncedProfile] = useState(false);
   const [stripeSubscriptionData, setStripeSubscriptionData] = useState<{
     plan: string;
     status: string;
@@ -179,6 +181,35 @@ export function useSubscription(): SubscriptionStatus {
             status: sub.status,
             customerId: sub.customerId,
           });
+
+          // Sync to profile if plan differs (to prevent infinite loops)
+          if (me?.profile?.subscription && !hasSyncedProfile) {
+            const profilePlan = me.profile.subscription.plan;
+            const needsSync =
+              (profilePlan === 'monthly' || profilePlan === 'yearly') &&
+              !profilePlan.includes('lunary') &&
+              planFromApi !== profilePlan;
+
+            if (needsSync) {
+              if (process.env.NODE_ENV === 'development') {
+                console.log(
+                  `[useSubscription] Syncing profile: ${profilePlan} -> ${planFromApi}`,
+                );
+              }
+              setHasSyncedProfile(true);
+              // Sync in background - don't await to prevent blocking
+              syncSubscriptionToProfile(me.profile, sub.customerId).catch(
+                (err) => {
+                  console.error(
+                    '[useSubscription] Failed to sync profile:',
+                    err,
+                  );
+                  setHasSyncedProfile(false); // Allow retry on error
+                },
+              );
+            }
+          }
+
           setSubscriptionState(stripeBasedState);
           return;
         } else {
@@ -276,6 +307,22 @@ export function useSubscription(): SubscriptionStatus {
           | 'cancelled'
           | 'past_due',
         hasAccess: (feature) => {
+          // Defensive check: if plan is lunary_plus_ai_annual and status is trial/active, always grant access
+          if (
+            (stripeNormalizedPlan === 'lunary_plus_ai_annual' ||
+              stripeSubscriptionData.plan === 'lunary_plus_ai_annual') &&
+            (stripeStatus === 'trial' || stripeStatus === 'active')
+          ) {
+            const hasAccess =
+              FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+            if (process.env.NODE_ENV === 'development') {
+              console.log(
+                `[useSubscription] Feature access (Stripe defensive): feature=${feature}, status=${stripeStatus}, plan=${stripeNormalizedPlan}, hasAccess=${hasAccess}`,
+              );
+            }
+            return hasAccess;
+          }
+
           const access = hasFeatureAccess(
             stripeStatus,
             stripeNormalizedPlan,
@@ -365,6 +412,22 @@ export function useSubscription(): SubscriptionStatus {
           | 'cancelled'
           | 'past_due',
         hasAccess: (feature) => {
+          // Defensive check: if plan is lunary_plus_ai_annual and status is trial/active, always grant access
+          if (
+            (normalizedPlan === 'lunary_plus_ai_annual' ||
+              plan === 'lunary_plus_ai_annual') &&
+            (status === 'trial' || status === 'active')
+          ) {
+            const hasAccess =
+              FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+            if (process.env.NODE_ENV === 'development') {
+              console.log(
+                `[useSubscription] Feature access (defensive check): feature=${feature}, status=${status}, plan=${normalizedPlan}, hasAccess=${hasAccess}`,
+              );
+            }
+            return hasAccess;
+          }
+
           // Use normalized plan for feature access checks
           // hasFeatureAccess already handles 'yearly' -> 'lunary_plus_ai_annual' conversion
           const access = hasFeatureAccess(status, normalizedPlan, feature);

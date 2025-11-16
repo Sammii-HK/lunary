@@ -88,8 +88,10 @@ const formatMemory = (entries: string[]): string =>
 const describeContext = (context: LunaryContext): string => {
   const parts: string[] = [];
 
-  // Tarot cards - prominent format, especially for saved readings
+  // Tarot cards - always include daily/weekly/personal cards (they're always generated)
   const tarotCards: string[] = [];
+
+  // Saved reading (if exists)
   if (
     context.tarot.lastReading?.cards &&
     context.tarot.lastReading.cards.length > 0
@@ -101,18 +103,29 @@ const describeContext = (context: LunaryContext): string => {
         return `${c.name}${position}${reversed}`;
       })
       .join(', ');
-    tarotCards.push(
-      `SAVED READING: ${cardDetails} | Spread: ${context.tarot.lastReading.spread}`,
-    );
+    const spreadName = context.tarot.lastReading.spread || 'Unknown Spread';
+    tarotCards.push(`SAVED READING: ${cardDetails} | Spread: ${spreadName}`);
   }
-  if (context.tarot.daily)
+
+  // Daily, weekly, personal cards - these are always available
+  if (context.tarot.daily) {
     tarotCards.push(`Daily: ${context.tarot.daily.name}`);
-  if (context.tarot.weekly)
+  }
+  if (context.tarot.weekly) {
     tarotCards.push(`Weekly: ${context.tarot.weekly.name}`);
-  if (context.tarot.personal)
+  }
+  if (context.tarot.personal) {
     tarotCards.push(`Personal: ${context.tarot.personal.name}`);
+  }
+
+  // Always include tarot section - cards are always generated
   if (tarotCards.length > 0) {
     parts.push(`TAROT CARDS: ${tarotCards.join(' | ')}`);
+  } else {
+    // Fallback if somehow no cards are available
+    parts.push(
+      `TAROT CARDS: Available (daily/weekly/personal cards generated)`,
+    );
   }
 
   // Pattern analysis - include insights since they're already computed
@@ -146,11 +159,14 @@ const describeContext = (context: LunaryContext): string => {
     parts.push(moonInfo);
   }
 
-  // Transits - only top 3 most relevant
+  // Transits - include more transits for comprehensive context
   if (context.currentTransits && context.currentTransits.length > 0) {
     const topTransits = context.currentTransits
-      .slice(0, 3)
-      .map((t) => `${t.from} ${t.aspect} ${t.to}`)
+      .slice(0, 5) // Increased from 3 to 5 for better context
+      .map((t) => {
+        const applying = t.applying ? ' (applying)' : '';
+        return `${t.from} ${t.aspect} ${t.to}${applying}`;
+      })
       .join(', ');
     parts.push(`TRANSITS: ${topTransits}`);
   }
@@ -159,21 +175,31 @@ const describeContext = (context: LunaryContext): string => {
   if (context.birthChart && context.birthChart.placements) {
     const keyPlacements = context.birthChart.placements
       .filter((p) =>
-        ['Sun', 'Moon', 'Ascendant', 'Mercury', 'Venus', 'Mars'].includes(
-          p.planet,
-        ),
+        [
+          'Sun',
+          'Moon',
+          'Ascendant',
+          'Mercury',
+          'Venus',
+          'Mars',
+          'Jupiter',
+          'Saturn',
+        ].includes(p.planet),
       )
-      .map((p) => `${p.planet}: ${p.sign}`)
-      .slice(0, 6);
+      .map((p) => {
+        const house = p.house ? ` (H${p.house})` : '';
+        return `${p.planet}: ${p.sign}${house}`;
+      })
+      .slice(0, 8); // Increased from 6 to 8
     if (keyPlacements.length > 0) {
       parts.push(`BIRTH CHART: ${keyPlacements.join(', ')}`);
     }
   }
 
-  // Mood - only recent trend, not full history
+  // Mood - include recent trend
   if (context.mood?.last7d && context.mood.last7d.length > 0) {
     const recentMoods = context.mood.last7d
-      .slice(-3)
+      .slice(-5) // Increased from 3 to 5 for better context
       .map((m) => m.tag)
       .join(', ');
     parts.push(`MOOD: ${recentMoods}`);

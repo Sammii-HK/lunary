@@ -326,11 +326,6 @@ export default function BookOfShadowsPage() {
                     onActionClick={(prompt) => sendMessage(prompt)}
                     disabled={isStreaming}
                   />
-                  {reflectionPrompt && (
-                    <p className='mt-3 italic text-zinc-400'>
-                      {reflectionPrompt}
-                    </p>
-                  )}
                 </div>
               )}
             </div>

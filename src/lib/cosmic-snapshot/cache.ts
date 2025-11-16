@@ -19,14 +19,31 @@ export async function getCachedSnapshot(
   const cached = unstable_cache(
     async () => {
       const result = await sql`
-        SELECT snapshot_data
+        SELECT snapshot_data, updated_at
         FROM cosmic_snapshots
         WHERE user_id = ${userId} AND snapshot_date = ${dateStr}
         LIMIT 1
       `;
 
       if (result.rows.length > 0) {
-        return result.rows[0].snapshot_data as LunaryContext;
+        const snapshot = result.rows[0].snapshot_data as LunaryContext;
+        const updatedAt = new Date(result.rows[0].updated_at);
+        const now = new Date();
+        const hoursSinceUpdate =
+          (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60);
+
+        // Tarot cards change daily - if snapshot is older than 24 hours, return null to force refresh
+        // This ensures daily/weekly/personal cards are always fresh
+        if (hoursSinceUpdate > 24) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              `[getCachedSnapshot] Snapshot too old (${hoursSinceUpdate.toFixed(1)}h), forcing refresh for tarot data`,
+            );
+          }
+          return null;
+        }
+
+        return snapshot;
       }
 
       return null;
@@ -34,7 +51,7 @@ export async function getCachedSnapshot(
     [cacheKey],
     {
       tags,
-      revalidate: 14400,
+      revalidate: 86400, // 24 hours - tarot cards change daily
     },
   );
 

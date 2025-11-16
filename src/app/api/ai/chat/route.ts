@@ -134,6 +134,8 @@ export async function POST(request: NextRequest) {
     const { historyLimit, includeMood } =
       CONTEXT_RULES[planId] ?? CONTEXT_RULES.free;
 
+    // Disable cache for chat to ensure fresh, comprehensive context
+    // Cached snapshots may be stale and missing recent tarot readings or updates
     const { context, dailyHighlight } = await buildLunaryContext({
       userId: user.id,
       tz: user.timezone ?? 'Europe/London',
@@ -143,6 +145,7 @@ export async function POST(request: NextRequest) {
       historyLimit,
       includeMood,
       now,
+      useCache: false, // Always build fresh context for chat
     });
 
     if (assistCommand.type) {

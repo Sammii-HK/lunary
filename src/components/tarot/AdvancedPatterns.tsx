@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Paywall } from '@/components/Paywall';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
@@ -44,7 +44,7 @@ type AdvancedPatternAnalysis = {
         dominantThemes: string[];
         frequentCards: Array<{ name: string; count: number }>;
       };
-      days90?: {
+      days180?: {
         dominantThemes: string[];
         frequentCards: Array<{ name: string; count: number }>;
       };
@@ -101,8 +101,21 @@ interface AdvancedPatternsProps {
 
 export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
   const subscription = useSubscription();
-  const hasAdvancedAccess = subscription.hasAccess('advanced_patterns');
-  const hasTarotPatternsAccess = subscription.hasAccess('tarot_patterns');
+
+  // Memoize derived values to prevent unnecessary re-renders
+  const hasAdvancedAccess = useMemo(
+    () => subscription.hasAccess('advanced_patterns'),
+    [subscription],
+  );
+  const hasTarotPatternsAccess = useMemo(
+    () => subscription.hasAccess('tarot_patterns'),
+    [subscription],
+  );
+  const isAnnual = useMemo(
+    () => subscription.plan === 'yearly',
+    [subscription.plan],
+  );
+
   const [viewMode, setViewMode] = useState<ViewMode>('daily');
   const [activeTab, setActiveTab] = useState<AdvancedTab>('year-over-year');
   const [analysis, setAnalysis] = useState<AdvancedPatternAnalysis | null>(
@@ -110,8 +123,6 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const isAnnual = subscription.plan === 'yearly';
 
   // Debug logging
   useEffect(() => {
@@ -132,13 +143,27 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
     }
   }, [subscription, hasAdvancedAccess, hasTarotPatternsAccess]);
 
+  // Check sessionStorage for cached analysis
   useEffect(() => {
-    if (viewMode === 'advanced' && hasAdvancedAccess && !analysis && !loading) {
-      fetchAdvancedPatterns();
+    if (viewMode === 'advanced' && !analysis) {
+      try {
+        const cached = sessionStorage.getItem('advanced-patterns-analysis');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          // Check if cache is less than 1 hour old
+          const cacheAge = Date.now() - (parsed.timestamp || 0);
+          if (cacheAge < 3600000) {
+            setAnalysis(parsed.data);
+            return;
+          }
+        }
+      } catch (e) {
+        // Ignore cache errors
+      }
     }
-  }, [viewMode, hasAdvancedAccess, analysis, loading]);
+  }, [viewMode, analysis]);
 
-  const fetchAdvancedPatterns = async () => {
+  const fetchAdvancedPatterns = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -146,21 +171,46 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
       if (!response.ok) {
         if (response.status === 403) {
           setError('Upgrade to Lunary+ AI to access advanced pattern analysis');
+          // Don't return - allow component to show upgrade UI
         } else {
           setError('Failed to load advanced patterns');
+          return;
         }
-        return;
-      }
-      const data = await response.json();
-      if (data.success && data.analysis) {
-        setAnalysis(data.analysis);
+      } else {
+        const data = await response.json();
+        if (data.success && data.analysis) {
+          setAnalysis(data.analysis);
+          setError(null);
+          // Cache in sessionStorage
+          try {
+            sessionStorage.setItem(
+              'advanced-patterns-analysis',
+              JSON.stringify({
+                data: data.analysis,
+                timestamp: Date.now(),
+              }),
+            );
+          } catch (e) {
+            // Ignore storage errors
+          }
+        } else {
+          setError('Invalid response from server');
+        }
       }
     } catch (err) {
+      console.error('Failed to fetch advanced patterns:', err);
       setError('Unable to load advanced patterns');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Only fetch when switching to advanced mode and we don't have data yet
+    if (viewMode === 'advanced' && !analysis && !loading && !error) {
+      fetchAdvancedPatterns();
+    }
+  }, [viewMode, analysis, loading, error, fetchAdvancedPatterns]);
 
   const availableTabs: AdvancedTab[] = isAnnual
     ? [
@@ -308,7 +358,17 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
 
       {viewMode === 'advanced' && (
         <div className='space-y-4'>
-          {!hasAdvancedAccess && (
+          {loading && (
+            <div className='flex items-center justify-center py-12'>
+              <div className='flex flex-col items-center gap-3'>
+                <div className='w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin' />
+                <p className='text-sm text-zinc-400'>
+                  Loading advanced patterns...
+                </p>
+              </div>
+            </div>
+          )}
+          {error && !analysis && !loading && (
             <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 mb-4'>
               <div className='flex items-start gap-3'>
                 <Lock className='h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0' />
@@ -333,19 +393,19 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
               <button
                 key={tab}
                 onClick={() => {
-                  if (!hasAdvancedAccess) return;
+                  if (!analysis) return;
                   setActiveTab(tab);
                 }}
-                disabled={!hasAdvancedAccess}
+                disabled={!analysis}
                 className={cn(
                   'px-2 py-1 text-xs rounded-full transition-colors',
-                  !hasAdvancedAccess
+                  !analysis
                     ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
                     : activeTab === tab
                       ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                       : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
                 )}
-                title={!hasAdvancedAccess ? 'Upgrade to unlock' : undefined}
+                title={!analysis ? 'Upgrade to unlock' : undefined}
               >
                 {tab === 'year-over-year' && 'Year-over-Year'}
                 {tab === 'multi-dimensional' && 'Multi-Dimensional'}
@@ -356,7 +416,7 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
             ))}
           </div>
 
-          {!hasAdvancedAccess && (
+          {error && !analysis && (
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-8 text-center space-y-4 opacity-50 pointer-events-none'>
               <BarChart3 className='w-12 h-12 text-zinc-600 mx-auto' />
               <div>
@@ -371,7 +431,7 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
             </div>
           )}
 
-          {hasAdvancedAccess && (
+          {analysis && (
             <>
               {loading && (
                 <div className='text-center py-8 text-zinc-400 text-sm'>
@@ -434,7 +494,7 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                               Last Year
                             </h5>
                             {analysis.yearOverYear.lastYear.dominantThemes
-                              .length > 0 && (
+                              .length > 0 ? (
                               <div className='flex flex-wrap gap-1.5 mb-3'>
                                 {analysis.yearOverYear.lastYear.dominantThemes.map(
                                   (theme) => (
@@ -447,9 +507,13 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                                   ),
                                 )}
                               </div>
+                            ) : (
+                              <p className='text-xs text-zinc-400 mb-3'>
+                                No historical data available for comparison
+                              </p>
                             )}
                             {analysis.yearOverYear.lastYear.frequentCards
-                              .length > 0 && (
+                              .length > 0 ? (
                               <div className='space-y-1'>
                                 {analysis.yearOverYear.lastYear.frequentCards
                                   .slice(0, 3)
@@ -462,6 +526,10 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                                     </div>
                                   ))}
                               </div>
+                            ) : (
+                              <p className='text-xs text-zinc-400'>
+                                No cards found in historical data
+                              </p>
                             )}
                           </div>
                         </div>
@@ -584,15 +652,15 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                         <h4 className='text-sm font-medium text-zinc-300 mb-3'>
                           Extended Timeline
                         </h4>
-                        {analysis.enhancedTarot.timeline.days90 && (
+                        {analysis.enhancedTarot.timeline.days180 && (
                           <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
                             <h5 className='text-xs font-medium text-purple-300/90 mb-2'>
                               180-Day Patterns
                             </h5>
-                            {analysis.enhancedTarot.timeline.days90
+                            {analysis.enhancedTarot.timeline.days180
                               .dominantThemes.length > 0 && (
                               <div className='flex flex-wrap gap-1.5 mb-3'>
-                                {analysis.enhancedTarot.timeline.days90.dominantThemes.map(
+                                {analysis.enhancedTarot.timeline.days180.dominantThemes.map(
                                   (theme) => (
                                     <span
                                       key={theme}
@@ -604,10 +672,10 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                                 )}
                               </div>
                             )}
-                            {analysis.enhancedTarot.timeline.days90
+                            {analysis.enhancedTarot.timeline.days180
                               .frequentCards.length > 0 && (
                               <div className='space-y-1'>
-                                {analysis.enhancedTarot.timeline.days90.frequentCards
+                                {analysis.enhancedTarot.timeline.days180.frequentCards
                                   .slice(0, 5)
                                   .map((card) => (
                                     <div
