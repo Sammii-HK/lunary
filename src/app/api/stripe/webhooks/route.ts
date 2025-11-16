@@ -58,8 +58,11 @@ async function getPlanTypeFromSubscription(
   }
 
   // Final fallback: use interval-based mapping for backward compatibility
+  // Note: This is less ideal - prefer using price ID mapping or metadata
   const interval = subscription.items.data[0]?.price?.recurring?.interval;
-  return interval === 'month' ? 'monthly' : 'yearly';
+  // Default to lunary_plus for monthly, but this should be avoided
+  // The price ID mapping above should catch most cases
+  return interval === 'month' ? 'lunary_plus' : 'lunary_plus_ai_annual';
 }
 
 export async function POST(request: NextRequest) {

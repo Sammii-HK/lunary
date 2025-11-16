@@ -175,11 +175,21 @@ export const FEATURE_ACCESS = {
 export function normalizePlanType(planType: string | undefined): string {
   if (!planType) return 'free';
 
-  if (planType === 'yearly' || planType === 'lunary_plus_ai_annual') {
+  // Preserve specific plan identifiers first
+  if (
+    planType === 'lunary_plus_ai' ||
+    planType === 'lunary_plus_ai_annual' ||
+    planType === 'lunary_plus'
+  ) {
+    return planType;
+  }
+
+  // Normalize generic terms only when specific plan isn't available
+  if (planType === 'yearly') {
     return 'lunary_plus_ai_annual';
   }
 
-  if (planType === 'monthly' || planType === 'lunary_plus') {
+  if (planType === 'monthly') {
     return 'lunary_plus';
   }
 
