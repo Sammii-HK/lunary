@@ -179,21 +179,21 @@ export const useAssistantChat = () => {
   }, [userId]);
 
   const appendAssistantContent = useCallback((content: string) => {
-    if (!streamingMessageIdRef.current) {
-      const id = makeId();
-      streamingMessageIdRef.current = id;
-      setMessages((prev) => [
-        ...prev,
-        {
-          id,
-          role: 'assistant',
-          content,
-        },
-      ]);
-    } else {
-      const targetId = streamingMessageIdRef.current;
-      setMessages((prev) =>
-        prev.map((message) =>
+    setMessages((prev) => {
+      if (!streamingMessageIdRef.current) {
+        const id = makeId();
+        streamingMessageIdRef.current = id;
+        return [
+          ...prev,
+          {
+            id,
+            role: 'assistant',
+            content,
+          },
+        ];
+      } else {
+        const targetId = streamingMessageIdRef.current;
+        return prev.map((message) =>
           message.id === targetId
             ? {
                 ...message,
@@ -203,9 +203,9 @@ export const useAssistantChat = () => {
                     : content,
               }
             : message,
-        ),
-      );
-    }
+        );
+      }
+    });
   }, []);
 
   const stop = useCallback(() => {
@@ -374,6 +374,11 @@ export const useAssistantChat = () => {
               case 'message': {
                 const text = safeJsonParse<string>(data);
                 if (typeof text === 'string' && text.trim().length > 0) {
+                  // Ensure we have a streaming message ID before appending
+                  if (!streamingMessageIdRef.current) {
+                    const id = makeId();
+                    streamingMessageIdRef.current = id;
+                  }
                   // Throttle UI updates
                   const now = Date.now();
                   if (now - lastUpdateTimeRef.current >= THROTTLE_MS) {
@@ -381,9 +386,13 @@ export const useAssistantChat = () => {
                     lastUpdateTimeRef.current = now;
                   } else {
                     // Queue update for throttled execution
+                    const targetId = streamingMessageIdRef.current;
                     setTimeout(
                       () => {
-                        if (!abortController.signal.aborted) {
+                        if (
+                          !abortController.signal.aborted &&
+                          streamingMessageIdRef.current === targetId
+                        ) {
                           appendAssistantContent(text);
                           lastUpdateTimeRef.current = Date.now();
                         }
@@ -395,7 +404,11 @@ export const useAssistantChat = () => {
                 break;
               }
               case 'done': {
-                streamingMessageIdRef.current = null;
+                // Don't clear streamingMessageIdRef immediately - allow any pending throttled updates to complete
+                // Clear it after a short delay to ensure all queued updates have processed
+                setTimeout(() => {
+                  streamingMessageIdRef.current = null;
+                }, THROTTLE_MS * 2);
                 break;
               }
               default:

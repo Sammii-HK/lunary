@@ -39,6 +39,7 @@ type ComposeReplyParams = {
   context: LunaryContext;
   userMessage: string;
   memorySnippets?: string[];
+  threadId?: string | null;
 };
 
 export type ComposedReply = {
@@ -52,6 +53,7 @@ export const composeAssistantReply = async ({
   context,
   userMessage,
   memorySnippets = [],
+  threadId,
 }: ComposeReplyParams): Promise<ComposedReply> => {
   const promptSections = buildPromptSections({
     context,
@@ -109,10 +111,36 @@ export const composeAssistantReply = async ({
       content: userMessage,
     });
 
+    // Include recent conversation history from thread for personalized context
+    if (threadId) {
+      try {
+        const { loadThreadFromDatabase } = await import('./threads');
+        const thread = await loadThreadFromDatabase(threadId);
+        if (thread && thread.messages.length > 0) {
+          // Get last 3 exchanges (6 messages: 3 user + 3 assistant)
+          const recentMessages = thread.messages
+            .slice(-6)
+            .map((msg) => ({
+              role: msg.role === 'user' ? 'user' : 'assistant',
+              content: msg.content,
+            }))
+            .filter((msg) => msg.content.trim().length > 0);
+
+          if (recentMessages.length > 0) {
+            // Insert history before the current user message
+            messages.splice(messages.length - 1, 0, ...recentMessages);
+          }
+        }
+      } catch (error) {
+        console.error('[AI Responder] Failed to load thread history:', error);
+        // Continue without history if loading fails
+      }
+    }
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
-      max_tokens: 250, // Reduced for shorter, more concise responses
+      max_tokens: 400, // Increased for more detailed, personalized responses
       temperature: 0.9,
     });
 

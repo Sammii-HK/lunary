@@ -27,14 +27,16 @@ CRITICAL RULES:
 5. Connect ONLY the actual cosmic patterns provided to the user's question.
 6. Be direct and specific - avoid generic astrological language.
 7. Do NOT include journal prompts in your response - they will be added separately.
-8. BREVITY IS ESSENTIAL: Keep responses to 3-5 sentences maximum. Be concise while maintaining depth and meaning.
-9. Get to the point quickly - lead with the most relevant insight, then add one or two supporting points if needed.
+8. BREVITY IS ESSENTIAL: Keep responses to 4-6 sentences for more detailed, personalized guidance. Be concise while maintaining depth and meaning.
+9. Get to the point quickly - lead with the most relevant insight, then add supporting points.
 10. CRITICAL: Do NOT repeat information from previous messages. Each response should be fresh and new. If you've already mentioned something, don't mention it again unless the user specifically asks about it.
 11. Focus on NEW insights based on the current question, not rehashing what was said before.
 12. Vary your opening - don't always start with "While I cannot predict..." - be creative and direct.
 13. Don't mention the same transits/aspects in every response - focus on what's most relevant to THIS specific question.
 14. If you've already explained what a transit means, don't explain it again - just reference it briefly if relevant.
-15. Every word counts - remove filler phrases and get straight to the insight.
+15. AVOID REPETITION: Don't repeat the moon phase name twice (e.g., "Waning Crescent in Libra aligns with Waning Crescent energy" is redundant). Just mention it once naturally.
+16. Every word counts - remove filler phrases and get straight to the insight.
+17. Use conversation history to provide continuity and build on previous exchanges, but don't repeat what was already said.
 `.trim();
 
 const safetyGuidance = `
@@ -81,17 +83,21 @@ const formatMemory = (entries: string[]): string =>
 const describeContext = (context: LunaryContext): string => {
   const parts: string[] = [];
 
-  // Tarot cards - concise format
+  // Tarot cards - prominent format, especially for saved readings
   const tarotCards: string[] = [];
   if (
     context.tarot.lastReading?.cards &&
     context.tarot.lastReading.cards.length > 0
   ) {
-    const cardNames = context.tarot.lastReading.cards
-      .map((c) => c.name)
+    const cardDetails = context.tarot.lastReading.cards
+      .map((c) => {
+        const position = c.position ? ` (${c.position})` : '';
+        const reversed = c.reversed ? ' [reversed]' : '';
+        return `${c.name}${position}${reversed}`;
+      })
       .join(', ');
     tarotCards.push(
-      `Saved: ${cardNames} (${context.tarot.lastReading.spread})`,
+      `SAVED READING: ${cardDetails} | Spread: ${context.tarot.lastReading.spread}`,
     );
   }
   if (context.tarot.daily)
@@ -101,7 +107,7 @@ const describeContext = (context: LunaryContext): string => {
   if (context.tarot.personal)
     tarotCards.push(`Personal: ${context.tarot.personal.name}`);
   if (tarotCards.length > 0) {
-    parts.push(`TAROT: ${tarotCards.join(' | ')}`);
+    parts.push(`TAROT CARDS: ${tarotCards.join(' | ')}`);
   }
 
   // Pattern analysis - include insights since they're already computed
@@ -123,10 +129,11 @@ const describeContext = (context: LunaryContext): string => {
     }
   }
 
-  // Moon - concise
+  // Moon - concise, avoid repetition
   if (context.moon) {
     const moonSign = context.moon.sign.toLowerCase();
     const constellationInfo = getConstellationInfo(moonSign);
+    // Just state the phase and sign, don't repeat the phase
     let moonInfo = `MOON: ${context.moon.phase} in ${context.moon.sign}`;
     if (constellationInfo) {
       moonInfo += ` | ${constellationInfo.name}: ${constellationInfo.information.substring(0, 100)}`;
@@ -143,12 +150,16 @@ const describeContext = (context: LunaryContext): string => {
     parts.push(`TRANSITS: ${topTransits}`);
   }
 
-  // Birth chart - only key placements (not full JSON)
+  // Birth chart - include more placements for better personalization
   if (context.birthChart && context.birthChart.placements) {
     const keyPlacements = context.birthChart.placements
-      .filter((p) => ['Sun', 'Moon', 'Ascendant'].includes(p.planet))
+      .filter((p) =>
+        ['Sun', 'Moon', 'Ascendant', 'Mercury', 'Venus', 'Mars'].includes(
+          p.planet,
+        ),
+      )
       .map((p) => `${p.planet}: ${p.sign}`)
-      .slice(0, 3);
+      .slice(0, 6);
     if (keyPlacements.length > 0) {
       parts.push(`BIRTH CHART: ${keyPlacements.join(', ')}`);
     }
@@ -185,9 +196,10 @@ const getModeSpecificGuidance = (userMessage: string): string => {
 
   if (
     content.includes('interpret my last tarot') ||
-    content.includes('interpret my tarot')
+    content.includes('interpret my tarot') ||
+    content.includes('tarot reading')
   ) {
-    return "\n\nMODE: Tarot Interpretation\nFocus on interpreting the user's most recent tarot reading. Connect the cards to their current situation and provide meaningful insights. Reference specific cards from their reading.";
+    return "\n\nMODE: Tarot Interpretation\nCRITICAL: Check the TAROT section in the context data. The user's saved tarot reading cards are listed there. You MUST reference the specific cards from their reading. If cards are listed in the context, interpret them. If no cards are listed, acknowledge that no reading is saved yet.";
   }
 
   if (

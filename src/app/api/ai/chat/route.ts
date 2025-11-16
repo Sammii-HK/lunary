@@ -298,6 +298,7 @@ export async function POST(request: NextRequest) {
         context,
         userMessage: body.message,
         memorySnippets,
+        threadId: body.threadId,
       });
     } catch (error) {
       const errorMessage =

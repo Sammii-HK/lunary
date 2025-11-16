@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
@@ -75,6 +76,7 @@ export default function BookOfShadowsPage() {
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [promptHandled, setPromptHandled] = useState(false);
+  const [isAssistExpanded, setIsAssistExpanded] = useState(true);
   const lastSendTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -303,28 +305,41 @@ export default function BookOfShadowsPage() {
                     <div ref={messagesEndRef} />
                   </>
                 )}
-                <CopilotQuickActions
-                  onActionClick={(prompt) => sendMessage(prompt)}
-                  disabled={isStreaming}
-                />
               </div>
             </div>
 
-            {(assistSnippet || reflectionPrompt) && (
-              <div className='border-t border-zinc-800/70 bg-zinc-900/40 px-4 py-3 text-sm text-zinc-300 md:px-6 md:py-4'>
-                {assistSnippet ? (
-                  <p className='mb-2 text-zinc-200'>
-                    <span className='font-semibold text-purple-300/90'>
-                      Assist
-                    </span>{' '}
-                    {assistSnippet}
-                  </p>
-                ) : null}
-                {reflectionPrompt ? (
-                  <p className='italic text-zinc-400'>{reflectionPrompt}</p>
-                ) : null}
-              </div>
-            )}
+            <div className='border-t border-zinc-800/70 bg-zinc-900/40'>
+              <button
+                onClick={() => setIsAssistExpanded(!isAssistExpanded)}
+                className='flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-purple-300/90 transition hover:bg-zinc-800/40 md:px-6'
+              >
+                <span>Assist</span>
+                {isAssistExpanded ? (
+                  <ChevronUp className='w-4 h-4' />
+                ) : (
+                  <ChevronDown className='w-4 h-4' />
+                )}
+              </button>
+              {isAssistExpanded && (
+                <div className='px-4 pb-3 text-sm text-zinc-300 md:px-6 md:pb-4'>
+                  <CopilotQuickActions
+                    onActionClick={(prompt) => sendMessage(prompt)}
+                    disabled={isStreaming}
+                  />
+                  {assistSnippet && (
+                    <p className='mb-2 text-zinc-200'>
+                      <span className='font-semibold text-purple-300/90'>
+                        Assist
+                      </span>{' '}
+                      {assistSnippet}
+                    </p>
+                  )}
+                  {reflectionPrompt && (
+                    <p className='italic text-zinc-400'>{reflectionPrompt}</p>
+                  )}
+                </div>
+              )}
+            </div>
           </section>
 
           <form
