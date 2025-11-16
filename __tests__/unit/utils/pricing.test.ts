@@ -55,7 +55,7 @@ describe('Pricing Utilities', () => {
 
       expect(freePlan?.price).toBe(0);
       expect(lunaryPlusPlan?.price).toBe(4.99);
-      expect(yearlyPlan?.price).toBe(79.99);
+      expect(yearlyPlan?.price).toBe(89.99);
     });
   });
 });
