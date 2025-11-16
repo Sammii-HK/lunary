@@ -271,17 +271,11 @@ export default function BookOfShadowsPage() {
             >
               <div className='mx-auto flex max-w-2xl flex-col gap-4 md:gap-6'>
                 {messages.length === 0 ? (
-                  <>
-                    <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
-                      Begin by sharing how you're feeling, what you're
-                      exploring, or what guidance you're seeking. I'll answer
-                      with gentle, grounded insight.
-                    </div>
-                    <CopilotQuickActions
-                      onActionClick={(prompt) => sendMessage(prompt)}
-                      disabled={isStreaming}
-                    />
-                  </>
+                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                    Begin by sharing how you're feeling, what you're exploring,
+                    or what guidance you're seeking. I'll answer with gentle,
+                    grounded insight.
+                  </div>
                 ) : (
                   <>
                     {messages.map((message) => (
@@ -309,6 +303,10 @@ export default function BookOfShadowsPage() {
                     <div ref={messagesEndRef} />
                   </>
                 )}
+                <CopilotQuickActions
+                  onActionClick={(prompt) => sendMessage(prompt)}
+                  disabled={isStreaming}
+                />
               </div>
             </div>
 

@@ -146,8 +146,8 @@ export function TarotSpreadExperience({
   onRequireUpgrade,
   onCardPreview,
 }: TarotSpreadExperienceProps) {
-  const [selectedSpreadSlug, setSelectedSpreadSlug] = useState<string>(
-    TAROT_SPREADS[0].slug,
+  const [selectedSpreadSlug, setSelectedSpreadSlug] = useState<string | null>(
+    null,
   );
   const [readings, setReadings] = useState<SpreadReadingRecord[]>([]);
   const [currentReading, setCurrentReading] =
@@ -164,7 +164,9 @@ export function TarotSpreadExperience({
   const [lastSavedNotes, setLastSavedNotes] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
-  const selectedSpread = TAROT_SPREAD_MAP[selectedSpreadSlug];
+  const selectedSpread = selectedSpreadSlug
+    ? TAROT_SPREAD_MAP[selectedSpreadSlug]
+    : null;
 
   const unlockedSpreads = useMemo(
     () => unlockedSpreadSlugs,
@@ -278,7 +280,7 @@ export function TarotSpreadExperience({
       }
 
       // Ensure selected spread is accessible
-      if (!unlocked.has(selectedSpreadSlug)) {
+      if (selectedSpreadSlug !== null && !unlocked.has(selectedSpreadSlug)) {
         const firstUnlockedSlug = findFirstUnlockedSpread(
           unlocked,
           subscriptionPlan.plan,
@@ -584,6 +586,15 @@ export function TarotSpreadExperience({
             ))}
           </div>
         </CollapsibleSpreadLibrary>
+
+        {!selectedSpread && (
+          <div className='flex flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 bg-zinc-900/20 p-12 text-center'>
+            <Sparkles className='mb-3 h-8 w-8 text-purple-300/50' />
+            <p className='text-sm text-zinc-400'>
+              Select a spread from above to begin your reading
+            </p>
+          </div>
+        )}
 
         {selectedSpread && (
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3'>

@@ -104,7 +104,9 @@ export function useSubscription(): SubscriptionStatus {
           const isTrialActive = status === 'trial' && trialDaysRemaining > 0;
           const isSubscribed = status === 'active' || isTrialActive;
 
-          const normalizedPlan = normalizePlanType(sub.plan);
+          // Use plan from API response if available, otherwise fall back to interval-based detection
+          const planFromApi = sub.plan;
+          const normalizedPlan = normalizePlanType(planFromApi);
           const planForState =
             normalizedPlan === 'lunary_plus_ai_annual'
               ? 'yearly'

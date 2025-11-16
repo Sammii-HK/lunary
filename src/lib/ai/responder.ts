@@ -130,19 +130,10 @@ export const composeAssistantReply = async ({
       .replace(/\n\n+/g, '\n\n')
       .trim();
 
-    // Only include AI response and assist/reflection - no generic cosmic paragraph
-    // Only add reflection if it's meaningful (has moon or tarot context)
-    const responseParts = [
-      cleanedResponse,
-      assistSnippet,
-      reflection &&
-      (context.moon || context.tarot.daily || context.tarot.lastReading)
-        ? reflection
-        : null,
-    ].filter(Boolean);
-
+    // Only include AI response - assistSnippet and reflection are returned separately
+    // Don't include them in message content to avoid duplication
     return {
-      message: responseParts.join('\n\n'),
+      message: cleanedResponse,
       assistSnippet: assistSnippet ?? null,
       reflection,
       promptSections,

@@ -26,7 +26,7 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className='sticky bottom-0 z-50 flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
+    <nav className='sticky bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
       <div className='flex w-full max-w-3xl items-center justify-between px-4 py-3 text-white md:justify-evenly md:px-6'>
         <NavLink href='/' icon={Eclipse} label='Home' activePath={pathname} />
         <NavLink

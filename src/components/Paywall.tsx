@@ -186,7 +186,7 @@ export function UpgradePrompt() {
           {authState.isAuthenticated
             ? isTrialActive
               ? 'Continue Trial'
-              : 'Start Free Trial'
+              : 'Upgrade now'
             : 'Sign In to Continue'}
         </Link>
       </div>

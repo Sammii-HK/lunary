@@ -104,10 +104,16 @@ const interpretTarot = (context: LunaryContext): string => {
     return 'No tarot spread is on record, yet the deck invites you to pull with intention and ask what wants to be revealed.';
   }
 
-  const description = cards
-    .map((card) => `${card.name}${card.reversed ? ' (reversed)' : ''}`)
-    .join(', ');
+  // Filter out any cards without names and map to card names
+  const cardNames = cards
+    .filter((card) => card && card.name && card.name.trim())
+    .map((card) => `${card.name}${card.reversed ? ' (reversed)' : ''}`);
 
+  if (cardNames.length === 0) {
+    return 'No tarot spread is on record, yet the deck invites you to pull with intention and ask what wants to be revealed.';
+  }
+
+  const description = cardNames.join(', ');
   return `Your recent spread whispers through ${description}. Notice which archetype feels closest to your present heart.`;
 };
 

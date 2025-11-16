@@ -8,6 +8,49 @@ function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
+async function getPlanTypeFromSubscription(
+  subscription: Stripe.Subscription,
+): Promise<string> {
+  // First try to get plan_id from subscription metadata
+  const planIdFromMetadata = subscription.metadata?.plan_id;
+  if (planIdFromMetadata) {
+    return planIdFromMetadata;
+  }
+
+  // Try to get from price metadata
+  const priceId = subscription.items.data[0]?.price?.id;
+  if (priceId) {
+    try {
+      const stripe = getStripe();
+      const price = await stripe.prices.retrieve(priceId, {
+        expand: ['product'],
+      });
+      const product = price.product as Stripe.Product;
+
+      const planIdFromPrice =
+        price.metadata?.plan_id || product.metadata?.plan_id;
+      if (planIdFromPrice) {
+        return planIdFromPrice;
+      }
+
+      // Fallback to price ID mapping
+      const { getPlanIdFromPriceId } = await import(
+        '../../../../../utils/pricing'
+      );
+      const mappedPlanId = getPlanIdFromPriceId(priceId);
+      if (mappedPlanId) {
+        return mappedPlanId;
+      }
+    } catch (error) {
+      console.error('Failed to retrieve price metadata:', error);
+    }
+  }
+
+  // Final fallback: use interval-based mapping for backward compatibility
+  const interval = subscription.items.data[0]?.price?.recurring?.interval;
+  return interval === 'month' ? 'monthly' : 'yearly';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe();
@@ -66,10 +109,14 @@ export async function POST(request: NextRequest) {
 
     const subscription = activeSubscription || subscriptions.data[0];
 
+    // Extract plan_id from subscription metadata
+    const planType = await getPlanTypeFromSubscription(subscription);
+
     console.log('Selected subscription:', {
       id: subscription.id,
       status: subscription.status,
       customerId: subscription.customer,
+      planType,
     });
 
     return NextResponse.json({
@@ -78,6 +125,7 @@ export async function POST(request: NextRequest) {
         id: subscription.id,
         status: subscription.status,
         customer: subscription.customer,
+        plan: planType,
         current_period_end: (subscription as any).current_period_end || null,
         trial_end: (subscription as any).trial_end || null,
         items: subscription.items,

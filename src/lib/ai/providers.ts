@@ -264,11 +264,35 @@ export const getTarotLastReading = async ({
 
       return {
         spread: row.spread_name || 'Three Card Insight',
-        cards: cards.map((card: any) => ({
-          name: card.name,
-          position: card.position,
-          reversed: card.reversed || false,
-        })),
+        cards: cards
+          .map((card: any) => {
+            // Handle nested card structure (card.card.name) or direct structure (card.name)
+            const cardName = card.card?.name || card.name;
+            const cardPosition =
+              card.positionId || card.positionLabel || card.position;
+            const cardReversed = card.card?.reversed || card.reversed || false;
+
+            if (!cardName) {
+              console.warn('[Tarot Provider] Card missing name:', card);
+              return null;
+            }
+
+            return {
+              name: cardName,
+              position: cardPosition,
+              reversed: cardReversed,
+            };
+          })
+          .filter(
+            (
+              card: {
+                name: string;
+                position?: string;
+                reversed: boolean;
+              } | null,
+            ): card is { name: string; position?: string; reversed: boolean } =>
+              card !== null,
+          ),
         timestamp: row.created_at || dayjs(now).toISOString(),
       };
     }
