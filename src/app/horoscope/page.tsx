@@ -15,7 +15,10 @@ export default function HoroscopePage() {
   const subscription = useSubscription();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
-  const hasChartAccess = hasBirthChartAccess(subscription.status);
+  const hasChartAccess = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
 
   useEffect(() => {
     if (hasChartAccess) {

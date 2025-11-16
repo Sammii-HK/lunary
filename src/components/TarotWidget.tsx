@@ -12,7 +12,10 @@ export const TarotWidget = () => {
   const subscription = useSubscription();
   const { currentTarotCard } = useAstronomyContext();
 
-  const hasChartAccess = hasBirthChartAccess(subscription.status);
+  const hasChartAccess = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
   const userName = (me?.profile as any)?.name;
 
   // If user doesn't have birth chart access, show general tarot reading

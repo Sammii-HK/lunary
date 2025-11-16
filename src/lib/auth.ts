@@ -53,39 +53,33 @@ function initializeAuth() {
     return authInstance;
   }
 
-  console.log('🔍 Initializing Better Auth...', {
-    hasJazzAccount: !!process.env.JAZZ_WORKER_ACCOUNT,
-    hasJazzSecret: !!process.env.JAZZ_WORKER_SECRET,
-    hasAuthSecret: !!process.env.BETTER_AUTH_SECRET,
-    isBuildPhase: !!process.env.NEXT_PHASE,
-    nodeEnv: process.env.NODE_ENV,
-    vercelEnv: process.env.VERCEL_ENV,
-    jazzAccountLength: process.env.JAZZ_WORKER_ACCOUNT?.length || 0,
-    jazzSecretLength: process.env.JAZZ_WORKER_SECRET?.length || 0,
-    jazzAccountFirstChars:
-      process.env.JAZZ_WORKER_ACCOUNT?.substring(0, 3) || 'N/A',
-    jazzSecretFirstChars:
-      process.env.JAZZ_WORKER_SECRET?.substring(0, 3) || 'N/A',
-    allEnvKeys: Object.keys(process.env)
-      .filter(
-        (key) =>
-          key.includes('JAZZ') ||
-          key.includes('AUTH') ||
-          key.includes('VERCEL'),
-      )
-      .sort(),
-  });
+  if (
+    process.env.NODE_ENV === 'development' &&
+    process.env.DEBUG_AUTH === 'true'
+  ) {
+    console.log('🔍 Initializing Better Auth...', {
+      hasJazzAccount: !!process.env.JAZZ_WORKER_ACCOUNT,
+      hasJazzSecret: !!process.env.JAZZ_WORKER_SECRET,
+      hasAuthSecret: !!process.env.BETTER_AUTH_SECRET,
+      nodeEnv: process.env.NODE_ENV,
+    });
+  }
 
   try {
     const accountID = getRequiredEnvVar('JAZZ_WORKER_ACCOUNT', true);
     const accountSecret = getRequiredEnvVar('JAZZ_WORKER_SECRET', true);
 
-    console.log('🔍 Got env vars:', {
-      accountIDLength: accountID?.length || 0,
-      accountSecretLength: accountSecret?.length || 0,
-      accountIDEmpty: accountID === '',
-      accountSecretEmpty: accountSecret === '',
-    });
+    if (
+      process.env.NODE_ENV === 'development' &&
+      process.env.DEBUG_AUTH === 'true'
+    ) {
+      console.log('🔍 Got env vars:', {
+        accountIDLength: accountID?.length || 0,
+        accountSecretLength: accountSecret?.length || 0,
+        accountIDEmpty: accountID === '',
+        accountSecretEmpty: accountSecret === '',
+      });
+    }
 
     authInstance = betterAuth({
       database: JazzBetterAuthDatabaseAdapter({
@@ -275,7 +269,12 @@ function initializeAuth() {
       advanced: { database: { generateId: () => crypto.randomUUID() } },
     });
 
-    console.log('✅ Better Auth initialized successfully');
+    if (
+      process.env.NODE_ENV === 'development' &&
+      process.env.DEBUG_AUTH === 'true'
+    ) {
+      console.log('✅ Better Auth initialized successfully');
+    }
     return authInstance;
   } catch (error) {
     console.error('❌ Failed to initialize Better Auth:', {

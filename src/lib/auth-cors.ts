@@ -28,11 +28,16 @@ export async function withCors(
   }
 
   try {
-    console.log('🔍 withCors: Calling auth handler', {
-      method: request.method,
-      url: request.url,
-      origin,
-    });
+    if (
+      process.env.NODE_ENV === 'development' &&
+      process.env.DEBUG_AUTH === 'true'
+    ) {
+      console.log('🔍 withCors: Calling auth handler', {
+        method: request.method,
+        url: request.url,
+        origin,
+      });
+    }
 
     const validatedRequest = createRequestWithValidatedOrigin(request, origin);
     const response = await handler(validatedRequest);

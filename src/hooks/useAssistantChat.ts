@@ -76,6 +76,9 @@ export const useAssistantChat = () => {
   const [error, setError] = useState<string | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
   const previousUserIdRef = useRef<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const lastUpdateTimeRef = useRef<number>(0);
+  const THROTTLE_MS = 50; // Throttle UI updates to 50ms
 
   const loadThreadHistory = useCallback(
     async (id: string) => {
@@ -205,10 +208,24 @@ export const useAssistantChat = () => {
     }
   }, []);
 
+  const stop = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsStreaming(false);
+      streamingMessageIdRef.current = null;
+    }
+  }, []);
+
   const sendMessage = useCallback(
     async (content: string) => {
       if (!content.trim() || isStreaming) {
         return;
+      }
+
+      // Abort any existing request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
 
       const userMessage: AssistantMessage = {
@@ -221,6 +238,10 @@ export const useAssistantChat = () => {
       setIsStreaming(true);
       streamingMessageIdRef.current = null;
 
+      // Create new AbortController for this request
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       try {
         const response = await fetch(
           `/api/ai/chat?stream=1${threadId ? `&threadId=${threadId}` : ''}`,
@@ -231,6 +252,7 @@ export const useAssistantChat = () => {
               Accept: 'text/event-stream',
             },
             credentials: 'include',
+            signal: abortController.signal,
             body: JSON.stringify({
               message: content,
               threadId,
@@ -239,6 +261,10 @@ export const useAssistantChat = () => {
         );
 
         if (!response.ok) {
+          // Check if aborted
+          if (abortController.signal.aborted) {
+            return;
+          }
           if (response.status === 401) {
             throw new Error('Unauthorized - Please sign in to use the AI chat');
           }
@@ -274,6 +300,11 @@ export const useAssistantChat = () => {
         let buffer = '';
 
         while (true) {
+          // Check if aborted
+          if (abortController.signal.aborted) {
+            reader.cancel();
+            break;
+          }
           const { value, done } = await reader.read();
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
@@ -343,7 +374,23 @@ export const useAssistantChat = () => {
               case 'message': {
                 const text = safeJsonParse<string>(data);
                 if (typeof text === 'string' && text.trim().length > 0) {
-                  appendAssistantContent(text);
+                  // Throttle UI updates
+                  const now = Date.now();
+                  if (now - lastUpdateTimeRef.current >= THROTTLE_MS) {
+                    appendAssistantContent(text);
+                    lastUpdateTimeRef.current = now;
+                  } else {
+                    // Queue update for throttled execution
+                    setTimeout(
+                      () => {
+                        if (!abortController.signal.aborted) {
+                          appendAssistantContent(text);
+                          lastUpdateTimeRef.current = Date.now();
+                        }
+                      },
+                      THROTTLE_MS - (now - lastUpdateTimeRef.current),
+                    );
+                  }
                 }
                 break;
               }
@@ -357,6 +404,11 @@ export const useAssistantChat = () => {
           }
         }
       } catch (error) {
+        // Don't set error if request was aborted
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('[AssistantChat] Request aborted by user');
+          return;
+        }
         console.error('[AssistantChat] Streaming error', error);
         const errorMessage =
           error instanceof Error
@@ -368,6 +420,7 @@ export const useAssistantChat = () => {
       } finally {
         setIsStreaming(false);
         streamingMessageIdRef.current = null;
+        abortControllerRef.current = null;
       }
     },
     [appendAssistantContent, isStreaming, threadId, userId],
@@ -378,6 +431,7 @@ export const useAssistantChat = () => {
       messages,
       sendMessage,
       isStreaming,
+      stop,
       assistSnippet,
       reflectionPrompt,
       usage,
@@ -392,6 +446,7 @@ export const useAssistantChat = () => {
       messages,
       sendMessage,
       isStreaming,
+      stop,
       assistSnippet,
       reflectionPrompt,
       usage,

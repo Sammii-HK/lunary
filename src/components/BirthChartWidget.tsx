@@ -17,7 +17,10 @@ export const BirthChartWidget = () => {
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
 
-  const hasChartAccess = hasBirthChartAccess(subscription.status);
+  const hasChartAccess = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
 
   // If user doesn't have birth chart access, show paywall
   if (!hasChartAccess) {

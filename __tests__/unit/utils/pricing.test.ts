@@ -41,13 +41,17 @@ describe('Pricing Utilities', () => {
       expect(
         PRICING_PLANS.find((p) => p.id === 'lunary_plus_ai'),
       ).toBeDefined();
-      expect(PRICING_PLANS.find((p) => p.id === 'yearly')).toBeDefined();
+      expect(
+        PRICING_PLANS.find((p) => p.id === 'lunary_plus_ai_annual'),
+      ).toBeDefined();
     });
 
     it('should have correct pricing', () => {
       const freePlan = PRICING_PLANS.find((p) => p.id === 'free');
       const lunaryPlusPlan = PRICING_PLANS.find((p) => p.id === 'lunary_plus');
-      const yearlyPlan = PRICING_PLANS.find((p) => p.id === 'yearly');
+      const yearlyPlan = PRICING_PLANS.find(
+        (p) => p.id === 'lunary_plus_ai_annual',
+      );
 
       expect(freePlan?.price).toBe(0);
       expect(lunaryPlusPlan?.price).toBe(4.99);

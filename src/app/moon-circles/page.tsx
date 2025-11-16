@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { sql } from '@vercel/postgres';
 import { MoonCircleInsights } from '@/components/MoonCircleInsights';
+import { MoonCirclesPreview } from '@/components/MoonCirclesPreview';
 import { cn } from '@/lib/utils';
 
 export const revalidate = 300;
@@ -162,90 +163,92 @@ export default async function MoonCirclesPage({
         </div>
       )}
 
-      <div className='space-y-10'>
-        {circles.map((circle) => (
-          <section
-            key={circle.id}
-            className='rounded-3xl border border-purple-500/30 bg-black/40 p-6 shadow-lg shadow-purple-500/20 backdrop-blur'
-          >
-            <div className='grid gap-8 lg:grid-cols-[1.2fr_0.8fr]'>
-              <div className='space-y-5'>
-                <div className='flex flex-wrap items-center gap-3'>
-                  <span
-                    className={cn(
-                      'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
-                      circle.moon_phase === 'Full Moon'
-                        ? 'bg-amber-400/20 text-amber-100'
-                        : 'bg-indigo-400/20 text-indigo-100',
-                    )}
-                  >
-                    {circle.moon_phase}
-                  </span>
-                  <span className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'>
-                    {formatReadableDate(circle.event_date)}
-                  </span>
-                  <span className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'>
-                    {circle.insight_count} insight
-                    {circle.insight_count === 1 ? '' : 's'}
-                  </span>
-                </div>
-                <div className='space-y-2'>
-                  <h2 className='text-2xl font-semibold text-white'>
-                    {circle.theme || circle.title || 'Moon Circle'}
-                  </h2>
-                  {circle.description && (
-                    <p className='text-sm text-purple-100/80'>
-                      {circle.description}
-                    </p>
-                  )}
-                </div>
-                {circle.focus_points.length > 0 && (
-                  <div className='space-y-2'>
-                    <p className='text-xs uppercase tracking-[0.2em] text-purple-200/70'>
-                      Focus
-                    </p>
-                    <div className='flex flex-wrap gap-2'>
-                      {circle.focus_points.map((focus) => (
-                        <span
-                          key={focus}
-                          className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'
-                        >
-                          {focus}
-                        </span>
-                      ))}
-                    </div>
+      <MoonCirclesPreview circles={circles}>
+        <div className='space-y-10'>
+          {circles.map((circle) => (
+            <section
+              key={circle.id}
+              className='rounded-3xl border border-purple-500/30 bg-black/40 p-6 shadow-lg shadow-purple-500/20 backdrop-blur'
+            >
+              <div className='grid gap-8 lg:grid-cols-[1.2fr_0.8fr]'>
+                <div className='space-y-5'>
+                  <div className='flex flex-wrap items-center gap-3'>
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
+                        circle.moon_phase === 'Full Moon'
+                          ? 'bg-amber-400/20 text-amber-100'
+                          : 'bg-indigo-400/20 text-indigo-100',
+                      )}
+                    >
+                      {circle.moon_phase}
+                    </span>
+                    <span className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'>
+                      {formatReadableDate(circle.event_date)}
+                    </span>
+                    <span className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'>
+                      {circle.insight_count} insight
+                      {circle.insight_count === 1 ? '' : 's'}
+                    </span>
                   </div>
-                )}
-                <div className='flex flex-wrap gap-3'>
-                  <Link
-                    href={`/moon-circles/${circle.id}`}
-                    className='inline-flex items-center justify-center rounded-2xl bg-white/90 px-5 py-2.5 text-sm font-semibold text-purple-900 shadow-inner hover:bg-white'
-                  >
-                    View circle details
-                  </Link>
-                  <Link
-                    href={`/moon-circles/${circle.id}?share=true`}
-                    className='inline-flex items-center justify-center rounded-2xl border border-purple-500/40 px-5 py-2.5 text-sm font-semibold text-purple-100 hover:border-purple-300 hover:text-white'
-                  >
-                    Share an insight
-                  </Link>
+                  <div className='space-y-2'>
+                    <h2 className='text-2xl font-semibold text-white'>
+                      {circle.theme || circle.title || 'Moon Circle'}
+                    </h2>
+                    {circle.description && (
+                      <p className='text-sm text-purple-100/80'>
+                        {circle.description}
+                      </p>
+                    )}
+                  </div>
+                  {circle.focus_points.length > 0 && (
+                    <div className='space-y-2'>
+                      <p className='text-xs uppercase tracking-[0.2em] text-purple-200/70'>
+                        Focus
+                      </p>
+                      <div className='flex flex-wrap gap-2'>
+                        {circle.focus_points.map((focus) => (
+                          <span
+                            key={focus}
+                            className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'
+                          >
+                            {focus}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className='flex flex-wrap gap-3'>
+                    <Link
+                      href={`/moon-circles/${circle.id}`}
+                      className='inline-flex items-center justify-center rounded-2xl bg-white/90 px-5 py-2.5 text-sm font-semibold text-purple-900 shadow-inner hover:bg-white'
+                    >
+                      View circle details
+                    </Link>
+                    <Link
+                      href={`/moon-circles/${circle.id}?share=true`}
+                      className='inline-flex items-center justify-center rounded-2xl border border-purple-500/40 px-5 py-2.5 text-sm font-semibold text-purple-100 hover:border-purple-300 hover:text-white'
+                    >
+                      Share an insight
+                    </Link>
+                  </div>
                 </div>
-              </div>
 
-              <MoonCircleInsights
-                moonCircleId={circle.id}
-                moonPhase={circle.moon_phase}
-                date={circle.event_date}
-                insightCount={circle.insight_count}
-                collapsedByDefault
-                autoFetch={false}
-                pageSize={2}
-                showShareForm={false}
-              />
-            </div>
-          </section>
-        ))}
-      </div>
+                <MoonCircleInsights
+                  moonCircleId={circle.id}
+                  moonPhase={circle.moon_phase}
+                  date={circle.event_date}
+                  insightCount={circle.insight_count}
+                  collapsedByDefault
+                  autoFetch={false}
+                  pageSize={2}
+                  showShareForm={false}
+                />
+              </div>
+            </section>
+          ))}
+        </div>
+      </MoonCirclesPreview>
     </div>
   );
 }

@@ -63,6 +63,7 @@ export default function BookOfShadowsPage() {
     messages,
     sendMessage,
     isStreaming,
+    stop,
     assistSnippet,
     reflectionPrompt,
     usage,
@@ -346,13 +347,23 @@ export default function BookOfShadowsPage() {
                 className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 md:text-base'
               />
             </div>
-            <Button
-              type='submit'
-              disabled={isStreaming || input.trim().length === 0}
-              className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-zinc-700 md:self-end'
-            >
-              {isStreaming ? 'Listening…' : 'Ask Lunary'}
-            </Button>
+            {isStreaming ? (
+              <Button
+                type='button'
+                onClick={stop}
+                className='inline-flex items-center gap-2 rounded-xl bg-red-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-red-500 md:self-end'
+              >
+                Stop
+              </Button>
+            ) : (
+              <Button
+                type='submit'
+                disabled={input.trim().length === 0}
+                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-zinc-700 md:self-end'
+              >
+                Ask Lunary
+              </Button>
+            )}
           </form>
         </main>
       </div>

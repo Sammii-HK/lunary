@@ -7,6 +7,7 @@ import {
   hasFeatureAccess,
   FEATURE_ACCESS,
   getTrialDaysRemaining,
+  normalizePlanType,
 } from '../../utils/pricing';
 
 export interface SubscriptionStatus {
@@ -16,7 +17,7 @@ export interface SubscriptionStatus {
   plan: 'free' | 'monthly' | 'yearly';
   planName?: string;
   status: 'free' | 'trial' | 'active' | 'cancelled' | 'past_due';
-  hasAccess: (feature: keyof typeof FEATURE_ACCESS) => boolean;
+  hasAccess: (feature: string) => boolean;
   showUpgradePrompt: boolean;
   customerId?: string;
   subscriptionId?: string;
@@ -72,10 +73,12 @@ export function useSubscription(): SubscriptionStatus {
 
   const fetchFromStripe = useCallback(async (customerId: string) => {
     try {
-      console.log(
-        'Fetching subscription from Stripe for customer:',
-        customerId,
-      );
+      if (process.env.NODE_ENV === 'development') {
+        console.log(
+          'Fetching subscription from Stripe for customer:',
+          customerId,
+        );
+      }
       setSubscriptionState((prev) => ({ ...prev, loading: true }));
 
       const response = await fetch('/api/stripe/get-subscription', {
@@ -101,11 +104,21 @@ export function useSubscription(): SubscriptionStatus {
           const isTrialActive = status === 'trial' && trialDaysRemaining > 0;
           const isSubscribed = status === 'active' || isTrialActive;
 
+          const normalizedPlan = normalizePlanType(sub.plan);
+          const planForState =
+            normalizedPlan === 'lunary_plus_ai_annual'
+              ? 'yearly'
+              : normalizedPlan === 'lunary_plus_ai'
+                ? 'monthly'
+                : normalizedPlan === 'lunary_plus'
+                  ? 'monthly'
+                  : 'free';
+
           const stripeBasedState: SubscriptionStatus = {
             isSubscribed,
             isTrialActive,
             trialDaysRemaining,
-            plan: sub.plan as 'free' | 'monthly' | 'yearly',
+            plan: planForState as 'free' | 'monthly' | 'yearly',
             planName: sub.planName,
             status: status as
               | 'free'
@@ -113,14 +126,17 @@ export function useSubscription(): SubscriptionStatus {
               | 'active'
               | 'cancelled'
               | 'past_due',
-            hasAccess: (feature) => hasFeatureAccess(status, sub.plan, feature),
+            hasAccess: (feature) =>
+              hasFeatureAccess(status, normalizedPlan, feature),
             showUpgradePrompt: !isSubscribed && status !== 'cancelled',
             customerId: sub.customerId,
             subscriptionId: sub.id,
             loading: false,
           };
 
-          console.log('Subscription fetched from Stripe:', stripeBasedState);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Subscription fetched from Stripe:', stripeBasedState);
+          }
           setSubscriptionState(stripeBasedState);
           return;
         }
@@ -140,16 +156,20 @@ export function useSubscription(): SubscriptionStatus {
     }
 
     if (!me?.profile) {
-      console.log('useSubscription: No profile found');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('useSubscription: No profile found');
+      }
       setSubscriptionState(defaultState);
       return;
     }
 
     const profileSubscription = (me.profile as any)?.subscription;
-    console.log(
-      'useSubscription: Profile found, subscription:',
-      profileSubscription,
-    );
+    if (process.env.NODE_ENV === 'development') {
+      console.log(
+        'useSubscription: Profile found, subscription:',
+        profileSubscription,
+      );
+    }
 
     if (
       profileSubscription &&
@@ -167,18 +187,29 @@ export function useSubscription(): SubscriptionStatus {
         : 0;
       const isSubscribed = status === 'active' || isTrialActive;
 
+      const normalizedPlan = normalizePlanType(plan);
+      const planForState =
+        normalizedPlan === 'lunary_plus_ai_annual'
+          ? 'yearly'
+          : normalizedPlan === 'lunary_plus_ai'
+            ? 'monthly'
+            : normalizedPlan === 'lunary_plus'
+              ? 'monthly'
+              : 'free';
+
       const profileBasedState: SubscriptionStatus = {
         isSubscribed,
         isTrialActive,
         trialDaysRemaining,
-        plan: plan as 'free' | 'monthly' | 'yearly',
+        plan: planForState as 'free' | 'monthly' | 'yearly',
         status: status as
           | 'free'
           | 'trial'
           | 'active'
           | 'cancelled'
           | 'past_due',
-        hasAccess: (feature) => hasFeatureAccess(status, plan, feature),
+        hasAccess: (feature) =>
+          hasFeatureAccess(status, normalizedPlan, feature),
         showUpgradePrompt: !isSubscribed && status !== 'cancelled',
         customerId:
           profileSubscription.stripeCustomerId ||
@@ -187,7 +218,9 @@ export function useSubscription(): SubscriptionStatus {
         loading: false,
       };
 
-      console.log('useSubscription profile-based result:', profileBasedState);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('useSubscription profile-based result:', profileBasedState);
+      }
       setSubscriptionState(profileBasedState);
       setHasCheckedStripe(true);
       return;
@@ -198,13 +231,17 @@ export function useSubscription(): SubscriptionStatus {
       const customerId = getCustomerId();
 
       if (customerId) {
-        console.log(
-          'No profile subscription but found customer ID, fetching from Stripe...',
-        );
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            'No profile subscription but found customer ID, fetching from Stripe...',
+          );
+        }
         fetchFromStripe(customerId);
         return;
       } else {
-        console.log('No customer ID found, using default state');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('No customer ID found, using default state');
+        }
         setSubscriptionState(defaultState);
       }
     }

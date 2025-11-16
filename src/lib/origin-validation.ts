@@ -62,7 +62,12 @@ const getStaticOrigins = (): string[] => {
   const uniqueOrigins = Array.from(new Set(origins));
 
   if (process.env.NODE_ENV !== 'production' || process.env.VERCEL) {
-    console.log('🔐 Better Auth trustedOrigins:', uniqueOrigins);
+    if (
+      process.env.NODE_ENV === 'development' &&
+      process.env.DEBUG_AUTH === 'true'
+    ) {
+      console.log('🔐 Better Auth trustedOrigins:', uniqueOrigins);
+    }
   }
 
   return uniqueOrigins;

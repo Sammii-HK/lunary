@@ -2,6 +2,8 @@
 
 import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { HelpCircle } from 'lucide-react';
 import {
   generateBirthChart,
   saveBirthChartToProfile,
@@ -30,6 +32,8 @@ import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { TrialReminder } from '@/components/TrialReminder';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
+import { YearlyForecast } from '@/components/forecast/YearlyForecast';
+import { Download } from 'lucide-react';
 
 export default function ProfilePage() {
   // Hooks must be called unconditionally - handle errors inside the hook or in the component
@@ -51,7 +55,10 @@ export default function ProfilePage() {
 
   // Check if user can collect birthday data
   const canCollectBirthdayData = canCollectBirthday(subscription.status);
-  const hasBirthChartAccessData = hasBirthChartAccess(subscription.status);
+  const hasBirthChartAccessData = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
   const canEditProfile = authState.isAuthenticated && canCollectBirthdayData;
 
   // Simplified authentication check
@@ -753,7 +760,7 @@ export default function ProfilePage() {
       )}
 
       {authState.isAuthenticated && (
-        <div className='w-full max-w-3xl'>
+        <div className='w-full max-w-3xl space-y-6'>
           <SubscriptionManagement
             customerId={
               (me?.profile as any)?.stripeCustomerId ||
@@ -763,6 +770,64 @@ export default function ProfilePage() {
               (me?.profile as any)?.subscription?.stripeSubscriptionId
             }
           />
+
+          {subscription.hasAccess('yearly_forecast') && (
+            <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg p-6'>
+              <YearlyForecast />
+            </div>
+          )}
+
+          {subscription.hasAccess('data_export') && (
+            <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg p-6'>
+              <h2 className='text-lg font-semibold text-white mb-2'>
+                Export Your Data
+              </h2>
+              <p className='text-sm text-zinc-400 mb-4'>
+                Download all your cosmic data including birth chart, tarot
+                readings, collections, and more.
+              </p>
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/export/data');
+                    if (!response.ok) {
+                      if (response.status === 403) {
+                        alert(
+                          'Upgrade to Lunary+ AI Annual to export your data',
+                        );
+                      } else {
+                        alert('Failed to export data');
+                      }
+                      return;
+                    }
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const contentDisposition = response.headers.get(
+                      'Content-Disposition',
+                    );
+                    const filename = contentDisposition
+                      ? contentDisposition
+                          .split('filename=')[1]
+                          ?.replace(/"/g, '')
+                      : `lunary-export-${new Date().toISOString().split('T')[0]}.json`;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                  } catch (error) {
+                    alert('Failed to export data');
+                  }
+                }}
+                className='inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700'
+              >
+                <Download className='w-4 h-4' />
+                Export Data (JSON)
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -827,6 +892,18 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      <div className='mt-12 pt-8 border-t border-zinc-800/50'>
+        <div className='flex justify-center'>
+          <Link
+            href='/help'
+            className='inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-400 transition-colors'
+          >
+            <HelpCircle className='w-3.5 h-3.5' />
+            Help & Support
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

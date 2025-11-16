@@ -801,7 +801,10 @@ const BirthChartPage = () => {
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
 
-  const hasChartAccess = hasBirthChartAccess(subscription.status);
+  const hasChartAccess = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
   const [shareOrigin, setShareOrigin] = useState('https://lunary.app');
   const [sharePopover, setSharePopover] = useState<string | null>(null);
   const firstName = useMemo(

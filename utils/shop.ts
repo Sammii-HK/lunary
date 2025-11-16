@@ -4,7 +4,13 @@ export interface DigitalPack {
   id: string;
   name: string;
   description: string;
-  category: 'moon_phases' | 'crystals' | 'spells' | 'tarot' | 'astrology' | 'seasonal';
+  category:
+    | 'moon_phases'
+    | 'crystals'
+    | 'spells'
+    | 'tarot'
+    | 'astrology'
+    | 'seasonal';
   subcategory?: string;
   price: number; // in cents
   stripeProductId?: string;
@@ -94,12 +100,12 @@ export function getRemainingDownloads(purchase: Purchase): number {
 
 export function getDownloadExpiryDays(purchase: Purchase): number | null {
   if (!purchase.expiresAt) return null;
-  
+
   const now = new Date();
   const expiry = new Date(purchase.expiresAt);
   const diffTime = expiry.getTime() - now.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return Math.max(0, diffDays);
 }
 
@@ -132,7 +138,7 @@ export function getPackPreviewUrl(pack: DigitalPack): string {
     name: pack.name,
     items: pack.metadata?.itemCount?.toString() || '0',
   });
-  
+
   return `${baseUrl}/api/shop/og?${params.toString()}`;
 }
 
@@ -141,7 +147,7 @@ export function generateDownloadFilename(pack: DigitalPack): string {
   const category = pack.category;
   const subcategory = pack.subcategory ? `_${pack.subcategory}` : '';
   const format = pack.metadata?.format?.toLowerCase() || 'pdf';
-  
+
   return `${category}${subcategory}_${slug}.${format}`;
 }
 
@@ -151,11 +157,13 @@ export function getMockPacks(): DigitalPack[] {
     {
       id: 'pack_moon_2025',
       name: 'Moon Phases 2025',
-      description: 'Complete guide to all moon phases throughout 2025, with detailed insights and spiritual guidance for each lunar cycle.',
+      description:
+        'Complete guide to all moon phases throughout 2025, with detailed insights and spiritual guidance for each lunar cycle.',
       category: 'moon_phases',
       subcategory: '2025',
       price: 1999,
-      imageUrl: '/api/shop/og?category=moon_phases&name=Moon%20Phases%202025&items=13',
+      imageUrl:
+        '/api/shop/og?category=moon_phases&name=Moon%20Phases%202025&items=13',
       stripePriceId: 'price_mock_moon_2025',
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -169,10 +177,12 @@ export function getMockPacks(): DigitalPack[] {
     {
       id: 'pack_crystals_healing',
       name: 'Crystal Healing Guide',
-      description: 'Discover the power of crystals with this comprehensive guide featuring properties, uses, and healing techniques.',
+      description:
+        'Discover the power of crystals with this comprehensive guide featuring properties, uses, and healing techniques.',
       category: 'crystals',
       price: 1499,
-      imageUrl: '/api/shop/og?category=crystals&name=Crystal%20Healing%20Guide&items=8',
+      imageUrl:
+        '/api/shop/og?category=crystals&name=Crystal%20Healing%20Guide&items=8',
       stripePriceId: 'price_mock_crystals',
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -185,10 +195,12 @@ export function getMockPacks(): DigitalPack[] {
     {
       id: 'pack_spells_protection',
       name: 'Protection Spells Collection',
-      description: 'Sacred rituals and spells for protection, cleansing, and spiritual defense.',
+      description:
+        'Sacred rituals and spells for protection, cleansing, and spiritual defense.',
       category: 'spells',
       price: 1299,
-      imageUrl: '/api/shop/og?category=spells&name=Protection%20Spells%20Collection&items=5',
+      imageUrl:
+        '/api/shop/og?category=spells&name=Protection%20Spells%20Collection&items=5',
       stripePriceId: 'price_mock_spells',
       isActive: true,
       createdAt: new Date().toISOString(),
