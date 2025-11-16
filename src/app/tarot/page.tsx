@@ -922,6 +922,21 @@ const TarotReadings = () => {
             title={`Your ${timeFrame}-Day Tarot Patterns`}
             color='zinc'
           >
+            <div className='mb-4 flex flex-wrap gap-2'>
+              {[7, 14, 20, 30, 90].map((days) => (
+                <button
+                  key={days}
+                  onClick={() => setTimeFrame(days)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    timeFrame === days
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
+                  }`}
+                >
+                  {days} days
+                </button>
+              ))}
+            </div>
             <AdvancedPatterns
               basicPatterns={
                 hasChartAccess ? personalizedReading?.trendAnalysis : undefined

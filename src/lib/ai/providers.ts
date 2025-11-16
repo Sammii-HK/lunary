@@ -246,9 +246,9 @@ export const getTarotLastReading = async ({
   try {
     const { sql } = await import('@vercel/postgres');
 
-    // Fetch the most recent tarot reading from database
+    // Fetch the most recent tarot reading from database (including all spreads and daily pulls)
     const result = await sql`
-      SELECT cards, spread_name, created_at
+      SELECT cards, spread_name, spread_slug, created_at
       FROM tarot_readings
       WHERE user_id = ${userId}
         AND archived_at IS NULL
@@ -262,7 +262,7 @@ export const getTarotLastReading = async ({
         ? row.cards
         : JSON.parse(row.cards || '[]');
 
-      return {
+      const reading = {
         spread: row.spread_name || 'Three Card Insight',
         cards: cards
           .map((card: any) => {
@@ -295,7 +295,14 @@ export const getTarotLastReading = async ({
           ),
         timestamp: row.created_at || dayjs(now).toISOString(),
       };
+
+      console.log(
+        `[Tarot Provider] Found reading for user ${userId}: spread=${reading.spread}, cards=${reading.cards.length}`,
+      );
+      return reading;
     }
+
+    console.log(`[Tarot Provider] No tarot readings found for user ${userId}`);
   } catch (error) {
     console.error('[Tarot Provider] Failed to fetch from database:', error);
   }

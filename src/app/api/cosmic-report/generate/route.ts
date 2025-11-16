@@ -5,7 +5,10 @@ import { createShareToken, buildShareUrl } from '@/lib/cosmic-report/share';
 import { CosmicReportData, COSMIC_SECTIONS } from '@/lib/cosmic-report/types';
 import { sendEmail } from '@/lib/email';
 import { requireUser } from '@/lib/ai/auth';
-import { hasFeatureAccess } from '../../../../../utils/pricing';
+import {
+  hasFeatureAccess,
+  normalizePlanType,
+} from '../../../../../utils/pricing';
 
 const generateSchema = z.object({
   report_type: z.enum(['weekly', 'monthly', 'custom']),
@@ -152,21 +155,94 @@ export async function POST(request: NextRequest) {
 
     // Check subscription status and feature access
     const subscriptionResult = await sql`
-      SELECT plan_type, status
+      SELECT plan_type, status, stripe_customer_id
       FROM subscriptions
       WHERE user_id = ${user.id}
       ORDER BY created_at DESC
       LIMIT 1
     `;
 
-    const subscription = subscriptionResult.rows[0];
-    const subscriptionStatus = subscription?.status || 'free';
-    const planType = subscription?.plan_type;
+    let subscription = subscriptionResult.rows[0];
+    // Normalize status: 'trialing' -> 'trial' for consistency with hasFeatureAccess
+    const rawStatus = subscription?.status || 'free';
+    let subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
+    // Normalize plan type to ensure correct feature access
+    let planType = normalizePlanType(subscription?.plan_type);
+    const customerId = subscription?.stripe_customer_id;
 
-    // Check if user has access to downloadable_reports feature
-    if (
-      !hasFeatureAccess(subscriptionStatus, planType, 'downloadable_reports')
-    ) {
+    // Debug logging
+    console.log('[cosmic-report/generate] Subscription check:', {
+      userId: user.id,
+      rawStatus,
+      subscriptionStatus,
+      rawPlanType: subscription?.plan_type,
+      normalizedPlanType: planType,
+      hasSubscription: !!subscription,
+      customerId,
+    });
+
+    // Check if database grants access
+    let hasAccess = hasFeatureAccess(
+      subscriptionStatus,
+      planType,
+      'downloadable_reports',
+    );
+
+    // If database doesn't grant access but we have a customer ID, check Stripe as source of truth
+    if (!hasAccess && customerId) {
+      try {
+        const stripeResponse = await fetch(
+          `${request.nextUrl.origin}/api/stripe/get-subscription`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customerId }),
+          },
+        );
+
+        if (stripeResponse.ok) {
+          const stripeData = await stripeResponse.json();
+          if (
+            (stripeData.success || stripeData.hasSubscription) &&
+            stripeData.subscription
+          ) {
+            const stripeSub = stripeData.subscription;
+            // Normalize status: 'trialing' -> 'trial' for consistency
+            const rawStripeStatus = stripeSub.status;
+            subscriptionStatus =
+              rawStripeStatus === 'trialing' ? 'trial' : rawStripeStatus;
+            planType = normalizePlanType(stripeSub.plan);
+
+            console.log('[cosmic-report/generate] Using Stripe subscription:', {
+              rawStripeStatus,
+              subscriptionStatus,
+              rawPlan: stripeSub.plan,
+              normalizedPlan: planType,
+            });
+
+            hasAccess = hasFeatureAccess(
+              subscriptionStatus,
+              planType,
+              'downloadable_reports',
+            );
+          }
+        }
+      } catch (error) {
+        console.error(
+          '[cosmic-report/generate] Failed to check Stripe subscription:',
+          error,
+        );
+      }
+    }
+
+    console.log('[cosmic-report/generate] Feature access check:', {
+      subscriptionStatus,
+      planType,
+      feature: 'downloadable_reports',
+      hasAccess,
+    });
+
+    if (!hasAccess) {
       return NextResponse.json(
         {
           success: false,

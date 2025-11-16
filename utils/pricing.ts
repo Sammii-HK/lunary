@@ -220,13 +220,22 @@ export function hasFeatureAccess(
     return FEATURE_ACCESS.free.includes(feature);
   }
 
-  if (subscriptionStatus === 'trial' || subscriptionStatus === 'active') {
+  // Normalize status: 'trialing' -> 'trial' for consistency
+  const normalizedStatus =
+    subscriptionStatus === 'trialing' ? 'trial' : subscriptionStatus;
+
+  if (normalizedStatus === 'trial' || normalizedStatus === 'active') {
     const normalizedPlan = normalizePlanType(planType);
 
+    // CRITICAL: 'yearly' should always map to annual plan features
+    // This ensures any yearly subscription gets annual plan access
+    const effectivePlan =
+      normalizedPlan === 'yearly' ? 'lunary_plus_ai_annual' : normalizedPlan;
+
     const planFeatures =
-      normalizedPlan === 'lunary_plus_ai_annual'
+      effectivePlan === 'lunary_plus_ai_annual'
         ? FEATURE_ACCESS.lunary_plus_ai_annual
-        : normalizedPlan === 'lunary_plus_ai'
+        : effectivePlan === 'lunary_plus_ai'
           ? FEATURE_ACCESS.lunary_plus_ai
           : FEATURE_ACCESS.lunary_plus;
 

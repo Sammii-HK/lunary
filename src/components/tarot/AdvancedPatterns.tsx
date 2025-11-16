@@ -113,11 +113,30 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
 
   const isAnnual = subscription.plan === 'yearly';
 
+  // Debug logging
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[AdvancedPatterns] Subscription state:', {
+        plan: subscription.plan,
+        status: subscription.status,
+        hasAdvancedAccess,
+        hasTarotPatternsAccess,
+        isSubscribed: subscription.isSubscribed,
+        customerId: subscription.customerId,
+      });
+      // Test feature access directly
+      console.log('[AdvancedPatterns] Direct feature access test:', {
+        advanced: subscription.hasAccess('advanced_patterns'),
+        tarot: subscription.hasAccess('tarot_patterns'),
+      });
+    }
+  }, [subscription, hasAdvancedAccess, hasTarotPatternsAccess]);
+
   useEffect(() => {
     if (viewMode === 'advanced' && hasAdvancedAccess && !analysis && !loading) {
       fetchAdvancedPatterns();
     }
-  }, [viewMode, hasAdvancedAccess]);
+  }, [viewMode, hasAdvancedAccess, analysis, loading]);
 
   const fetchAdvancedPatterns = async () => {
     setLoading(true);
@@ -152,6 +171,15 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
         '12-month',
       ]
     : ['year-over-year', 'multi-dimensional'];
+
+  // Wait for subscription to load before showing paywall
+  if (subscription.loading) {
+    return (
+      <div className='text-center py-8 text-zinc-400 text-sm'>
+        Loading subscription...
+      </div>
+    );
+  }
 
   // Show paywall if user doesn't have tarot_patterns access (for daily view)
   if (!hasTarotPatternsAccess) {
@@ -559,7 +587,7 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                         {analysis.enhancedTarot.timeline.days90 && (
                           <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
                             <h5 className='text-xs font-medium text-purple-300/90 mb-2'>
-                              90-Day Patterns
+                              180-Day Patterns
                             </h5>
                             {analysis.enhancedTarot.timeline.days90
                               .dominantThemes.length > 0 && (

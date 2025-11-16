@@ -326,16 +326,10 @@ export default function BookOfShadowsPage() {
                     onActionClick={(prompt) => sendMessage(prompt)}
                     disabled={isStreaming}
                   />
-                  {assistSnippet && (
-                    <p className='mb-2 text-zinc-200'>
-                      <span className='font-semibold text-purple-300/90'>
-                        Assist
-                      </span>{' '}
-                      {assistSnippet}
-                    </p>
-                  )}
                   {reflectionPrompt && (
-                    <p className='italic text-zinc-400'>{reflectionPrompt}</p>
+                    <p className='mt-3 italic text-zinc-400'>
+                      {reflectionPrompt}
+                    </p>
                   )}
                 </div>
               )}

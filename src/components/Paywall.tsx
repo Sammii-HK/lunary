@@ -46,9 +46,20 @@ interface PaywallProps {
 }
 
 export function Paywall({ feature, children, fallback }: PaywallProps) {
-  const { hasAccess, isTrialActive, trialDaysRemaining, showUpgradePrompt } =
-    useSubscription();
+  const {
+    hasAccess,
+    isTrialActive,
+    trialDaysRemaining,
+    showUpgradePrompt,
+    loading,
+  } = useSubscription();
   const authState = useAuthStatus();
+
+  // If subscription is still loading, show children (components handle their own loading states)
+  // This prevents premature paywall display while subscription loads
+  if (loading) {
+    return <>{children}</>;
+  }
 
   if (hasAccess(feature)) {
     return <>{children}</>;

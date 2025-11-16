@@ -58,7 +58,10 @@ export async function GET(request: NextRequest) {
     `;
 
     const subscription = subscriptionResult.rows[0];
-    const subscriptionStatus = subscription?.status || 'free';
+    // Normalize status: 'trialing' -> 'trial' for consistency with hasFeatureAccess
+    const rawStatus = subscription?.status || 'free';
+    const subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
+    // Normalize plan type to ensure correct feature access
     const planType = normalizePlanType(subscription?.plan_type);
 
     if (!hasFeatureAccess(subscriptionStatus, planType, 'data_export')) {

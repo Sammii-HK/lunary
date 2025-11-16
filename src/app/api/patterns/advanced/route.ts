@@ -75,6 +75,15 @@ async function getYearOverYearComparison(
   const lastYearStart = thisYearStart.subtract(1, 'year');
   const lastYearEnd = thisYearStart.subtract(1, 'day');
 
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[getYearOverYearComparison] Date ranges:', {
+      thisYearStart: thisYearStart.toISOString(),
+      lastYearStart: lastYearStart.toISOString(),
+      lastYearEnd: lastYearEnd.toISOString(),
+      now: now.toISOString(),
+    });
+  }
+
   // Get readings from this year
   const thisYearResult = await sql`
     SELECT cards, created_at
@@ -86,7 +95,7 @@ async function getYearOverYearComparison(
   `;
 
   // Get readings from last year
-  const lastYearResult = await sql`
+  let lastYearResult = await sql`
     SELECT cards, created_at
     FROM tarot_readings
     WHERE user_id = ${userId}
@@ -95,6 +104,28 @@ async function getYearOverYearComparison(
       AND created_at < ${thisYearStart.toISOString()}
     ORDER BY created_at DESC
   `;
+
+  // If last year is empty, use ALL historical data before this year
+  if (lastYearResult.rows.length === 0) {
+    console.log(
+      '[getYearOverYearComparison] Last year empty, using all historical data',
+    );
+    lastYearResult = await sql`
+      SELECT cards, created_at
+      FROM tarot_readings
+      WHERE user_id = ${userId}
+        AND archived_at IS NULL
+        AND created_at < ${thisYearStart.toISOString()}
+      ORDER BY created_at DESC
+    `;
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[getYearOverYearComparison] Results:', {
+      thisYearCount: thisYearResult.rows.length,
+      lastYearCount: lastYearResult.rows.length,
+    });
+  }
 
   const analyzeReadings = (readings: any[]) => {
     const cardFrequency: { [key: string]: number } = {};
@@ -184,15 +215,28 @@ async function getEnhancedTarotPatterns(
   planType: string,
 ): Promise<AdvancedPatternAnalysis['enhancedTarot']> {
   const days = planType === 'lunary_plus_ai_annual' ? 365 : 90;
+  const startDate = dayjs().subtract(days, 'day');
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      `[getEnhancedTarotPatterns] Querying ${days} days (plan: ${planType}): from ${startDate.toISOString()} to now`,
+    );
+  }
 
   const result = await sql`
     SELECT cards, created_at
     FROM tarot_readings
     WHERE user_id = ${userId}
       AND archived_at IS NULL
-      AND created_at >= NOW() - INTERVAL '${days} days'
+      AND created_at >= NOW() - (${days} || ' days')::INTERVAL
     ORDER BY created_at DESC
   `;
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      `[getEnhancedTarotPatterns] Found ${result.rows.length} readings for ${days}-day period`,
+    );
+  }
 
   const suitCounts: { [key: string]: number } = {};
   const arcanaCounts = { major: 0, minor: 0 };
@@ -247,7 +291,7 @@ async function getEnhancedTarotPatterns(
   };
 
   if (planType === 'lunary_plus_ai_annual') {
-    timeline.days90 = await getTimelineAnalysis(userId, 90);
+    timeline.days90 = await getTimelineAnalysis(userId, 180); // Changed from 90 to 180
     timeline.days365 = await getTimelineAnalysis(userId, 365);
   }
 
@@ -268,13 +312,25 @@ async function getTimelineAnalysis(
   dominantThemes: string[];
   frequentCards: Array<{ name: string; count: number }>;
 }> {
+  const startDate = dayjs().subtract(days, 'day');
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      `[getTimelineAnalysis] Querying ${days} days: from ${startDate.toISOString()} to now`,
+    );
+  }
   const result = await sql`
     SELECT cards
     FROM tarot_readings
     WHERE user_id = ${userId}
       AND archived_at IS NULL
-      AND created_at >= NOW() - INTERVAL '${days} days'
+      AND created_at >= NOW() - (${days} || ' days')::INTERVAL
   `;
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      `[getTimelineAnalysis] Found ${result.rows.length} readings for ${days}-day period`,
+    );
+  }
 
   const cardFrequency: { [key: string]: number } = {};
   const keywordCounts: { [key: string]: number } = {};
@@ -366,16 +422,74 @@ export async function GET(request: NextRequest) {
     const user = await requireUser(request);
 
     const subscriptionResult = await sql`
-      SELECT plan_type, status
+      SELECT plan_type, status, stripe_customer_id
       FROM subscriptions
       WHERE user_id = ${user.id}
       ORDER BY created_at DESC
       LIMIT 1
     `;
 
-    const subscription = subscriptionResult.rows[0];
-    const subscriptionStatus = subscription?.status || 'free';
-    const planType = normalizePlanType(subscription?.plan_type);
+    let subscription = subscriptionResult.rows[0];
+    // Normalize status: 'trialing' -> 'trial' for consistency with hasFeatureAccess
+    const rawStatus = subscription?.status || 'free';
+    let subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
+    let planType = normalizePlanType(subscription?.plan_type);
+    const customerId = subscription?.stripe_customer_id;
+    const rawPlanType = subscription?.plan_type;
+
+    // Always check Stripe if we have customer ID (Stripe is source of truth)
+    // This ensures we get correct plan even if database is stale
+    if (customerId) {
+      try {
+        const stripeResponse = await fetch(
+          `${request.nextUrl.origin}/api/stripe/get-subscription`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customerId }),
+          },
+        );
+
+        if (stripeResponse.ok) {
+          const stripeData = await stripeResponse.json();
+          if (
+            (stripeData.success || stripeData.hasSubscription) &&
+            stripeData.subscription
+          ) {
+            const stripeSub = stripeData.subscription;
+            // Normalize status: 'trialing' -> 'trial' for consistency
+            const rawStripeStatus = stripeSub.status;
+            subscriptionStatus =
+              rawStripeStatus === 'trialing' ? 'trial' : rawStripeStatus;
+            planType = normalizePlanType(stripeSub.plan);
+            console.log(
+              `[patterns/advanced] Fetched from Stripe: rawStatus=${rawStripeStatus}, status=${subscriptionStatus}, plan=${stripeSub.plan}, normalized=${planType}, hasAccess=${hasFeatureAccess(subscriptionStatus, planType, 'advanced_patterns')}`,
+            );
+          } else {
+            console.log(
+              '[patterns/advanced] Stripe response missing subscription data',
+            );
+          }
+        } else {
+          console.log(
+            `[patterns/advanced] Stripe fetch failed: ${stripeResponse.status}`,
+          );
+        }
+      } catch (error) {
+        console.error(
+          '[patterns/advanced] Failed to fetch from Stripe:',
+          error,
+        );
+      }
+    } else {
+      console.log(
+        '[patterns/advanced] No customer ID, using database subscription',
+      );
+    }
+
+    console.log(
+      `[patterns/advanced] User ${user.id}: status=${subscriptionStatus}, planType=${planType}, hasAccess=${hasFeatureAccess(subscriptionStatus, planType, 'advanced_patterns')}`,
+    );
 
     if (!hasFeatureAccess(subscriptionStatus, planType, 'advanced_patterns')) {
       return NextResponse.json(
@@ -399,10 +513,30 @@ export async function GET(request: NextRequest) {
     };
 
     if (planType === 'lunary_plus_ai_annual') {
+      // Use explicit different date ranges to ensure queries are different
+      const sixMonthsDays = 183; // 6 months = ~183 days
+      const twelveMonthsDays = 365; // 12 months = 365 days
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[patterns/advanced] Fetching extended timeline:', {
+          sixMonthsDays,
+          twelveMonthsDays,
+        });
+      }
+
       const [months6, months12] = await Promise.all([
-        getTimelineAnalysis(user.id, 180),
-        getTimelineAnalysis(user.id, 365),
+        getTimelineAnalysis(user.id, sixMonthsDays),
+        getTimelineAnalysis(user.id, twelveMonthsDays),
       ]);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[patterns/advanced] Extended timeline results:', {
+          months6Cards: months6.frequentCards.length,
+          months6Themes: months6.dominantThemes.length,
+          months12Cards: months12.frequentCards.length,
+          months12Themes: months12.dominantThemes.length,
+        });
+      }
 
       analysis.extendedTimeline = {
         months6: {

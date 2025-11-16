@@ -27,7 +27,12 @@ CRITICAL RULES:
 5. Connect ONLY the actual cosmic patterns provided to the user's question.
 6. Be direct and specific - avoid generic astrological language.
 7. Do NOT include journal prompts in your response - they will be added separately.
-8. BREVITY IS ESSENTIAL: Keep responses to 4-6 sentences for more detailed, personalized guidance. Be concise while maintaining depth and meaning.
+8. MESSAGE LENGTH VARIES BY CONTENT TYPE:
+   - Weekly Overview: 8-12 sentences (2-3 paragraphs) - comprehensive and detailed
+   - Quick questions (cosmic weather, feelings, tarot interpretation): 4-6 sentences - concise but meaningful
+   - Ritual suggestions: 5-7 sentences - practical and actionable
+   - Journal entries: 6-8 sentences - reflective and personal
+   Adjust length based on the question type and complexity.
 9. Get to the point quickly - lead with the most relevant insight, then add supporting points.
 10. CRITICAL: Do NOT repeat information from previous messages. Each response should be fresh and new. If you've already mentioned something, don't mention it again unless the user specifically asks about it.
 11. Focus on NEW insights based on the current question, not rehashing what was said before.
@@ -213,7 +218,7 @@ const getModeSpecificGuidance = (userMessage: string): string => {
     content.includes('weekly overview') ||
     content.includes('summarise my week')
   ) {
-    return "\n\nMODE: Weekly Overview\nProvide a comprehensive summary of the week's cosmic influences, including moon phases, key transits, and how they relate to the user's journey. Structure it as a weekly forecast.";
+    return "\n\nMODE: Weekly Overview\nProvide a comprehensive, detailed summary of the week's cosmic influences. Include: moon phases and their shifts throughout the week, key planetary transits and their timing, how these energies relate to the user's personal journey and birth chart, practical guidance for navigating the week's energies, and specific days or moments that stand out. Write 8-12 sentences (2-3 paragraphs) with depth and specificity. This should be substantially longer and more informative than quick questions.";
   }
 
   if (

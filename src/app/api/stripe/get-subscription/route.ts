@@ -127,10 +127,13 @@ export async function POST(request: NextRequest) {
       subscription: {
         id: subscription.id,
         status: subscription.status,
+        customerId: subscription.customer,
         customer: subscription.customer,
         plan: planType,
+        planName: planType, // Include planName for compatibility
         current_period_end: (subscription as any).current_period_end || null,
         trial_end: (subscription as any).trial_end || null,
+        trialEnd: (subscription as any).trial_end || null, // Include both formats
         items: subscription.items,
         created: subscription.created,
       },

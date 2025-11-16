@@ -38,10 +38,13 @@ export default function CosmicStatePage() {
     fetchCosmicState();
   }, [me]);
 
+  // Wait for subscription to load before determining free user status
   const isFreeUser =
-    !subscription.isSubscribed && subscription.status === 'free';
+    !subscription.loading &&
+    !subscription.isSubscribed &&
+    subscription.status === 'free';
 
-  if (loading) {
+  if (loading || subscription.loading) {
     return (
       <div className='min-h-screen bg-black text-white flex items-center justify-center'>
         <div className='text-zinc-400'>Loading your cosmic state...</div>

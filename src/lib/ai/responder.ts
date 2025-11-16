@@ -146,10 +146,29 @@ export const composeAssistantReply = async ({
       }
     }
 
+    // Determine max_tokens based on content type
+    const isWeeklyOverview =
+      userMessage.toLowerCase().includes('weekly overview') ||
+      userMessage.toLowerCase().includes('summarise my week');
+    const isRitualRequest =
+      userMessage.toLowerCase().includes('ritual') &&
+      (userMessage.toLowerCase().includes('moon') ||
+        userMessage.toLowerCase().includes('tonight'));
+    const isJournalEntry =
+      userMessage.toLowerCase().includes('journal entry') ||
+      userMessage.toLowerCase().includes('format as journal');
+
+    let maxTokens = 400; // Default for quick questions
+    if (isWeeklyOverview) {
+      maxTokens = 600; // Longer for comprehensive weekly overviews
+    } else if (isRitualRequest || isJournalEntry) {
+      maxTokens = 500; // Medium length for rituals and journal entries
+    }
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
-      max_tokens: 400, // Increased for more detailed, personalized responses
+      max_tokens: maxTokens,
       temperature: 0.9,
     });
 
