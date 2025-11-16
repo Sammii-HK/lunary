@@ -63,7 +63,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     features: [
       'Everything in Lunary+',
       'Unlimited AI chat (Lunary Copilot)',
-      'Deeper tarot readings',
+      'Advanced pattern analysis',
       'Personalized weekly reports',
       'Saved chat threads',
       'Cosmic Report Generator (downloadable PDF reports)',
@@ -76,15 +76,15 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'lunary_plus_ai_annual',
     name: 'Lunary+ AI Annual',
     description: 'Full year of cosmic wisdom with AI',
-    price: 79.99,
+    price: 89.99,
     interval: 'year',
     stripePriceId:
       process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID || '',
-    savings: 'Save 26%',
+    savings: 'Save 17%',
     features: [
       'Everything in Lunary+ AI',
       'Unlimited tarot spreads',
-      'Advanced pattern analysis',
+      'Extended timeline analysis (6 & 12-month trends)',
       'Yearly cosmic forecast',
       'Export your cosmic data',
       'Unlimited collections & folders',

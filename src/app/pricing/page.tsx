@@ -72,11 +72,33 @@ export default function PricingPage() {
       if (plan.price === 0) return plan;
 
       const currencyPrice = getPriceForCurrency(plan.id as any, currency);
+      const displayPrice = currencyPrice?.amount || plan.price;
+      const displayCurrency = currencyPrice?.currency.toUpperCase() || currency;
+
+      // Calculate dynamic savings for annual plan
+      let calculatedSavings: string | undefined = plan.savings;
+      if (plan.interval === 'year' && plan.id === 'lunary_plus_ai_annual') {
+        // Find the monthly AI plan price in the same currency
+        const monthlyAIPrice = getPriceForCurrency(
+          'lunary_plus_ai' as any,
+          currency,
+        );
+        if (monthlyAIPrice) {
+          const yearlyCost = monthlyAIPrice.amount * 12;
+          const savings = yearlyCost - displayPrice;
+          const savingsPercent = Math.round((savings / yearlyCost) * 100);
+          calculatedSavings = `Save ${savingsPercent}%`;
+        }
+      }
+
+      // Always prefer currency-specific price ID, never fall back to env var
+      // as it might point to old prices
       return {
         ...plan,
-        displayPrice: currencyPrice?.amount || plan.price,
-        displayCurrency: currencyPrice?.currency.toUpperCase() || currency,
-        currencyPriceId: currencyPrice?.priceId || plan.stripePriceId,
+        displayPrice,
+        displayCurrency,
+        currencyPriceId: currencyPrice?.priceId || undefined, // Don't fall back to old env var
+        calculatedSavings,
       };
     });
   }, [pricingPlans, currency]);
@@ -279,11 +301,11 @@ export default function PricingPage() {
                       </div>
                     )}
 
-                    {plan.savings && (
+                    {(plan.calculatedSavings || plan.savings) && (
                       <div className='absolute -top-3 right-3 z-20'>
                         <div className='px-2.5 py-1 rounded-full border border-zinc-700/50 bg-zinc-800/80 backdrop-blur-sm'>
                           <span className='text-xs font-semibold text-zinc-300'>
-                            {plan.savings}
+                            {plan.calculatedSavings || plan.savings}
                           </span>
                         </div>
                       </div>
@@ -369,14 +391,28 @@ export default function PricingPage() {
                           </Link>
                         ) : (
                           <button
-                            onClick={() =>
-                              handleSubscribe(
-                                plan.currencyPriceId || plan.stripePriceId,
-                                plan.id,
-                              )
-                            }
+                            onClick={() => {
+                              const priceId =
+                                (plan as any).currencyPriceId ||
+                                plan.stripePriceId;
+                              if (!priceId) {
+                                console.error(
+                                  'No price ID available for plan:',
+                                  plan.id,
+                                );
+                                alert(
+                                  'Price not available. Please refresh the page.',
+                                );
+                                return;
+                              }
+                              handleSubscribe(priceId, plan.id);
+                            }}
                             disabled={
-                              loading === plan.id || !plan.stripePriceId
+                              loading === plan.id ||
+                              !(
+                                (plan as any).currencyPriceId ||
+                                plan.stripePriceId
+                              )
                             }
                             className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
                               plan.popular
