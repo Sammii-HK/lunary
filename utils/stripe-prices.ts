@@ -321,13 +321,19 @@ export function getPriceForCurrency(
   const planPrices = STRIPE_PRICE_MAPPING[planId];
   if (!planPrices) return null;
 
+  const upperCurrency = currency.toUpperCase() as keyof typeof planPrices;
+
   // Try exact match first
-  if (planPrices[currency.toUpperCase()]) {
-    return planPrices[currency.toUpperCase()];
+  if (upperCurrency in planPrices && planPrices[upperCurrency]) {
+    return planPrices[upperCurrency] as {
+      priceId: string;
+      amount: number;
+      currency: string;
+    };
   }
 
   // Fallback to USD
-  return planPrices['USD'] || null;
+  return (planPrices as any)['USD'] || null;
 }
 
 export function getAvailableCurrencies(planId: PlanId): string[] {
