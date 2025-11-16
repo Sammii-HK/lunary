@@ -498,7 +498,7 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                             )}
                             {analysis.yearOverYear.thisYear.frequentCards
                               .length > 0 && (
-                              <div className='space-y-1'>
+                              <div className='space-y-3'>
                                 {analysis.yearOverYear.thisYear.frequentCards
                                   .slice(0, 3)
                                   .map((card) => {
@@ -509,33 +509,46 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                                           t.metric ===
                                           `${card.name} appearances`,
                                       );
+                                    // Find recap for this card if available
+                                    const cardRecap =
+                                      analysis.yearOverYear.thisYear.cardRecaps?.find(
+                                        (r) => r.cardName === card.name,
+                                      );
                                     return (
                                       <div
                                         key={card.name}
-                                        className='flex items-center justify-between text-xs'
+                                        className='space-y-1'
                                       >
-                                        <span className='text-zinc-300'>
-                                          {card.name} ({card.count}x)
-                                        </span>
-                                        {cardTrend && (
-                                          <span
-                                            className={cn(
-                                              'flex items-center gap-0.5 text-[10px]',
-                                              cardTrend.direction === 'up'
-                                                ? 'text-emerald-400'
-                                                : cardTrend.direction === 'down'
-                                                  ? 'text-red-400'
-                                                  : 'text-zinc-500',
-                                            )}
-                                          >
-                                            {cardTrend.direction === 'up'
-                                              ? '↑'
-                                              : cardTrend.direction === 'down'
-                                                ? '↓'
-                                                : '→'}
-                                            {cardTrend.change > 0 ? '+' : ''}
-                                            {cardTrend.change}%
+                                        <div className='flex items-center justify-between text-xs'>
+                                          <span className='text-zinc-300 font-medium'>
+                                            {card.name} ({card.count}x)
                                           </span>
+                                          {cardTrend && (
+                                            <span
+                                              className={cn(
+                                                'flex items-center gap-0.5 text-[10px]',
+                                                cardTrend.direction === 'up'
+                                                  ? 'text-emerald-400'
+                                                  : cardTrend.direction ===
+                                                      'down'
+                                                    ? 'text-red-400'
+                                                    : 'text-zinc-500',
+                                              )}
+                                            >
+                                              {cardTrend.direction === 'up'
+                                                ? '↑'
+                                                : cardTrend.direction === 'down'
+                                                  ? '↓'
+                                                  : '→'}
+                                              {cardTrend.change > 0 ? '+' : ''}
+                                              {cardTrend.change}%
+                                            </span>
+                                          )}
+                                        </div>
+                                        {cardRecap && (
+                                          <p className='text-xs text-zinc-400 leading-relaxed'>
+                                            {cardRecap.recap}
+                                          </p>
                                         )}
                                       </div>
                                     );

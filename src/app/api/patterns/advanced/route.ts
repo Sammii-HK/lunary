@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import { unstable_cache } from 'next/cache';
 import { generateSpreadReading } from '@/utils/tarot/spreadReading';
 import { TAROT_SPREAD_MAP } from '@/constants/tarotSpreads';
+import { getTarotCardByName } from '@/utils/tarot/deck';
 
 export const revalidate = 86400; // 24 hours cache
 
@@ -222,7 +223,7 @@ async function getCachedYearAnalysis(
   let storedAnalysis;
   try {
     storedAnalysis = await sql`
-      SELECT analysis_data, card_recaps, trends
+      SELECT analysis_data, trends
       FROM year_analysis
       WHERE user_id = ${userId} AND year = ${year}
       LIMIT 1
@@ -243,10 +244,15 @@ async function getCachedYearAnalysis(
             `[getCachedYearAnalysis] Using stored analysis for year ${year} from database`,
           );
         }
-        // Return analysis with card_recaps and trends if available
+        // Generate card recaps on-the-fly from frequentCards (no need to store in DB)
+        const cardRecaps = analysis.frequentCards.slice(0, 5).map((card) => ({
+          cardName: card.name,
+          recap: generateCardRecap(card.name, card.count, 'year-over-year'),
+        }));
+
         return {
           ...analysis,
-          cardRecaps: storedAnalysis.rows[0].card_recaps || null,
+          cardRecaps: cardRecaps.length > 0 ? cardRecaps : null,
           trends: storedAnalysis.rows[0].trends || null,
         };
       }
@@ -385,9 +391,15 @@ async function getCachedYearAnalysis(
         }
       }
 
+      // Generate card recaps on-the-fly from frequentCards (no need to store in DB)
+      const cardRecaps = frequentCards.slice(0, 5).map((card) => ({
+        cardName: card.name,
+        recap: generateCardRecap(card.name, card.count, 'year-over-year'),
+      }));
+
       return {
         ...analysis,
-        cardRecaps: null,
+        cardRecaps: cardRecaps.length > 0 ? cardRecaps : null,
         trends: null,
       };
     },
@@ -648,11 +660,21 @@ async function getCachedYearAnalysis(
             }
           }
 
+          // Generate card recaps on-the-fly from frequentCards
+          const cardRecaps = frequentCards.slice(0, 5).map((card) => ({
+            cardName: card.name,
+            recap: generateCardRecap(card.name, card.count, 'year-over-year'),
+          }));
+
           // Invalidate cache so next request uses fresh data
           const { revalidateTag } = await import('next/cache');
           revalidateTag(`year-analysis-${userId}-${year}`);
 
-          return analysis;
+          return {
+            ...analysis,
+            cardRecaps: cardRecaps.length > 0 ? cardRecaps : null,
+            trends: null,
+          };
         }
       } catch (error) {
         console.error(
@@ -1374,6 +1396,27 @@ function getNumberMeaning(number: string): string {
     Ten: 'Completion of cycles',
   };
   return meanings[number] || 'Significant number pattern';
+}
+
+function generateCardRecap(
+  cardName: string,
+  count: number,
+  context: 'year-over-year' | 'timeline' = 'year-over-year',
+): string {
+  const card = getTarotCardByName(cardName);
+  if (!card) {
+    return `"${cardName}" has appeared ${count} times, indicating a significant pattern in your readings.`;
+  }
+
+  const topKeywords = card.keywords.slice(0, 2).join(' and ');
+  const frequencyContext =
+    count >= 5 ? 'frequently' : count >= 3 ? 'regularly' : 'notably';
+
+  if (context === 'year-over-year') {
+    return `"${cardName}" has appeared ${count} times ${frequencyContext} throughout this period, emphasizing ${topKeywords.toLowerCase()} themes in your journey. This card's presence suggests ${card.keywords[0]?.toLowerCase() || 'significant'} energies are woven into your path, inviting reflection on how these patterns relate to your current experiences.`;
+  } else {
+    return `"${cardName}" appears ${frequencyContext} (${count} times) in this timeline, highlighting ${topKeywords.toLowerCase()} as key themes. The card's emphasis on ${card.keywords[0]?.toLowerCase() || 'these patterns'} suggests important patterns worth exploring in your spiritual practice.`;
+  }
 }
 
 export async function GET(request: NextRequest) {
