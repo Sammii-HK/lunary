@@ -12,6 +12,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import dayjs from 'dayjs';
 
 type AdvancedPatternAnalysis = {
   yearOverYear: {
@@ -92,11 +93,19 @@ type AdvancedPatternAnalysis = {
       dominantThemes: string[];
       frequentCards: Array<{ name: string; count: number }>;
       trendAnalysis: string[];
+      timelineData?: Array<{
+        date: string;
+        cards: Array<{ name: string; suit: string }>;
+      }>;
     };
     months12?: {
       dominantThemes: string[];
       frequentCards: Array<{ name: string; count: number }>;
       trendAnalysis: string[];
+      timelineData?: Array<{
+        date: string;
+        cards: Array<{ name: string; suit: string }>;
+      }>;
     };
   };
 };
@@ -887,103 +896,17 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                       </div>
                       {timelinePeriod === '6-month' &&
                         analysis.extendedTimeline.months6 && (
-                          <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-                            {analysis.extendedTimeline.months6.dominantThemes
-                              .length > 0 && (
-                              <div className='flex flex-wrap gap-1.5 mb-3'>
-                                {analysis.extendedTimeline.months6.dominantThemes.map(
-                                  (theme) => (
-                                    <span
-                                      key={theme}
-                                      className='px-2 py-0.5 text-xs rounded bg-purple-500/20 text-purple-200'
-                                    >
-                                      {theme}
-                                    </span>
-                                  ),
-                                )}
-                              </div>
-                            )}
-                            {analysis.extendedTimeline.months6.frequentCards
-                              .length > 0 && (
-                              <div className='space-y-1 mb-3'>
-                                {analysis.extendedTimeline.months6.frequentCards
-                                  .slice(0, 5)
-                                  .map((card) => (
-                                    <div
-                                      key={card.name}
-                                      className='text-xs text-zinc-300'
-                                    >
-                                      {card.name} ({card.count}x)
-                                    </div>
-                                  ))}
-                              </div>
-                            )}
-                            {analysis.extendedTimeline.months6.trendAnalysis
-                              .length > 0 && (
-                              <div className='space-y-2'>
-                                {analysis.extendedTimeline.months6.trendAnalysis.map(
-                                  (insight, idx) => (
-                                    <p
-                                      key={idx}
-                                      className='text-xs text-zinc-300'
-                                    >
-                                      {insight}
-                                    </p>
-                                  ),
-                                )}
-                              </div>
-                            )}
-                          </div>
+                          <TimelineVisualization
+                            data={analysis.extendedTimeline.months6}
+                            period={6}
+                          />
                         )}
                       {timelinePeriod === '12-month' &&
                         analysis.extendedTimeline.months12 && (
-                          <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                            {analysis.extendedTimeline.months12.dominantThemes
-                              .length > 0 && (
-                              <div className='flex flex-wrap gap-1.5 mb-3'>
-                                {analysis.extendedTimeline.months12.dominantThemes.map(
-                                  (theme) => (
-                                    <span
-                                      key={theme}
-                                      className='px-2 py-0.5 text-xs rounded bg-indigo-500/20 text-indigo-200'
-                                    >
-                                      {theme}
-                                    </span>
-                                  ),
-                                )}
-                              </div>
-                            )}
-                            {analysis.extendedTimeline.months12.frequentCards
-                              .length > 0 && (
-                              <div className='space-y-1 mb-3'>
-                                {analysis.extendedTimeline.months12.frequentCards
-                                  .slice(0, 5)
-                                  .map((card) => (
-                                    <div
-                                      key={card.name}
-                                      className='text-xs text-zinc-300'
-                                    >
-                                      {card.name} ({card.count}x)
-                                    </div>
-                                  ))}
-                              </div>
-                            )}
-                            {analysis.extendedTimeline.months12.trendAnalysis
-                              .length > 0 && (
-                              <div className='space-y-2'>
-                                {analysis.extendedTimeline.months12.trendAnalysis.map(
-                                  (insight, idx) => (
-                                    <p
-                                      key={idx}
-                                      className='text-xs text-zinc-300'
-                                    >
-                                      {insight}
-                                    </p>
-                                  ),
-                                )}
-                              </div>
-                            )}
-                          </div>
+                          <TimelineVisualization
+                            data={analysis.extendedTimeline.months12}
+                            period={12}
+                          />
                         )}
                     </div>
                   )}
@@ -991,6 +914,318 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
               )}
             </>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function getCardSuitColor(cardName: string): string {
+  if (
+    cardName.includes('Major') ||
+    [
+      'Fool',
+      'Magician',
+      'High Priestess',
+      'Empress',
+      'Emperor',
+      'Hierophant',
+      'Lovers',
+      'Chariot',
+      'Strength',
+      'Hermit',
+      'Wheel of Fortune',
+      'Justice',
+      'Hanged Man',
+      'Death',
+      'Temperance',
+      'Devil',
+      'Tower',
+      'Star',
+      'Moon',
+      'Sun',
+      'Judgement',
+      'World',
+    ].some((name) => cardName.includes(name))
+  ) {
+    return 'bg-purple-500/30 border-purple-500/50';
+  }
+  if (cardName.includes('Wands')) return 'bg-red-500/30 border-red-500/50';
+  if (cardName.includes('Cups')) return 'bg-blue-500/30 border-blue-500/50';
+  if (cardName.includes('Swords'))
+    return 'bg-yellow-500/30 border-yellow-500/50';
+  if (cardName.includes('Pentacles'))
+    return 'bg-green-500/30 border-green-500/50';
+  return 'bg-zinc-500/30 border-zinc-500/50';
+}
+
+function TimelineVisualization({
+  data,
+  period,
+}: {
+  data: {
+    dominantThemes: string[];
+    frequentCards: Array<{ name: string; count: number }>;
+    trendAnalysis: string[];
+    timelineData?: Array<{
+      date: string;
+      cards: Array<{ name: string; suit: string }>;
+    }>;
+  };
+  period: number;
+}) {
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
+  const startDate = dayjs().subtract(period, 'month');
+  const endDate = dayjs();
+  const totalDays = endDate.diff(startDate, 'day');
+
+  const months = Array.from({ length: period }, (_, i) => {
+    const date = dayjs().subtract(period - 1 - i, 'month');
+    return {
+      label: date.format('MMM'),
+      date: date.format('YYYY-MM'),
+      startDay: date.startOf('month').diff(startDate, 'day'),
+      daysInMonth: date.daysInMonth(),
+    };
+  });
+
+  // Build card markers from timeline data - show ALL cards, not just top ones
+  const cardMarkers: Array<{
+    date: string;
+    position: number;
+    cards: Array<{ name: string; suit: string }>;
+  }> = [];
+
+  if (data.timelineData) {
+    data.timelineData.forEach((entry) => {
+      const entryDate = dayjs(entry.date);
+      const position = (entryDate.diff(startDate, 'day') / totalDays) * 100;
+      cardMarkers.push({
+        date: entry.date,
+        position: Math.max(0, Math.min(100, position)),
+        cards: entry.cards,
+      });
+    });
+  }
+
+  // Group cards by suit for trend visualization
+  const suitTrends: {
+    [suit: string]: Array<{ date: string; position: number }>;
+  } = {};
+  cardMarkers.forEach((marker) => {
+    marker.cards.forEach((card) => {
+      if (!suitTrends[card.suit]) {
+        suitTrends[card.suit] = [];
+      }
+      suitTrends[card.suit].push({
+        date: marker.date,
+        position: marker.position,
+      });
+    });
+  });
+
+  return (
+    <div className='space-y-4'>
+      <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
+        <div className='mb-4'>
+          <h5 className='text-xs font-medium text-purple-300/90 mb-3'>
+            Timeline Visualization ({period} Months)
+          </h5>
+          <div className='relative h-12 bg-zinc-900/50 rounded overflow-hidden'>
+            {/* Month labels */}
+            <div className='absolute inset-0 flex'>
+              {months.map((month, idx) => (
+                <div
+                  key={month.date}
+                  className='flex-1 border-r border-zinc-800/50 last:border-r-0 relative'
+                  style={{
+                    background: `linear-gradient(135deg, ${
+                      idx % 2 === 0
+                        ? 'rgba(139, 92, 246, 0.05)'
+                        : 'rgba(99, 102, 241, 0.05)'
+                    } 0%, transparent 100%)`,
+                  }}
+                >
+                  <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500/20' />
+                  <div className='absolute top-1 left-1/2 -translate-x-1/2'>
+                    <span className='text-[8px] text-zinc-500 font-medium'>
+                      {month.label}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Card markers on timeline - show all cards as dots */}
+            {cardMarkers.map((marker, idx) => {
+              return (
+                <div
+                  key={`${marker.date}-${idx}`}
+                  className='absolute top-0 bottom-0'
+                  style={{ left: `${marker.position}%` }}
+                  onMouseEnter={() => setHoveredDate(marker.date)}
+                  onMouseLeave={() => setHoveredDate(null)}
+                >
+                  <div className='relative h-full flex items-center justify-center'>
+                    {/* Show dots for each card, stacked vertically if multiple */}
+                    <div className='flex flex-col gap-0.5 items-center'>
+                      {marker.cards.map((card, cardIdx) => {
+                        const suitColor = getCardSuitColor(card.name);
+                        return (
+                          <div
+                            key={`${marker.date}-${card.name}-${cardIdx}`}
+                            className={cn(
+                              'w-1.5 h-1.5 rounded-full border border-white/30 transition-all',
+                              suitColor,
+                              hoveredDate === marker.date
+                                ? 'opacity-100 scale-150'
+                                : 'opacity-80',
+                            )}
+                            title={`${card.name} - ${dayjs(marker.date).format('MMM D')}`}
+                          />
+                        );
+                      })}
+                    </div>
+                    {hoveredDate === marker.date && (
+                      <div className='absolute left-1/2 -translate-x-1/2 -top-12 z-10 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-300 min-w-[120px]'>
+                        <div className='font-medium mb-1 text-zinc-200'>
+                          {dayjs(marker.date).format('MMM D, YYYY')}
+                        </div>
+                        <div className='space-y-0.5 max-h-32 overflow-y-auto'>
+                          {marker.cards.map((card) => (
+                            <div
+                              key={card.name}
+                              className='text-[10px] flex items-center gap-1'
+                            >
+                              <div
+                                className={cn(
+                                  'w-1.5 h-1.5 rounded-full',
+                                  getCardSuitColor(card.name),
+                                )}
+                              />
+                              {card.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Trend lines for suits */}
+            {Object.entries(suitTrends).map(([suit, points]) => {
+              if (points.length < 2) return null;
+              const suitColor = getCardSuitColor(`${suit} of Test`);
+              const sortedPoints = points.sort(
+                (a, b) => a.position - b.position,
+              );
+              const pathData = sortedPoints
+                .map((point, idx) => {
+                  const x = point.position;
+                  const y = 50 + (idx % 3) * 5 - 5; // Slight vertical offset for visual separation
+                  return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                })
+                .join(' ');
+
+              let strokeColor = 'rgba(139, 92, 246, 0.3)';
+              if (suitColor.includes('red')) {
+                strokeColor = 'rgba(239, 68, 68, 0.3)';
+              } else if (suitColor.includes('blue')) {
+                strokeColor = 'rgba(59, 130, 246, 0.3)';
+              } else if (suitColor.includes('yellow')) {
+                strokeColor = 'rgba(234, 179, 8, 0.3)';
+              } else if (suitColor.includes('green')) {
+                strokeColor = 'rgba(34, 197, 94, 0.3)';
+              }
+
+              return (
+                <svg
+                  key={suit}
+                  className='absolute inset-0 pointer-events-none'
+                  style={{ zIndex: 0 }}
+                >
+                  <path
+                    d={pathData}
+                    fill='none'
+                    stroke={strokeColor}
+                    strokeWidth='1'
+                    strokeDasharray='2 2'
+                  />
+                </svg>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className='mt-3 flex items-center gap-4 text-xs text-zinc-400'>
+          <div className='flex items-center gap-1'>
+            <div className='w-1.5 h-1.5 rounded-full bg-red-500/30 border border-red-500/50' />
+            <span>Fire</span>
+          </div>
+          <div className='flex items-center gap-1'>
+            <div className='w-1.5 h-1.5 rounded-full bg-blue-500/30 border border-blue-500/50' />
+            <span>Water</span>
+          </div>
+          <div className='flex items-center gap-1'>
+            <div className='w-1.5 h-1.5 rounded-full bg-yellow-500/30 border border-yellow-500/50' />
+            <span>Air</span>
+          </div>
+          <div className='flex items-center gap-1'>
+            <div className='w-1.5 h-1.5 rounded-full bg-green-500/30 border border-green-500/50' />
+            <span>Earth</span>
+          </div>
+          <div className='flex items-center gap-1'>
+            <div className='w-1.5 h-1.5 rounded-full bg-purple-500/30 border border-purple-500/50' />
+            <span>Major</span>
+          </div>
+        </div>
+      </div>
+
+      {data.dominantThemes.length > 0 && (
+        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <h5 className='text-xs font-medium text-zinc-300 mb-2'>
+            Dominant Themes
+          </h5>
+          <div className='flex flex-wrap gap-1.5'>
+            {data.dominantThemes.map((theme) => (
+              <span
+                key={theme}
+                className='px-2 py-0.5 text-xs rounded bg-purple-500/20 text-purple-200'
+              >
+                {theme}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {data.frequentCards.length > 0 && (
+        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <h5 className='text-xs font-medium text-zinc-300 mb-2'>
+            Most Frequent Cards
+          </h5>
+          <div className='space-y-1'>
+            {data.frequentCards.slice(0, 5).map((card) => (
+              <div key={card.name} className='text-xs text-zinc-300'>
+                {card.name} ({card.count}x)
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {data.trendAnalysis.length > 0 && (
+        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <h5 className='text-xs font-medium text-zinc-300 mb-2'>
+            Trend Analysis
+          </h5>
+          <div className='space-y-2'>
+            {data.trendAnalysis.map((insight, idx) => (
+              <p key={idx} className='text-xs text-zinc-300'>
+                {insight}
+              </p>
+            ))}
+          </div>
         </div>
       )}
     </div>

@@ -192,11 +192,19 @@ interface AdvancedPatternAnalysis {
       dominantThemes: string[];
       frequentCards: Array<{ name: string; count: number }>;
       trendAnalysis: string[];
+      timelineData?: Array<{
+        date: string;
+        cards: Array<{ name: string; suit: string }>;
+      }>;
     };
     months12?: {
       dominantThemes: string[];
       frequentCards: Array<{ name: string; count: number }>;
       trendAnalysis: string[];
+      timelineData?: Array<{
+        date: string;
+        cards: Array<{ name: string; suit: string }>;
+      }>;
     };
   };
 }
@@ -1179,6 +1187,10 @@ async function getTimelineAnalysis(
 ): Promise<{
   dominantThemes: string[];
   frequentCards: Array<{ name: string; count: number }>;
+  timelineData?: Array<{
+    date: string;
+    cards: Array<{ name: string; suit: string }>;
+  }>;
 }> {
   const cacheKey = `timeline-analysis-${userId}-${days}`;
   const tags = [
@@ -1279,19 +1291,35 @@ async function getTimelineAnalysis(
         ORDER BY created_at DESC
       `;
 
+      // Build timeline data with reading dates
+      const timelineDataMap: Map<
+        string,
+        Array<{ name: string; suit: string }>
+      > = new Map();
+
       savedReadingsResult.rows.forEach((row) => {
         const cards = Array.isArray(row.cards)
           ? row.cards
           : JSON.parse(row.cards || '[]');
+        const dateKey = dayjs(row.created_at).format('YYYY-MM-DD');
+        const cardsForDate: Array<{ name: string; suit: string }> = [];
+
         cards.forEach((card: any) => {
           const cardName = card.card?.name || card.name;
+          const suit = getCardSuit(cardName);
           cardFrequency[cardName] = (cardFrequency[cardName] || 0) + 1;
+          cardsForDate.push({ name: cardName, suit });
 
           const keywords = card.card?.keywords || card.keywords || [];
           keywords.forEach((keyword: string) => {
             keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
           });
         });
+
+        if (cardsForDate.length > 0) {
+          const existing = timelineDataMap.get(dateKey) || [];
+          timelineDataMap.set(dateKey, [...existing, ...cardsForDate]);
+        }
       });
 
       if (process.env.NODE_ENV === 'development') {
@@ -1317,7 +1345,16 @@ async function getTimelineAnalysis(
         .slice(0, 10)
         .map(([name, count]) => ({ name, count: count as number }));
 
-      return { dominantThemes, frequentCards };
+      // Convert timeline data map to array, sorted by date
+      const timelineData = Array.from(timelineDataMap.entries())
+        .map(([date, cards]) => ({ date, cards }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      return {
+        dominantThemes,
+        frequentCards,
+        timelineData: timelineData.length > 0 ? timelineData : undefined,
+      };
     },
     [cacheKey],
     {
@@ -1611,10 +1648,12 @@ export async function GET(request: NextRequest) {
         months6: {
           ...months6,
           trendAnalysis: generateTrendAnalysis(months6),
+          timelineData: months6.timelineData,
         },
         months12: {
           ...months12,
           trendAnalysis: generateTrendAnalysis(months12),
+          timelineData: months12.timelineData,
         },
       };
     }
