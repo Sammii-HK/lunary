@@ -121,14 +121,23 @@ export const composeAssistantReply = async ({
           const recentMessages = thread.messages
             .slice(-6)
             .map((msg) => ({
-              role: msg.role === 'user' ? 'user' : 'assistant',
+              role: (msg.role === 'user' ? 'user' : 'assistant') as
+                | 'user'
+                | 'assistant',
               content: msg.content,
             }))
             .filter((msg) => msg.content.trim().length > 0);
 
           if (recentMessages.length > 0) {
             // Insert history before the current user message
-            messages.splice(messages.length - 1, 0, ...recentMessages);
+            messages.splice(
+              messages.length - 1,
+              0,
+              ...(recentMessages as Array<{
+                role: 'user' | 'assistant';
+                content: string;
+              }>),
+            );
           }
         }
       } catch (error) {

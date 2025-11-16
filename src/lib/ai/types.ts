@@ -106,7 +106,11 @@ export type LunaryContext = {
   };
 };
 
-export type AiPlanId = 'free' | 'lunary_plus' | 'lunary_plus_ai';
+export type AiPlanId =
+  | 'free'
+  | 'lunary_plus'
+  | 'lunary_plus_ai'
+  | 'lunary_plus_ai_annual';
 
 export type AiPlan = {
   id: AiPlanId;
