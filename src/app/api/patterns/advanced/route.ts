@@ -177,13 +177,19 @@ async function getCachedYearAnalysis(
   dominantThemes: string[];
   frequentCards: Array<{ name: string; count: number }>;
   patternInsights: string[];
+  cardRecaps?: Array<{ cardName: string; recap: string }> | null;
+  trends?: Array<{
+    metric: string;
+    change: number;
+    direction: 'up' | 'down' | 'stable';
+  }> | null;
 }> {
   // Check database first for stored analysis (persistent cache)
   // Handle gracefully if table doesn't exist yet
   let storedAnalysis;
   try {
     storedAnalysis = await sql`
-      SELECT analysis_data
+      SELECT analysis_data, card_recaps, trends
       FROM year_analysis
       WHERE user_id = ${userId} AND year = ${year}
       LIMIT 1
@@ -204,7 +210,12 @@ async function getCachedYearAnalysis(
             `[getCachedYearAnalysis] Using stored analysis for year ${year} from database`,
           );
         }
-        return analysis;
+        // Return analysis with card_recaps and trends if available
+        return {
+          ...analysis,
+          cardRecaps: storedAnalysis.rows[0].card_recaps || null,
+          trends: storedAnalysis.rows[0].trends || null,
+        };
       }
     }
   } catch (error: any) {
@@ -341,7 +352,11 @@ async function getCachedYearAnalysis(
         }
       }
 
-      return analysis;
+      return {
+        ...analysis,
+        cardRecaps: null,
+        trends: null,
+      };
     },
     [cacheKey],
     {

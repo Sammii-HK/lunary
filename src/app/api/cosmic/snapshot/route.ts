@@ -20,13 +20,26 @@ export async function GET(request: NextRequest) {
     const dateParam = searchParams.get('date');
 
     const date = dateParam ? new Date(dateParam) : new Date();
+
+    // Try to get cached snapshot first
+    // getCachedSnapshot checks DB and returns snapshot if it exists and is <24h old
+    // Next.js cache layer (revalidate: 3600) provides additional caching
     let snapshot = await getCachedSnapshot(user.id, date);
 
-    // ALWAYS generate snapshot if it doesn't exist
-    // getCachedSnapshot already handles stale snapshots (>24h) by returning null
-    // This ensures cosmic data is always available
+    // Generate snapshot if it doesn't exist or is stale (>24h old)
+    // This ensures cosmic data is always available and fresh
     if (!snapshot) {
       try {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            '[cosmic/snapshot] No snapshot found, generating new one...',
+            {
+              userId: user.id,
+              date: date.toISOString(),
+            },
+          );
+        }
+
         // Get user profile data
         const profileResult = await sql`
           SELECT email, name, birthday, timezone, locale
@@ -36,7 +49,21 @@ export async function GET(request: NextRequest) {
         `;
         const profile = profileResult.rows[0];
 
+        if (!profile) {
+          console.error('[cosmic/snapshot] User profile not found:', {
+            userId: user.id,
+          });
+          return NextResponse.json(
+            { error: 'User profile not found' },
+            { status: 404 },
+          );
+        }
+
         if (!profile?.birthday) {
+          console.error('[cosmic/snapshot] Birthday required but not set:', {
+            userId: user.id,
+            hasProfile: !!profile,
+          });
           return NextResponse.json(
             { error: 'Birthday required to generate cosmic snapshot' },
             { status: 400 },
@@ -46,6 +73,9 @@ export async function GET(request: NextRequest) {
         // Get or build global cosmic data
         let globalData = await getGlobalCosmicData(date);
         if (!globalData) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[cosmic/snapshot] Building global cosmic data...');
+          }
           globalData = await buildGlobalCosmicData(date);
         }
 
@@ -72,6 +102,10 @@ export async function GET(request: NextRequest) {
             hasBirthChart: !!snapshot?.birthChart,
             hasTransits: snapshot?.currentTransits.length || 0,
             hasMoon: !!snapshot?.moon,
+            hasTarot:
+              !!snapshot?.tarot?.daily ||
+              !!snapshot?.tarot?.weekly ||
+              !!snapshot?.tarot?.personal,
           });
           // Still return it - let the UI handle empty state
         }
@@ -80,21 +114,36 @@ export async function GET(request: NextRequest) {
         await saveSnapshot(user.id, date, snapshot);
 
         if (process.env.NODE_ENV === 'development') {
-          console.log('[cosmic/snapshot] Generated snapshot:', {
-            userId: user.id,
-            hasBirthChart: !!snapshot.birthChart,
-            hasTransits: snapshot.currentTransits.length > 0,
-            hasMoon: !!snapshot.moon,
-            hasTarot:
-              !!snapshot.tarot.daily ||
-              !!snapshot.tarot.weekly ||
-              !!snapshot.tarot.personal,
-          });
+          console.log(
+            '[cosmic/snapshot] Successfully generated and saved snapshot:',
+            {
+              userId: user.id,
+              hasBirthChart: !!snapshot.birthChart,
+              hasTransits: snapshot.currentTransits.length > 0,
+              hasMoon: !!snapshot.moon,
+              hasTarot:
+                !!snapshot.tarot.daily ||
+                !!snapshot.tarot.weekly ||
+                !!snapshot.tarot.personal,
+            },
+          );
         }
       } catch (error) {
-        console.error('[cosmic/snapshot] Failed to generate snapshot:', error);
+        console.error('[cosmic/snapshot] Failed to generate snapshot:', {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          userId: user.id,
+        });
         return NextResponse.json(
-          { error: 'Failed to generate cosmic snapshot' },
+          {
+            error: 'Failed to generate cosmic snapshot',
+            details:
+              process.env.NODE_ENV === 'development'
+                ? error instanceof Error
+                  ? error.message
+                  : String(error)
+                : undefined,
+          },
           { status: 500 },
         );
       }

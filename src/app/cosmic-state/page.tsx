@@ -21,9 +21,13 @@ export default function CosmicStatePage() {
   const subscription = useSubscription();
   const [loading, setLoading] = useState(true);
   const [cosmicData, setCosmicData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCosmicState = async (useCache = true) => {
+    const fetchCosmicState = async (
+      useCache = true,
+      retryCount = 0,
+    ): Promise<void> => {
       const userId = (me as any)?.id;
       if (!userId) {
         setLoading(false);
@@ -33,35 +37,138 @@ export default function CosmicStatePage() {
       const cacheKey = `cosmic-state-${userId}`;
       const today = new Date().toISOString().split('T')[0];
 
-      // Check cache first
-      if (useCache) {
+      // Check cache first (only on first attempt, not on retries)
+      // CRITICAL: Validate cached data has actual content before using it
+      if (useCache && retryCount === 0) {
         try {
           const cached = sessionStorage.getItem(cacheKey);
           if (cached) {
             const parsed = JSON.parse(cached);
-            // Use cache if it's from today and less than 24 hours old
             const cacheDate = parsed.date || '';
             const cacheAge = Date.now() - (parsed.timestamp || 0);
-            if (cacheDate === today && cacheAge < 86400000) {
+
+            // Validate cached data has actual content
+            const hasValidData =
+              parsed.data &&
+              (parsed.data.birthChart ||
+                parsed.data.currentTransits ||
+                parsed.data.moon);
+
+            // Only use cache if it's valid, from today, less than 24h old, AND has actual data
+            if (cacheDate === today && cacheAge < 86400000 && hasValidData) {
               setCosmicData(parsed.data);
               setLoading(false);
-              // Fetch fresh data in background
-              fetchCosmicState(false);
+              setError(null);
+              // Always fetch fresh data in background to ensure cache stays updated
+              setTimeout(() => {
+                fetch('/api/cosmic/snapshot', { cache: 'no-store' })
+                  .then((res) => {
+                    if (res.ok) {
+                      return res.json();
+                    }
+                    return null;
+                  })
+                  .then((data) => {
+                    // Overwrite cache with fresh data if it exists
+                    if (
+                      data &&
+                      (data.birthChart || data.currentTransits || data.moon)
+                    ) {
+                      setCosmicData(data);
+                      try {
+                        sessionStorage.setItem(
+                          cacheKey,
+                          JSON.stringify({
+                            data,
+                            date: today,
+                            timestamp: Date.now(),
+                          }),
+                        );
+                      } catch (e) {
+                        // Ignore storage errors
+                      }
+                    }
+                  })
+                  .catch(() => {
+                    // Ignore background fetch errors
+                  });
+              }, 100);
               return;
+            } else {
+              // Invalid or stale cached data - remove it
+              try {
+                sessionStorage.removeItem(cacheKey);
+              } catch (e) {
+                // Ignore removal errors
+              }
+              // Continue to fetch fresh data below
             }
           }
         } catch (e) {
           // Ignore cache errors, continue to fetch
+          // Remove potentially corrupted cache
+          try {
+            sessionStorage.removeItem(cacheKey);
+          } catch {
+            // Ignore removal errors
+          }
         }
       }
 
-      // Fetch fresh data
+      // ALWAYS fetch fresh data - API will auto-create snapshot if missing
       try {
-        const response = await fetch('/api/cosmic/snapshot');
-        if (response.ok) {
-          const data = await response.json();
+        const response = await fetch('/api/cosmic/snapshot', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store', // Ensure we always get fresh data
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = `Failed to fetch cosmic state: ${response.status}`;
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch {
+            // Use default error message
+          }
+
+          console.error(
+            `[cosmic-state] API error: ${response.status} - ${errorMessage}`,
+          );
+
+          // Retry on server errors (5xx) or if snapshot needs to be created (404)
+          // Also retry on 400 (bad request) as it might be a transient issue
+          if (
+            response.status >= 500 ||
+            response.status === 404 ||
+            response.status === 400
+          ) {
+            if (retryCount < 3) {
+              const delay = Math.min(1000 * Math.pow(2, retryCount), 5000);
+              console.log(
+                `[cosmic-state] Retrying fetch (attempt ${retryCount + 1}/3) after ${delay}ms`,
+              );
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              return fetchCosmicState(false, retryCount + 1);
+            }
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+
+        // Ensure we have valid data - API should always return valid snapshot
+        // API auto-creates snapshot if missing, so this should always succeed
+        if (data && (data.birthChart || data.currentTransits || data.moon)) {
           setCosmicData(data);
-          // Cache the result
+          setError(null);
+          // Cache the result for faster subsequent loads
           try {
             sessionStorage.setItem(
               cacheKey,
@@ -75,14 +182,54 @@ export default function CosmicStatePage() {
             // Ignore storage errors
           }
         } else {
+          // Invalid data - API should have created snapshot, but it's empty
           console.error(
-            'Failed to fetch cosmic state:',
-            response.status,
-            response.statusText,
+            '[cosmic-state] Received invalid/empty snapshot data:',
+            {
+              hasBirthChart: !!data?.birthChart,
+              hasTransits: !!data?.currentTransits?.length,
+              hasMoon: !!data?.moon,
+            },
+          );
+
+          // Retry once more - snapshot generation might be in progress
+          if (retryCount < 2) {
+            console.log(
+              '[cosmic-state] Invalid snapshot data, retrying after delay...',
+            );
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            return fetchCosmicState(false, retryCount + 1);
+          }
+          throw new Error(
+            'Invalid cosmic snapshot data received. Please ensure your profile has a birthday set.',
           );
         }
       } catch (error) {
-        console.error('Failed to fetch cosmic state:', error);
+        console.error('[cosmic-state] Failed to fetch cosmic state:', error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to load cosmic state. Please try refreshing.';
+        setError(errorMessage);
+
+        // Retry on network errors or if error suggests retry might help
+        if (retryCount < 3) {
+          const isNetworkError = error instanceof TypeError;
+          const isRetryableError =
+            errorMessage.includes('Failed to fetch') ||
+            errorMessage.includes('network') ||
+            errorMessage.includes('500') ||
+            errorMessage.includes('404');
+
+          if (isNetworkError || isRetryableError) {
+            const delay = Math.min(1000 * Math.pow(2, retryCount), 5000);
+            console.log(
+              `[cosmic-state] Retrying after error (attempt ${retryCount + 1}/3) after ${delay}ms`,
+            );
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            return fetchCosmicState(false, retryCount + 1);
+          }
+        }
       } finally {
         setLoading(false);
       }
@@ -105,6 +252,78 @@ export default function CosmicStatePage() {
     );
   }
 
+  if (error && !cosmicData) {
+    return (
+      <div className='min-h-screen bg-black text-white p-4 md:p-8'>
+        <div className='max-w-4xl mx-auto'>
+          <div className='mb-8'>
+            <h1 className='text-3xl md:text-4xl font-bold mb-2'>
+              Your Cosmic State
+            </h1>
+          </div>
+          <div className='bg-red-900/20 border border-red-500/50 rounded-lg p-6'>
+            <h2 className='text-xl font-semibold text-red-400 mb-2'>
+              Error Loading Cosmic State
+            </h2>
+            <p className='text-red-300 mb-4'>{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                setLoading(true);
+                const fetchCosmicState = async () => {
+                  const userId = (me as any)?.id;
+                  if (!userId) {
+                    setLoading(false);
+                    return;
+                  }
+                  try {
+                    const response = await fetch('/api/cosmic/snapshot');
+                    if (response.ok) {
+                      const data = await response.json();
+                      if (
+                        data &&
+                        (data.birthChart || data.currentTransits || data.moon)
+                      ) {
+                        setCosmicData(data);
+                        setError(null);
+                      } else {
+                        setError('Invalid cosmic snapshot data received');
+                      }
+                    } else {
+                      const errorText = await response.text();
+                      let errorMessage = `Failed to fetch: ${response.status}`;
+                      try {
+                        const errorData = JSON.parse(errorText);
+                        if (errorData.error) {
+                          errorMessage = errorData.error;
+                        }
+                      } catch {
+                        // Use default
+                      }
+                      setError(errorMessage);
+                    }
+                  } catch (err) {
+                    setError(
+                      err instanceof Error
+                        ? err.message
+                        : 'Failed to load cosmic state',
+                    );
+                  } finally {
+                    setLoading(false);
+                  }
+                };
+                fetchCosmicState();
+              }}
+              className='px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md text-white font-medium transition-colors'
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='min-h-screen bg-black text-white p-4 md:p-8'>
       <div className='max-w-4xl mx-auto'>
@@ -115,6 +334,13 @@ export default function CosmicStatePage() {
           <p className='text-zinc-400'>
             A snapshot of your personalized astrological profile
           </p>
+          {error && cosmicData && (
+            <div className='mt-4 bg-yellow-900/20 border border-yellow-500/50 rounded-lg p-3'>
+              <p className='text-yellow-300 text-sm'>
+                Warning: {error} (showing cached data)
+              </p>
+            </div>
+          )}
         </div>
 
         {isFreeUser && (

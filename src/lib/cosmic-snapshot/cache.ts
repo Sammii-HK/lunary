@@ -34,10 +34,11 @@ export async function getCachedSnapshot(
 
         // Tarot cards change daily - if snapshot is older than 24 hours, return null to force refresh
         // This ensures daily/weekly/personal cards are always fresh
+        // The route will generate a new snapshot when this returns null
         if (hoursSinceUpdate > 24) {
           if (process.env.NODE_ENV === 'development') {
             console.log(
-              `[getCachedSnapshot] Snapshot too old (${hoursSinceUpdate.toFixed(1)}h), forcing refresh for tarot data`,
+              `[getCachedSnapshot] Snapshot too old (${hoursSinceUpdate.toFixed(1)}h), returning null to trigger refresh`,
             );
           }
           return null;
@@ -46,12 +47,15 @@ export async function getCachedSnapshot(
         return snapshot;
       }
 
+      // No snapshot exists - return null so route can create it
       return null;
     },
     [cacheKey],
     {
       tags,
-      revalidate: 86400, // 24 hours - tarot cards change daily
+      revalidate: 3600, // 1 hour - Next.js cache TTL
+      // Note: We don't cache null results indefinitely - if snapshot is stale or missing,
+      // the route will generate it and saveSnapshot will invalidate the cache tags
     },
   );
 

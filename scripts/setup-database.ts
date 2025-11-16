@@ -631,6 +631,63 @@ async function setupDatabase() {
 
     console.log('✅ Cosmic snapshots tables created');
 
+    // Create the year_analysis table (cached year-over-year analysis results)
+    await sql`
+    CREATE TABLE IF NOT EXISTS year_analysis (
+      user_id TEXT NOT NULL,
+      year INTEGER NOT NULL,
+      analysis_data JSONB NOT NULL,
+      card_recaps JSONB,
+      trends JSONB,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      PRIMARY KEY (user_id, year)
+    )
+    `;
+
+    // Add new columns if they don't exist (for existing tables)
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'year_analysis' AND column_name = 'card_recaps') THEN
+          ALTER TABLE year_analysis ADD COLUMN card_recaps JSONB;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'year_analysis' AND column_name = 'trends') THEN
+          ALTER TABLE year_analysis ADD COLUMN trends JSONB;
+        END IF;
+      END $$;
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_year_analysis_user_id ON year_analysis(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_year_analysis_year ON year_analysis(year)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_year_analysis_updated_at ON year_analysis(updated_at)`;
+
+    console.log('✅ Year analysis table created');
+
+    // Create the pattern_analysis table (stores multidimensional and timeline analysis)
+    await sql`
+      CREATE TABLE IF NOT EXISTS pattern_analysis (
+        user_id TEXT NOT NULL,
+        analysis_type TEXT NOT NULL,
+        element_patterns JSONB,
+        color_patterns JSONB,
+        correlations JSONB,
+        timeline_data JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (user_id, analysis_type)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_pattern_analysis_user_id ON pattern_analysis(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_pattern_analysis_type ON pattern_analysis(analysis_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_pattern_analysis_updated_at ON pattern_analysis(updated_at)`;
+
+    console.log('✅ Pattern analysis table created');
+
     // Create collections and collection_folders tables
     await sql`
       CREATE TABLE IF NOT EXISTS collection_folders (
