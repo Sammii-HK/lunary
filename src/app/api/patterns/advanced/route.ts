@@ -118,11 +118,23 @@ interface AdvancedPatternAnalysis {
       dominantThemes: string[];
       frequentCards: Array<{ name: string; count: number }>;
       patternInsights: string[];
+      cardRecaps?: Array<{ cardName: string; recap: string }> | null;
+      trends?: Array<{
+        metric: string;
+        change: number;
+        direction: 'up' | 'down' | 'stable';
+      }> | null;
     };
     lastYear: {
       dominantThemes: string[];
       frequentCards: Array<{ name: string; count: number }>;
       patternInsights: string[];
+      cardRecaps?: Array<{ cardName: string; recap: string }> | null;
+      trends?: Array<{
+        metric: string;
+        change: number;
+        direction: 'up' | 'down' | 'stable';
+      }> | null;
     };
     comparison: {
       themes: Array<{
@@ -130,6 +142,11 @@ interface AdvancedPatternAnalysis {
         change: 'increased' | 'decreased' | 'new' | 'removed';
       }>;
       insights: string[];
+      trends: Array<{
+        metric: string;
+        change: number;
+        direction: 'up' | 'down' | 'stable';
+      }>;
     };
   };
   enhancedTarot: {
@@ -137,6 +154,22 @@ interface AdvancedPatternAnalysis {
       suitPatterns: Array<{ suit: string; count: number; percentage: number }>;
       arcanaBalance: { major: number; minor: number };
       numberPatterns: Array<{ number: string; count: number; meaning: string }>;
+      elementPatterns: Array<{
+        element: string;
+        count: number;
+        percentage: number;
+        suits: string[];
+      }>;
+      colorPatterns: Array<{
+        color: string;
+        count: number;
+        percentage: number;
+      }>;
+      correlations: Array<{
+        dimension1: string;
+        dimension2: string;
+        insight: string;
+      }>;
     };
     timeline: {
       days30: {
@@ -742,7 +775,13 @@ async function getYearOverYearComparison(
 
   const insights: string[] = [];
 
-  // Add insights based on comparison
+  // Calculate trends for year-over-year comparison
+  const trends: Array<{
+    metric: string;
+    change: number;
+    direction: 'up' | 'down' | 'stable';
+  }> = [];
+
   // Check if last year has data by checking if dominant themes or cards exist
   if (
     lastYearData.dominantThemes.length === 0 &&
@@ -752,6 +791,95 @@ async function getYearOverYearComparison(
       "This is your first year of tarot readings. As you continue your journey, you'll be able to see how your themes evolve year over year.",
     );
   } else {
+    // Calculate trends for frequent cards
+    const thisYearCardMap = new Map(
+      thisYearData.frequentCards.map((card) => [card.name, card.count]),
+    );
+    const lastYearCardMap = new Map(
+      lastYearData.frequentCards.map((card) => [card.name, card.count]),
+    );
+
+    // Compare cards that appear in both years
+    const allCardNames = new Set([
+      ...thisYearData.frequentCards.map((c) => c.name),
+      ...lastYearData.frequentCards.map((c) => c.name),
+    ]);
+
+    allCardNames.forEach((cardName) => {
+      const thisYearCount = thisYearCardMap.get(cardName) || 0;
+      const lastYearCount = lastYearCardMap.get(cardName) || 0;
+
+      if (thisYearCount > 0 && lastYearCount > 0) {
+        // Card appeared in both years - calculate percentage change
+        const change = ((thisYearCount - lastYearCount) / lastYearCount) * 100;
+        const direction = change > 5 ? 'up' : change < -5 ? 'down' : 'stable';
+        trends.push({
+          metric: `${cardName} appearances`,
+          change: Math.round(change * 10) / 10,
+          direction,
+        });
+      } else if (thisYearCount > 0 && lastYearCount === 0) {
+        // New card this year
+        trends.push({
+          metric: `${cardName} appearances`,
+          change: 100,
+          direction: 'up',
+        });
+      } else if (thisYearCount === 0 && lastYearCount > 0) {
+        // Card disappeared this year
+        trends.push({
+          metric: `${cardName} appearances`,
+          change: -100,
+          direction: 'down',
+        });
+      }
+    });
+
+    // Calculate theme growth rate
+    const themeGrowthRate =
+      lastYearData.dominantThemes.length > 0
+        ? ((thisYearData.dominantThemes.length -
+            lastYearData.dominantThemes.length) /
+            lastYearData.dominantThemes.length) *
+          100
+        : 0;
+
+    if (Math.abs(themeGrowthRate) > 1) {
+      trends.push({
+        metric: 'Dominant themes count',
+        change: Math.round(themeGrowthRate * 10) / 10,
+        direction:
+          themeGrowthRate > 5 ? 'up' : themeGrowthRate < -5 ? 'down' : 'stable',
+      });
+    }
+
+    // Calculate total card frequency change
+    const thisYearTotalCards = thisYearData.frequentCards.reduce(
+      (sum, card) => sum + card.count,
+      0,
+    );
+    const lastYearTotalCards = lastYearData.frequentCards.reduce(
+      (sum, card) => sum + card.count,
+      0,
+    );
+
+    if (lastYearTotalCards > 0) {
+      const totalCardChange =
+        ((thisYearTotalCards - lastYearTotalCards) / lastYearTotalCards) * 100;
+      if (Math.abs(totalCardChange) > 1) {
+        trends.push({
+          metric: 'Total card frequency',
+          change: Math.round(totalCardChange * 10) / 10,
+          direction:
+            totalCardChange > 5
+              ? 'up'
+              : totalCardChange < -5
+                ? 'down'
+                : 'stable',
+        });
+      }
+    }
+
     const newThemes = themes.filter((t) => t.change === 'new');
     if (newThemes.length > 0) {
       insights.push(
@@ -774,9 +902,17 @@ async function getYearOverYearComparison(
   }
 
   return {
-    thisYear: thisYearData,
-    lastYear: lastYearData,
-    comparison: { themes, insights },
+    thisYear: {
+      ...thisYearData,
+      cardRecaps: thisYearData.cardRecaps || null,
+      trends: thisYearData.trends || null,
+    },
+    lastYear: {
+      ...lastYearData,
+      cardRecaps: lastYearData.cardRecaps || null,
+      trends: lastYearData.trends || null,
+    },
+    comparison: { themes, insights, trends },
   };
 }
 
@@ -813,6 +949,12 @@ async function getEnhancedTarotPatterns(
   const suitCounts: { [key: string]: number } = {};
   const arcanaCounts = { major: 0, minor: 0 };
   const numberCounts: { [key: string]: number } = {};
+  const elementCounts: { [key: string]: number } = {};
+  const colorCounts: { [key: string]: number } = {};
+  const elementToSuits: { [key: string]: Set<string> } = {};
+  const suitToNumberCounts: { [key: string]: { [key: string]: number } } = {};
+  const elementToNumberCounts: { [key: string]: { [key: string]: number } } =
+    {};
   let totalCards = 0;
 
   result.rows.forEach((row) => {
@@ -825,6 +967,18 @@ async function getEnhancedTarotPatterns(
       const suit = getCardSuit(cardName);
       suitCounts[suit] = (suitCounts[suit] || 0) + 1;
 
+      // Map suit to element
+      const element = getSuitElement(suit);
+      elementCounts[element] = (elementCounts[element] || 0) + 1;
+      if (!elementToSuits[element]) {
+        elementToSuits[element] = new Set();
+      }
+      elementToSuits[element].add(suit);
+
+      // Map suit to color
+      const color = getSuitColor(suit);
+      colorCounts[color] = (colorCounts[color] || 0) + 1;
+
       if (suit === 'Major Arcana') {
         arcanaCounts.major++;
       } else {
@@ -835,7 +989,22 @@ async function getEnhancedTarotPatterns(
         /\b(Ace|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten)\b/,
       );
       if (numberMatch) {
-        numberCounts[numberMatch[1]] = (numberCounts[numberMatch[1]] || 0) + 1;
+        const number = numberMatch[1];
+        numberCounts[number] = (numberCounts[number] || 0) + 1;
+
+        // Track suit-to-number correlations
+        if (!suitToNumberCounts[suit]) {
+          suitToNumberCounts[suit] = {};
+        }
+        suitToNumberCounts[suit][number] =
+          (suitToNumberCounts[suit][number] || 0) + 1;
+
+        // Track element-to-number correlations
+        if (!elementToNumberCounts[element]) {
+          elementToNumberCounts[element] = {};
+        }
+        elementToNumberCounts[element][number] =
+          (elementToNumberCounts[element][number] || 0) + 1;
       }
     });
   });
@@ -856,6 +1025,64 @@ async function getEnhancedTarotPatterns(
       meaning: getNumberMeaning(number),
     }))
     .sort((a, b) => b.count - a.count);
+
+  // Calculate element patterns
+  const elementPatterns = Object.entries(elementCounts)
+    .map(([element, count]) => ({
+      element,
+      count,
+      percentage: totalCards > 0 ? Math.round((count / totalCards) * 100) : 0,
+      suits: Array.from(elementToSuits[element] || []),
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  // Calculate color patterns
+  const colorPatterns = Object.entries(colorCounts)
+    .map(([color, count]) => ({
+      color,
+      count,
+      percentage: totalCards > 0 ? Math.round((count / totalCards) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  // Calculate correlations
+  const correlations: Array<{
+    dimension1: string;
+    dimension2: string;
+    insight: string;
+  }> = [];
+
+  // Element-Number correlations
+  Object.entries(elementToNumberCounts).forEach(([element, numberCounts]) => {
+    const topNumber = Object.entries(numberCounts).sort(
+      ([, a], [, b]) => b - a,
+    )[0];
+    if (topNumber && topNumber[1] >= 2) {
+      correlations.push({
+        dimension1: element,
+        dimension2: `${topNumber[0]} cards`,
+        insight: `${element} energy frequently appears with ${topNumber[0]} cards, suggesting ${getNumberMeaning(topNumber[0]).toLowerCase()} themes in ${element.toLowerCase()} aspects of your life.`,
+      });
+    }
+  });
+
+  // Suit-Arcana correlations
+  const majorArcanaSuits =
+    Object.entries(suitCounts)
+      .filter(([suit]) => suit === 'Major Arcana')
+      .map(([, count]) => count)[0] || 0;
+  const minorArcanaTotal = totalCards - majorArcanaSuits;
+
+  if (majorArcanaSuits > 0 && minorArcanaTotal > 0) {
+    const majorPercentage = Math.round((majorArcanaSuits / totalCards) * 100);
+    if (majorPercentage > 30) {
+      correlations.push({
+        dimension1: 'Major Arcana',
+        dimension2: 'Minor Arcana',
+        insight: `Major Arcana cards represent ${majorPercentage}% of your readings, indicating significant life lessons and transformative energies are prominent in your journey.`,
+      });
+    }
+  }
 
   // Get timeline analysis
   const timeline: AdvancedPatternAnalysis['enhancedTarot']['timeline'] = {
@@ -914,6 +1141,9 @@ async function getEnhancedTarotPatterns(
       suitPatterns,
       arcanaBalance: arcanaCounts,
       numberPatterns,
+      elementPatterns,
+      colorPatterns,
+      correlations,
     },
     timeline,
   };
@@ -1112,6 +1342,22 @@ function getCardSuit(cardName: string): string {
   if (cardName.includes('Swords')) return 'Swords';
   if (cardName.includes('Pentacles')) return 'Pentacles';
   return 'Unknown';
+}
+
+function getSuitElement(suit: string): string {
+  if (suit === 'Wands') return 'Fire';
+  if (suit === 'Cups') return 'Water';
+  if (suit === 'Swords') return 'Air';
+  if (suit === 'Pentacles') return 'Earth';
+  return 'Spirit';
+}
+
+function getSuitColor(suit: string): string {
+  if (suit === 'Wands') return 'Red/Orange';
+  if (suit === 'Cups') return 'Blue';
+  if (suit === 'Swords') return 'Yellow/White';
+  if (suit === 'Pentacles') return 'Green/Brown';
+  return 'Purple/Gold';
 }
 
 function getNumberMeaning(number: string): string {
