@@ -7,53 +7,86 @@ export function useCurrency() {
   const [currency, setCurrency] = useState<string>('USD');
 
   useEffect(() => {
-    // Detect currency from browser locale
+    // Detect currency from browser locale and timezone
     try {
-      // Try to get currency from Intl API
       const locale = navigator.language || 'en-US';
-      const formatter = new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: 'USD', // Default
-      });
 
-      // Get currency from locale (e.g., 'en-GB' -> 'GBP', 'en-US' -> 'USD')
-      // Map common locales to currencies
-      const localeToCurrency: Record<string, string> = {
-        'en-GB': 'GBP',
-        'en-US': 'USD',
-        'en-CA': 'CAD',
-        'en-AU': 'AUD',
-        'en-NZ': 'NZD',
-        'fr-FR': 'EUR',
-        'fr-CA': 'CAD',
-        'de-DE': 'EUR',
-        'es-ES': 'EUR',
-        'it-IT': 'EUR',
-        'pt-BR': 'BRL',
-        'ja-JP': 'JPY',
-        'zh-CN': 'CNY',
-        'zh-HK': 'HKD',
-        'sv-SE': 'SEK',
-        'no-NO': 'NOK',
-        'da-DK': 'DKK',
-        'pl-PL': 'PLN',
-        'cs-CZ': 'CZK',
-        'hu-HU': 'HUF',
-        'hi-IN': 'INR',
-        'es-MX': 'MXN',
-        'af-ZA': 'ZAR',
+      // Map timezones to currencies (more reliable than locale alone)
+      const timezoneToCurrency: Record<string, string> = {
+        'Europe/London': 'GBP',
+        'America/New_York': 'USD',
+        'America/Chicago': 'USD',
+        'America/Denver': 'USD',
+        'America/Los_Angeles': 'USD',
+        'America/Toronto': 'CAD',
+        'America/Vancouver': 'CAD',
+        'Australia/Sydney': 'AUD',
+        'Australia/Melbourne': 'AUD',
+        'Pacific/Auckland': 'NZD',
+        'Europe/Paris': 'EUR',
+        'Europe/Berlin': 'EUR',
+        'Europe/Rome': 'EUR',
+        'Europe/Madrid': 'EUR',
+        'Europe/Amsterdam': 'EUR',
+        'Europe/Brussels': 'EUR',
+        'Europe/Vienna': 'EUR',
+        'America/Sao_Paulo': 'BRL',
+        'Asia/Tokyo': 'JPY',
+        'Asia/Shanghai': 'CNY',
+        'Asia/Hong_Kong': 'HKD',
+        'Europe/Stockholm': 'SEK',
+        'Europe/Oslo': 'NOK',
+        'Europe/Copenhagen': 'DKK',
+        'Europe/Warsaw': 'PLN',
+        'Europe/Prague': 'CZK',
+        'Europe/Budapest': 'HUF',
+        'Asia/Kolkata': 'INR',
+        'Asia/Singapore': 'SGD',
+        'America/Mexico_City': 'MXN',
+        'Africa/Johannesburg': 'ZAR',
       };
 
-      // Try to get currency from locale
-      const detectedCurrency =
-        localeToCurrency[locale] ||
-        localeToCurrency[locale.split('-')[0]] ||
-        'USD';
+      // Try to get currency from timezone first (most reliable)
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      let detectedCurrency = timezoneToCurrency[timezone];
 
-      // Check if we have prices for this currency, otherwise fallback to USD
-      // We'll check this when we use it, but for now just set it
+      // Fallback to locale-based detection if timezone didn't match
+      if (!detectedCurrency) {
+        const localeToCurrency: Record<string, string> = {
+          'en-GB': 'GBP',
+          'en-US': 'USD',
+          'en-CA': 'CAD',
+          'en-AU': 'AUD',
+          'en-NZ': 'NZD',
+          'fr-FR': 'EUR',
+          'fr-CA': 'CAD',
+          'de-DE': 'EUR',
+          'es-ES': 'EUR',
+          'it-IT': 'EUR',
+          'pt-BR': 'BRL',
+          'ja-JP': 'JPY',
+          'zh-CN': 'CNY',
+          'zh-HK': 'HKD',
+          'sv-SE': 'SEK',
+          'no-NO': 'NOK',
+          'da-DK': 'DKK',
+          'pl-PL': 'PLN',
+          'cs-CZ': 'CZK',
+          'hu-HU': 'HUF',
+          'hi-IN': 'INR',
+          'es-MX': 'MXN',
+          'af-ZA': 'ZAR',
+        };
+
+        detectedCurrency =
+          localeToCurrency[locale] ||
+          localeToCurrency[locale.split('-')[0]] ||
+          'USD';
+      }
+
       setCurrency(detectedCurrency);
     } catch (error) {
+      // USD is a safe default fallback
       console.warn('Failed to detect currency, using USD:', error);
       setCurrency('USD');
     }

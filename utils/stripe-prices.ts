@@ -1,6 +1,6 @@
 // Auto-generated price mapping from Stripe
 // Run: npm run generate-price-mapping
-// Last updated: 2025-11-16T00:00:23.986Z
+// Last updated: 2025-11-16T00:48:43.259Z
 
 export const STRIPE_PRICE_MAPPING = {
   lunary_plus: {
@@ -208,105 +208,105 @@ export const STRIPE_PRICE_MAPPING = {
     },
   },
   lunary_plus_ai_annual: {
+    USD: {
+      priceId: 'price_1STu7dDA9sa1fEONDnKGNKS8',
+      amount: 89.99,
+      currency: 'usd',
+    },
     ZAR: {
-      priceId: 'price_1STtE2DA9sa1fEONMKAykGr0',
-      amount: 1479.99,
+      priceId: 'price_1STu7LDA9sa1fEON7gAZ1CNS',
+      amount: 1664.99,
       currency: 'zar',
     },
     BRL: {
-      priceId: 'price_1STtE2DA9sa1fEONdEqfv7PQ',
-      amount: 391.99,
+      priceId: 'price_1STu7LDA9sa1fEON0pfYziiV',
+      amount: 440.99,
       currency: 'brl',
     },
     MXN: {
-      priceId: 'price_1STtE1DA9sa1fEONgGYSu017',
-      amount: 1359.99,
+      priceId: 'price_1STu7KDA9sa1fEONIZsx801p',
+      amount: 1529.99,
       currency: 'mxn',
     },
     HKD: {
-      priceId: 'price_1STtE1DA9sa1fEONHD718Mby',
-      amount: 623.99,
+      priceId: 'price_1STu7JDA9sa1fEONMrkdrQjd',
+      amount: 701.99,
       currency: 'hkd',
     },
     SGD: {
-      priceId: 'price_1STtE1DA9sa1fEON8JQt76ik',
-      amount: 107.99,
+      priceId: 'price_1STu7JDA9sa1fEONJUJJKEPa',
+      amount: 120.99,
       currency: 'sgd',
     },
     INR: {
-      priceId: 'price_1STtE1DA9sa1fEONDi0wyEba',
-      amount: 6639.99,
+      priceId: 'price_1STu7IDA9sa1fEON1Kg8ZORP',
+      amount: 7469.99,
       currency: 'inr',
     },
     HUF: {
-      priceId: 'price_1STtE0DA9sa1fEONu2JWOWUz',
-      amount: 28797,
+      priceId: 'price_1STu7IDA9sa1fEONlrqwopeO',
+      amount: 32397,
       currency: 'huf',
     },
     CZK: {
-      priceId: 'price_1STtE0DA9sa1fEONpn7QRReo',
-      amount: 1823.99,
+      priceId: 'price_1STu7HDA9sa1fEONEfAqAmQH',
+      amount: 2051.99,
       currency: 'czk',
     },
     PLN: {
-      priceId: 'price_1STtE0DA9sa1fEONViDlUY89',
-      amount: 319.99,
+      priceId: 'price_1STu7GDA9sa1fEONXcAEFwgz',
+      amount: 359.99,
       currency: 'pln',
     },
     DKK: {
-      priceId: 'price_1STtDzDA9sa1fEONQp0GC5rM',
-      amount: 549.99,
+      priceId: 'price_1STu7GDA9sa1fEONMWy0tnK3',
+      amount: 618.99,
       currency: 'dkk',
     },
     NOK: {
-      priceId: 'price_1STtDzDA9sa1fEONMVFpRfEr',
-      amount: 855.99,
+      priceId: 'price_1STu7FDA9sa1fEONw5tQEFTE',
+      amount: 962.99,
       currency: 'nok',
     },
     SEK: {
-      priceId: 'price_1STtDzDA9sa1fEONlM1AFM1U',
-      amount: 839.99,
+      priceId: 'price_1STu7FDA9sa1fEONMxY0eM8P',
+      amount: 944.99,
       currency: 'sek',
     },
     NZD: {
-      priceId: 'price_1STtDyDA9sa1fEONCUZZuDZZ',
-      amount: 131.99,
+      priceId: 'price_1STu7EDA9sa1fEON2owJugAw',
+      amount: 147.99,
       currency: 'nzd',
     },
     CHF: {
-      priceId: 'price_1STtDyDA9sa1fEONEZoIsp2l',
-      amount: 70.99,
+      priceId: 'price_1STu7DDA9sa1fEON2KwxKXQf',
+      amount: 79.99,
       currency: 'chf',
     },
     JPY: {
-      priceId: 'price_1STtDyDA9sa1fEON2vEgrK9v',
-      amount: 11919,
+      priceId: 'price_1STu7CDA9sa1fEONIjF3tJww',
+      amount: 13409,
       currency: 'jpy',
     },
     AUD: {
-      priceId: 'price_1STtDyDA9sa1fEONFtIzFKH4',
-      amount: 121.99,
+      priceId: 'price_1STu7CDA9sa1fEON4qet28px',
+      amount: 136.99,
       currency: 'aud',
     },
     CAD: {
-      priceId: 'price_1STtDxDA9sa1fEON9UCMSxKj',
-      amount: 108.99,
+      priceId: 'price_1STu7BDA9sa1fEONP8YtlMOe',
+      amount: 122.99,
       currency: 'cad',
     },
     EUR: {
-      priceId: 'price_1STtDxDA9sa1fEONx54kkJIT',
-      amount: 73.99,
+      priceId: 'price_1STu7BDA9sa1fEONsHGiKlRj',
+      amount: 82.99,
       currency: 'eur',
     },
     GBP: {
-      priceId: 'price_1STtDxDA9sa1fEONnVtM9Lvn',
-      amount: 63.99,
+      priceId: 'price_1STu7ADA9sa1fEONMYpKyCVg',
+      amount: 71.99,
       currency: 'gbp',
-    },
-    USD: {
-      priceId: 'price_1STrq1DA9sa1fEONXTUugmWU',
-      amount: 79.99,
-      currency: 'usd',
     },
   },
 } as const;
@@ -321,15 +321,13 @@ export function getPriceForCurrency(
   const planPrices = STRIPE_PRICE_MAPPING[planId];
   if (!planPrices) return null;
 
-  const upperCurrency = currency.toUpperCase();
-
   // Try exact match first
-  if (upperCurrency in planPrices) {
-    return (planPrices as any)[upperCurrency];
+  if (planPrices[currency.toUpperCase()]) {
+    return planPrices[currency.toUpperCase()];
   }
 
   // Fallback to USD
-  return (planPrices as any)['USD'] || null;
+  return planPrices['USD'] || null;
 }
 
 export function getAvailableCurrencies(planId: PlanId): string[] {

@@ -37,10 +37,20 @@ async function generatePriceMapping(): Promise<PriceMapping> {
 
     // Find the product by searching for it
     const searchQuery = `name:'${plan.name}' AND metadata['plan_id']:'${plan.id}'`;
-    const products = await stripe.products.search({
-      query: searchQuery,
-      limit: 1,
-    });
+    console.log(`   🔍 Searching for product with query: ${searchQuery}`);
+    let products;
+    try {
+      products = await stripe.products.search({
+        query: searchQuery,
+        limit: 1,
+      });
+      console.log(
+        `   ✅ Search completed, found ${products.data.length} products`,
+      );
+    } catch (searchError) {
+      console.error(`   ❌ Search failed:`, searchError);
+      continue;
+    }
 
     if (products.data.length === 0) {
       console.log(`   ⚠️  Product not found`);
@@ -48,13 +58,22 @@ async function generatePriceMapping(): Promise<PriceMapping> {
     }
 
     const product = products.data[0];
+    console.log(`   📦 Found product: ${product.id}`);
 
     // Get all prices for this product
-    const prices = await stripe.prices.list({
-      product: product.id,
-      active: true,
-      limit: 100,
-    });
+    console.log(`   🔍 Fetching prices for product ${product.id}...`);
+    let prices;
+    try {
+      prices = await stripe.prices.list({
+        product: product.id,
+        active: true,
+        limit: 100,
+      });
+      console.log(`   ✅ Found ${prices.data.length} prices`);
+    } catch (listError) {
+      console.error(`   ❌ Failed to list prices:`, listError);
+      continue;
+    }
 
     mapping[plan.id] = {};
 
@@ -91,6 +110,9 @@ async function main() {
     // Also write to a file for easy import
     const fs = await import('fs');
     const outputPath = resolve(process.cwd(), 'utils/stripe-prices.ts');
+
+    console.log(`\n📝 Writing price mapping to: ${outputPath}`);
+
     const content = `// Auto-generated price mapping from Stripe
 // Run: npm run generate-price-mapping
 // Last updated: ${new Date().toISOString()}
@@ -123,8 +145,13 @@ export function getAvailableCurrencies(planId: PlanId): string[] {
 }
 `;
 
-    fs.writeFileSync(outputPath, content, 'utf-8');
-    console.log(`\n✅ Price mapping written to: ${outputPath}`);
+    try {
+      fs.writeFileSync(outputPath, content, 'utf-8');
+      console.log(`✅ Price mapping written successfully!`);
+    } catch (writeError) {
+      console.error(`❌ Failed to write file:`, writeError);
+      throw writeError;
+    }
   } catch (error) {
     console.error('💥 Fatal error:', error);
     process.exit(1);
