@@ -493,42 +493,49 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                             <h5 className='text-xs font-medium text-indigo-300/90 mb-2'>
                               Last Year
                             </h5>
-                            {analysis.yearOverYear.lastYear.dominantThemes
-                              .length > 0 ? (
-                              <div className='flex flex-wrap gap-1.5 mb-3'>
-                                {analysis.yearOverYear.lastYear.dominantThemes.map(
-                                  (theme) => (
-                                    <span
-                                      key={theme}
-                                      className='px-2 py-0.5 text-xs rounded bg-indigo-500/20 text-indigo-200'
-                                    >
-                                      {theme}
-                                    </span>
-                                  ),
+                            {loading ? (
+                              <p className='text-xs text-zinc-400 mb-3'>
+                                Generating historical data...
+                              </p>
+                            ) : analysis.yearOverYear.lastYear.dominantThemes
+                                .length > 0 ||
+                              analysis.yearOverYear.lastYear.frequentCards
+                                .length > 0 ? (
+                              <>
+                                {analysis.yearOverYear.lastYear.dominantThemes
+                                  .length > 0 && (
+                                  <div className='flex flex-wrap gap-1.5 mb-3'>
+                                    {analysis.yearOverYear.lastYear.dominantThemes.map(
+                                      (theme) => (
+                                        <span
+                                          key={theme}
+                                          className='px-2 py-0.5 text-xs rounded bg-indigo-500/20 text-indigo-200'
+                                        >
+                                          {theme}
+                                        </span>
+                                      ),
+                                    )}
+                                  </div>
                                 )}
-                              </div>
+                                {analysis.yearOverYear.lastYear.frequentCards
+                                  .length > 0 ? (
+                                  <div className='space-y-1'>
+                                    {analysis.yearOverYear.lastYear.frequentCards
+                                      .slice(0, 3)
+                                      .map((card) => (
+                                        <div
+                                          key={card.name}
+                                          className='text-xs text-zinc-300'
+                                        >
+                                          {card.name} ({card.count}x)
+                                        </div>
+                                      ))}
+                                  </div>
+                                ) : null}
+                              </>
                             ) : (
                               <p className='text-xs text-zinc-400 mb-3'>
                                 No historical data available for comparison
-                              </p>
-                            )}
-                            {analysis.yearOverYear.lastYear.frequentCards
-                              .length > 0 ? (
-                              <div className='space-y-1'>
-                                {analysis.yearOverYear.lastYear.frequentCards
-                                  .slice(0, 3)
-                                  .map((card) => (
-                                    <div
-                                      key={card.name}
-                                      className='text-xs text-zinc-300'
-                                    >
-                                      {card.name} ({card.count}x)
-                                    </div>
-                                  ))}
-                              </div>
-                            ) : (
-                              <p className='text-xs text-zinc-400'>
-                                No cards found in historical data
                               </p>
                             )}
                           </div>
