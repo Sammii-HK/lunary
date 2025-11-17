@@ -144,9 +144,44 @@ export async function POST(request: NextRequest) {
       userBirthday: user.birthday,
       historyLimit,
       includeMood,
+      planId,
       now,
       useCache: false, // Always build fresh context for chat
     });
+
+    // Detect if user is asking about a specific tarot card and fetch grimoire data
+    let grimoireData:
+      | {
+          tarotCards?: Array<{
+            name: string;
+            keywords: string[];
+            information: string;
+          }>;
+          rituals?: Array<{ title: string; description: string }>;
+        }
+      | undefined;
+
+    const tarotCardMatch = body.message.match(
+      /tarot card ["']([^"']+)["']|tarot card (\w+(?:\s+\w+)*)/i,
+    );
+    if (tarotCardMatch) {
+      const cardName = tarotCardMatch[1] || tarotCardMatch[2];
+      if (cardName) {
+        try {
+          const { getTarotCardByName } = await import(
+            '@/utils/tarot/getCardByName'
+          );
+          const cardData = getTarotCardByName(cardName);
+          if (cardData) {
+            grimoireData = {
+              tarotCards: [cardData],
+            };
+          }
+        } catch (error) {
+          console.error('[Chat] Failed to fetch tarot card data:', error);
+        }
+      }
+    }
 
     if (assistCommand.type) {
       const assistSnippet = runAssistCommand(assistCommand, context);
@@ -157,9 +192,8 @@ export async function POST(request: NextRequest) {
         userMessage: body.message,
       });
 
-      const assistantContent = [assistSnippet, reflection]
-        .filter((chunk): chunk is string => !!chunk && chunk.trim().length > 0)
-        .join('\n\n');
+      // Only save assistSnippet to thread - reflection is sent separately and should NOT be in message content
+      const assistantContent = assistSnippet || '';
 
       const tokensIn = estimateTokenCount(body.message);
       const tokensOut = estimateTokenCount(assistantContent);
@@ -295,6 +329,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Build prompt sections with grimoire data if available
+    const promptSections = buildPromptSections({
+      context,
+      memorySnippets,
+      userMessage: body.message,
+      grimoireData,
+    });
+
     let composed;
     try {
       composed = await composeAssistantReply({
@@ -302,6 +344,7 @@ export async function POST(request: NextRequest) {
         userMessage: body.message,
         memorySnippets,
         threadId: body.threadId,
+        promptSectionsOverride: promptSections,
       });
     } catch (error) {
       const errorMessage =

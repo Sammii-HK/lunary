@@ -26,9 +26,9 @@ CRITICAL RULES:
 4. If tarot cards are provided, reference them by their exact names from the context.
 5. Connect ONLY the actual cosmic patterns provided to the user's question.
 6. Be direct and specific - avoid generic astrological language.
-7. Do NOT include journal prompts in your response - they will be added separately.
+7. CRITICAL: Do NOT include journal prompts or reflection prompts in your response. Never write phrases like "You could journal on..." or "inviting you to explore..." - these are handled separately by the system and should NEVER appear in your message content. Your response should end naturally without suggesting journaling or reflection activities.
 8. MESSAGE LENGTH VARIES BY CONTENT TYPE:
-   - Weekly Overview: 8-12 sentences (2-3 paragraphs) - comprehensive and detailed
+   - Weekly Overview: 8-12 sentences (2-3 paragraphs) - comprehensive but concise
    - Quick questions (cosmic weather, feelings, tarot interpretation): 4-6 sentences - concise but meaningful
    - Ritual suggestions: 5-7 sentences - practical and actionable
    - Journal entries: 6-8 sentences - reflective and personal
@@ -85,7 +85,17 @@ type PromptSections = {
 const formatMemory = (entries: string[]): string =>
   entries.length > 0 ? entries.map((entry) => `- ${entry}`).join('\n') : '';
 
-const describeContext = (context: LunaryContext): string => {
+const describeContext = (
+  context: LunaryContext,
+  grimoireData?: {
+    tarotCards?: Array<{
+      name: string;
+      keywords: string[];
+      information: string;
+    }>;
+    rituals?: Array<{ title: string; description: string }>;
+  },
+): string => {
   const parts: string[] = [];
 
   // Tarot cards - always include daily/weekly/personal cards (they're always generated)
@@ -128,6 +138,27 @@ const describeContext = (context: LunaryContext): string => {
     );
   }
 
+  // Recent readings with insights (for AI Plus users)
+  if (context.tarot.recentReadings && context.tarot.recentReadings.length > 0) {
+    const recentReadingsInfo: string[] = [];
+    context.tarot.recentReadings.slice(0, 10).forEach((reading, index) => {
+      const cardNames = reading.cards.map((c) => c.name).join(', ');
+      let readingInfo = `${index + 1}. ${reading.spread}: ${cardNames}`;
+      if (reading.summary) {
+        readingInfo += ` | Summary: ${reading.summary.substring(0, 150)}`;
+      }
+      if (reading.highlights && reading.highlights.length > 0) {
+        readingInfo += ` | Highlights: ${reading.highlights.slice(0, 3).join(', ')}`;
+      }
+      recentReadingsInfo.push(readingInfo);
+    });
+    if (recentReadingsInfo.length > 0) {
+      parts.push(
+        `RECENT TAROT READINGS (${recentReadingsInfo.length}): ${recentReadingsInfo.join(' || ')}`,
+      );
+    }
+  }
+
   // Pattern analysis - include insights since they're already computed
   if (context.tarot.patternAnalysis) {
     const analysis = context.tarot.patternAnalysis;
@@ -147,6 +178,22 @@ const describeContext = (context: LunaryContext): string => {
     }
   }
 
+  // Add grimoire data for tarot cards if provided (when user asks about specific cards)
+  if (grimoireData?.tarotCards && grimoireData.tarotCards.length > 0) {
+    const cardInfo = grimoireData.tarotCards
+      .map((card) => {
+        const keywords = card.keywords
+          ? `Keywords: ${card.keywords.join(', ')}`
+          : '';
+        const info = card.information ? `Info: ${card.information}` : '';
+        return `${card.name} - ${keywords} ${info}`.trim();
+      })
+      .join(' || ');
+    if (cardInfo) {
+      parts.push(`GRIMOIRE TAROT DATA: ${cardInfo}`);
+    }
+  }
+
   // Moon - concise, avoid repetition
   if (context.moon) {
     const moonSign = context.moon.sign.toLowerCase();
@@ -160,12 +207,14 @@ const describeContext = (context: LunaryContext): string => {
   }
 
   // Transits - include more transits for comprehensive context
+  // For weekly overviews, include more transits
   if (context.currentTransits && context.currentTransits.length > 0) {
     const topTransits = context.currentTransits
-      .slice(0, 5) // Increased from 3 to 5 for better context
+      .slice(0, 8) // Increased to 8 for weekly overviews
       .map((t) => {
         const applying = t.applying ? ' (applying)' : '';
-        return `${t.from} ${t.aspect} ${t.to}${applying}`;
+        const strength = t.strength ? ` strength:${t.strength.toFixed(2)}` : '';
+        return `${t.from} ${t.aspect} ${t.to}${applying}${strength}`;
       })
       .join(', ');
     parts.push(`TRANSITS: ${topTransits}`);
@@ -244,7 +293,7 @@ const getModeSpecificGuidance = (userMessage: string): string => {
     content.includes('weekly overview') ||
     content.includes('summarise my week')
   ) {
-    return "\n\nMODE: Weekly Overview\nProvide a comprehensive, detailed summary of the week's cosmic influences. Include: moon phases and their shifts throughout the week, key planetary transits and their timing, how these energies relate to the user's personal journey and birth chart, practical guidance for navigating the week's energies, and specific days or moments that stand out. Write 8-12 sentences (2-3 paragraphs) with depth and specificity. This should be substantially longer and more informative than quick questions.";
+    return "\n\nMODE: Weekly Overview\nCRITICAL: Write 8-12 sentences (2-3 paragraphs). Do NOT write a single short sentence.\n\nYou MUST include:\n1. Overall lunar journey - describe how moon phases shift throughout the week, what each phase means, and when transitions occur\n2. Major planetary transits - detail the most important transits, what they mean, when they're exact, and how they affect the user personally based on their birth chart\n3. Practical guidance - connect cosmic patterns to actionable insights, highlight specific days that stand out, and provide day-by-day focus areas\n\nBe SPECIFIC and DETAILED. Name specific transits, mention specific days, explain what each transit means. This is NOT a quick summary - it's a comprehensive weekly guide.";
   }
 
   if (
@@ -261,10 +310,19 @@ export const buildPromptSections = ({
   context,
   memorySnippets,
   userMessage,
+  grimoireData,
 }: {
   context: LunaryContext;
   memorySnippets: string[];
   userMessage: string;
+  grimoireData?: {
+    tarotCards?: Array<{
+      name: string;
+      keywords: string[];
+      information: string;
+    }>;
+    rituals?: Array<{ title: string; description: string }>;
+  };
 }): PromptSections => {
   const memory =
     memorySnippets.length > 0
@@ -277,7 +335,7 @@ export const buildPromptSections = ({
   return {
     system: systemPrompt,
     memory,
-    context: `Context data:\n${describeContext(context)}`,
+    context: `Context data:\n${describeContext(context, grimoireData)}`,
     userMessage,
   };
 };

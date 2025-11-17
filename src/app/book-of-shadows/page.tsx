@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -10,17 +10,93 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { AuthComponent } from '@/components/Auth';
 import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
+import { parseMessageContent } from '@/utils/messageParser';
 
 const MessageBubble = ({
   role,
   content,
   messageId,
+  onEntityClick,
 }: {
   role: 'user' | 'assistant';
   content: string;
   messageId?: string;
+  onEntityClick?: (entity: {
+    type: 'tarot' | 'ritual' | 'spell';
+    name: string;
+  }) => void;
 }) => {
   const isUser = role === 'user';
+  // Only parse assistant messages for entities (user messages don't need parsing)
+  // Use useMemo to re-parse when component re-renders (e.g., after cache initialization)
+  const parsed = React.useMemo(
+    () =>
+      !isUser ? parseMessageContent(content) : { text: content, entities: [] },
+    [content, isUser],
+  );
+
+  const renderContent = () => {
+    if (parsed.entities.length === 0) {
+      const lines = content.split('\n');
+      return lines.map((line, index) => (
+        <span key={index}>
+          {line}
+          {index < lines.length - 1 && '\n'}
+        </span>
+      ));
+    }
+
+    const parts: Array<{
+      text: string;
+      isEntity: boolean;
+      entity?: { type: 'tarot' | 'ritual' | 'spell'; name: string };
+    }> = [];
+    let lastIndex = 0;
+
+    parsed.entities.forEach((entity) => {
+      if (entity.startIndex > lastIndex) {
+        parts.push({
+          text: content.slice(lastIndex, entity.startIndex),
+          isEntity: false,
+        });
+      }
+      parts.push({
+        text: content.slice(entity.startIndex, entity.endIndex),
+        isEntity: true,
+        entity: { type: entity.type, name: entity.name },
+      });
+      lastIndex = entity.endIndex;
+    });
+
+    if (lastIndex < content.length) {
+      parts.push({ text: content.slice(lastIndex), isEntity: false });
+    }
+
+    const result: React.ReactNode[] = [];
+    parts.forEach((part, partIndex) => {
+      const lines = part.text.split('\n');
+      lines.forEach((line, lineIndex) => {
+        if (lineIndex > 0) {
+          result.push('\n');
+        }
+        if (part.isEntity && part.entity && onEntityClick) {
+          result.push(
+            <button
+              key={`${partIndex}-${lineIndex}`}
+              onClick={() => onEntityClick(part.entity!)}
+              className='underline decoration-dotted decoration-purple-400/60 hover:decoration-purple-400 text-purple-300 hover:text-purple-200 transition-colors cursor-pointer'
+            >
+              {line}
+            </button>,
+          );
+        } else {
+          result.push(<span key={`${partIndex}-${lineIndex}`}>{line}</span>);
+        }
+      });
+    });
+    return result;
+  };
+
   return (
     <div
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
@@ -33,11 +109,7 @@ const MessageBubble = ({
               : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
           }`}
         >
-          {content.split('\n').map((line, index) => (
-            <p key={index} className='whitespace-pre-wrap'>
-              {line}
-            </p>
-          ))}
+          {renderContent()}
         </div>
         {!isUser && (
           <div className='opacity-0 group-hover:opacity-100 transition-opacity'>
@@ -64,6 +136,7 @@ export default function BookOfShadowsPage() {
     messages,
     sendMessage,
     isStreaming,
+    isLoadingHistory,
     stop,
     assistSnippet,
     reflectionPrompt,
@@ -72,7 +145,30 @@ export default function BookOfShadowsPage() {
     dailyHighlight,
     error,
     clearError,
+    addMessage,
+    threadId,
   } = useAssistantChat();
+
+  const [cacheInitialized, setCacheInitialized] = useState(false);
+
+  // Initialize tarot card parser on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Pre-load tarot cards to populate parser cache
+      import('../../../utils/tarot/tarot-cards')
+        .then((module) => {
+          const tarotCards = module.tarotCards;
+          // Initialize the cache in messageParser
+          import('@/utils/messageParser').then((module) => {
+            module.initializeTarotCardCache(tarotCards);
+            setCacheInitialized(true);
+          });
+        })
+        .catch(() => {
+          // Ignore errors - parser will handle gracefully
+        });
+    }
+  }, []);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [promptHandled, setPromptHandled] = useState(false);
@@ -272,7 +368,11 @@ export default function BookOfShadowsPage() {
               className='flex-1 overflow-y-auto px-4 py-6 md:px-6'
             >
               <div className='mx-auto flex max-w-2xl flex-col gap-4 md:gap-6'>
-                {messages.length === 0 ? (
+                {isLoadingHistory ? (
+                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                    Loading your conversation...
+                  </div>
+                ) : messages.length === 0 ? (
                   <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
                     Begin by sharing how you're feeling, what you're exploring,
                     or what guidance you're seeking. I'll answer with gentle,
@@ -280,12 +380,130 @@ export default function BookOfShadowsPage() {
                   </div>
                 ) : (
                   <>
-                    {messages.map((message) => (
+                    {messages.map((message, index) => (
                       <MessageBubble
-                        key={message.id}
+                        key={`${message.id}-${index}-${cacheInitialized}`}
                         role={message.role}
                         content={message.content}
                         messageId={message.id}
+                        onEntityClick={async (entity) => {
+                          try {
+                            let content = '';
+
+                            if (entity.type === 'tarot') {
+                              // Fetch tarot card data directly from grimoire
+                              const { getTarotCardByName } = await import(
+                                '@/utils/tarot/getCardByName'
+                              );
+                              const cardData = getTarotCardByName(entity.name);
+
+                              if (cardData) {
+                                // Just show the description, no heading or keywords
+                                content = cardData.information;
+                              } else {
+                                content = `I couldn't find information about "${entity.name}" in the grimoire.`;
+                              }
+                            } else if (
+                              entity.type === 'ritual' ||
+                              entity.type === 'spell'
+                            ) {
+                              // Fetch spell/ritual data directly from grimoire
+                              const { spellDatabase } = await import(
+                                '@/constants/grimoire/spells'
+                              );
+                              const spell = spellDatabase.find(
+                                (s) =>
+                                  s.title.toLowerCase() ===
+                                    entity.name.toLowerCase() ||
+                                  s.alternativeNames?.some(
+                                    (n) =>
+                                      n.toLowerCase() ===
+                                      entity.name.toLowerCase(),
+                                  ),
+                              );
+
+                              if (spell) {
+                                const typeLabel =
+                                  spell.type === 'ritual' ? 'Ritual' : 'Spell';
+                                const difficulty = spell.difficulty
+                                  ? `**Difficulty:** ${spell.difficulty.charAt(0).toUpperCase() + spell.difficulty.slice(1)}\n\n`
+                                  : '';
+                                const purpose = spell.purpose
+                                  ? `**Purpose:** ${spell.purpose}\n\n`
+                                  : '';
+                                const description =
+                                  spell.fullDescription || spell.description;
+                                const timing = spell.timing?.bestTiming
+                                  ? `**Best Timing:** ${spell.timing.bestTiming}\n\n`
+                                  : '';
+
+                                content = `## ${spell.title} (${typeLabel})\n\n${difficulty}${purpose}${timing}${description}`;
+
+                                if (spell.steps && spell.steps.length > 0) {
+                                  content += `\n\n**Steps:**\n${spell.steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}`;
+                                }
+                              } else {
+                                content = `I couldn't find information about "${entity.name}" in the grimoire.`;
+                              }
+                            }
+
+                            if (content) {
+                              // Generate ID
+                              const messageId =
+                                typeof crypto !== 'undefined' &&
+                                crypto.randomUUID
+                                  ? crypto.randomUUID()
+                                  : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+                              // Add message to UI
+                              addMessage({
+                                id: messageId,
+                                role: 'assistant',
+                                content,
+                              });
+
+                              // Save to thread history
+                              if (threadId) {
+                                try {
+                                  await fetch('/api/ai/thread/append', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    credentials: 'include',
+                                    body: JSON.stringify({
+                                      threadId,
+                                      assistantMessage: {
+                                        role: 'assistant',
+                                        content,
+                                        entityName: entity.name,
+                                        ts: new Date().toISOString(),
+                                        tokens: 0,
+                                      },
+                                    }),
+                                  });
+                                } catch (err) {
+                                  console.error(
+                                    '[EntityClick] Failed to save to thread:',
+                                    err,
+                                  );
+                                }
+                              }
+
+                              // Scroll to bottom
+                              setTimeout(() => {
+                                messagesEndRef.current?.scrollIntoView({
+                                  behavior: 'smooth',
+                                });
+                              }, 100);
+                            }
+                          } catch (error) {
+                            console.error(
+                              '[MessageBubble] Failed to fetch entity data:',
+                              error,
+                            );
+                          }
+                        }}
                       />
                     ))}
                     {error && (
