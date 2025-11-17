@@ -348,14 +348,28 @@ export async function syncSubscriptionToProfile(
       profile._owner || profile,
     );
 
+    if (!profile.$jazz) {
+      console.error(
+        '[syncSubscriptionToProfile] Profile does not have $jazz property',
+        { profileKeys: Object.keys(profile) },
+      );
+      return {
+        success: false,
+        message: 'Profile is not a valid Jazz coValue',
+      };
+    }
+
     profile.$jazz.set('subscription', subscriptionCoValue);
+
+    // Access subscription directly from profile (Jazz coValues expose properties directly)
+    const syncedSubscription = (profile as any).subscription;
 
     console.log('Subscription synced to Jazz profile:', {
       customerId,
       status: subscriptionData.status,
       plan: subscriptionData.plan,
       schemaPlan: schemaPlan,
-      syncedPlan: (profile.$jazz.get('subscription') as any)?.plan,
+      syncedPlan: syncedSubscription?.plan || 'unknown',
     });
 
     return { success: true, data: subscriptionData };
