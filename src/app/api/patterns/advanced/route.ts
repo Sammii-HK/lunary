@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/ai/auth';
 import {
   hasFeatureAccess,
   normalizePlanType,
+  FEATURE_ACCESS,
 } from '../../../../../utils/pricing';
 import { getTarotPatternAnalysis } from '@/lib/ai/providers';
 import dayjs from 'dayjs';
@@ -1057,11 +1058,60 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Debug logging to understand what's happening
+    const normalizedPlan = normalizePlanType(planType);
     console.log(
-      `[patterns/advanced] User ${user.id}: status=${subscriptionStatus}, planType=${planType}, hasAccess=${hasFeatureAccess(subscriptionStatus, planType, 'advanced_patterns')}`,
+      `[patterns/advanced] Final check - subscriptionStatus: ${subscriptionStatus}, planType: ${planType}, normalized: ${normalizedPlan}`,
+    );
+    console.log(
+      `[patterns/advanced] Checking access - status is trial/active: ${subscriptionStatus === 'trial' || subscriptionStatus === 'active'}, plan is annual: ${normalizedPlan === 'lunary_plus_ai_annual' || planType === 'lunary_plus_ai_annual'}`,
     );
 
-    if (!hasFeatureAccess(subscriptionStatus, planType, 'advanced_patterns')) {
+    // Defensive check: if plan is lunary_plus_ai_annual or lunary_plus_ai and status is trial/active, always grant access
+    // This matches the client-side hook logic and yearly forecast route
+    let hasAccess = false;
+
+    // Check both normalized and raw plan type
+    const isAnnualPlan =
+      normalizedPlan === 'lunary_plus_ai_annual' ||
+      planType === 'lunary_plus_ai_annual' ||
+      planType === 'yearly';
+    const isAIPlan =
+      normalizedPlan === 'lunary_plus_ai' ||
+      planType === 'lunary_plus_ai' ||
+      isAnnualPlan;
+    const isValidStatus =
+      subscriptionStatus === 'trial' ||
+      subscriptionStatus === 'active' ||
+      subscriptionStatus === 'trialing';
+
+    if (isAIPlan && isValidStatus) {
+      // Check if feature is in the appropriate plan's feature list
+      if (isAnnualPlan) {
+        hasAccess =
+          FEATURE_ACCESS.lunary_plus_ai_annual.includes('advanced_patterns');
+      } else {
+        hasAccess = FEATURE_ACCESS.lunary_plus_ai.includes('advanced_patterns');
+      }
+      console.log(
+        `[patterns/advanced] Defensive check passed - ${isAnnualPlan ? 'annual' : 'AI'} plan (${planType}/${normalizedPlan}) with valid status (${subscriptionStatus}), hasAccess: ${hasAccess}`,
+      );
+    } else {
+      // Fall back to standard hasFeatureAccess check
+      hasAccess = hasFeatureAccess(
+        subscriptionStatus,
+        planType,
+        'advanced_patterns',
+      );
+      console.log(
+        `[patterns/advanced] Standard hasFeatureAccess result: ${hasAccess} for feature 'advanced_patterns' (status: ${subscriptionStatus}, plan: ${planType})`,
+      );
+    }
+
+    if (!hasAccess) {
+      console.error(
+        `[patterns/advanced] Access denied for user ${user.id}: status=${subscriptionStatus}, planType=${planType}, normalized=${normalizedPlan}`,
+      );
       return NextResponse.json(
         {
           error:
