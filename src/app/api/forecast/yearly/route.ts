@@ -163,6 +163,15 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
     const userId = user.id;
+    const userPlanRaw = user.plan;
+    const normalizedUserPlan = normalizePlanType(userPlanRaw);
+    const userHasAnnualOverride =
+      normalizedUserPlan === 'lunary_plus_ai_annual' ||
+      userPlanRaw === 'yearly';
+
+    console.log(
+      `[forecast/yearly] User ${userId} plan override check: raw=${userPlanRaw}, normalized=${normalizedUserPlan}, override=${userHasAnnualOverride}`,
+    );
 
     const { searchParams } = new URL(request.url);
     const yearParam = searchParams.get('year');
@@ -189,6 +198,13 @@ export async function GET(request: NextRequest) {
     let subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
     let planType = normalizePlanType(subscription?.plan_type);
     const customerId = subscription?.stripe_customer_id;
+
+    if (userHasAnnualOverride) {
+      planType = normalizedUserPlan;
+      if (subscriptionStatus === 'free' || !subscriptionStatus) {
+        subscriptionStatus = 'active';
+      }
+    }
 
     // Try to fetch from Stripe API for more accurate subscription data
     // This is especially important in preview deployments where DB might be stale
@@ -286,34 +302,53 @@ export async function GET(request: NextRequest) {
     // Defensive check: if plan is lunary_plus_ai_annual and status is trial/active, always grant access
     // This matches the client-side hook logic
     let hasAccess = false;
+    let accessSource: 'user_plan_override' | 'subscription_logic' =
+      'subscription_logic';
 
-    // Check both normalized and raw plan type
-    const isAnnualPlan =
-      normalizedPlan === 'lunary_plus_ai_annual' ||
-      planType === 'lunary_plus_ai_annual' ||
-      planType === 'yearly';
-    const isValidStatus =
-      subscriptionStatus === 'trial' ||
-      subscriptionStatus === 'active' ||
-      subscriptionStatus === 'trialing';
-
-    if (isAnnualPlan && isValidStatus) {
+    if (userHasAnnualOverride) {
       hasAccess =
         FEATURE_ACCESS.lunary_plus_ai_annual.includes('yearly_forecast');
+      accessSource = 'user_plan_override';
       console.log(
-        `[forecast/yearly] Defensive check passed - annual plan (${planType}/${normalizedPlan}) with valid status (${subscriptionStatus}), hasAccess: ${hasAccess}`,
-      );
-    } else {
-      // Fall back to standard hasFeatureAccess check
-      hasAccess = hasFeatureAccess(
-        subscriptionStatus,
-        planType,
-        'yearly_forecast',
-      );
-      console.log(
-        `[forecast/yearly] Standard hasFeatureAccess result: ${hasAccess} for feature 'yearly_forecast' (status: ${subscriptionStatus}, plan: ${planType})`,
+        `[forecast/yearly] Granting access via user plan override (raw=${userPlanRaw}, normalized=${normalizedUserPlan})`,
       );
     }
+
+    if (!hasAccess) {
+      // Check both normalized and raw plan type
+      const isAnnualPlan =
+        normalizedPlan === 'lunary_plus_ai_annual' ||
+        planType === 'lunary_plus_ai_annual' ||
+        planType === 'yearly';
+      const isValidStatus =
+        subscriptionStatus === 'trial' ||
+        subscriptionStatus === 'active' ||
+        subscriptionStatus === 'trialing';
+
+      if (isAnnualPlan && isValidStatus) {
+        hasAccess =
+          FEATURE_ACCESS.lunary_plus_ai_annual.includes('yearly_forecast');
+        accessSource = 'subscription_logic';
+        console.log(
+          `[forecast/yearly] Defensive check passed - annual plan (${planType}/${normalizedPlan}) with valid status (${subscriptionStatus}), hasAccess: ${hasAccess}`,
+        );
+      } else {
+        // Fall back to standard hasFeatureAccess check
+        hasAccess = hasFeatureAccess(
+          subscriptionStatus,
+          planType,
+          'yearly_forecast',
+        );
+        accessSource = 'subscription_logic';
+        console.log(
+          `[forecast/yearly] Standard hasFeatureAccess result: ${hasAccess} for feature 'yearly_forecast' (status: ${subscriptionStatus}, plan: ${planType})`,
+        );
+      }
+    }
+
+    console.log(
+      `[forecast/yearly] Access decision for user ${userId}: hasAccess=${hasAccess}, source=${accessSource}, subscriptionStatus=${subscriptionStatus}, planType=${planType}, normalizedUserPlan=${normalizedUserPlan}`,
+    );
 
     if (!hasAccess) {
       console.error(
