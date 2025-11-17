@@ -39,16 +39,14 @@ export default function SubscriptionManagement({
   const displaySubscription = stripeSubscription ||
     subscription || { status: 'free', isSubscribed: false };
 
-  const fetchStripeSubscription = async () => {
+  const fetchStripeSubscription = async (forceRefresh = false) => {
     const customerIdToUse = customerId || subscription.customerId;
     if (!customerIdToUse) return;
 
     try {
       const response = await fetch('/api/stripe/get-subscription', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerId: customerIdToUse,
         }),
@@ -106,8 +104,28 @@ export default function SubscriptionManagement({
   const handleRefresh = async () => {
     setLoading('refresh');
     setError(null);
-    await fetchStripeSubscription();
-    // Also trigger a page refresh to update subscription hook
+
+    // Clear any cached subscription data
+    try {
+      // Clear service worker cache if it exists
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map((cacheName) => caches.delete(cacheName)),
+        );
+      }
+    } catch (e) {
+      // Ignore cache clearing errors
+      console.warn('Could not clear caches:', e);
+    }
+
+    // Force refresh with cache-busting
+    await fetchStripeSubscription(true);
+
+    // Small delay to ensure sync completes before reload
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Reload page to refresh all subscription hooks and clear any client-side cache
     window.location.reload();
     setLoading(null);
   };

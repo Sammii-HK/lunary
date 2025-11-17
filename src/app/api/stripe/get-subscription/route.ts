@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+// Cache subscription checks for 5 minutes to reduce CPU/API calls
+// Subscription status changes infrequently, and users can force refresh via button
+export const revalidate = 300;
+
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
+    const isPreview =
+      process.env.VERCEL_ENV === 'preview' ||
+      process.env.NODE_ENV === 'development';
+    if (isPreview) {
+      console.warn(
+        '[get-subscription] STRIPE_SECRET_KEY not set in preview/dev environment - subscription checks will use database only',
+      );
+      return null;
+    }
     throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
   }
   return new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -10,6 +23,7 @@ function getStripe() {
 
 async function getPlanTypeFromSubscription(
   subscription: Stripe.Subscription,
+  stripe: Stripe,
 ): Promise<string> {
   // First try to get plan_id from subscription metadata
   const planIdFromMetadata = subscription.metadata?.plan_id;
@@ -21,7 +35,6 @@ async function getPlanTypeFromSubscription(
   const priceId = subscription.items.data[0]?.price?.id;
   if (priceId) {
     try {
-      const stripe = getStripe();
       const price = await stripe.prices.retrieve(priceId, {
         expand: ['product'],
       });
@@ -85,6 +98,18 @@ async function getPlanTypeFromSubscription(
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Stripe not configured',
+          message:
+            'Stripe API not available in this environment - use database subscription',
+          useDatabaseFallback: true,
+        },
+        { status: 503 },
+      );
+    }
     let body;
     try {
       const text = await request.text();
@@ -135,25 +160,35 @@ export async function POST(request: NextRequest) {
     const subscription = activeSubscription || subscriptions.data[0];
 
     // Extract plan_id from subscription metadata
-    const planType = await getPlanTypeFromSubscription(subscription);
+    const planType = await getPlanTypeFromSubscription(subscription, stripe);
 
-    return NextResponse.json({
-      success: true,
-      subscription: {
-        id: subscription.id,
-        status: subscription.status,
-        customerId: subscription.customer,
-        customer: subscription.customer,
-        plan: planType,
-        planName: planType, // Include planName for compatibility
-        current_period_end: (subscription as any).current_period_end || null,
-        trial_end: (subscription as any).trial_end || null,
-        trialEnd: (subscription as any).trial_end || null, // Include both formats
-        items: subscription.items,
-        created: subscription.created,
+    return NextResponse.json(
+      {
+        success: true,
+        subscription: {
+          id: subscription.id,
+          status: subscription.status,
+          customerId: subscription.customer,
+          customer: subscription.customer,
+          plan: planType,
+          planName: planType, // Include planName for compatibility
+          current_period_end: (subscription as any).current_period_end || null,
+          trial_end: (subscription as any).trial_end || null,
+          trialEnd: (subscription as any).trial_end || null, // Include both formats
+          items: subscription.items,
+          created: subscription.created,
+        },
+        message: `Found ${subscription.status} subscription`,
       },
-      message: `Found ${subscription.status} subscription`,
-    });
+      {
+        headers: {
+          // Cache for 5 minutes, allow stale-while-revalidate for 10 minutes
+          // Reduces Stripe API calls significantly - users can force refresh via button
+          'Cache-Control':
+            'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
+        },
+      },
+    );
   } catch (error) {
     console.error('Error fetching subscription:', error);
     return NextResponse.json(

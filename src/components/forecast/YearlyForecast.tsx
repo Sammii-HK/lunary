@@ -50,7 +50,9 @@ export function YearlyForecast() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/forecast/yearly');
+      const response = await fetch('/api/forecast/yearly', {
+        cache: 'no-store',
+      });
       if (!response.ok) {
         if (response.status === 403) {
           setError('Upgrade to Lunary+ AI Annual to access yearly forecast');

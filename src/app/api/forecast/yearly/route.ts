@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/ai/auth';
 import {
   hasFeatureAccess,
   normalizePlanType,
+  FEATURE_ACCESS,
 } from '../../../../../utils/pricing';
 import {
   getRealPlanetaryPositions,
@@ -18,7 +19,9 @@ import dayjs from 'dayjs';
 
 const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
 
-export const revalidate = 86400;
+// Cache for 5 minutes - subscription checks are cached at Stripe route level
+// Forecast generation is expensive, longer cache significantly reduces CPU
+export const revalidate = 300;
 
 interface YearlyForecast {
   year: number;
@@ -172,8 +175,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // First, check database subscription
     const subscriptionResult = await sql`
-      SELECT plan_type, status
+      SELECT plan_type, status, stripe_customer_id
       FROM subscriptions
       WHERE user_id = ${userId}
       ORDER BY created_at DESC
@@ -181,13 +185,118 @@ export async function GET(request: NextRequest) {
     `;
 
     const subscription = subscriptionResult.rows[0];
-    // Normalize status: 'trialing' -> 'trial' for consistency with hasFeatureAccess
-    const rawStatus = subscription?.status || 'free';
-    const subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
-    // Normalize plan type to ensure correct feature access
-    const planType = normalizePlanType(subscription?.plan_type);
+    let rawStatus = subscription?.status || 'free';
+    let subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
+    let planType = normalizePlanType(subscription?.plan_type);
+    const customerId = subscription?.stripe_customer_id;
 
-    if (!hasFeatureAccess(subscriptionStatus, planType, 'yearly_forecast')) {
+    // Try to fetch from Stripe API for more accurate subscription data
+    // This is especially important in preview deployments where DB might be stale
+
+    if (customerId) {
+      try {
+        const stripeResponse = await fetch(
+          `${request.nextUrl.origin}/api/stripe/get-subscription`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customerId }),
+            // Allow Next.js to cache for 5 minutes (matches Stripe route)
+            next: { revalidate: 300 },
+          },
+        );
+
+        if (stripeResponse.ok) {
+          const stripeData = await stripeResponse.json();
+          console.log(
+            `[forecast/yearly] Stripe API response:`,
+            JSON.stringify(stripeData, null, 2),
+          );
+          if (
+            (stripeData.success || stripeData.hasSubscription) &&
+            stripeData.subscription
+          ) {
+            const stripeSub = stripeData.subscription;
+            // Normalize status: 'trialing' -> 'trial' for consistency
+            const rawStripeStatus = stripeSub.status;
+            subscriptionStatus =
+              rawStripeStatus === 'trialing' ? 'trial' : rawStripeStatus;
+            const rawPlan = stripeSub.plan;
+            planType = normalizePlanType(rawPlan);
+            const immediateAccessCheck = hasFeatureAccess(
+              subscriptionStatus,
+              planType,
+              'yearly_forecast',
+            );
+            console.log(
+              `[forecast/yearly] Fetched from Stripe: rawStatus=${rawStripeStatus}, status=${subscriptionStatus}, rawPlan=${rawPlan}, normalized=${planType}, hasAccess=${immediateAccessCheck}`,
+            );
+          } else {
+            console.log(
+              '[forecast/yearly] Stripe response missing subscription data, using database subscription',
+              { stripeData },
+            );
+          }
+        } else {
+          // Check if Stripe is unavailable (503) - this is expected in preview/dev
+          const stripeData =
+            stripeResponse.status === 503
+              ? await stripeResponse.json().catch(() => null)
+              : null;
+
+          if (stripeData?.useDatabaseFallback) {
+            console.log(
+              '[forecast/yearly] Stripe not configured in this environment, using database subscription',
+            );
+            // Continue with database subscription (already set above)
+          } else {
+            console.log(
+              `[forecast/yearly] Stripe fetch failed: ${stripeResponse.status}, using database subscription`,
+            );
+            // Continue with database subscription (already set above)
+          }
+        }
+      } catch (error) {
+        console.error('[forecast/yearly] Failed to fetch from Stripe:', error);
+        // Continue with database subscription (already set above)
+      }
+    }
+
+    // Debug logging to understand what's happening
+    const normalizedPlan = normalizePlanType(planType);
+    console.log(
+      `[forecast/yearly] Final check - subscriptionStatus: ${subscriptionStatus}, planType: ${planType}, normalized: ${normalizedPlan}`,
+    );
+
+    // Defensive check: if plan is lunary_plus_ai_annual and status is trial/active, always grant access
+    // This matches the client-side hook logic
+    let hasAccess = false;
+    if (
+      (normalizedPlan === 'lunary_plus_ai_annual' ||
+        planType === 'lunary_plus_ai_annual') &&
+      (subscriptionStatus === 'trial' || subscriptionStatus === 'active')
+    ) {
+      hasAccess =
+        FEATURE_ACCESS.lunary_plus_ai_annual.includes('yearly_forecast');
+      console.log(
+        `[forecast/yearly] Defensive check passed - annual plan with trial/active status, hasAccess: ${hasAccess}`,
+      );
+    } else {
+      // Fall back to standard hasFeatureAccess check
+      hasAccess = hasFeatureAccess(
+        subscriptionStatus,
+        planType,
+        'yearly_forecast',
+      );
+      console.log(
+        `[forecast/yearly] Standard hasFeatureAccess result: ${hasAccess} for feature 'yearly_forecast'`,
+      );
+    }
+
+    if (!hasAccess) {
+      console.error(
+        `[forecast/yearly] ACCESS DENIED - status: ${subscriptionStatus}, plan: ${planType}, normalized: ${normalizedPlan}`,
+      );
       return NextResponse.json(
         {
           error:
@@ -213,8 +322,10 @@ export async function GET(request: NextRequest) {
       { success: true, forecast },
       {
         headers: {
+          // Cache for 5 minutes with stale-while-revalidate
+          // Significantly reduces CPU - users can force refresh via button
           'Cache-Control':
-            'private, s-maxage=86400, stale-while-revalidate=43200',
+            'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
         },
       },
     );

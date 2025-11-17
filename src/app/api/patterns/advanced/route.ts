@@ -1000,6 +1000,8 @@ export async function GET(request: NextRequest) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ customerId }),
+            // Allow Next.js to cache for 5 minutes (matches Stripe route)
+            next: { revalidate: 300 },
           },
         );
 
