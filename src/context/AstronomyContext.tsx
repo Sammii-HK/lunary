@@ -76,7 +76,7 @@ export const AstronomyContextProvider = ({
   // Get account info if available
   const account = useAccount();
   const userName = account?.me?.profile?.name;
-  const userBirthday = account?.me?.profile?.birthday;
+  const userBirthday = (account?.me?.profile as any)?.birthday;
 
   const [currentDateTime, setCurrentDateTime] = useState(dayjs().toDate());
   const [currentDate, setCurrentDate] = useState(

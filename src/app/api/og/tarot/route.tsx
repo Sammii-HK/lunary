@@ -3,7 +3,8 @@ import { NextRequest } from 'next/server';
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import utc from 'dayjs/plugin/utc';
-import { getTarotCard } from '../../../../utils/tarot/tarot';
+import { getTarotCard } from '../../../../../utils/tarot/tarot';
+import { getTarotCardByName } from '../../../../../src/utils/tarot/getCardByName';
 
 dayjs.extend(dayOfYear);
 dayjs.extend(utc);
@@ -11,133 +12,84 @@ dayjs.extend(utc);
 export const dynamic = 'force-dynamic';
 export const revalidate = 86400; // Cache for 24 hours (content updates daily)
 
-// Major Arcana with suit color system
-const tarotCards = [
-  // Major Arcana - Gold/Yellow theme
-  {
-    name: 'The Fool',
-    suit: 'Major',
-    color: '#F59E0B',
-    archetype: 'New Beginnings',
-    keywords: ['Adventure', 'Spontaneity', 'Faith'],
-  },
-  {
-    name: 'The Magician',
-    suit: 'Major',
-    color: '#EAB308',
-    archetype: 'Manifestation',
-    keywords: ['Power', 'Focus', 'Skill'],
-  },
-  {
-    name: 'The High Priestess',
-    suit: 'Major',
-    color: '#CA8A04',
-    archetype: 'Intuition',
-    keywords: ['Mystery', 'Wisdom', 'Subconscious'],
-  },
-  {
-    name: 'The Empress',
-    suit: 'Major',
-    color: '#A16207',
-    archetype: 'Abundance',
-    keywords: ['Fertility', 'Nature', 'Nurturing'],
-  },
-  {
-    name: 'The Emperor',
-    suit: 'Major',
-    color: '#92400E',
-    archetype: 'Authority',
-    keywords: ['Structure', 'Control', 'Leadership'],
-  },
-  {
-    name: 'The Lovers',
-    suit: 'Major',
-    color: '#F59E0B',
-    archetype: 'Choice',
-    keywords: ['Love', 'Union', 'Values'],
-  },
-  {
-    name: 'The Chariot',
-    suit: 'Major',
-    color: '#D97706',
-    archetype: 'Victory',
-    keywords: ['Control', 'Determination', 'Success'],
-  },
-  {
-    name: 'Strength',
-    suit: 'Major',
-    color: '#B45309',
-    archetype: 'Inner Power',
-    keywords: ['Courage', 'Patience', 'Compassion'],
-  },
+// Get suit from card name
+function getCardSuit(cardName: string): string {
+  if (cardName.includes('Cups')) return 'Cups';
+  if (cardName.includes('Wands')) return 'Wands';
+  if (cardName.includes('Swords')) return 'Swords';
+  if (cardName.includes('Pentacles')) return 'Pentacles';
+  return 'Major';
+}
 
-  // Cups - Blue theme (Water)
-  {
-    name: 'Ace of Cups',
-    suit: 'Cups',
-    color: '#2563EB',
-    archetype: 'New Love',
-    keywords: ['Emotion', 'Intuition', 'Spirituality'],
-  },
-  {
-    name: 'Two of Cups',
-    suit: 'Cups',
-    color: '#1D4ED8',
-    archetype: 'Partnership',
-    keywords: ['Union', 'Connection', 'Harmony'],
-  },
+// Get color based on suit
+function getSuitColor(suit: string): string {
+  const colorMap: Record<string, string> = {
+    Major: '#F59E0B', // Gold/Yellow
+    Cups: '#2563EB', // Blue (Water)
+    Wands: '#DC2626', // Red (Fire)
+    Swords: '#7C3AED', // Purple (Air)
+    Pentacles: '#059669', // Green (Earth)
+  };
+  return colorMap[suit] || '#9333EA';
+}
 
-  // Wands - Red theme (Fire)
-  {
-    name: 'Ace of Wands',
-    suit: 'Wands',
-    color: '#DC2626',
-    archetype: 'Creative Spark',
-    keywords: ['Inspiration', 'Growth', 'Potential'],
-  },
-  {
-    name: 'Two of Wands',
-    suit: 'Wands',
-    color: '#B91C1C',
-    archetype: 'Planning',
-    keywords: ['Future', 'Discovery', 'Decisions'],
-  },
+// Derive archetype from card name or keywords
+function getCardArchetype(cardName: string, keywords: string[]): string {
+  // Use first keyword capitalized as archetype, or derive from card name
+  if (keywords.length > 0) {
+    return (
+      keywords[0].charAt(0).toUpperCase() + keywords[0].slice(1).toLowerCase()
+    );
+  }
 
-  // Swords - Purple theme (Air)
-  {
-    name: 'Ace of Swords',
-    suit: 'Swords',
-    color: '#7C3AED',
-    archetype: 'Mental Clarity',
-    keywords: ['Truth', 'Justice', 'Clarity'],
-  },
-  {
-    name: 'Two of Swords',
-    suit: 'Swords',
-    color: '#6D28D9',
-    archetype: 'Difficult Choice',
-    keywords: ['Indecision', 'Balance', 'Stalemate'],
-  },
+  // Fallback: derive from card name
+  if (cardName.includes('Ace')) return 'New Beginnings';
+  if (cardName.includes('Two')) return 'Partnership';
+  if (cardName.includes('Three')) return 'Creativity';
+  if (cardName.includes('Four')) return 'Stability';
+  if (cardName.includes('Five')) return 'Conflict';
+  if (cardName.includes('Six')) return 'Harmony';
+  if (cardName.includes('Seven')) return 'Reflection';
+  if (cardName.includes('Eight')) return 'Movement';
+  if (cardName.includes('Nine')) return 'Completion';
+  if (cardName.includes('Ten')) return 'Fulfillment';
 
-  // Pentacles - Green theme (Earth)
-  {
-    name: 'Ace of Pentacles',
-    suit: 'Pentacles',
-    color: '#059669',
-    archetype: 'Material Opportunity',
-    keywords: ['Prosperity', 'Manifestation', 'Resources'],
-  },
-  {
-    name: 'Two of Pentacles',
-    suit: 'Pentacles',
-    color: '#047857',
-    archetype: 'Balance',
-    keywords: ['Adaptability', 'Time Management', 'Priorities'],
-  },
-];
+  return 'Guidance';
+}
 
-function getTarotTheme(card: any, date: string) {
-  const dayVariation = new Date(date).getDate() % 5;
+// Get OG properties for tarot card using centralized source
+function getTarotOGProperties(cardName: string): {
+  name: string;
+  keywords: string[];
+  archetype: string;
+  color: string;
+} {
+  const card = getTarotCardByName(cardName);
+
+  if (card) {
+    const suit = getCardSuit(cardName);
+    const color = getSuitColor(suit);
+    const archetype = getCardArchetype(cardName, card.keywords);
+
+    return {
+      name: card.name,
+      keywords: card.keywords,
+      archetype,
+      color,
+    };
+  }
+
+  // Fallback for unknown cards
+  return {
+    name: cardName,
+    keywords: ['Guidance', 'Wisdom', 'Insight'],
+    archetype: 'Guidance',
+    color: '#9333EA',
+  };
+}
+
+function getTarotTheme(card: any, date: dayjs.Dayjs) {
+  const dayVariation = date.date() % 5;
 
   // Subtle card color backgrounds (like crystal system)
   const cardColorHex = card.color;
@@ -165,34 +117,14 @@ export async function GET(request: NextRequest) {
   const dailySeed = `cosmic-${dateObj.format('YYYY-MM-DD')}-${dayOfYearUtc}-energy`;
   const tarotCard = getTarotCard(dailySeed);
 
-  // Map to OG image card format - find matching card in tarotCards array for color/archetype
-  const ogCard =
-    tarotCards.find((c) => c.name === tarotCard.name) || tarotCards[0];
-  const card = {
-    name: tarotCard.name,
-    keywords: tarotCard.keywords,
-    archetype: ogCard.archetype,
-    color: ogCard.color,
-  };
+  // Get OG properties using centralized tarot cards source
+  const card = getTarotOGProperties(tarotCard.name);
 
-  // Format date for display
-  const formattedDate = dateObj
-    .toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-    .replace(/\//g, '/');
+  // Format date for display using dayjs
+  const formattedDate = dateObj.format('DD/MM/YYYY');
 
-  // Same theme system as cosmic
-  const dayVariation = dateObj.date() % 5;
-  const themes = [
-    `linear-gradient(135deg, #0a0a1a, #1a1a2e)`,
-    `linear-gradient(135deg, #1a1a2e, #2d3561)`,
-    `linear-gradient(135deg, #2c3e50, #34495e)`,
-    `linear-gradient(135deg, #1e2a3a, #2c3e50)`,
-    `linear-gradient(135deg, #1a2332, #1e3c72)`,
-  ];
+  // Same theme system as cosmic - use card color for theme
+  const theme = getTarotTheme(card, dateObj);
 
   return new ImageResponse(
     (
@@ -203,7 +135,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          background: themes[dayVariation],
+          background: theme.background,
           fontFamily: 'Roboto Mono',
           color: 'white',
           padding: '60px 40px',
