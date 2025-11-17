@@ -66,7 +66,6 @@ export const requireUser = async (
         SELECT plan_type, status
         FROM subscriptions
         WHERE user_id = ${user.id}
-        AND status IN ('active', 'trial')
         ORDER BY created_at DESC
         LIMIT 1
       `;
@@ -74,7 +73,11 @@ export const requireUser = async (
       if (subscriptionResult.rows.length > 0) {
         const sub = subscriptionResult.rows[0];
         // Map subscription plan to AI plan
-        if (sub.status === 'active' || sub.status === 'trial') {
+        if (
+          sub.status === 'active' ||
+          sub.status === 'trial' ||
+          sub.status === 'trialing'
+        ) {
           subscriptionPlan = sub.plan_type || 'monthly';
         }
       }

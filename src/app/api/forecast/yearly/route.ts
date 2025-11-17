@@ -164,6 +164,7 @@ export async function GET(request: NextRequest) {
     const user = await requireUser(request);
     const userId = user.id;
     const userPlanRaw = user.plan;
+    const userEmail = user.email;
     const normalizedUserPlan = normalizePlanType(userPlanRaw);
     const userHasAnnualOverride =
       normalizedUserPlan === 'lunary_plus_ai_annual' ||
@@ -197,12 +198,46 @@ export async function GET(request: NextRequest) {
     let rawStatus = subscription?.status || 'free';
     let subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
     let planType = normalizePlanType(subscription?.plan_type);
-    const customerId = subscription?.stripe_customer_id;
+    let customerId = subscription?.stripe_customer_id;
 
     if (userHasAnnualOverride) {
       planType = normalizedUserPlan;
       if (subscriptionStatus === 'free' || !subscriptionStatus) {
         subscriptionStatus = 'active';
+      }
+    }
+
+    // If we don't have a customer ID yet, try to find it via Stripe customer lookup using email
+    if (!customerId && userEmail) {
+      try {
+        const customerLookup = await fetch(
+          `${request.nextUrl.origin}/api/stripe/find-customer`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail }),
+            cache: 'no-store',
+          },
+        );
+
+        if (customerLookup.ok) {
+          const lookupData = await customerLookup.json();
+          if (lookupData?.found && lookupData.customer?.id) {
+            customerId = lookupData.customer.id;
+            console.log(
+              `[forecast/yearly] Found Stripe customer via email lookup: ${customerId}`,
+            );
+          }
+        } else {
+          console.warn(
+            `[forecast/yearly] Failed to look up customer by email (${userEmail}): ${customerLookup.status}`,
+          );
+        }
+      } catch (error) {
+        console.error(
+          '[forecast/yearly] Error while looking up Stripe customer by email:',
+          error,
+        );
       }
     }
 
