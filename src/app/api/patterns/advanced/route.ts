@@ -11,7 +11,9 @@ import { generateSpreadReading } from '@/utils/tarot/spreadReading';
 import { TAROT_SPREAD_MAP } from '@/constants/tarotSpreads';
 import { getTarotCardByName } from '@/utils/tarot/deck';
 
-export const revalidate = 86400; // 24 hours cache
+// Don't cache this route - subscription status can change at any time
+// Analysis data is cached in database, but subscription checks must be fresh
+export const revalidate = 0;
 
 async function generateHistoricalReadingsForYear(
   userId: string,
@@ -1018,13 +1020,27 @@ export async function GET(request: NextRequest) {
             );
           } else {
             console.log(
-              '[patterns/advanced] Stripe response missing subscription data',
+              '[patterns/advanced] Stripe response missing subscription data, using database subscription',
             );
           }
         } else {
-          console.log(
-            `[patterns/advanced] Stripe fetch failed: ${stripeResponse.status}`,
-          );
+          // Check if Stripe is unavailable (503) - this is expected in preview/dev
+          const stripeData =
+            stripeResponse.status === 503
+              ? await stripeResponse.json().catch(() => null)
+              : null;
+
+          if (stripeData?.useDatabaseFallback) {
+            console.log(
+              '[patterns/advanced] Stripe not configured in this environment, using database subscription',
+            );
+            // Continue with database subscription (already set above)
+          } else {
+            console.log(
+              `[patterns/advanced] Stripe fetch failed: ${stripeResponse.status}, using database subscription`,
+            );
+            // Continue with database subscription (already set above)
+          }
         }
       } catch (error) {
         console.error(
@@ -1073,8 +1089,9 @@ export async function GET(request: NextRequest) {
       { success: true, analysis },
       {
         headers: {
-          'Cache-Control':
-            'private, s-maxage=86400, stale-while-revalidate=43200',
+          // Don't cache subscription checks - status can change at any time
+          // Analysis data is cached in database, but subscription checks must be fresh
+          'Cache-Control': 'private, no-cache, no-store, must-revalidate',
         },
       },
     );
