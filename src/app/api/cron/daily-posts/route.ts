@@ -440,7 +440,7 @@ async function runDailyPosts(dateStr: string) {
           alt: post.alt,
         })),
         variants: post.variants,
-        reddit: post.reddit,
+        redditOptions: post.redditOptions,
       };
 
       if (pinterestOptions) {
