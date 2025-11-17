@@ -7,7 +7,6 @@ import {
 } from '../../../../../utils/pricing';
 import { getTarotPatternAnalysis } from '@/lib/ai/providers';
 import dayjs from 'dayjs';
-import { unstable_cache } from 'next/cache';
 import { generateSpreadReading } from '@/utils/tarot/spreadReading';
 import { TAROT_SPREAD_MAP } from '@/constants/tarotSpreads';
 import { getTarotCardByName } from '@/utils/tarot/deck';
@@ -161,40 +160,6 @@ interface AdvancedPatternAnalysis {
         insight: string;
       }>;
     };
-    timeline: {
-      days30: {
-        dominantThemes: string[];
-        frequentCards: Array<{ name: string; count: number }>;
-      };
-      days180?: {
-        dominantThemes: string[];
-        frequentCards: Array<{ name: string; count: number }>;
-      };
-      days365?: {
-        dominantThemes: string[];
-        frequentCards: Array<{ name: string; count: number }>;
-      };
-    };
-  };
-  extendedTimeline?: {
-    months6?: {
-      dominantThemes: string[];
-      frequentCards: Array<{ name: string; count: number }>;
-      trendAnalysis: string[];
-      timelineData?: Array<{
-        date: string;
-        cards: Array<{ name: string; suit: string }>;
-      }>;
-    };
-    months12?: {
-      dominantThemes: string[];
-      frequentCards: Array<{ name: string; count: number }>;
-      trendAnalysis: string[];
-      timelineData?: Array<{
-        date: string;
-        cards: Array<{ name: string; suit: string }>;
-      }>;
-    };
   };
 }
 
@@ -215,12 +180,13 @@ async function getCachedYearAnalysis(
     direction: 'up' | 'down' | 'stable';
   }> | null;
 }> {
-  // Check database first for stored analysis (persistent cache)
-  // Handle gracefully if table doesn't exist yet
+  // Lazy recalculation: Check DB first for cached analysis
+  // Only recalculate if analysis is stale (new readings since last calculation)
   let storedAnalysis;
+  let lastReadingDate: string | null = null;
   try {
     storedAnalysis = await sql`
-      SELECT analysis_data, trends
+      SELECT analysis_data, trends, last_reading_date
       FROM year_analysis
       WHERE user_id = ${userId} AND year = ${year}
       LIMIT 1
@@ -232,16 +198,57 @@ async function getCachedYearAnalysis(
         frequentCards: Array<{ name: string; count: number }>;
         patternInsights: string[];
       };
-      if (
+      lastReadingDate = storedAnalysis.rows[0].last_reading_date;
+
+      // Check if analysis is stale by comparing with latest reading
+      if (lastReadingDate) {
+        const latestReadingResult = await sql`
+          SELECT MAX(created_at) as latest_reading
+          FROM tarot_readings
+          WHERE user_id = ${userId}
+            AND archived_at IS NULL
+            AND created_at >= ${startDate}
+            AND created_at <= ${endDate}
+        `;
+
+        const latestReading = latestReadingResult.rows[0]?.latest_reading;
+        const isStale =
+          latestReading && new Date(latestReading) > new Date(lastReadingDate);
+
+        if (!isStale) {
+          // Analysis is fresh, return cached data
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              `[getCachedYearAnalysis] Using fresh cached analysis for year ${year}`,
+            );
+          }
+          const cardRecaps = analysis.frequentCards.slice(0, 5).map((card) => ({
+            cardName: card.name,
+            recap: generateCardRecap(card.name, card.count, 'year-over-year'),
+          }));
+
+          return {
+            ...analysis,
+            cardRecaps: cardRecaps.length > 0 ? cardRecaps : null,
+            trends: storedAnalysis.rows[0].trends || null,
+          };
+        } else {
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              `[getCachedYearAnalysis] Analysis is stale for year ${year}, recalculating...`,
+            );
+          }
+        }
+      } else if (
         analysis.dominantThemes.length > 0 ||
         analysis.frequentCards.length > 0
       ) {
+        // No last_reading_date but has data - return it (backward compatibility)
         if (process.env.NODE_ENV === 'development') {
           console.log(
-            `[getCachedYearAnalysis] Using stored analysis for year ${year} from database`,
+            `[getCachedYearAnalysis] Using stored analysis for year ${year} (no last_reading_date)`,
           );
         }
-        // Generate card recaps on-the-fly from frequentCards (no need to store in DB)
         const cardRecaps = analysis.frequentCards.slice(0, 5).map((card) => ({
           cardName: card.name,
           recap: generateCardRecap(card.name, card.count, 'year-over-year'),
@@ -267,187 +274,28 @@ async function getCachedYearAnalysis(
     }
   }
 
-  // Cache key includes version to invalidate old cached empty results
-  // v4: Added database storage for persistent caching
-  const cacheKey = `year-analysis-${userId}-${year}-v4`;
-  const tags = [`year-analysis-${userId}`, `year-analysis-${userId}-${year}`];
-
-  // Cache full calendar years (Jan 1 - Dec 31) for 1 year since they're complete and don't change
-  // Both current and historical years use full calendar year boundaries
-  // Use 1 year cache for all years - if cache is empty, it will be refreshed on next request
-  const revalidateTime = 31536000; // 1 year for all years
-
-  const cached = unstable_cache(
-    async () => {
-      let result = await sql`
-        SELECT cards, created_at
-        FROM tarot_readings
-        WHERE user_id = ${userId}
-          AND archived_at IS NULL
-          AND created_at >= ${startDate}
-          AND created_at <= ${endDate}
-        ORDER BY created_at DESC
-      `;
-
-      // IMPORTANT: Check for historical data BEFORE caching empty results
-      // If no data for specific year and it's a past year, use all historical data before CURRENT year starts
-      // This ensures we always have data for comparison even if user didn't have readings in that specific year
-      // We check before current year (not end of last year) to include all historical readings
-      if (result.rows.length === 0 && year < dayjs().year()) {
-        const currentYearStart = dayjs(`${dayjs().year()}-01-01T00:00:00Z`);
-        const historicalResult = await sql`
-          SELECT cards, created_at
-          FROM tarot_readings
-          WHERE user_id = ${userId}
-            AND archived_at IS NULL
-            AND created_at < ${currentYearStart.toISOString()}
-          ORDER BY created_at DESC
-          LIMIT 1000
-        `;
-        if (historicalResult.rows.length > 0) {
-          result = historicalResult;
-          if (process.env.NODE_ENV === 'development') {
-            console.log(
-              `[getCachedYearAnalysis] Using ${historicalResult.rows.length} historical readings for year ${year} (before ${currentYearStart.toISOString()})`,
-            );
-          }
-        } else {
-          if (process.env.NODE_ENV === 'development') {
-            console.log(
-              `[getCachedYearAnalysis] No data found for year ${year} and no historical data before current year`,
-            );
-          }
-        }
-      }
-
-      const cardFrequency: { [key: string]: number } = {};
-      const keywordCounts: { [key: string]: number } = {};
-
-      result.rows.forEach((row) => {
-        const cards = Array.isArray(row.cards)
-          ? row.cards
-          : JSON.parse(row.cards || '[]');
-        cards.forEach((card: any) => {
-          const cardName = card.card?.name || card.name;
-          cardFrequency[cardName] = (cardFrequency[cardName] || 0) + 1;
-
-          const keywords = card.card?.keywords || card.keywords || [];
-          keywords.forEach((keyword: string) => {
-            keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-          });
-        });
-      });
-
-      const dominantThemes = Object.entries(keywordCounts)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5)
-        .map(([keyword]) => keyword);
-
-      const frequentCards = Object.entries(cardFrequency)
-        .filter(([, count]) => count >= 2)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10)
-        .map(([name, count]) => ({ name, count: count as number }));
-
-      const patternInsights: string[] = [];
-      if (frequentCards.length > 0) {
-        const topCard = frequentCards[0];
-        patternInsights.push(
-          `"${topCard.name}" appeared ${topCard.count} times, indicating a significant theme in your journey.`,
-        );
-      }
-
-      const analysis = { dominantThemes, frequentCards, patternInsights };
-
-      // Store analysis in database for persistent caching
-      // Handle gracefully if table doesn't exist yet
-      try {
-        await sql`
-          INSERT INTO year_analysis (user_id, year, analysis_data, updated_at)
-          VALUES (${userId}, ${year}, ${JSON.stringify(analysis)}::jsonb, NOW())
-          ON CONFLICT (user_id, year)
-          DO UPDATE SET
-            analysis_data = ${JSON.stringify(analysis)}::jsonb,
-            updated_at = NOW()
-        `;
-      } catch (error: any) {
-        // If table doesn't exist, that's okay - user needs to run setup-db
-        if (error?.code === '42P01') {
-          if (process.env.NODE_ENV === 'development') {
-            console.log(
-              `[getCachedYearAnalysis] year_analysis table doesn't exist - run 'pnpm setup-db' to create it`,
-            );
-          }
-        } else {
-          if (process.env.NODE_ENV === 'development') {
-            console.error(
-              `[getCachedYearAnalysis] Failed to store analysis in database:`,
-              error,
-            );
-          }
-        }
-      }
-
-      // Generate card recaps on-the-fly from frequentCards (no need to store in DB)
-      const cardRecaps = frequentCards.slice(0, 5).map((card) => ({
-        cardName: card.name,
-        recap: generateCardRecap(card.name, card.count, 'year-over-year'),
-      }));
-
-      return {
-        ...analysis,
-        cardRecaps: cardRecaps.length > 0 ? cardRecaps : null,
-        trends: null,
-      };
-    },
-    [cacheKey],
-    {
-      tags,
-      revalidate: revalidateTime,
-    },
-  );
-
-  // Get cached result first
-  const cachedResult = await cached();
-
+  // No cached data or stale - recalculate analysis
   if (process.env.NODE_ENV === 'development') {
-    console.log(`[getCachedYearAnalysis] Cached result for year ${year}:`, {
-      themes: cachedResult.dominantThemes.length,
-      cards: cachedResult.frequentCards.length,
-      isEmpty:
-        cachedResult.dominantThemes.length === 0 &&
-        cachedResult.frequentCards.length === 0,
-      isPastYear: year < dayjs().year(),
-    });
+    console.log(
+      `[getCachedYearAnalysis] Recalculating analysis for year ${year}...`,
+    );
   }
 
-  // CRITICAL: Overwrite empty cache results by checking database directly
-  // If cache returned empty but database has data, process and return it
-  // This ensures empty cache doesn't block historical data from being shown
-  const isEmpty =
-    cachedResult.dominantThemes.length === 0 &&
-    cachedResult.frequentCards.length === 0;
+  let result = await sql`
+    SELECT cards, created_at
+    FROM tarot_readings
+    WHERE user_id = ${userId}
+      AND archived_at IS NULL
+      AND created_at >= ${startDate}
+      AND created_at <= ${endDate}
+    ORDER BY created_at DESC
+  `;
 
-  if (isEmpty && year < dayjs().year()) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(
-        `[getCachedYearAnalysis] Cache is empty for year ${year}, checking database for historical data...`,
-      );
-    }
-    // Bypass cache and check database directly for historical data
+  // IMPORTANT: Check for historical data for past years
+  // If no data for specific year and it's a past year, try to use historical data or generate readings
+  if (result.rows.length === 0 && year < dayjs().year()) {
     const currentYearStart = dayjs(`${dayjs().year()}-01-01T00:00:00Z`);
-
-    // First, check ALL readings to see what we have
-    const allReadingsCheck = await sql`
-      SELECT created_at
-      FROM tarot_readings
-      WHERE user_id = ${userId}
-        AND archived_at IS NULL
-      ORDER BY created_at DESC
-      LIMIT 10
-    `;
-
-    const freshCheck = await sql`
+    const historicalResult = await sql`
       SELECT cards, created_at
       FROM tarot_readings
       WHERE user_id = ${userId}
@@ -456,83 +304,20 @@ async function getCachedYearAnalysis(
       ORDER BY created_at DESC
       LIMIT 1000
     `;
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log(
-        `[getCachedYearAnalysis] Historical data check for year ${year}:`,
-        {
-          rowsFound: freshCheck.rows.length,
-          currentYearStart: dayjs(
-            `${dayjs().year()}-01-01T00:00:00Z`,
-          ).toISOString(),
-          allReadingsCount: allReadingsCheck.rows.length,
-          sampleDates: allReadingsCheck.rows
-            .slice(0, 5)
-            .map((r: any) => r.created_at),
-        },
-      );
-    }
-
-    if (freshCheck.rows.length > 0) {
-      // Data exists now! Process it and return (this will eventually update cache)
+    if (historicalResult.rows.length > 0) {
+      result = historicalResult;
       if (process.env.NODE_ENV === 'development') {
         console.log(
-          `[getCachedYearAnalysis] Overwriting empty cache with ${freshCheck.rows.length} historical readings for year ${year}`,
+          `[getCachedYearAnalysis] Using ${historicalResult.rows.length} historical readings for year ${year}`,
         );
       }
-
-      const cardFrequency: { [key: string]: number } = {};
-      const keywordCounts: { [key: string]: number } = {};
-
-      freshCheck.rows.forEach((row) => {
-        const cards = Array.isArray(row.cards)
-          ? row.cards
-          : JSON.parse(row.cards || '[]');
-        cards.forEach((card: any) => {
-          const cardName = card.card?.name || card.name;
-          cardFrequency[cardName] = (cardFrequency[cardName] || 0) + 1;
-
-          const keywords = card.card?.keywords || card.keywords || [];
-          keywords.forEach((keyword: string) => {
-            keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-          });
-        });
-      });
-
-      const dominantThemes = Object.entries(keywordCounts)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5)
-        .map(([keyword]) => keyword);
-
-      const frequentCards = Object.entries(cardFrequency)
-        .filter(([, count]) => count >= 2)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10)
-        .map(([name, count]) => ({ name, count: count as number }));
-
-      const patternInsights: string[] = [];
-      if (frequentCards.length > 0) {
-        const topCard = frequentCards[0];
-        patternInsights.push(
-          `"${topCard.name}" appeared ${topCard.count} times, indicating a significant theme in your journey.`,
-        );
-      }
-
-      // Invalidate cache so next request gets fresh data from cache
-      const { revalidateTag } = await import('next/cache');
-      revalidateTag(`year-analysis-${userId}-${year}`);
-
-      return { dominantThemes, frequentCards, patternInsights };
     } else {
+      // No historical data - try generating readings for this past year
       if (process.env.NODE_ENV === 'development') {
         console.log(
-          `[getCachedYearAnalysis] No historical data found for year ${year}, generating synchronously...`,
+          `[getCachedYearAnalysis] No historical data found for year ${year}, generating readings...`,
         );
       }
-
-      // For past years, generate synchronously since they're static and won't change
-      // This ensures we return actual data instead of empty results
-      // Use userName passed to function, or try to get from subscriptions table
       try {
         let finalUserName = userName;
         if (!finalUserName) {
@@ -545,34 +330,13 @@ async function getCachedYearAnalysis(
             `;
             finalUserName = subscriptionResult.rows[0]?.user_name;
           } catch {
-            // Subscriptions table might not have user_name, that's okay
             finalUserName = undefined;
           }
         }
-
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            `[getCachedYearAnalysis] Generating historical readings for year ${year} synchronously...`,
-          );
-        }
-
-        // Generate synchronously for past years - they're static so this is safe
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            `[getCachedYearAnalysis] About to generate readings for year ${year}, date range: ${startDate} to ${endDate}`,
-          );
-        }
-
         await generateHistoricalReadingsForYear(userId, year, finalUserName);
 
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            `[getCachedYearAnalysis] Generation complete, checking database...`,
-          );
-        }
-
-        // After generation, re-check database for the newly created readings
-        const afterGenerationCheck = await sql`
+        // Re-query after generation
+        result = await sql`
           SELECT cards, created_at
           FROM tarot_readings
           WHERE user_id = ${userId}
@@ -581,127 +345,107 @@ async function getCachedYearAnalysis(
             AND created_at <= ${endDate}
           ORDER BY created_at DESC
         `;
-
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            `[getCachedYearAnalysis] After generation check: found ${afterGenerationCheck.rows.length} readings`,
-          );
-        }
-
-        if (afterGenerationCheck.rows.length > 0) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log(
-              `[getCachedYearAnalysis] Found ${afterGenerationCheck.rows.length} readings after generation, processing...`,
-            );
-          }
-
-          // Process the newly generated readings
-          const cardFrequency: { [key: string]: number } = {};
-          const keywordCounts: { [key: string]: number } = {};
-
-          afterGenerationCheck.rows.forEach((row) => {
-            const cards = Array.isArray(row.cards)
-              ? row.cards
-              : JSON.parse(row.cards || '[]');
-            cards.forEach((card: any) => {
-              const cardName = card.card?.name || card.name;
-              cardFrequency[cardName] = (cardFrequency[cardName] || 0) + 1;
-
-              const keywords = card.card?.keywords || card.keywords || [];
-              keywords.forEach((keyword: string) => {
-                keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-              });
-            });
-          });
-
-          const dominantThemes = Object.entries(keywordCounts)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 5)
-            .map(([keyword]) => keyword);
-
-          const frequentCards = Object.entries(cardFrequency)
-            .filter(([, count]) => count >= 2)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 10)
-            .map(([name, count]) => ({ name, count: count as number }));
-
-          const patternInsights: string[] = [];
-          if (frequentCards.length > 0) {
-            const topCard = frequentCards[0];
-            patternInsights.push(
-              `"${topCard.name}" appeared ${topCard.count} times, indicating a significant theme in your journey.`,
-            );
-          }
-
-          const analysis = { dominantThemes, frequentCards, patternInsights };
-
-          // Store in database cache
-          try {
-            await sql`
-              INSERT INTO year_analysis (user_id, year, analysis_data, updated_at)
-              VALUES (${userId}, ${year}, ${JSON.stringify(analysis)}::jsonb, NOW())
-              ON CONFLICT (user_id, year)
-              DO UPDATE SET
-                analysis_data = ${JSON.stringify(analysis)}::jsonb,
-                updated_at = NOW()
-            `;
-          } catch (error: any) {
-            if (error?.code !== '42P01') {
-              // Only log if it's not a missing table error
-              if (process.env.NODE_ENV === 'development') {
-                console.error(
-                  `[getCachedYearAnalysis] Failed to store analysis:`,
-                  error,
-                );
-              }
-            }
-          }
-
-          // Generate card recaps on-the-fly from frequentCards
-          const cardRecaps = frequentCards.slice(0, 5).map((card) => ({
-            cardName: card.name,
-            recap: generateCardRecap(card.name, card.count, 'year-over-year'),
-          }));
-
-          // Invalidate cache so next request uses fresh data
-          const { revalidateTag } = await import('next/cache');
-          revalidateTag(`year-analysis-${userId}-${year}`);
-
-          return {
-            ...analysis,
-            cardRecaps: cardRecaps.length > 0 ? cardRecaps : null,
-            trends: null,
-          };
-        }
       } catch (error) {
-        console.error(
-          `[getCachedYearAnalysis] Failed to generate historical readings:`,
-          error,
-        );
-        // Log full error details
-        if (error instanceof Error) {
+        if (process.env.NODE_ENV === 'development') {
           console.error(
-            `[getCachedYearAnalysis] Error message:`,
-            error.message,
+            `[getCachedYearAnalysis] Failed to generate historical readings:`,
+            error,
           );
-          console.error(`[getCachedYearAnalysis] Error stack:`, error.stack);
         }
-        // Continue to return empty result if generation fails
       }
     }
   }
 
-  // Return cached result (empty or not)
-  if (process.env.NODE_ENV === 'development') {
-    console.log(
-      `[getCachedYearAnalysis] Returning cached result for year ${year}:`,
-      {
-        themes: cachedResult.dominantThemes.length,
-        cards: cachedResult.frequentCards.length,
-      },
+  const cardFrequency: { [key: string]: number } = {};
+  const keywordCounts: { [key: string]: number } = {};
+
+  result.rows.forEach((row) => {
+    const cards = Array.isArray(row.cards)
+      ? row.cards
+      : JSON.parse(row.cards || '[]');
+    cards.forEach((card: any) => {
+      const cardName = card.card?.name || card.name;
+      cardFrequency[cardName] = (cardFrequency[cardName] || 0) + 1;
+
+      const keywords = card.card?.keywords || card.keywords || [];
+      keywords.forEach((keyword: string) => {
+        keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+      });
+    });
+  });
+
+  const dominantThemes = Object.entries(keywordCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([keyword]) => keyword);
+
+  const frequentCards = Object.entries(cardFrequency)
+    .filter(([, count]) => count >= 2)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([name, count]) => ({ name, count: count as number }));
+
+  const patternInsights: string[] = [];
+  if (frequentCards.length > 0) {
+    const topCard = frequentCards[0];
+    patternInsights.push(
+      `"${topCard.name}" appeared ${topCard.count} times, indicating a significant theme in your journey.`,
     );
   }
-  return cachedResult;
+
+  const analysis = { dominantThemes, frequentCards, patternInsights };
+
+  // Get latest reading date for this year to store with analysis
+  const latestReadingResult = await sql`
+    SELECT MAX(created_at) as latest_reading
+    FROM tarot_readings
+    WHERE user_id = ${userId}
+      AND archived_at IS NULL
+      AND created_at >= ${startDate}
+      AND created_at <= ${endDate}
+  `;
+  const latestReadingDate = latestReadingResult.rows[0]?.latest_reading;
+
+  // Store analysis in database with last_reading_date for lazy recalculation
+  try {
+    await sql`
+      INSERT INTO year_analysis (user_id, year, analysis_data, last_reading_date, updated_at)
+      VALUES (${userId}, ${year}, ${JSON.stringify(analysis)}::jsonb, ${latestReadingDate || null}, NOW())
+      ON CONFLICT (user_id, year)
+      DO UPDATE SET
+        analysis_data = ${JSON.stringify(analysis)}::jsonb,
+        last_reading_date = ${latestReadingDate || null},
+        updated_at = NOW()
+    `;
+  } catch (error: any) {
+    // If table doesn't exist, that's okay - user needs to run setup-db
+    if (error?.code === '42P01') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(
+          `[getCachedYearAnalysis] year_analysis table doesn't exist - run 'pnpm setup-db' to create it`,
+        );
+      }
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.error(
+          `[getCachedYearAnalysis] Failed to store analysis in database:`,
+          error,
+        );
+      }
+    }
+  }
+
+  // Generate card recaps on-the-fly from frequentCards (no need to store in DB)
+  const cardRecaps = frequentCards.slice(0, 5).map((card) => ({
+    cardName: card.name,
+    recap: generateCardRecap(card.name, card.count, 'year-over-year'),
+  }));
+
+  return {
+    ...analysis,
+    cardRecaps: cardRecaps.length > 0 ? cardRecaps : null,
+    trends: null,
+  };
 }
 
 async function getYearOverYearComparison(
@@ -1121,58 +865,6 @@ async function getEnhancedTarotPatterns(
     }
   });
 
-  // Get timeline analysis
-  const timeline: AdvancedPatternAnalysis['enhancedTarot']['timeline'] = {
-    days30: await getTimelineAnalysis(userId, 30, userName, userBirthday),
-  };
-
-  if (planType === 'lunary_plus_ai_annual') {
-    // Query readings separately to verify date ranges are different
-    const days180Start = dayjs().subtract(180, 'day');
-    const days365Start = dayjs().subtract(365, 'day');
-
-    const days180CountResult = await sql`
-      SELECT COUNT(*) as count, MIN(created_at) as oldest, MAX(created_at) as newest
-      FROM tarot_readings
-      WHERE user_id = ${userId}
-        AND archived_at IS NULL
-        AND created_at >= ${days180Start.toISOString()}
-    `;
-
-    const days365CountResult = await sql`
-      SELECT COUNT(*) as count, MIN(created_at) as oldest, MAX(created_at) as newest
-      FROM tarot_readings
-      WHERE user_id = ${userId}
-        AND archived_at IS NULL
-        AND created_at >= ${days365Start.toISOString()}
-    `;
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[getEnhancedTarotPatterns] Reading counts by date range:', {
-        days180: {
-          startDate: days180Start.toISOString(),
-          count: days180CountResult.rows[0]?.count || 0,
-          oldestReading: days180CountResult.rows[0]?.oldest || 'none',
-          newestReading: days180CountResult.rows[0]?.newest || 'none',
-        },
-        days365: {
-          startDate: days365Start.toISOString(),
-          count: days365CountResult.rows[0]?.count || 0,
-          oldestReading: days365CountResult.rows[0]?.oldest || 'none',
-          newestReading: days365CountResult.rows[0]?.newest || 'none',
-        },
-      });
-    }
-
-    const [days180Analysis, days365Analysis] = await Promise.all([
-      getTimelineAnalysis(userId, 180, userName, userBirthday),
-      getTimelineAnalysis(userId, 365, userName, userBirthday),
-    ]);
-
-    timeline.days180 = days180Analysis;
-    timeline.days365 = days365Analysis;
-  }
-
   return {
     multiDimensional: {
       suitPatterns,
@@ -1180,195 +872,7 @@ async function getEnhancedTarotPatterns(
       numberPatterns,
       correlations,
     },
-    timeline,
   };
-}
-
-async function getTimelineAnalysis(
-  userId: string,
-  days: number,
-  userName?: string,
-  userBirthday?: string,
-): Promise<{
-  dominantThemes: string[];
-  frequentCards: Array<{ name: string; count: number }>;
-  timelineData?: Array<{
-    date: string;
-    cards: Array<{ name: string; suit: string }>;
-  }>;
-}> {
-  const cacheKey = `timeline-analysis-${userId}-${days}`;
-  const tags = [
-    `timeline-analysis-${userId}`,
-    `timeline-analysis-${userId}-${days}`,
-  ];
-
-  // Cache timeline analysis - shorter periods (30 days) refresh more often than longer ones (365 days)
-  // Historical data (180+ days) can be cached longer since older readings don't change
-  const revalidateTime = days <= 30 ? 3600 : days <= 180 ? 86400 : 604800; // 1h, 1d, 1w
-
-  const cached = unstable_cache(
-    async () => {
-      const startDate = dayjs().subtract(days, 'day');
-      if (process.env.NODE_ENV === 'development') {
-        console.log(
-          `[getTimelineAnalysis] Analyzing ${days} days: from ${startDate.toISOString()} to now`,
-        );
-      }
-
-      const displayName = userName;
-      const birthday = userBirthday;
-
-      // Generate seeded cards for each day in the range
-      const tarotModule = await import('../../../../../utils/tarot/tarot');
-      const getTarotCard = tarotModule.getTarotCard;
-      const cardFrequency: { [key: string]: number } = {};
-      const keywordCounts: { [key: string]: number } = {};
-
-      const now = dayjs();
-      for (let i = 0; i < days; i++) {
-        const date = now.subtract(i, 'day');
-        const dateString = date.toDate().toDateString();
-
-        // Generate daily card for this date
-        const dailyCard = getTarotCard(
-          `daily-${dateString}`,
-          displayName,
-          birthday,
-        );
-        const dailyCardName = dailyCard.name;
-        cardFrequency[dailyCardName] = (cardFrequency[dailyCardName] || 0) + 1;
-        if (dailyCard.keywords) {
-          dailyCard.keywords.forEach((keyword: string) => {
-            keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-          });
-        }
-
-        // Generate weekly card (once per week)
-        if (i % 7 === 0) {
-          const weekStart = date.startOf('week');
-          const weekStartYear = weekStart.year();
-          const weekStartMonth = weekStart.month() + 1;
-          const weekStartDate = weekStart.date();
-          // Calculate day of year manually (dayjs doesn't have dayOfYear by default)
-          const startOfYear = weekStart.startOf('year');
-          const dayOfYear = weekStart.diff(startOfYear, 'day') + 1;
-          const weekNumber = Math.floor(dayOfYear / 7);
-          const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
-          const weeklyCard = getTarotCard(weeklySeed, displayName, birthday);
-          const weeklyCardName = weeklyCard.name;
-          cardFrequency[weeklyCardName] =
-            (cardFrequency[weeklyCardName] || 0) + 1;
-          if (weeklyCard.keywords) {
-            weeklyCard.keywords.forEach((keyword: string) => {
-              keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-            });
-          }
-        }
-
-        // Generate personal card (once per month)
-        if (i % 30 === 0) {
-          const month = date.month().toString();
-          const personalSeed = birthday ? birthday + month : month;
-          const personalCard = getTarotCard(
-            personalSeed,
-            displayName,
-            birthday,
-          );
-          const personalCardName = personalCard.name;
-          cardFrequency[personalCardName] =
-            (cardFrequency[personalCardName] || 0) + 1;
-          if (personalCard.keywords) {
-            personalCard.keywords.forEach((keyword: string) => {
-              keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-            });
-          }
-        }
-      }
-
-      // Also include saved readings from this period
-      const savedReadingsResult = await sql`
-        SELECT cards, created_at
-        FROM tarot_readings
-        WHERE user_id = ${userId}
-          AND archived_at IS NULL
-          AND created_at >= NOW() - (${days} || ' days')::INTERVAL
-        ORDER BY created_at DESC
-      `;
-
-      // Build timeline data with reading dates
-      const timelineDataMap: Map<
-        string,
-        Array<{ name: string; suit: string }>
-      > = new Map();
-
-      savedReadingsResult.rows.forEach((row) => {
-        const cards = Array.isArray(row.cards)
-          ? row.cards
-          : JSON.parse(row.cards || '[]');
-        const dateKey = dayjs(row.created_at).format('YYYY-MM-DD');
-        const cardsForDate: Array<{ name: string; suit: string }> = [];
-
-        cards.forEach((card: any) => {
-          const cardName = card.card?.name || card.name;
-          const suit = getCardSuit(cardName);
-          cardFrequency[cardName] = (cardFrequency[cardName] || 0) + 1;
-          cardsForDate.push({ name: cardName, suit });
-
-          const keywords = card.card?.keywords || card.keywords || [];
-          keywords.forEach((keyword: string) => {
-            keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-          });
-        });
-
-        if (cardsForDate.length > 0) {
-          const existing = timelineDataMap.get(dateKey) || [];
-          timelineDataMap.set(dateKey, [...existing, ...cardsForDate]);
-        }
-      });
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[getTimelineAnalysis] Analysis for ${days}-day period:`, {
-          seededDaysAnalyzed: days,
-          savedReadingsFound: savedReadingsResult.rows.length,
-          uniqueCards: Object.keys(cardFrequency).length,
-          totalCardOccurrences: Object.values(cardFrequency).reduce(
-            (a, b) => a + b,
-            0,
-          ),
-        });
-      }
-
-      const dominantThemes = Object.entries(keywordCounts)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5)
-        .map(([keyword]) => keyword);
-
-      const frequentCards = Object.entries(cardFrequency)
-        .filter(([, count]) => count >= 2)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10)
-        .map(([name, count]) => ({ name, count: count as number }));
-
-      // Convert timeline data map to array, sorted by date
-      const timelineData = Array.from(timelineDataMap.entries())
-        .map(([date, cards]) => ({ date, cards }))
-        .sort((a, b) => a.date.localeCompare(b.date));
-
-      return {
-        dominantThemes,
-        frequentCards,
-        timelineData: timelineData.length > 0 ? timelineData : undefined,
-      };
-    },
-    [cacheKey],
-    {
-      tags,
-      revalidate: revalidateTime,
-    },
-  );
-
-  return await cached();
 }
 
 function getCardSuit(cardName: string): string {
@@ -1564,108 +1068,6 @@ export async function GET(request: NextRequest) {
       yearOverYear,
       enhancedTarot,
     };
-
-    if (planType === 'lunary_plus_ai_annual') {
-      // Use explicit different date ranges to ensure queries are different
-      const sixMonthsDays = 183; // 6 months = ~183 days
-      const twelveMonthsDays = 365; // 12 months = 365 days
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[patterns/advanced] Fetching extended timeline:', {
-          sixMonthsDays,
-          twelveMonthsDays,
-        });
-      }
-
-      // Query readings separately to verify date ranges
-      const sixMonthsStart = dayjs().subtract(sixMonthsDays, 'day');
-      const twelveMonthsStart = dayjs().subtract(twelveMonthsDays, 'day');
-
-      // Get raw reading counts to verify queries are different
-      const sixMonthsCountResult = await sql`
-        SELECT COUNT(*) as count, MIN(created_at) as oldest, MAX(created_at) as newest
-        FROM tarot_readings
-        WHERE user_id = ${user.id}
-          AND archived_at IS NULL
-          AND created_at >= ${sixMonthsStart.toISOString()}
-      `;
-
-      const twelveMonthsCountResult = await sql`
-        SELECT COUNT(*) as count, MIN(created_at) as oldest, MAX(created_at) as newest
-        FROM tarot_readings
-        WHERE user_id = ${user.id}
-          AND archived_at IS NULL
-          AND created_at >= ${twelveMonthsStart.toISOString()}
-      `;
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[patterns/advanced] Reading counts by date range:', {
-          sixMonths: {
-            days: sixMonthsDays,
-            startDate: sixMonthsStart.toISOString(),
-            count: sixMonthsCountResult.rows[0]?.count || 0,
-            oldestReading: sixMonthsCountResult.rows[0]?.oldest || 'none',
-            newestReading: sixMonthsCountResult.rows[0]?.newest || 'none',
-          },
-          twelveMonths: {
-            days: twelveMonthsDays,
-            startDate: twelveMonthsStart.toISOString(),
-            count: twelveMonthsCountResult.rows[0]?.count || 0,
-            oldestReading: twelveMonthsCountResult.rows[0]?.oldest || 'none',
-            newestReading: twelveMonthsCountResult.rows[0]?.newest || 'none',
-          },
-        });
-      }
-
-      const [months6, months12] = await Promise.all([
-        getTimelineAnalysis(
-          user.id,
-          sixMonthsDays,
-          user.displayName,
-          user.birthday,
-        ),
-        getTimelineAnalysis(
-          user.id,
-          twelveMonthsDays,
-          user.displayName,
-          user.birthday,
-        ),
-      ]);
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[patterns/advanced] Extended timeline results:', {
-          months6: {
-            cards: months6.frequentCards.length,
-            themes: months6.dominantThemes.length,
-            topCards: months6.frequentCards
-              .slice(0, 3)
-              .map((c) => `${c.name} (${c.count}x)`),
-            topThemes: months6.dominantThemes.slice(0, 3),
-          },
-          months12: {
-            cards: months12.frequentCards.length,
-            themes: months12.dominantThemes.length,
-            topCards: months12.frequentCards
-              .slice(0, 3)
-              .map((c) => `${c.name} (${c.count}x)`),
-            topThemes: months12.dominantThemes.slice(0, 3),
-          },
-        });
-      }
-
-      analysis.extendedTimeline = {
-        months6: {
-          ...months6,
-          trendAnalysis: generateTrendAnalysis(months6),
-          timelineData: months6.timelineData,
-        },
-        months12: {
-          ...months12,
-          trendAnalysis: generateTrendAnalysis(months12),
-          timelineData: months12.timelineData,
-        },
-      };
-    }
 
     return NextResponse.json(
       { success: true, analysis },

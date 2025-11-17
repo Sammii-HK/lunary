@@ -639,6 +639,7 @@ async function setupDatabase() {
       analysis_data JSONB NOT NULL,
       card_recaps JSONB,
       trends JSONB,
+      last_reading_date TIMESTAMP WITH TIME ZONE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       PRIMARY KEY (user_id, year)
@@ -657,6 +658,11 @@ async function setupDatabase() {
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                        WHERE table_name = 'year_analysis' AND column_name = 'trends') THEN
           ALTER TABLE year_analysis ADD COLUMN trends JSONB;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'year_analysis' AND column_name = 'last_reading_date') THEN
+          ALTER TABLE year_analysis ADD COLUMN last_reading_date TIMESTAMP WITH TIME ZONE;
         END IF;
       END $$;
     `;
