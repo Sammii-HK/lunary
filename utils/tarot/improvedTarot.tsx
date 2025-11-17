@@ -281,16 +281,39 @@ const analyzeTrends = (
   const cardPatternLimit =
     timeFrameDays >= 90 ? 8 : timeFrameDays >= 30 ? 6 : 4;
 
+  // Track card details for frequent cards
+  const cardDetailsMap: { [name: string]: { keywords: string[] } } = {};
+  pastReadings.forEach((card) => {
+    if (!cardDetailsMap[card.name]) {
+      const details = getCardDetails(card);
+      cardDetailsMap[card.name] = { keywords: details.keywords };
+    }
+  });
+
   // Find frequent cards with readings (top repeats, including doubles)
   const frequentCards = Object.entries(cardCounts)
     .filter(([, count]) => count >= 2)
     .sort((a, b) => b[1] - a[1])
     .slice(0, cardPatternLimit)
-    .map(([name, count]) => ({
-      name,
-      count,
-      reading: getPatternReading(name, count),
-    }));
+    .map(([name, count]) => {
+      const cardDetails = cardDetailsMap[name];
+      const keywords = cardDetails?.keywords || [];
+      // Use first keyword as theme, or fallback to pattern reading
+      const theme =
+        keywords.length > 0
+          ? keywords[0].charAt(0).toUpperCase() +
+            keywords[0].slice(1).toLowerCase() +
+            (keywords.length > 1
+              ? ` and ${keywords.slice(1, 2).join(' ').toLowerCase()}`
+              : '')
+          : getPatternReading(name, count);
+
+      return {
+        name,
+        count,
+        reading: theme,
+      };
+    });
 
   // Enhanced suit patterns with card breakdown
   const suitPatterns = Object.entries(suitCounts)

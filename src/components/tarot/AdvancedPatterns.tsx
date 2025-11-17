@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Paywall } from '@/components/Paywall';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
@@ -104,9 +104,6 @@ type AdvancedPatternAnalysis = {
   };
 };
 
-type ViewMode = 'daily' | 'advanced';
-type AdvancedTab = 'year-over-year' | 'multi-dimensional';
-
 type BasicPatterns = {
   dominantThemes: string[];
   frequentCards: Array<{ name: string; count: number; reading?: string }>;
@@ -137,18 +134,23 @@ interface RecentReading {
 
 interface AdvancedPatternsProps {
   basicPatterns?: BasicPatterns;
-  timeFrame?: number;
+  selectedView: number | 'year-over-year';
+  isMultidimensionalMode: boolean;
+  onMultidimensionalModeChange: (enabled: boolean) => void;
   recentReadings?: RecentReading[];
   onCardClick?: (card: { name: string }) => void;
 }
 
 export function AdvancedPatterns({
   basicPatterns,
-  timeFrame = 30,
+  selectedView,
+  isMultidimensionalMode,
+  onMultidimensionalModeChange,
   recentReadings,
   onCardClick,
 }: AdvancedPatternsProps) {
   const subscription = useSubscription();
+  const timeFrame = typeof selectedView === 'number' ? selectedView : 30;
 
   // Memoize derived values to prevent unnecessary re-renders
   const hasAdvancedAccess = useMemo(
@@ -164,13 +166,12 @@ export function AdvancedPatterns({
     [subscription.plan],
   );
 
-  const [viewMode, setViewMode] = useState<ViewMode>('daily');
-  const [activeTab, setActiveTab] = useState<AdvancedTab>('year-over-year');
   const [analysis, setAnalysis] = useState<AdvancedPatternAnalysis | null>(
     null,
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastFetchedRef = useRef<string>('');
 
   // Debug logging
   useEffect(() => {
@@ -191,31 +192,20 @@ export function AdvancedPatterns({
     }
   }, [subscription, hasAdvancedAccess, hasTarotPatternsAccess]);
 
-  // Check sessionStorage for cached analysis
-  useEffect(() => {
-    if (viewMode === 'advanced' && !analysis) {
-      try {
-        const cached = sessionStorage.getItem('advanced-patterns-analysis');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          // Check if cache is less than 1 hour old
-          const cacheAge = Date.now() - (parsed.timestamp || 0);
-          if (cacheAge < 3600000) {
-            setAnalysis(parsed.data);
-            return;
-          }
-        }
-      } catch (e) {
-        // Ignore cache errors
-      }
-    }
-  }, [viewMode, analysis]);
-
   const fetchAdvancedPatterns = useCallback(async () => {
+    if (loading) return; // Prevent concurrent fetches
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/patterns/advanced');
+      // Build query params based on selectedView
+      // Always pass days parameter when it's a number (for multidimensional analysis)
+      const params = new URLSearchParams();
+      if (typeof selectedView === 'number') {
+        params.set('days', selectedView.toString());
+      }
+      const response = await fetch(
+        `/api/patterns/advanced?${params.toString()}`,
+      );
       if (!response.ok) {
         if (response.status === 403) {
           setError('Upgrade to Lunary+ AI to access advanced pattern analysis');
@@ -229,10 +219,11 @@ export function AdvancedPatterns({
         if (data.success && data.analysis) {
           setAnalysis(data.analysis);
           setError(null);
-          // Cache in sessionStorage
+          // Cache in sessionStorage with date range in key (each date range cached separately)
           try {
+            const cacheKey = `advanced-patterns-analysis-${selectedView}-${isMultidimensionalMode}`;
             sessionStorage.setItem(
-              'advanced-patterns-analysis',
+              cacheKey,
               JSON.stringify({
                 data: data.analysis,
                 timestamp: Date.now(),
@@ -251,23 +242,63 @@ export function AdvancedPatterns({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedView, isMultidimensionalMode, loading]);
 
   useEffect(() => {
     // Fetch advanced patterns when:
-    // 1. Switching to advanced mode and we don't have data yet
-    // 2. In daily mode but timeframe is 180 or 365 (need timeline data)
-    if (
-      ((viewMode === 'advanced' && !analysis) ||
-        (viewMode === 'daily' && (timeFrame === 180 || timeFrame === 365))) &&
-      !loading &&
-      !error
-    ) {
+    // 1. Multidimensional mode is ON and we don't have data yet
+    // 2. Selected view is year-over-year
+    // Skip fetching if already loading
+    if (loading) return;
+
+    const fetchKey = `${selectedView}-${isMultidimensionalMode}`;
+    const needsFetch = isMultidimensionalMode;
+
+    if (!needsFetch) return;
+
+    // Check cache first (with date range in key) - each date range cached separately
+    const cacheKey = `advanced-patterns-analysis-${selectedView}-${isMultidimensionalMode}`;
+    let cachedData = null;
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // Check if cache is less than 1 hour old
+        const cacheAge = Date.now() - (parsed.timestamp || 0);
+        if (cacheAge < 3600000) {
+          cachedData = parsed.data;
+        }
+      }
+    } catch (e) {
+      // Ignore cache errors
+    }
+
+    // If view changed, update ref
+    const viewChanged = lastFetchedRef.current !== fetchKey;
+    if (viewChanged) {
+      lastFetchedRef.current = fetchKey;
+    }
+
+    // If we have cached data for this date range, use it (don't fetch)
+    if (cachedData) {
+      if (!analysis || viewChanged) {
+        setAnalysis(cachedData);
+      }
+      return; // Don't fetch if we have valid cache
+    }
+
+    // If we already have analysis for this exact combination, don't fetch again
+    if (!viewChanged && analysis) {
+      return;
+    }
+
+    // Only fetch if we don't have cached data and don't have current analysis
+    // Note: year-over-year data is included in the API response, so we fetch for any advanced mode
+    if (!cachedData && !analysis && !error) {
       fetchAdvancedPatterns();
     }
-  }, [viewMode, analysis, loading, error, fetchAdvancedPatterns, timeFrame]);
-
-  const availableTabs: AdvancedTab[] = ['year-over-year', 'multi-dimensional'];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMultidimensionalMode, selectedView]);
 
   // Wait for subscription to load before showing paywall
   if (subscription.loading) {
@@ -278,7 +309,7 @@ export function AdvancedPatterns({
     );
   }
 
-  // Show paywall if user doesn't have tarot_patterns access (for daily view)
+  // Show paywall if user doesn't have tarot_patterns access
   if (!hasTarotPatternsAccess) {
     return (
       <Paywall feature='tarot_patterns'>
@@ -289,44 +320,8 @@ export function AdvancedPatterns({
 
   return (
     <div className='relative'>
-      <button
-        onClick={() => {
-          if (!hasAdvancedAccess && viewMode === 'daily') {
-            // Show upgrade prompt - button still clickable but will show paywall
-            return;
-          }
-          setViewMode(viewMode === 'daily' ? 'advanced' : 'daily');
-        }}
-        className={cn(
-          'absolute top-0 right-0 p-1.5 rounded-md transition-colors',
-          hasAdvancedAccess
-            ? 'bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-400 hover:text-zinc-300'
-            : 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50',
-        )}
-        aria-label={
-          viewMode === 'daily'
-            ? 'Switch to advanced view'
-            : 'Switch to daily view'
-        }
-        title={
-          !hasAdvancedAccess && viewMode === 'daily'
-            ? 'Upgrade to Lunary+ AI to unlock advanced patterns'
-            : undefined
-        }
-      >
-        <div className='relative'>
-          {viewMode === 'daily' ? (
-            <BarChart3 className='w-4 h-4' />
-          ) : (
-            <Sparkles className='w-4 h-4' />
-          )}
-          {!hasAdvancedAccess && viewMode === 'daily' && (
-            <Lock className='w-2.5 h-2.5 absolute -top-0.5 -right-0.5 text-zinc-600' />
-          )}
-        </div>
-      </button>
-
-      {viewMode === 'daily' && (
+      {/* Show basic patterns when not in multidimensional mode and not year-over-year */}
+      {!isMultidimensionalMode && selectedView !== 'year-over-year' && (
         <div className='space-y-6 pt-8'>
           {basicPatterns ? (
             <>
@@ -359,35 +354,24 @@ export function AdvancedPatterns({
                   <h3 className='text-sm font-medium text-zinc-300 mb-3'>
                     Frequent Cards
                   </h3>
-                  <div className='space-y-2'>
+                  <div className='space-y-3'>
                     {basicPatterns.frequentCards
                       .slice(0, 5)
-                      .map((card, index) => {
-                        // Extract theme keywords from reading if available
-                        const themeMatch =
-                          card.reading?.match(/themes? of ([^.]+)/i);
-                        const theme = themeMatch
-                          ? themeMatch[1].trim()
-                          : card.reading
-                            ? card.reading.split('.')[0].toLowerCase()
-                            : null;
-
-                        return (
-                          <div
-                            key={index}
-                            className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-3'
-                          >
-                            <p className='font-medium text-zinc-100 text-sm mb-0.5'>
-                              {card.name} ({card.count}x)
+                      .map((card, index) => (
+                        <div
+                          key={index}
+                          className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'
+                        >
+                          <p className='font-medium text-zinc-100 mb-2'>
+                            {card.name} ({card.count}x)
+                          </p>
+                          {card.reading && (
+                            <p className='text-sm text-zinc-400 leading-relaxed'>
+                              {card.reading}
                             </p>
-                            {theme && (
-                              <p className='text-xs text-zinc-400 leading-relaxed'>
-                                {theme}
-                              </p>
-                            )}
-                          </div>
-                        );
-                      })}
+                          )}
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
@@ -428,39 +412,19 @@ export function AdvancedPatterns({
                 </div>
               )}
 
-              {/* Show timeline visualization for 6-month and 12-month views */}
-              {(timeFrame === 180 || timeFrame === 365) &&
-                analysis?.extendedTimeline && (
-                  <div className='mt-6'>
-                    {timeFrame === 180 && analysis.extendedTimeline.months6 && (
-                      <TimelineVisualization
-                        data={analysis.extendedTimeline.months6}
-                        period={6}
-                      />
-                    )}
-                    {timeFrame === 365 &&
-                      analysis.extendedTimeline.months12 && (
-                        <TimelineVisualization
-                          data={analysis.extendedTimeline.months12}
-                          period={12}
-                        />
-                      )}
-                  </div>
-                )}
-
               {/* Show recent daily cards for 7-day view */}
-              {timeFrame === 7 &&
+              {selectedView === 7 &&
                 recentReadings &&
                 recentReadings.length > 0 && (
-                  <div className='mt-6'>
-                    <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+                  <div className='mt-4'>
+                    <h3 className='text-sm font-medium text-zinc-300 mb-2'>
                       Recent Daily Cards
                     </h3>
-                    <div className='space-y-1.5'>
+                    <div className='space-y-1'>
                       {recentReadings.map((reading) => (
                         <div
                           key={reading.date}
-                          className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-2.5 flex justify-between items-center hover:bg-zinc-900/50 transition-colors cursor-pointer'
+                          className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-2 flex justify-between items-center hover:bg-zinc-900/50 transition-colors cursor-pointer'
                           onClick={() => {
                             if (onCardClick) {
                               onCardClick(reading.card);
@@ -499,14 +463,15 @@ export function AdvancedPatterns({
         </div>
       )}
 
-      {viewMode === 'advanced' && (
-        <div className='space-y-4'>
+      {/* Show year-over-year when selected AND advanced mode is ON */}
+      {selectedView === 'year-over-year' && isMultidimensionalMode && (
+        <div className='space-y-4 pt-8'>
           {loading && (
             <div className='flex items-center justify-center py-12'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin' />
                 <p className='text-sm text-zinc-400'>
-                  Loading advanced patterns...
+                  Loading year-over-year analysis...
                 </p>
               </div>
             </div>
@@ -531,452 +496,412 @@ export function AdvancedPatterns({
               </div>
             </div>
           )}
-          <div className='flex flex-wrap gap-1.5 pt-8'>
-            {availableTabs.map((tab) => {
-              const isDisabled = !analysis || !hasAdvancedAccess;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    if (isDisabled) {
-                      // Button still visible but disabled - upgrade prompt shown via title
-                      return;
-                    }
-                    setActiveTab(tab);
-                  }}
-                  disabled={isDisabled}
-                  className={cn(
-                    'px-2 py-1 text-xs rounded-full transition-colors relative',
-                    isDisabled
-                      ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
-                      : activeTab === tab
-                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                  )}
-                  title={
-                    isDisabled ? 'Upgrade to Lunary+ AI to unlock' : undefined
-                  }
-                >
-                  {tab === 'year-over-year' && 'Year-over-Year'}
-                  {tab === 'multi-dimensional' && 'Multi-Dimensional'}
-                  {isDisabled && (
-                    <Lock className='w-2.5 h-2.5 absolute -top-0.5 -right-0.5 text-zinc-600' />
-                  )}
-                </button>
-              );
-            })}
-          </div>
 
-          {error && !analysis && (
-            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-8 text-center space-y-4 opacity-50 pointer-events-none'>
-              <BarChart3 className='w-12 h-12 text-zinc-600 mx-auto' />
-              <div>
-                <h4 className='text-sm font-medium text-zinc-400 mb-2'>
-                  Advanced Pattern Analysis
-                </h4>
-                <p className='text-xs text-zinc-500'>
-                  Year-over-year comparisons, multi-dimensional insights, and
-                  extended timeline analysis
-                </p>
-              </div>
-            </div>
+          {error && analysis && (
+            <div className='text-center py-8 text-red-400 text-sm'>{error}</div>
           )}
 
-          {analysis && (
-            <>
-              {loading && (
-                <div className='text-center py-8 text-zinc-400 text-sm'>
-                  Loading advanced patterns...
-                </div>
-              )}
-
-              {error && (
-                <div className='text-center py-8 text-red-400 text-sm'>
-                  {error}
-                </div>
-              )}
-
-              {analysis && !loading && (
-                <div className='space-y-6'>
-                  {activeTab === 'year-over-year' && analysis.yearOverYear && (
-                    <div className='space-y-4'>
-                      <div>
-                        <h4 className='text-sm font-medium text-zinc-300 mb-3'>
-                          This Year vs Last Year
-                        </h4>
-                        <div className='grid gap-4 md:grid-cols-2'>
-                          <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-                            <h5 className='text-xs font-medium text-purple-300/90 mb-2'>
-                              This Year
-                            </h5>
-                            {analysis.yearOverYear.thisYear.dominantThemes
-                              .length > 0 && (
-                              <div className='flex flex-wrap gap-1.5 mb-3'>
-                                {analysis.yearOverYear.thisYear.dominantThemes.map(
-                                  (theme) => (
-                                    <span
-                                      key={theme}
-                                      className='px-2 py-0.5 text-xs rounded bg-purple-500/20 text-purple-200'
-                                    >
-                                      {theme}
-                                    </span>
-                                  ),
-                                )}
-                              </div>
-                            )}
-                            {analysis.yearOverYear.thisYear.frequentCards
-                              .length > 0 && (
-                              <div className='space-y-3'>
-                                {analysis.yearOverYear.thisYear.frequentCards
-                                  .slice(0, 3)
-                                  .map((card) => {
-                                    // Find trend for this card if available
-                                    const cardTrend =
-                                      analysis.yearOverYear.comparison.trends.find(
-                                        (t) =>
-                                          t.metric ===
-                                          `${card.name} appearances`,
-                                      );
-                                    // Find recap for this card if available
-                                    const cardRecap =
-                                      analysis.yearOverYear.thisYear.cardRecaps?.find(
-                                        (r) => r.cardName === card.name,
-                                      );
-                                    return (
-                                      <div
-                                        key={card.name}
-                                        className='space-y-1'
-                                      >
-                                        <div className='flex items-center justify-between text-xs'>
-                                          <span className='text-zinc-300 font-medium'>
-                                            {card.name} ({card.count}x)
-                                          </span>
-                                          {cardTrend && (
-                                            <span
-                                              className={cn(
-                                                'flex items-center gap-0.5 text-[10px]',
-                                                cardTrend.direction === 'up'
-                                                  ? 'text-emerald-400'
-                                                  : cardTrend.direction ===
-                                                      'down'
-                                                    ? 'text-red-400'
-                                                    : 'text-zinc-500',
-                                              )}
-                                            >
-                                              {cardTrend.direction === 'up'
-                                                ? '↑'
-                                                : cardTrend.direction === 'down'
-                                                  ? '↓'
-                                                  : '→'}
-                                              {cardTrend.change > 0 ? '+' : ''}
-                                              {cardTrend.change}%
-                                            </span>
-                                          )}
-                                        </div>
-                                        {cardRecap && (
-                                          <p className='text-xs text-zinc-400 leading-relaxed'>
-                                            {cardRecap.recap}
-                                          </p>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                              </div>
-                            )}
-                          </div>
-                          <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                            <h5 className='text-xs font-medium text-indigo-300/90 mb-2'>
-                              Last Year
-                            </h5>
-                            {loading ? (
-                              <p className='text-xs text-zinc-400 mb-3'>
-                                Generating historical data...
-                              </p>
-                            ) : analysis.yearOverYear.lastYear.dominantThemes
-                                .length > 0 ||
-                              analysis.yearOverYear.lastYear.frequentCards
-                                .length > 0 ? (
-                              <>
-                                {analysis.yearOverYear.lastYear.dominantThemes
-                                  .length > 0 && (
-                                  <div className='flex flex-wrap gap-1.5 mb-3'>
-                                    {analysis.yearOverYear.lastYear.dominantThemes.map(
-                                      (theme) => (
-                                        <span
-                                          key={theme}
-                                          className='px-2 py-0.5 text-xs rounded bg-indigo-500/20 text-indigo-200'
-                                        >
-                                          {theme}
-                                        </span>
-                                      ),
-                                    )}
-                                  </div>
-                                )}
-                                {analysis.yearOverYear.lastYear.frequentCards
-                                  .length > 0 ? (
-                                  <div className='space-y-3'>
-                                    {analysis.yearOverYear.lastYear.frequentCards
-                                      .slice(0, 3)
-                                      .map((card) => {
-                                        // Find recap for this card if available
-                                        const cardRecap =
-                                          analysis.yearOverYear.lastYear.cardRecaps?.find(
-                                            (r) => r.cardName === card.name,
-                                          );
-                                        return (
-                                          <div
-                                            key={card.name}
-                                            className='space-y-1'
-                                          >
-                                            <div className='text-xs text-zinc-300 font-medium'>
-                                              {card.name} ({card.count}x)
-                                            </div>
-                                            {cardRecap && (
-                                              <p className='text-xs text-zinc-400 leading-relaxed'>
-                                                {cardRecap.recap}
-                                              </p>
-                                            )}
-                                          </div>
-                                        );
-                                      })}
-                                  </div>
-                                ) : null}
-                              </>
-                            ) : (
-                              <p className='text-xs text-zinc-400 mb-3'>
-                                No historical data available for comparison
-                              </p>
-                            )}
-                          </div>
+          {analysis && analysis.yearOverYear && !loading && (
+            <div className='space-y-6'>
+              <div className='space-y-4'>
+                <div>
+                  <h4 className='text-sm font-medium text-zinc-300 mb-3'>
+                    This Year vs Last Year
+                  </h4>
+                  <div className='grid gap-4 md:grid-cols-2'>
+                    <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
+                      <h5 className='text-xs font-medium text-purple-300/90 mb-2'>
+                        This Year
+                      </h5>
+                      {analysis.yearOverYear.thisYear.dominantThemes.length >
+                        0 && (
+                        <div className='flex flex-wrap gap-1.5 mb-3'>
+                          {analysis.yearOverYear.thisYear.dominantThemes.map(
+                            (theme) => (
+                              <span
+                                key={theme}
+                                className='px-2 py-0.5 text-xs rounded bg-purple-500/20 text-purple-200'
+                              >
+                                {theme}
+                              </span>
+                            ),
+                          )}
                         </div>
-                        {analysis.yearOverYear.comparison.trends.length > 0 && (
-                          <div className='mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-                            <h5 className='text-xs font-medium text-emerald-300/90 mb-2'>
-                              Year-over-Year Trends
-                            </h5>
-                            <div className='space-y-2'>
-                              {analysis.yearOverYear.comparison.trends
-                                .slice(0, 5)
-                                .map((trend, idx) => {
-                                  const arrow =
-                                    trend.direction === 'up'
-                                      ? '↑'
-                                      : trend.direction === 'down'
-                                        ? '↓'
-                                        : '→';
-                                  const colorClass =
-                                    trend.direction === 'up'
-                                      ? 'text-emerald-400'
-                                      : trend.direction === 'down'
-                                        ? 'text-red-400'
-                                        : 'text-zinc-400';
-                                  const changeSign =
-                                    trend.change > 0 ? '+' : '';
-                                  return (
-                                    <div
-                                      key={idx}
-                                      className='flex items-center justify-between text-xs'
-                                    >
-                                      <span className='text-zinc-300'>
-                                        {trend.metric}
-                                      </span>
+                      )}
+                      {analysis.yearOverYear.thisYear.frequentCards.length >
+                        0 && (
+                        <div className='space-y-3'>
+                          {analysis.yearOverYear.thisYear.frequentCards
+                            .slice(0, 3)
+                            .map((card) => {
+                              // Find trend for this card if available
+                              const cardTrend =
+                                analysis.yearOverYear.comparison.trends.find(
+                                  (t) =>
+                                    t.metric === `${card.name} appearances`,
+                                );
+                              // Find recap for this card if available
+                              const cardRecap =
+                                analysis.yearOverYear.thisYear.cardRecaps?.find(
+                                  (r) => r.cardName === card.name,
+                                );
+                              return (
+                                <div key={card.name} className='space-y-1'>
+                                  <div className='flex items-center justify-between text-xs'>
+                                    <span className='text-zinc-300 font-medium'>
+                                      {card.name} ({card.count}x)
+                                    </span>
+                                    {cardTrend && (
                                       <span
                                         className={cn(
-                                          'flex items-center gap-1',
-                                          colorClass,
+                                          'flex items-center gap-0.5 text-[10px]',
+                                          cardTrend.direction === 'up'
+                                            ? 'text-emerald-400'
+                                            : cardTrend.direction === 'down'
+                                              ? 'text-red-400'
+                                              : 'text-zinc-500',
                                         )}
                                       >
-                                        <span>{arrow}</span>
-                                        <span>
-                                          {changeSign}
-                                          {trend.change}%
-                                        </span>
+                                        {cardTrend.direction === 'up'
+                                          ? '↑'
+                                          : cardTrend.direction === 'down'
+                                            ? '↓'
+                                            : '→'}
+                                        {cardTrend.change > 0 ? '+' : ''}
+                                        {cardTrend.change}%
                                       </span>
+                                    )}
+                                  </div>
+                                  {cardRecap && (
+                                    <p className='text-xs text-zinc-400 leading-relaxed'>
+                                      {cardRecap.recap}
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      )}
+                    </div>
+                    <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
+                      <h5 className='text-xs font-medium text-indigo-300/90 mb-2'>
+                        Last Year
+                      </h5>
+                      {loading ? (
+                        <p className='text-xs text-zinc-400 mb-3'>
+                          Generating historical data...
+                        </p>
+                      ) : analysis.yearOverYear.lastYear.dominantThemes.length >
+                          0 ||
+                        analysis.yearOverYear.lastYear.frequentCards.length >
+                          0 ? (
+                        <>
+                          {analysis.yearOverYear.lastYear.dominantThemes
+                            .length > 0 && (
+                            <div className='flex flex-wrap gap-1.5 mb-3'>
+                              {analysis.yearOverYear.lastYear.dominantThemes.map(
+                                (theme) => (
+                                  <span
+                                    key={theme}
+                                    className='px-2 py-0.5 text-xs rounded bg-indigo-500/20 text-indigo-200'
+                                  >
+                                    {theme}
+                                  </span>
+                                ),
+                              )}
+                            </div>
+                          )}
+                          {analysis.yearOverYear.lastYear.frequentCards.length >
+                          0 ? (
+                            <div className='space-y-3'>
+                              {analysis.yearOverYear.lastYear.frequentCards
+                                .slice(0, 3)
+                                .map((card) => {
+                                  // Find recap for this card if available
+                                  const cardRecap =
+                                    analysis.yearOverYear.lastYear.cardRecaps?.find(
+                                      (r) => r.cardName === card.name,
+                                    );
+                                  return (
+                                    <div key={card.name} className='space-y-1'>
+                                      <div className='text-xs text-zinc-300 font-medium'>
+                                        {card.name} ({card.count}x)
+                                      </div>
+                                      {cardRecap && (
+                                        <p className='text-xs text-zinc-400 leading-relaxed'>
+                                          {cardRecap.recap}
+                                        </p>
+                                      )}
                                     </div>
                                   );
                                 })}
                             </div>
-                          </div>
+                          ) : null}
+                        </>
+                      ) : (
+                        <p className='text-xs text-zinc-400 mb-3'>
+                          No historical data available for comparison
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {analysis.yearOverYear.comparison.trends.length > 0 && (
+                    <div className='mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
+                      <h5 className='text-xs font-medium text-emerald-300/90 mb-2'>
+                        Year-over-Year Trends
+                      </h5>
+                      <div className='space-y-2'>
+                        {analysis.yearOverYear.comparison.trends
+                          .slice(0, 5)
+                          .map((trend, idx) => {
+                            const arrow =
+                              trend.direction === 'up'
+                                ? '↑'
+                                : trend.direction === 'down'
+                                  ? '↓'
+                                  : '→';
+                            const colorClass =
+                              trend.direction === 'up'
+                                ? 'text-emerald-400'
+                                : trend.direction === 'down'
+                                  ? 'text-red-400'
+                                  : 'text-zinc-400';
+                            const changeSign = trend.change > 0 ? '+' : '';
+                            return (
+                              <div
+                                key={idx}
+                                className='flex items-center justify-between text-xs'
+                              >
+                                <span className='text-zinc-300'>
+                                  {trend.metric}
+                                </span>
+                                <span
+                                  className={cn(
+                                    'flex items-center gap-1',
+                                    colorClass,
+                                  )}
+                                >
+                                  <span>{arrow}</span>
+                                  <span>
+                                    {changeSign}
+                                    {trend.change}%
+                                  </span>
+                                </span>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+                  {analysis.yearOverYear.comparison.insights.length > 0 && (
+                    <div className='mt-4 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+                      <h5 className='text-xs font-medium text-zinc-300 mb-2'>
+                        Comparison Insights
+                      </h5>
+                      <ul className='space-y-1 text-xs text-zinc-400'>
+                        {analysis.yearOverYear.comparison.insights.map(
+                          (insight, idx) => (
+                            <li key={idx}>{insight}</li>
+                          ),
                         )}
-                        {analysis.yearOverYear.comparison.insights.length >
-                          0 && (
-                          <div className='mt-4 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-                            <h5 className='text-xs font-medium text-zinc-300 mb-2'>
-                              Comparison Insights
-                            </h5>
-                            <ul className='space-y-1 text-xs text-zinc-400'>
-                              {analysis.yearOverYear.comparison.insights.map(
-                                (insight, idx) => (
-                                  <li key={idx}>{insight}</li>
-                                ),
-                              )}
-                            </ul>
-                          </div>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Show multidimensional analysis when sparkle is ON and a date tab is selected */}
+      {isMultidimensionalMode && typeof selectedView === 'number' && (
+        <div className='space-y-4 pt-8'>
+          {loading && (
+            <div className='flex items-center justify-center py-12'>
+              <div className='flex flex-col items-center gap-3'>
+                <div className='w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin' />
+                <p className='text-sm text-zinc-400'>
+                  Loading multidimensional analysis...
+                </p>
+              </div>
+            </div>
+          )}
+          {error && !analysis && !loading && (
+            <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 mb-4'>
+              <div className='flex items-start gap-3'>
+                <Lock className='h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0' />
+                <div className='flex-1'>
+                  <h4 className='text-sm font-medium text-purple-200 mb-1'>
+                    Advanced Pattern Analysis
+                  </h4>
+                  <p className='text-xs text-purple-300/80 mb-3'>
+                    Upgrade to Lunary+ AI to unlock year-over-year comparisons,
+                    multi-dimensional analysis, and extended timeline insights.
+                  </p>
+                  <UpgradePrompt
+                    variant='inline'
+                    featureName='advanced_patterns'
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {error && analysis && (
+            <div className='text-center py-8 text-red-400 text-sm'>{error}</div>
+          )}
+
+          {analysis && analysis.enhancedTarot && !loading && (
+            <div className='space-y-6'>
+              <div className='space-y-4'>
+                <div>
+                  <h4 className='text-sm font-medium text-zinc-300 mb-3'>
+                    Multi-Dimensional Analysis
+                    {typeof selectedView === 'number' && (
+                      <span className='text-xs text-zinc-500 ml-2'>
+                        ({selectedView} days)
+                      </span>
+                    )}
+                  </h4>
+                  <div className='grid gap-4 md:grid-cols-2'>
+                    <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
+                      <h5 className='text-xs font-medium text-purple-300/90 mb-2'>
+                        Suit Distribution
+                      </h5>
+                      <div className='space-y-2'>
+                        {analysis.enhancedTarot.multiDimensional.suitPatterns.map(
+                          (suit) => (
+                            <div
+                              key={suit.suit}
+                              className='flex items-center justify-between text-xs'
+                            >
+                              <span className='text-zinc-300'>{suit.suit}</span>
+                              <span className='text-zinc-400'>
+                                {suit.count} ({suit.percentage}%)
+                              </span>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                    <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
+                      <h5 className='text-xs font-medium text-indigo-300/90 mb-2'>
+                        Arcana Balance
+                      </h5>
+                      <div className='space-y-2 text-xs'>
+                        {(() => {
+                          const total =
+                            analysis.enhancedTarot.multiDimensional
+                              .arcanaBalance.major +
+                            analysis.enhancedTarot.multiDimensional
+                              .arcanaBalance.minor;
+                          const majorPercentage =
+                            total > 0
+                              ? Math.round(
+                                  (analysis.enhancedTarot.multiDimensional
+                                    .arcanaBalance.major /
+                                    total) *
+                                    100,
+                                )
+                              : 0;
+                          const minorPercentage =
+                            total > 0
+                              ? Math.round(
+                                  (analysis.enhancedTarot.multiDimensional
+                                    .arcanaBalance.minor /
+                                    total) *
+                                    100,
+                                )
+                              : 0;
+                          return (
+                            <>
+                              <div className='flex items-center justify-between'>
+                                <span className='text-zinc-300'>
+                                  Major Arcana
+                                </span>
+                                <span className='text-zinc-400'>
+                                  {
+                                    analysis.enhancedTarot.multiDimensional
+                                      .arcanaBalance.major
+                                  }{' '}
+                                  ({majorPercentage}%)
+                                </span>
+                              </div>
+                              <div className='flex items-center justify-between'>
+                                <span className='text-zinc-300'>
+                                  Minor Arcana
+                                </span>
+                                <span className='text-zinc-400'>
+                                  {
+                                    analysis.enhancedTarot.multiDimensional
+                                      .arcanaBalance.minor
+                                  }{' '}
+                                  ({minorPercentage}%)
+                                </span>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                  {analysis.enhancedTarot.multiDimensional.numberPatterns
+                    .length > 0 && (
+                    <div className='mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
+                      <h5 className='text-xs font-medium text-emerald-300/90 mb-2'>
+                        Number Patterns
+                      </h5>
+                      <div className='space-y-2'>
+                        {analysis.enhancedTarot.multiDimensional.numberPatterns.map(
+                          (pattern) => (
+                            <div key={pattern.number} className='text-xs'>
+                              <div className='flex items-center justify-between mb-1'>
+                                <span className='text-zinc-300 font-medium'>
+                                  {pattern.number}
+                                </span>
+                                <span className='text-zinc-400'>
+                                  {pattern.count}x ({pattern.percentage}%)
+                                </span>
+                              </div>
+                              <p className='text-zinc-400'>{pattern.meaning}</p>
+                            </div>
+                          ),
                         )}
                       </div>
                     </div>
                   )}
-
-                  {activeTab === 'multi-dimensional' &&
-                    analysis.enhancedTarot && (
-                      <div className='space-y-4'>
-                        <div>
-                          <h4 className='text-sm font-medium text-zinc-300 mb-3'>
-                            Multi-Dimensional Analysis
-                          </h4>
-                          <div className='grid gap-4 md:grid-cols-2'>
-                            <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-                              <h5 className='text-xs font-medium text-purple-300/90 mb-2'>
-                                Suit Distribution
-                              </h5>
-                              <div className='space-y-2'>
-                                {analysis.enhancedTarot.multiDimensional.suitPatterns.map(
-                                  (suit) => (
-                                    <div
-                                      key={suit.suit}
-                                      className='flex items-center justify-between text-xs'
-                                    >
-                                      <span className='text-zinc-300'>
-                                        {suit.suit}
-                                      </span>
-                                      <span className='text-zinc-400'>
-                                        {suit.count} ({suit.percentage}%)
-                                      </span>
-                                    </div>
-                                  ),
-                                )}
+                  {analysis.enhancedTarot.multiDimensional.correlations.length >
+                    0 && (
+                    <div className='mt-4 rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-4'>
+                      <h5 className='text-xs font-medium text-cyan-300/90 mb-2'>
+                        Dimension Correlations
+                      </h5>
+                      <div className='space-y-2'>
+                        {analysis.enhancedTarot.multiDimensional.correlations.map(
+                          (correlation, idx) => (
+                            <div key={idx} className='text-xs'>
+                              <div className='flex items-center gap-2 mb-1'>
+                                <span className='text-cyan-300 font-medium'>
+                                  {correlation.dimension1}
+                                </span>
+                                <span className='text-zinc-500'>×</span>
+                                <span className='text-cyan-300 font-medium'>
+                                  {correlation.dimension2}
+                                </span>
                               </div>
+                              <p className='text-zinc-400 leading-relaxed'>
+                                {correlation.insight}
+                              </p>
                             </div>
-                            <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                              <h5 className='text-xs font-medium text-indigo-300/90 mb-2'>
-                                Arcana Balance
-                              </h5>
-                              <div className='space-y-2 text-xs'>
-                                {(() => {
-                                  const total =
-                                    analysis.enhancedTarot.multiDimensional
-                                      .arcanaBalance.major +
-                                    analysis.enhancedTarot.multiDimensional
-                                      .arcanaBalance.minor;
-                                  const majorPercentage =
-                                    total > 0
-                                      ? Math.round(
-                                          (analysis.enhancedTarot
-                                            .multiDimensional.arcanaBalance
-                                            .major /
-                                            total) *
-                                            100,
-                                        )
-                                      : 0;
-                                  const minorPercentage =
-                                    total > 0
-                                      ? Math.round(
-                                          (analysis.enhancedTarot
-                                            .multiDimensional.arcanaBalance
-                                            .minor /
-                                            total) *
-                                            100,
-                                        )
-                                      : 0;
-                                  return (
-                                    <>
-                                      <div className='flex items-center justify-between'>
-                                        <span className='text-zinc-300'>
-                                          Major Arcana
-                                        </span>
-                                        <span className='text-zinc-400'>
-                                          {
-                                            analysis.enhancedTarot
-                                              .multiDimensional.arcanaBalance
-                                              .major
-                                          }{' '}
-                                          ({majorPercentage}%)
-                                        </span>
-                                      </div>
-                                      <div className='flex items-center justify-between'>
-                                        <span className='text-zinc-300'>
-                                          Minor Arcana
-                                        </span>
-                                        <span className='text-zinc-400'>
-                                          {
-                                            analysis.enhancedTarot
-                                              .multiDimensional.arcanaBalance
-                                              .minor
-                                          }{' '}
-                                          ({minorPercentage}%)
-                                        </span>
-                                      </div>
-                                    </>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          </div>
-                          {analysis.enhancedTarot.multiDimensional
-                            .numberPatterns.length > 0 && (
-                            <div className='mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-                              <h5 className='text-xs font-medium text-emerald-300/90 mb-2'>
-                                Number Patterns
-                              </h5>
-                              <div className='space-y-2'>
-                                {analysis.enhancedTarot.multiDimensional.numberPatterns.map(
-                                  (pattern) => (
-                                    <div
-                                      key={pattern.number}
-                                      className='text-xs'
-                                    >
-                                      <div className='flex items-center justify-between mb-1'>
-                                        <span className='text-zinc-300 font-medium'>
-                                          {pattern.number}
-                                        </span>
-                                        <span className='text-zinc-400'>
-                                          {pattern.count}x ({pattern.percentage}
-                                          %)
-                                        </span>
-                                      </div>
-                                      <p className='text-zinc-400'>
-                                        {pattern.meaning}
-                                      </p>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          {analysis.enhancedTarot.multiDimensional.correlations
-                            .length > 0 && (
-                            <div className='mt-4 rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-4'>
-                              <h5 className='text-xs font-medium text-cyan-300/90 mb-2'>
-                                Dimension Correlations
-                              </h5>
-                              <div className='space-y-2'>
-                                {analysis.enhancedTarot.multiDimensional.correlations.map(
-                                  (correlation, idx) => (
-                                    <div key={idx} className='text-xs'>
-                                      <div className='flex items-center gap-2 mb-1'>
-                                        <span className='text-cyan-300 font-medium'>
-                                          {correlation.dimension1}
-                                        </span>
-                                        <span className='text-zinc-500'>×</span>
-                                        <span className='text-cyan-300 font-medium'>
-                                          {correlation.dimension2}
-                                        </span>
-                                      </div>
-                                      <p className='text-zinc-400 leading-relaxed'>
-                                        {correlation.insight}
-                                      </p>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                          ),
+                        )}
                       </div>
-                    )}
+                    </div>
+                  )}
                 </div>
-              )}
-            </>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -1021,277 +946,4 @@ function getCardSuitColor(cardName: string): string {
   if (cardName.includes('Pentacles'))
     return 'bg-green-500/30 border-green-500/50';
   return 'bg-zinc-500/30 border-zinc-500/50';
-}
-
-function TimelineVisualization({
-  data,
-  period,
-}: {
-  data: {
-    dominantThemes: string[];
-    frequentCards: Array<{ name: string; count: number }>;
-    trendAnalysis: string[];
-    timelineData?: Array<{
-      date: string;
-      cards: Array<{ name: string; suit: string }>;
-    }>;
-  };
-  period: number;
-}) {
-  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
-  const startDate = dayjs().subtract(period, 'month');
-  const endDate = dayjs();
-  const totalDays = endDate.diff(startDate, 'day');
-
-  const months = Array.from({ length: period }, (_, i) => {
-    const date = dayjs().subtract(period - 1 - i, 'month');
-    return {
-      label: date.format('MMM'),
-      date: date.format('YYYY-MM'),
-      startDay: date.startOf('month').diff(startDate, 'day'),
-      daysInMonth: date.daysInMonth(),
-    };
-  });
-
-  // Build card markers from timeline data - show ALL cards, not just top ones
-  const cardMarkers: Array<{
-    date: string;
-    position: number;
-    cards: Array<{ name: string; suit: string }>;
-  }> = [];
-
-  if (data.timelineData) {
-    data.timelineData.forEach((entry) => {
-      const entryDate = dayjs(entry.date);
-      const position = (entryDate.diff(startDate, 'day') / totalDays) * 100;
-      cardMarkers.push({
-        date: entry.date,
-        position: Math.max(0, Math.min(100, position)),
-        cards: entry.cards,
-      });
-    });
-  }
-
-  // Group cards by suit for trend visualization
-  const suitTrends: {
-    [suit: string]: Array<{ date: string; position: number }>;
-  } = {};
-  cardMarkers.forEach((marker) => {
-    marker.cards.forEach((card) => {
-      if (!suitTrends[card.suit]) {
-        suitTrends[card.suit] = [];
-      }
-      suitTrends[card.suit].push({
-        date: marker.date,
-        position: marker.position,
-      });
-    });
-  });
-
-  return (
-    <div className='space-y-4'>
-      <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-        <div className='mb-4'>
-          <h5 className='text-xs font-medium text-purple-300/90 mb-3'>
-            Timeline Visualization ({period} Months)
-          </h5>
-          <div className='relative h-12 bg-zinc-900/50 rounded overflow-hidden'>
-            {/* Month labels */}
-            <div className='absolute inset-0 flex'>
-              {months.map((month, idx) => (
-                <div
-                  key={month.date}
-                  className='flex-1 border-r border-zinc-800/50 last:border-r-0 relative'
-                  style={{
-                    background: `linear-gradient(135deg, ${
-                      idx % 2 === 0
-                        ? 'rgba(139, 92, 246, 0.05)'
-                        : 'rgba(99, 102, 241, 0.05)'
-                    } 0%, transparent 100%)`,
-                  }}
-                >
-                  <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500/20' />
-                  <div className='absolute top-1 left-1/2 -translate-x-1/2'>
-                    <span className='text-[8px] text-zinc-500 font-medium'>
-                      {month.label}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Card markers on timeline - show all cards as dots */}
-            {cardMarkers.map((marker, idx) => {
-              return (
-                <div
-                  key={`${marker.date}-${idx}`}
-                  className='absolute top-0 bottom-0'
-                  style={{ left: `${marker.position}%` }}
-                  onMouseEnter={() => setHoveredDate(marker.date)}
-                  onMouseLeave={() => setHoveredDate(null)}
-                >
-                  <div className='relative h-full flex items-center justify-center'>
-                    {/* Show dots for each card, stacked vertically if multiple */}
-                    <div className='flex flex-col gap-0.5 items-center'>
-                      {marker.cards.map((card, cardIdx) => {
-                        const suitColor = getCardSuitColor(card.name);
-                        return (
-                          <div
-                            key={`${marker.date}-${card.name}-${cardIdx}`}
-                            className={cn(
-                              'w-1.5 h-1.5 rounded-full border border-white/30 transition-all',
-                              suitColor,
-                              hoveredDate === marker.date
-                                ? 'opacity-100 scale-150'
-                                : 'opacity-80',
-                            )}
-                            title={`${card.name} - ${dayjs(marker.date).format('MMM D')}`}
-                          />
-                        );
-                      })}
-                    </div>
-                    {hoveredDate === marker.date && (
-                      <div className='absolute left-1/2 -translate-x-1/2 -top-12 z-10 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-300 min-w-[120px]'>
-                        <div className='font-medium mb-1 text-zinc-200'>
-                          {dayjs(marker.date).format('MMM D, YYYY')}
-                        </div>
-                        <div className='space-y-0.5 max-h-32 overflow-y-auto'>
-                          {marker.cards.map((card) => (
-                            <div
-                              key={card.name}
-                              className='text-[10px] flex items-center gap-1'
-                            >
-                              <div
-                                className={cn(
-                                  'w-1.5 h-1.5 rounded-full',
-                                  getCardSuitColor(card.name),
-                                )}
-                              />
-                              {card.name}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Trend lines for suits */}
-            {Object.entries(suitTrends).map(([suit, points]) => {
-              if (points.length < 2) return null;
-              const suitColor = getCardSuitColor(`${suit} of Test`);
-              const sortedPoints = points.sort(
-                (a, b) => a.position - b.position,
-              );
-              const pathData = sortedPoints
-                .map((point, idx) => {
-                  const x = point.position;
-                  const y = 50 + (idx % 3) * 5 - 5; // Slight vertical offset for visual separation
-                  return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
-                })
-                .join(' ');
-
-              let strokeColor = 'rgba(139, 92, 246, 0.3)';
-              if (suitColor.includes('red')) {
-                strokeColor = 'rgba(239, 68, 68, 0.3)';
-              } else if (suitColor.includes('blue')) {
-                strokeColor = 'rgba(59, 130, 246, 0.3)';
-              } else if (suitColor.includes('yellow')) {
-                strokeColor = 'rgba(234, 179, 8, 0.3)';
-              } else if (suitColor.includes('green')) {
-                strokeColor = 'rgba(34, 197, 94, 0.3)';
-              }
-
-              return (
-                <svg
-                  key={suit}
-                  className='absolute inset-0 pointer-events-none'
-                  style={{ zIndex: 0 }}
-                >
-                  <path
-                    d={pathData}
-                    fill='none'
-                    stroke={strokeColor}
-                    strokeWidth='1'
-                    strokeDasharray='2 2'
-                  />
-                </svg>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className='mt-3 flex items-center gap-4 text-xs text-zinc-400'>
-          <div className='flex items-center gap-1'>
-            <div className='w-1.5 h-1.5 rounded-full bg-red-500/30 border border-red-500/50' />
-            <span>Fire</span>
-          </div>
-          <div className='flex items-center gap-1'>
-            <div className='w-1.5 h-1.5 rounded-full bg-blue-500/30 border border-blue-500/50' />
-            <span>Water</span>
-          </div>
-          <div className='flex items-center gap-1'>
-            <div className='w-1.5 h-1.5 rounded-full bg-yellow-500/30 border border-yellow-500/50' />
-            <span>Air</span>
-          </div>
-          <div className='flex items-center gap-1'>
-            <div className='w-1.5 h-1.5 rounded-full bg-green-500/30 border border-green-500/50' />
-            <span>Earth</span>
-          </div>
-          <div className='flex items-center gap-1'>
-            <div className='w-1.5 h-1.5 rounded-full bg-purple-500/30 border border-purple-500/50' />
-            <span>Major</span>
-          </div>
-        </div>
-      </div>
-
-      {data.dominantThemes.length > 0 && (
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-          <h5 className='text-xs font-medium text-zinc-300 mb-2'>
-            Dominant Themes
-          </h5>
-          <div className='flex flex-wrap gap-1.5'>
-            {data.dominantThemes.map((theme) => (
-              <span
-                key={theme}
-                className='px-2 py-0.5 text-xs rounded bg-purple-500/20 text-purple-200'
-              >
-                {theme}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-      {data.frequentCards.length > 0 && (
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-          <h5 className='text-xs font-medium text-zinc-300 mb-2'>
-            Most Frequent Cards
-          </h5>
-          <div className='space-y-1'>
-            {data.frequentCards.slice(0, 5).map((card) => (
-              <div key={card.name} className='text-xs text-zinc-300'>
-                {card.name} ({card.count}x)
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {data.trendAnalysis.length > 0 && (
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-          <h5 className='text-xs font-medium text-zinc-300 mb-2'>
-            Trend Analysis
-          </h5>
-          <div className='space-y-2'>
-            {data.trendAnalysis.map((insight, idx) => (
-              <p key={idx} className='text-xs text-zinc-300'>
-                {insight}
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }

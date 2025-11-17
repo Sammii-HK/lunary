@@ -940,8 +940,10 @@ async function getEnhancedTarotPatterns(
   planType: string,
   userName?: string,
   userBirthday?: string,
+  requestedDays?: number,
 ): Promise<AdvancedPatternAnalysis['enhancedTarot']> {
-  const days = planType === 'lunary_plus_ai_annual' ? 365 : 90;
+  const days =
+    requestedDays || (planType === 'lunary_plus_ai_annual' ? 365 : 90);
   const startDate = dayjs().subtract(days, 'day');
 
   if (process.env.NODE_ENV === 'development') {
@@ -1462,6 +1464,9 @@ function generateCardRecap(
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
+    const { searchParams } = request.nextUrl;
+    const daysParam = searchParams.get('days');
+    const requestedDays = daysParam ? parseInt(daysParam, 10) : undefined;
 
     const subscriptionResult = await sql`
       SELECT plan_type, status, stripe_customer_id
@@ -1551,6 +1556,7 @@ export async function GET(request: NextRequest) {
         planType,
         user.displayName,
         user.birthday,
+        requestedDays,
       ),
     ]);
 

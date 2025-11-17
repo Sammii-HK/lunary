@@ -84,18 +84,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Fetching subscription for customer:', customerId);
-
     // Get all subscriptions for this customer
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: 'all', // Include all statuses
       limit: 10,
     });
-
-    console.log(
-      `Found ${subscriptions.data.length} subscriptions for customer ${customerId}`,
-    );
 
     if (subscriptions.data.length === 0) {
       return NextResponse.json({
@@ -114,13 +108,6 @@ export async function POST(request: NextRequest) {
 
     // Extract plan_id from subscription metadata
     const planType = await getPlanTypeFromSubscription(subscription);
-
-    console.log('Selected subscription:', {
-      id: subscription.id,
-      status: subscription.status,
-      customerId: subscription.customer,
-      planType,
-    });
 
     return NextResponse.json({
       success: true,

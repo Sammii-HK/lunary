@@ -7,7 +7,9 @@ import {
   MoonSnapshot,
   TarotCard,
   TarotReading,
+  TarotReadingWithInsights,
   TransitRecord,
+  AiPlanId,
 } from './types';
 import {
   CurrentTransitsResponse,
@@ -19,6 +21,7 @@ import {
   getMoodHistory as defaultGetMoodHistory,
   getTarotLastReading as defaultGetTarotLastReading,
   getTarotPatternAnalysis as defaultGetTarotPatternAnalysis,
+  getTarotRecentReadings as defaultGetTarotRecentReadings,
 } from './providers';
 import { getCachedSnapshot, saveSnapshot } from '../cosmic-snapshot/cache';
 
@@ -34,6 +37,11 @@ export type LunaryContextDependencies = {
     userId: string;
     now?: Date;
   }) => Promise<TarotReading | null>;
+  getTarotRecentReadings: (params: {
+    userId: string;
+    limit?: number;
+    now?: Date;
+  }) => Promise<TarotReadingWithInsights[]>;
   getTarotPatternAnalysis: (params: {
     userId: string;
     userName?: string;
@@ -68,6 +76,7 @@ const defaultDependencies: LunaryContextDependencies = {
   getBirthChart: defaultGetBirthChart,
   getCurrentTransits: defaultGetCurrentTransits,
   getTarotLastReading: defaultGetTarotLastReading,
+  getTarotRecentReadings: defaultGetTarotRecentReadings,
   getTarotPatternAnalysis: defaultGetTarotPatternAnalysis,
   getDailyHighlight: defaultGetDailyHighlight,
   getMoodHistory: defaultGetMoodHistory,
@@ -82,6 +91,7 @@ export type BuildLunaryContextParams = {
   userBirthday?: string;
   historyLimit?: number;
   includeMood?: boolean;
+  planId?: AiPlanId;
   deps?: Partial<LunaryContextDependencies>;
   now?: Date;
 };
@@ -114,6 +124,7 @@ export const buildLunaryContext = async ({
   userBirthday,
   historyLimit = 10,
   includeMood = true,
+  planId,
   deps: dependencyOverrides,
   now = new Date(),
   useCache = true,
@@ -171,10 +182,16 @@ export const buildLunaryContext = async ({
 
   const deps = mergeDeps(dependencyOverrides);
 
+  // For AI Plus users, fetch recent readings with insights
+  const isAiPlusUser =
+    planId === 'lunary_plus_ai' || planId === 'lunary_plus_ai_annual';
+  const recentReadingsLimit = isAiPlusUser ? 10 : 0;
+
   const [
     birthChart,
     currentTransits,
     tarotReading,
+    tarotRecentReadings,
     tarotPatternAnalysis,
     dailyHighlight,
     mood,
@@ -195,6 +212,17 @@ export const buildLunaryContext = async ({
       console.error('[LunaryContext] Failed to fetch tarot reading', error);
       return null;
     }),
+    recentReadingsLimit > 0
+      ? deps
+          .getTarotRecentReadings({ userId, limit: recentReadingsLimit, now })
+          .catch((error) => {
+            console.error(
+              '[LunaryContext] Failed to fetch recent tarot readings',
+              error,
+            );
+            return [];
+          })
+      : Promise.resolve([]),
     // Use cached tarot data if available, otherwise fetch fresh
     cachedTarotData
       ? Promise.resolve({
@@ -302,6 +330,8 @@ export const buildLunaryContext = async ({
     moon: currentTransits?.moon ?? null,
     tarot: {
       lastReading: tarotReading ?? undefined,
+      recentReadings:
+        tarotRecentReadings.length > 0 ? tarotRecentReadings : undefined,
       // Ensure tarot cards are always included - use cached, fetched, or fallback
       daily: finalTarotPatternAnalysis?.daily ?? undefined,
       weekly: finalTarotPatternAnalysis?.weekly ?? undefined,

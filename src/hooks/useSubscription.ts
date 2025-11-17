@@ -80,12 +80,6 @@ export function useSubscription(): SubscriptionStatus {
 
   const fetchFromStripe = useCallback(async (customerId: string) => {
     try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(
-          'Fetching subscription from Stripe for customer:',
-          customerId,
-        );
-      }
       setSubscriptionState((prev) => ({ ...prev, loading: true }));
 
       const response = await fetch('/api/stripe/get-subscription', {
@@ -97,12 +91,6 @@ export function useSubscription(): SubscriptionStatus {
 
       if (response.ok) {
         const data = await response.json();
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            '[useSubscription] Stripe API response:',
-            JSON.stringify(data, null, 2),
-          );
-        }
         if (data.success && data.subscription) {
           const sub = data.subscription;
           const status = sub.status === 'trialing' ? 'trial' : sub.status;
@@ -122,15 +110,6 @@ export function useSubscription(): SubscriptionStatus {
           const planFromApi = sub.plan || 'free';
           const normalizedPlan = normalizePlanType(planFromApi);
 
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[useSubscription] Plan normalization:', {
-              planFromApi,
-              normalizedPlan,
-              status,
-              isSubscribed,
-              isTrialActive,
-            });
-          }
           const planForState =
             normalizedPlan === 'lunary_plus_ai_annual'
               ? 'yearly'
@@ -154,11 +133,7 @@ export function useSubscription(): SubscriptionStatus {
               | 'past_due',
             hasAccess: (feature) => {
               const access = hasFeatureAccess(status, normalizedPlan, feature);
-              if (process.env.NODE_ENV === 'development') {
-                console.log(
-                  `[useSubscription] Feature access check (Stripe): feature=${feature}, status=${status}, plan=${planFromApi}, normalized=${normalizedPlan}, hasAccess=${access}`,
-                );
-              }
+
               return access;
             },
             showUpgradePrompt: !isSubscribed && status !== 'cancelled',
@@ -167,14 +142,6 @@ export function useSubscription(): SubscriptionStatus {
             loading: false,
           };
 
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[useSubscription] Subscription fetched from Stripe:', {
-              ...stripeBasedState,
-              hasAccess_advanced:
-                stripeBasedState.hasAccess('advanced_patterns'),
-              hasAccess_tarot: stripeBasedState.hasAccess('tarot_patterns'),
-            });
-          }
           // Store Stripe data for comparison with profile
           setStripeSubscriptionData({
             plan: planFromApi,
@@ -191,11 +158,6 @@ export function useSubscription(): SubscriptionStatus {
               planFromApi !== profilePlan;
 
             if (needsSync) {
-              if (process.env.NODE_ENV === 'development') {
-                console.log(
-                  `[useSubscription] Syncing profile: ${profilePlan} -> ${planFromApi}`,
-                );
-              }
               setHasSyncedProfile(true);
               // Sync in background - don't await to prevent blocking
               syncSubscriptionToProfile(me.profile, sub.customerId).catch(
@@ -213,12 +175,6 @@ export function useSubscription(): SubscriptionStatus {
           setSubscriptionState(stripeBasedState);
           return;
         } else {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn(
-              '[useSubscription] Stripe API returned success but no subscription:',
-              data,
-            );
-          }
         }
       } else {
         console.warn(
@@ -235,11 +191,6 @@ export function useSubscription(): SubscriptionStatus {
 
     // If we get here, Stripe fetch failed or returned no subscription
     // Fall back to profile subscription or default state
-    if (process.env.NODE_ENV === 'development') {
-      console.log(
-        '[useSubscription] Stripe fetch failed, will fall back to profile subscription',
-      );
-    }
     setSubscriptionState((prev) => ({ ...prev, loading: false }));
   }, []);
 
@@ -249,9 +200,6 @@ export function useSubscription(): SubscriptionStatus {
     }
 
     if (!me?.profile) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('useSubscription: No profile found');
-      }
       setSubscriptionState(defaultState);
       return;
     }
@@ -259,25 +207,12 @@ export function useSubscription(): SubscriptionStatus {
     const profileSubscription = (me.profile as any)?.subscription;
     const customerId = getCustomerId();
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(
-        '[useSubscription] Profile subscription raw data:',
-        JSON.stringify(profileSubscription, null, 2),
-      );
-      console.log('[useSubscription] Customer ID:', customerId);
-    }
-
     // Prioritize Stripe data if available (most accurate source of truth)
     // This ensures we use correct plan even if profile subscription is stale
     if (
       stripeSubscriptionData &&
       stripeSubscriptionData.customerId === customerId
     ) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(
-          `[useSubscription] Using Stripe subscription data (plan: ${stripeSubscriptionData.plan}) instead of profile`,
-        );
-      }
       // Recreate state from Stripe data to ensure it's correct
       const stripeStatus =
         stripeSubscriptionData.status === 'trialing'
@@ -315,11 +250,6 @@ export function useSubscription(): SubscriptionStatus {
           ) {
             const hasAccess =
               FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
-            if (process.env.NODE_ENV === 'development') {
-              console.log(
-                `[useSubscription] Feature access (Stripe defensive): feature=${feature}, status=${stripeStatus}, plan=${stripeNormalizedPlan}, hasAccess=${hasAccess}`,
-              );
-            }
             return hasAccess;
           }
 
@@ -328,11 +258,6 @@ export function useSubscription(): SubscriptionStatus {
             stripeNormalizedPlan,
             feature,
           );
-          if (process.env.NODE_ENV === 'development') {
-            console.log(
-              `[useSubscription] Feature access (Stripe priority): feature=${feature}, status=${stripeStatus}, plan=${stripeSubscriptionData.plan}, normalized=${stripeNormalizedPlan}, hasAccess=${access}`,
-            );
-          }
           return access;
         },
         showUpgradePrompt: false, // User has subscription
@@ -365,11 +290,6 @@ export function useSubscription(): SubscriptionStatus {
         (plan === 'monthly' || plan === 'yearly') &&
         !plan.includes('lunary')
       ) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            `[useSubscription] Profile has generic plan (${plan}), fetching from Stripe to get exact plan type`,
-          );
-        }
         setHasCheckedStripe(true);
         fetchFromStripe(customerId);
         return;
@@ -420,22 +340,12 @@ export function useSubscription(): SubscriptionStatus {
           ) {
             const hasAccess =
               FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
-            if (process.env.NODE_ENV === 'development') {
-              console.log(
-                `[useSubscription] Feature access (defensive check): feature=${feature}, status=${status}, plan=${normalizedPlan}, hasAccess=${hasAccess}`,
-              );
-            }
             return hasAccess;
           }
 
           // Use normalized plan for feature access checks
           // hasFeatureAccess already handles 'yearly' -> 'lunary_plus_ai_annual' conversion
           const access = hasFeatureAccess(status, normalizedPlan, feature);
-          if (process.env.NODE_ENV === 'development') {
-            console.log(
-              `[useSubscription] Feature access (profile): feature=${feature}, status=${status}, rawPlan=${plan}, normalizedPlan=${normalizedPlan}, hasAccess=${access}`,
-            );
-          }
           return access;
         },
         showUpgradePrompt: !isSubscribed && status !== 'cancelled',
@@ -445,52 +355,6 @@ export function useSubscription(): SubscriptionStatus {
         subscriptionId: profileSubscription.stripeSubscriptionId,
         loading: false,
       };
-
-      if (process.env.NODE_ENV === 'development') {
-        const testAdvanced = hasFeatureAccess(
-          status,
-          normalizedPlan,
-          'advanced_patterns',
-        );
-        const testTarot = hasFeatureAccess(
-          status,
-          normalizedPlan,
-          'tarot_patterns',
-        );
-        console.log('[useSubscription] Profile subscription summary:', {
-          rawStatus: rawStatus,
-          normalizedStatus: status,
-          rawPlan: plan,
-          normalizedPlan: normalizedPlan,
-          planForState: planForState,
-          isSubscribed: isSubscribed,
-          isTrialActive: isTrialActive,
-          hasAdvancedAccess: testAdvanced,
-          hasTarotAccess: testTarot,
-          showUpgradePrompt: !isSubscribed && status !== 'cancelled',
-          // Test with different combinations
-          test1_trialing_yearly: hasFeatureAccess(
-            'trialing',
-            'yearly',
-            'advanced_patterns',
-          ),
-          test2_trial_yearly: hasFeatureAccess(
-            'trial',
-            'yearly',
-            'advanced_patterns',
-          ),
-          test3_trial_annual: hasFeatureAccess(
-            'trial',
-            'lunary_plus_ai_annual',
-            'advanced_patterns',
-          ),
-          test4_trial_yearly_normalized: hasFeatureAccess(
-            'trial',
-            normalizePlanType('yearly'),
-            'advanced_patterns',
-          ),
-        });
-      }
 
       // Set state immediately from profile - this is the source of truth
       setSubscriptionState(profileBasedState);
@@ -505,20 +369,10 @@ export function useSubscription(): SubscriptionStatus {
 
       if (customerId && !profileSubscription) {
         // No profile subscription but we have customer ID - fetch from Stripe
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            '[useSubscription] No profile subscription, fetching from Stripe...',
-          );
-        }
         fetchFromStripe(customerId);
         return;
       } else {
         // No customer ID or no profile subscription - use default state
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            '[useSubscription] No subscription found, using default state',
-          );
-        }
         setSubscriptionState(defaultState);
       }
     }
