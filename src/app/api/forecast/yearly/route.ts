@@ -195,12 +195,13 @@ export async function GET(request: NextRequest) {
 
     if (customerId) {
       try {
+        // Pass userId so get-subscription route can update database automatically
         const stripeResponse = await fetch(
           `${request.nextUrl.origin}/api/stripe/get-subscription`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ customerId }),
+            body: JSON.stringify({ customerId, userId }),
             // Allow Next.js to cache for 5 minutes (matches Stripe route)
             next: { revalidate: 300 },
           },
@@ -223,6 +224,17 @@ export async function GET(request: NextRequest) {
               rawStripeStatus === 'trialing' ? 'trial' : rawStripeStatus;
             const rawPlan = stripeSub.plan;
             planType = normalizePlanType(rawPlan);
+
+            // CRITICAL: If Stripe says lunary_plus_ai_annual, use it directly
+            // Don't let database override Stripe data
+            if (
+              rawPlan === 'lunary_plus_ai_annual' ||
+              planType === 'lunary_plus_ai_annual'
+            ) {
+              planType = 'lunary_plus_ai_annual';
+            }
+            // Database is automatically updated by get-subscription route
+
             const immediateAccessCheck = hasFeatureAccess(
               subscriptionStatus,
               planType,
@@ -267,19 +279,29 @@ export async function GET(request: NextRequest) {
     console.log(
       `[forecast/yearly] Final check - subscriptionStatus: ${subscriptionStatus}, planType: ${planType}, normalized: ${normalizedPlan}`,
     );
+    console.log(
+      `[forecast/yearly] Checking access - status is trial/active: ${subscriptionStatus === 'trial' || subscriptionStatus === 'active'}, plan is annual: ${normalizedPlan === 'lunary_plus_ai_annual' || planType === 'lunary_plus_ai_annual'}`,
+    );
 
     // Defensive check: if plan is lunary_plus_ai_annual and status is trial/active, always grant access
     // This matches the client-side hook logic
     let hasAccess = false;
-    if (
-      (normalizedPlan === 'lunary_plus_ai_annual' ||
-        planType === 'lunary_plus_ai_annual') &&
-      (subscriptionStatus === 'trial' || subscriptionStatus === 'active')
-    ) {
+
+    // Check both normalized and raw plan type
+    const isAnnualPlan =
+      normalizedPlan === 'lunary_plus_ai_annual' ||
+      planType === 'lunary_plus_ai_annual' ||
+      planType === 'yearly';
+    const isValidStatus =
+      subscriptionStatus === 'trial' ||
+      subscriptionStatus === 'active' ||
+      subscriptionStatus === 'trialing';
+
+    if (isAnnualPlan && isValidStatus) {
       hasAccess =
         FEATURE_ACCESS.lunary_plus_ai_annual.includes('yearly_forecast');
       console.log(
-        `[forecast/yearly] Defensive check passed - annual plan with trial/active status, hasAccess: ${hasAccess}`,
+        `[forecast/yearly] Defensive check passed - annual plan (${planType}/${normalizedPlan}) with valid status (${subscriptionStatus}), hasAccess: ${hasAccess}`,
       );
     } else {
       // Fall back to standard hasFeatureAccess check
@@ -289,7 +311,7 @@ export async function GET(request: NextRequest) {
         'yearly_forecast',
       );
       console.log(
-        `[forecast/yearly] Standard hasFeatureAccess result: ${hasAccess} for feature 'yearly_forecast'`,
+        `[forecast/yearly] Standard hasFeatureAccess result: ${hasAccess} for feature 'yearly_forecast' (status: ${subscriptionStatus}, plan: ${planType})`,
       );
     }
 

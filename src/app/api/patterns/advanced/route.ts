@@ -994,12 +994,13 @@ export async function GET(request: NextRequest) {
     // This ensures we get correct plan even if database is stale
     if (customerId) {
       try {
+        // Pass userId so get-subscription route can update database automatically
         const stripeResponse = await fetch(
           `${request.nextUrl.origin}/api/stripe/get-subscription`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ customerId }),
+            body: JSON.stringify({ customerId, userId: user.id }),
             // Allow Next.js to cache for 5 minutes (matches Stripe route)
             next: { revalidate: 300 },
           },

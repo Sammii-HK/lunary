@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { sql } from '@vercel/postgres';
 
 // Cache subscription checks for 5 minutes to reduce CPU/API calls
 // Subscription status changes infrequently, and users can force refresh via button
@@ -128,13 +129,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { customerId } = body;
+    const { customerId, userId } = body;
 
     if (!customerId) {
       return NextResponse.json(
         { error: 'Customer ID is required' },
         { status: 400 },
       );
+    }
+
+    // Get customer to retrieve userId and email for database sync
+    let userIdToUse: string | null = userId || null;
+    let userEmail: string | null = null;
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      if (!userIdToUse) {
+        userIdToUse = (customer as any).metadata?.userId || null;
+      }
+      userEmail = (customer as any).email || null;
+    } catch (error) {
+      console.warn('[get-subscription] Failed to retrieve customer:', error);
     }
 
     // Get all subscriptions for this customer
@@ -161,6 +175,83 @@ export async function POST(request: NextRequest) {
 
     // Extract plan_id from subscription metadata
     const planType = await getPlanTypeFromSubscription(subscription, stripe);
+
+    // Map Stripe status to database status
+    const rawStatus = subscription.status;
+    const mappedStatus =
+      rawStatus === 'trialing'
+        ? 'trial'
+        : rawStatus === 'active'
+          ? 'active'
+          : rawStatus === 'canceled'
+            ? 'cancelled'
+            : rawStatus === 'past_due'
+              ? 'past_due'
+              : 'free';
+
+    // Update database with fresh Stripe data so future checks are correct
+    // This ensures all routes that fetch from Stripe automatically have DB updated
+    if (userIdToUse || userEmail) {
+      try {
+        const trialEndsAt = subscription.trial_end
+          ? new Date(subscription.trial_end * 1000).toISOString()
+          : null;
+        const currentPeriodEnd = (subscription as any).current_period_end
+          ? new Date(
+              (subscription as any).current_period_end * 1000,
+            ).toISOString()
+          : null;
+
+        if (userIdToUse) {
+          // Update by user_id (preferred)
+          await sql`
+            INSERT INTO subscriptions (
+              user_id, user_email, status, plan_type, stripe_customer_id,
+              stripe_subscription_id, trial_ends_at, current_period_end
+            ) VALUES (
+              ${userIdToUse}, ${userEmail}, ${mappedStatus}, ${planType},
+              ${customerId}, ${subscription.id}, ${trialEndsAt}, ${currentPeriodEnd}
+            )
+            ON CONFLICT (user_id) DO UPDATE SET
+              status = EXCLUDED.status,
+              plan_type = EXCLUDED.plan_type,
+              stripe_customer_id = EXCLUDED.stripe_customer_id,
+              stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+              trial_ends_at = EXCLUDED.trial_ends_at,
+              current_period_end = EXCLUDED.current_period_end,
+              user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+              updated_at = NOW()
+          `;
+          console.log(
+            `[get-subscription] ✅ Synced subscription to database for user ${userIdToUse}: plan=${planType}, status=${mappedStatus}`,
+          );
+        } else if (userEmail) {
+          // Update by email if user_id not available
+          await sql`
+            UPDATE subscriptions
+            SET
+              status = ${mappedStatus},
+              plan_type = ${planType},
+              stripe_customer_id = ${customerId},
+              stripe_subscription_id = ${subscription.id},
+              trial_ends_at = ${trialEndsAt},
+              current_period_end = ${currentPeriodEnd},
+              updated_at = NOW()
+            WHERE user_email = ${userEmail}
+          `;
+          console.log(
+            `[get-subscription] ✅ Updated subscription in database for email ${userEmail}: plan=${planType}, status=${mappedStatus}`,
+          );
+        }
+      } catch (dbError) {
+        console.error('[get-subscription] Failed to update database:', dbError);
+        // Don't fail the request if DB update fails - subscription data is still valid
+      }
+    } else {
+      console.warn(
+        '[get-subscription] Cannot update database: no userId or email available',
+      );
+    }
 
     return NextResponse.json(
       {

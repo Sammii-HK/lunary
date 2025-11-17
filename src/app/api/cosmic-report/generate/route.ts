@@ -191,12 +191,13 @@ export async function POST(request: NextRequest) {
     // If database doesn't grant access but we have a customer ID, check Stripe as source of truth
     if (!hasAccess && customerId) {
       try {
+        // Pass userId so get-subscription route can update database automatically
         const stripeResponse = await fetch(
           `${request.nextUrl.origin}/api/stripe/get-subscription`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ customerId }),
+            body: JSON.stringify({ customerId, userId: user.id }),
             // Allow Next.js to cache for 5 minutes (matches Stripe route)
             next: { revalidate: 300 },
           },
