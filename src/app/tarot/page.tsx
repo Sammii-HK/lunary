@@ -996,6 +996,7 @@ const TarotReadings = () => {
                     return;
                   }
                   setSelectedView('year-over-year');
+                  setIsMultidimensionalMode(true); // Year-over-year requires advanced mode
                 }}
                 className={cn(
                   'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
