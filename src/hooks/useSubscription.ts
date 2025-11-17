@@ -135,10 +135,12 @@ export function useSubscription(): SubscriptionStatus {
               | 'cancelled'
               | 'past_due',
             hasAccess: (feature) => {
-              // Defensive check: if plan is lunary_plus_ai_annual or lunary_plus_ai and status is trial/active, always grant access
+              // Defensive check: if plan is lunary_plus_ai_annual or yearly and status is trial/active, always grant access
+              // Check both normalized and raw plan to handle cases where normalization might not have occurred
               if (
                 (normalizedPlan === 'lunary_plus_ai_annual' ||
-                  planFromApi === 'lunary_plus_ai_annual') &&
+                  planFromApi === 'lunary_plus_ai_annual' ||
+                  planFromApi === 'yearly') &&
                 (status === 'trial' || status === 'active')
               ) {
                 const hasAccess =
@@ -215,7 +217,9 @@ export function useSubscription(): SubscriptionStatus {
     // If we get here, Stripe fetch failed or returned no subscription
     // Fall back to profile subscription or default state
     setSubscriptionState((prev) => ({ ...prev, loading: false }));
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // hasSyncedProfile and me.profile are intentionally excluded to prevent infinite loops
+  }, []); // hasSyncedProfile and me.profile intentionally excluded
 
   useEffect(() => {
     if (!hasJazzProvider) {
@@ -265,10 +269,12 @@ export function useSubscription(): SubscriptionStatus {
           | 'cancelled'
           | 'past_due',
         hasAccess: (feature) => {
-          // Defensive check: if plan is lunary_plus_ai_annual or lunary_plus_ai and status is trial/active, always grant access
+          // Defensive check: if plan is lunary_plus_ai_annual or yearly and status is trial/active, always grant access
+          // Check both normalized and raw plan to handle cases where normalization might not have occurred
           if (
             (stripeNormalizedPlan === 'lunary_plus_ai_annual' ||
-              stripeSubscriptionData.plan === 'lunary_plus_ai_annual') &&
+              stripeSubscriptionData.plan === 'lunary_plus_ai_annual' ||
+              stripeSubscriptionData.plan === 'yearly') &&
             (stripeStatus === 'trial' || stripeStatus === 'active')
           ) {
             const hasAccess =
@@ -364,10 +370,12 @@ export function useSubscription(): SubscriptionStatus {
           | 'cancelled'
           | 'past_due',
         hasAccess: (feature) => {
-          // Defensive check: if plan is lunary_plus_ai_annual or lunary_plus_ai and status is trial/active, always grant access
+          // Defensive check: if plan is lunary_plus_ai_annual or yearly and status is trial/active, always grant access
+          // Check both normalized and raw plan to handle cases where normalization might not have occurred
           if (
             (normalizedPlan === 'lunary_plus_ai_annual' ||
-              plan === 'lunary_plus_ai_annual') &&
+              plan === 'lunary_plus_ai_annual' ||
+              plan === 'yearly') &&
             (status === 'trial' || status === 'active')
           ) {
             const hasAccess =

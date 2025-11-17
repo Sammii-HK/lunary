@@ -40,11 +40,14 @@ export function YearlyForecast() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const hasAccess = subscription.hasAccess('yearly_forecast');
+
   useEffect(() => {
-    if (subscription.hasAccess('yearly_forecast') && !forecast && !loading) {
+    if (hasAccess && !forecast && !loading && !subscription.loading) {
       fetchForecast();
     }
-  }, [subscription.hasAccess('yearly_forecast')]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasAccess, subscription.loading, subscription.plan, subscription.status]);
 
   const fetchForecast = async () => {
     setLoading(true);
