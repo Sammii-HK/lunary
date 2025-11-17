@@ -1,5 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import dayjs from 'dayjs';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
+import utc from 'dayjs/plugin/utc';
+import { getTarotCard } from '../../../../utils/tarot/tarot';
+
+dayjs.extend(dayOfYear);
+dayjs.extend(utc);
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 86400; // Cache for 24 hours (content updates daily)
@@ -153,10 +160,20 @@ export async function GET(request: NextRequest) {
   const dateParam = searchParams.get('date');
 
   const targetDate = dateParam || new Date().toISOString().split('T')[0];
-  const dateObj = new Date(targetDate);
-  const seed =
-    dateObj.getDate() + dateObj.getMonth() * 31 + dateObj.getFullYear() * 7;
-  const card = tarotCards[seed % tarotCards.length];
+  const dateObj = dayjs(targetDate).utc();
+  const dayOfYearUtc = dateObj.dayOfYear();
+  const dailySeed = `cosmic-${dateObj.format('YYYY-MM-DD')}-${dayOfYearUtc}-energy`;
+  const tarotCard = getTarotCard(dailySeed);
+
+  // Map to OG image card format - find matching card in tarotCards array for color/archetype
+  const ogCard =
+    tarotCards.find((c) => c.name === tarotCard.name) || tarotCards[0];
+  const card = {
+    name: tarotCard.name,
+    keywords: tarotCard.keywords,
+    archetype: ogCard.archetype,
+    color: ogCard.color,
+  };
 
   // Format date for display
   const formattedDate = dateObj
@@ -168,7 +185,7 @@ export async function GET(request: NextRequest) {
     .replace(/\//g, '/');
 
   // Same theme system as cosmic
-  const dayVariation = dateObj.getDate() % 5;
+  const dayVariation = dateObj.date() % 5;
   const themes = [
     `linear-gradient(135deg, #0a0a1a, #1a1a2e)`,
     `linear-gradient(135deg, #1a1a2e, #2d3561)`,

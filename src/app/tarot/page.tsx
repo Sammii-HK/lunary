@@ -227,7 +227,7 @@ const TarotReadings = () => {
       return {
         day: day.format('dddd'),
         date: day.format('MMM D'),
-        card: getTarotCard(seed, 'cosmic-daily-energy'),
+        card: getTarotCard(seed),
       };
     });
   }, [hasChartAccess]);
@@ -297,7 +297,7 @@ const TarotReadings = () => {
         day: day.format('dddd'),
         date: day.format('MMM D'),
         card: getTarotCard(
-          dayjs(day).toDate().toDateString(),
+          `daily-${day.format('YYYY-MM-DD')}`,
           userName,
           userBirthday,
         ),
