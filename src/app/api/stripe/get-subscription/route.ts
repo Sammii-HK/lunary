@@ -39,7 +39,23 @@ async function getPlanTypeFromSubscription(
       );
       const mappedPlanId = getPlanIdFromPriceId(priceId);
       if (mappedPlanId) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            `[getPlanTypeFromSubscription] Mapped plan from price ID ${priceId}: ${mappedPlanId}`,
+          );
+        }
         return mappedPlanId;
+      } else {
+        console.warn(
+          `[getPlanTypeFromSubscription] Price ID ${priceId} not found in mapping. Available env vars:`,
+          {
+            LUNARY_PLUS: !!process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID,
+            LUNARY_PLUS_AI:
+              !!process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID,
+            LUNARY_PLUS_AI_ANNUAL:
+              !!process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID,
+          },
+        );
       }
     } catch (error) {
       console.error('Failed to retrieve price metadata:', error);
@@ -48,10 +64,22 @@ async function getPlanTypeFromSubscription(
 
   // Final fallback: use interval-based mapping for backward compatibility
   // Note: This is less ideal - prefer using price ID mapping or metadata
+  // WARNING: This fallback cannot distinguish between lunary_plus and lunary_plus_ai monthly plans
   const interval = subscription.items.data[0]?.price?.recurring?.interval;
-  // Default to lunary_plus for monthly, but this should be avoided
-  // The price ID mapping above should catch most cases
-  return interval === 'month' ? 'lunary_plus' : 'lunary_plus_ai_annual';
+  if (interval) {
+    console.warn(
+      `[getPlanTypeFromSubscription] Using interval-based fallback for ${interval} subscription. Price ID mapping should have caught this.`,
+    );
+    // For monthly, default to lunary_plus (lower tier) - this is conservative
+    // For yearly, default to lunary_plus_ai_annual (only yearly plan available)
+    return interval === 'month' ? 'lunary_plus' : 'lunary_plus_ai_annual';
+  }
+
+  // If we truly can't determine, return free as safest default
+  console.error(
+    '[getPlanTypeFromSubscription] Could not determine plan type from subscription',
+  );
+  return 'free';
 }
 
 export async function POST(request: NextRequest) {

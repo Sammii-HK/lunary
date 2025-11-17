@@ -172,23 +172,40 @@ export const FEATURE_ACCESS = {
   ],
 };
 
+/**
+ * Normalizes plan type to one of the four valid plans:
+ * - 'free'
+ * - 'lunary_plus' (Plus)
+ * - 'lunary_plus_ai' (Plus AI)
+ * - 'lunary_plus_ai_annual' (Plus AI Annual)
+ *
+ * IMPORTANT: This function preserves specific plan identifiers.
+ * Only converts generic 'monthly'/'yearly' when specific plan isn't available.
+ * WARNING: Converting 'monthly' to 'lunary_plus' may be incorrect if user has 'lunary_plus_ai'.
+ * Always prefer fetching specific plan name from Stripe via price ID mapping.
+ */
 export function normalizePlanType(planType: string | undefined): string {
   if (!planType) return 'free';
 
-  // Preserve specific plan identifiers first
+  // Preserve specific plan identifiers first - these are the four valid plans
   if (
     planType === 'lunary_plus_ai' ||
     planType === 'lunary_plus_ai_annual' ||
-    planType === 'lunary_plus'
+    planType === 'lunary_plus' ||
+    planType === 'free'
   ) {
     return planType;
   }
 
   // Normalize generic terms only when specific plan isn't available
-  if (planType === 'yearly') {
+  // WARNING: This is a fallback - prefer using specific plan names from Stripe
+  if (planType === 'yearly' || planType === 'annual') {
     return 'lunary_plus_ai_annual';
   }
 
+  // WARNING: 'monthly' could be either 'lunary_plus' or 'lunary_plus_ai'
+  // Defaulting to 'lunary_plus' is conservative but may be incorrect
+  // Always prefer fetching from Stripe to get exact plan name
   if (planType === 'monthly') {
     return 'lunary_plus';
   }

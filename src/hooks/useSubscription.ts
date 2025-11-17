@@ -106,10 +106,13 @@ export function useSubscription(): SubscriptionStatus {
           const isTrialActive = status === 'trial' && trialDaysRemaining > 0;
           const isSubscribed = status === 'active' || isTrialActive;
 
-          // Use plan from API response - should be 'lunary_plus_ai_annual' for annual plans
+          // Use plan from API response - should be specific plan name (lunary_plus, lunary_plus_ai, or lunary_plus_ai_annual)
+          // Stripe API should return specific plan name via price ID mapping, not generic 'monthly'/'yearly'
           const planFromApi = sub.plan || 'free';
           const normalizedPlan = normalizePlanType(planFromApi);
 
+          // Map to simplified plan state for UI (free/monthly/yearly)
+          // Note: Both lunary_plus and lunary_plus_ai map to 'monthly' for UI purposes
           const planForState =
             normalizedPlan === 'lunary_plus_ai_annual'
               ? 'yearly'
@@ -132,8 +135,28 @@ export function useSubscription(): SubscriptionStatus {
               | 'cancelled'
               | 'past_due',
             hasAccess: (feature) => {
-              const access = hasFeatureAccess(status, normalizedPlan, feature);
+              // Defensive check: if plan is lunary_plus_ai_annual or lunary_plus_ai and status is trial/active, always grant access
+              if (
+                (normalizedPlan === 'lunary_plus_ai_annual' ||
+                  planFromApi === 'lunary_plus_ai_annual') &&
+                (status === 'trial' || status === 'active')
+              ) {
+                const hasAccess =
+                  FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+                return hasAccess;
+              }
 
+              if (
+                (normalizedPlan === 'lunary_plus_ai' ||
+                  planFromApi === 'lunary_plus_ai') &&
+                (status === 'trial' || status === 'active')
+              ) {
+                const hasAccess =
+                  FEATURE_ACCESS.lunary_plus_ai.includes(feature);
+                return hasAccess;
+              }
+
+              const access = hasFeatureAccess(status, normalizedPlan, feature);
               return access;
             },
             showUpgradePrompt: !isSubscribed && status !== 'cancelled',
@@ -242,7 +265,7 @@ export function useSubscription(): SubscriptionStatus {
           | 'cancelled'
           | 'past_due',
         hasAccess: (feature) => {
-          // Defensive check: if plan is lunary_plus_ai_annual and status is trial/active, always grant access
+          // Defensive check: if plan is lunary_plus_ai_annual or lunary_plus_ai and status is trial/active, always grant access
           if (
             (stripeNormalizedPlan === 'lunary_plus_ai_annual' ||
               stripeSubscriptionData.plan === 'lunary_plus_ai_annual') &&
@@ -250,6 +273,15 @@ export function useSubscription(): SubscriptionStatus {
           ) {
             const hasAccess =
               FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+            return hasAccess;
+          }
+
+          if (
+            (stripeNormalizedPlan === 'lunary_plus_ai' ||
+              stripeSubscriptionData.plan === 'lunary_plus_ai') &&
+            (stripeStatus === 'trial' || stripeStatus === 'active')
+          ) {
+            const hasAccess = FEATURE_ACCESS.lunary_plus_ai.includes(feature);
             return hasAccess;
           }
 
@@ -332,7 +364,7 @@ export function useSubscription(): SubscriptionStatus {
           | 'cancelled'
           | 'past_due',
         hasAccess: (feature) => {
-          // Defensive check: if plan is lunary_plus_ai_annual and status is trial/active, always grant access
+          // Defensive check: if plan is lunary_plus_ai_annual or lunary_plus_ai and status is trial/active, always grant access
           if (
             (normalizedPlan === 'lunary_plus_ai_annual' ||
               plan === 'lunary_plus_ai_annual') &&
@@ -340,6 +372,15 @@ export function useSubscription(): SubscriptionStatus {
           ) {
             const hasAccess =
               FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+            return hasAccess;
+          }
+
+          if (
+            (normalizedPlan === 'lunary_plus_ai' ||
+              plan === 'lunary_plus_ai') &&
+            (status === 'trial' || status === 'active')
+          ) {
+            const hasAccess = FEATURE_ACCESS.lunary_plus_ai.includes(feature);
             return hasAccess;
           }
 
