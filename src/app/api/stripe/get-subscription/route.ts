@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { sql } from '@vercel/postgres';
+import { normalizePlanType } from '../../../../../utils/pricing';
 
 // Cache subscription checks for 5 minutes to reduce CPU/API calls
 // Subscription status changes infrequently, and users can force refresh via button
@@ -174,7 +175,8 @@ export async function POST(request: NextRequest) {
     const subscription = activeSubscription || subscriptions.data[0];
 
     // Extract plan_id from subscription metadata
-    const planType = await getPlanTypeFromSubscription(subscription, stripe);
+    const rawPlanType = await getPlanTypeFromSubscription(subscription, stripe);
+    const planType = normalizePlanType(rawPlanType);
 
     // Map Stripe status to database status
     const rawStatus = subscription.status;
@@ -263,6 +265,7 @@ export async function POST(request: NextRequest) {
           customer: subscription.customer,
           plan: planType,
           planName: planType, // Include planName for compatibility
+          rawPlan: rawPlanType,
           current_period_end: (subscription as any).current_period_end || null,
           trial_end: (subscription as any).trial_end || null,
           trialEnd: (subscription as any).trial_end || null, // Include both formats

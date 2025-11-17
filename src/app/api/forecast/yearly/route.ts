@@ -198,39 +198,39 @@ export async function GET(request: NextRequest) {
     ]);
 
     const subscription = subscriptionResult.rows[0];
-    let rawStatus = subscription?.status || 'free';
-    let subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
-    let planType = normalizePlanType(subscription?.plan_type);
-    let customerId = subscription?.stripe_customer_id;
-
     const conversionPlan = conversionPlanResult.rows[0]?.plan_type;
-    const planOverrideSources = [
-      userPlanRaw,
-      subscription?.plan_type,
-      conversionPlan,
-      conversionPlan === 'yearly' ? 'yearly' : undefined,
-      subscription?.plan_type === 'yearly' ? 'yearly' : undefined,
-    ].filter(Boolean) as string[];
 
-    const normalizedUserPlan =
-      planOverrideSources
-        .map((value) => normalizePlanType(value))
-        .find((plan) => plan && plan !== 'free' && plan !== 'lunary_plus') ||
-      (userPlanRaw ? normalizePlanType(userPlanRaw) : 'free');
-
-    const userHasAnnualOverride =
-      normalizedUserPlan === 'lunary_plus_ai_annual' ||
-      planOverrideSources.some((plan) => plan === 'yearly');
-
-    console.log(
-      `[forecast/yearly] User ${userId} plan override check: session=${userPlanRaw}, subscriptionPlan=${subscription?.plan_type}, conversionPlan=${conversionPlan}, normalizedOverride=${normalizedUserPlan}, override=${userHasAnnualOverride}`,
-    );
-
-    if (userHasAnnualOverride) {
-      planType = normalizedUserPlan;
-      if (subscriptionStatus === 'free' || !subscriptionStatus) {
-        subscriptionStatus = 'active';
+    let customerId = subscription?.stripe_customer_id;
+    let planSource: 'session' | 'subscription' | 'conversion' | 'stripe' =
+      'session';
+    let planType = normalizePlanType(userPlanRaw);
+    let subscriptionStatus:
+      | 'free'
+      | 'trial'
+      | 'active'
+      | 'cancelled'
+      | 'past_due' = planType !== 'free' ? 'active' : 'free';
+    if ((!planType || planType === 'free') && subscription?.plan_type) {
+      const dbPlan = normalizePlanType(subscription.plan_type);
+      if (dbPlan !== 'free') {
+        planType = dbPlan;
+        planSource = 'subscription';
+        const rawStatus = subscription.status || 'free';
+        subscriptionStatus =
+          rawStatus === 'trialing'
+            ? 'trial'
+            : (rawStatus as typeof subscriptionStatus);
       }
+    }
+
+    if (
+      (!planType || planType === 'free') &&
+      conversionPlan &&
+      normalizePlanType(conversionPlan) !== 'free'
+    ) {
+      planType = normalizePlanType(conversionPlan);
+      planSource = 'conversion';
+      subscriptionStatus = 'active';
     }
 
     // If we don't have a customer ID yet, try to find it via Stripe customer lookup using email
@@ -298,27 +298,14 @@ export async function GET(request: NextRequest) {
             // Normalize status: 'trialing' -> 'trial' for consistency
             const rawStripeStatus = stripeSub.status;
             subscriptionStatus =
-              rawStripeStatus === 'trialing' ? 'trial' : rawStripeStatus;
+              rawStripeStatus === 'trialing'
+                ? 'trial'
+                : (rawStripeStatus as typeof subscriptionStatus);
             const rawPlan = stripeSub.plan;
             planType = normalizePlanType(rawPlan);
-
-            // CRITICAL: If Stripe says lunary_plus_ai_annual, use it directly
-            // Don't let database override Stripe data
-            if (
-              rawPlan === 'lunary_plus_ai_annual' ||
-              planType === 'lunary_plus_ai_annual'
-            ) {
-              planType = 'lunary_plus_ai_annual';
-            }
-            // Database is automatically updated by get-subscription route
-
-            const immediateAccessCheck = hasFeatureAccess(
-              subscriptionStatus,
-              planType,
-              'yearly_forecast',
-            );
+            planSource = 'stripe';
             console.log(
-              `[forecast/yearly] Fetched from Stripe: rawStatus=${rawStripeStatus}, status=${subscriptionStatus}, rawPlan=${rawPlan}, normalized=${planType}, hasAccess=${immediateAccessCheck}`,
+              `[forecast/yearly] Fetched from Stripe: rawStatus=${rawStripeStatus}, status=${subscriptionStatus}, rawPlan=${rawPlan}, normalized=${planType}`,
             );
           } else {
             console.log(
@@ -351,64 +338,29 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Debug logging to understand what's happening
     const normalizedPlan = normalizePlanType(planType);
-    console.log(
-      `[forecast/yearly] Final check - subscriptionStatus: ${subscriptionStatus}, planType: ${planType}, normalized: ${normalizedPlan}`,
-    );
-    console.log(
-      `[forecast/yearly] Checking access - status is trial/active: ${subscriptionStatus === 'trial' || subscriptionStatus === 'active'}, plan is annual: ${normalizedPlan === 'lunary_plus_ai_annual' || planType === 'lunary_plus_ai_annual'}`,
-    );
+    const isAnnualPlan = normalizedPlan === 'lunary_plus_ai_annual';
+    const statusIsActive =
+      subscriptionStatus === 'trial' || subscriptionStatus === 'active';
 
-    // Defensive check: if plan is lunary_plus_ai_annual and status is trial/active, always grant access
-    // This matches the client-side hook logic
+    if (planSource !== 'subscription' && normalizedPlan !== 'free') {
+      subscriptionStatus = statusIsActive ? subscriptionStatus : 'active';
+    }
+
     let hasAccess = false;
-    let accessSource: 'user_plan_override' | 'subscription_logic' =
-      'subscription_logic';
-
-    if (userHasAnnualOverride) {
+    if (isAnnualPlan) {
       hasAccess =
         FEATURE_ACCESS.lunary_plus_ai_annual.includes('yearly_forecast');
-      accessSource = 'user_plan_override';
-      console.log(
-        `[forecast/yearly] Granting access via user plan override (raw=${userPlanRaw}, normalized=${normalizedUserPlan})`,
+    } else {
+      hasAccess = hasFeatureAccess(
+        subscriptionStatus,
+        normalizedPlan,
+        'yearly_forecast',
       );
     }
 
-    if (!hasAccess) {
-      // Check both normalized and raw plan type
-      const isAnnualPlan =
-        normalizedPlan === 'lunary_plus_ai_annual' ||
-        planType === 'lunary_plus_ai_annual' ||
-        planType === 'yearly';
-      const isValidStatus =
-        subscriptionStatus === 'trial' ||
-        subscriptionStatus === 'active' ||
-        subscriptionStatus === 'trialing';
-
-      if (isAnnualPlan && isValidStatus) {
-        hasAccess =
-          FEATURE_ACCESS.lunary_plus_ai_annual.includes('yearly_forecast');
-        accessSource = 'subscription_logic';
-        console.log(
-          `[forecast/yearly] Defensive check passed - annual plan (${planType}/${normalizedPlan}) with valid status (${subscriptionStatus}), hasAccess: ${hasAccess}`,
-        );
-      } else {
-        // Fall back to standard hasFeatureAccess check
-        hasAccess = hasFeatureAccess(
-          subscriptionStatus,
-          planType,
-          'yearly_forecast',
-        );
-        accessSource = 'subscription_logic';
-        console.log(
-          `[forecast/yearly] Standard hasFeatureAccess result: ${hasAccess} for feature 'yearly_forecast' (status: ${subscriptionStatus}, plan: ${planType})`,
-        );
-      }
-    }
-
     console.log(
-      `[forecast/yearly] Access decision for user ${userId}: hasAccess=${hasAccess}, source=${accessSource}, subscriptionStatus=${subscriptionStatus}, planType=${planType}, normalizedUserPlan=${normalizedUserPlan}`,
+      `[forecast/yearly] Access decision for user ${userId}: hasAccess=${hasAccess}, plan=${normalizedPlan}, planSource=${planSource}, status=${subscriptionStatus}`,
     );
 
     if (!hasAccess) {
@@ -425,14 +377,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userProfileResult = await sql`
-      SELECT birthday
-      FROM accounts
-      WHERE id = ${userId}
-      LIMIT 1
-    `;
-
-    const userBirthday = userProfileResult.rows[0]?.birthday || undefined;
+    let userBirthday = user.birthday;
+    if (!userBirthday) {
+      try {
+        const userProfileResult = await sql`
+          SELECT birthday
+          FROM accounts
+          WHERE id = ${userId}
+          LIMIT 1
+        `;
+        userBirthday = userProfileResult.rows[0]?.birthday || undefined;
+      } catch (dbError: any) {
+        if (dbError?.code !== '42P01') {
+          throw dbError;
+        }
+        console.warn(
+          '[forecast/yearly] accounts table missing in this environment - continuing without birthday',
+        );
+      }
+    }
 
     const forecast = await generateYearlyForecast(year, userBirthday);
 

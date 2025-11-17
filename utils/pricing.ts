@@ -214,16 +214,24 @@ export function normalizePlanType(planType: string | undefined): string {
 }
 
 export function getPlanIdFromPriceId(priceId: string): string | null {
-  const envVars: Record<string, string> = {
-    [process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID || '']: 'lunary_plus',
-    [process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID || '']:
-      'lunary_plus_ai',
-    [process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID || '']:
-      'lunary_plus_ai_annual',
-    [process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || '']: 'lunary_plus',
-    [process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID || '']:
-      'lunary_plus_ai_annual',
-  };
+  const envVars: Record<string, string> = {};
+
+  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID) {
+    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID] =
+      'lunary_plus';
+  }
+  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID) {
+    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID] =
+      'lunary_plus_ai';
+  }
+  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID) {
+    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID] =
+      'lunary_plus_ai_annual';
+  }
+  // Legacy Cosmic Guide monthly price still maps to Lunary+ access
+  if (process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID) {
+    envVars[process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID] = 'lunary_plus';
+  }
 
   return envVars[priceId] || null;
 }
