@@ -20,6 +20,7 @@ import {
   Sparkles,
   Share2,
   Lock,
+  X,
 } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
@@ -173,7 +174,23 @@ const TarotReadings = () => {
     30,
   );
   const [isMultidimensionalMode, setIsMultidimensionalMode] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
+
+  // Handle ESC key to close upgrade modal
+  useEffect(() => {
+    if (!showUpgradeModal) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowUpgradeModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showUpgradeModal]);
   const [selectedCard, setSelectedCard] = useState<{
     name: string;
     keywords: string[];
@@ -960,6 +977,8 @@ const TarotReadings = () => {
                     key={days}
                     onClick={() => {
                       if (isLocked) {
+                        setUpgradeFeature('advanced_patterns');
+                        setShowUpgradeModal(true);
                         return;
                       }
                       setSelectedView(days);
@@ -993,6 +1012,8 @@ const TarotReadings = () => {
                 onClick={() => {
                   const hasAccess = subscription.hasAccess('advanced_patterns');
                   if (!hasAccess) {
+                    setUpgradeFeature('advanced_patterns');
+                    setShowUpgradeModal(true);
                     return;
                   }
                   setSelectedView('year-over-year');
@@ -1021,6 +1042,8 @@ const TarotReadings = () => {
                 onClick={() => {
                   const hasAccess = subscription.hasAccess('advanced_patterns');
                   if (!hasAccess) {
+                    setUpgradeFeature('advanced_patterns');
+                    setShowUpgradeModal(true);
                     return;
                   }
                   setIsMultidimensionalMode(!isMultidimensionalMode);
@@ -1074,6 +1097,33 @@ const TarotReadings = () => {
         isOpen={!!selectedCard}
         onClose={() => setSelectedCard(null)}
       />
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm'
+          onClick={() => setShowUpgradeModal(false)}
+        >
+          <div
+            className='relative w-full max-w-md bg-zinc-900 rounded-lg border border-zinc-800/50 p-6'
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowUpgradeModal(false)}
+              className='absolute top-4 right-4 text-zinc-400 hover:text-zinc-100 transition-colors'
+            >
+              <X className='w-5 h-5' />
+            </button>
+            <UpgradePrompt
+              variant='card'
+              featureName={upgradeFeature || 'advanced_patterns'}
+              title='Unlock Advanced Patterns'
+              description='Upgrade to Lunary+ AI Annual to access year-over-year comparisons, multi-dimensional analysis, and extended timeline insights.'
+              requiredPlan='lunary_plus_ai_annual'
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
