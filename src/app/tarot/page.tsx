@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Sparkles,
   Share2,
+  Lock,
 } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
@@ -34,6 +35,7 @@ import {
 } from '@/components/tarot/TarotSpreadExperience';
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
+import { cn } from '@/lib/utils';
 
 const SUIT_ELEMENTS: Record<string, string> = {
   Cups: 'Water',
@@ -919,63 +921,80 @@ const TarotReadings = () => {
 
         {subscription.hasAccess('tarot_patterns') && (
           <HoroscopeSection
-            title={`Your ${timeFrame}-Day Tarot Patterns`}
+            title={
+              timeFrame === 365
+                ? '12-Month Patterns'
+                : timeFrame === 180
+                  ? '6-Month Patterns'
+                  : timeFrame === 90
+                    ? '90-Day Patterns'
+                    : timeFrame === 30
+                      ? '30-Day Patterns'
+                      : timeFrame === 14
+                        ? '14-Day Patterns'
+                        : '7-Day Patterns'
+            }
             color='zinc'
           >
             <div className='mb-4 flex flex-wrap gap-2'>
-              {[7, 14, 20, 30, 90].map((days) => (
-                <button
-                  key={days}
-                  onClick={() => setTimeFrame(days)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                    timeFrame === days
-                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
-                  }`}
-                >
-                  {days} days
-                </button>
-              ))}
+              {[7, 14, 30, 90, 180, 365].map((days) => {
+                const needsAdvancedAccess = days === 180 || days === 365;
+                const hasAccess = needsAdvancedAccess
+                  ? subscription.hasAccess('advanced_patterns')
+                  : subscription.hasAccess('tarot_patterns');
+                const isLocked = needsAdvancedAccess && !hasAccess;
+
+                return (
+                  <button
+                    key={days}
+                    onClick={() => {
+                      if (isLocked) {
+                        // Show upgrade prompt on click
+                        return;
+                      }
+                      setTimeFrame(days);
+                    }}
+                    className={cn(
+                      'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                      isLocked
+                        ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                        : timeFrame === days
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                    )}
+                    title={
+                      isLocked
+                        ? 'Upgrade to Lunary+ AI Annual to unlock'
+                        : undefined
+                    }
+                  >
+                    {days === 180
+                      ? '6 months'
+                      : days === 365
+                        ? '12 months'
+                        : `${days} days`}
+                    {isLocked && (
+                      <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                    )}
+                  </button>
+                );
+              })}
             </div>
             <AdvancedPatterns
               basicPatterns={
                 hasChartAccess ? personalizedReading?.trendAnalysis : undefined
               }
+              timeFrame={timeFrame}
+              recentReadings={
+                timeFrame === 7 ? personalizedPreviousReadings : undefined
+              }
+              onCardClick={(card: { name: string }) => {
+                const tarotCard = getTarotCardByName(card.name);
+                if (tarotCard) setSelectedCard(tarotCard);
+              }}
             />
           </HoroscopeSection>
         )}
-
-        <HoroscopeSection title='Recent Daily Cards' color='zinc'>
-          <div className='space-y-3'>
-            {personalizedPreviousReadings.map((reading) => (
-              <div
-                key={reading.date}
-                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 flex justify-between items-center hover:bg-zinc-900/50 transition-colors'
-              >
-                <div>
-                  <span className='font-medium text-zinc-100'>
-                    {reading.day}
-                  </span>{' '}
-                  <span className='text-sm text-zinc-400'>{reading.date}</span>
-                </div>
-                <div className='text-right'>
-                  <p
-                    className='font-medium text-zinc-100 cursor-pointer hover:text-purple-300 transition-colors'
-                    onClick={() => {
-                      const card = getTarotCardByName(reading.card.name);
-                      if (card) setSelectedCard(card);
-                    }}
-                  >
-                    {reading.card.name}
-                  </p>
-                  <p className='text-sm text-zinc-400'>
-                    {reading.card.keywords[0]}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </HoroscopeSection>
       </div>
 
       <TarotCardModal

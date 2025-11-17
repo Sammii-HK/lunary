@@ -55,16 +55,10 @@ type AdvancedPatternAnalysis = {
     multiDimensional: {
       suitPatterns: Array<{ suit: string; count: number; percentage: number }>;
       arcanaBalance: { major: number; minor: number };
-      numberPatterns: Array<{ number: string; count: number; meaning: string }>;
-      elementPatterns: Array<{
-        element: string;
+      numberPatterns: Array<{
+        number: string;
         count: number;
-        percentage: number;
-        suits: string[];
-      }>;
-      colorPatterns: Array<{
-        color: string;
-        count: number;
+        meaning: string;
         percentage: number;
       }>;
       correlations: Array<{
@@ -111,8 +105,7 @@ type AdvancedPatternAnalysis = {
 };
 
 type ViewMode = 'daily' | 'advanced';
-type AdvancedTab = 'year-over-year' | 'multi-dimensional' | 'timeline';
-type TimelinePeriod = '6-month' | '12-month';
+type AdvancedTab = 'year-over-year' | 'multi-dimensional';
 
 type BasicPatterns = {
   dominantThemes: string[];
@@ -133,11 +126,28 @@ type BasicPatterns = {
   timeFrame: number;
 };
 
-interface AdvancedPatternsProps {
-  basicPatterns?: BasicPatterns;
+interface RecentReading {
+  date: string;
+  day: string;
+  card: {
+    name: string;
+    keywords: string[];
+  };
 }
 
-export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
+interface AdvancedPatternsProps {
+  basicPatterns?: BasicPatterns;
+  timeFrame?: number;
+  recentReadings?: RecentReading[];
+  onCardClick?: (card: { name: string }) => void;
+}
+
+export function AdvancedPatterns({
+  basicPatterns,
+  timeFrame = 30,
+  recentReadings,
+  onCardClick,
+}: AdvancedPatternsProps) {
   const subscription = useSubscription();
 
   // Memoize derived values to prevent unnecessary re-renders
@@ -156,8 +166,6 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
 
   const [viewMode, setViewMode] = useState<ViewMode>('daily');
   const [activeTab, setActiveTab] = useState<AdvancedTab>('year-over-year');
-  const [timelinePeriod, setTimelinePeriod] =
-    useState<TimelinePeriod>('6-month');
   const [analysis, setAnalysis] = useState<AdvancedPatternAnalysis | null>(
     null,
   );
@@ -246,15 +254,20 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
   }, []);
 
   useEffect(() => {
-    // Only fetch when switching to advanced mode and we don't have data yet
-    if (viewMode === 'advanced' && !analysis && !loading && !error) {
+    // Fetch advanced patterns when:
+    // 1. Switching to advanced mode and we don't have data yet
+    // 2. In daily mode but timeframe is 180 or 365 (need timeline data)
+    if (
+      ((viewMode === 'advanced' && !analysis) ||
+        (viewMode === 'daily' && (timeFrame === 180 || timeFrame === 365))) &&
+      !loading &&
+      !error
+    ) {
       fetchAdvancedPatterns();
     }
-  }, [viewMode, analysis, loading, error, fetchAdvancedPatterns]);
+  }, [viewMode, analysis, loading, error, fetchAdvancedPatterns, timeFrame]);
 
-  const availableTabs: AdvancedTab[] = isAnnual
-    ? ['year-over-year', 'multi-dimensional', 'timeline']
-    : ['year-over-year', 'multi-dimensional'];
+  const availableTabs: AdvancedTab[] = ['year-over-year', 'multi-dimensional'];
 
   // Wait for subscription to load before showing paywall
   if (subscription.loading) {
@@ -277,26 +290,40 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
   return (
     <div className='relative'>
       <button
-        onClick={() => setViewMode(viewMode === 'daily' ? 'advanced' : 'daily')}
+        onClick={() => {
+          if (!hasAdvancedAccess && viewMode === 'daily') {
+            // Show upgrade prompt - button still clickable but will show paywall
+            return;
+          }
+          setViewMode(viewMode === 'daily' ? 'advanced' : 'daily');
+        }}
         className={cn(
           'absolute top-0 right-0 p-1.5 rounded-md transition-colors',
           hasAdvancedAccess
             ? 'bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-400 hover:text-zinc-300'
-            : viewMode === 'advanced'
-              ? 'bg-zinc-800/30 text-zinc-500'
-              : 'bg-zinc-800/30 text-zinc-600 hover:bg-zinc-800/40',
+            : 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50',
         )}
         aria-label={
           viewMode === 'daily'
             ? 'Switch to advanced view'
             : 'Switch to daily view'
         }
+        title={
+          !hasAdvancedAccess && viewMode === 'daily'
+            ? 'Upgrade to Lunary+ AI to unlock advanced patterns'
+            : undefined
+        }
       >
-        {viewMode === 'daily' ? (
-          <BarChart3 className='w-4 h-4' />
-        ) : (
-          <Sparkles className='w-4 h-4' />
-        )}
+        <div className='relative'>
+          {viewMode === 'daily' ? (
+            <BarChart3 className='w-4 h-4' />
+          ) : (
+            <Sparkles className='w-4 h-4' />
+          )}
+          {!hasAdvancedAccess && viewMode === 'daily' && (
+            <Lock className='w-2.5 h-2.5 absolute -top-0.5 -right-0.5 text-zinc-600' />
+          )}
+        </div>
       </button>
 
       {viewMode === 'daily' && (
@@ -332,24 +359,35 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                   <h3 className='text-sm font-medium text-zinc-300 mb-3'>
                     Frequent Cards
                   </h3>
-                  <div className='space-y-3'>
+                  <div className='space-y-2'>
                     {basicPatterns.frequentCards
                       .slice(0, 5)
-                      .map((card, index) => (
-                        <div
-                          key={index}
-                          className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'
-                        >
-                          <p className='font-medium text-zinc-100 mb-1'>
-                            {card.name} ({card.count} times)
-                          </p>
-                          {card.reading && (
-                            <p className='text-sm text-zinc-400 leading-relaxed'>
-                              {card.reading}
+                      .map((card, index) => {
+                        // Extract theme keywords from reading if available
+                        const themeMatch =
+                          card.reading?.match(/themes? of ([^.]+)/i);
+                        const theme = themeMatch
+                          ? themeMatch[1].trim()
+                          : card.reading
+                            ? card.reading.split('.')[0].toLowerCase()
+                            : null;
+
+                        return (
+                          <div
+                            key={index}
+                            className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-3'
+                          >
+                            <p className='font-medium text-zinc-100 text-sm mb-0.5'>
+                              {card.name} ({card.count}x)
                             </p>
-                          )}
-                        </div>
-                      ))}
+                            {theme && (
+                              <p className='text-xs text-zinc-400 leading-relaxed'>
+                                {theme}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               )}
@@ -362,25 +400,96 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                   <div className='space-y-3'>
                     {basicPatterns.suitPatterns
                       .slice(0, 4)
-                      .map((pattern, index) => (
-                        <div
-                          key={index}
-                          className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'
-                        >
-                          <p className='font-medium text-zinc-100 mb-2'>
-                            {pattern.suit} ({pattern.count}/
-                            {basicPatterns.timeFrame} days)
-                          </p>
-                          {pattern.reading && (
-                            <p className='text-sm text-zinc-400 leading-relaxed'>
-                              {pattern.reading}
+                      .map((pattern, index) => {
+                        const percentage =
+                          basicPatterns.timeFrame > 0
+                            ? Math.round(
+                                (pattern.count / basicPatterns.timeFrame) * 100,
+                              )
+                            : 0;
+                        return (
+                          <div
+                            key={index}
+                            className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'
+                          >
+                            <p className='font-medium text-zinc-100 mb-2'>
+                              {pattern.suit} ({pattern.count}/
+                              {basicPatterns.timeFrame} days, {percentage}%)
                             </p>
-                          )}
-                        </div>
-                      ))}
+                            {pattern.reading && (
+                              <p className='text-sm text-zinc-400 leading-relaxed'>
+                                {pattern.reading}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               )}
+
+              {/* Show timeline visualization for 6-month and 12-month views */}
+              {(timeFrame === 180 || timeFrame === 365) &&
+                analysis?.extendedTimeline && (
+                  <div className='mt-6'>
+                    {timeFrame === 180 && analysis.extendedTimeline.months6 && (
+                      <TimelineVisualization
+                        data={analysis.extendedTimeline.months6}
+                        period={6}
+                      />
+                    )}
+                    {timeFrame === 365 &&
+                      analysis.extendedTimeline.months12 && (
+                        <TimelineVisualization
+                          data={analysis.extendedTimeline.months12}
+                          period={12}
+                        />
+                      )}
+                  </div>
+                )}
+
+              {/* Show recent daily cards for 7-day view */}
+              {timeFrame === 7 &&
+                recentReadings &&
+                recentReadings.length > 0 && (
+                  <div className='mt-6'>
+                    <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+                      Recent Daily Cards
+                    </h3>
+                    <div className='space-y-1.5'>
+                      {recentReadings.map((reading) => (
+                        <div
+                          key={reading.date}
+                          className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-2.5 flex justify-between items-center hover:bg-zinc-900/50 transition-colors cursor-pointer'
+                          onClick={() => {
+                            if (onCardClick) {
+                              onCardClick(reading.card);
+                            }
+                          }}
+                        >
+                          <div className='flex items-center gap-2'>
+                            <span className='text-xs font-medium text-zinc-300'>
+                              {reading.day}
+                            </span>
+                            <span className='text-[10px] text-zinc-500'>
+                              {reading.date}
+                            </span>
+                          </div>
+                          <div className='text-right'>
+                            <p className='text-xs font-medium text-zinc-100 hover:text-purple-300 transition-colors'>
+                              {reading.card.name}
+                            </p>
+                            {reading.card.keywords[0] && (
+                              <p className='text-[10px] text-zinc-500'>
+                                {reading.card.keywords[0]}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </>
           ) : (
             <div className='text-center py-8 text-zinc-400 text-sm'>
@@ -423,29 +532,39 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
             </div>
           )}
           <div className='flex flex-wrap gap-1.5 pt-8'>
-            {availableTabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => {
-                  if (!analysis) return;
-                  setActiveTab(tab);
-                }}
-                disabled={!analysis}
-                className={cn(
-                  'px-2 py-1 text-xs rounded-full transition-colors',
-                  !analysis
-                    ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
-                    : activeTab === tab
-                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                )}
-                title={!analysis ? 'Upgrade to unlock' : undefined}
-              >
-                {tab === 'year-over-year' && 'Year-over-Year'}
-                {tab === 'multi-dimensional' && 'Multi-Dimensional'}
-                {tab === 'timeline' && 'Timeline'}
-              </button>
-            ))}
+            {availableTabs.map((tab) => {
+              const isDisabled = !analysis || !hasAdvancedAccess;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    if (isDisabled) {
+                      // Button still visible but disabled - upgrade prompt shown via title
+                      return;
+                    }
+                    setActiveTab(tab);
+                  }}
+                  disabled={isDisabled}
+                  className={cn(
+                    'px-2 py-1 text-xs rounded-full transition-colors relative',
+                    isDisabled
+                      ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                      : activeTab === tab
+                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                  )}
+                  title={
+                    isDisabled ? 'Upgrade to Lunary+ AI to unlock' : undefined
+                  }
+                >
+                  {tab === 'year-over-year' && 'Year-over-Year'}
+                  {tab === 'multi-dimensional' && 'Multi-Dimensional'}
+                  {isDisabled && (
+                    <Lock className='w-2.5 h-2.5 absolute -top-0.5 -right-0.5 text-zinc-600' />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {error && !analysis && (
@@ -595,17 +714,31 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                                 )}
                                 {analysis.yearOverYear.lastYear.frequentCards
                                   .length > 0 ? (
-                                  <div className='space-y-1'>
+                                  <div className='space-y-3'>
                                     {analysis.yearOverYear.lastYear.frequentCards
                                       .slice(0, 3)
-                                      .map((card) => (
-                                        <div
-                                          key={card.name}
-                                          className='text-xs text-zinc-300'
-                                        >
-                                          {card.name} ({card.count}x)
-                                        </div>
-                                      ))}
+                                      .map((card) => {
+                                        // Find recap for this card if available
+                                        const cardRecap =
+                                          analysis.yearOverYear.lastYear.cardRecaps?.find(
+                                            (r) => r.cardName === card.name,
+                                          );
+                                        return (
+                                          <div
+                                            key={card.name}
+                                            className='space-y-1'
+                                          >
+                                            <div className='text-xs text-zinc-300 font-medium'>
+                                              {card.name} ({card.count}x)
+                                            </div>
+                                            {cardRecap && (
+                                              <p className='text-xs text-zinc-400 leading-relaxed'>
+                                                {cardRecap.recap}
+                                              </p>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                   </div>
                                 ) : null}
                               </>
@@ -719,28 +852,63 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                                 Arcana Balance
                               </h5>
                               <div className='space-y-2 text-xs'>
-                                <div className='flex items-center justify-between'>
-                                  <span className='text-zinc-300'>
-                                    Major Arcana
-                                  </span>
-                                  <span className='text-zinc-400'>
-                                    {
-                                      analysis.enhancedTarot.multiDimensional
-                                        .arcanaBalance.major
-                                    }
-                                  </span>
-                                </div>
-                                <div className='flex items-center justify-between'>
-                                  <span className='text-zinc-300'>
-                                    Minor Arcana
-                                  </span>
-                                  <span className='text-zinc-400'>
-                                    {
-                                      analysis.enhancedTarot.multiDimensional
-                                        .arcanaBalance.minor
-                                    }
-                                  </span>
-                                </div>
+                                {(() => {
+                                  const total =
+                                    analysis.enhancedTarot.multiDimensional
+                                      .arcanaBalance.major +
+                                    analysis.enhancedTarot.multiDimensional
+                                      .arcanaBalance.minor;
+                                  const majorPercentage =
+                                    total > 0
+                                      ? Math.round(
+                                          (analysis.enhancedTarot
+                                            .multiDimensional.arcanaBalance
+                                            .major /
+                                            total) *
+                                            100,
+                                        )
+                                      : 0;
+                                  const minorPercentage =
+                                    total > 0
+                                      ? Math.round(
+                                          (analysis.enhancedTarot
+                                            .multiDimensional.arcanaBalance
+                                            .minor /
+                                            total) *
+                                            100,
+                                        )
+                                      : 0;
+                                  return (
+                                    <>
+                                      <div className='flex items-center justify-between'>
+                                        <span className='text-zinc-300'>
+                                          Major Arcana
+                                        </span>
+                                        <span className='text-zinc-400'>
+                                          {
+                                            analysis.enhancedTarot
+                                              .multiDimensional.arcanaBalance
+                                              .major
+                                          }{' '}
+                                          ({majorPercentage}%)
+                                        </span>
+                                      </div>
+                                      <div className='flex items-center justify-between'>
+                                        <span className='text-zinc-300'>
+                                          Minor Arcana
+                                        </span>
+                                        <span className='text-zinc-400'>
+                                          {
+                                            analysis.enhancedTarot
+                                              .multiDimensional.arcanaBalance
+                                              .minor
+                                          }{' '}
+                                          ({minorPercentage}%)
+                                        </span>
+                                      </div>
+                                    </>
+                                  );
+                                })()}
                               </div>
                             </div>
                           </div>
@@ -762,69 +930,13 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                                           {pattern.number}
                                         </span>
                                         <span className='text-zinc-400'>
-                                          {pattern.count}x
+                                          {pattern.count}x ({pattern.percentage}
+                                          %)
                                         </span>
                                       </div>
                                       <p className='text-zinc-400'>
                                         {pattern.meaning}
                                       </p>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          {analysis.enhancedTarot.multiDimensional
-                            .elementPatterns.length > 0 && (
-                            <div className='mt-4 rounded-lg border border-orange-500/20 bg-orange-500/10 p-4'>
-                              <h5 className='text-xs font-medium text-orange-300/90 mb-2'>
-                                Element Patterns
-                              </h5>
-                              <div className='space-y-2'>
-                                {analysis.enhancedTarot.multiDimensional.elementPatterns.map(
-                                  (pattern) => (
-                                    <div
-                                      key={pattern.element}
-                                      className='flex items-center justify-between text-xs'
-                                    >
-                                      <div className='flex flex-col'>
-                                        <span className='text-zinc-300 font-medium'>
-                                          {pattern.element}
-                                        </span>
-                                        {pattern.suits.length > 0 && (
-                                          <span className='text-zinc-500 text-[10px]'>
-                                            {pattern.suits.join(', ')}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <span className='text-zinc-400'>
-                                        {pattern.count} ({pattern.percentage}%)
-                                      </span>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          {analysis.enhancedTarot.multiDimensional.colorPatterns
-                            .length > 0 && (
-                            <div className='mt-4 rounded-lg border border-pink-500/20 bg-pink-500/10 p-4'>
-                              <h5 className='text-xs font-medium text-pink-300/90 mb-2'>
-                                Color Patterns
-                              </h5>
-                              <div className='space-y-2'>
-                                {analysis.enhancedTarot.multiDimensional.colorPatterns.map(
-                                  (pattern) => (
-                                    <div
-                                      key={pattern.color}
-                                      className='flex items-center justify-between text-xs'
-                                    >
-                                      <span className='text-zinc-300'>
-                                        {pattern.color}
-                                      </span>
-                                      <span className='text-zinc-400'>
-                                        {pattern.count} ({pattern.percentage}%)
-                                      </span>
                                     </div>
                                   ),
                                 )}
@@ -862,54 +974,6 @@ export function AdvancedPatterns({ basicPatterns }: AdvancedPatternsProps) {
                         </div>
                       </div>
                     )}
-
-                  {activeTab === 'timeline' && analysis.extendedTimeline && (
-                    <div className='space-y-4'>
-                      <div className='flex items-center justify-between mb-3'>
-                        <h4 className='text-sm font-medium text-zinc-300'>
-                          Timeline Analysis
-                        </h4>
-                        <div className='flex gap-1.5'>
-                          <button
-                            onClick={() => setTimelinePeriod('6-month')}
-                            className={cn(
-                              'px-2 py-1 text-xs rounded-full transition-colors',
-                              timelinePeriod === '6-month'
-                                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                                : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                            )}
-                          >
-                            6 Months
-                          </button>
-                          <button
-                            onClick={() => setTimelinePeriod('12-month')}
-                            className={cn(
-                              'px-2 py-1 text-xs rounded-full transition-colors',
-                              timelinePeriod === '12-month'
-                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                                : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                            )}
-                          >
-                            12 Months
-                          </button>
-                        </div>
-                      </div>
-                      {timelinePeriod === '6-month' &&
-                        analysis.extendedTimeline.months6 && (
-                          <TimelineVisualization
-                            data={analysis.extendedTimeline.months6}
-                            period={6}
-                          />
-                        )}
-                      {timelinePeriod === '12-month' &&
-                        analysis.extendedTimeline.months12 && (
-                          <TimelineVisualization
-                            data={analysis.extendedTimeline.months12}
-                            period={12}
-                          />
-                        )}
-                    </div>
-                  )}
                 </div>
               )}
             </>

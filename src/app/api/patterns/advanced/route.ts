@@ -155,17 +155,6 @@ interface AdvancedPatternAnalysis {
       suitPatterns: Array<{ suit: string; count: number; percentage: number }>;
       arcanaBalance: { major: number; minor: number };
       numberPatterns: Array<{ number: string; count: number; meaning: string }>;
-      elementPatterns: Array<{
-        element: string;
-        count: number;
-        percentage: number;
-        suits: string[];
-      }>;
-      colorPatterns: Array<{
-        color: string;
-        count: number;
-        percentage: number;
-      }>;
       correlations: Array<{
         dimension1: string;
         dimension2: string;
@@ -979,8 +968,6 @@ async function getEnhancedTarotPatterns(
   const suitCounts: { [key: string]: number } = {};
   const arcanaCounts = { major: 0, minor: 0 };
   const numberCounts: { [key: string]: number } = {};
-  const elementCounts: { [key: string]: number } = {};
-  const colorCounts: { [key: string]: number } = {};
   const elementToSuits: { [key: string]: Set<string> } = {};
   const suitToNumberCounts: { [key: string]: { [key: string]: number } } = {};
   const elementToNumberCounts: { [key: string]: { [key: string]: number } } =
@@ -997,17 +984,12 @@ async function getEnhancedTarotPatterns(
       const suit = getCardSuit(cardName);
       suitCounts[suit] = (suitCounts[suit] || 0) + 1;
 
-      // Map suit to element
+      // Map suit to element for correlations
       const element = getSuitElement(suit);
-      elementCounts[element] = (elementCounts[element] || 0) + 1;
       if (!elementToSuits[element]) {
         elementToSuits[element] = new Set();
       }
       elementToSuits[element].add(suit);
-
-      // Map suit to color
-      const color = getSuitColor(suit);
-      colorCounts[color] = (colorCounts[color] || 0) + 1;
 
       if (suit === 'Major Arcana') {
         arcanaCounts.major++;
@@ -1053,25 +1035,8 @@ async function getEnhancedTarotPatterns(
       number,
       count: count as number,
       meaning: getNumberMeaning(number),
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  // Calculate element patterns
-  const elementPatterns = Object.entries(elementCounts)
-    .map(([element, count]) => ({
-      element,
-      count,
-      percentage: totalCards > 0 ? Math.round((count / totalCards) * 100) : 0,
-      suits: Array.from(elementToSuits[element] || []),
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  // Calculate color patterns
-  const colorPatterns = Object.entries(colorCounts)
-    .map(([color, count]) => ({
-      color,
-      count,
-      percentage: totalCards > 0 ? Math.round((count / totalCards) * 100) : 0,
+      percentage:
+        totalCards > 0 ? Math.round(((count as number) / totalCards) * 100) : 0,
     }))
     .sort((a, b) => b.count - a.count);
 
@@ -1088,15 +1053,36 @@ async function getEnhancedTarotPatterns(
       ([, a], [, b]) => b - a,
     )[0];
     if (topNumber && topNumber[1] >= 2) {
+      const elementTotal = Object.values(numberCounts).reduce(
+        (a, b) => a + b,
+        0,
+      );
+      const percentage = Math.round((topNumber[1] / elementTotal) * 100);
       correlations.push({
         dimension1: element,
         dimension2: `${topNumber[0]} cards`,
-        insight: `${element} energy frequently appears with ${topNumber[0]} cards, suggesting ${getNumberMeaning(topNumber[0]).toLowerCase()} themes in ${element.toLowerCase()} aspects of your life.`,
+        insight: `${element} energy frequently appears with ${topNumber[0]} cards (${percentage}% of ${element} cards), suggesting ${getNumberMeaning(topNumber[0]).toLowerCase()} themes in ${element.toLowerCase()} aspects of your life.`,
       });
     }
   });
 
-  // Suit-Arcana correlations
+  // Suit-Number correlations
+  Object.entries(suitToNumberCounts).forEach(([suit, numberCounts]) => {
+    const topNumber = Object.entries(numberCounts).sort(
+      ([, a], [, b]) => b - a,
+    )[0];
+    if (topNumber && topNumber[1] >= 2 && suit !== 'Major Arcana') {
+      const suitTotal = Object.values(numberCounts).reduce((a, b) => a + b, 0);
+      const percentage = Math.round((topNumber[1] / suitTotal) * 100);
+      correlations.push({
+        dimension1: suit,
+        dimension2: `${topNumber[0]} cards`,
+        insight: `${suit} cards frequently feature ${topNumber[0]}s (${percentage}% of ${suit} cards), indicating ${getNumberMeaning(topNumber[0]).toLowerCase()} patterns within ${suit.toLowerCase()} energy.`,
+      });
+    }
+  });
+
+  // Arcana-Number correlations
   const majorArcanaSuits =
     Object.entries(suitCounts)
       .filter(([suit]) => suit === 'Major Arcana')
@@ -1105,14 +1091,33 @@ async function getEnhancedTarotPatterns(
 
   if (majorArcanaSuits > 0 && minorArcanaTotal > 0) {
     const majorPercentage = Math.round((majorArcanaSuits / totalCards) * 100);
-    if (majorPercentage > 30) {
-      correlations.push({
-        dimension1: 'Major Arcana',
-        dimension2: 'Minor Arcana',
-        insight: `Major Arcana cards represent ${majorPercentage}% of your readings, indicating significant life lessons and transformative energies are prominent in your journey.`,
-      });
-    }
+    const minorPercentage = Math.round((minorArcanaTotal / totalCards) * 100);
+    correlations.push({
+      dimension1: 'Major Arcana',
+      dimension2: 'Minor Arcana',
+      insight: `Your readings show ${majorPercentage}% Major Arcana and ${minorPercentage}% Minor Arcana cards, ${majorPercentage > 40 ? 'indicating significant life lessons and transformative energies are prominent' : majorPercentage > 25 ? 'suggesting a balance between major life themes and daily experiences' : 'reflecting a focus on practical, day-to-day energies'}.`,
+    });
   }
+
+  // Suit-Arcana balance correlations
+  Object.entries(suitCounts).forEach(([suit, count]) => {
+    if (suit !== 'Major Arcana' && count > 0) {
+      const suitPercentage = Math.round((count / totalCards) * 100);
+      const arcanaType =
+        suitPercentage > 30
+          ? 'dominant'
+          : suitPercentage > 20
+            ? 'prominent'
+            : 'present';
+      if (suitPercentage >= 15) {
+        correlations.push({
+          dimension1: suit,
+          dimension2: 'Arcana Balance',
+          insight: `${suit} cards represent ${suitPercentage}% of your readings, making them ${arcanaType} in your tarot patterns. This suggests ${suit.toLowerCase()} energy is ${arcanaType === 'dominant' ? 'a central theme' : arcanaType === 'prominent' ? 'an important influence' : 'present'} in your current journey.`,
+        });
+      }
+    }
+  });
 
   // Get timeline analysis
   const timeline: AdvancedPatternAnalysis['enhancedTarot']['timeline'] = {
@@ -1171,8 +1176,6 @@ async function getEnhancedTarotPatterns(
       suitPatterns,
       arcanaBalance: arcanaCounts,
       numberPatterns,
-      elementPatterns,
-      colorPatterns,
       correlations,
     },
     timeline,
