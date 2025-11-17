@@ -165,14 +165,6 @@ export async function GET(request: NextRequest) {
     const userId = user.id;
     const userPlanRaw = user.plan;
     const userEmail = user.email;
-    const normalizedUserPlan = normalizePlanType(userPlanRaw);
-    const userHasAnnualOverride =
-      normalizedUserPlan === 'lunary_plus_ai_annual' ||
-      userPlanRaw === 'yearly';
-
-    console.log(
-      `[forecast/yearly] User ${userId} plan override check: raw=${userPlanRaw}, normalized=${normalizedUserPlan}, override=${userHasAnnualOverride}`,
-    );
 
     const { searchParams } = new URL(request.url);
     const yearParam = searchParams.get('year');
@@ -186,19 +178,53 @@ export async function GET(request: NextRequest) {
     }
 
     // First, check database subscription
-    const subscriptionResult = await sql`
-      SELECT plan_type, status, stripe_customer_id
-      FROM subscriptions
-      WHERE user_id = ${userId}
-      ORDER BY created_at DESC
-      LIMIT 1
-    `;
+    const [subscriptionResult, conversionPlanResult] = await Promise.all([
+      sql`
+        SELECT plan_type, status, stripe_customer_id
+        FROM subscriptions
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT 1
+      `,
+      sql`
+        SELECT plan_type
+        FROM conversion_events
+        WHERE user_id = ${userId}
+          AND plan_type IS NOT NULL
+          AND plan_type <> ''
+        ORDER BY created_at DESC
+        LIMIT 1
+      `,
+    ]);
 
     const subscription = subscriptionResult.rows[0];
     let rawStatus = subscription?.status || 'free';
     let subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
     let planType = normalizePlanType(subscription?.plan_type);
     let customerId = subscription?.stripe_customer_id;
+
+    const conversionPlan = conversionPlanResult.rows[0]?.plan_type;
+    const planOverrideSources = [
+      userPlanRaw,
+      subscription?.plan_type,
+      conversionPlan,
+      conversionPlan === 'yearly' ? 'yearly' : undefined,
+      subscription?.plan_type === 'yearly' ? 'yearly' : undefined,
+    ].filter(Boolean) as string[];
+
+    const normalizedUserPlan =
+      planOverrideSources
+        .map((value) => normalizePlanType(value))
+        .find((plan) => plan && plan !== 'free' && plan !== 'lunary_plus') ||
+      (userPlanRaw ? normalizePlanType(userPlanRaw) : 'free');
+
+    const userHasAnnualOverride =
+      normalizedUserPlan === 'lunary_plus_ai_annual' ||
+      planOverrideSources.some((plan) => plan === 'yearly');
+
+    console.log(
+      `[forecast/yearly] User ${userId} plan override check: session=${userPlanRaw}, subscriptionPlan=${subscription?.plan_type}, conversionPlan=${conversionPlan}, normalizedOverride=${normalizedUserPlan}, override=${userHasAnnualOverride}`,
+    );
 
     if (userHasAnnualOverride) {
       planType = normalizedUserPlan;

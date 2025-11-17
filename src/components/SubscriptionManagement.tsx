@@ -122,11 +122,6 @@ export default function SubscriptionManagement({
     // Force refresh with cache-busting
     await fetchStripeSubscription(true);
 
-    // Small delay to ensure sync completes before reload
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Reload page to refresh all subscription hooks and clear any client-side cache
-    window.location.reload();
     setLoading(null);
   };
 

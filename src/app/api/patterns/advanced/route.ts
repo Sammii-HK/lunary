@@ -971,17 +971,30 @@ function generateCardRecap(
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
+    const userPlanRaw = user.plan;
+
     const { searchParams } = request.nextUrl;
     const daysParam = searchParams.get('days');
     const requestedDays = daysParam ? parseInt(daysParam, 10) : undefined;
 
-    const subscriptionResult = await sql`
-      SELECT plan_type, status, stripe_customer_id
-      FROM subscriptions
-      WHERE user_id = ${user.id}
-      ORDER BY created_at DESC
-      LIMIT 1
-    `;
+    const [subscriptionResult, conversionPlanResult] = await Promise.all([
+      sql`
+        SELECT plan_type, status, stripe_customer_id
+        FROM subscriptions
+        WHERE user_id = ${user.id}
+        ORDER BY created_at DESC
+        LIMIT 1
+      `,
+      sql`
+        SELECT plan_type
+        FROM conversion_events
+        WHERE user_id = ${user.id}
+          AND plan_type IS NOT NULL
+          AND plan_type <> ''
+        ORDER BY created_at DESC
+        LIMIT 1
+      `,
+    ]);
 
     let subscription = subscriptionResult.rows[0];
     // Normalize status: 'trialing' -> 'trial' for consistency with hasFeatureAccess
@@ -990,6 +1003,29 @@ export async function GET(request: NextRequest) {
     let planType = normalizePlanType(subscription?.plan_type);
     const customerId = subscription?.stripe_customer_id;
     const rawPlanType = subscription?.plan_type;
+    const conversionPlan = conversionPlanResult.rows[0]?.plan_type;
+
+    const normalizedUserPlan = normalizePlanType(userPlanRaw);
+    const planOverrideSources = [
+      userPlanRaw,
+      subscription?.plan_type,
+      conversionPlan,
+      conversionPlan === 'yearly' ? 'yearly' : undefined,
+      rawPlanType === 'yearly' ? 'yearly' : undefined,
+    ].filter(Boolean) as string[];
+    const overridePlanMatch = planOverrideSources
+      .map((value) => normalizePlanType(value))
+      .find((plan) => plan && plan !== 'free' && plan !== 'lunary_plus');
+    const effectivePlan = overridePlanMatch || normalizedUserPlan;
+    const overrideIsAnnual = effectivePlan === 'lunary_plus_ai_annual';
+    const overrideMatchesAi = effectivePlan === 'lunary_plus_ai';
+    const overrideIsAi = overrideIsAnnual || overrideMatchesAi;
+    if (overrideIsAi) {
+      planType = effectivePlan;
+      if (subscriptionStatus === 'free' || !subscriptionStatus) {
+        subscriptionStatus = 'active';
+      }
+    }
 
     // Always check Stripe if we have customer ID (Stripe is source of truth)
     // This ensures we get correct plan even if database is stale
@@ -1070,6 +1106,18 @@ export async function GET(request: NextRequest) {
     // Defensive check: if plan is lunary_plus_ai_annual or lunary_plus_ai and status is trial/active, always grant access
     // This matches the client-side hook logic and yearly forecast route
     let hasAccess = false;
+    let accessSource: 'user_plan_override' | 'subscription_logic' =
+      'subscription_logic';
+
+    if (overrideIsAi) {
+      hasAccess = overrideIsAnnual
+        ? FEATURE_ACCESS.lunary_plus_ai_annual.includes('advanced_patterns')
+        : FEATURE_ACCESS.lunary_plus_ai.includes('advanced_patterns');
+      accessSource = 'user_plan_override';
+      console.log(
+        `[patterns/advanced] Granting access via user plan override (raw=${userPlanRaw}, normalized=${effectivePlan})`,
+      );
+    }
 
     // Check both normalized and raw plan type
     const isAnnualPlan =
@@ -1085,28 +1133,35 @@ export async function GET(request: NextRequest) {
       subscriptionStatus === 'active' ||
       subscriptionStatus === 'trialing';
 
-    if (isAIPlan && isValidStatus) {
-      // Check if feature is in the appropriate plan's feature list
-      if (isAnnualPlan) {
-        hasAccess =
-          FEATURE_ACCESS.lunary_plus_ai_annual.includes('advanced_patterns');
+    if (!hasAccess) {
+      if (isAIPlan && isValidStatus) {
+        // Check if feature is in the appropriate plan's feature list
+        if (isAnnualPlan) {
+          hasAccess =
+            FEATURE_ACCESS.lunary_plus_ai_annual.includes('advanced_patterns');
+        } else {
+          hasAccess =
+            FEATURE_ACCESS.lunary_plus_ai.includes('advanced_patterns');
+        }
+        console.log(
+          `[patterns/advanced] Defensive check passed - ${isAnnualPlan ? 'annual' : 'AI'} plan (${planType}/${normalizedPlan}) with valid status (${subscriptionStatus}), hasAccess: ${hasAccess}`,
+        );
       } else {
-        hasAccess = FEATURE_ACCESS.lunary_plus_ai.includes('advanced_patterns');
+        // Fall back to standard hasFeatureAccess check
+        hasAccess = hasFeatureAccess(
+          subscriptionStatus,
+          planType,
+          'advanced_patterns',
+        );
+        console.log(
+          `[patterns/advanced] Standard hasFeatureAccess result: ${hasAccess} for feature 'advanced_patterns' (status: ${subscriptionStatus}, plan: ${planType})`,
+        );
       }
-      console.log(
-        `[patterns/advanced] Defensive check passed - ${isAnnualPlan ? 'annual' : 'AI'} plan (${planType}/${normalizedPlan}) with valid status (${subscriptionStatus}), hasAccess: ${hasAccess}`,
-      );
-    } else {
-      // Fall back to standard hasFeatureAccess check
-      hasAccess = hasFeatureAccess(
-        subscriptionStatus,
-        planType,
-        'advanced_patterns',
-      );
-      console.log(
-        `[patterns/advanced] Standard hasFeatureAccess result: ${hasAccess} for feature 'advanced_patterns' (status: ${subscriptionStatus}, plan: ${planType})`,
-      );
     }
+
+    console.log(
+      `[patterns/advanced] Access decision for user ${user.id}: hasAccess=${hasAccess}, source=${accessSource}, subscriptionStatus=${subscriptionStatus}, planType=${planType}, normalizedUserPlan=${normalizedUserPlan}`,
+    );
 
     if (!hasAccess) {
       console.error(
