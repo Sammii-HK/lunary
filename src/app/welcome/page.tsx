@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { AuthButtons } from '@/components/AuthButtons';
-import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import {
   Sparkles,
   BarChart3,
@@ -15,57 +14,83 @@ import {
   Smartphone,
   Bell,
   WifiOff,
+  Brain,
+  Wand2,
+  ArrowRight,
 } from 'lucide-react';
 
 export default function WelcomePage() {
-  const features = [
+  // Outcome-based features
+  const outcomeFeatures = [
     {
-      icon: BarChart3,
-      title: 'Complete Birth Chart Analysis',
+      icon: Brain,
+      title: "Understand today's energy based on your birth chart",
       description:
-        'Your exact planetary positions calculated from your precise birth time, date, and location. Every aspect, every degree matters.',
+        'Get personalized daily insights that consider your exact planetary positions, not generic sun sign predictions.',
     },
     {
       icon: Sparkles,
-      title: 'Personalized Daily Insights',
+      title: 'See tarot patterns that reflect your emotional cycles',
       description:
-        'Daily guidance based on current planetary transits to your personal chart. No generic predictions—every insight is yours alone.',
+        'Your AI guide recognizes patterns in your tarot readings and connects them to your astrological transits.',
     },
     {
       icon: NotebookPen,
-      title: 'Book of Shadows Companion',
+      title: 'Let your AI guide interpret cosmic events for you',
       description:
-        'Have reflective conversations with Lunary’s calm AI—every reply grounded in your birth chart, tarot, and today’s moon.',
-    },
-    {
-      icon: Calendar,
-      title: 'Transit Calendar',
-      description:
-        'Track significant planetary movements and understand how they interact with your natal chart over time.',
+        'Ask questions and receive thoughtful answers grounded in your birth chart, tarot history, and current moon phase.',
     },
     {
       icon: Moon,
-      title: 'Lunar Wisdom',
+      title: 'Track your moods, rituals, and reflections in your Book of Shadows',
       description:
-        "Real-time moon phases, lunar calendars, and guidance based on the moon's current position in your chart.",
+        'Build a living record of your cosmic journey with AI-powered insights and personalized ritual suggestions.',
+    },
+  ];
+
+  // Why Lunary differentiators
+  const differentiators = [
+    {
+      icon: Brain,
+      title: 'Personal AI astral guide',
+      description:
+        'Your guide knows your chart, your emotions, your tarot, and your patterns—not generic horoscopes.',
     },
     {
-      icon: Telescope,
-      title: 'Astronomical Precision',
+      icon: Sparkles,
+      title: 'Deeply personalized readings',
       description:
-        'Built on accurate astronomical calculations using proven algorithms for planetary positions and celestial events.',
+        'Every insight is calculated from your exact birth time, date, and location. No generalizations.',
     },
     {
-      icon: Heart,
-      title: 'Crystal & Healing Guidance',
+      icon: Wand2,
+      title: 'Tarot + astrology + emotions combined',
       description:
-        'Personalized crystal recommendations aligned with your birth chart and current transits.',
+        'See how your tarot patterns align with astrological transits and emotional cycles.',
+    },
+    {
+      icon: NotebookPen,
+      title: 'Living Book of Shadows',
+      description:
+        'Your personal grimoire that grows with you, powered by AI insights and ritual generation.',
     },
     {
       icon: Sparkle,
-      title: 'Solar Returns & Cosmic Cycles',
+      title: 'Cosmic visuals and custom OG images',
       description:
-        'Understand your annual solar return and discover patterns in your personal cosmic timeline.',
+        'Share beautiful, personalized cosmic visuals that reflect your unique astrological signature.',
+    },
+    {
+      icon: Calendar,
+      title: 'Daily + weekly + monthly personalized cycles',
+      description:
+        'Understand your patterns across all time scales—from daily transits to annual solar returns.',
+    },
+    {
+      icon: Heart,
+      title: 'Built by a real practitioner, not a corporation',
+      description:
+        'Created with deep respect for astrological tradition and modern astronomical precision.',
     },
   ];
 
@@ -105,24 +130,36 @@ export default function WelcomePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* AI Hero Section - Front and Center */}
       <section className='relative overflow-hidden border-b border-zinc-800/50'>
-        <div className='absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-transparent'></div>
+        <div className='absolute inset-0 bg-gradient-to-b from-purple-950/20 via-transparent to-transparent'></div>
         <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32'>
-          <div className='text-center max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-8'>
+          <div className='text-center max-w-4xl mx-auto space-y-6 sm:space-y-8 md:space-y-10'>
+            <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-sm sm:text-base mb-4'>
+              <Brain className='w-4 h-4 sm:w-5 sm:h-5' />
+              <span>AI-Powered Cosmic Guidance</span>
+            </div>
+
             <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-light text-zinc-100 leading-[1.1] tracking-tight px-2'>
-              Astrology you can{' '}
-              <span className='font-normal text-purple-300/80'>talk</span> to
+              Your personal{' '}
+              <span className='font-normal text-purple-300/90'>AI-powered</span>{' '}
+              cosmic guide
             </h1>
 
             <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed font-light px-4'>
-              Ask your Book of Shadows for guidance and receive calm, grounded
-              answers powered by real astronomical data, your birth chart, and
-              the day’s cosmic weather.
+              Personalised daily insights, tarot interpretation, emotional
+              patterns, and birth chart analysis — all based on{' '}
+              <span className='text-purple-300/80'>you</span>.
             </p>
 
-            <div className='pt-2 sm:pt-4'>
-              <AuthButtons variant='primary' />
+            <div className='pt-4 sm:pt-6'>
+              <Link
+                href='/profile'
+                className='inline-flex items-center gap-2 bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 px-8 py-4 text-lg rounded-full font-medium transition-all group'
+              >
+                Meet Your Astral Guide
+                <ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform' />
+              </Link>
             </div>
 
             <div className='pt-6 sm:pt-8 flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-zinc-500'>
@@ -139,99 +176,229 @@ export default function WelcomePage() {
                 <span>Cancel anytime</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className='pt-8'>
-              <NewsletterSignupForm
-                align='center'
-                source='welcome_page_hero'
-                className='border-zinc-800/60 bg-zinc-950/60 shadow-none'
-                headline='Prefer to start with cosmic updates?'
-                description='Subscribe to our weekly newsletter to get lunar weather, curated rituals, and announcements before anyone else.'
-                ctaLabel='Send me the newsletter'
-                successMessage='You are all set! Check your inbox to confirm and start receiving our weekly cosmic digest.'
-              />
+      {/* Social Proof Section */}
+      <section className='py-8 sm:py-12 border-b border-zinc-800/50 bg-zinc-900/20'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center space-y-4'>
+            <p className='text-sm sm:text-base text-zinc-400'>
+              Trusted by thousands of cosmic seekers
+            </p>
+            <p className='text-xs sm:text-sm text-zinc-500'>
+              Backed by advanced astrology + AI models
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Lunary is Different */}
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
+              Why Lunary is Different
+            </h2>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
+              Unlike generic horoscope apps, Lunary combines AI, astrology, tarot,
+              and your personal patterns into one deeply personalized experience.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8'>
+            {differentiators.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={index}
+                  className='p-5 sm:p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
+                >
+                  <div className='w-10 h-10 sm:w-12 sm:h-12 mb-4 sm:mb-6 flex items-center justify-center'>
+                    <Icon
+                      className='w-6 h-6 sm:w-7 sm:h-7 text-purple-400'
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                  <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100 mb-2 sm:mb-3'>
+                    {item.title}
+                  </h3>
+                  <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed'>
+                    {item.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Outcome-Based Features */}
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50 bg-zinc-900/20'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
+              What you'll experience
+            </h2>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
+              Real outcomes, not generic features. Every insight is tailored to
+              your unique cosmic signature.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8'>
+            {outcomeFeatures.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={index}
+                  className='p-5 sm:p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
+                >
+                  <div className='w-10 h-10 sm:w-12 sm:h-12 mb-4 sm:mb-6 flex items-center justify-center'>
+                    <Icon
+                      className='w-6 h-6 sm:w-7 sm:h-7 text-purple-400'
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                  <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100 mb-2 sm:mb-3'>
+                    {feature.title}
+                  </h3>
+                  <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed'>
+                    {feature.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* What You'll Get After Signup Preview */}
+      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
+              What you'll unlock
+            </h2>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
+              See what awaits you after signup. Every feature is personalized to
+              your birth chart and cosmic patterns.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8'>
+            {/* Preview Card 1: Personalized Horoscope */}
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+              <div className='aspect-video bg-gradient-to-br from-purple-900/30 to-zinc-900/50 flex items-center justify-center'>
+                <div className='text-center p-6'>
+                  <BarChart3 className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    Personalized Horoscope
+                  </h3>
+                  <p className='text-sm text-zinc-400'>
+                    Daily insights based on your exact birth chart
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Card 2: AI Chat */}
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+              <div className='aspect-video bg-gradient-to-br from-purple-900/30 to-zinc-900/50 flex items-center justify-center'>
+                <div className='text-center p-6'>
+                  <Brain className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    AI Astral Guide
+                  </h3>
+                  <p className='text-sm text-zinc-400'>
+                    Ask questions and get answers grounded in your chart
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Card 3: Tarot Patterns */}
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+              <div className='aspect-video bg-gradient-to-br from-purple-900/30 to-zinc-900/50 flex items-center justify-center'>
+                <div className='text-center p-6'>
+                  <Sparkles className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    Tarot Pattern Recognition
+                  </h3>
+                  <p className='text-sm text-zinc-400'>
+                    See patterns that reflect your emotional cycles
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Card 4: Book of Shadows */}
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+              <div className='aspect-video bg-gradient-to-br from-purple-900/30 to-zinc-900/50 flex items-center justify-center'>
+                <div className='text-center p-6'>
+                  <NotebookPen className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    Book of Shadows
+                  </h3>
+                  <p className='text-sm text-zinc-400'>
+                    Track moods, rituals, and reflections
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Card 5: Lunar Rituals */}
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+              <div className='aspect-video bg-gradient-to-br from-purple-900/30 to-zinc-900/50 flex items-center justify-center'>
+                <div className='text-center p-6'>
+                  <Moon className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    Lunar Rituals
+                  </h3>
+                  <p className='text-sm text-zinc-400'>
+                    Personalized ritual suggestions for each moon phase
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Card 6: Birth Chart Analysis */}
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+              <div className='aspect-video bg-gradient-to-br from-purple-900/30 to-zinc-900/50 flex items-center justify-center'>
+                <div className='text-center p-6'>
+                  <Telescope className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    Complete Birth Chart
+                  </h3>
+                  <p className='text-sm text-zinc-400'>
+                    Detailed analysis of your cosmic fingerprint
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* What Makes Us Different */}
-      <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
-            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
-              What makes us different
-            </h2>
-            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
-              While others offer generic horoscopes, we provide insights
-              calculated from your complete birth chart. Every planet, every
-              aspect, every transit matters.
-            </p>
-          </div>
-
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8'>
-            {features.slice(0, 4).map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={index}
-                  className='p-5 sm:p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
-                >
-                  <div className='w-10 h-10 sm:w-12 sm:h-12 mb-4 sm:mb-6 flex items-center justify-center'>
-                    <Icon
-                      className='w-6 h-6 sm:w-7 sm:h-7 text-zinc-400'
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100 mb-2 sm:mb-3'>
-                    {feature.title}
-                  </h3>
-                  <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed'>
-                    {feature.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Core Features */}
+      {/* Pricing Tease */}
       <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 border-b border-zinc-800/50 bg-zinc-900/20'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 space-y-3 sm:space-y-4'>
-            <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
-              Everything you need for meaningful cosmic guidance
-            </h2>
-            <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 leading-relaxed px-4'>
-              Built on real astronomical data. Calculated with precision.
-              Presented with clarity and respect.
-            </p>
-          </div>
-
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8'>
-            {features.slice(4).map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={index}
-                  className='p-5 sm:p-6 md:p-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
-                >
-                  <div className='w-10 h-10 sm:w-12 sm:h-12 mb-4 sm:mb-6 flex items-center justify-center'>
-                    <Icon
-                      className='w-6 h-6 sm:w-7 sm:h-7 text-zinc-400'
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100 mb-2 sm:mb-3'>
-                    {feature.title}
-                  </h3>
-                  <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed'>
-                    {feature.description}
-                  </p>
-                </div>
-              );
-            })}
+        <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8'>
+          <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
+            Start exploring for free
+          </h2>
+          <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed px-4'>
+            Upgrade only if you want deeper, personalised insights. No pressure,
+            no commitment—just cosmic guidance when you need it.
+          </p>
+          <div className='pt-4'>
+            <Link
+              href='/pricing'
+              className='inline-flex items-center gap-2 text-purple-300/90 hover:text-purple-200 transition-colors text-sm sm:text-base'
+            >
+              View pricing
+              <ArrowRight className='w-4 h-4' />
+            </Link>
           </div>
         </div>
       </section>
@@ -286,11 +453,11 @@ export default function WelcomePage() {
                 </span>
               </div>
               <h3 className='text-base sm:text-lg md:text-xl font-medium text-zinc-100'>
-                Receive personalized insights
+                Meet your AI guide
               </h3>
               <p className='text-xs sm:text-sm md:text-base text-zinc-400 leading-relaxed px-2'>
-                Daily guidance that considers your unique chart, current
-                transits, and cosmic cycles.
+                Start asking questions and receive personalized insights based on
+                your chart, tarot patterns, and cosmic cycles.
               </p>
             </div>
           </div>
@@ -415,11 +582,12 @@ export default function WelcomePage() {
       <section className='py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32'>
         <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8'>
           <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 px-2'>
-            Start your free trial
+            Ready to meet your AI astral guide?
           </h2>
           <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed px-4'>
-            Experience astrology that's actually about you. Credit card required
-            but no payment taken during trial. Cancel anytime.
+            Start your free trial and experience astrology that's actually about
+            you. Credit card required but no payment taken during trial. Cancel
+            anytime.
           </p>
 
           <div className='pt-2 sm:pt-4'>
