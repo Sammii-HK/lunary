@@ -24,6 +24,7 @@ import {
   AB_TESTS,
   trackABTestConversion,
 } from '@/lib/ab-testing';
+import { SocialProof } from '@/components/SocialProof';
 
 export default function PricingPage() {
   const { me } = useAccount();
@@ -361,6 +362,300 @@ export default function PricingPage() {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Social Proof */}
+        <section className='py-12 sm:py-16 md:py-20 border-b border-zinc-800/50'>
+          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+            <SocialProof />
+          </div>
+        </section>
+
+        {/* Feature Comparison Table */}
+        <section className='py-12 sm:py-16 md:py-20 border-b border-zinc-800/50 bg-zinc-900/20'>
+          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+            <div className='text-center mb-10 md:mb-16 space-y-3 sm:space-y-4'>
+              <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
+                Compare Plans
+              </h2>
+              <p className='text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+                Find the perfect plan for your cosmic journey
+              </p>
+            </div>
+
+            <div className='overflow-x-auto'>
+              <table className='w-full border-collapse'>
+                <thead>
+                  <tr className='border-b border-zinc-800/50'>
+                    <th className='text-left py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Features
+                    </th>
+                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Free
+                    </th>
+                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Lunary+
+                    </th>
+                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Lunary+ AI
+                    </th>
+                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Annual
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-zinc-800/50'>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Daily moon phases & basic insights
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      General tarot card of the day
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Tarot spreads per month
+                    </td>
+                    <td className='py-4 px-4 text-center text-zinc-400'>2</td>
+                    <td className='py-4 px-4 text-center text-zinc-400'>10</td>
+                    <td className='py-4 px-4 text-center text-zinc-400'>10</td>
+                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
+                      Unlimited
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Complete birth chart analysis
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Personalized daily horoscopes
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Personal tarot card & guidance
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Daily transit calendar
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Crystal & herb recommendations
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Moon Circles (New & Full Moon)
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Unlimited AI chat (Lunary Copilot)
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Deeper tarot readings
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Personalized weekly reports
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Downloadable cosmic reports
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Yearly cosmic forecast
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Free trial period
+                    </td>
+                    <td className='py-4 px-4 text-center text-zinc-400'>—</td>
+                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
+                      7 days
+                    </td>
+                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
+                      7 days
+                    </td>
+                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
+                      14 days
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
