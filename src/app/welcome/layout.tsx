@@ -1,13 +1,34 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Lunary - Astrology Based on Real Data',
+  title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
   description:
-    'Your complete birth chart, calculated with astronomical precision. Daily insights that consider your unique cosmic signature. Real guidance, thoughtfully presented. Free 7-day trial - credit card required but no payment taken.',
+    'Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today. Understand today's energy based on your birth chart. Daily tarot, lunar cycles and planetary transits personalized to you.',
+  keywords: [
+    'AI astrology',
+    'personalized astrology',
+    'AI astral guide',
+    'personalized horoscope',
+    'birth chart astrology',
+    'tarot readings',
+    'lunar cycles',
+    'planetary transits',
+    'cosmic guidance',
+    'astrological insights',
+    'personalized tarot',
+    'astrology app',
+    'natal chart analysis',
+  ],
+  authors: [{ name: 'Lunary' }],
+  creator: 'Lunary',
+  publisher: 'Lunary',
+  alternates: {
+    canonical: 'https://lunary.app/welcome',
+  },
   openGraph: {
-    title: 'Lunary - Astrology Based on Real Data',
+    title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
     description:
-      'Your complete birth chart, calculated with astronomical precision. Daily insights that consider your unique cosmic signature.',
+      'Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today.',
     url: 'https://lunary.app/welcome',
     siteName: 'Lunary',
     images: [
@@ -15,7 +36,7 @@ export const metadata: Metadata = {
         url: '/api/og/cosmic',
         width: 1200,
         height: 630,
-        alt: 'Lunary - Astrology Based on Real Data',
+        alt: 'Lunary - Your AI-Powered Astral Guide',
       },
     ],
     locale: 'en_US',
@@ -23,13 +44,21 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lunary - Astrology Based on Real Data',
+    title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
     description:
-      'Your complete birth chart, calculated with astronomical precision. Daily insights that consider your unique cosmic signature.',
+      'Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today.',
     images: ['/api/og/cosmic'],
   },
-  alternates: {
-    canonical: 'https://lunary.app/welcome',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 

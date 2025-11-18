@@ -5,6 +5,25 @@ export function middleware(request: NextRequest) {
   const hostname =
     request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
 
+  // Force HTTPS redirect in production
+  const isProduction =
+    process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'production';
+  if (
+    isProduction &&
+    request.headers.get('x-forwarded-proto') !== 'https' &&
+    !hostname.includes('localhost')
+  ) {
+    url.protocol = 'https:';
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect www to non-www (canonical domain: lunary.app)
+  if (hostname.startsWith('www.')) {
+    url.hostname = hostname.replace('www.', '');
+    return NextResponse.redirect(url, 301);
+  }
+
   const configuredAdminHosts = [
     process.env.ADMIN_DASHBOARD_HOST,
     process.env.ADMIN_APP_HOST,

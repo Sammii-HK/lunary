@@ -60,9 +60,126 @@ export async function generateMetadata({
     sectionDescriptions[sectionSlug] ||
     `Explore ${sectionData.title} in the Lunary Grimoire. Comprehensive mystical knowledge and cosmic wisdom.`;
 
+  // Generate keywords based on section
+  const sectionKeywords: Record<string, string[]> = {
+    moon: [
+      'moon phases',
+      'lunar cycles',
+      'full moon',
+      'new moon',
+      'moon signs',
+      'lunar calendar',
+      'moon magic',
+      'moon rituals',
+      'void of course moon',
+      'lunar eclipse',
+    ],
+    'wheel-of-the-year': [
+      'wheel of the year',
+      'sabbats',
+      'pagan holidays',
+      'seasonal celebrations',
+      'witchcraft holidays',
+      'pagan calendar',
+    ],
+    astronomy: [
+      'astronomy',
+      'planets',
+      'zodiac signs',
+      'astronomical data',
+      'celestial bodies',
+      'astronomical calculations',
+    ],
+    tarot: [
+      'tarot cards',
+      'tarot reading',
+      'major arcana',
+      'minor arcana',
+      'tarot spreads',
+      'tarot interpretation',
+      'tarot guide',
+    ],
+    runes: ['runes', 'runic alphabet', 'rune meanings', 'runic divination'],
+    chakras: [
+      'chakras',
+      'energy centers',
+      'chakra balancing',
+      'seven chakras',
+      'chakra colors',
+    ],
+    numerology: [
+      'numerology',
+      'life path number',
+      'master numbers',
+      'numerological calculations',
+    ],
+    crystals: [
+      'crystals',
+      'crystal healing',
+      'crystal meanings',
+      'crystal guide',
+      'gemstones',
+    ],
+    correspondences: [
+      'magical correspondences',
+      'elemental correspondences',
+      'astrological correspondences',
+    ],
+    practices: [
+      'spells',
+      'rituals',
+      'witchcraft practices',
+      'magical practices',
+      'protection magic',
+    ],
+    'birth-chart': [
+      'birth chart',
+      'natal chart',
+      'astrological chart',
+      'birth chart reading',
+    ],
+    'candle-magic': [
+      'candle magic',
+      'candle spells',
+      'candle rituals',
+      'candle colors',
+    ],
+    divination: [
+      'divination',
+      'pendulum reading',
+      'scrying',
+      'dream interpretation',
+    ],
+    'modern-witchcraft': [
+      'modern witchcraft',
+      'witchcraft',
+      'witchcraft tools',
+      'witchcraft ethics',
+    ],
+    meditation: [
+      'meditation',
+      'mindfulness',
+      'spiritual meditation',
+      'grounding exercises',
+    ],
+  };
+
+  const keywords = [
+    ...(sectionKeywords[sectionSlug] || []),
+    'grimoire',
+    'mystical knowledge',
+    'cosmic wisdom',
+    'astrology guide',
+    'spiritual guide',
+  ];
+
   return {
     title,
     description,
+    keywords,
+    authors: [{ name: 'Lunary' }],
+    creator: 'Lunary',
+    publisher: 'Lunary',
     openGraph: {
       title,
       description,

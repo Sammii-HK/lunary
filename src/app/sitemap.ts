@@ -3,16 +3,17 @@ import { grimoire } from '@/constants/grimoire';
 import dayjs from 'dayjs';
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  // Use canonical domain (non-www)
   const baseUrl = 'https://lunary.app';
   const now = new Date();
 
-  // Static routes
+  // Static routes - ordered by priority
   const routes = [
     {
       url: baseUrl,
       lastModified: now,
       changeFrequency: 'daily' as const,
-      priority: 1,
+      priority: 1.0,
     },
     {
       url: `${baseUrl}/welcome`,
@@ -27,9 +28,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/comparison/best-personalized-astrology-apps`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/blog`,
       lastModified: now,
       changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
@@ -39,7 +52,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire`,
+      url: `${baseUrl}/comparison`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -67,18 +80,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/comparison`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/comparison/best-personalized-astrology-apps`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.9,
     },
   ];
 
