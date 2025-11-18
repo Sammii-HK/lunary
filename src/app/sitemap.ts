@@ -1,5 +1,10 @@
 import { MetadataRoute } from 'next';
 import { grimoire } from '@/constants/grimoire';
+import { zodiacSigns, planetaryBodies } from '../../utils/zodiac/zodiac';
+import { monthlyMoonPhases } from '../../utils/moon/monthlyPhases';
+import { tarotCards } from '../../utils/tarot/tarot-cards';
+import { astrologicalHouses } from '@/constants/grimoire/seo-data';
+import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -120,5 +125,80 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...routes, ...blogRoutes, ...grimoireRoutes];
+  // Add all zodiac sign pages
+  const zodiacRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/grimoire/zodiac/${stringToKebabCase(sign)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all planet pages
+  const planetRoutes = Object.keys(planetaryBodies).map((planet) => ({
+    url: `${baseUrl}/grimoire/planets/${stringToKebabCase(planet)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all house pages
+  const houseRoutes = Object.keys(astrologicalHouses).map((house) => ({
+    url: `${baseUrl}/grimoire/houses/${stringToKebabCase(house)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all moon phase pages
+  const moonPhaseRoutes = Object.keys(monthlyMoonPhases).map((phase) => ({
+    url: `${baseUrl}/grimoire/moon-phases/${stringToKebabCase(phase)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all moon in sign pages
+  const moonInSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/grimoire/moon-in/${stringToKebabCase(sign)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all tarot card pages
+  const tarotRoutes: MetadataRoute.Sitemap = [];
+  
+  // Major Arcana
+  Object.values(tarotCards.majorArcana).forEach((card) => {
+    tarotRoutes.push({
+      url: `${baseUrl}/grimoire/tarot/${stringToKebabCase(card.name)}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    });
+  });
+
+  // Minor Arcana
+  Object.values(tarotCards.minorArcana).forEach((suit) => {
+    Object.values(suit).forEach((card) => {
+      tarotRoutes.push({
+        url: `${baseUrl}/grimoire/tarot/${stringToKebabCase(card.name)}`,
+        lastModified: now,
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      });
+    });
+  });
+
+  return [
+    ...routes,
+    ...blogRoutes,
+    ...grimoireRoutes,
+    ...zodiacRoutes,
+    ...planetRoutes,
+    ...houseRoutes,
+    ...moonPhaseRoutes,
+    ...moonInSignRoutes,
+    ...tarotRoutes,
+  ];
 }
