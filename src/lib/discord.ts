@@ -6,6 +6,8 @@ type DiscordField = {
   inline?: boolean;
 };
 
+export type DiscordColor = 'success' | 'error' | 'warning' | 'info';
+
 type DiscordNotificationInput = {
   content?: string;
   title?: string;
@@ -14,6 +16,7 @@ type DiscordNotificationInput = {
   fields?: DiscordField[];
   footer?: string;
   username?: string;
+  color?: DiscordColor | number;
 };
 
 type DiscordSendResult =
@@ -46,6 +49,20 @@ export async function sendDiscordNotification(
   }
 
   if (input.title || input.description || input.fields?.length || input.url) {
+    const colorMap: Record<DiscordColor, number> = {
+      success: 0x00ff00, // Green
+      error: 0xff0000, // Red
+      warning: 0xffff00, // Yellow
+      info: 0x0099ff, // Blue
+    };
+
+    const embedColor =
+      typeof input.color === 'number'
+        ? input.color
+        : input.color
+          ? colorMap[input.color]
+          : undefined;
+
     payload.embeds = [
       {
         title: input.title,
@@ -53,6 +70,8 @@ export async function sendDiscordNotification(
         url: input.url,
         fields: input.fields?.slice(0, 25),
         footer: input.footer ? { text: input.footer } : undefined,
+        color: embedColor,
+        timestamp: new Date().toISOString(),
       },
     ];
   }
@@ -99,4 +118,42 @@ export async function sendDiscordNotification(
   }
 
   return { ok: false, error: 'Discord webhook failed unexpectedly' };
+}
+
+export interface AdminNotificationInput {
+  title: string;
+  message: string;
+  url?: string;
+  priority?: 'low' | 'normal' | 'high' | 'emergency';
+  fields?: DiscordField[];
+}
+
+export async function sendDiscordAdminNotification(
+  input: AdminNotificationInput,
+): Promise<DiscordSendResult> {
+  const colorMap: Record<string, DiscordColor> = {
+    low: 'info',
+    normal: 'info',
+    high: 'warning',
+    emergency: 'error',
+  };
+
+  const color = colorMap[input.priority || 'normal'] || 'info';
+
+  const description = input.message
+    .replace(/<b>/g, '**')
+    .replace(/<\/b>/g, '**')
+    .replace(/<i>/g, '*')
+    .replace(/<\/i>/g, '*')
+    .replace(/<br\s*\/?>/g, '\n')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/<[^>]+>/g, '');
+
+  return sendDiscordNotification({
+    title: input.title,
+    description,
+    url: input.url,
+    fields: input.fields,
+    color,
+  });
 }

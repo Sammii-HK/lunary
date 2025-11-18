@@ -899,6 +899,23 @@ async function setupDatabase() {
     await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_created_at ON analytics_conversions(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_trigger_feature ON analytics_conversions(trigger_feature)`;
 
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_notification_events (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        notification_type TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        notification_id TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_user_id ON analytics_notification_events(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_type ON analytics_notification_events(notification_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_event_type ON analytics_notification_events(event_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_created_at ON analytics_notification_events(created_at)`;
+
     console.log('✅ Analytics tables created');
 
     // Create weekly_ritual_usage table

@@ -5,10 +5,12 @@ export function sectionToSlug(section: string): string {
     return '';
   }
 
+  // Convert camelCase to kebab-case
+  // This regex inserts a dash before capital letters that follow lowercase letters or other capitals
   return section
-    .replace(/([A-Z])/g, '-$1')
-    .toLowerCase()
-    .replace(/^-/, '');
+    .replace(/([a-z])([A-Z])/g, '$1-$2') // Insert dash between lowercase and uppercase
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2') // Insert dash between multiple capitals and a capital followed by lowercase
+    .toLowerCase();
 }
 
 export function slugToSection(slug: string): string {

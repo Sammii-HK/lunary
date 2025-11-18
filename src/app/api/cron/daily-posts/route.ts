@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  sendAdminNotification,
-  NotificationTemplates,
-  sendPushoverNotification,
-} from '../../../../../utils/notifications/pushNotifications';
+import { NotificationTemplates } from '../../../../../utils/notifications/pushNotifications';
+import { sendDiscordAdminNotification } from '@/lib/discord';
 import {
   markEventsAsSent,
   cleanupOldDates,
@@ -526,27 +523,76 @@ async function runDailyPosts(dateStr: string) {
         posts[0]?.content || generateCosmicPost(cosmicContent).snippet;
 
       // Send one notification for daily posts with all images and content
-      await sendAdminNotification(
-        NotificationTemplates.dailyPreview(
-          dateStr,
-          posts.length,
-          cosmicContent?.primaryEvent,
-          postContent,
-          allImageUrls,
-        ),
+      const dailyPreview = NotificationTemplates.dailyPreview(
+        dateStr,
+        posts.length,
+        cosmicContent?.primaryEvent,
+        postContent,
+        allImageUrls,
       );
 
+      await sendDiscordAdminNotification({
+        title: dailyPreview.title,
+        message: dailyPreview.message,
+        priority: dailyPreview.priority,
+        url: dailyPreview.url,
+      });
+
       // Send success summary
-      await sendAdminNotification(
-        NotificationTemplates.cronSuccess(summary, posts),
-      );
+      const successTemplate = NotificationTemplates.cronSuccess(summary, posts);
+      const successFields = [
+        {
+          name: 'Results',
+          value: `${summary.successful}/${summary.total} posts`,
+          inline: true,
+        },
+        {
+          name: 'Success Rate',
+          value: summary.successRate,
+          inline: true,
+        },
+        {
+          name: 'Platforms',
+          value: 'X, Bluesky, Instagram, Reddit, Pinterest',
+          inline: true,
+        },
+      ];
+
+      await sendDiscordAdminNotification({
+        title: successTemplate.title,
+        message: successTemplate.message,
+        priority: successTemplate.priority,
+        url: successTemplate.url,
+        fields: successFields,
+      });
     } else {
-      await sendAdminNotification(
-        NotificationTemplates.cronFailure(
-          'All daily posts failed to schedule',
-          failedPosts,
-        ),
+      const failureTemplate = NotificationTemplates.cronFailure(
+        'All daily posts failed to schedule',
+        failedPosts,
       );
+      const failureFields = [
+        {
+          name: 'Error',
+          value: failureTemplate.message.substring(0, 200),
+          inline: false,
+        },
+        {
+          name: 'Failed Posts',
+          value:
+            failedPosts.length > 0
+              ? failedPosts.map((p) => p.name).join(', ')
+              : 'All posts',
+          inline: false,
+        },
+      ];
+
+      await sendDiscordAdminNotification({
+        title: failureTemplate.title,
+        message: failureTemplate.message,
+        priority: failureTemplate.priority,
+        url: failureTemplate.url,
+        fields: failureFields,
+      });
     }
   } catch (notificationError) {
     console.warn('📱 Push notification failed:', notificationError);
@@ -679,15 +725,53 @@ async function runWeeklyTasks(request: NextRequest) {
 
     // Send push notification for weekly content with blog preview and social posts info
     try {
-      await sendAdminNotification(
-        NotificationTemplates.weeklyContentGenerated(
-          blogData.data?.title || 'Weekly Content',
-          blogData.data?.weekNumber || 0,
-          blogData.data?.planetaryHighlights || [],
-          blogPreviewUrl,
-          socialPostsResult?.savedIds?.length || 0,
-        ),
+      const weeklyTemplate = NotificationTemplates.weeklyContentGenerated(
+        blogData.data?.title || 'Weekly Content',
+        blogData.data?.weekNumber || 0,
+        blogData.data?.planetaryHighlights || [],
+        blogPreviewUrl,
+        socialPostsResult?.savedIds?.length || 0,
       );
+
+      const highlights = (blogData.data?.planetaryHighlights || []).slice(0, 3);
+      const weeklyFields = [
+        {
+          name: 'Week',
+          value: `Week ${blogData.data?.weekNumber || 0}`,
+          inline: true,
+        },
+        {
+          name: 'Social Posts',
+          value: `${socialPostsResult?.savedIds?.length || 0} posts ready`,
+          inline: true,
+        },
+        {
+          name: 'Status',
+          value: 'Newsletter sent\nBlog ready',
+          inline: true,
+        },
+      ];
+
+      if (highlights.length > 0) {
+        weeklyFields.push({
+          name: 'Highlights',
+          value: highlights
+            .map(
+              (h: { planet: string; event?: string }) =>
+                `• ${h.planet} ${h.event?.replace('-', ' ') || 'activity'}`,
+            )
+            .join('\n'),
+          inline: false,
+        });
+      }
+
+      await sendDiscordAdminNotification({
+        title: weeklyTemplate.title,
+        message: weeklyTemplate.message,
+        priority: weeklyTemplate.priority,
+        url: weeklyTemplate.url,
+        fields: weeklyFields,
+      });
       console.log(
         `✅ Weekly notification sent: ${socialPostsResult?.savedIds?.length || 0} social posts ready for approval`,
       );
@@ -1018,23 +1102,30 @@ async function runNotificationCheck(dateStr: string) {
             ? 'https://lunary.app'
             : 'http://localhost:3000';
 
-        await sendPushoverNotification({
-          title: '📊 Weekly Conversion Digest',
-          message: `This Week:
-• ${weeklySignups} signups
-• ${weeklyTrials} trials started
-• ${weeklyConversions} conversions
+        const fields = [
+          {
+            name: 'This Week',
+            value: `${weeklySignups} signups\n${weeklyTrials} trials\n${weeklyConversions} conversions`,
+            inline: true,
+          },
+          {
+            name: 'Last 30 Days',
+            value: `${monthlySignups} signups\n${monthlyTrials} trials\n${monthlyConversions} conversions`,
+            inline: true,
+          },
+          {
+            name: 'Metrics',
+            value: `${conversionRate.toFixed(1)}% conversion rate\n${trialConversionRate.toFixed(1)}% trial conversion\n$${mrr.toFixed(2)} MRR`,
+            inline: true,
+          },
+        ];
 
-Last 30 Days:
-• ${monthlySignups} total signups
-• ${monthlyTrials} trials
-• ${monthlyConversions} conversions
-• ${conversionRate.toFixed(1)}% conversion rate
-• ${trialConversionRate.toFixed(1)}% trial conversion
-• $${mrr.toFixed(2)} MRR`,
+        await sendDiscordAdminNotification({
+          title: '📊 Weekly Conversion Digest',
+          message: 'Weekly conversion statistics for the past 7 and 30 days.',
           priority: 'normal',
-          sound: 'default',
           url: `${baseUrl}/admin/analytics`,
+          fields,
         });
 
         console.log('✅ Weekly conversion digest sent');

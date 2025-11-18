@@ -55,55 +55,56 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { email } = await params;
-    const decodedEmail = decodeURIComponent(email);
+    const decodedEmail = decodeURIComponent(email).toLowerCase();
     const body = await request.json();
     const { isActive, preferences, isVerified } = body;
 
-    const updates: string[] = [];
+    // Build SET clause parts
+    const setParts: string[] = [];
     const values: any[] = [];
 
     if (isActive !== undefined) {
-      updates.push('is_active = $' + (values.length + 1));
+      setParts.push(`is_active = $${values.length + 1}`);
       values.push(isActive);
-
       if (!isActive) {
-        updates.push('unsubscribed_at = NOW()');
+        setParts.push(`unsubscribed_at = NOW()`);
       }
     }
 
     if (preferences !== undefined) {
-      updates.push('preferences = $' + (values.length + 1));
+      setParts.push(`preferences = $${values.length + 1}::jsonb`);
       values.push(JSON.stringify(preferences));
     }
 
     if (isVerified !== undefined) {
-      updates.push('is_verified = $' + (values.length + 1));
+      setParts.push(`is_verified = $${values.length + 1}`);
       values.push(isVerified);
-
       if (isVerified) {
-        updates.push('verified_at = NOW()');
-        updates.push('verification_token = NULL');
+        setParts.push(`verified_at = NOW()`);
+        setParts.push(`verification_token = NULL`);
       }
     }
 
-    if (updates.length === 0) {
+    setParts.push(`updated_at = NOW()`);
+    values.push(decodedEmail);
+
+    if (setParts.length === 1) {
+      // Only updated_at, nothing to update
       return NextResponse.json(
         { error: 'No fields to update' },
         { status: 400 },
       );
     }
 
-    updates.push('updated_at = NOW()');
-    values.push(decodedEmail.toLowerCase());
-
+    const setClause = setParts.join(', ');
     const query = `
       UPDATE newsletter_subscribers
-      SET ${updates.join(', ')}
+      SET ${setClause}
       WHERE email = $${values.length}
       RETURNING id, email, is_active, is_verified, preferences
     `;
 
-    // Use template literal with sql.unsafe for dynamic queries
+    // Use sql.unsafe for dynamic queries with parameters
     const result = await (sql as any).unsafe(query, values);
 
     if (result.rows.length === 0) {

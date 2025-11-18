@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { sendPushoverNotification } from '../../../../../../utils/notifications/pushNotifications';
+import { sendDiscordAdminNotification } from '@/lib/discord';
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,32 +66,38 @@ export async function POST(request: NextRequest) {
       monthlyTrials > 0 ? (monthlyConversions / monthlyTrials) * 100 : 0;
 
     const title = '📊 Weekly Conversion Digest';
-    const message = `This Week:
-• ${weeklySignups} signups
-• ${weeklyTrials} trials started
-• ${weeklyConversions} conversions
 
-Last 30 Days:
-• ${monthlySignups} total signups
-• ${monthlyTrials} trials
-• ${monthlyConversions} conversions
-• ${conversionRate.toFixed(1)}% conversion rate
-• ${trialConversionRate.toFixed(1)}% trial conversion
-• $${mrr.toFixed(2)} MRR`;
+    const fields = [
+      {
+        name: 'This Week',
+        value: `${weeklySignups} signups\n${weeklyTrials} trials\n${weeklyConversions} conversions`,
+        inline: true,
+      },
+      {
+        name: 'Last 30 Days',
+        value: `${monthlySignups} signups\n${monthlyTrials} trials\n${monthlyConversions} conversions`,
+        inline: true,
+      },
+      {
+        name: 'Metrics',
+        value: `${conversionRate.toFixed(1)}% conversion rate\n${trialConversionRate.toFixed(1)}% trial conversion\n$${mrr.toFixed(2)} MRR`,
+        inline: true,
+      },
+    ];
 
-    const result = await sendPushoverNotification({
+    const result = await sendDiscordAdminNotification({
       title,
-      message,
+      message: `Weekly conversion statistics for the past 7 and 30 days.`,
       priority: 'normal',
-      sound: 'default',
       url:
         process.env.NODE_ENV === 'production'
           ? 'https://lunary.app/admin/analytics'
           : 'http://localhost:3000/admin/analytics',
+      fields,
     });
 
     return NextResponse.json({
-      success: result.success,
+      success: result.ok,
       data: {
         weekly: {
           signups: weeklySignups,
