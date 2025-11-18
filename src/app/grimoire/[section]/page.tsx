@@ -38,6 +38,8 @@ const sectionDescriptions: Record<string, string> = {
     'Discover different paths of modern witchcraft, essential tools, ethics, coven vs solitary practice, and creating your Book of Shadows.',
   meditation:
     'Meditation and mindfulness practices for spiritual growth: techniques, breathwork, grounding exercises, centering, and magical journaling.',
+  'compatibility-chart':
+    'Interactive compatibility chart for zodiac signs, elements, moon phases, and crystal categories. Discover how different energies interact and complement each other.',
 };
 
 export async function generateMetadata({

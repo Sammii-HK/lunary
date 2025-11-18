@@ -137,6 +137,9 @@ export const grimoire: {
       'Journaling',
     ],
   },
+  compatibilityChart: {
+    title: 'Compatibility Chart',
+  },
 };
 
 export const grimoireItems = Object.keys(grimoire);

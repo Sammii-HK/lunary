@@ -116,6 +116,14 @@ const Meditation = dynamic(() => import('./components/Meditation'), {
     <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
   ),
 });
+const CompatibilityChart = dynamic(
+  () => import('./components/CompatibilityChart'),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+  },
+);
 
 const GrimoireContent = {
   moon: <Moon />,
@@ -133,6 +141,7 @@ const GrimoireContent = {
   divination: <Divination />,
   modernWitchcraft: <ModernWitchcraft />,
   meditation: <Meditation />,
+  compatibilityChart: <CompatibilityChart />,
 };
 
 interface SearchResult {
