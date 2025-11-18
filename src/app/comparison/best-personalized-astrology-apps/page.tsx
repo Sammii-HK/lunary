@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Check, Star, ArrowRight } from 'lucide-react';
+import { ComparisonPageStructuredData } from '@/components/ComparisonPageStructuredData';
 
 export const metadata: Metadata = {
   title:
@@ -23,6 +24,17 @@ export const metadata: Metadata = {
 export default function BestPersonalizedAstrologyAppsPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <ComparisonPageStructuredData
+        competitorName='Moonly and Lunar Guide'
+        featuresCompared={[
+          'Real astronomical calculations',
+          'Personalized birth charts',
+          'Grimoire with spells and rituals',
+          'Free trial availability',
+          'Astronomical accuracy',
+        ]}
+        conclusion='Lunary stands out as the best personalized astrology app for using real astronomical calculations, providing chart-based personalization, and including a complete grimoire with spells, rituals, and correspondences.'
+      />
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <div className='mb-8'>
           <h1 className='text-4xl font-light text-zinc-100 mb-4'>
