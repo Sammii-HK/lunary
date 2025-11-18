@@ -9,10 +9,11 @@ let posthogLoaded = false;
 async function loadPostHog() {
   if (posthogLoaded) return posthog;
 
-  // Use dynamic import with string concatenation to prevent webpack static analysis
+  // Use direct import - PostHog is optional and will be caught in try/catch
+  // This avoids webpack "critical dependency" warning while still making it optional
   try {
-    const moduleName = 'posthog' + '-js';
-    const posthogModule = await import(moduleName);
+    // Dynamic import - PostHog may not be installed
+    const posthogModule = await import('posthog-js');
     posthog = posthogModule.default || posthogModule;
     posthogLoaded = true;
     return posthog;
