@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
-import { hasFeatureAccess } from '../../../../utils/pricing';
+import { hasFeatureAccess, normalizePlanType } from '../../../../utils/pricing';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,12 +9,17 @@ export async function GET(request: NextRequest) {
 
     // Check subscription access
     const subscriptionResult = await sql`
-      SELECT status, plan FROM subscriptions WHERE user_id = ${user.id} ORDER BY created_at DESC LIMIT 1
+      SELECT status, plan_type FROM subscriptions WHERE user_id = ${user.id} ORDER BY created_at DESC LIMIT 1
     `;
     const subscription = subscriptionResult.rows[0];
+    // Normalize status: 'trialing' -> 'trial' for consistency with hasFeatureAccess
+    const rawStatus = subscription?.status || 'free';
+    const subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
+    // Normalize plan type to ensure correct feature access
+    const planType = normalizePlanType(subscription?.plan_type);
     const hasAccess = hasFeatureAccess(
-      subscription?.status || 'free',
-      subscription?.plan || undefined,
+      subscriptionStatus,
+      planType,
       'collections',
     );
 
@@ -224,12 +229,17 @@ export async function POST(request: NextRequest) {
 
     // Check subscription access
     const subscriptionResult = await sql`
-      SELECT status, plan FROM subscriptions WHERE user_id = ${user.id} ORDER BY created_at DESC LIMIT 1
+      SELECT status, plan_type FROM subscriptions WHERE user_id = ${user.id} ORDER BY created_at DESC LIMIT 1
     `;
     const subscription = subscriptionResult.rows[0];
+    // Normalize status: 'trialing' -> 'trial' for consistency with hasFeatureAccess
+    const rawStatus = subscription?.status || 'free';
+    const subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
+    // Normalize plan type to ensure correct feature access
+    const planType = normalizePlanType(subscription?.plan_type);
     const hasAccess = hasFeatureAccess(
-      subscription?.status || 'free',
-      subscription?.plan || undefined,
+      subscriptionStatus,
+      planType,
       'collections',
     );
 

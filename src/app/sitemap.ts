@@ -80,6 +80,48 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
+    {
+      url: `${baseUrl}/help`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/press-kit`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/building-lunary`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/moon-circles`,
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/launch`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/product-hunt`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/cosmic-report-generator`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
   ];
 
   // Generate all blog week posts (from start of 2025 to current week)

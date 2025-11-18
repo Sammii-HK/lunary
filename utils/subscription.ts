@@ -212,19 +212,21 @@ export async function fetchSubscriptionFromStripe(customerId: string) {
     }
 
     const result = await response.json();
-    
+
     if (result.success && result.subscription) {
       const sub = result.subscription;
-      
+
       console.log('🔍 Processing subscription data:', {
         id: sub.id,
         status: sub.status,
         trial_end: sub.trial_end,
         current_period_end: sub.current_period_end,
       });
-      
+
       // Format to match our internal structure with safe timestamp handling
-      const safeTimestamp = (timestamp: number | null | undefined): string | null => {
+      const safeTimestamp = (
+        timestamp: number | null | undefined,
+      ): string | null => {
         if (!timestamp || timestamp <= 0) return null;
         try {
           return new Date(timestamp * 1000).toISOString();
@@ -234,13 +236,23 @@ export async function fetchSubscriptionFromStripe(customerId: string) {
         }
       };
 
+      // Use plan from API response if available (preserves specific plan types like 'lunary_plus_ai_annual')
+      // Otherwise fall back to interval-based detection
+      const planFromApi = sub.plan;
+      const plan =
+        planFromApi ||
+        (sub.items.data[0]?.price?.recurring?.interval === 'month'
+          ? 'monthly'
+          : 'yearly');
+
       return {
         customerId,
         stripeSubscriptionId: sub.id,
         status: mapStripeStatus(sub.status),
-        plan: sub.items.data[0]?.price?.recurring?.interval === 'month' ? 'monthly' : 'yearly',
+        plan,
         trialEndsAt: safeTimestamp(sub.trial_end),
-        currentPeriodEnd: safeTimestamp(sub.current_period_end) || new Date().toISOString(),
+        currentPeriodEnd:
+          safeTimestamp(sub.current_period_end) || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         stripeCustomerId: customerId,
       };
@@ -261,13 +273,16 @@ export async function syncSubscriptionToProfile(
   try {
     // First try stored data (from webhooks)
     let subscriptionData = getStoredSubscriptionData(customerId);
-    
+
     // If no stored data, fetch directly from Stripe (more reliable)
     if (!subscriptionData) {
-      console.log('No stored data, fetching directly from Stripe for customer:', customerId);
+      console.log(
+        'No stored data, fetching directly from Stripe for customer:',
+        customerId,
+      );
       subscriptionData = await fetchSubscriptionFromStripe(customerId);
     }
-    
+
     if (!subscriptionData) {
       console.log('No subscription data found for customer:', customerId);
       return { success: false, message: 'No subscription data found' };
@@ -275,12 +290,56 @@ export async function syncSubscriptionToProfile(
 
     const { Subscription } = await import('../schema');
 
+    // Schema now supports specific plan types, so preserve exact plan type from Stripe
+    // Only normalize generic terms if we don't have a specific plan type
+    let schemaPlan: string = subscriptionData.plan;
+
+    // If plan is generic, try to infer from context (but prefer specific types)
+    if (schemaPlan === 'yearly' && !subscriptionData.plan.includes('lunary')) {
+      // If we have a customer ID, we could fetch from Stripe to get exact plan
+      // But for now, default yearly to annual AI plan (most common)
+      schemaPlan = 'lunary_plus_ai_annual';
+    } else if (
+      schemaPlan === 'monthly' &&
+      !subscriptionData.plan.includes('lunary')
+    ) {
+      schemaPlan = 'lunary_plus';
+    }
+
+    // Ensure plan is one of the allowed schema values
+    const allowedPlans = [
+      'free',
+      'monthly',
+      'yearly',
+      'lunary_plus',
+      'lunary_plus_ai',
+      'lunary_plus_ai_annual',
+    ];
+    if (!allowedPlans.includes(schemaPlan)) {
+      console.warn(
+        `[syncSubscriptionToProfile] Unknown plan type: ${schemaPlan}, defaulting to yearly`,
+      );
+      schemaPlan = 'lunary_plus_ai_annual';
+    }
+
     const subscriptionCoValue = Subscription.create(
       {
-        status: subscriptionData.status as "free" | "trial" | "active" | "cancelled" | "past_due",
-        plan: subscriptionData.plan as "free" | "monthly" | "yearly",
+        status: subscriptionData.status as
+          | 'free'
+          | 'trial'
+          | 'active'
+          | 'cancelled'
+          | 'past_due',
+        plan: schemaPlan as
+          | 'free'
+          | 'monthly'
+          | 'yearly'
+          | 'lunary_plus'
+          | 'lunary_plus_ai'
+          | 'lunary_plus_ai_annual',
         stripeCustomerId: subscriptionData.stripeCustomerId || undefined,
-        stripeSubscriptionId: subscriptionData.stripeSubscriptionId || undefined,
+        stripeSubscriptionId:
+          subscriptionData.stripeSubscriptionId || undefined,
         currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
         trialEndsAt: subscriptionData.trialEndsAt || undefined,
         createdAt: subscriptionData.updatedAt || new Date().toISOString(),
@@ -289,12 +348,28 @@ export async function syncSubscriptionToProfile(
       profile._owner || profile,
     );
 
+    if (!profile.$jazz) {
+      console.error(
+        '[syncSubscriptionToProfile] Profile does not have $jazz property',
+        { profileKeys: Object.keys(profile) },
+      );
+      return {
+        success: false,
+        message: 'Profile is not a valid Jazz coValue',
+      };
+    }
+
     profile.$jazz.set('subscription', subscriptionCoValue);
+
+    // Access subscription directly from profile (Jazz coValues expose properties directly)
+    const syncedSubscription = (profile as any).subscription;
 
     console.log('Subscription synced to Jazz profile:', {
       customerId,
       status: subscriptionData.status,
       plan: subscriptionData.plan,
+      schemaPlan: schemaPlan,
+      syncedPlan: syncedSubscription?.plan || 'unknown',
     });
 
     return { success: true, data: subscriptionData };

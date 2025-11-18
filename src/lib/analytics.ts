@@ -239,28 +239,41 @@ export async function trackConversion(
 
     track(event, payload);
 
-    const [analyticsResponse, notificationResponse] = await Promise.allSettled([
-      fetch('/api/analytics/conversion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      }),
-      fetch('/api/admin/notifications/conversion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          eventType: event,
-          userId: eventData.userId,
-          userEmail: eventData.userEmail,
-          planType: eventData.planType,
-          metadata: eventData.metadata,
-        }),
-      }),
-    ]);
+    const analyticsPromise = fetch('/api/analytics/conversion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const notificationPromise =
+      event === 'app_opened'
+        ? null
+        : fetch('/api/admin/notifications/conversion', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              eventType: event,
+              userId: eventData.userId,
+              userEmail: eventData.userEmail,
+              planType: eventData.planType,
+              metadata: eventData.metadata,
+            }),
+          });
+
+    const settledResults = await Promise.allSettled(
+      notificationPromise
+        ? [analyticsPromise, notificationPromise]
+        : [analyticsPromise],
+    );
+
+    const analyticsResponse = settledResults[0];
+    const notificationResponse = notificationPromise
+      ? settledResults[1]
+      : undefined;
 
     if (analyticsResponse.status === 'rejected') {
       console.error(
@@ -269,7 +282,7 @@ export async function trackConversion(
       );
     }
 
-    if (notificationResponse.status === 'rejected') {
+    if (notificationResponse && notificationResponse.status === 'rejected') {
       console.error(
         'Failed to send conversion notification:',
         notificationResponse.reason,

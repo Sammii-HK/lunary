@@ -85,8 +85,8 @@ export const getGeneralTarotReading = (): GeneralTarotReading => {
   }
 
   // Get cards using the existing tarot system
-  const dailyCard = getTarotCard(dailySeed, 'cosmic-daily-energy');
-  const weeklyCard = getTarotCard(weeklySeed, 'universal-weekly-guidance');
+  const dailyCard = getTarotCard(dailySeed);
+  const weeklyCard = getTarotCard(weeklySeed);
 
   // Generate guidance based on cosmic themes
   const dailyMessage = `Today's cosmic energy through ${dailyCard.name} suggests ${getDailyTheme(dayOfWeekLocal)}. The universe encourages you to ${getActionTheme(dailyCard.keywords)}.`;

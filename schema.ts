@@ -44,7 +44,14 @@ export const BirthChart = co.list(BirthChartPlanet);
 
 export const Subscription = co.map({
   status: z.enum(['free', 'trial', 'active', 'cancelled', 'past_due']),
-  plan: z.enum(['free', 'monthly', 'yearly']),
+  plan: z.enum([
+    'free',
+    'monthly',
+    'yearly',
+    'lunary_plus',
+    'lunary_plus_ai',
+    'lunary_plus_ai_annual',
+  ]),
   stripeCustomerId: z.string().optional(),
   stripeSubscriptionId: z.string().optional(),
   currentPeriodEnd: z.string().optional(),

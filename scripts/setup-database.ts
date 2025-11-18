@@ -544,6 +544,451 @@ async function setupDatabase() {
 
     console.log('✅ Moon circle insights table created');
 
+    // Create the newsletter_subscribers table
+    await sql`
+    CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+      id SERIAL PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      user_id TEXT,
+      is_active BOOLEAN DEFAULT true,
+      is_verified BOOLEAN DEFAULT false,
+      verification_token TEXT,
+      verified_at TIMESTAMP WITH TIME ZONE,
+      unsubscribed_at TIMESTAMP WITH TIME ZONE,
+      preferences JSONB DEFAULT '{
+        "weeklyNewsletter": true,
+        "blogUpdates": true,
+        "productUpdates": false,
+        "cosmicAlerts": false
+      }'::jsonb,
+      source TEXT,
+      referrer TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      last_email_sent TIMESTAMP WITH TIME ZONE,
+      email_count INTEGER DEFAULT 0
+    )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_newsletter_subscribers_email ON newsletter_subscribers(email)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_newsletter_subscribers_user_id ON newsletter_subscribers(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_newsletter_subscribers_active ON newsletter_subscribers(is_active) WHERE is_active = true`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_newsletter_subscribers_verified ON newsletter_subscribers(is_verified) WHERE is_verified = true`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_newsletter_subscribers_preferences ON newsletter_subscribers USING GIN(preferences)`;
+
+    await sql`
+    CREATE OR REPLACE FUNCTION update_newsletter_subscribers_updated_at()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        NEW.updated_at = NOW();
+        RETURN NEW;
+    END;
+    $$ language 'plpgsql'
+    `;
+
+    await sql`
+    DROP TRIGGER IF EXISTS update_newsletter_subscribers_updated_at ON newsletter_subscribers
+    `;
+
+    await sql`
+    CREATE TRIGGER update_newsletter_subscribers_updated_at
+        BEFORE UPDATE ON newsletter_subscribers
+        FOR EACH ROW
+        EXECUTE FUNCTION update_newsletter_subscribers_updated_at()
+    `;
+
+    console.log('✅ Newsletter subscribers table created');
+
+    // Create the cosmic_snapshots table (cached cosmic data for performance)
+    await sql`
+    CREATE TABLE IF NOT EXISTS cosmic_snapshots (
+      user_id TEXT NOT NULL,
+      snapshot_date DATE NOT NULL,
+      snapshot_data JSONB NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      PRIMARY KEY (user_id, snapshot_date)
+    )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_cosmic_snapshots_user_id ON cosmic_snapshots(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_cosmic_snapshots_date ON cosmic_snapshots(snapshot_date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_cosmic_snapshots_updated_at ON cosmic_snapshots(updated_at)`;
+
+    // Create the global_cosmic_data table (shared cosmic data)
+    await sql`
+    CREATE TABLE IF NOT EXISTS global_cosmic_data (
+      data_date DATE PRIMARY KEY,
+      moon_phase JSONB NOT NULL,
+      planetary_positions JSONB NOT NULL,
+      general_transits JSONB NOT NULL,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_global_cosmic_data_date ON global_cosmic_data(data_date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_global_cosmic_data_updated_at ON global_cosmic_data(updated_at)`;
+
+    console.log('✅ Cosmic snapshots tables created');
+
+    // Create the yearly_forecasts table (shared yearly forecast cache)
+    await sql`
+    CREATE TABLE IF NOT EXISTS yearly_forecasts (
+      year INTEGER PRIMARY KEY,
+      summary TEXT,
+      forecast JSONB NOT NULL,
+      stats JSONB,
+      source TEXT DEFAULT 'manual',
+      generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      expires_at TIMESTAMP WITH TIME ZONE,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_yearly_forecasts_updated_at ON yearly_forecasts(updated_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_yearly_forecasts_generated_at ON yearly_forecasts(generated_at)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_yearly_forecasts_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_yearly_forecasts_timestamp ON yearly_forecasts
+    `;
+
+    await sql`
+      CREATE TRIGGER update_yearly_forecasts_timestamp
+          BEFORE UPDATE ON yearly_forecasts
+          FOR EACH ROW
+          EXECUTE FUNCTION update_yearly_forecasts_updated_at()
+    `;
+
+    console.log('✅ Yearly forecasts table created');
+
+    // Create the year_analysis table (cached year-over-year analysis results)
+    await sql`
+    CREATE TABLE IF NOT EXISTS year_analysis (
+      user_id TEXT NOT NULL,
+      year INTEGER NOT NULL,
+      analysis_data JSONB NOT NULL,
+      card_recaps JSONB,
+      trends JSONB,
+      last_reading_date TIMESTAMP WITH TIME ZONE,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      PRIMARY KEY (user_id, year)
+    )
+    `;
+
+    // Add new columns if they don't exist (for existing tables)
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'year_analysis' AND column_name = 'card_recaps') THEN
+          ALTER TABLE year_analysis ADD COLUMN card_recaps JSONB;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'year_analysis' AND column_name = 'trends') THEN
+          ALTER TABLE year_analysis ADD COLUMN trends JSONB;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'year_analysis' AND column_name = 'last_reading_date') THEN
+          ALTER TABLE year_analysis ADD COLUMN last_reading_date TIMESTAMP WITH TIME ZONE;
+        END IF;
+      END $$;
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_year_analysis_user_id ON year_analysis(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_year_analysis_year ON year_analysis(year)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_year_analysis_updated_at ON year_analysis(updated_at)`;
+
+    console.log('✅ Year analysis table created');
+
+    // Create the pattern_analysis table (stores multidimensional and timeline analysis)
+    await sql`
+      CREATE TABLE IF NOT EXISTS pattern_analysis (
+        user_id TEXT NOT NULL,
+        analysis_type TEXT NOT NULL,
+        element_patterns JSONB,
+        color_patterns JSONB,
+        correlations JSONB,
+        timeline_data JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (user_id, analysis_type)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_pattern_analysis_user_id ON pattern_analysis(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_pattern_analysis_type ON pattern_analysis(analysis_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_pattern_analysis_updated_at ON pattern_analysis(updated_at)`;
+
+    console.log('✅ Pattern analysis table created');
+
+    // Create collections and collection_folders tables
+    await sql`
+      CREATE TABLE IF NOT EXISTS collection_folders (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        color TEXT DEFAULT '#6366f1',
+        icon TEXT DEFAULT 'book',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_collection_folders_user_id ON collection_folders(user_id)`;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS collections (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT,
+        category TEXT NOT NULL CHECK (category IN ('chat', 'ritual', 'insight', 'moon_circle', 'tarot', 'journal')),
+        content JSONB NOT NULL,
+        tags TEXT[],
+        folder_id INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_user_id ON collections(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_category ON collections(category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_created_at ON collections(created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_tags ON collections USING GIN(tags)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_folder_id ON collections(folder_id)`;
+
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint 
+          WHERE conname = 'collections_folder_id_fkey'
+        ) THEN
+          ALTER TABLE collections 
+          ADD CONSTRAINT collections_folder_id_fkey 
+          FOREIGN KEY (folder_id) REFERENCES collection_folders(id) ON DELETE SET NULL;
+        END IF;
+      END $$;
+    `;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_collections_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_collections_timestamp ON collections
+    `;
+
+    await sql`
+      CREATE TRIGGER update_collections_timestamp
+          BEFORE UPDATE ON collections
+          FOR EACH ROW
+          EXECUTE FUNCTION update_collections_updated_at()
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_collection_folders_timestamp ON collection_folders
+    `;
+
+    await sql`
+      CREATE TRIGGER update_collection_folders_timestamp
+          BEFORE UPDATE ON collection_folders
+          FOR EACH ROW
+          EXECUTE FUNCTION update_collections_updated_at()
+    `;
+
+    console.log('✅ Collections tables created');
+
+    // Create cosmic_reports table
+    await sql`
+      CREATE TABLE IF NOT EXISTS cosmic_reports (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT,
+        report_type TEXT NOT NULL,
+        report_data JSONB NOT NULL,
+        share_token TEXT UNIQUE,
+        is_public BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        expires_at TIMESTAMP WITH TIME ZONE
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_cosmic_reports_user_id ON cosmic_reports(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_cosmic_reports_share_token ON cosmic_reports(share_token)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_cosmic_reports_is_public ON cosmic_reports(is_public) WHERE is_public = true`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_cosmic_reports_created_at ON cosmic_reports(created_at)`;
+
+    console.log('✅ Cosmic reports table created');
+
+    // Create analytics tables
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_user_activity (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        activity_date DATE NOT NULL,
+        activity_type TEXT NOT NULL,
+        activity_count INTEGER DEFAULT 1,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id, activity_date, activity_type)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_user_activity_user_id ON analytics_user_activity(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_user_activity_date ON analytics_user_activity(activity_date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_user_activity_type ON analytics_user_activity(activity_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_user_activity_user_date ON analytics_user_activity(user_id, activity_date)`;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_ai_usage (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        session_id TEXT NOT NULL,
+        message_count INTEGER DEFAULT 0,
+        token_count INTEGER DEFAULT 0,
+        mode TEXT,
+        completed BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        completed_at TIMESTAMP WITH TIME ZONE,
+        UNIQUE(session_id)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_ai_usage_user_id ON analytics_ai_usage(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_ai_usage_session_id ON analytics_ai_usage(session_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_ai_usage_created_at ON analytics_ai_usage(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_ai_usage_mode ON analytics_ai_usage(mode)`;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_conversions (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        conversion_type TEXT NOT NULL,
+        from_plan TEXT,
+        to_plan TEXT,
+        trigger_feature TEXT,
+        days_to_convert INTEGER,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_user_id ON analytics_conversions(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_type ON analytics_conversions(conversion_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_created_at ON analytics_conversions(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_trigger_feature ON analytics_conversions(trigger_feature)`;
+
+    console.log('✅ Analytics tables created');
+
+    // Create weekly_ritual_usage table
+    await sql`
+      CREATE TABLE IF NOT EXISTS weekly_ritual_usage (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        week_start DATE NOT NULL,
+        ritual_count INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id, week_start)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_weekly_ritual_usage_user_week ON weekly_ritual_usage(user_id, week_start)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_weekly_ritual_usage_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_weekly_ritual_usage_timestamp ON weekly_ritual_usage
+    `;
+
+    await sql`
+      CREATE TRIGGER update_weekly_ritual_usage_timestamp
+          BEFORE UPDATE ON weekly_ritual_usage
+          FOR EACH ROW
+          EXECUTE FUNCTION update_weekly_ritual_usage_updated_at()
+    `;
+
+    console.log('✅ Weekly ritual usage table created');
+
+    // Create launch_signups table
+    await sql`
+      CREATE TABLE IF NOT EXISTS launch_signups (
+        id SERIAL PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        source TEXT NOT NULL,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_launch_signups_email ON launch_signups(email)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_launch_signups_source ON launch_signups(source)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_launch_signups_created_at ON launch_signups(created_at)`;
+
+    console.log('✅ Launch signups table created');
+
+    // Create referral tables
+    await sql`
+      CREATE TABLE IF NOT EXISTS referral_codes (
+        id SERIAL PRIMARY KEY,
+        code TEXT NOT NULL UNIQUE,
+        user_id TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        uses INTEGER DEFAULT 0,
+        max_uses INTEGER
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_referral_codes_user_id ON referral_codes(user_id)`;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_referrals (
+        id SERIAL PRIMARY KEY,
+        referrer_user_id TEXT NOT NULL,
+        referred_user_id TEXT NOT NULL,
+        referral_code TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        reward_granted BOOLEAN DEFAULT false,
+        reward_granted_at TIMESTAMP WITH TIME ZONE,
+        UNIQUE(referred_user_id)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_referrals_referrer ON user_referrals(referrer_user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_referrals_referred ON user_referrals(referred_user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_referrals_code ON user_referrals(referral_code)`;
+
+    console.log('✅ Referral tables created');
+
     console.log('✅ Database setup complete!');
     console.log(
       '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, and moon circle insights',

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 
 import { auth } from '@/lib/auth';
+import { normalizePlanType } from '../../../utils/pricing';
 
 export type AuthenticatedUser = {
   id: string;
@@ -58,6 +59,14 @@ export const requireUser = async (
       throw new UnauthorizedError();
     }
 
+    const sessionPlanCandidates = [
+      (user as any)?.subscription?.plan,
+      (user as any)?.plan,
+      (user as any)?.planName,
+      (user as any)?.aiPlan,
+    ].filter(Boolean) as string[];
+    const normalizedSessionPlan = normalizePlanType(sessionPlanCandidates[0]);
+
     // Fetch subscription from database to get accurate plan
     let subscriptionPlan: string | undefined;
     try {
@@ -66,16 +75,18 @@ export const requireUser = async (
         SELECT plan_type, status
         FROM subscriptions
         WHERE user_id = ${user.id}
-        AND status IN ('active', 'trial')
         ORDER BY created_at DESC
         LIMIT 1
       `;
 
       if (subscriptionResult.rows.length > 0) {
         const sub = subscriptionResult.rows[0];
-        // Map subscription plan to AI plan
-        if (sub.status === 'active' || sub.status === 'trial') {
-          subscriptionPlan = sub.plan_type || 'monthly';
+        if (
+          sub.status === 'active' ||
+          sub.status === 'trial' ||
+          sub.status === 'trialing'
+        ) {
+          subscriptionPlan = sub.plan_type || undefined;
         }
       }
     } catch (error) {
@@ -88,7 +99,12 @@ export const requireUser = async (
       displayName: user.name ?? user.displayName ?? undefined,
       timezone: user.tz ?? user.timezone ?? DEFAULT_TIMEZONE,
       locale: extractPrimaryLocale(user.locale ?? user.language ?? 'en-GB'),
-      plan: subscriptionPlan || user.aiPlan || user.plan || undefined,
+      plan:
+        (normalizedSessionPlan && normalizedSessionPlan !== 'free'
+          ? normalizedSessionPlan
+          : undefined) ||
+        normalizePlanType(subscriptionPlan) ||
+        undefined,
       birthday: user.birthday ?? user.birthDate ?? undefined,
     };
   } catch (error) {

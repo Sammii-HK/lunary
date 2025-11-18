@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 
 import { trackNotificationEvent } from '@/lib/analytics/tracking';
+import { sendDiscordNotification } from '@/lib/discord';
 
 // Lazy initialization of VAPID keys (only when actually needed)
 function ensureVapidConfigured() {
@@ -227,6 +228,69 @@ export async function POST(request: NextRequest) {
     console.log(
       `✅ Notification sent: ${successful} successful, ${failed} failed`,
     );
+
+    const truncate = (value: string | undefined, max: number) => {
+      if (!value) return value;
+      return value.length > max ? `${value.slice(0, max - 3)}...` : value;
+    };
+
+    const discordFields: { name: string; value: string; inline?: boolean }[] =
+      [];
+
+    if (eventType) {
+      discordFields.push({
+        name: 'Event Type',
+        value: String(eventType),
+        inline: true,
+      });
+    }
+
+    if (payload.data?.priority !== undefined) {
+      discordFields.push({
+        name: 'Priority',
+        value: String(payload.data.priority),
+        inline: true,
+      });
+    }
+
+    discordFields.push({
+      name: 'Recipients',
+      value: String(subscriptions.rows.length),
+      inline: true,
+    });
+
+    discordFields.push({
+      name: 'Delivered',
+      value: `${successful} ok / ${failed} failed`,
+      inline: true,
+    });
+
+    const footerParts: string[] = [];
+
+    if (payload.data?.eventName) {
+      footerParts.push(payload.data.eventName);
+    }
+
+    if (payload.data?.date) {
+      footerParts.push(payload.data.date);
+    }
+
+    if (payload.data?.source) {
+      footerParts.push(`Source: ${payload.data.source}`);
+    }
+
+    const discordResult = await sendDiscordNotification({
+      content: `Cosmic alert: ${payload.title}`,
+      title: payload.title,
+      description: truncate(payload.body, 1500),
+      url: payload.data?.url,
+      fields: discordFields,
+      footer: footerParts.length ? footerParts.join(' • ') : undefined,
+    });
+
+    if (!discordResult.ok && !discordResult.skipped) {
+      console.error('[discord] notification send failed:', discordResult.error);
+    }
 
     return NextResponse.json({
       success: successful > 0,
