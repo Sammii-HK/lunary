@@ -179,6 +179,32 @@ export async function POST(request: NextRequest) {
       END $$;
     `;
 
+    // Add trial nurture tracking columns if they don't exist
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day2_sent') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day2_sent BOOLEAN DEFAULT false;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day3_sent') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day3_sent BOOLEAN DEFAULT false;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day5_sent') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day5_sent BOOLEAN DEFAULT false;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day7_sent') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day7_sent BOOLEAN DEFAULT false;
+        END IF;
+      END $$;
+    `;
+
     // Create update timestamp trigger function for subscriptions
     await sql`
       CREATE OR REPLACE FUNCTION update_subscriptions_updated_at()
