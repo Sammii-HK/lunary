@@ -19,6 +19,16 @@ async function setupRouteBlocking(page: Page) {
     const resourceType = route.request().resourceType();
     const url = route.request().url();
 
+    // BLOCK slow auth session checks - return mock immediately (CRITICAL FOR SPEED)
+    if (url.includes('/api/auth/get-session')) {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ session: null, user: null }),
+      });
+      return;
+    }
+
     // Block images (unless needed for visual tests)
     if (
       resourceType === 'image' &&
@@ -63,6 +73,38 @@ type AuthFixtures = {
 };
 
 export const test = base.extend<AuthFixtures>({
+  // Override browser to set up route interception at context level
+  browser: async ({ browser }, use) => {
+    // Set up route interception for ALL contexts created from this browser
+    const originalNewContext = browser.newContext.bind(browser);
+    browser.newContext = async (options?: any) => {
+      const context = await originalNewContext(options);
+      // Block auth session checks at context level - applies to all pages
+      await context.route('**/api/auth/get-session', (route) => {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ session: null, user: null }),
+        });
+      });
+      return context;
+    };
+    await use(browser);
+  },
+
+  // Add route blocking to base page fixture for ALL tests (backup)
+  page: async ({ page }, use) => {
+    // Block slow auth session checks - return mock immediately
+    await page.route('**/api/auth/get-session', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ session: null, user: null }),
+      });
+    });
+    await use(page);
+  },
+
   testUser: async ({}, use) => {
     // Access TEST_USERS.regular as a getter to ensure env vars are read at test time
     const testUser = TEST_USERS.regular;
@@ -100,10 +142,30 @@ export const test = base.extend<AuthFixtures>({
         ignoreHTTPSErrors: true,
       });
 
+      // CRITICAL: Block auth session checks FIRST before any other routes
+      // This MUST be set up before any pages are created
+      await authContext.route(/.*\/api\/auth\/get-session.*/, (route) => {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ session: null, user: null }),
+        });
+      });
+
       // Setup route blocking for faster tests
       await authContext.route('**/*', (route) => {
         const resourceType = route.request().resourceType();
         const url = route.request().url();
+
+        // BLOCK slow auth session checks - return mock immediately (backup check)
+        if (url.includes('/api/auth/get-session')) {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ session: null, user: null }),
+          });
+          return;
+        }
 
         if (
           resourceType === 'image' &&

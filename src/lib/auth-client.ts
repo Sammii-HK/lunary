@@ -3,17 +3,21 @@
 import { createAuthClient } from 'better-auth/client';
 import { jazzPluginClient } from 'jazz-tools/better-auth/auth/client';
 
-// Detect test mode at runtime (works in client components)
+// Detect Playwright e2e test mode (NOT Jest unit tests)
+// Only skip auth checks in Playwright e2e tests, not Jest unit tests
 function isTestMode(): boolean {
   if (typeof window === 'undefined') return false;
-  return (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.search.includes('test=true') ||
-    // Also check for Playwright test indicators
+
+  // Jest unit tests run in jsdom (Node.js), not real browser
+  // Only skip for Playwright e2e tests which run in real browser
+  const isPlaywrightTest =
     window.navigator.userAgent.includes('HeadlessChrome') ||
-    (window as any).__PLAYWRIGHT_TEST__ === true
-  );
+    (window as any).__PLAYWRIGHT_TEST__ === true ||
+    // Check for Playwright-specific indicators
+    (window.location.hostname === 'localhost' &&
+      window.navigator.userAgent.includes('Playwright'));
+
+  return isPlaywrightTest;
 }
 
 // Better Auth client configuration with Jazz plugin

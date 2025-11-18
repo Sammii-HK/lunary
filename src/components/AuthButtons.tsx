@@ -16,26 +16,31 @@ interface AuthButtonsProps {
   className?: string;
 }
 
-// Skip auth checks in test/CI environments
-const isTestMode =
-  process.env.NODE_ENV === 'test' ||
-  process.env.CI === 'true' ||
-  !!process.env.CI ||
-  (typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1'));
+// Skip auth checks ONLY in Playwright e2e tests (NOT Jest unit tests)
+function isTestMode(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  // Jest unit tests run in jsdom (Node.js), not real browser
+  // Only skip for Playwright e2e tests which run in real browser
+  return (
+    window.navigator.userAgent.includes('HeadlessChrome') ||
+    (window as any).__PLAYWRIGHT_TEST__ === true ||
+    (window.location.hostname === 'localhost' &&
+      window.navigator.userAgent.includes('Playwright'))
+  );
+}
 
 export function AuthButtons({
   variant = 'primary',
   className = '',
 }: AuthButtonsProps) {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(!isTestMode); // Skip loading in test mode
+  const [loading, setLoading] = useState(!isTestMode()); // Skip loading in test mode
   const account = useAccount();
 
   useEffect(() => {
-    if (isTestMode) {
-      // In test mode, skip auth check entirely
+    if (isTestMode()) {
+      // In Playwright e2e test mode, skip auth check entirely
       setLoading(false);
       return;
     }

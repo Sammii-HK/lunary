@@ -55,34 +55,29 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { email } = await params;
-    const decodedEmail = decodeURIComponent(email);
+    const decodedEmail = decodeURIComponent(email).toLowerCase();
     const body = await request.json();
     const { isActive, preferences, isVerified } = body;
 
-    const updates: string[] = [];
-    const values: any[] = [];
+    // Build dynamic query using sql template literal
+    const updates: any[] = [];
 
     if (isActive !== undefined) {
-      updates.push('is_active = $' + (values.length + 1));
-      values.push(isActive);
-
+      updates.push(sql`is_active = ${isActive}`);
       if (!isActive) {
-        updates.push('unsubscribed_at = NOW()');
+        updates.push(sql`unsubscribed_at = NOW()`);
       }
     }
 
     if (preferences !== undefined) {
-      updates.push('preferences = $' + (values.length + 1));
-      values.push(JSON.stringify(preferences));
+      updates.push(sql`preferences = ${JSON.stringify(preferences)}::jsonb`);
     }
 
     if (isVerified !== undefined) {
-      updates.push('is_verified = $' + (values.length + 1));
-      values.push(isVerified);
-
+      updates.push(sql`is_verified = ${isVerified}`);
       if (isVerified) {
-        updates.push('verified_at = NOW()');
-        updates.push('verification_token = NULL');
+        updates.push(sql`verified_at = NOW()`);
+        updates.push(sql`verification_token = NULL`);
       }
     }
 
@@ -93,18 +88,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    updates.push('updated_at = NOW()');
-    values.push(decodedEmail.toLowerCase());
+    updates.push(sql`updated_at = NOW()`);
 
-    const query = `
+    // Combine all updates using sql.join
+    const result = await sql`
       UPDATE newsletter_subscribers
-      SET ${updates.join(', ')}
-      WHERE email = $${values.length}
+      SET ${sql.join(updates, sql`, `)}
+      WHERE email = ${decodedEmail}
       RETURNING id, email, is_active, is_verified, preferences
     `;
-
-    // Use template literal with sql.unsafe for dynamic queries
-    const result = await (sql as any).unsafe(query, values);
 
     if (result.rows.length === 0) {
       return NextResponse.json(

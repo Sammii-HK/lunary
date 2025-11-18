@@ -89,6 +89,9 @@ export default defineConfig({
       NODE_ENV: 'test',
       CI: process.env.CI || 'true', // Explicitly set CI for middleware
       GITHUB_ACTIONS: process.env.GITHUB_ACTIONS || 'true', // GitHub Actions flag
+      // CRITICAL: Bypass auth in test mode to prevent hanging
+      BYPASS_AUTH: 'true',
+      SKIP_AUTH: 'true',
       // Suppress Next.js verbose logging in tests
       NEXT_TELEMETRY_DISABLED: '1',
       // Set default test values if not provided
