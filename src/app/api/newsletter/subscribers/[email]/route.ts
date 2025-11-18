@@ -59,44 +59,53 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const { isActive, preferences, isVerified } = body;
 
-    // Build dynamic query using sql template literal
-    const updates: any[] = [];
+    // Build SET clause parts
+    const setParts: string[] = [];
+    const values: any[] = [];
 
     if (isActive !== undefined) {
-      updates.push(sql`is_active = ${isActive}`);
+      setParts.push(`is_active = $${values.length + 1}`);
+      values.push(isActive);
       if (!isActive) {
-        updates.push(sql`unsubscribed_at = NOW()`);
+        setParts.push(`unsubscribed_at = NOW()`);
       }
     }
 
     if (preferences !== undefined) {
-      updates.push(sql`preferences = ${JSON.stringify(preferences)}::jsonb`);
+      setParts.push(`preferences = $${values.length + 1}::jsonb`);
+      values.push(JSON.stringify(preferences));
     }
 
     if (isVerified !== undefined) {
-      updates.push(sql`is_verified = ${isVerified}`);
+      setParts.push(`is_verified = $${values.length + 1}`);
+      values.push(isVerified);
       if (isVerified) {
-        updates.push(sql`verified_at = NOW()`);
-        updates.push(sql`verification_token = NULL`);
+        setParts.push(`verified_at = NOW()`);
+        setParts.push(`verification_token = NULL`);
       }
     }
 
-    if (updates.length === 0) {
+    setParts.push(`updated_at = NOW()`);
+    values.push(decodedEmail);
+
+    if (setParts.length === 1) {
+      // Only updated_at, nothing to update
       return NextResponse.json(
         { error: 'No fields to update' },
         { status: 400 },
       );
     }
 
-    updates.push(sql`updated_at = NOW()`);
-
-    // Combine all updates using sql.join
-    const result = await sql`
+    const setClause = setParts.join(', ');
+    const query = `
       UPDATE newsletter_subscribers
-      SET ${sql.join(updates, sql`, `)}
-      WHERE email = ${decodedEmail}
+      SET ${setClause}
+      WHERE email = $${values.length}
       RETURNING id, email, is_active, is_verified, preferences
     `;
+
+    // Use sql.unsafe for dynamic queries with parameters
+    const result = await (sql as any).unsafe(query, values);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
