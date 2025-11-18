@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     const baseUrl =
       process.env.NODE_ENV === 'production'
-        ? 'https://www.lunary.app'
+        ? 'https://lunary.app'
         : 'http://localhost:3000';
 
     const platforms = [platform];
@@ -121,14 +121,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build media array - ensure URLs use canonical www.lunary.app to avoid redirects
+    // Build media array - ensure URLs use canonical lunary.app (non-www) domain
     const mediaArray = actualImageUrl
       ? [
           {
             type: 'image' as const,
-            url: String(actualImageUrl)
-              .trim()
-              .replace(/^https:\/\/lunary\.app\//, 'https://www.lunary.app/'),
+            url: String(actualImageUrl).trim(),
             alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
           },
         ]

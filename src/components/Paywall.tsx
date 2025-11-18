@@ -72,6 +72,14 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
   return (
     <div className='bg-gray-900 rounded-lg p-8 text-center'>
       <div className='max-w-md mx-auto'>
+        {/* Teaser Text */}
+        <div className='mb-6 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/30'>
+          <p className='text-purple-200 text-sm font-medium italic'>
+            &ldquo;This is the personalised interpretation for YOUR
+            chart.&rdquo;
+          </p>
+        </div>
+
         <div className='w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6'>
           <svg
             className='w-8 h-8 text-white'

@@ -12,6 +12,7 @@ import { PWA_MANIFEST_URL } from '@/constants/pwa';
 import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
 import { StructuredData } from '@/components/StructuredData';
 import { AppChrome } from '@/components/AppChrome';
+import { PostHogProvider } from '@/components/PostHogProvider';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -43,6 +44,17 @@ export async function generateMetadata(): Promise<Metadata> {
     publisher: 'Lunary',
     alternates: {
       canonical: 'https://lunary.app',
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
     openGraph: {
       title: 'Lunary - Your Daily Cosmic Guide',
@@ -105,15 +117,17 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <StructuredData />
-        <ErrorBoundaryWrapper>
-          <LunaryJazzProvider>
-            <ConditionalMainWrapper>
-              <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-              <Analytics />
-            </ConditionalMainWrapper>
-            <AppChrome />
-          </LunaryJazzProvider>
-        </ErrorBoundaryWrapper>
+        <PostHogProvider>
+          <ErrorBoundaryWrapper>
+            <LunaryJazzProvider>
+              <ConditionalMainWrapper>
+                <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                <Analytics />
+              </ConditionalMainWrapper>
+              <AppChrome />
+            </LunaryJazzProvider>
+          </ErrorBoundaryWrapper>
+        </PostHogProvider>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 const Divination = () => {
@@ -18,9 +19,9 @@ const Divination = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Divination Methods
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Divination Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Explore various divination methods beyond tarot: pendulum, scrying,
           dream interpretation, and reading omens. Each method offers unique
@@ -31,9 +32,12 @@ const Divination = () => {
       {/* Pendulum Section */}
       <section id='pendulum' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/pendulum-divination'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Pendulum Divination
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Pendulums are simple yet powerful divination tools. They answer
             yes/no questions and can help locate objects or energy.
@@ -120,7 +124,12 @@ const Divination = () => {
       {/* Scrying Section */}
       <section id='scrying' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>Scrying</h2>
+          <Link
+            href='/grimoire/scrying'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
+            Scrying
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Scrying is the art of seeing visions in reflective surfaces. Common
             tools include crystal balls, black mirrors, water, and fire.
@@ -188,9 +197,12 @@ const Divination = () => {
       {/* Dream Interpretation Section */}
       <section id='dream-interpretation' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/dream-interpretation'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Dream Interpretation
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Dreams are messages from your subconscious and the spiritual realm.
             Learning to interpret dreams opens a powerful channel of guidance.
@@ -293,9 +305,12 @@ const Divination = () => {
       {/* Omen Reading Section */}
       <section id='omen-reading' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/reading-omens'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Reading Omens
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Omens are signs from nature and the universe. Learning to recognize
             and interpret omens connects you with cosmic guidance.

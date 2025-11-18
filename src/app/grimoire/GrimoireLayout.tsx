@@ -23,6 +23,7 @@ import { chakras } from '@/constants/chakras';
 import {
   crystalCategories,
   getCrystalsByCategory,
+  crystalDatabase,
 } from '@/constants/grimoire/crystals';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import {
@@ -30,6 +31,8 @@ import {
   monthlyMoonPhases,
 } from '../../../utils/moon/monthlyPhases';
 import { zodiacSigns, planetaryBodies } from '../../../utils/zodiac/zodiac';
+import { wheelOfTheYearSabbats } from '@/constants/sabbats';
+import { tarotCards } from '../../../utils/tarot/tarot-cards';
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -155,7 +158,12 @@ interface SearchResult {
     | 'chakra'
     | 'moon'
     | 'zodiac'
-    | 'planet';
+    | 'planet'
+    | 'candle'
+    | 'practice'
+    | 'sabbat'
+    | 'meditation'
+    | 'witch';
   title: string;
   section?: string;
   href: string;
@@ -267,7 +275,7 @@ export default function GrimoireLayout({
       });
     });
 
-    // Search runes
+    // Search runes - link to individual pages
     Object.entries(runesList).forEach(([key, rune]) => {
       if (
         rune.name.toLowerCase().includes(query) ||
@@ -279,13 +287,13 @@ export default function GrimoireLayout({
           type: 'rune',
           title: `${rune.symbol} ${rune.name}`,
           section: 'runes',
-          href: `/grimoire/runes#${key}`,
+          href: `/grimoire/runes/${stringToKebabCase(key)}`,
           match: `Meaning: ${rune.meaning}`,
         });
       }
     });
 
-    // Search tarot
+    // Search tarot suits - link to individual pages
     Object.entries(tarotSuits).forEach(([key, suit]) => {
       if (
         suit.name.toLowerCase().includes(query) ||
@@ -294,13 +302,14 @@ export default function GrimoireLayout({
       ) {
         results.push({
           type: 'tarot',
-          title: `Tarot - ${suit.name}`,
+          title: `Tarot Suit - ${suit.name}`,
           section: 'tarot',
-          href: '/grimoire/tarot#arcana',
+          href: `/grimoire/tarot-suits/${stringToKebabCase(key)}`,
         });
       }
     });
 
+    // Search tarot spreads - link to individual pages
     Object.entries(tarotSpreads).forEach(([key, spread]) => {
       if (
         spread.name.toLowerCase().includes(query) ||
@@ -310,12 +319,44 @@ export default function GrimoireLayout({
           type: 'tarot',
           title: `Tarot Spread - ${spread.name}`,
           section: 'tarot',
-          href: '/grimoire/tarot#spreads',
+          href: `/grimoire/tarot-spreads/${stringToKebabCase(key)}`,
         });
       }
     });
 
-    // Search correspondences - Colors
+    // Search tarot cards - link to individual pages
+    Object.entries(tarotCards.majorArcana).forEach(([key, card]) => {
+      if (
+        card.name.toLowerCase().includes(query) ||
+        card.keywords.some((kw) => kw.toLowerCase().includes(query)) ||
+        card.information?.toLowerCase().includes(query)
+      ) {
+        results.push({
+          type: 'tarot',
+          title: `Tarot Card - ${card.name}`,
+          section: 'tarot',
+          href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
+        });
+      }
+    });
+    Object.entries(tarotCards.minorArcana).forEach(([suitKey, suit]) => {
+      Object.entries(suit).forEach(([key, card]) => {
+        if (
+          card.name.toLowerCase().includes(query) ||
+          card.keywords.some((kw) => kw.toLowerCase().includes(query)) ||
+          card.information?.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'tarot',
+            title: `Tarot Card - ${card.name}`,
+            section: 'tarot',
+            href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
+          });
+        }
+      });
+    });
+
+    // Search correspondences - Colors - link to individual pages
     Object.entries(correspondencesData.colors).forEach(([color, data]) => {
       if (
         color.toLowerCase().includes(query) ||
@@ -327,13 +368,55 @@ export default function GrimoireLayout({
           type: 'correspondence',
           title: `Color - ${color}`,
           section: 'correspondences',
-          href: '/grimoire/correspondences#colors',
+          href: `/grimoire/correspondences/colors/${stringToKebabCase(color)}`,
           match: `Uses: ${data.uses.join(', ')}`,
         });
       }
     });
 
-    // Search correspondences - Elements
+    // Search candle colors
+    const candleColors = [
+      { name: 'Red', uses: ['Love spells', 'Courage', 'Energy', 'Protection'] },
+      {
+        name: 'Pink',
+        uses: ['Romantic love', 'Friendship', 'Emotional healing'],
+      },
+      { name: 'Orange', uses: ['Career success', 'Creativity', 'Attraction'] },
+      { name: 'Yellow', uses: ['Communication', 'Learning', 'Mental clarity'] },
+      { name: 'Green', uses: ['Money', 'Growth', 'Fertility', 'Healing'] },
+      { name: 'Blue', uses: ['Peace', 'Healing', 'Protection', 'Wisdom'] },
+      {
+        name: 'Purple',
+        uses: ['Spirituality', 'Divination', 'Psychic development'],
+      },
+      {
+        name: 'Indigo',
+        uses: ['Meditation', 'Intuition', 'Psychic protection'],
+      },
+      { name: 'White', uses: ['All-purpose', 'Protection', 'Purification'] },
+      {
+        name: 'Black',
+        uses: ['Banishing', 'Protection', 'Removing negativity'],
+      },
+      { name: 'Brown', uses: ['Grounding', 'Stability', 'Home protection'] },
+      { name: 'Silver', uses: ['Intuition', 'Dream work', 'Moon magic'] },
+    ];
+    candleColors.forEach((candle) => {
+      if (
+        candle.name.toLowerCase().includes(query) ||
+        candle.uses.some((use) => use.toLowerCase().includes(query))
+      ) {
+        results.push({
+          type: 'candle',
+          title: `Candle Color - ${candle.name}`,
+          section: 'candle-magic',
+          href: `/grimoire/candle-magic#color-meanings`,
+          match: `Uses: ${candle.uses.join(', ')}`,
+        });
+      }
+    });
+
+    // Search correspondences - Elements - link to individual pages
     Object.entries(correspondencesData.elements).forEach(([element, data]) => {
       if (
         element.toLowerCase().includes(query) ||
@@ -349,13 +432,13 @@ export default function GrimoireLayout({
           type: 'correspondence',
           title: `Element - ${element}`,
           section: 'correspondences',
-          href: '/grimoire/correspondences#elements',
+          href: `/grimoire/correspondences/elements/${stringToKebabCase(element)}`,
           match: `Direction: ${data.directions}`,
         });
       }
     });
 
-    // Search correspondences - Days
+    // Search correspondences - Days - link to individual pages
     Object.entries(correspondencesData.days).forEach(([day, data]) => {
       if (
         day.toLowerCase().includes(query) ||
@@ -368,13 +451,13 @@ export default function GrimoireLayout({
           type: 'correspondence',
           title: `Planetary Day - ${day}`,
           section: 'correspondences',
-          href: '/grimoire/correspondences#days',
+          href: `/grimoire/correspondences/days/${stringToKebabCase(day)}`,
           match: `Planet: ${data.planet}, Element: ${data.element}`,
         });
       }
     });
 
-    // Search correspondences - Herbs
+    // Search correspondences - Herbs - link to individual pages
     Object.entries(correspondencesData.herbs).forEach(([herb, data]) => {
       if (
         herb.toLowerCase().includes(query) ||
@@ -386,13 +469,13 @@ export default function GrimoireLayout({
           type: 'correspondence',
           title: `Herb - ${herb}`,
           section: 'correspondences',
-          href: '/grimoire/correspondences#herbs',
+          href: `/grimoire/correspondences/herbs/${stringToKebabCase(herb)}`,
           match: `Uses: ${data.uses.join(', ')}`,
         });
       }
     });
 
-    // Search correspondences - Numbers
+    // Search correspondences - Numbers - link to individual pages
     Object.entries(correspondencesData.numbers).forEach(([num, data]) => {
       if (
         num === query ||
@@ -404,13 +487,13 @@ export default function GrimoireLayout({
           type: 'correspondence',
           title: `Number - ${num}`,
           section: 'correspondences',
-          href: '/grimoire/correspondences#numbers',
+          href: `/grimoire/correspondences/numbers/${stringToKebabCase(num)}`,
           match: `Uses: ${data.uses.join(', ')}`,
         });
       }
     });
 
-    // Search correspondences - Deities
+    // Search correspondences - Deities - link to individual pages
     Object.entries(correspondencesData.deities).forEach(([pantheon, gods]) => {
       Object.entries(gods).forEach(([name, data]) => {
         if (
@@ -422,14 +505,14 @@ export default function GrimoireLayout({
             type: 'correspondence',
             title: `${pantheon} Deity - ${name}`,
             section: 'correspondences',
-            href: '/grimoire/correspondences#deities',
+            href: `/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(name)}`,
             match: `Domain: ${data.domain.join(', ')}`,
           });
         }
       });
     });
 
-    // Search correspondences - Flowers
+    // Search correspondences - Flowers - link to individual pages
     Object.entries(correspondencesData.flowers).forEach(([flower, data]) => {
       if (
         flower.toLowerCase().includes(query) ||
@@ -441,13 +524,13 @@ export default function GrimoireLayout({
           type: 'correspondence',
           title: `Flower - ${flower}`,
           section: 'correspondences',
-          href: '/grimoire/correspondences#flowers',
+          href: `/grimoire/correspondences/flowers/${stringToKebabCase(flower)}`,
           match: `Uses: ${data.uses.join(', ')}`,
         });
       }
     });
 
-    // Search correspondences - Wood
+    // Search correspondences - Wood - link to individual pages
     Object.entries(correspondencesData.wood).forEach(([wood, data]) => {
       if (
         wood.toLowerCase().includes(query) ||
@@ -459,13 +542,13 @@ export default function GrimoireLayout({
           type: 'correspondence',
           title: `Wood - ${wood}`,
           section: 'correspondences',
-          href: '/grimoire/correspondences#wood',
+          href: `/grimoire/correspondences/wood/${stringToKebabCase(wood)}`,
           match: `Uses: ${data.uses.join(', ')}`,
         });
       }
     });
 
-    // Search correspondences - Animals
+    // Search correspondences - Animals - link to individual pages
     Object.entries(correspondencesData.animals).forEach(([animal, data]) => {
       if (
         animal.toLowerCase().includes(query) ||
@@ -477,13 +560,30 @@ export default function GrimoireLayout({
           type: 'correspondence',
           title: `Animal - ${animal}`,
           section: 'correspondences',
-          href: '/grimoire/correspondences#animals',
+          href: `/grimoire/correspondences/animals/${stringToKebabCase(animal)}`,
           match: `Uses: ${data.uses.join(', ')}`,
         });
       }
     });
 
-    // Search chakras
+    // Search candle magic
+    if (
+      query.includes('candle') ||
+      query.includes('candle magic') ||
+      query.includes('carving') ||
+      query.includes('anointing')
+    ) {
+      results.push({
+        type: 'practice',
+        title: 'Candle Magic',
+        section: 'candle-magic',
+        href: '/grimoire/candle-magic',
+        match:
+          'Complete guide to candle magic, color meanings, carving, and rituals',
+      });
+    }
+
+    // Search chakras - link to individual pages
     Object.entries(chakras).forEach(([key, chakra]) => {
       if (
         chakra.name.toLowerCase().includes(query) ||
@@ -496,13 +596,13 @@ export default function GrimoireLayout({
           type: 'chakra',
           title: `${chakra.symbol} ${chakra.name} Chakra`,
           section: 'chakras',
-          href: '/grimoire/chakras',
+          href: `/grimoire/chakras/${stringToKebabCase(key)}`,
           match: `Color: ${chakra.color}, Properties: ${chakra.properties}`,
         });
       }
     });
 
-    // Search moon phases
+    // Search moon phases - link to individual pages
     Object.entries(monthlyMoonPhases).forEach(([phase, data]) => {
       if (
         phase.toLowerCase().includes(query) ||
@@ -512,12 +612,12 @@ export default function GrimoireLayout({
           type: 'moon',
           title: `Moon Phase - ${phase}`,
           section: 'moon',
-          href: '/grimoire/moon#phases',
+          href: `/grimoire/moon-phases/${stringToKebabCase(phase)}`,
         });
       }
     });
 
-    // Search full moon names
+    // Search full moon names - link to individual pages
     Object.entries(annualFullMoons).forEach(([month, moon]) => {
       if (
         moon.name.toLowerCase().includes(query) ||
@@ -528,13 +628,13 @@ export default function GrimoireLayout({
           type: 'moon',
           title: `Full Moon - ${moon.name}`,
           section: 'moon',
-          href: '/grimoire/moon#full-moon-names',
+          href: `/grimoire/full-moons/${stringToKebabCase(month)}`,
           match: `${month} - ${moon.description.slice(0, 60)}...`,
         });
       }
     });
 
-    // Search zodiac signs
+    // Search zodiac signs - link to individual pages
     Object.entries(zodiacSigns).forEach(([key, sign]) => {
       const signData = sign as { name: string; mysticalProperties?: string };
       if (
@@ -545,12 +645,12 @@ export default function GrimoireLayout({
           type: 'zodiac',
           title: `Zodiac Sign - ${signData.name}`,
           section: 'astronomy',
-          href: '/grimoire/astronomy#zodiac',
+          href: `/grimoire/zodiac/${stringToKebabCase(key)}`,
         });
       }
     });
 
-    // Search planets
+    // Search planets - link to individual pages
     Object.entries(planetaryBodies).forEach(([key, planet]) => {
       const planetData = planet as {
         name: string;
@@ -564,37 +664,384 @@ export default function GrimoireLayout({
           type: 'planet',
           title: `Planet - ${planetData.name}`,
           section: 'astronomy',
-          href: '/grimoire/astronomy#planets',
+          href: `/grimoire/planets/${stringToKebabCase(key)}`,
         });
       }
     });
 
-    // Search crystals (from crystal database - SSOT)
-    crystalCategories.forEach((categoryName) => {
-      const crystals = getCrystalsByCategory(categoryName);
-      crystals.forEach((crystal) => {
-        if (
-          crystal.name.toLowerCase().includes(query) ||
-          crystal.alternativeNames?.some((name) =>
-            name.toLowerCase().includes(query),
-          ) ||
-          crystal.properties.some((prop) =>
-            prop.toLowerCase().includes(query),
-          ) ||
-          categoryName.toLowerCase().includes(query)
-        ) {
-          results.push({
-            type: 'crystal',
-            title: `Crystal - ${crystal.name}`,
-            section: 'crystals',
-            href: '/grimoire/crystals#crystal-categories',
-            match: `Category: ${categoryName}`,
-          });
-        }
-      });
+    // Search crystals - link to individual pages
+    crystalDatabase.forEach((crystal) => {
+      if (
+        crystal.name.toLowerCase().includes(query) ||
+        crystal.alternativeNames?.some((name) =>
+          name.toLowerCase().includes(query),
+        ) ||
+        crystal.properties.some((prop) => prop.toLowerCase().includes(query)) ||
+        crystal.description.toLowerCase().includes(query) ||
+        crystal.intentions.some((intent) =>
+          intent.toLowerCase().includes(query),
+        )
+      ) {
+        results.push({
+          type: 'crystal',
+          title: `Crystal - ${crystal.name}`,
+          section: 'crystals',
+          href: `/grimoire/crystals/${stringToKebabCase(crystal.name)}`,
+          match: `Properties: ${crystal.properties.slice(0, 3).join(', ')}`,
+        });
+      }
     });
 
-    return results.slice(0, 15); // Increased limit to 15 results
+    // Search sabbats - link to individual pages
+    wheelOfTheYearSabbats.forEach((sabbat) => {
+      if (
+        sabbat.name.toLowerCase().includes(query) ||
+        sabbat.description.toLowerCase().includes(query) ||
+        sabbat.date.toLowerCase().includes(query)
+      ) {
+        results.push({
+          type: 'sabbat',
+          title: `Sabbat - ${sabbat.name}`,
+          section: 'wheel-of-the-year',
+          href: `/grimoire/sabbats/${stringToKebabCase(sabbat.name)}`,
+          match: `${sabbat.date} - ${sabbat.description.slice(0, 60)}...`,
+        });
+      }
+    });
+
+    // Search meditation techniques - link to individual pages
+    const meditationTechniques = {
+      'guided-meditation': { name: 'Guided Meditation' },
+      'mindfulness-meditation': { name: 'Mindfulness Meditation' },
+      'visualization-meditation': { name: 'Visualization Meditation' },
+      'walking-meditation': { name: 'Walking Meditation' },
+      'mantra-meditation': { name: 'Mantra Meditation' },
+      'loving-kindness-meditation': { name: 'Loving-Kindness Meditation' },
+      'body-scan-meditation': { name: 'Body Scan Meditation' },
+      'transcendental-meditation': { name: 'Transcendental Meditation' },
+    };
+    Object.entries(meditationTechniques).forEach(([key, technique]) => {
+      if (technique.name.toLowerCase().includes(query)) {
+        results.push({
+          type: 'meditation',
+          title: `Meditation - ${technique.name}`,
+          section: 'meditation',
+          href: `/grimoire/meditation/${key}`,
+        });
+      }
+    });
+
+    // Search witch types - link to individual pages
+    const witchTypes = [
+      'green-witch',
+      'kitchen-witch',
+      'hedge-witch',
+      'sea-witch',
+      'cosmic-witch',
+      'eclectic-witch',
+    ];
+    witchTypes.forEach((witch) => {
+      const witchName = witch
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+      if (witchName.toLowerCase().includes(query) || witch.includes(query)) {
+        results.push({
+          type: 'witch',
+          title: `Witch Path - ${witchName}`,
+          section: 'modern-witchcraft',
+          href: `/grimoire/witches/${witch}`,
+        });
+      }
+    });
+
+    // Search divination methods - link to individual pages
+    const divinationMethods = [
+      {
+        name: 'Pendulum Divination',
+        slug: 'pendulum-divination',
+        keywords: ['pendulum', 'dowsing', 'yes no'],
+      },
+      {
+        name: 'Scrying',
+        slug: 'scrying',
+        keywords: ['scrying', 'crystal ball', 'black mirror', 'water scrying'],
+      },
+      {
+        name: 'Dream Interpretation',
+        slug: 'dream-interpretation',
+        keywords: ['dream', 'dreams', 'dream journal', 'lucid'],
+      },
+      {
+        name: 'Reading Omens',
+        slug: 'reading-omens',
+        keywords: ['omen', 'omens', 'signs', 'animal omen', 'natural signs'],
+      },
+    ];
+    divinationMethods.forEach((method) => {
+      if (
+        method.name.toLowerCase().includes(query) ||
+        method.slug.toLowerCase().includes(query) ||
+        method.keywords.some((kw) => kw.toLowerCase().includes(query))
+      ) {
+        results.push({
+          type: 'section',
+          title: `Divination - ${method.name}`,
+          section: 'divination',
+          href: `/grimoire/${method.slug}`,
+        });
+      }
+    });
+
+    // Search modern witchcraft subsections - link to individual pages
+    const witchcraftSubsections = [
+      {
+        name: 'Book of Shadows',
+        slug: 'book-of-shadows',
+        keywords: ['book of shadows', 'bos', 'grimoire', 'journal'],
+      },
+      {
+        name: 'Witchcraft Tools',
+        slug: 'witchcraft-tools',
+        keywords: [
+          'tools',
+          'athame',
+          'wand',
+          'chalice',
+          'pentacle',
+          'cauldron',
+        ],
+      },
+      {
+        name: 'Witchcraft Ethics',
+        slug: 'witchcraft-ethics',
+        keywords: ['ethics', 'wiccan rede', 'threefold law', 'harm none'],
+      },
+    ];
+    witchcraftSubsections.forEach((subsection) => {
+      if (
+        subsection.name.toLowerCase().includes(query) ||
+        subsection.slug.toLowerCase().includes(query) ||
+        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
+      ) {
+        results.push({
+          type: 'section',
+          title: `Modern Witchcraft - ${subsection.name}`,
+          section: 'modern-witchcraft',
+          href: `/grimoire/${subsection.slug}`,
+        });
+      }
+    });
+
+    // Search breathwork
+    if (
+      query.includes('breathwork') ||
+      query.includes('breathing') ||
+      query.includes('pranayama') ||
+      query.includes('breath')
+    ) {
+      results.push({
+        type: 'meditation',
+        title: 'Breathwork Techniques',
+        section: 'meditation',
+        href: '/grimoire/breathwork',
+        match:
+          'Conscious breathing techniques for grounding, centering, and energy regulation',
+      });
+    }
+
+    // Search birth chart subsections
+    const birthChartSubsections = [
+      {
+        name: 'Transits',
+        slug: 'transits',
+        keywords: [
+          'transits',
+          'planetary transits',
+          'current transits',
+          'saturn return',
+        ],
+      },
+      {
+        name: 'Rising Sign',
+        slug: 'rising-sign',
+        keywords: [
+          'rising sign',
+          'ascendant',
+          'ascendant sign',
+          'outer personality',
+        ],
+      },
+      {
+        name: 'Synastry',
+        slug: 'synastry',
+        keywords: [
+          'synastry',
+          'relationship compatibility',
+          'compatibility',
+          'relationship astrology',
+        ],
+      },
+    ];
+    birthChartSubsections.forEach((subsection) => {
+      if (
+        subsection.name.toLowerCase().includes(query) ||
+        subsection.slug.toLowerCase().includes(query) ||
+        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
+      ) {
+        results.push({
+          type: 'section',
+          title: `Birth Chart - ${subsection.name}`,
+          section: 'birth-chart',
+          href: `/grimoire/${subsection.slug}`,
+        });
+      }
+    });
+
+    // Search candle magic subsections
+    const candleMagicSubsections = [
+      {
+        name: 'Incantations by Candle Color',
+        slug: 'incantations-by-candle-color',
+        keywords: [
+          'incantations',
+          'candle incantations',
+          'candle chants',
+          'spell chants',
+        ],
+      },
+      {
+        name: 'Lighting Candles on Your Altar',
+        slug: 'lighting-candles-on-altar',
+        keywords: [
+          'lighting candles',
+          'altar',
+          'candle lighting ritual',
+          'altar setup',
+        ],
+      },
+      {
+        name: 'Anointing Candles with Oils',
+        slug: 'anointing-candles',
+        keywords: [
+          'anointing',
+          'anointing candles',
+          'candle oils',
+          'essential oils',
+        ],
+      },
+    ];
+    candleMagicSubsections.forEach((subsection) => {
+      if (
+        subsection.name.toLowerCase().includes(query) ||
+        subsection.slug.toLowerCase().includes(query) ||
+        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
+      ) {
+        results.push({
+          type: 'practice',
+          title: `Candle Magic - ${subsection.name}`,
+          section: 'candle-magic',
+          href: `/grimoire/${subsection.slug}`,
+        });
+      }
+    });
+
+    // Search moon subsections
+    const moonSubsections = [
+      {
+        name: 'Moon Rituals by Phase',
+        slug: 'moon-rituals',
+        keywords: [
+          'moon rituals',
+          'lunar rituals',
+          'moon phase rituals',
+          'new moon ritual',
+          'full moon ritual',
+        ],
+      },
+      {
+        name: 'Moon Signs & Daily Influence',
+        slug: 'moon-signs',
+        keywords: [
+          'moon signs',
+          'moon in signs',
+          'daily moon sign',
+          'moon sign meaning',
+        ],
+      },
+    ];
+    moonSubsections.forEach((subsection) => {
+      if (
+        subsection.name.toLowerCase().includes(query) ||
+        subsection.slug.toLowerCase().includes(query) ||
+        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
+      ) {
+        results.push({
+          type: 'moon',
+          title: `Moon - ${subsection.name}`,
+          section: 'moon',
+          href: `/grimoire/${subsection.slug}`,
+        });
+      }
+    });
+
+    // Search tarot subsections
+    const tarotSubsections = [
+      {
+        name: 'Reading Card Combinations',
+        slug: 'card-combinations',
+        keywords: [
+          'card combinations',
+          'reading combinations',
+          'tarot pairs',
+          'multiple cards',
+        ],
+      },
+      {
+        name: 'Reversed Cards Guide',
+        slug: 'reversed-cards-guide',
+        keywords: [
+          'reversed cards',
+          'reversed tarot',
+          'upside down cards',
+          'reversed meaning',
+        ],
+      },
+    ];
+    tarotSubsections.forEach((subsection) => {
+      if (
+        subsection.name.toLowerCase().includes(query) ||
+        subsection.slug.toLowerCase().includes(query) ||
+        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
+      ) {
+        results.push({
+          type: 'tarot',
+          title: `Tarot - ${subsection.name}`,
+          section: 'tarot',
+          href: `/grimoire/${subsection.slug}`,
+        });
+      }
+    });
+
+    // Search spellcraft fundamentals
+    if (
+      query.includes('spellcraft') ||
+      query.includes('spell fundamentals') ||
+      query.includes('magic basics') ||
+      query.includes('how to cast') ||
+      query.includes('spell basics')
+    ) {
+      results.push({
+        type: 'practice',
+        title: 'Spellcraft Fundamentals',
+        section: 'practices',
+        href: '/grimoire/spellcraft-fundamentals',
+        match:
+          'Essential foundations of spellcraft, timing, intention, and magical practice',
+      });
+    }
+
+    return results.slice(0, 20); // Increased limit to 20 results
   }, [searchQuery]);
 
   // Filter sections based on search
