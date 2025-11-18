@@ -22,7 +22,8 @@ export function TrialCountdownBanner() {
           <div className='flex items-center gap-3 flex-1'>
             <Clock className='w-5 h-5 text-purple-300 flex-shrink-0' />
             <span className='text-sm font-medium text-white'>
-              Your trial ends in {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} ·{' '}
+              Your trial ends in {trialDaysRemaining} day
+              {trialDaysRemaining !== 1 ? 's' : ''} ·{' '}
               <Link
                 href='/pricing'
                 className='underline hover:text-purple-200 transition-colors inline-flex items-center gap-1'

@@ -32,7 +32,8 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
         {/* Teaser Text */}
         <div className='mb-6 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/30'>
           <p className='text-purple-200 text-sm font-medium italic'>
-            &ldquo;This is the personalised interpretation for YOUR chart.&rdquo;
+            &ldquo;This is the personalised interpretation for YOUR
+            chart.&rdquo;
           </p>
         </div>
 
