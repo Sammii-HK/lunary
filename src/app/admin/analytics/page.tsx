@@ -19,6 +19,7 @@ import {
 
 import { MetricsCard } from '@/components/admin/MetricsCard';
 import { ConversionFunnel } from '@/components/admin/ConversionFunnel';
+import { PostHogHeatmap } from '@/components/admin/PostHogHeatmap';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -39,6 +40,7 @@ type ActivityResponse = {
   dau: number;
   wau: number;
   mau: number;
+  returning_users: number;
   retention: {
     day_1: number;
     day_7: number;
@@ -211,6 +213,7 @@ export default function AnalyticsPage() {
     if (activity) {
       rows.push(
         ['Activity', 'DAU', String(activity.dau)],
+        ['Activity', 'Returning Users', String(activity.returning_users ?? 0)],
         ['Activity', 'WAU', String(activity.wau)],
         ['Activity', 'MAU', String(activity.mau)],
         ['Activity', 'Churn Rate', `${activity.churn_rate.toFixed(2)}%`],
@@ -318,6 +321,17 @@ export default function AnalyticsPage() {
       title: 'Daily Active Users',
       value: activity?.dau ?? 0,
       subtitle: 'Users active yesterday',
+    },
+    {
+      title: 'Returning Users',
+      value: activity?.returning_users ?? 0,
+      subtitle: `${
+        activity?.dau
+          ? Math.round(
+              ((activity.returning_users ?? 0) / activity.dau) * 100,
+            )
+          : 0
+      }% of DAU`,
     },
     {
       title: 'Weekly Active Users',
@@ -679,6 +693,20 @@ export default function AnalyticsPage() {
                 icon={<Sparkles className='h-5 w-5 text-amber-300' />}
               />
             </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <Card className='border-zinc-800 bg-zinc-950/40'>
+          <CardHeader>
+            <CardTitle>Page-Level Heatmaps</CardTitle>
+            <CardDescription>
+              Visual insights into user interactions and behavior patterns
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PostHogHeatmap />
           </CardContent>
         </Card>
       </section>
