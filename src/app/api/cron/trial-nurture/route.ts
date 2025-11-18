@@ -9,7 +9,10 @@ import {
   generateTrialDay5EmailHTML,
   generateTrialDay5EmailText,
 } from '@/lib/email-templates/trial-nurture';
-import { generateTrialExpiredEmailHTML, generateTrialExpiredEmailText } from '@/lib/email-templates/trial-expired';
+import {
+  generateTrialExpiredEmailHTML,
+  generateTrialExpiredEmailText,
+} from '@/lib/email-templates/trial-expired';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,13 +32,13 @@ export async function GET(request: NextRequest) {
     // Calculate dates for each email in the sequence
     const day2Date = new Date(today);
     day2Date.setDate(day2Date.getDate() - 2);
-    
+
     const day3Date = new Date(today);
     day3Date.setDate(day3Date.getDate() - 3);
-    
+
     const day5Date = new Date(today);
     day5Date.setDate(day5Date.getDate() - 5);
-    
+
     const day7Date = new Date(today);
     day7Date.setDate(day7Date.getDate() - 7);
 
@@ -209,7 +212,7 @@ export async function GET(request: NextRequest) {
 
         await sendEmail({
           to: user.email,
-          subject: '⏰ 2 Days Left—Here\'s What You\'ll Miss',
+          subject: "⏰ 2 Days Left—Here's What You'll Miss",
           html,
           text,
           tracking: {

@@ -75,7 +75,8 @@ export function generateWeeklyReportEmailHTML(
       <h2 style="color: #fff; margin-top: 0; font-size: 20px;">🔮 Tarot Patterns This Week</h2>
       <p style="color: #cbd5e1; margin-bottom: 10px;">Dominant themes: <strong style="color: #fff;">${report.tarotPatterns.dominantThemes.join(', ')}</strong></p>
       ${
-        report.tarotPatterns.frequentCards && report.tarotPatterns.frequentCards.length > 0
+        report.tarotPatterns.frequentCards &&
+        report.tarotPatterns.frequentCards.length > 0
           ? `
       <div style="margin-top: 15px;">
         <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">Most frequent cards:</p>
@@ -179,7 +180,15 @@ Key Transits:
 ${report.keyTransits.map((t) => `${t.transit} - ${t.date}\n  ${t.description}`).join('\n')}
 
 ${report.tarotPatterns.dominantThemes.length > 0 ? `\n🔮 Tarot Patterns:\nDominant themes: ${report.tarotPatterns.dominantThemes.join(', ')}\n` : ''}
-${report.tarotPatterns.frequentCards && report.tarotPatterns.frequentCards.length > 0 ? `Most frequent cards: ${report.tarotPatterns.frequentCards.slice(0, 5).map(c => `${c.name} (${c.count}x)`).join(', ')}\n` : ''}
+${
+  report.tarotPatterns.frequentCards &&
+  report.tarotPatterns.frequentCards.length > 0
+    ? `Most frequent cards: ${report.tarotPatterns.frequentCards
+        .slice(0, 5)
+        .map((c) => `${c.name} (${c.count}x)`)
+        .join(', ')}\n`
+    : ''
+}
 
 💫 Cosmic Insights:
 This week's cosmic energy has been ${report.tarotPatterns.dominantThemes.length > 0 ? report.tarotPatterns.dominantThemes[0].toLowerCase() : 'dynamic'}, with ${report.keyTransits.length} significant planetary transits shaping your path. The moon's journey through ${report.moonPhases.length > 0 ? report.moonPhases[0].phase : 'various phases'} has influenced the emotional landscape, while your tarot patterns reveal deeper themes ${report.tarotPatterns.dominantThemes.length > 0 ? `around ${report.tarotPatterns.dominantThemes.slice(0, 2).join(' and ')}` : 'of transformation'}.

@@ -16,7 +16,7 @@ export function generateNewMoonEmailHTML(
   moonData: MoonEventData,
 ): string {
   const dateStr = moonData.date.toISOString().split('T')[0];
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -132,12 +132,16 @@ export function generateNewMoonEmailHTML(
             <p>Hi ${userName || 'there'},</p>
             <p>The New Moon in <strong>${moonData.moonSign}</strong> marks a powerful moment of renewal and intention-setting. This is your cosmic blank slate—a time to plant seeds for the lunar cycle ahead.</p>
             
-            ${moonData.intention ? `
+            ${
+              moonData.intention
+                ? `
             <div class="intention-box">
               <h3 style="margin-top: 0; color: #fff; font-size: 20px;">✨ This Moon's Energy</h3>
               <p style="color: #cbd5e1; margin: 0; line-height: 1.8;">${moonData.intention}</p>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <div class="ritual-box">
               <h3 style="margin-top: 0; color: #fff; font-size: 20px;">🌙 New Moon Ritual</h3>
@@ -152,12 +156,16 @@ export function generateNewMoonEmailHTML(
               ${moonData.ritualSuggestion ? `<p style="color: #cbd5e1; margin-top: 12px; font-style: italic;">${moonData.ritualSuggestion}</p>` : ''}
             </div>
             
-            ${moonData.tarotSuggestion ? `
+            ${
+              moonData.tarotSuggestion
+                ? `
             <div class="ritual-box">
               <h3 style="margin-top: 0; color: #fff; font-size: 20px;">🔮 Tarot Guidance</h3>
               <p style="color: #cbd5e1; margin: 0;">${moonData.tarotSuggestion}</p>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <div style="text-align: center;">
               <a href="${baseUrl}/moon-circles?date=${dateStr}" class="cta-button">
@@ -185,7 +193,7 @@ export function generateNewMoonEmailText(
   moonData: MoonEventData,
 ): string {
   const dateStr = moonData.date.toISOString().split('T')[0];
-  
+
   return `
 New Moon in ${moonData.moonSign} - Lunary 🌑
 
@@ -220,7 +228,7 @@ export function generateFullMoonEmailHTML(
   moonData: MoonEventData,
 ): string {
   const dateStr = moonData.date.toISOString().split('T')[0];
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -336,12 +344,16 @@ export function generateFullMoonEmailHTML(
             <p>Hi ${userName || 'there'},</p>
             <p>The Full Moon in <strong>${moonData.moonSign}</strong> illuminates what needs to be seen. This is a time of culmination, release, and celebration—when the seeds you planted at the New Moon come into full bloom.</p>
             
-            ${moonData.intention ? `
+            ${
+              moonData.intention
+                ? `
             <div class="release-box">
               <h3 style="margin-top: 0; color: #fff; font-size: 20px;">✨ This Moon's Energy</h3>
               <p style="color: #cbd5e1; margin: 0; line-height: 1.8;">${moonData.intention}</p>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <div class="ritual-box">
               <h3 style="margin-top: 0; color: #fff; font-size: 20px;">🌕 Full Moon Ritual</h3>
@@ -356,12 +368,16 @@ export function generateFullMoonEmailHTML(
               ${moonData.ritualSuggestion ? `<p style="color: #cbd5e1; margin-top: 12px; font-style: italic;">${moonData.ritualSuggestion}</p>` : ''}
             </div>
             
-            ${moonData.tarotSuggestion ? `
+            ${
+              moonData.tarotSuggestion
+                ? `
             <div class="ritual-box">
               <h3 style="margin-top: 0; color: #fff; font-size: 20px;">🔮 Tarot Guidance</h3>
               <p style="color: #cbd5e1; margin: 0;">${moonData.tarotSuggestion}</p>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <div style="text-align: center;">
               <a href="${baseUrl}/moon-circles?date=${dateStr}" class="cta-button">
@@ -389,7 +405,7 @@ export function generateFullMoonEmailText(
   moonData: MoonEventData,
 ): string {
   const dateStr = moonData.date.toISOString().split('T')[0];
-  
+
   return `
 Full Moon in ${moonData.moonSign} - Lunary 🌕
 

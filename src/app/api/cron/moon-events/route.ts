@@ -38,7 +38,11 @@ export async function GET(request: NextRequest) {
     // Generate moon circle data to get moon phase and sign
     const moonCircle = await generateMoonCircle(today);
 
-    if (!moonCircle || (moonCircle.moonPhase !== 'New Moon' && moonCircle.moonPhase !== 'Full Moon')) {
+    if (
+      !moonCircle ||
+      (moonCircle.moonPhase !== 'New Moon' &&
+        moonCircle.moonPhase !== 'Full Moon')
+    ) {
       console.log('📭 No New Moon or Full Moon today');
       return NextResponse.json({
         success: true,
