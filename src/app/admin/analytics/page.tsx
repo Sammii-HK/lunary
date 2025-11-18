@@ -20,6 +20,7 @@ import {
 import { MetricsCard } from '@/components/admin/MetricsCard';
 import { ConversionFunnel } from '@/components/admin/ConversionFunnel';
 import { PostHogHeatmap } from '@/components/admin/PostHogHeatmap';
+import { SuccessMetrics } from '@/components/admin/SuccessMetrics';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -145,6 +146,7 @@ export default function AnalyticsPage() {
   const [featureUsage, setFeatureUsage] = useState<FeatureUsageResponse | null>(
     null,
   );
+  const [successMetrics, setSuccessMetrics] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -161,6 +163,7 @@ export default function AnalyticsPage() {
         conversionsRes,
         notificationsRes,
         featureUsageRes,
+        successMetricsRes,
       ] = await Promise.all([
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
@@ -169,6 +172,7 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/conversions?${queryParams}`),
         fetch(`/api/admin/analytics/notifications?${queryParams}`),
         fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
+        fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
       ]);
 
       if (!activityRes.ok) {
@@ -186,12 +190,16 @@ export default function AnalyticsPage() {
       if (!featureUsageRes.ok) {
         throw new Error('Failed to load feature usage metrics');
       }
+      if (!successMetricsRes.ok) {
+        throw new Error('Failed to load success metrics');
+      }
 
       setActivity(await activityRes.json());
       setAiMetrics(await aiRes.json());
       setConversions(await conversionsRes.json());
       setNotifications(await notificationsRes.json());
       setFeatureUsage(await featureUsageRes.json());
+      setSuccessMetrics(await successMetricsRes.json());
     } catch (err) {
       setError(
         err instanceof Error
@@ -395,7 +403,8 @@ export default function AnalyticsPage() {
     !aiMetrics &&
     !conversions &&
     !notifications &&
-    !featureUsage
+    !featureUsage &&
+    !successMetrics
   ) {
     return (
       <div className='flex min-h-screen items-center justify-center text-zinc-400'>
@@ -484,6 +493,10 @@ export default function AnalyticsPage() {
           {error}
         </div>
       )}
+
+      <section>
+        <SuccessMetrics data={successMetrics} loading={loading && !successMetrics} />
+      </section>
 
       <section className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
         {overviewCards.map((card) => (
