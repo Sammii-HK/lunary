@@ -9,6 +9,8 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { AuthComponent } from '@/components/Auth';
 import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
+import { useAIPrompts } from '@/hooks/useAIPrompts';
+import { AIPromptCard } from '@/components/AIPromptCard';
 
 const MessageBubble = ({
   role,
@@ -71,6 +73,12 @@ export default function BookOfShadowsPage() {
     error,
     clearError,
   } = useAssistantChat();
+  const {
+    prompts,
+    hasNewPrompts,
+    isLoading: promptsLoading,
+    markPromptAsRead,
+  } = useAIPrompts();
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [promptHandled, setPromptHandled] = useState(false);
@@ -259,6 +267,11 @@ export default function BookOfShadowsPage() {
                 Today: {dailyHighlight.primaryEvent}
               </span>
             ) : null}
+            {hasNewPrompts && (
+              <span className='rounded-full border border-purple-500/60 bg-purple-500/20 px-3 py-1 text-purple-300 font-semibold animate-pulse'>
+                ✨ New Prompt
+              </span>
+            )}
           </div>
         </header>
 
@@ -276,6 +289,21 @@ export default function BookOfShadowsPage() {
                       exploring, or what guidance you're seeking. I'll answer
                       with gentle, grounded insight.
                     </div>
+                    {!promptsLoading && prompts.length > 0 && (
+                      <div className='space-y-2'>
+                        <h3 className='text-sm font-medium text-zinc-300 px-1'>
+                          Suggested Prompts
+                        </h3>
+                        {prompts.slice(0, 3).map((prompt) => (
+                          <AIPromptCard
+                            key={prompt.id}
+                            prompt={prompt}
+                            onUsePrompt={sendMessage}
+                            onMarkAsRead={markPromptAsRead}
+                          />
+                        ))}
+                      </div>
+                    )}
                     <CopilotQuickActions
                       onActionClick={(prompt) => sendMessage(prompt)}
                       disabled={isStreaming}
