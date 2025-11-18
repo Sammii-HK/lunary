@@ -44,6 +44,13 @@ export function FeatureGate({
   if (gateType === 'hard') {
     return (
       <div className={className}>
+        {/* Teaser Text */}
+        <div className='mb-4 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/30'>
+          <p className='text-purple-200 text-sm font-medium italic'>
+            &ldquo;This is the personalised interpretation for YOUR
+            chart.&rdquo;
+          </p>
+        </div>
         <UpgradePrompt
           variant='card'
           featureName={feature}
@@ -58,6 +65,13 @@ export function FeatureGate({
     return (
       <div className={className}>
         <div className='relative'>
+          {/* Teaser Text */}
+          <div className='mb-4 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/30'>
+            <p className='text-purple-200 text-sm font-medium italic'>
+              &ldquo;This is the personalised interpretation for YOUR
+              chart.&rdquo;
+            </p>
+          </div>
           <div className='opacity-50 pointer-events-none'>{previewContent}</div>
           <div className='absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-lg'>
             <div className='text-center p-6 max-w-md'>

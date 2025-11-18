@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 export type InsightSource = 'app' | 'email' | 'substack' | string;
@@ -45,6 +45,13 @@ export const InsightCard = memo(function InsightCard({
 }: InsightCardProps) {
   const sourceKey = (insight.source || 'app').toLowerCase();
   const sourceLabel = sourceLabels[sourceKey] || 'Shared insight';
+
+  useEffect(() => {
+    // Track insight access for weekly usage counter
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('insight-accessed'));
+    }
+  }, []);
 
   return (
     <article
