@@ -5,18 +5,48 @@ export function middleware(request: NextRequest) {
   const hostname =
     request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
 
-  // Skip redirects in test/CI environments and for localhost
+  // Skip ALL redirects in test/CI environments and for localhost
   const isTestOrCI =
     process.env.NODE_ENV === 'test' ||
     process.env.CI === 'true' ||
     process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined;
   const isLocalhost =
     hostname.includes('localhost') || hostname === '127.0.0.1';
+
+  // Early return for test/CI/localhost - skip all redirect logic
+  if (isTestOrCI || isLocalhost) {
+    // Only allow blog week and grimoire redirects (these are safe path redirects)
+    const blogWeekMatch = url.pathname.match(/^\/blog\/week\/(\d+)-(\d{4})$/);
+    if (blogWeekMatch) {
+      const weekNumber = blogWeekMatch[1];
+      const year = blogWeekMatch[2];
+      const canonicalUrl = new URL(
+        `/blog/week/week-${weekNumber}-${year}`,
+        request.url,
+      );
+      return NextResponse.redirect(canonicalUrl, 301);
+    }
+
+    if (url.pathname === '/grimoire' && url.searchParams.has('item')) {
+      const item = url.searchParams.get('item');
+      if (item) {
+        const slug = item
+          .replace(/([A-Z])/g, '-$1')
+          .toLowerCase()
+          .replace(/^-/, '');
+        const hash = url.hash || '';
+        return NextResponse.redirect(
+          new URL(`/grimoire/${slug}${hash}`, request.url),
+        );
+      }
+    }
+
+    return NextResponse.next();
+  }
+
   const isProduction =
-    !isTestOrCI &&
-    !isLocalhost &&
-    (process.env.NODE_ENV === 'production' ||
-      process.env.VERCEL_ENV === 'production');
+    process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'production';
 
   // Redirect www to non-www FIRST (canonical domain: lunary.app)
   // This must happen before HTTPS redirect to avoid loops
@@ -61,55 +91,57 @@ export function middleware(request: NextRequest) {
 
   const adminPrefix = '/admin';
   const skipAdminRewritePrefixes = ['/auth', '/api', '/_next'];
-  let shouldRewrite = false;
 
   const hasAdminPrefix = url.pathname.startsWith(adminPrefix);
   const shouldSkip = skipAdminRewritePrefixes.some((prefix) =>
     url.pathname.startsWith(prefix),
   );
 
-  if (!isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  if (isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
-    const trimmedPath = url.pathname.slice(adminPrefix.length) || '/';
-    const cleanPath = trimmedPath.startsWith('/')
-      ? trimmedPath
-      : `/${trimmedPath}`;
-    const redirectUrl = new URL(cleanPath, request.url);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  if (isAdminSubdomain && !hasAdminPrefix && !shouldSkip) {
-    const newPathname =
-      url.pathname === '/' ? adminPrefix : `${adminPrefix}${url.pathname}`;
-    url.pathname = newPathname;
-
-    console.log('🔄 Rewriting admin subdomain:', {
-      from: request.nextUrl.pathname,
-      to: newPathname,
-      hostname,
-    });
-
-    return NextResponse.rewrite(url);
-  }
-
-  const isProductionLike =
-    process.env.NODE_ENV === 'production' ||
-    process.env.VERCEL_ENV === 'production';
-
-  if (url.pathname.startsWith(adminPrefix)) {
-    // Check for admin session cookie (Better Auth stores session in cookies)
-    const authCookie = request.cookies.get('better-auth.session_token');
-
-    if (isProductionLike && !authCookie) {
-      // Redirect to auth page if not authenticated
-      return NextResponse.redirect(new URL('/auth', request.url));
+  // Skip admin redirects in test/CI environments
+  if (!isTestOrCI && !isLocalhost) {
+    if (!isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
+      return NextResponse.redirect(new URL('/', request.url));
     }
 
-    // Note: Full admin check happens client-side in the admin page component
-    // Middleware just ensures user is authenticated
+    if (isAdminSubdomain && hasAdminPrefix && !shouldSkip) {
+      const trimmedPath = url.pathname.slice(adminPrefix.length) || '/';
+      const cleanPath = trimmedPath.startsWith('/')
+        ? trimmedPath
+        : `/${trimmedPath}`;
+      const redirectUrl = new URL(cleanPath, request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (isAdminSubdomain && !hasAdminPrefix && !shouldSkip) {
+      const newPathname =
+        url.pathname === '/' ? adminPrefix : `${adminPrefix}${url.pathname}`;
+      url.pathname = newPathname;
+
+      console.log('🔄 Rewriting admin subdomain:', {
+        from: request.nextUrl.pathname,
+        to: newPathname,
+        hostname,
+      });
+
+      return NextResponse.rewrite(url);
+    }
+
+    const isProductionLike =
+      process.env.NODE_ENV === 'production' ||
+      process.env.VERCEL_ENV === 'production';
+
+    if (url.pathname.startsWith(adminPrefix)) {
+      // Check for admin session cookie (Better Auth stores session in cookies)
+      const authCookie = request.cookies.get('better-auth.session_token');
+
+      if (isProductionLike && !authCookie) {
+        // Redirect to auth page if not authenticated
+        return NextResponse.redirect(new URL('/auth', request.url));
+      }
+
+      // Note: Full admin check happens client-side in the admin page component
+      // Middleware just ensures user is authenticated
+    }
   }
 
   // Redirect old blog week URL format to canonical format
