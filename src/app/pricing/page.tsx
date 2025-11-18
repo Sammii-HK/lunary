@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
@@ -16,6 +16,8 @@ import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
 import { Check, Star, Zap } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { useCurrency, formatPrice } from '../../hooks/useCurrency';
+import { getPriceForCurrency } from '../../../utils/stripe-prices';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
 import { useConversionTracking } from '@/hooks/useConversionTracking';
 import { conversionTracking } from '@/lib/analytics';
@@ -31,6 +33,7 @@ export default function PricingPage() {
   const subscription = useSubscription();
   const authState = useAuthStatus();
   const { trackEvent } = useConversionTracking();
+  const currency = useCurrency();
   const [loading, setLoading] = useState<string | null>(null);
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
@@ -63,6 +66,43 @@ export default function PricingPage() {
 
   const subscriptionStatus = subscription.status || 'free';
   const trialDaysRemaining = subscription.trialDaysRemaining;
+
+  // Compute prices with currency mapping
+  const plansWithCurrency = useMemo(() => {
+    return pricingPlans.map((plan) => {
+      if (plan.price === 0) return plan;
+
+      const currencyPrice = getPriceForCurrency(plan.id as any, currency);
+      const displayPrice = currencyPrice?.amount || plan.price;
+      const displayCurrency = currencyPrice?.currency.toUpperCase() || currency;
+
+      // Calculate dynamic savings for annual plan
+      let calculatedSavings: string | undefined = plan.savings;
+      if (plan.interval === 'year' && plan.id === 'lunary_plus_ai_annual') {
+        // Find the monthly AI plan price in the same currency
+        const monthlyAIPrice = getPriceForCurrency(
+          'lunary_plus_ai' as any,
+          currency,
+        );
+        if (monthlyAIPrice) {
+          const yearlyCost = monthlyAIPrice.amount * 12;
+          const savings = yearlyCost - displayPrice;
+          const savingsPercent = Math.round((savings / yearlyCost) * 100);
+          calculatedSavings = `Save ${savingsPercent}%`;
+        }
+      }
+
+      // Always prefer currency-specific price ID, never fall back to env var
+      // as it might point to old prices
+      return {
+        ...plan,
+        displayPrice,
+        displayCurrency,
+        currencyPriceId: currencyPrice?.priceId || undefined, // Don't fall back to old env var
+        calculatedSavings,
+      };
+    });
+  }, [pricingPlans, currency]);
 
   const handleSubscribe = async (priceId: string, planId: string) => {
     if (!priceId) return;
@@ -154,6 +194,12 @@ export default function PricingPage() {
                   Blog
                 </Link>
                 <Link
+                  href='/pricing'
+                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+                >
+                  Pricing
+                </Link>
+                <Link
                   href='/welcome'
                   className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
                 >
@@ -164,6 +210,12 @@ export default function PricingPage() {
                   className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
                 >
                   Daily Insights
+                </Link>
+                <Link
+                  href='/help'
+                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+                >
+                  Help
                 </Link>
               </div>
             </div>
@@ -226,7 +278,7 @@ export default function PricingPage() {
               </div>
             ) : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-6 xl:gap-8 max-w-6xl mx-auto'>
-                {pricingPlans.map((plan) => (
+                {plansWithCurrency.map((plan: any) => (
                   <div
                     key={plan.id}
                     className={`relative rounded-xl p-6 md:p-6 lg:p-7 border transition-all duration-300 flex flex-col ${
@@ -250,11 +302,11 @@ export default function PricingPage() {
                       </div>
                     )}
 
-                    {plan.savings && (
+                    {(plan.calculatedSavings || plan.savings) && (
                       <div className='absolute -top-3 right-3 z-20'>
                         <div className='px-2.5 py-1 rounded-full border border-zinc-700/50 bg-zinc-800/80 backdrop-blur-sm'>
                           <span className='text-xs font-semibold text-zinc-300'>
-                            {plan.savings}
+                            {plan.calculatedSavings || plan.savings}
                           </span>
                         </div>
                       </div>
@@ -280,14 +332,22 @@ export default function PricingPage() {
                         ) : (
                           <div className='space-y-1'>
                             <div className='text-5xl md:text-6xl font-light text-zinc-100 leading-none'>
-                              ${plan.price}
+                              {formatPrice(
+                                plan.displayPrice,
+                                plan.displayCurrency,
+                              )}
                               <span className='text-xl md:text-2xl font-normal text-zinc-400 ml-2'>
                                 /{plan.interval}
                               </span>
                             </div>
                             {plan.interval === 'year' && (
                               <div className='text-sm text-zinc-500'>
-                                Just $3.33/month billed annually
+                                Just{' '}
+                                {formatPrice(
+                                  plan.displayPrice / 12,
+                                  plan.displayCurrency,
+                                )}
+                                /month billed annually
                               </div>
                             )}
                           </div>
@@ -296,7 +356,7 @@ export default function PricingPage() {
 
                       {/* Features */}
                       <div className='space-y-2.5 pt-4 border-t border-zinc-800/50 flex-1'>
-                        {plan.features.map((feature, index) => (
+                        {plan.features.map((feature: string, index: number) => (
                           <div key={index} className='flex items-start gap-3'>
                             <Check
                               className='w-4 h-4 text-zinc-500 mt-0.5 flex-shrink-0'
@@ -332,11 +392,28 @@ export default function PricingPage() {
                           </Link>
                         ) : (
                           <button
-                            onClick={() =>
-                              handleSubscribe(plan.stripePriceId, plan.id)
-                            }
+                            onClick={() => {
+                              const priceId =
+                                (plan as any).currencyPriceId ||
+                                plan.stripePriceId;
+                              if (!priceId) {
+                                console.error(
+                                  'No price ID available for plan:',
+                                  plan.id,
+                                );
+                                alert(
+                                  'Price not available. Please refresh the page.',
+                                );
+                                return;
+                              }
+                              handleSubscribe(priceId, plan.id);
+                            }}
                             disabled={
-                              loading === plan.id || !plan.stripePriceId
+                              loading === plan.id ||
+                              !(
+                                (plan as any).currencyPriceId ||
+                                plan.stripePriceId
+                              )
                             }
                             className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
                               plan.popular

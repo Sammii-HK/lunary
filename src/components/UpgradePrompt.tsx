@@ -15,21 +15,36 @@ export type UpgradePromptVariant =
   | 'modal'
   | 'floating';
 
+type PlanType =
+  | 'free'
+  | 'lunary_plus'
+  | 'lunary_plus_ai'
+  | 'lunary_plus_ai_annual';
+
 interface UpgradePromptProps {
   variant?: UpgradePromptVariant;
   featureName?: string;
   title?: string;
   description?: string;
+  requiredPlan?: PlanType;
   showTrialCountdown?: boolean;
   className?: string;
   onShow?: () => void;
 }
+
+const PLAN_LABELS: Record<PlanType, string> = {
+  free: 'Cosmic Explorer',
+  lunary_plus: 'Lunary+',
+  lunary_plus_ai: 'Lunary+ AI',
+  lunary_plus_ai_annual: 'Lunary+ AI Annual',
+};
 
 export function UpgradePrompt({
   variant = 'card',
   featureName,
   title,
   description,
+  requiredPlan,
   showTrialCountdown = true,
   className = '',
   onShow,
@@ -47,13 +62,18 @@ export function UpgradePrompt({
     conversionTracking.upgradePromptShown(featureName);
   }
 
+  const planLabel = requiredPlan ? PLAN_LABELS[requiredPlan] : undefined;
   const defaultTitle = isTrialActive
     ? `Trial: ${trialDaysRemaining} days left`
-    : 'Unlock Personalized Features';
+    : planLabel
+      ? `Upgrade to ${planLabel}`
+      : 'Unlock Personalized Features';
 
   const defaultDescription = isTrialActive
     ? 'Continue enjoying premium cosmic insights after your trial'
-    : 'Get personalized birth charts, daily horoscopes, and cosmic guidance tailored to you';
+    : planLabel
+      ? `This feature requires ${planLabel}. Upgrade to unlock it.`
+      : 'Get personalized birth charts, daily horoscopes, and cosmic guidance tailored to you';
 
   const promptTitle = title || defaultTitle;
   const promptDescription = description || defaultDescription;
@@ -135,7 +155,7 @@ export function UpgradePrompt({
                 {authState.isAuthenticated
                   ? isTrialActive
                     ? 'Continue Trial'
-                    : 'Start Free Trial'
+                    : 'Upgrade now'
                   : 'Sign In'}
               </Link>
             </div>

@@ -312,7 +312,7 @@ export const getEnhancedPersonalizedTarotReading = (
   includeTrends: boolean = true,
 ): EnhancedReading => {
   const today = new Date();
-  const todayString = today.toDateString();
+  const todayString = today.toISOString().split('T')[0];
 
   // Calculate week start and week number for unique weekly seed
   const weekStart = new Date(today);

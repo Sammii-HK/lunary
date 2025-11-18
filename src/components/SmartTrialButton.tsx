@@ -45,7 +45,7 @@ export function SmartTrialButton({
 
     if (authState.isAuthenticated && authState.user) {
       return {
-        text: isTrialActive ? 'Continue Trial' : 'Start Free Trial',
+        text: isTrialActive ? 'Continue Trial' : 'Upgrade now',
         href: '/pricing',
         action: 'link' as const,
       };

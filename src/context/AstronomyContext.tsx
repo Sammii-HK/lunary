@@ -76,10 +76,11 @@ export const AstronomyContextProvider = ({
   // Get account info if available
   const account = useAccount();
   const userName = account?.me?.profile?.name;
+  const userBirthday = (account?.me?.profile as any)?.birthday;
 
   const [currentDateTime, setCurrentDateTime] = useState(dayjs().toDate());
   const [currentDate, setCurrentDate] = useState(
-    currentDateTime.toDateString(),
+    dayjs(currentDateTime).format('YYYY-MM-DD'),
   );
 
   const [observer, setObserver] = useState<any>(null);
@@ -135,8 +136,8 @@ export const AstronomyContextProvider = ({
     [currentDateTime],
   );
   const currentTarotCard = useMemo(
-    () => getTarotCard(currentDate, userName),
-    [currentDate, userName],
+    () => getTarotCard(`daily-${currentDate}`, userName, userBirthday),
+    [currentDate, userName, userBirthday],
   );
   const symbol =
     monthlyMoonPhases[
@@ -151,7 +152,7 @@ export const AstronomyContextProvider = ({
   // const horoscope = useMemo(() => getHoroscope(currentAstrologicalChart, natalChart), [currentAstrologicalChart, natalChart]);
 
   useEffect(() => {
-    setCurrentDate(currentDateTime.toDateString());
+    setCurrentDate(dayjs(currentDateTime).format('YYYY-MM-DD'));
   }, [currentDateTime]);
 
   return (

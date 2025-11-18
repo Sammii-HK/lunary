@@ -31,9 +31,12 @@ export const createAssistantStream = ({
   ];
 
   const paragraphs = composed.message.split('\n\n');
-  paragraphs.forEach((paragraph) => {
-    chunks.push({ event: 'message', data: paragraph });
-  });
+  // Filter out empty paragraphs to prevent issues with message display
+  paragraphs
+    .filter((paragraph) => paragraph.trim().length > 0)
+    .forEach((paragraph) => {
+      chunks.push({ event: 'message', data: paragraph });
+    });
 
   chunks.push({ event: 'done', data: null });
 

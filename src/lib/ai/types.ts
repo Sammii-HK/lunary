@@ -53,6 +53,12 @@ export type TarotReading = {
   timestamp: string;
 };
 
+export type TarotReadingWithInsights = TarotReading & {
+  summary?: string;
+  highlights?: string[];
+  journalingPrompts?: string[];
+};
+
 export type TarotPatternAnalysis = {
   daily?: TarotCard;
   weekly?: TarotCard;
@@ -91,6 +97,7 @@ export type LunaryContext = {
   moon: MoonSnapshot | null;
   tarot: {
     lastReading?: TarotReading;
+    recentReadings?: TarotReadingWithInsights[];
     daily?: TarotCard;
     weekly?: TarotCard;
     personal?: TarotCard;
@@ -106,7 +113,11 @@ export type LunaryContext = {
   };
 };
 
-export type AiPlanId = 'free' | 'lunary_plus' | 'lunary_plus_ai';
+export type AiPlanId =
+  | 'free'
+  | 'lunary_plus'
+  | 'lunary_plus_ai'
+  | 'lunary_plus_ai_annual';
 
 export type AiPlan = {
   id: AiPlanId;
