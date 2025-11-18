@@ -5,23 +5,39 @@ export function middleware(request: NextRequest) {
   const hostname =
     request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
 
-  // Force HTTPS redirect in production
+  // Skip redirects in test/CI environments and for localhost
+  const isTestOrCI =
+    process.env.NODE_ENV === 'test' ||
+    process.env.CI === 'true' ||
+    process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined;
+  const isLocalhost =
+    hostname.includes('localhost') || hostname === '127.0.0.1';
   const isProduction =
-    process.env.NODE_ENV === 'production' ||
-    process.env.VERCEL_ENV === 'production';
-  if (
-    isProduction &&
-    request.headers.get('x-forwarded-proto') !== 'https' &&
-    !hostname.includes('localhost')
-  ) {
-    url.protocol = 'https:';
-    return NextResponse.redirect(url);
+    !isTestOrCI &&
+    !isLocalhost &&
+    (process.env.NODE_ENV === 'production' ||
+      process.env.VERCEL_ENV === 'production');
+
+  // Redirect www to non-www FIRST (canonical domain: lunary.app)
+  // This must happen before HTTPS redirect to avoid loops
+  if (hostname.startsWith('www.') && !isTestOrCI && !isLocalhost) {
+    const nonWwwHostname = hostname.replace('www.', '');
+    const redirectUrl = new URL(request.url);
+    redirectUrl.hostname = nonWwwHostname;
+    // Always use HTTPS for the redirect in production
+    if (isProduction) {
+      redirectUrl.protocol = 'https:';
+      redirectUrl.port = '';
+    }
+    return NextResponse.redirect(redirectUrl, 301);
   }
 
-  // Redirect www to non-www (canonical domain: lunary.app)
-  if (hostname.startsWith('www.')) {
-    url.hostname = hostname.replace('www.', '');
-    return NextResponse.redirect(url, 301);
+  // Force HTTPS redirect in production (but skip in test/CI environments)
+  // This happens AFTER www redirect to avoid loops
+  if (isProduction && request.headers.get('x-forwarded-proto') !== 'https') {
+    url.protocol = 'https:';
+    url.port = '';
+    return NextResponse.redirect(url);
   }
 
   const configuredAdminHosts = [
