@@ -6,10 +6,13 @@ export function middleware(request: NextRequest) {
     request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
 
   // Skip ALL redirects in test/CI environments and for localhost
+  // Check CI more robustly (GitHub Actions sets CI=true, Edge Runtime may handle it differently)
   const isTestOrCI =
     process.env.NODE_ENV === 'test' ||
     process.env.CI === 'true' ||
-    process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined;
+    !!process.env.CI ||
+    process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined ||
+    process.env.GITHUB_ACTIONS === 'true';
   const isLocalhost =
     hostname.includes('localhost') || hostname === '127.0.0.1';
 
