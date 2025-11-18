@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { grimoire } from '@/constants/grimoire';
+import { sectionToSlug } from '@/utils/grimoire';
 import dayjs from 'dayjs';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -153,10 +154,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all grimoire sections
   const grimoireItems = Object.keys(grimoire);
   const grimoireRoutes = grimoireItems.map((item) => ({
-    url: `${baseUrl}/grimoire/${item
-      .replace(/([A-Z])/g, '-$1')
-      .toLowerCase()
-      .replace(/^-/, '')}`,
+    url: `${baseUrl}/grimoire/${sectionToSlug(item)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.7,

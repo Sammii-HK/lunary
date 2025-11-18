@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodiacSigns } from '../../../../utils/zodiac/zodiac';
 import { monthlyMoonPhases } from '../../../../utils/moon/monthlyPhases';
 import {
@@ -886,6 +886,18 @@ export default function CompatibilityChart() {
   const [selection1, setSelection1] = useState<string>('');
   const [selection2, setSelection2] = useState<string>('');
 
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const element = document.getElementById(hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, []);
+
   const moonPhaseMap: Record<string, string> = {
     newMoon: 'New Moon',
     waxingCrescent: 'Waxing Crescent',
@@ -990,205 +1002,375 @@ export default function CompatibilityChart() {
   const options = getOptions();
 
   return (
-    <div className='space-y-6'>
-      <div>
+    <article className='space-y-8 pb-20'>
+      <header className='mb-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           Compatibility Chart
         </h1>
-        <p className='text-sm text-zinc-400 mb-6'>
+        <p className='text-sm text-zinc-400 leading-relaxed'>
           Explore compatibility between zodiac signs, elements, moon phases, and
-          crystal categories. Select two items to see their compatibility.
+          crystal categories. Discover how different cosmic energies interact,
+          complement, and challenge each other. Select two items from the same
+          category to see their detailed compatibility analysis including
+          scores, strengths, and areas for growth.
         </p>
-      </div>
+      </header>
 
-      {/* Type Selector */}
-      <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-        <label className='block text-sm font-medium text-zinc-300 mb-2'>
-          Compatibility Type
-        </label>
-        <select
-          value={compatibilityType}
-          onChange={(e) => {
-            setCompatibilityType(e.target.value as CompatibilityType);
-            setSelection1('');
-            setSelection2('');
-          }}
-          className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-        >
-          <option value='zodiac'>Zodiac Signs</option>
-          <option value='element'>Elements</option>
-          <option value='moon'>Moon Phases</option>
-          <option value='crystal'>Crystal Categories</option>
-        </select>
-      </div>
-
-      {/* Selection Controls */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-          <label className='block text-sm font-medium text-zinc-300 mb-2'>
-            First Selection
-          </label>
-          <select
-            value={selection1}
-            onChange={(e) => setSelection1(e.target.value)}
-            className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-          >
-            <option value=''>Select...</option>
-            {options.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+      <section id='compatibility-tool' className='space-y-6'>
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Select Compatibility Type
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Choose the type of compatibility you want to explore. Each type
+            provides unique insights into how different energies interact.
+          </p>
         </div>
 
         <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-          <label className='block text-sm font-medium text-zinc-300 mb-2'>
-            Second Selection
+          <label
+            htmlFor='compatibility-type-selector'
+            className='block text-sm font-medium text-zinc-300 mb-2'
+          >
+            Compatibility Type
           </label>
           <select
-            value={selection2}
-            onChange={(e) => setSelection2(e.target.value)}
+            id='compatibility-type-selector'
+            value={compatibilityType}
+            onChange={(e) => {
+              setCompatibilityType(e.target.value as CompatibilityType);
+              setSelection1('');
+              setSelection2('');
+            }}
+            aria-label='Select compatibility type'
             className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
           >
-            <option value=''>Select...</option>
-            {options
-              .filter((option) => option !== selection1)
-              .map((option) => (
+            <option value='zodiac'>Zodiac Signs</option>
+            <option value='element'>Elements</option>
+            <option value='moon'>Moon Phases</option>
+            <option value='crystal'>Crystal Categories</option>
+          </select>
+        </div>
+
+        <div>
+          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+            Compare Two Items
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Select two items from the chosen category to see their compatibility
+            analysis.
+          </p>
+        </div>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <label
+              htmlFor='selection-1'
+              className='block text-sm font-medium text-zinc-300 mb-2'
+            >
+              First Selection
+            </label>
+            <select
+              id='selection-1'
+              value={selection1}
+              onChange={(e) => setSelection1(e.target.value)}
+              aria-label='Select first item for compatibility comparison'
+              className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+            >
+              <option value=''>Select...</option>
+              {options.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
-          </select>
-        </div>
-      </div>
+            </select>
+          </div>
 
-      {/* Results */}
-      {result && (
-        <div
-          className={`rounded-lg border p-6 ${getScoreBgColor(result.score)}`}
-        >
-          <div className='flex items-center justify-between mb-4'>
-            <h2 className='text-xl font-medium text-zinc-100'>
-              Compatibility: {selection1} & {selection2}
-            </h2>
-            <div
-              className={`text-3xl font-bold ${getScoreColor(result.score)}`}
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <label
+              htmlFor='selection-2'
+              className='block text-sm font-medium text-zinc-300 mb-2'
             >
-              {result.score}%
-            </div>
-          </div>
-
-          <p className='text-sm text-zinc-300 mb-4'>{result.description}</p>
-
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'>
-            <div>
-              <h3 className='text-sm font-medium text-green-400 mb-2'>
-                Strengths
-              </h3>
-              <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
-                {result.strengths.map((strength, index) => (
-                  <li key={index}>{strength}</li>
+              Second Selection
+            </label>
+            <select
+              id='selection-2'
+              value={selection2}
+              onChange={(e) => setSelection2(e.target.value)}
+              aria-label='Select second item for compatibility comparison'
+              className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+            >
+              <option value=''>Select...</option>
+              {options
+                .filter((option) => option !== selection1)
+                .map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
                 ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className='text-sm font-medium text-orange-400 mb-2'>
-                Challenges
-              </h3>
-              <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
-                {result.challenges.map((challenge, index) => (
-                  <li key={index}>{challenge}</li>
-                ))}
-              </ul>
-            </div>
+            </select>
           </div>
         </div>
-      )}
 
-      {/* Info Section */}
-      <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-        <h3 className='text-lg font-medium text-purple-300 mb-2'>
-          About Compatibility Charts
-        </h3>
-        <p className='text-sm text-zinc-300 leading-relaxed'>
-          Compatibility charts provide insights into how different energies,
-          elements, and cosmic forces interact. Remember that compatibility is
-          just one factor in relationships and connections. Individual charts,
-          personal growth, and communication play equally important roles.
-        </p>
-      </div>
+        {result && (
+          <section
+            id='compatibility-result'
+            className={`rounded-lg border p-6 ${getScoreBgColor(result.score)}`}
+            aria-live='polite'
+            aria-atomic='true'
+          >
+            <div className='flex items-center justify-between mb-4'>
+              <h2 className='text-xl font-medium text-zinc-100'>
+                Compatibility: {selection1} & {selection2}
+              </h2>
+              <div
+                className={`text-3xl font-bold ${getScoreColor(result.score)}`}
+              >
+                {result.score}%
+              </div>
+            </div>
 
-      {/* SEO Structured Data */}
-      <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'WebApplication',
-            name: 'Compatibility Chart - Lunary Grimoire',
-            description:
-              'Interactive compatibility chart for zodiac signs, elements, moon phases, and crystal categories. Discover how different energies interact and complement each other.',
-            applicationCategory: 'AstrologyApplication',
-            operatingSystem: 'Web',
-            offers: {
-              '@type': 'Offer',
-              price: '0',
-              priceCurrency: 'USD',
-            },
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: '4.8',
-              ratingCount: '150',
-            },
-            featureList: [
-              'Zodiac sign compatibility',
-              'Element compatibility',
-              'Moon phase compatibility',
-              'Crystal category compatibility',
-              'Detailed compatibility scores',
-              'Strengths and challenges analysis',
-            ],
-          }),
-        }}
-      />
+            <p className='text-sm text-zinc-300 mb-4'>{result.description}</p>
 
-      <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: [
-              {
-                '@type': 'Question',
-                name: 'How accurate are compatibility charts?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Compatibility charts provide insights into how different energies, elements, and cosmic forces interact. However, compatibility is just one factor in relationships and connections. Individual charts, personal growth, and communication play equally important roles.',
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'>
+              <div>
+                <h3 className='text-sm font-medium text-green-400 mb-2'>
+                  Strengths
+                </h3>
+                <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
+                  {result.strengths.map((strength, index) => (
+                    <li key={index}>{strength}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className='text-sm font-medium text-orange-400 mb-2'>
+                  Challenges
+                </h3>
+                <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
+                  {result.challenges.map((challenge, index) => (
+                    <li key={index}>{challenge}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section id='about-compatibility' className='space-y-6'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+            <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+              Understanding Compatibility Charts
+            </h2>
+            <div className='space-y-4 text-sm text-zinc-300 leading-relaxed'>
+              <p>
+                Compatibility charts provide insights into how different
+                energies, elements, and cosmic forces interact. These tools help
+                you understand the dynamics between zodiac signs, elements, moon
+                phases, and crystal categories.
+              </p>
+              <div>
+                <h3 className='text-lg font-medium text-purple-300 mb-2'>
+                  How to Use This Tool
+                </h3>
+                <ol className='list-decimal list-inside space-y-2 ml-2'>
+                  <li>
+                    Select a compatibility type (Zodiac Signs, Elements, Moon
+                    Phases, or Crystal Categories)
+                  </li>
+                  <li>Choose two items from the same category to compare</li>
+                  <li>
+                    Review the compatibility score, description, strengths, and
+                    challenges
+                  </li>
+                  <li>
+                    Use this information as a guide, not a definitive answer
+                  </li>
+                </ol>
+              </div>
+              <div>
+                <h3 className='text-lg font-medium text-purple-300 mb-2'>
+                  Interpreting Scores
+                </h3>
+                <ul className='list-disc list-inside space-y-2 ml-2'>
+                  <li>
+                    <strong className='text-green-400'>85-100%:</strong>{' '}
+                    Excellent compatibility with strong shared strengths
+                  </li>
+                  <li>
+                    <strong className='text-yellow-400'>70-84%:</strong> Good
+                    compatibility with some challenges to navigate
+                  </li>
+                  <li>
+                    <strong className='text-orange-400'>55-69%:</strong>{' '}
+                    Moderate compatibility requiring understanding and effort
+                  </li>
+                  <li>
+                    <strong className='text-red-400'>Below 55%:</strong>{' '}
+                    Challenging compatibility that may require significant work
+                  </li>
+                </ul>
+              </div>
+              <p className='text-zinc-400 italic'>
+                Remember: Compatibility is just one factor in relationships and
+                connections. Individual charts, personal growth, communication,
+                and mutual respect play equally important roles. Use these
+                insights as a starting point for deeper understanding, not as
+                absolute predictions.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* SEO Structured Data - BreadcrumbList */}
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'Home',
+                  item: 'https://lunary.app',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'Grimoire',
+                  item: 'https://lunary.app/grimoire',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 3,
+                  name: 'Compatibility Chart',
+                  item: 'https://lunary.app/grimoire/compatibility-chart',
+                },
+              ],
+            }),
+          }}
+        />
+
+        {/* SEO Structured Data - Article */}
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Article',
+              headline: 'Compatibility Chart - Lunary Grimoire',
+              description:
+                'Interactive compatibility chart for zodiac signs, elements, moon phases, and crystal categories. Discover how different cosmic energies interact and complement each other.',
+              author: {
+                '@type': 'Organization',
+                name: 'Lunary',
+                url: 'https://lunary.app',
+              },
+              publisher: {
+                '@type': 'Organization',
+                name: 'Lunary',
+                logo: {
+                  '@type': 'ImageObject',
+                  url: 'https://lunary.app/logo.png',
                 },
               },
-              {
-                '@type': 'Question',
-                name: 'What types of compatibility can I check?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'You can check compatibility between zodiac signs, elements (Fire, Earth, Air, Water), moon phases (New Moon, Full Moon, etc.), and crystal categories. Each type provides unique insights into how different energies interact.',
-                },
+              datePublished: '2024-01-01',
+              dateModified: new Date().toISOString().split('T')[0],
+              mainEntityOfPage: {
+                '@type': 'WebPage',
+                '@id': 'https://lunary.app/grimoire/compatibility-chart',
               },
-              {
-                '@type': 'Question',
-                name: 'How do I interpret compatibility scores?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Scores of 85% or higher indicate excellent compatibility with shared strengths. Scores of 70-84% show good compatibility with some challenges to navigate. Scores below 70% may require more effort and understanding, but can still work with mutual respect and communication.',
-                },
+              image: 'https://lunary.app/api/og/cosmic',
+              keywords: [
+                'zodiac compatibility',
+                'astrology compatibility',
+                'element compatibility',
+                'moon phase compatibility',
+                'crystal compatibility',
+                'cosmic compatibility',
+                'astrological relationships',
+                'zodiac sign relationships',
+              ],
+            }),
+          }}
+        />
+
+        {/* SEO Structured Data - WebApplication */}
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'Compatibility Chart - Lunary Grimoire',
+              description:
+                'Interactive compatibility chart for zodiac signs, elements, moon phases, and crystal categories. Discover how different energies interact and complement each other.',
+              applicationCategory: 'AstrologyApplication',
+              operatingSystem: 'Web',
+              browserRequirements: 'Requires JavaScript',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
               },
-            ],
-          }),
-        }}
-      />
-    </div>
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: '4.8',
+                ratingCount: '150',
+              },
+              featureList: [
+                'Zodiac sign compatibility analysis',
+                'Element compatibility (Fire, Earth, Air, Water)',
+                'Moon phase compatibility',
+                'Crystal category compatibility',
+                'Detailed compatibility scores (0-100%)',
+                'Strengths and challenges analysis',
+                'Interactive comparison tool',
+              ],
+              screenshot: 'https://lunary.app/api/og/cosmic',
+            }),
+          }}
+        />
+
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'How accurate are compatibility charts?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Compatibility charts provide insights into how different energies, elements, and cosmic forces interact. However, compatibility is just one factor in relationships and connections. Individual charts, personal growth, and communication play equally important roles.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'What types of compatibility can I check?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'You can check compatibility between zodiac signs, elements (Fire, Earth, Air, Water), moon phases (New Moon, Full Moon, etc.), and crystal categories. Each type provides unique insights into how different energies interact.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'How do I interpret compatibility scores?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Scores of 85% or higher indicate excellent compatibility with shared strengths. Scores of 70-84% show good compatibility with some challenges to navigate. Scores below 70% may require more effort and understanding, but can still work with mutual respect and communication.',
+                  },
+                },
+              ],
+            }),
+          }}
+        />
+      </section>
+    </article>
   );
 }
