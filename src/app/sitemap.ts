@@ -3,7 +3,12 @@ import { grimoire } from '@/constants/grimoire';
 import { zodiacSigns, planetaryBodies } from '../../utils/zodiac/zodiac';
 import { monthlyMoonPhases } from '../../utils/moon/monthlyPhases';
 import { tarotCards } from '../../utils/tarot/tarot-cards';
-import { astrologicalHouses } from '@/constants/grimoire/seo-data';
+import { astrologicalHouses, astrologicalAspects, retrogradeInfo, eclipseInfo } from '@/constants/grimoire/seo-data';
+import { angelNumbers, lifePathNumbers } from '@/constants/grimoire/numerology-data';
+import { runesList } from '@/constants/runes';
+import { chakras } from '@/constants/chakras';
+import { annualFullMoons } from '@/constants/moon/annualFullMoons';
+import { crystalDatabase } from '@/constants/grimoire/crystals';
 import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
 
@@ -190,6 +195,94 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   });
 
+  // Add all angel number pages
+  const angelNumberRoutes = Object.keys(angelNumbers).map((number) => ({
+    url: `${baseUrl}/grimoire/angel-numbers/${number}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all life path number pages
+  const lifePathRoutes = Object.keys(lifePathNumbers).map((number) => ({
+    url: `${baseUrl}/grimoire/life-path/${number}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all rune pages
+  const runeRoutes = Object.keys(runesList).map((rune) => ({
+    url: `${baseUrl}/grimoire/runes/${stringToKebabCase(rune)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all chakra pages
+  const chakraRoutes = Object.keys(chakras).map((chakra) => ({
+    url: `${baseUrl}/grimoire/chakras/${stringToKebabCase(chakra)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all aspect pages
+  const aspectRoutes = Object.keys(astrologicalAspects).map((aspect) => ({
+    url: `${baseUrl}/grimoire/aspects/${stringToKebabCase(aspect)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all retrograde pages
+  const retrogradeRoutes = Object.keys(retrogradeInfo).map((planet) => ({
+    url: `${baseUrl}/grimoire/retrogrades/${planet}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all eclipse pages
+  const eclipseRoutes = Object.keys(eclipseInfo).map((type) => ({
+    url: `${baseUrl}/grimoire/eclipses/${type}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all full moon name pages
+  const fullMoonRoutes = Object.keys(annualFullMoons).map((month) => ({
+    url: `${baseUrl}/grimoire/full-moons/${stringToKebabCase(month)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add lunar node pages
+  const lunarNodeRoutes = [
+    {
+      url: `${baseUrl}/grimoire/lunar-nodes/north-node`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire/lunar-nodes/south-node`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+  ];
+
+  // Add all crystal pages
+  const crystalRoutes = crystalDatabase.map((crystal) => ({
+    url: `${baseUrl}/grimoire/crystals/${stringToKebabCase(crystal.name)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
   return [
     ...routes,
     ...blogRoutes,
@@ -200,5 +293,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...moonPhaseRoutes,
     ...moonInSignRoutes,
     ...tarotRoutes,
+    ...angelNumberRoutes,
+    ...lifePathRoutes,
+    ...runeRoutes,
+    ...chakraRoutes,
+    ...aspectRoutes,
+    ...retrogradeRoutes,
+    ...eclipseRoutes,
+    ...fullMoonRoutes,
+    ...lunarNodeRoutes,
+    ...crystalRoutes,
   ];
 }
