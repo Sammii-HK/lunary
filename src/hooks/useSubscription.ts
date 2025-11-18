@@ -7,7 +7,9 @@ import {
   hasFeatureAccess,
   FEATURE_ACCESS,
   getTrialDaysRemaining,
+  normalizePlanType,
 } from '../../utils/pricing';
+import { syncSubscriptionToProfile } from '../../utils/subscription';
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
@@ -16,7 +18,7 @@ export interface SubscriptionStatus {
   plan: 'free' | 'monthly' | 'yearly';
   planName?: string;
   status: 'free' | 'trial' | 'active' | 'cancelled' | 'past_due';
-  hasAccess: (feature: keyof typeof FEATURE_ACCESS) => boolean;
+  hasAccess: (feature: string) => boolean;
   showUpgradePrompt: boolean;
   customerId?: string;
   subscriptionId?: string;
@@ -41,6 +43,12 @@ export function useSubscription(): SubscriptionStatus {
   const [subscriptionState, setSubscriptionState] =
     useState<SubscriptionStatus>(defaultState);
   const [hasCheckedStripe, setHasCheckedStripe] = useState(false);
+  const [hasSyncedProfile, setHasSyncedProfile] = useState(false);
+  const [stripeSubscriptionData, setStripeSubscriptionData] = useState<{
+    plan: string;
+    status: string;
+    customerId: string;
+  } | null>(null);
 
   let me: any;
   let hasJazzProvider = true;
@@ -72,10 +80,6 @@ export function useSubscription(): SubscriptionStatus {
 
   const fetchFromStripe = useCallback(async (customerId: string) => {
     try {
-      console.log(
-        'Fetching subscription from Stripe for customer:',
-        customerId,
-      );
       setSubscriptionState((prev) => ({ ...prev, loading: true }));
 
       const response = await fetch('/api/stripe/get-subscription', {
@@ -87,25 +91,42 @@ export function useSubscription(): SubscriptionStatus {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.hasSubscription) {
+        if (data.success && data.subscription) {
           const sub = data.subscription;
           const status = sub.status === 'trialing' ? 'trial' : sub.status;
-          const trialDaysRemaining = sub.trialEnd
+          const trialEnd = sub.trial_end || sub.trialEnd;
+          const trialDaysRemaining = trialEnd
             ? Math.max(
                 0,
                 Math.ceil(
-                  (sub.trialEnd * 1000 - Date.now()) / (1000 * 60 * 60 * 24),
+                  (trialEnd * 1000 - Date.now()) / (1000 * 60 * 60 * 24),
                 ),
               )
             : 0;
           const isTrialActive = status === 'trial' && trialDaysRemaining > 0;
           const isSubscribed = status === 'active' || isTrialActive;
 
+          // Use plan from API response - should be specific plan name (lunary_plus, lunary_plus_ai, or lunary_plus_ai_annual)
+          // Stripe API should return specific plan name via price ID mapping, not generic 'monthly'/'yearly'
+          const planFromApi = sub.plan || 'free';
+          const normalizedPlan = normalizePlanType(planFromApi);
+
+          // Map to simplified plan state for UI (free/monthly/yearly)
+          // Note: Both lunary_plus and lunary_plus_ai map to 'monthly' for UI purposes
+          const planForState =
+            normalizedPlan === 'lunary_plus_ai_annual'
+              ? 'yearly'
+              : normalizedPlan === 'lunary_plus_ai'
+                ? 'monthly'
+                : normalizedPlan === 'lunary_plus'
+                  ? 'monthly'
+                  : 'free';
+
           const stripeBasedState: SubscriptionStatus = {
             isSubscribed,
             isTrialActive,
             trialDaysRemaining,
-            plan: sub.plan as 'free' | 'monthly' | 'yearly',
+            plan: planForState as 'free' | 'monthly' | 'yearly',
             planName: sub.planName,
             status: status as
               | 'free'
@@ -113,26 +134,92 @@ export function useSubscription(): SubscriptionStatus {
               | 'active'
               | 'cancelled'
               | 'past_due',
-            hasAccess: (feature) => hasFeatureAccess(status, sub.plan, feature),
+            hasAccess: (feature) => {
+              // Defensive check: if plan is lunary_plus_ai_annual or yearly and status is trial/active, always grant access
+              // Check both normalized and raw plan to handle cases where normalization might not have occurred
+              if (
+                (normalizedPlan === 'lunary_plus_ai_annual' ||
+                  planFromApi === 'lunary_plus_ai_annual' ||
+                  planFromApi === 'yearly') &&
+                (status === 'trial' || status === 'active')
+              ) {
+                const hasAccess =
+                  FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+                return hasAccess;
+              }
+
+              if (
+                (normalizedPlan === 'lunary_plus_ai' ||
+                  planFromApi === 'lunary_plus_ai') &&
+                (status === 'trial' || status === 'active')
+              ) {
+                const hasAccess =
+                  FEATURE_ACCESS.lunary_plus_ai.includes(feature);
+                return hasAccess;
+              }
+
+              const access = hasFeatureAccess(status, normalizedPlan, feature);
+              return access;
+            },
             showUpgradePrompt: !isSubscribed && status !== 'cancelled',
             customerId: sub.customerId,
             subscriptionId: sub.id,
             loading: false,
           };
 
-          console.log('Subscription fetched from Stripe:', stripeBasedState);
+          // Store Stripe data for comparison with profile
+          setStripeSubscriptionData({
+            plan: planFromApi,
+            status: sub.status,
+            customerId: sub.customerId,
+          });
+
+          // Sync to profile if plan differs (to prevent infinite loops)
+          if (me?.profile?.subscription && !hasSyncedProfile) {
+            const profilePlan = me.profile.subscription.plan;
+            const needsSync =
+              (profilePlan === 'monthly' || profilePlan === 'yearly') &&
+              !profilePlan.includes('lunary') &&
+              planFromApi !== profilePlan;
+
+            if (needsSync) {
+              setHasSyncedProfile(true);
+              // Sync in background - don't await to prevent blocking
+              syncSubscriptionToProfile(me.profile, sub.customerId).catch(
+                (err) => {
+                  console.error(
+                    '[useSubscription] Failed to sync profile:',
+                    err,
+                  );
+                  setHasSyncedProfile(false); // Allow retry on error
+                },
+              );
+            }
+          }
+
           setSubscriptionState(stripeBasedState);
           return;
+        } else {
         }
       } else {
-        console.warn('Failed to fetch subscription:', response.status);
+        console.warn(
+          '[useSubscription] Failed to fetch subscription:',
+          response.status,
+        );
       }
     } catch (error) {
-      console.error('Error fetching subscription from Stripe:', error);
+      console.error(
+        '[useSubscription] Error fetching subscription from Stripe:',
+        error,
+      );
     }
 
+    // If we get here, Stripe fetch failed or returned no subscription
+    // Fall back to profile subscription or default state
     setSubscriptionState((prev) => ({ ...prev, loading: false }));
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // hasSyncedProfile and me.profile are intentionally excluded to prevent infinite loops
+  }, []); // hasSyncedProfile and me.profile intentionally excluded
 
   useEffect(() => {
     if (!hasJazzProvider) {
@@ -140,45 +227,176 @@ export function useSubscription(): SubscriptionStatus {
     }
 
     if (!me?.profile) {
-      console.log('useSubscription: No profile found');
       setSubscriptionState(defaultState);
       return;
     }
 
     const profileSubscription = (me.profile as any)?.subscription;
-    console.log(
-      'useSubscription: Profile found, subscription:',
-      profileSubscription,
-    );
+    const customerId = getCustomerId();
 
+    // Prioritize Stripe data if available (most accurate source of truth)
+    // This ensures we use correct plan even if profile subscription is stale
+    if (
+      stripeSubscriptionData &&
+      stripeSubscriptionData.customerId === customerId
+    ) {
+      // Recreate state from Stripe data to ensure it's correct
+      const stripeStatus =
+        stripeSubscriptionData.status === 'trialing'
+          ? 'trial'
+          : stripeSubscriptionData.status;
+      const stripeNormalizedPlan = normalizePlanType(
+        stripeSubscriptionData.plan,
+      );
+      const stripePlanForState =
+        stripeNormalizedPlan === 'lunary_plus_ai_annual'
+          ? 'yearly'
+          : stripeNormalizedPlan === 'lunary_plus_ai'
+            ? 'monthly'
+            : stripeNormalizedPlan === 'lunary_plus'
+              ? 'monthly'
+              : 'free';
+
+      const stripeBasedState: SubscriptionStatus = {
+        isSubscribed: stripeStatus === 'active' || stripeStatus === 'trial',
+        isTrialActive: stripeStatus === 'trial',
+        trialDaysRemaining: stripeStatus === 'trial' ? 14 : 0, // Default, will be updated by fetchFromStripe if needed
+        plan: stripePlanForState as 'free' | 'monthly' | 'yearly',
+        status: stripeStatus as
+          | 'free'
+          | 'trial'
+          | 'active'
+          | 'cancelled'
+          | 'past_due',
+        hasAccess: (feature) => {
+          // Defensive check: if plan is lunary_plus_ai_annual or yearly and status is trial/active, always grant access
+          // Check both normalized and raw plan to handle cases where normalization might not have occurred
+          if (
+            (stripeNormalizedPlan === 'lunary_plus_ai_annual' ||
+              stripeSubscriptionData.plan === 'lunary_plus_ai_annual' ||
+              stripeSubscriptionData.plan === 'yearly') &&
+            (stripeStatus === 'trial' || stripeStatus === 'active')
+          ) {
+            const hasAccess =
+              FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+            return hasAccess;
+          }
+
+          if (
+            (stripeNormalizedPlan === 'lunary_plus_ai' ||
+              stripeSubscriptionData.plan === 'lunary_plus_ai') &&
+            (stripeStatus === 'trial' || stripeStatus === 'active')
+          ) {
+            const hasAccess = FEATURE_ACCESS.lunary_plus_ai.includes(feature);
+            return hasAccess;
+          }
+
+          const access = hasFeatureAccess(
+            stripeStatus,
+            stripeNormalizedPlan,
+            feature,
+          );
+          return access;
+        },
+        showUpgradePrompt: false, // User has subscription
+        customerId: stripeSubscriptionData.customerId,
+        loading: false,
+      };
+
+      setSubscriptionState(stripeBasedState);
+      setHasCheckedStripe(true);
+      return;
+    }
+
+    // Fallback to profile subscription - widget syncs subscription data here for reuse
+    // But if profile plan looks wrong (monthly when we have customer ID), fetch from Stripe to verify
     if (
       profileSubscription &&
       profileSubscription.status &&
       profileSubscription.status !== 'free'
     ) {
-      const status = profileSubscription.status;
+      // Normalize status: 'trialing' -> 'trial' for consistency
+      const rawStatus = profileSubscription.status;
+      const status = rawStatus === 'trialing' ? 'trial' : rawStatus;
       const plan = profileSubscription.plan || 'free';
+
+      // If profile has generic plan (monthly/yearly) but we have customer ID, fetch from Stripe to get exact plan
+      // This handles cases where profile sync hasn't completed or is stale
+      if (
+        customerId &&
+        !hasCheckedStripe &&
+        (plan === 'monthly' || plan === 'yearly') &&
+        !plan.includes('lunary')
+      ) {
+        setHasCheckedStripe(true);
+        fetchFromStripe(customerId);
+        return;
+      }
       const isTrialActive =
         status === 'trial' && profileSubscription.trialEndsAt
           ? new Date(profileSubscription.trialEndsAt) > new Date()
-          : false;
+          : status === 'trial'; // If status is 'trial', consider trial active even without trialEndsAt
       const trialDaysRemaining = profileSubscription.trialEndsAt
         ? getTrialDaysRemaining(profileSubscription.trialEndsAt)
-        : 0;
-      const isSubscribed = status === 'active' || isTrialActive;
+        : status === 'trial'
+          ? 7
+          : 0; // Default to 7 days if trialing but no trialEndsAt
+      const isSubscribed =
+        status === 'active' || status === 'trial' || isTrialActive;
+
+      // Normalize plan to ensure correct feature access
+      // normalizePlanType already converts 'yearly' -> 'lunary_plus_ai_annual'
+      // This ensures profile subscriptions with 'yearly' get annual plan features
+      const normalizedPlan = normalizePlanType(plan);
+
+      const planForState =
+        normalizedPlan === 'lunary_plus_ai_annual'
+          ? 'yearly'
+          : normalizedPlan === 'lunary_plus_ai'
+            ? 'monthly'
+            : normalizedPlan === 'lunary_plus'
+              ? 'monthly'
+              : 'free';
 
       const profileBasedState: SubscriptionStatus = {
         isSubscribed,
         isTrialActive,
         trialDaysRemaining,
-        plan: plan as 'free' | 'monthly' | 'yearly',
+        plan: planForState as 'free' | 'monthly' | 'yearly',
         status: status as
           | 'free'
           | 'trial'
           | 'active'
           | 'cancelled'
           | 'past_due',
-        hasAccess: (feature) => hasFeatureAccess(status, plan, feature),
+        hasAccess: (feature) => {
+          // Defensive check: if plan is lunary_plus_ai_annual or yearly and status is trial/active, always grant access
+          // Check both normalized and raw plan to handle cases where normalization might not have occurred
+          if (
+            (normalizedPlan === 'lunary_plus_ai_annual' ||
+              plan === 'lunary_plus_ai_annual' ||
+              plan === 'yearly') &&
+            (status === 'trial' || status === 'active')
+          ) {
+            const hasAccess =
+              FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+            return hasAccess;
+          }
+
+          if (
+            (normalizedPlan === 'lunary_plus_ai' ||
+              plan === 'lunary_plus_ai') &&
+            (status === 'trial' || status === 'active')
+          ) {
+            const hasAccess = FEATURE_ACCESS.lunary_plus_ai.includes(feature);
+            return hasAccess;
+          }
+
+          // Use normalized plan for feature access checks
+          // hasFeatureAccess already handles 'yearly' -> 'lunary_plus_ai_annual' conversion
+          const access = hasFeatureAccess(status, normalizedPlan, feature);
+          return access;
+        },
         showUpgradePrompt: !isSubscribed && status !== 'cancelled',
         customerId:
           profileSubscription.stripeCustomerId ||
@@ -187,24 +405,23 @@ export function useSubscription(): SubscriptionStatus {
         loading: false,
       };
 
-      console.log('useSubscription profile-based result:', profileBasedState);
+      // Set state immediately from profile - this is the source of truth
       setSubscriptionState(profileBasedState);
       setHasCheckedStripe(true);
       return;
     }
 
+    // Fallback: Only fetch from Stripe if no profile subscription exists
+    // Profile subscription is the source of truth (synced by widget)
     if (!hasCheckedStripe) {
       setHasCheckedStripe(true);
-      const customerId = getCustomerId();
 
-      if (customerId) {
-        console.log(
-          'No profile subscription but found customer ID, fetching from Stripe...',
-        );
+      if (customerId && !profileSubscription) {
+        // No profile subscription but we have customer ID - fetch from Stripe
         fetchFromStripe(customerId);
         return;
       } else {
-        console.log('No customer ID found, using default state');
+        // No customer ID or no profile subscription - use default state
         setSubscriptionState(defaultState);
       }
     }
@@ -215,6 +432,7 @@ export function useSubscription(): SubscriptionStatus {
     defaultState,
     getCustomerId,
     fetchFromStripe,
+    stripeSubscriptionData,
   ]);
 
   if (!hasJazzProvider) {

@@ -873,7 +873,10 @@ export const CrystalWidget = () => {
     });
   }, []);
 
-  const hasChartAccess = hasBirthChartAccess(subscription.status);
+  const hasChartAccess = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
 
   // Get birth chart data (needed for hooks)
   const hasBirthChartData = hasBirthChart(me?.profile);

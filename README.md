@@ -90,6 +90,12 @@ Real-time planetary position calculations using Astronomy Engine with ecliptic c
 
 **Delivery**: Parallel notification dispatch with Promise.allSettled for error handling, tracks delivery success/failure, marks inactive subscriptions.
 
+### Discord Notifications
+
+- Configure a Discord incoming webhook (Server Settings → Integrations → Webhooks) and store the URL in the `DISCORD_WEBHOOK_URL` environment variable for every deployment target (Vercel dashboard, local `.env`, etc.).
+- Mirror the same secret in the Cloudflare Worker by adding `DISCORD_WEBHOOK_URL` to the worker variables so cron-based alerts can reach Discord even when Vercel functions are idle.
+- The backend automatically detects when `DISCORD_WEBHOOK_URL` is present and posts concise cosmic updates to the linked Discord channel alongside push/email sends.
+
 ### Automation & Cron Jobs
 
 **Daily Posts** (8 AM UTC - Vercel Cron):

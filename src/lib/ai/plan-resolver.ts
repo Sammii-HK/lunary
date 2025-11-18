@@ -18,12 +18,15 @@ const SUBSCRIPTION_PLAN_MAP: Record<string, AiPlanId> = {
   free: 'free',
   trial: 'lunary_plus',
   monthly: 'lunary_plus',
-  yearly: 'lunary_plus_ai',
-  annual: 'lunary_plus_ai',
+  yearly: 'lunary_plus_ai_annual',
+  annual: 'lunary_plus_ai_annual',
   premium: 'lunary_plus_ai',
   'cosmic explorer': 'free',
   'cosmic guide': 'lunary_plus',
   'cosmic master': 'lunary_plus_ai',
+  lunary_plus: 'lunary_plus',
+  lunary_plus_ai: 'lunary_plus_ai',
+  lunary_plus_ai_annual: 'lunary_plus_ai_annual',
 };
 
 const NORMALISE = (value?: string | null): string | null => {
@@ -52,7 +55,15 @@ const resolveFromValue = (value?: string | null): AiPlanId | null => {
     return SUBSCRIPTION_PLAN_MAP[normalized];
   }
 
-  if (normalized.includes('cosmic master') || normalized.includes('annual')) {
+  if (
+    normalized.includes('cosmic master') ||
+    normalized.includes('lunary_plus_ai_annual') ||
+    (normalized.includes('annual') && normalized.includes('ai'))
+  ) {
+    return 'lunary_plus_ai_annual';
+  }
+
+  if (normalized.includes('lunary_plus_ai') && !normalized.includes('annual')) {
     return 'lunary_plus_ai';
   }
 

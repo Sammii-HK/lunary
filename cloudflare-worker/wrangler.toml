@@ -12,3 +12,4 @@ crons = [
 # Environment variables (set these in Cloudflare dashboard)
 [vars]
 # CRON_SECRET
+# DISCORD_WEBHOOK_URL
