@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { stringToKebabCase } from '../../utils/string';
+
 interface TarotCardProps {
   name: string;
   keywords: string[];
@@ -11,10 +14,15 @@ export function TarotCard({
   information,
   variant = 'major',
 }: TarotCardProps) {
+  const cardSlug = stringToKebabCase(name);
+
   return (
-    <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 transition-colors'>
+    <Link
+      href={`/grimoire/tarot/${cardSlug}`}
+      className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+    >
       <h3
-        className={`text-lg font-medium mb-2 ${
+        className={`text-lg font-medium mb-2 group-hover:text-purple-400 transition-colors ${
           variant === 'major' ? 'text-purple-300' : 'text-zinc-100'
         }`}
       >
@@ -38,6 +46,6 @@ export function TarotCard({
         </div>
       </div>
       <p className='text-sm text-zinc-300 leading-relaxed'>{information}</p>
-    </div>
+    </Link>
   );
 }

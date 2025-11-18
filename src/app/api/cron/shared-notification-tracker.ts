@@ -88,7 +88,7 @@ export async function cleanupOldDates(keepDays: number = 1): Promise<void> {
     // Once the day is over, we don't need to track those events anymore
     await sql`
       DELETE FROM notification_sent_events
-      WHERE date < CURRENT_DATE - INTERVAL '${keepDays} days'
+      WHERE date < CURRENT_DATE - (${keepDays} || ' days')::INTERVAL
     `;
   } catch (error) {
     console.error('Error cleaning up old dates:', error);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Share2, Copy, Check } from 'lucide-react';
 import { useAccount } from 'jazz-tools/react';
 
@@ -75,10 +76,13 @@ export function ShareCosmicCard() {
     <div className='space-y-4'>
       {cardData && (
         <div className='bg-zinc-900 rounded-lg p-4 border border-zinc-800'>
-          <img
+          <Image
             src={cardData.ogImageUrl}
             alt='Cosmic State Card'
+            width={1200}
+            height={630}
             className='w-full rounded-lg mb-4'
+            unoptimized
           />
           <div className='flex gap-2'>
             <button

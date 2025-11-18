@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Bookmark, BookmarkCheck, FolderPlus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -36,14 +36,7 @@ export function SaveToCollection({
   const [folders, setFolders] = useState<any[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (authState.isAuthenticated) {
-      checkIfSaved();
-      fetchFolders();
-    }
-  }, [authState.isAuthenticated, item]);
-
-  const checkIfSaved = async () => {
+  const checkIfSaved = useCallback(async () => {
     try {
       const response = await fetch(
         `/api/collections?category=${item.category}&limit=100`,
@@ -58,9 +51,9 @@ export function SaveToCollection({
     } catch (error) {
       console.error('Error checking if saved:', error);
     }
-  };
+  }, [item]);
 
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     try {
       const response = await fetch('/api/collections/folders');
       const data = await response.json();
@@ -70,7 +63,14 @@ export function SaveToCollection({
     } catch (error) {
       console.error('Error fetching folders:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (authState.isAuthenticated) {
+      checkIfSaved();
+      fetchFolders();
+    }
+  }, [authState.isAuthenticated, checkIfSaved, fetchFolders]);
 
   const handleSave = async () => {
     if (!authState.isAuthenticated) {

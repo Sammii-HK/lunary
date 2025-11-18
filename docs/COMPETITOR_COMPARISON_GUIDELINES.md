@@ -54,9 +54,15 @@
 **Example Keywords:**
 
 - "lunary vs moonly"
-- "best personalized astrology app"
 - "lunary vs lunar guide"
+- "lunary vs arcarae"
+- "lunary vs co-star"
+- "lunary vs pattern"
+- "best personalized astrology app"
 - "astrology app comparison"
+- "arcarae alternative"
+- "co-star alternative"
+- "pattern alternative"
 
 ### 4. **Legal Protection**
 
@@ -165,11 +171,63 @@
 - Helps users make informed decisions
 - Standard SEO practice
 
+## 🎯 **Competitive Positioning**
+
+### Lunary vs Arcarae
+
+**Arcarae:**
+- Community-focused platform
+- Angel numbers content
+- Generic spiritual content
+
+**Lunary:**
+- Deeply personalized analysis based on birth chart
+- AI astral guide for personalized insights
+- Complete magical tools ecosystem (grimoire, tarot, rituals)
+- Real astronomical calculations
+
+**Key Differentiator:** Lunary provides deeply personalized, chart-based insights vs Arcarae's community-driven generic content approach.
+
+### Lunary vs Co–Star
+
+**Co–Star:**
+- Aesthetic design
+- Generic astrology content
+- Social features
+
+**Lunary:**
+- Tailored insights based on exact birth chart
+- Personalized tarot readings
+- Rituals and magical practices
+- AI-powered astral guide
+- Complete grimoire with spells and correspondences
+
+**Key Differentiator:** Lunary offers true personalization with magical tools vs Co–Star's aesthetic but generic approach.
+
+### Lunary vs Pattern
+
+**Pattern:**
+- Psychology-based pattern analysis
+- Behavioral insights
+
+**Lunary:**
+- Full magical ecosystem
+- Astrological pattern analysis
+- Tarot pattern insights
+- Rituals and spells
+- Complete grimoire
+- AI astral guide
+
+**Key Differentiator:** Lunary provides a complete magical and astrological ecosystem vs Pattern's psychology-focused pattern analysis.
+
 ## 🚀 **Next Steps**
 
 1. ✅ Created "Lunary vs Moonly" page
 2. ⚠️ Create "Lunary vs Lunar Guide" page
-3. ⚠️ Create "Best Personalized Astrology Apps" hub page
-4. ⚠️ Add ComparisonPage structured data
-5. ⚠️ Link from homepage and pricing page
-6. ⚠️ Share on social media
+3. ⚠️ Create "Lunary vs Arcarae" comparison page
+4. ⚠️ Create "Lunary vs Co–Star" comparison page
+5. ⚠️ Create "Lunary vs Pattern" comparison page
+6. ⚠️ Create "Best Personalized Astrology Apps" hub page
+7. ⚠️ Add ComparisonPage structured data
+8. ⚠️ Link from homepage and pricing page
+9. ⚠️ Share on social media

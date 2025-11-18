@@ -38,3 +38,5 @@ CREATE INDEX IF NOT EXISTS idx_user_referrals_code ON user_referrals(referral_co
 
 
 
+
+

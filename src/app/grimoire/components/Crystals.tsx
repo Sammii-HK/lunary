@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import {
   crystalDatabase,
   crystalCategories,
   getCrystalsByCategory,
 } from '@/constants/grimoire/crystals';
+import { stringToKebabCase } from '../../../../utils/string';
 
 const Crystals = () => {
   // Group crystals by category from the grimoire database
@@ -37,9 +39,9 @@ const Crystals = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Crystals
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Crystal Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Comprehensive crystal guide with daily selections, categories, and how
           to work with crystals for healing and magic
@@ -67,19 +69,23 @@ const Crystals = () => {
                 {category.name}
               </h3>
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-                {category.crystals.map((crystal) => (
-                  <div
-                    key={crystal.name}
-                    className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-                  >
-                    <h4 className='font-medium text-zinc-100 mb-2'>
-                      {crystal.name}
-                    </h4>
-                    <p className='text-sm text-zinc-300 leading-relaxed'>
-                      {crystal.properties}
-                    </p>
-                  </div>
-                ))}
+                {category.crystals.map((crystal) => {
+                  const crystalSlug = stringToKebabCase(crystal.name);
+                  return (
+                    <Link
+                      key={crystal.name}
+                      href={`/grimoire/crystals/${crystalSlug}`}
+                      className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                    >
+                      <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                        {crystal.name}
+                      </h4>
+                      <p className='text-sm text-zinc-300 leading-relaxed'>
+                        {crystal.properties}
+                      </p>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           ))}

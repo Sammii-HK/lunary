@@ -39,8 +39,8 @@ export async function GET(request: NextRequest) {
     }
 
     const today = new Date();
-    const todayString = today.toDateString();
-    const dateStr = today.toISOString().split('T')[0];
+    const todayString = today.toISOString().split('T')[0];
+    const dateStr = todayString;
 
     console.log('🔮 Sending personalized tarot notifications for:', dateStr);
 

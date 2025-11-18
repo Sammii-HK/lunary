@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
+import { stringToKebabCase } from '../../../../utils/string';
 
 const Meditation = () => {
   useEffect(() => {
@@ -18,9 +20,9 @@ const Meditation = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Meditation & Mindfulness
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Meditation & Mindfulness Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Meditation and mindfulness practices for spiritual growth, energy
           work, and daily well-being. Essential skills for any magical practice.
@@ -39,68 +41,59 @@ const Meditation = () => {
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Guided Meditation
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
-              Follow a recorded or live guide through visualization and
-              relaxation. Great for beginners and specific intentions.
-            </p>
-            <p className='text-xs text-zinc-400'>
-              Best for: Beginners, specific goals, relaxation, healing
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Mindfulness Meditation
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
-              Focus on present-moment awareness without judgment. Observe
-              thoughts, feelings, and sensations as they arise.
-            </p>
-            <p className='text-xs text-zinc-400'>
-              Best for: Daily practice, stress reduction, emotional regulation
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Visualization Meditation
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
-              Create mental images of desired outcomes, places, or experiences.
-              Powerful for manifestation and spiritual work.
-            </p>
-            <p className='text-xs text-zinc-400'>
-              Best for: Manifestation, spiritual journeying, healing, energy
-              work
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Walking Meditation
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
-              Meditate while walking slowly and mindfully. Focus on each step,
-              breath, and sensation. Connects body and mind.
-            </p>
-            <p className='text-xs text-zinc-400'>
-              Best for: Those who struggle with sitting, nature connection,
-              grounding
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Mantra Meditation
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
-              Repeat a word, phrase, or sound to focus the mind. Can be spoken
-              aloud or silently. Creates vibration and focus.
-            </p>
-            <p className='text-xs text-zinc-400'>
-              Best for: Focus, spiritual connection, energy raising
-            </p>
-          </div>
+          {[
+            {
+              name: 'Guided Meditation',
+              description:
+                'Follow a recorded or live guide through visualization and relaxation. Great for beginners and specific intentions.',
+              bestFor: 'Beginners, specific goals, relaxation, healing',
+            },
+            {
+              name: 'Mindfulness Meditation',
+              description:
+                'Focus on present-moment awareness without judgment. Observe thoughts, feelings, and sensations as they arise.',
+              bestFor: 'Daily practice, stress reduction, emotional regulation',
+            },
+            {
+              name: 'Visualization Meditation',
+              description:
+                'Create mental images of desired outcomes, places, or experiences. Powerful for manifestation and spiritual work.',
+              bestFor:
+                'Manifestation, spiritual journeying, healing, energy work',
+            },
+            {
+              name: 'Walking Meditation',
+              description:
+                'Meditate while walking slowly and mindfully. Focus on each step, breath, and sensation. Connects body and mind.',
+              bestFor:
+                'Those who struggle with sitting, nature connection, grounding',
+            },
+            {
+              name: 'Mantra Meditation',
+              description:
+                'Repeat a word, phrase, or sound to focus the mind. Can be spoken aloud or silently. Creates vibration and focus.',
+              bestFor: 'Focus, spiritual connection, energy raising',
+            },
+          ].map((technique) => {
+            const techniqueSlug = stringToKebabCase(technique.name);
+            return (
+              <Link
+                key={technique.name}
+                href={`/grimoire/meditation/${techniqueSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-purple-300 mb-2 group-hover:text-purple-200 transition-colors'>
+                  {technique.name}
+                </h3>
+                <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+                  {technique.description}
+                </p>
+                <p className='text-xs text-zinc-400'>
+                  Best for: {technique.bestFor}
+                </p>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -108,7 +101,12 @@ const Meditation = () => {
       <section id='breathwork' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-            Breathwork Techniques
+            <a
+              href='/grimoire/breathwork'
+              className='hover:text-purple-400 transition-colors'
+            >
+              Breathwork Techniques
+            </a>
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
             Conscious breathing regulates energy, calms the mind, and prepares

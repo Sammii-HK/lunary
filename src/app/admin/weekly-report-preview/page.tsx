@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Eye, Mail, Calendar, User, RefreshCw } from 'lucide-react';
 
 type WeeklyReport = {
@@ -41,7 +41,7 @@ type PreviewData = {
   weekEnd: string;
 };
 
-export default function WeeklyReportPreviewPage() {
+function WeeklyReportPreviewContent() {
   const [userId, setUserId] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [weekStart, setWeekStart] = useState(() => {
@@ -348,5 +348,19 @@ export default function WeeklyReportPreviewPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function WeeklyReportPreviewPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center'>
+          <div className='text-zinc-400'>Loading...</div>
+        </div>
+      }
+    >
+      <WeeklyReportPreviewContent />
+    </Suspense>
   );
 }

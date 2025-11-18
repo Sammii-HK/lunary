@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { tarotSpreads, tarotSuits } from '@/constants/tarot';
 import { tarotCards } from '../../../../utils/tarot/tarot-cards';
 import { TarotCard } from '@/components/TarotCard';
+import { stringToKebabCase } from '../../../../utils/string';
 
 const Tarot = () => {
   const suits = Object.keys(tarotSuits);
@@ -54,37 +56,51 @@ const Tarot = () => {
           </p>
         </div>
         <div className='space-y-4'>
-          {Object.keys(tarotSpreads).map((spread: string) => (
-            <div
-              key={spread}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                {tarotSpreads[spread as keyof typeof tarotSpreads].name}
-              </h3>
-              <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
-                {tarotSpreads[spread as keyof typeof tarotSpreads].description}
-              </p>
-              {Array.isArray(
-                tarotSpreads[spread as keyof typeof tarotSpreads].instructions,
-              ) &&
-              tarotSpreads[spread as keyof typeof tarotSpreads].instructions
-                .length > 0 ? (
-                <ul className='list-disc list-inside text-sm text-zinc-400 space-y-1'>
-                  {tarotSpreads[
-                    spread as keyof typeof tarotSpreads
-                  ].instructions.map((instruction: string, index: number) => (
-                    <li key={index}>{instruction}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className='text-sm text-zinc-400'>
-                  {tarotSpreads[spread as keyof typeof tarotSpreads]
-                    .instructions || 'Instructions coming soon.'}
+          {Object.keys(tarotSpreads).map((spread: string) => {
+            const spreadSlug = stringToKebabCase(spread);
+            return (
+              <Link
+                key={spread}
+                href={`/grimoire/tarot-spreads/${spreadSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                  {tarotSpreads[spread as keyof typeof tarotSpreads].name}
+                </h3>
+                <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+                  {
+                    tarotSpreads[spread as keyof typeof tarotSpreads]
+                      .description
+                  }
                 </p>
-              )}
-            </div>
-          ))}
+                {Array.isArray(
+                  tarotSpreads[spread as keyof typeof tarotSpreads]
+                    .instructions,
+                ) &&
+                tarotSpreads[spread as keyof typeof tarotSpreads].instructions
+                  .length > 0 ? (
+                  <ul className='list-disc list-inside text-sm text-zinc-400 space-y-1'>
+                    {tarotSpreads[
+                      spread as keyof typeof tarotSpreads
+                    ].instructions
+                      .slice(0, 3)
+                      .map((instruction: string, index: number) => (
+                        <li key={index}>{instruction}</li>
+                      ))}
+                    {tarotSpreads[spread as keyof typeof tarotSpreads]
+                      .instructions.length > 3 && (
+                      <li className='text-purple-400'>...and more</li>
+                    )}
+                  </ul>
+                ) : (
+                  <p className='text-sm text-zinc-400'>
+                    {tarotSpreads[spread as keyof typeof tarotSpreads]
+                      .instructions || 'Instructions coming soon.'}
+                  </p>
+                )}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -129,22 +145,29 @@ const Tarot = () => {
 
         {/* Suit Information */}
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
-          {suits.map((suit: string) => (
-            <div
-              key={suit}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                {tarotSuits[suit as keyof typeof tarotSuits].name}
-              </h3>
-              <p className='text-xs text-zinc-400 mb-2'>
-                Element: {tarotSuits[suit as keyof typeof tarotSuits].element}
-              </p>
-              <p className='text-sm text-zinc-300 leading-relaxed'>
-                {tarotSuits[suit as keyof typeof tarotSuits].mysticalProperties}
-              </p>
-            </div>
-          ))}
+          {suits.map((suit: string) => {
+            const suitSlug = stringToKebabCase(suit);
+            return (
+              <Link
+                key={suit}
+                href={`/grimoire/tarot-suits/${suitSlug}`}
+                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                  {tarotSuits[suit as keyof typeof tarotSuits].name}
+                </h3>
+                <p className='text-xs text-zinc-400 mb-2'>
+                  Element: {tarotSuits[suit as keyof typeof tarotSuits].element}
+                </p>
+                <p className='text-sm text-zinc-300 leading-relaxed'>
+                  {
+                    tarotSuits[suit as keyof typeof tarotSuits]
+                      .mysticalProperties
+                  }
+                </p>
+              </Link>
+            );
+          })}
         </div>
 
         {/* All Minor Arcana Cards by Suit */}
@@ -172,7 +195,12 @@ const Tarot = () => {
       <section id='reversed-cards' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-            Reversed Cards Guide
+            <Link
+              href='/grimoire/reversed-cards-guide'
+              className='hover:text-purple-400 transition-colors'
+            >
+              Reversed Cards Guide
+            </Link>
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
             Reversed cards (cards that appear upside down) add depth and nuance
@@ -266,7 +294,12 @@ const Tarot = () => {
       <section id='card-combinations' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-            Reading Card Combinations
+            <Link
+              href='/grimoire/card-combinations'
+              className='hover:text-purple-400 transition-colors'
+            >
+              Reading Card Combinations
+            </Link>
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
             Cards don't exist in isolation. Learning to read cards together

@@ -36,6 +36,7 @@ export default function SocialPostsPage() {
     tone: 'natural',
     includeCTA: true,
     count: 3,
+    weekOffset: 0,
   });
 
   const handleGenerate = async () => {
@@ -132,8 +133,6 @@ export default function SocialPostsPage() {
                 >
                   <option value='instagram'>Instagram</option>
                   <option value='twitter'>Twitter/X</option>
-                  <option value='facebook'>Facebook</option>
-                  <option value='linkedin'>LinkedIn</option>
                   <option value='pinterest'>Pinterest</option>
                   <option value='reddit'>Reddit</option>
                 </select>
@@ -192,6 +191,26 @@ export default function SocialPostsPage() {
                   }
                   className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white'
                 />
+              </div>
+
+              <div>
+                <label className='block text-sm font-medium mb-2'>Week</label>
+                <select
+                  value={formData.weekOffset}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      weekOffset: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white'
+                >
+                  <option value={0}>Current Week</option>
+                  <option value={1}>Next Week (+1)</option>
+                  <option value={2}>+2 Weeks</option>
+                  <option value={3}>+3 Weeks</option>
+                  <option value={4}>+4 Weeks</option>
+                </select>
               </div>
             </div>
 

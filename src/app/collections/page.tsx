@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { BookOpen, Folder, Plus, Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -28,7 +28,7 @@ interface Folder {
   itemCount: number;
 }
 
-export default function CollectionsPage() {
+function CollectionsPageContent() {
   const authState = useAuthStatus();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -38,19 +38,7 @@ export default function CollectionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  useEffect(() => {
-    if (authState.isAuthenticated && !authState.loading) {
-      fetchCollections();
-      fetchFolders();
-    }
-  }, [
-    authState.isAuthenticated,
-    authState.loading,
-    selectedCategory,
-    selectedFolder,
-  ]);
-
-  const fetchCollections = async () => {
+  const fetchCollections = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -67,9 +55,9 @@ export default function CollectionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, selectedFolder]);
 
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     try {
       const response = await fetch('/api/collections/folders');
       const data = await response.json();
@@ -79,7 +67,19 @@ export default function CollectionsPage() {
     } catch (error) {
       console.error('Error fetching folders:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (authState.isAuthenticated && !authState.loading) {
+      fetchCollections();
+      fetchFolders();
+    }
+  }, [
+    authState.isAuthenticated,
+    authState.loading,
+    fetchCollections,
+    fetchFolders,
+  ]);
 
   const filteredCollections = collections.filter((collection) => {
     if (searchQuery) {
@@ -325,5 +325,19 @@ export default function CollectionsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CollectionsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen flex items-center justify-center'>
+          <div className='text-zinc-400'>Loading...</div>
+        </div>
+      }
+    >
+      <CollectionsPageContent />
+    </Suspense>
   );
 }

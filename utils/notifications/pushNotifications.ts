@@ -197,12 +197,37 @@ export async function sendPushoverNotification(
   }
 }
 
-// Send notification via Pushover only
+// Send notification via Discord (preferred) or Pushover (fallback)
 export async function sendAdminNotification(
   notification: PushNotification,
 ): Promise<NotificationResult> {
   console.log('📱 Sending admin notification:', notification.title);
 
+  // Try Discord first
+  try {
+    const { sendDiscordAdminNotification } = await import('@/lib/discord');
+    const discordResult = await sendDiscordAdminNotification({
+      title: notification.title,
+      message: notification.message,
+      priority: notification.priority,
+      url: notification.url,
+    });
+
+    if (discordResult.ok) {
+      console.log('📱 Discord notification sent successfully');
+      return {
+        success: true,
+        service: 'pushover', // Keep same return type for compatibility
+      };
+    }
+  } catch (error) {
+    console.warn(
+      '📱 Discord notification failed, falling back to Pushover:',
+      error,
+    );
+  }
+
+  // Fallback to Pushover if Discord fails
   const result = await sendPushoverNotification(notification);
 
   if (result.success) {

@@ -7,16 +7,59 @@ import { FEATURE_ACCESS } from '../../utils/pricing';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
 
+type FeatureName =
+  | 'moon_phases'
+  | 'general_horoscope'
+  | 'general_tarot'
+  | 'general_crystal_recommendations'
+  | 'grimoire'
+  | 'lunar_calendar'
+  | 'weekly_ai_ritual'
+  | 'birth_chart'
+  | 'birthday_collection'
+  | 'personalized_horoscope'
+  | 'personal_tarot'
+  | 'personalized_crystal_recommendations'
+  | 'transit_calendar'
+  | 'tarot_patterns'
+  | 'solar_return'
+  | 'cosmic_profile'
+  | 'moon_circles'
+  | 'ritual_generator'
+  | 'collections'
+  | 'unlimited_ai_chat'
+  | 'deeper_readings'
+  | 'weekly_reports'
+  | 'saved_chat_threads'
+  | 'downloadable_reports'
+  | 'ai_ritual_generation'
+  | 'unlimited_collections'
+  | 'advanced_patterns'
+  | 'unlimited_tarot_spreads'
+  | 'yearly_forecast'
+  | 'data_export';
+
 interface PaywallProps {
-  feature: keyof typeof FEATURE_ACCESS;
+  feature: FeatureName;
   children: ReactNode;
   fallback?: ReactNode;
 }
 
 export function Paywall({ feature, children, fallback }: PaywallProps) {
-  const { hasAccess, isTrialActive, trialDaysRemaining, showUpgradePrompt } =
-    useSubscription();
+  const {
+    hasAccess,
+    isTrialActive,
+    trialDaysRemaining,
+    showUpgradePrompt,
+    loading,
+  } = useSubscription();
   const authState = useAuthStatus();
+
+  // If subscription is still loading, show children (components handle their own loading states)
+  // This prevents premature paywall display while subscription loads
+  if (loading) {
+    return <>{children}</>;
+  }
 
   if (hasAccess(feature)) {
     return <>{children}</>;
@@ -29,6 +72,14 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
   return (
     <div className='bg-gray-900 rounded-lg p-8 text-center'>
       <div className='max-w-md mx-auto'>
+        {/* Teaser Text */}
+        <div className='mb-6 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/30'>
+          <p className='text-purple-200 text-sm font-medium italic'>
+            &ldquo;This is the personalised interpretation for YOUR
+            chart.&rdquo;
+          </p>
+        </div>
+
         <div className='w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6'>
           <svg
             className='w-8 h-8 text-white'
@@ -92,6 +143,12 @@ function getFeatureDescription(feature: string): string {
       return 'Discover deep insights through tarot pattern analysis, revealing trends and themes in your cosmic journey over time.';
     case 'crystal_recommendations':
       return 'Receive daily crystal recommendations perfectly aligned with your birth chart and current cosmic energies.';
+    case 'downloadable_reports':
+      return 'Generate personalized PDF cosmic reports with transits, moon phases, tarot insights, and rituals. Create shareable reports for launches, birthdays, and special moments.';
+    case 'yearly_forecast':
+      return 'Get a comprehensive yearly cosmic forecast with major transits, eclipses, retrograde periods, and seasonal transitions. Plan your year with cosmic awareness.';
+    case 'data_export':
+      return 'Export all your cosmic data including birth chart, tarot readings, collections, and insights. Download your complete Lunary journey as JSON.';
     default:
       return 'This Personalised Feature provides deeper insights into your cosmic profile and personalized guidance.';
   }
@@ -148,7 +205,7 @@ export function UpgradePrompt() {
           {authState.isAuthenticated
             ? isTrialActive
               ? 'Continue Trial'
-              : 'Start Free Trial'
+              : 'Upgrade now'
             : 'Sign In to Continue'}
         </Link>
       </div>
