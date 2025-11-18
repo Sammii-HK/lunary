@@ -72,12 +72,62 @@ export function generateWeeklyReportEmailHTML(
       report.tarotPatterns.dominantThemes.length > 0
         ? `
     <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 20px; margin: 20px 0;">
-      <h2 style="color: #fff; margin-top: 0; font-size: 20px;">Tarot Patterns</h2>
-      <p style="color: #cbd5e1;">Dominant themes: ${report.tarotPatterns.dominantThemes.join(', ')}</p>
+      <h2 style="color: #fff; margin-top: 0; font-size: 20px;">🔮 Tarot Patterns This Week</h2>
+      <p style="color: #cbd5e1; margin-bottom: 10px;">Dominant themes: <strong style="color: #fff;">${report.tarotPatterns.dominantThemes.join(', ')}</strong></p>
+      ${
+        report.tarotPatterns.frequentCards && report.tarotPatterns.frequentCards.length > 0
+          ? `
+      <div style="margin-top: 15px;">
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">Most frequent cards:</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          ${report.tarotPatterns.frequentCards
+            .slice(0, 5)
+            .map(
+              (card) => `
+            <span style="background: rgba(255, 255, 255, 0.1); padding: 6px 12px; border-radius: 6px; font-size: 13px; color: #cbd5e1;">
+              ${card.name} (${card.count}x)
+            </span>
+          `,
+            )
+            .join('')}
+        </div>
+      </div>
+      `
+          : ''
+      }
     </div>
     `
         : ''
     }
+
+    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 20px; margin: 20px 0;">
+      <h2 style="color: #fff; margin-top: 0; font-size: 20px;">📊 Week Overview</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 6px;">
+          <div style="font-size: 24px; margin-bottom: 5px;">${report.moonPhases.length}</div>
+          <div style="color: #94a3b8; font-size: 13px;">Moon Phases</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 6px;">
+          <div style="font-size: 24px; margin-bottom: 5px;">${report.keyTransits.length}</div>
+          <div style="color: #94a3b8; font-size: 13px;">Key Transits</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 20px; margin: 20px 0;">
+      <h2 style="color: #fff; margin-top: 0; font-size: 20px;">💫 Cosmic Insights</h2>
+      <p style="color: #cbd5e1; line-height: 1.8;">
+        This week's cosmic energy has been ${report.tarotPatterns.dominantThemes.length > 0 ? report.tarotPatterns.dominantThemes[0].toLowerCase() : 'dynamic'}, 
+        with ${report.keyTransits.length} significant planetary transits shaping your path. 
+        The moon's journey through ${report.moonPhases.length > 0 ? report.moonPhases[0].phase : 'various phases'} 
+        has influenced the emotional landscape, while your tarot patterns reveal deeper themes 
+        ${report.tarotPatterns.dominantThemes.length > 0 ? `around ${report.tarotPatterns.dominantThemes.slice(0, 2).join(' and ')}` : 'of transformation'}.
+      </p>
+      <p style="color: #cbd5e1; margin-top: 15px; line-height: 1.8;">
+        <strong style="color: #fff;">Looking ahead:</strong> Use these insights to align with the cosmic flow. 
+        Pay attention to the patterns that emerged this week—they're guiding you toward your highest path.
+      </p>
+    </div>
 
     <div style="text-align: center; margin: 30px 0;">
       <a href="${appUrl}/cosmic-state" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">
@@ -114,17 +164,27 @@ export function generateWeeklyReportEmailText(
   return `
 ${greeting}
 
-Your Weekly Cosmic Report
+🌙 Your Weekly Cosmic Report
 
 ${report.summary}
+
+📊 Week Overview:
+- ${report.moonPhases.length} Moon Phases
+- ${report.keyTransits.length} Key Transits
 
 Moon Phases This Week:
 ${report.moonPhases.map((p) => `${p.emoji} ${p.phase} - ${p.date}`).join('\n')}
 
 Key Transits:
-${report.keyTransits.map((t) => `${t.transit} - ${t.date}`).join('\n')}
+${report.keyTransits.map((t) => `${t.transit} - ${t.date}\n  ${t.description}`).join('\n')}
 
-${report.tarotPatterns.dominantThemes.length > 0 ? `Tarot Patterns: ${report.tarotPatterns.dominantThemes.join(', ')}\n` : ''}
+${report.tarotPatterns.dominantThemes.length > 0 ? `\n🔮 Tarot Patterns:\nDominant themes: ${report.tarotPatterns.dominantThemes.join(', ')}\n` : ''}
+${report.tarotPatterns.frequentCards && report.tarotPatterns.frequentCards.length > 0 ? `Most frequent cards: ${report.tarotPatterns.frequentCards.slice(0, 5).map(c => `${c.name} (${c.count}x)`).join(', ')}\n` : ''}
+
+💫 Cosmic Insights:
+This week's cosmic energy has been ${report.tarotPatterns.dominantThemes.length > 0 ? report.tarotPatterns.dominantThemes[0].toLowerCase() : 'dynamic'}, with ${report.keyTransits.length} significant planetary transits shaping your path. The moon's journey through ${report.moonPhases.length > 0 ? report.moonPhases[0].phase : 'various phases'} has influenced the emotional landscape, while your tarot patterns reveal deeper themes ${report.tarotPatterns.dominantThemes.length > 0 ? `around ${report.tarotPatterns.dominantThemes.slice(0, 2).join(' and ')}` : 'of transformation'}.
+
+Looking ahead: Use these insights to align with the cosmic flow. Pay attention to the patterns that emerged this week—they're guiding you toward your highest path.
 
 View your full cosmic state: ${appUrl}/cosmic-state
 Ask Lunary AI: ${appUrl}/book-of-shadows
