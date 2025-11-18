@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
   description:
-    'Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today. Understand today's energy based on your birth chart. Daily tarot, lunar cycles and planetary transits personalized to you.',
+    "Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today. Understand today's energy based on your birth chart. Daily tarot, lunar cycles and planetary transits personalized to you.",
   keywords: [
     'AI astrology',
     'personalized astrology',

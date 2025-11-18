@@ -96,6 +96,19 @@ export function middleware(request: NextRequest) {
     // Middleware just ensures user is authenticated
   }
 
+  // Redirect old blog week URL format to canonical format
+  // /blog/week/{N}-{YEAR} → /blog/week/week-{N}-{YEAR}
+  const blogWeekMatch = url.pathname.match(/^\/blog\/week\/(\d+)-(\d{4})$/);
+  if (blogWeekMatch) {
+    const weekNumber = blogWeekMatch[1];
+    const year = blogWeekMatch[2];
+    const canonicalUrl = new URL(
+      `/blog/week/week-${weekNumber}-${year}`,
+      request.url,
+    );
+    return NextResponse.redirect(canonicalUrl, 301);
+  }
+
   // Redirect old query parameter URLs to new static routes
   // Only handle /grimoire?item=... requests
   if (url.pathname === '/grimoire' && url.searchParams.has('item')) {

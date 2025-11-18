@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Book of Shadows - Lunary | AI Astral Guide & Magical Journal',
   description:
-    'Your personal Book of Shadows with AI astral guide. Write, store, and analyze your magical practice. Have reflective conversations with Lunary's calm AI—every reply grounded in your birth chart, tarot, and today's moon. Free 7-day trial.',
+    "Your personal Book of Shadows with AI astral guide. Write, store, and analyze your magical practice. Have reflective conversations with Lunary's calm AI—every reply grounded in your birth chart, tarot, and today's moon. Free 7-day trial.",
   keywords: [
     'book of shadows',
     'magical journal',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Book of Shadows - Lunary | AI Astral Guide & Magical Journal',
     description:
-      'Your personal Book of Shadows with AI astral guide. Write, store, and analyze your magical practice. Have reflective conversations grounded in your birth chart, tarot, and today's moon.',
+      "Your personal Book of Shadows with AI astral guide. Write, store, and analyze your magical practice. Have reflective conversations grounded in your birth chart, tarot, and today's moon.",
     url: 'https://lunary.app/book-of-shadows',
     siteName: 'Lunary',
     images: [
