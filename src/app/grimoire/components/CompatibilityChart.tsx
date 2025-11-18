@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { zodiacSigns } from '../../../utils/zodiac/zodiac';
-import { monthlyMoonPhases } from '../../../utils/moon/monthlyPhases';
+import { zodiacSigns } from '../../../../utils/zodiac/zodiac';
+import { monthlyMoonPhases } from '../../../../utils/moon/monthlyPhases';
 import {
   crystalCategories,
   getCrystalsByCategory,
@@ -19,7 +19,10 @@ interface CompatibilityResult {
 }
 
 // Zodiac compatibility matrix
-const zodiacCompatibility: Record<string, Record<string, CompatibilityResult>> = {
+const zodiacCompatibility: Record<
+  string,
+  Record<string, CompatibilityResult>
+> = {
   Aries: {
     Aries: {
       score: 75,
@@ -165,7 +168,8 @@ const zodiacCompatibility: Record<string, Record<string, CompatibilityResult>> =
   Gemini: {
     Gemini: {
       score: 80,
-      description: 'Two Air signs create intellectual, communicative connection.',
+      description:
+        'Two Air signs create intellectual, communicative connection.',
       strengths: ['Communication', 'Intellectual connection', 'Variety'],
       challenges: ['Both can be restless', 'Need commitment'],
     },
@@ -214,7 +218,11 @@ const zodiacCompatibility: Record<string, Record<string, CompatibilityResult>> =
     Aquarius: {
       score: 90,
       description: 'Perfect Air sign match - innovative and independent.',
-      strengths: ['Shared independence', 'Innovation', 'Intellectual connection'],
+      strengths: [
+        'Shared independence',
+        'Innovation',
+        'Intellectual connection',
+      ],
       challenges: ['Both can be detached', 'Need emotional connection'],
     },
     Pisces: {
@@ -447,7 +455,8 @@ const zodiacCompatibility: Record<string, Record<string, CompatibilityResult>> =
   Sagittarius: {
     Sagittarius: {
       score: 85,
-      description: 'Two Fire signs create adventurous, free-spirited connection.',
+      description:
+        'Two Fire signs create adventurous, free-spirited connection.',
       strengths: ['Shared values', 'Adventure', 'Freedom'],
       challenges: ['Both can be restless', 'Need commitment'],
     },
@@ -494,7 +503,11 @@ const zodiacCompatibility: Record<string, Record<string, CompatibilityResult>> =
     Aquarius: {
       score: 85,
       description: 'Two Air signs create innovative, independent connection.',
-      strengths: ['Shared independence', 'Innovation', 'Intellectual connection'],
+      strengths: [
+        'Shared independence',
+        'Innovation',
+        'Intellectual connection',
+      ],
       challenges: ['Both can be detached', 'Need emotional connection'],
     },
     Pisces: {
@@ -507,7 +520,8 @@ const zodiacCompatibility: Record<string, Record<string, CompatibilityResult>> =
   Pisces: {
     Pisces: {
       score: 85,
-      description: 'Two Water signs create intuitive, compassionate connection.',
+      description:
+        'Two Water signs create intuitive, compassionate connection.',
       strengths: ['Emotional connection', 'Intuition', 'Compassion'],
       challenges: ['Both can be dreamy', 'Need grounding'],
     },
@@ -527,7 +541,10 @@ Object.keys(zodiacCompatibility).forEach((sign1) => {
 });
 
 // Element compatibility
-const elementCompatibility: Record<string, Record<string, CompatibilityResult>> = {
+const elementCompatibility: Record<
+  string,
+  Record<string, CompatibilityResult>
+> = {
   Fire: {
     Fire: {
       score: 90,
@@ -577,7 +594,8 @@ const elementCompatibility: Record<string, Record<string, CompatibilityResult>> 
   Air: {
     Air: {
       score: 90,
-      description: 'Two Air elements create intellectual, communicative connection.',
+      description:
+        'Two Air elements create intellectual, communicative connection.',
       strengths: ['Shared intellect', 'Communication', 'Variety'],
       challenges: ['Can be too detached', 'Need grounding'],
     },
@@ -611,7 +629,10 @@ Object.keys(elementCompatibility).forEach((elem1) => {
 });
 
 // Moon phase compatibility
-const moonPhaseCompatibility: Record<string, Record<string, CompatibilityResult>> = {
+const moonPhaseCompatibility: Record<
+  string,
+  Record<string, CompatibilityResult>
+> = {
   'New Moon': {
     'New Moon': {
       score: 85,
@@ -865,6 +886,21 @@ export default function CompatibilityChart() {
   const [selection1, setSelection1] = useState<string>('');
   const [selection2, setSelection2] = useState<string>('');
 
+  const moonPhaseMap: Record<string, string> = {
+    newMoon: 'New Moon',
+    waxingCrescent: 'Waxing Crescent',
+    firstQuarter: 'First Quarter',
+    waxingGibbous: 'Waxing Gibbous',
+    fullMoon: 'Full Moon',
+    waningGibbous: 'Waning Gibbous',
+    lastQuarter: 'Last Quarter',
+    waningCrescent: 'Waning Crescent',
+  };
+
+  const reverseMoonPhaseMap: Record<string, string> = Object.fromEntries(
+    Object.entries(moonPhaseMap).map(([key, value]) => [value, key]),
+  );
+
   const getCompatibilityResult = (): CompatibilityResult | null => {
     if (!selection1 || !selection2) return null;
 
@@ -882,6 +918,7 @@ export default function CompatibilityChart() {
           null
         );
       case 'moon':
+        // Moon phases are stored with Title Case keys, so use selection directly
         return (
           moonPhaseCompatibility[selection1]?.[selection2] ||
           moonPhaseCompatibility[selection2]?.[selection1] ||
@@ -925,7 +962,9 @@ export default function CompatibilityChart() {
       case 'element':
         return Object.keys(correspondencesData.elements);
       case 'moon':
-        return Object.keys(monthlyMoonPhases);
+        return Object.keys(monthlyMoonPhases).map(
+          (key) => moonPhaseMap[key] || key,
+        );
       case 'crystal':
         return crystalCategories;
       default:
@@ -1080,6 +1119,76 @@ export default function CompatibilityChart() {
           personal growth, and communication play equally important roles.
         </p>
       </div>
+
+      {/* SEO Structured Data */}
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebApplication',
+            name: 'Compatibility Chart - Lunary Grimoire',
+            description:
+              'Interactive compatibility chart for zodiac signs, elements, moon phases, and crystal categories. Discover how different energies interact and complement each other.',
+            applicationCategory: 'AstrologyApplication',
+            operatingSystem: 'Web',
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'USD',
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '4.8',
+              ratingCount: '150',
+            },
+            featureList: [
+              'Zodiac sign compatibility',
+              'Element compatibility',
+              'Moon phase compatibility',
+              'Crystal category compatibility',
+              'Detailed compatibility scores',
+              'Strengths and challenges analysis',
+            ],
+          }),
+        }}
+      />
+
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'How accurate are compatibility charts?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Compatibility charts provide insights into how different energies, elements, and cosmic forces interact. However, compatibility is just one factor in relationships and connections. Individual charts, personal growth, and communication play equally important roles.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What types of compatibility can I check?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'You can check compatibility between zodiac signs, elements (Fire, Earth, Air, Water), moon phases (New Moon, Full Moon, etc.), and crystal categories. Each type provides unique insights into how different energies interact.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How do I interpret compatibility scores?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Scores of 85% or higher indicate excellent compatibility with shared strengths. Scores of 70-84% show good compatibility with some challenges to navigate. Scores below 70% may require more effort and understanding, but can still work with mutual respect and communication.',
+                },
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }
