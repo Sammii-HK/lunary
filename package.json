@@ -43,6 +43,7 @@
     "generate-price-mapping": "tsx scripts/generate-price-mapping.ts",
     "update-yearly-pricing": "tsx scripts/update-yearly-pricing.ts",
     "fix-usd-yearly-price": "tsx scripts/fix-usd-yearly-price.ts",
+    "seed:yearly": "tsx scripts/seed-yearly-forecast.ts",
     "cleanup": "bash scripts/dev-cleanup.sh",
     "cleanup:port": "bash scripts/cleanup-port-3000.sh",
     "clear-cache": "bash scripts/clear-all-cache.sh"

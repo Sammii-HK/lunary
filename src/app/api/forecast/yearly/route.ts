@@ -6,158 +6,166 @@ import {
   normalizePlanType,
   FEATURE_ACCESS,
 } from '../../../../../utils/pricing';
-import {
-  getRealPlanetaryPositions,
-  getAccurateMoonPhase,
-  calculateRealAspects,
-  checkSignIngress,
-  checkRetrogradeEvents,
-  checkSeasonalEvents,
-} from '../../../../../utils/astrology/cosmic-og';
-import { Observer } from 'astronomy-engine';
-import dayjs from 'dayjs';
+import { YearlyForecast, generateYearlyForecast } from '@/lib/forecast/yearly';
 
-const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
+type YearlyForecastRow = {
+  forecast: YearlyForecast;
+  expires_at: Date | null;
+};
+
+const CACHE_HEADERS = {
+  'Cache-Control':
+    'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
+};
+
+async function getCachedYearlyForecast(
+  year: number,
+): Promise<YearlyForecast | null> {
+  const dbUrl =
+    process.env.POSTGRES_URL || process.env.DATABASE_URL || 'not-set';
+  const dbPrefix = dbUrl.includes('localhost')
+    ? 'local'
+    : dbUrl.includes('vercel')
+      ? 'vercel'
+      : 'unknown';
+
+  console.log(
+    `[forecast/yearly] Checking cache for year ${year} (DB: ${dbPrefix})`,
+  );
+
+  try {
+    const result = await sql<YearlyForecastRow>`
+      SELECT forecast, expires_at
+      FROM yearly_forecasts
+      WHERE year = ${year}
+      LIMIT 1
+    `;
+
+    console.log(
+      `[forecast/yearly] Cache query returned ${result.rows.length} row(s) for year ${year}`,
+    );
+
+    const row = result.rows[0];
+    if (!row) {
+      console.log(`[forecast/yearly] No cached data found for year ${year}`);
+      return null;
+    }
+
+    if (!row.forecast) {
+      console.warn(
+        `[forecast/yearly] Cached row exists but forecast field is null for year ${year}`,
+      );
+      return null;
+    }
+
+    if (row.expires_at && new Date(row.expires_at) < new Date()) {
+      console.log(
+        `[forecast/yearly] Cached data expired for year ${year} (expires_at: ${row.expires_at})`,
+      );
+      return null;
+    }
+
+    const forecast = row.forecast;
+    console.log(
+      `[forecast/yearly] Cache HIT for year ${year}: ${forecast.majorTransits?.length || 0} transits, ${forecast.retrogrades?.length || 0} retrogrades, ${forecast.eclipses?.length || 0} eclipses, ${forecast.keyAspects?.length || 0} aspects`,
+    );
+
+    return forecast;
+  } catch (error: any) {
+    if (error?.code === '42P01') {
+      console.warn(
+        `[forecast/yearly] yearly_forecasts table missing (code: 42P01) - run setup-db to create it. Error: ${error.message}`,
+      );
+      return null;
+    }
+    console.error(
+      `[forecast/yearly] Error querying cache for year ${year}:`,
+      error,
+    );
+    throw error;
+  }
+}
+
+async function cacheYearlyForecast(
+  year: number,
+  forecast: YearlyForecast,
+  source: string,
+): Promise<void> {
+  const stats = {
+    majorTransits: forecast.majorTransits.length,
+    retrogrades: forecast.retrogrades.length,
+    eclipses: forecast.eclipses.length,
+    keyAspects: forecast.keyAspects.length,
+  };
+
+  const dbUrl =
+    process.env.POSTGRES_URL || process.env.DATABASE_URL || 'not-set';
+  const dbPrefix = dbUrl.includes('localhost')
+    ? 'local'
+    : dbUrl.includes('vercel')
+      ? 'vercel'
+      : 'unknown';
+
+  console.log(
+    `[forecast/yearly] Caching forecast for year ${year} (source: ${source}, DB: ${dbPrefix})`,
+  );
+
+  try {
+    await sql`
+      INSERT INTO yearly_forecasts (
+        year,
+        summary,
+        forecast,
+        stats,
+        source,
+        generated_at,
+        expires_at,
+        created_at,
+        updated_at
+      )
+      VALUES (
+        ${year},
+        ${forecast.summary},
+        ${JSON.stringify(forecast)}::jsonb,
+        ${JSON.stringify(stats)}::jsonb,
+        ${source},
+        NOW(),
+        NULL,
+        NOW(),
+        NOW()
+      )
+      ON CONFLICT (year)
+      DO UPDATE SET
+        summary = EXCLUDED.summary,
+        forecast = EXCLUDED.forecast,
+        stats = EXCLUDED.stats,
+        source = EXCLUDED.source,
+        generated_at = NOW(),
+        expires_at = NULL,
+        updated_at = NOW()
+    `;
+    console.log(
+      `[forecast/yearly] Successfully cached forecast for year ${year} with stats:`,
+      stats,
+    );
+  } catch (error: any) {
+    if (error?.code === '42P01') {
+      console.warn(
+        `[forecast/yearly] yearly_forecasts table missing (code: 42P01) - skipping cache write. Error: ${error.message}`,
+      );
+      return;
+    }
+    console.error(
+      `[forecast/yearly] Error caching forecast for year ${year}:`,
+      error,
+    );
+    throw error;
+  }
+}
 
 // Cache for 5 minutes - subscription checks are cached at Stripe route level
 // Forecast generation is expensive, longer cache significantly reduces CPU
 export const revalidate = 300;
-
-interface YearlyForecast {
-  year: number;
-  majorTransits: Array<{
-    date: string;
-    event: string;
-    description: string;
-    significance: string;
-  }>;
-  eclipses: Array<{
-    date: string;
-    type: 'solar' | 'lunar';
-    sign: string;
-    description: string;
-  }>;
-  retrogrades: Array<{
-    planet: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-  }>;
-  keyAspects: Array<{
-    date: string;
-    aspect: string;
-    planets: string[];
-    description: string;
-  }>;
-  summary: string;
-}
-
-function calculateEclipses(year: number): YearlyForecast['eclipses'] {
-  const eclipses: YearlyForecast['eclipses'] = [];
-  const startDate = new Date(year, 0, 1);
-  const endDate = new Date(year, 11, 31);
-
-  let currentDate = new Date(startDate);
-  while (currentDate <= endDate) {
-    const moonPhase = getAccurateMoonPhase(currentDate);
-    const positions = getRealPlanetaryPositions(currentDate, DEFAULT_OBSERVER);
-
-    if (
-      moonPhase.isSignificant &&
-      (moonPhase.name === 'New Moon' || moonPhase.name === 'Full Moon')
-    ) {
-      eclipses.push({
-        date: currentDate.toISOString().split('T')[0],
-        type: moonPhase.name === 'New Moon' ? 'solar' : 'lunar',
-        sign: positions.moon?.sign || 'Unknown',
-        description: `${moonPhase.name === 'New Moon' ? 'Solar' : 'Lunar'} Eclipse in ${positions.moon?.sign || 'Unknown'} - ${moonPhase.energy || 'A powerful cosmic event'}`,
-      });
-    }
-
-    currentDate = new Date(currentDate.getTime() + 14 * 24 * 60 * 60 * 1000);
-  }
-
-  return eclipses.slice(0, 6);
-}
-
-async function generateYearlyForecast(
-  year: number,
-  userBirthday?: string,
-): Promise<YearlyForecast> {
-  const startDate = new Date(year, 0, 1);
-  const endDate = new Date(year, 11, 31);
-
-  const majorTransits: YearlyForecast['majorTransits'] = [];
-  const retrogrades: YearlyForecast['retrogrades'] = [];
-  const keyAspects: YearlyForecast['keyAspects'] = [];
-
-  let currentDate = new Date(startDate);
-  const checkedDates = new Set<string>();
-
-  while (currentDate <= endDate) {
-    const dateStr = currentDate.toISOString().split('T')[0];
-
-    if (checkedDates.has(dateStr)) {
-      currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
-      continue;
-    }
-    checkedDates.add(dateStr);
-
-    const positions = getRealPlanetaryPositions(currentDate, DEFAULT_OBSERVER);
-    const aspects = calculateRealAspects(positions);
-    const ingresses = checkSignIngress(positions, currentDate);
-    const retrogradeEvents = checkRetrogradeEvents(positions);
-
-    retrogradeEvents.forEach((event) => {
-      if (
-        event.type === 'starts' &&
-        !retrogrades.find(
-          (r) => r.planet === event.planet && r.startDate === dateStr,
-        )
-      ) {
-        retrogrades.push({
-          planet: event.planet || 'Unknown',
-          startDate: dateStr,
-          endDate: '',
-          description: `${event.planet} retrograde begins`,
-        });
-      }
-    });
-
-    aspects
-      .filter((a) => a.priority >= 8)
-      .forEach((aspect) => {
-        keyAspects.push({
-          date: dateStr,
-          aspect: aspect.aspect || '',
-          planets: [aspect.planet1 || '', aspect.planet2 || ''],
-          description: aspect.description || '',
-        });
-
-        majorTransits.push({
-          date: dateStr,
-          event: aspect.aspect || '',
-          description: aspect.description || '',
-          significance: `Major ${aspect.aspect} between ${aspect.planet1} and ${aspect.planet2}`,
-        });
-      });
-
-    currentDate = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
-  }
-
-  const eclipses = calculateEclipses(year);
-
-  const summary = `Your ${year} cosmic forecast reveals ${majorTransits.length} major planetary transits, ${retrogrades.length} planetary retrogrades, ${eclipses.length} eclipses, and ${keyAspects.length} significant aspects. This year brings transformative energies and opportunities for growth.`;
-
-  return {
-    year,
-    majorTransits: majorTransits.slice(0, 20),
-    eclipses,
-    retrogrades: retrogrades.slice(0, 10),
-    keyAspects: keyAspects.slice(0, 20),
-    summary,
-  };
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -377,38 +385,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let userBirthday = user.birthday;
-    if (!userBirthday) {
-      try {
-        const userProfileResult = await sql`
-          SELECT birthday
-          FROM accounts
-          WHERE id = ${userId}
-          LIMIT 1
-        `;
-        userBirthday = userProfileResult.rows[0]?.birthday || undefined;
-      } catch (dbError: any) {
-        if (dbError?.code !== '42P01') {
-          throw dbError;
-        }
-        console.warn(
-          '[forecast/yearly] accounts table missing in this environment - continuing without birthday',
-        );
-      }
+    const cachedForecast = await getCachedYearlyForecast(year);
+    if (cachedForecast) {
+      console.log(
+        `[forecast/yearly] ✅ CACHE HIT - Serving cached forecast for ${year} from yearly_forecasts table`,
+      );
+      return NextResponse.json(
+        { success: true, forecast: cachedForecast },
+        { headers: CACHE_HEADERS },
+      );
     }
 
-    const forecast = await generateYearlyForecast(year, userBirthday);
+    console.log(
+      `[forecast/yearly] ❌ CACHE MISS - Generating forecast for year ${year} on-demand`,
+    );
+    const forecast = await generateYearlyForecast(year);
+    console.log(
+      `[forecast/yearly] Generated forecast: ${forecast.majorTransits.length} transits, ${forecast.retrogrades.length} retrogrades, ${forecast.eclipses.length} eclipses, ${forecast.keyAspects.length} aspects`,
+    );
+    await cacheYearlyForecast(year, forecast, 'api');
+    console.log(
+      `[forecast/yearly] Cached newly generated forecast for year ${year}`,
+    );
 
     return NextResponse.json(
       { success: true, forecast },
-      {
-        headers: {
-          // Cache for 5 minutes with stale-while-revalidate
-          // Significantly reduces CPU - users can force refresh via button
-          'Cache-Control':
-            'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
-        },
-      },
+      { headers: CACHE_HEADERS },
     );
   } catch (error) {
     console.error('Failed to generate yearly forecast:', error);

@@ -4,6 +4,7 @@ import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
+import { betterAuthClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import {
   Eye,
@@ -22,19 +23,80 @@ export default function CosmicStatePage() {
   const [loading, setLoading] = useState(true);
   const [cosmicData, setCosmicData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get user ID from Better Auth session (matches what API expects)
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        console.log('[cosmic-state] Calling betterAuthClient.getSession()...');
+        const session = await betterAuthClient.getSession().catch((err) => {
+          console.error('[cosmic-state] getSession() threw error:', err);
+          throw err;
+        });
+
+        console.log('[cosmic-state] Session response received:', {
+          hasSession: !!session,
+          sessionType: typeof session,
+          sessionKeys: session ? Object.keys(session) : [],
+          hasData: !!session?.data,
+          dataKeys: session?.data ? Object.keys(session.data) : [],
+          hasUser: !!session?.data?.user,
+          userKeys: session?.data?.user ? Object.keys(session.data.user) : [],
+          userId: session?.data?.user?.id,
+          fullSession: JSON.stringify(session, null, 2).substring(0, 500),
+        });
+
+        const id = session?.data?.user?.id;
+        console.log('[cosmic-state] Extracted user ID:', id);
+
+        if (!id) {
+          console.warn(
+            '[cosmic-state] No user ID found in session, trying alternative methods...',
+          );
+          // Try fetching from the API directly
+          try {
+            const response = await fetch('/api/auth/get-session');
+            const apiSession = await response.json();
+            console.log('[cosmic-state] API session response:', apiSession);
+            const apiUserId = apiSession?.user?.id || apiSession?.id;
+            if (apiUserId) {
+              console.log('[cosmic-state] Found user ID from API:', apiUserId);
+              setUserId(apiUserId);
+              return;
+            }
+          } catch (apiErr) {
+            console.error(
+              '[cosmic-state] Failed to get session from API:',
+              apiErr,
+            );
+          }
+        }
+
+        setUserId(id || null);
+      } catch (err) {
+        console.error('[cosmic-state] Failed to get user ID:', {
+          error: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined,
+        });
+        setUserId(null);
+      }
+    };
+    getUserId();
+  }, []);
 
   useEffect(() => {
+    console.log('[cosmic-state] useEffect running, userId:', userId);
+
     const fetchCosmicState = async (
       useCache = true,
       retryCount = 0,
     ): Promise<void> => {
-      const userId = (me as any)?.id;
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
+      console.log('[cosmic-state] fetchCosmicState called');
 
-      const cacheKey = `cosmic-state-${userId}`;
+      // The API authenticates via cookies, so we can call it without userId
+      // Use userId for cache key if available, otherwise use generic key
+      const cacheKey = userId ? `cosmic-state-${userId}` : 'cosmic-state-anon';
       const today = new Date().toISOString().split('T')[0];
 
       // Check cache first (only on first attempt, not on retries)
@@ -117,16 +179,29 @@ export default function CosmicStatePage() {
 
       // ALWAYS fetch fresh data - API will auto-create snapshot if missing
       try {
-        const response = await fetch('/api/cosmic/snapshot', {
+        console.log('[cosmic-state] Fetching /api/cosmic/snapshot...');
+        const timestamp = Date.now();
+        const response = await fetch(`/api/cosmic/snapshot?t=${timestamp}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
           cache: 'no-store', // Ensure we always get fresh data
         });
+        console.log('[cosmic-state] Response received:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+        });
+
+        const responseText = await response.text();
+        console.log(
+          '[cosmic-state] Response body (first 500 chars):',
+          responseText.substring(0, 500),
+        );
 
         if (!response.ok) {
-          const errorText = await response.text();
+          const errorText = responseText;
           let errorMessage = `Failed to fetch cosmic state: ${response.status}`;
           try {
             const errorData = JSON.parse(errorText);
@@ -161,7 +236,13 @@ export default function CosmicStatePage() {
           throw new Error(errorMessage);
         }
 
-        const data = await response.json();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          console.error('[cosmic-state] Failed to parse response as JSON:', e);
+          throw new Error('Invalid JSON response from server');
+        }
 
         // Ensure we have valid data - API should always return valid snapshot
         // API auto-creates snapshot if missing, so this should always succeed
@@ -236,7 +317,7 @@ export default function CosmicStatePage() {
     };
 
     fetchCosmicState();
-  }, [me]);
+  }, [userId]);
 
   // Wait for subscription to load before determining free user status
   const isFreeUser =
@@ -271,7 +352,6 @@ export default function CosmicStatePage() {
                 setError(null);
                 setLoading(true);
                 const fetchCosmicState = async () => {
-                  const userId = (me as any)?.id;
                   if (!userId) {
                     setLoading(false);
                     return;
@@ -701,38 +781,20 @@ export default function CosmicStatePage() {
             <p className='text-zinc-400 mb-4'>
               {loading
                 ? 'Generating your cosmic state...'
-                : cosmicData
-                  ? 'Cosmic data is being generated. Please refresh in a moment.'
-                  : 'No cosmic data available. Complete your profile to see your cosmic state.'}
+                : "We're creating your cosmic snapshot. It will appear here as soon as it is ready."}
             </p>
             {!loading && (
-              <div className='space-y-2'>
-                <button
-                  onClick={() => {
-                    setLoading(true);
-                    fetch(`/api/cosmic/snapshot`)
-                      .then((res) => res.json())
-                      .then((data) => {
-                        setCosmicData(data);
-                        setLoading(false);
-                      })
-                      .catch((err) => {
-                        console.error('Failed to refresh:', err);
-                        setLoading(false);
-                      });
-                  }}
-                  className='text-purple-400 hover:text-purple-300 underline'
-                >
-                  Refresh Cosmic State
-                </button>
-                <div className='text-xs text-zinc-500 mt-2'>
+              <div className='text-xs text-zinc-500'>
+                Make sure your profile has your birthday saved so we can build
+                your chart.
+                <span className='ml-1'>
                   <Link
                     href='/profile'
                     className='text-purple-400 hover:text-purple-300 underline'
                   >
-                    Go to Profile →
+                    Update profile →
                   </Link>
-                </div>
+                </span>
               </div>
             )}
           </div>
