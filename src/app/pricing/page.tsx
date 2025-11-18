@@ -27,6 +27,7 @@ import {
   trackABTestConversion,
 } from '@/lib/ab-testing';
 
+// Metadata is handled in layout.tsx for client components
 export default function PricingPage() {
   const { me } = useAccount();
   const subscription = useSubscription();

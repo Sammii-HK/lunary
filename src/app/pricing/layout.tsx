@@ -1,13 +1,30 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pricing - Lunary',
+  title: 'Pricing - Lunary | Personalized Astrology Plans',
   description:
-    'Simple, transparent pricing for personalized astrology. Start your free 7-day trial - credit card required but no payment taken. Cancel anytime. Get birth chart analysis, daily horoscopes, and cosmic guidance.',
+    'Simple, transparent pricing for personalized astrology. Start your free 7-day trial - credit card required but no payment taken. Cancel anytime. Get personalized horoscopes, tarot readings, birth chart analysis, and cosmic insights.',
+  keywords: [
+    'astrology app pricing',
+    'personalized astrology subscription',
+    'astrology app cost',
+    'birth chart app pricing',
+    'horoscope app subscription',
+    'tarot app pricing',
+    'astrology free trial',
+    'cosmic guidance pricing',
+    'astrological insights subscription',
+  ],
+  authors: [{ name: 'Lunary' }],
+  creator: 'Lunary',
+  publisher: 'Lunary',
+  alternates: {
+    canonical: 'https://lunary.app/pricing',
+  },
   openGraph: {
-    title: 'Pricing - Lunary',
+    title: 'Pricing - Lunary | Personalized Astrology Plans',
     description:
-      'Simple, transparent pricing. Start your free trial - credit card required but no payment taken. Cancel anytime.',
+      'Simple, transparent pricing for personalized astrology. Start your free 7-day trial - credit card required but no payment taken. Cancel anytime.',
     url: 'https://lunary.app/pricing',
     siteName: 'Lunary',
     images: [
@@ -23,13 +40,21 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pricing - Lunary',
+    title: 'Pricing - Lunary | Personalized Astrology Plans',
     description:
-      'Simple, transparent pricing. Start your free trial - credit card required but no payment taken.',
+      'Simple, transparent pricing for personalized astrology. Start your free 7-day trial - credit card required but no payment taken.',
     images: ['/api/og/cosmic'],
   },
-  alternates: {
-    canonical: 'https://lunary.app/pricing',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 

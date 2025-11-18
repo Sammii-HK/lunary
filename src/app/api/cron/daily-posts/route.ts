@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
 async function runDailyPosts(dateStr: string) {
   console.log('📱 Generating daily social media posts...');
 
-  const productionUrl = 'https://www.lunary.app';
+  const productionUrl = 'https://lunary.app';
 
   // Fetch dynamic content for all post types
   const [cosmicResponse] = await Promise.all([

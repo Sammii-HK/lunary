@@ -1,7 +1,12 @@
 'use client';
 
-import { getAstrologicalChart, AstroChartInformation } from './astrology';
-import { Observer } from 'astronomy-engine';
+import {
+  getAstrologicalChart,
+  AstroChartInformation,
+  getZodiacSign,
+  formatDegree,
+} from './astrology';
+import { Observer, AstroTime, Horizon, Ecliptic } from 'astronomy-engine';
 import dayjs from 'dayjs';
 
 export type BirthChartData = {
@@ -86,14 +91,79 @@ export const generateBirthChart = async (
   console.log('Generated astro chart:', astroChart);
 
   // Convert to storage format
-  const birthChartData = astroChart.map((planet: AstroChartInformation) => ({
-    body: planet.body,
-    sign: planet.sign,
-    degree: planet.formattedDegree.degree,
-    minute: planet.formattedDegree.minute,
-    eclipticLongitude: planet.eclipticLongitude,
-    retrograde: planet.retrograde,
-  }));
+  const birthChartData: BirthChartData[] = astroChart.map(
+    (planet: AstroChartInformation) => ({
+      body: planet.body as string,
+      sign: planet.sign,
+      degree: planet.formattedDegree.degree,
+      minute: planet.formattedDegree.minute,
+      eclipticLongitude: planet.eclipticLongitude,
+      retrograde: planet.retrograde,
+    }),
+  );
+
+  // Calculate Ascendant (Rising Sign)
+  // The Ascendant is the zodiac sign on the eastern horizon at birth
+  try {
+    const astroTime = new AstroTime(birthDateTime);
+    // Calculate the horizon at the eastern point (azimuth = 90 degrees)
+    // The Ascendant is at the intersection of the eastern horizon and the ecliptic
+    const horizon = Horizon(astroTime, finalObserver, 0, 0, 'normal');
+
+    // Calculate the ecliptic longitude of the Ascendant
+    // This is a simplified calculation - for more accuracy, we'd need to calculate
+    // the intersection of the horizon plane with the ecliptic plane
+    // For now, we'll use the sidereal time to approximate
+    const siderealTime = horizon.ra; // Right ascension of the meridian
+    const localSiderealTime = siderealTime + finalObserver.longitude / 15; // Convert longitude to hours
+
+    // Calculate the ecliptic longitude of the Ascendant
+    // This is a simplified formula - the actual calculation is more complex
+    const obliquity = 23.4393; // Earth's axial tilt in degrees
+    const latRad = (finalObserver.latitude * Math.PI) / 180;
+    const lstRad = (localSiderealTime * 15 * Math.PI) / 180;
+
+    // Calculate the Ascendant using the formula:
+    // tan(ASC) = (cos(lst) / (cos(lat) * tan(obliquity) + sin(lat) * sin(lst)))
+    const tanAsc =
+      Math.cos(lstRad) /
+      (Math.cos(latRad) * Math.tan((obliquity * Math.PI) / 180) +
+        Math.sin(latRad) * Math.sin(lstRad));
+    let ascendantLongitude = Math.atan(tanAsc);
+
+    // Adjust for quadrant
+    if (Math.cos(lstRad) < 0) {
+      ascendantLongitude += Math.PI;
+    }
+    if (ascendantLongitude < 0) {
+      ascendantLongitude += 2 * Math.PI;
+    }
+
+    // Convert to degrees
+    const ascendantLongitudeDeg = (ascendantLongitude * 180) / Math.PI;
+    const ascendantSign = getZodiacSign(ascendantLongitudeDeg);
+    const ascendantFormatted = formatDegree(ascendantLongitudeDeg);
+
+    // Add Ascendant to birth chart data
+    birthChartData.push({
+      body: 'Ascendant',
+      sign: ascendantSign,
+      degree: ascendantFormatted.degree,
+      minute: ascendantFormatted.minute,
+      eclipticLongitude: ascendantLongitudeDeg,
+      retrograde: false, // Ascendant doesn't retrograde
+    });
+
+    console.log('Calculated Ascendant:', {
+      sign: ascendantSign,
+      degree: ascendantFormatted.degree,
+      minute: ascendantFormatted.minute,
+      longitude: ascendantLongitudeDeg,
+    });
+  } catch (error) {
+    console.error('Error calculating Ascendant:', error);
+    // If Ascendant calculation fails, continue without it
+  }
 
   console.log('Converted birth chart data:', birthChartData);
   return birthChartData;

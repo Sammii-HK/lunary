@@ -5,6 +5,25 @@ export function middleware(request: NextRequest) {
   const hostname =
     request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
 
+  // Force HTTPS redirect in production
+  const isProduction =
+    process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'production';
+  if (
+    isProduction &&
+    request.headers.get('x-forwarded-proto') !== 'https' &&
+    !hostname.includes('localhost')
+  ) {
+    url.protocol = 'https:';
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect www to non-www (canonical domain: lunary.app)
+  if (hostname.startsWith('www.')) {
+    url.hostname = hostname.replace('www.', '');
+    return NextResponse.redirect(url, 301);
+  }
+
   const configuredAdminHosts = [
     process.env.ADMIN_DASHBOARD_HOST,
     process.env.ADMIN_APP_HOST,
@@ -15,6 +34,14 @@ export function middleware(request: NextRequest) {
 
   const isAdminSubdomain =
     hostname.startsWith('admin.') || configuredAdminHosts.includes(hostname);
+
+  // console.log('🔍 Middleware check:', {
+  //   hostname,
+  //   isAdminSubdomain,
+  //   pathname: url.pathname,
+  //   configuredAdminHosts,
+  //   nodeEnv: process.env.NODE_ENV,
+  // });
 
   const adminPrefix = '/admin';
   const skipAdminRewritePrefixes = ['/auth', '/api', '/_next'];
@@ -67,6 +94,19 @@ export function middleware(request: NextRequest) {
 
     // Note: Full admin check happens client-side in the admin page component
     // Middleware just ensures user is authenticated
+  }
+
+  // Redirect old blog week URL format to canonical format
+  // /blog/week/{N}-{YEAR} → /blog/week/week-{N}-{YEAR}
+  const blogWeekMatch = url.pathname.match(/^\/blog\/week\/(\d+)-(\d{4})$/);
+  if (blogWeekMatch) {
+    const weekNumber = blogWeekMatch[1];
+    const year = blogWeekMatch[2];
+    const canonicalUrl = new URL(
+      `/blog/week/week-${weekNumber}-${year}`,
+      request.url,
+    );
+    return NextResponse.redirect(canonicalUrl, 301);
   }
 
   // Redirect old query parameter URLs to new static routes

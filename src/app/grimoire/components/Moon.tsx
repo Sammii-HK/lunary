@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { annualFullMoons, FullMoon } from '@/constants/moon/annualFullMoons';
 import {
   MonthlyMoonPhase,
@@ -7,6 +8,7 @@ import {
 } from '../../../../utils/moon/monthlyPhases';
 import { MoonPhase } from '../../../../utils/moon/moonPhases';
 import { months } from '../../../../utils/months';
+import { stringToKebabCase } from '../../../../utils/string';
 import { useEffect } from 'react';
 
 const Moon = () => {
@@ -28,9 +30,9 @@ const Moon = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Moon
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Moon Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Explore moon phases, full moon names, lunar wisdom, and moon rituals
         </p>
@@ -39,19 +41,23 @@ const Moon = () => {
       <section id='phases' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Moon Phases</h2>
         <div className='space-y-3'>
-          {moonPhases.map((phase: string) => (
-            <div
-              key={phase}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <div className='text-sm text-zinc-300 leading-relaxed'>
-                <span className='text-lg mr-2'>
-                  {monthlyMoonPhases[phase as MoonPhase].symbol}
-                </span>
-                {monthlyMoonPhases[phase as MoonPhase].information}
-              </div>
-            </div>
-          ))}
+          {moonPhases.map((phase: string) => {
+            const phaseSlug = stringToKebabCase(phase);
+            return (
+              <Link
+                key={phase}
+                href={`/grimoire/moon-phases/${phaseSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <div className='text-sm text-zinc-300 leading-relaxed group-hover:text-purple-300 transition-colors'>
+                  <span className='text-lg mr-2'>
+                    {monthlyMoonPhases[phase as MoonPhase].symbol}
+                  </span>
+                  {monthlyMoonPhases[phase as MoonPhase].information}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -61,19 +67,21 @@ const Moon = () => {
           {fullMoonNames.map((fullMoon: string, index: number) => {
             const moon: FullMoon =
               annualFullMoons[fullMoon as keyof typeof annualFullMoons];
+            const monthSlug = stringToKebabCase(fullMoon);
             return (
-              <div
+              <Link
                 key={moon.name}
-                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+                href={`/grimoire/full-moons/${monthSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-1'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-purple-400 transition-colors'>
                   {moon.name} -{' '}
                   <span className='font-normal'>{months[index]}</span>
                 </h3>
                 <p className='text-sm text-zinc-300 leading-relaxed'>
                   {moon.description}
                 </p>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -81,7 +89,12 @@ const Moon = () => {
 
       <section id='rituals' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>
-          Moon Rituals by Phase
+          <a
+            href='/grimoire/moon-rituals'
+            className='hover:text-purple-400 transition-colors'
+          >
+            Moon Rituals by Phase
+          </a>
         </h2>
         <p className='text-sm text-zinc-400 mb-4'>
           Each moon phase offers unique energy for different types of magical
@@ -146,7 +159,12 @@ const Moon = () => {
       <section id='moon-signs' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-            Moon Signs & Daily Influence
+            <a
+              href='/grimoire/moon-signs'
+              className='hover:text-purple-400 transition-colors'
+            >
+              Moon Signs & Daily Influence
+            </a>
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
             The moon changes signs every 2-3 days, influencing emotional energy,
@@ -160,7 +178,26 @@ const Moon = () => {
               Fire Moon Signs
             </h3>
             <p className='text-xs text-zinc-400 mb-2'>
-              Aries, Leo, Sagittarius
+              <Link
+                href='/grimoire/moon-in/aries'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Aries
+              </Link>
+              ,{' '}
+              <Link
+                href='/grimoire/moon-in/leo'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Leo
+              </Link>
+              ,{' '}
+              <Link
+                href='/grimoire/moon-in/sagittarius'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Sagittarius
+              </Link>
             </p>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Passionate, energetic, and action-oriented. Good for starting
@@ -173,7 +210,26 @@ const Moon = () => {
               Earth Moon Signs
             </h3>
             <p className='text-xs text-zinc-400 mb-2'>
-              Taurus, Virgo, Capricorn
+              <Link
+                href='/grimoire/moon-in/taurus'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Taurus
+              </Link>
+              ,{' '}
+              <Link
+                href='/grimoire/moon-in/virgo'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Virgo
+              </Link>
+              ,{' '}
+              <Link
+                href='/grimoire/moon-in/capricorn'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Capricorn
+              </Link>
             </p>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Grounded, practical, and stable. Ideal for building, organizing,
@@ -185,7 +241,26 @@ const Moon = () => {
               Air Moon Signs
             </h3>
             <p className='text-xs text-zinc-400 mb-2'>
-              Gemini, Libra, Aquarius
+              <Link
+                href='/grimoire/moon-in/gemini'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Gemini
+              </Link>
+              ,{' '}
+              <Link
+                href='/grimoire/moon-in/libra'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Libra
+              </Link>
+              ,{' '}
+              <Link
+                href='/grimoire/moon-in/aquarius'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Aquarius
+              </Link>
             </p>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Communicative, social, and intellectual. Perfect for discussions,
@@ -198,7 +273,26 @@ const Moon = () => {
               Water Moon Signs
             </h3>
             <p className='text-xs text-zinc-400 mb-2'>
-              Cancer, Scorpio, Pisces
+              <Link
+                href='/grimoire/moon-in/cancer'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Cancer
+              </Link>
+              ,{' '}
+              <Link
+                href='/grimoire/moon-in/scorpio'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Scorpio
+              </Link>
+              ,{' '}
+              <Link
+                href='/grimoire/moon-in/pisces'
+                className='hover:text-purple-300 transition-colors'
+              >
+                Pisces
+              </Link>
             </p>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Intuitive, emotional, and deeply feeling. Best for emotional work,
@@ -284,8 +378,11 @@ const Moon = () => {
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+          <Link
+            href='/grimoire/eclipses/solar-eclipse'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-purple-300 mb-2 group-hover:text-purple-200 transition-colors'>
               Solar Eclipses (New Moon)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -307,9 +404,12 @@ const Moon = () => {
                 projects, making commitments
               </p>
             </div>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+          </Link>
+          <Link
+            href='/grimoire/eclipses/lunar-eclipse'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-purple-300 mb-2 group-hover:text-purple-200 transition-colors'>
               Lunar Eclipses (Full Moon)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -330,7 +430,7 @@ const Moon = () => {
                 completing cycles, emotional healing
               </p>
             </div>
-          </div>
+          </Link>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
             <h3 className='text-lg font-medium text-purple-300 mb-2'>
               Eclipse Season

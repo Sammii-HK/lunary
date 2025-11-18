@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
+import { stringToKebabCase } from '../../../../utils/string';
 
 const ModernWitchcraft = () => {
   useEffect(() => {
@@ -18,9 +20,9 @@ const ModernWitchcraft = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Modern Witchcraft
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Modern Witchcraft Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Explore different paths of modern witchcraft, essential tools, ethics,
           and practices. Witchcraft is a diverse and personal spiritual path.
@@ -39,74 +41,66 @@ const ModernWitchcraft = () => {
           </p>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Green Witch
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
-              Works closely with nature, plants, and earth energy. Focuses on
-              herbalism, gardening, and natural magic. Deep connection to the
-              seasons and natural cycles.
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Kitchen Witch
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
-              Practices magic through cooking, baking, and home care. Infuses
-              daily activities with intention. Magic happens in the kitchen and
-              home.
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Hedge Witch
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
-              Works between worlds, practices astral travel, and communicates
-              with spirits. Often solitary, focuses on liminal spaces and
-              boundaries between realms.
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Sea Witch
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
-              Connected to water, ocean, and tides. Works with sea salt, shells,
-              and water magic. Draws power from lunar cycles and ocean energy.
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Cosmic Witch
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
-              Focuses on astrology, planetary magic, and celestial energy.
-              Aligns practice with moon phases, planetary transits, and cosmic
-              events.
-            </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
-              Eclectic Witch
-            </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
-              Draws from multiple traditions and creates a personal practice.
-              Adapts and combines different methods based on what resonates.
-              Most common path in modern witchcraft.
-            </p>
-          </div>
+          {[
+            {
+              name: 'Green Witch',
+              description:
+                'Works closely with nature, plants, and earth energy. Focuses on herbalism, gardening, and natural magic. Deep connection to the seasons and natural cycles.',
+            },
+            {
+              name: 'Kitchen Witch',
+              description:
+                'Practices magic through cooking, baking, and home care. Infuses daily activities with intention. Magic happens in the kitchen and home.',
+            },
+            {
+              name: 'Hedge Witch',
+              description:
+                'Works between worlds, practices astral travel, and communicates with spirits. Often solitary, focuses on liminal spaces and boundaries between realms.',
+            },
+            {
+              name: 'Sea Witch',
+              description:
+                'Connected to water, ocean, and tides. Works with sea salt, shells, and water magic. Draws power from lunar cycles and ocean energy.',
+            },
+            {
+              name: 'Cosmic Witch',
+              description:
+                'Focuses on astrology, planetary magic, and celestial energy. Aligns practice with moon phases, planetary transits, and cosmic events.',
+            },
+            {
+              name: 'Eclectic Witch',
+              description:
+                'Draws from multiple traditions and creates a personal practice. Adapts and combines different methods based on what resonates. Most common path in modern witchcraft.',
+            },
+          ].map((witch) => {
+            const witchSlug = stringToKebabCase(witch.name);
+            return (
+              <Link
+                key={witch.name}
+                href={`/grimoire/witches/${witchSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-purple-300 mb-2 group-hover:text-purple-200 transition-colors'>
+                  {witch.name}
+                </h3>
+                <p className='text-sm text-zinc-300 leading-relaxed'>
+                  {witch.description}
+                </p>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
       {/* Witch Tools Section */}
       <section id='tools' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/witchcraft-tools'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Essential Witch Tools
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Tools enhance your practice but aren't required. The most important
             tool is your intention. Start simple and add tools as needed.
@@ -191,9 +185,12 @@ const ModernWitchcraft = () => {
       {/* Ethics Section */}
       <section id='ethics' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/witchcraft-ethics'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Witchcraft Ethics
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Ethical practice is fundamental to witchcraft. Different traditions
             have different codes, but core principles remain consistent.
@@ -324,9 +321,12 @@ const ModernWitchcraft = () => {
       {/* Book of Shadows Section */}
       <section id='book-of-shadows' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/book-of-shadows'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Book of Shadows
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             A Book of Shadows (BOS) is your personal grimoire—a record of your
             spells, rituals, correspondences, and spiritual journey. It's a

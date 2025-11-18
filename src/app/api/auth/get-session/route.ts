@@ -2,15 +2,11 @@ import { auth } from '@/lib/auth';
 import { withCors } from '@/lib/auth-cors';
 
 async function handleAuthRequest(request: Request) {
-  if (
-    process.env.NODE_ENV === 'development' &&
-    process.env.DEBUG_AUTH === 'true'
-  ) {
-    console.log('🔍 Auth request to get-session:', {
-      method: request.method,
-      url: request.url,
-    });
-  }
+  // console.log('🔍 Auth request to get-session:', {
+  //   method: request.method,
+  //   url: request.url,
+  //   headers: Object.fromEntries(request.headers.entries()),
+  // });
 
   try {
     const response = await withCors(request, auth.handler);
@@ -82,10 +78,12 @@ async function handleAuthRequest(request: Request) {
 }
 
 export async function GET(request: Request) {
+  // console.log('🔍 GET /api/auth/get-session called');
   return handleAuthRequest(request);
 }
 
 export async function POST(request: Request) {
+  // console.log('🔍 POST /api/auth/get-session called');
   return handleAuthRequest(request);
 }
 
