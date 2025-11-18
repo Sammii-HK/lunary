@@ -58,6 +58,24 @@ export async function GET(request: NextRequest) {
     const wau = Number(wauResult.rows[0]?.value || 0);
     const mau = Number(mauResult.rows[0]?.value || 0);
 
+    // Calculate returning users (users who had activity before the current period)
+    const returningUsersPromise = sql`
+      SELECT COUNT(DISTINCT a.user_id) AS value
+      FROM analytics_user_activity a
+      WHERE a.activity_type = 'session'
+        AND a.activity_date = ${endDate}
+        AND EXISTS (
+          SELECT 1
+          FROM analytics_user_activity b
+          WHERE b.user_id = a.user_id
+            AND b.activity_type = 'session'
+            AND b.activity_date < ${endDate}
+        )
+    `;
+
+    const returningUsersResult = await returningUsersPromise;
+    const returningUsers = Number(returningUsersResult.rows[0]?.value || 0);
+
     const trends = await sql`
       WITH buckets AS (
         SELECT generate_series(
@@ -101,6 +119,7 @@ export async function GET(request: NextRequest) {
       dau,
       wau,
       mau,
+      returning_users: returningUsers,
       retention,
       churn_rate: churnRate,
       trends: trends.rows.map((row) => ({
