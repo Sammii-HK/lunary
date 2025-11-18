@@ -1,6 +1,12 @@
 'use client';
 
-import { ArrowDownRight, ArrowUpRight, Minus, Target, TrendingUp } from 'lucide-react';
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Minus,
+  Target,
+  TrendingUp,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Card,
@@ -82,12 +88,17 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
     },
     {
       label: 'Search Impressions + Clicks',
-      value: data.search_impressions_clicks.impressions + data.search_impressions_clicks.clicks,
+      value:
+        data.search_impressions_clicks.impressions +
+        data.search_impressions_clicks.clicks,
       trend: data.search_impressions_clicks.trend,
       change: data.search_impressions_clicks.change,
       target: null,
       format: (v: number) => {
-        if (data.search_impressions_clicks.impressions === 0 && data.search_impressions_clicks.clicks === 0) {
+        if (
+          data.search_impressions_clicks.impressions === 0 &&
+          data.search_impressions_clicks.clicks === 0
+        ) {
           return 'Not configured';
         }
         return `${data.search_impressions_clicks.impressions.toLocaleString()} impressions, ${data.search_impressions_clicks.clicks.toLocaleString()} clicks`;
@@ -181,14 +192,9 @@ function MetricCard({
   };
 
   const TrendIcon =
-    trend === 'up'
-      ? ArrowUpRight
-      : trend === 'down'
-        ? ArrowDownRight
-        : Minus;
+    trend === 'up' ? ArrowUpRight : trend === 'down' ? ArrowDownRight : Minus;
 
-  const isInTargetRange =
-    target && value >= target.min && value <= target.max;
+  const isInTargetRange = target && value >= target.min && value <= target.max;
 
   return (
     <div

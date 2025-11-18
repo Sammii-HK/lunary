@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -56,7 +56,7 @@ const MessageBubble = ({
   );
 };
 
-export default function BookOfShadowsPage() {
+function BookOfShadowsContent() {
   const authState = useAuthStatus();
   const searchParams = useSearchParams();
   const {
@@ -357,5 +357,21 @@ export default function BookOfShadowsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function BookOfShadowsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+          <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
+            <div className='text-zinc-400'>Loading...</div>
+          </div>
+        </div>
+      }
+    >
+      <BookOfShadowsContent />
+    </Suspense>
   );
 }

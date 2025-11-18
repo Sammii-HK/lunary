@@ -70,9 +70,19 @@ export async function GET(request: NextRequest) {
             AND b.activity_date < (${formatDate(prevWeekEnd)}::date - INTERVAL '6 days')
         )
     `;
-    const prevWeeklyReturning = Number(prevWeeklyReturningResult.rows[0]?.value || 0);
-    const weeklyReturningTrend = weeklyReturning > prevWeeklyReturning ? 'up' : weeklyReturning < prevWeeklyReturning ? 'down' : 'stable';
-    const weeklyReturningChange = prevWeeklyReturning > 0 ? ((weeklyReturning - prevWeeklyReturning) / prevWeeklyReturning) * 100 : 0;
+    const prevWeeklyReturning = Number(
+      prevWeeklyReturningResult.rows[0]?.value || 0,
+    );
+    const weeklyReturningTrend =
+      weeklyReturning > prevWeeklyReturning
+        ? 'up'
+        : weeklyReturning < prevWeeklyReturning
+          ? 'down'
+          : 'stable';
+    const weeklyReturningChange =
+      prevWeeklyReturning > 0
+        ? ((weeklyReturning - prevWeeklyReturning) / prevWeeklyReturning) * 100
+        : 0;
 
     // 4. Conversion Rate
     const freeUsersResult = await sql`
@@ -88,13 +98,18 @@ export async function GET(request: NextRequest) {
       FROM analytics_conversions
       WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
     `;
-    const totalConversions = Number(conversionsResult.rows[0]?.total_conversions || 0);
-    const conversionRate = freeUsers > 0 ? (totalConversions / freeUsers) * 100 : 0;
+    const totalConversions = Number(
+      conversionsResult.rows[0]?.total_conversions || 0,
+    );
+    const conversionRate =
+      freeUsers > 0 ? (totalConversions / freeUsers) * 100 : 0;
 
     // Previous period conversion rate for trend
     const prevRangeStart = new Date(range.start);
     const prevRangeEnd = new Date(range.end);
-    const periodDays = Math.ceil((range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24));
+    const periodDays = Math.ceil(
+      (range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24),
+    );
     prevRangeStart.setDate(prevRangeStart.getDate() - periodDays);
     prevRangeEnd.setDate(prevRangeEnd.getDate() - periodDays);
 
@@ -111,10 +126,21 @@ export async function GET(request: NextRequest) {
       FROM analytics_conversions
       WHERE created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
     `;
-    const prevTotalConversions = Number(prevConversionsResult.rows[0]?.total_conversions || 0);
-    const prevConversionRate = prevFreeUsers > 0 ? (prevTotalConversions / prevFreeUsers) * 100 : 0;
-    const conversionTrend = conversionRate > prevConversionRate ? 'up' : conversionRate < prevConversionRate ? 'down' : 'stable';
-    const conversionChange = prevConversionRate > 0 ? ((conversionRate - prevConversionRate) / prevConversionRate) * 100 : 0;
+    const prevTotalConversions = Number(
+      prevConversionsResult.rows[0]?.total_conversions || 0,
+    );
+    const prevConversionRate =
+      prevFreeUsers > 0 ? (prevTotalConversions / prevFreeUsers) * 100 : 0;
+    const conversionTrend =
+      conversionRate > prevConversionRate
+        ? 'up'
+        : conversionRate < prevConversionRate
+          ? 'down'
+          : 'stable';
+    const conversionChange =
+      prevConversionRate > 0
+        ? ((conversionRate - prevConversionRate) / prevConversionRate) * 100
+        : 0;
 
     // 5. Search Impressions & Clicks (placeholder - would need Google Search Console API)
     // For now, return placeholder values
@@ -154,9 +180,19 @@ export async function GET(request: NextRequest) {
       FROM analytics_ai_usage
       WHERE created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
     `;
-    const prevAiMessages = Number(prevAiMessagesResult.rows[0]?.total_messages || 0);
-    const aiMessagesTrend = aiMessages > prevAiMessages ? 'up' : aiMessages < prevAiMessages ? 'down' : 'stable';
-    const aiMessagesChange = prevAiMessages > 0 ? ((aiMessages - prevAiMessages) / prevAiMessages) * 100 : 0;
+    const prevAiMessages = Number(
+      prevAiMessagesResult.rows[0]?.total_messages || 0,
+    );
+    const aiMessagesTrend =
+      aiMessages > prevAiMessages
+        ? 'up'
+        : aiMessages < prevAiMessages
+          ? 'down'
+          : 'stable';
+    const aiMessagesChange =
+      prevAiMessages > 0
+        ? ((aiMessages - prevAiMessages) / prevAiMessages) * 100
+        : 0;
 
     // 8. Substack Subscribers (using push subscriptions as proxy)
     const substackSubscribersResult = await sql`
@@ -164,7 +200,9 @@ export async function GET(request: NextRequest) {
       FROM push_subscriptions
       WHERE is_active = true
     `;
-    const substackSubscribers = Number(substackSubscribersResult.rows[0]?.count || 0);
+    const substackSubscribers = Number(
+      substackSubscribersResult.rows[0]?.count || 0,
+    );
 
     // Previous period for trend
     const prevSubstackSubscribersResult = await sql`
@@ -173,9 +211,21 @@ export async function GET(request: NextRequest) {
       WHERE is_active = true
         AND created_at < ${formatTimestamp(prevRangeEnd)}
     `;
-    const prevSubstackSubscribers = Number(prevSubstackSubscribersResult.rows[0]?.count || 0);
-    const substackTrend = substackSubscribers > prevSubstackSubscribers ? 'up' : substackSubscribers < prevSubstackSubscribers ? 'down' : 'stable';
-    const substackChange = prevSubstackSubscribers > 0 ? ((substackSubscribers - prevSubstackSubscribers) / prevSubstackSubscribers) * 100 : 0;
+    const prevSubstackSubscribers = Number(
+      prevSubstackSubscribersResult.rows[0]?.count || 0,
+    );
+    const substackTrend =
+      substackSubscribers > prevSubstackSubscribers
+        ? 'up'
+        : substackSubscribers < prevSubstackSubscribers
+          ? 'down'
+          : 'stable';
+    const substackChange =
+      prevSubstackSubscribers > 0
+        ? ((substackSubscribers - prevSubstackSubscribers) /
+            prevSubstackSubscribers) *
+          100
+        : 0;
 
     return NextResponse.json({
       daily_active_users: {

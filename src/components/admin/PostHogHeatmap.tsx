@@ -12,12 +12,15 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
+  const posthogHost =
+    process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
   const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
   useEffect(() => {
     if (!posthogKey) {
-      setError('PostHog API key not configured. Set NEXT_PUBLIC_POSTHOG_KEY in your environment variables.');
+      setError(
+        'PostHog API key not configured. Set NEXT_PUBLIC_POSTHOG_KEY in your environment variables.',
+      );
       setLoading(false);
       return;
     }
@@ -35,7 +38,8 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
           PostHog is not configured. To enable page-level heatmaps:
         </div>
         <ol className='mt-4 space-y-2 text-left text-xs text-zinc-500'>
-          <li>1. Sign up at{' '}
+          <li>
+            1. Sign up at{' '}
             <a
               href='https://posthog.com'
               target='_blank'
@@ -47,13 +51,12 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
           </li>
           <li>2. Get your API key from your PostHog project settings</li>
           <li>3. Add NEXT_PUBLIC_POSTHOG_KEY to your environment variables</li>
-          <li>4. Optionally set NEXT_PUBLIC_POSTHOG_HOST (defaults to us.i.posthog.com)</li>
+          <li>
+            4. Optionally set NEXT_PUBLIC_POSTHOG_HOST (defaults to
+            us.i.posthog.com)
+          </li>
         </ol>
-        <Button
-          asChild
-          variant='secondary'
-          className='mt-4 gap-2'
-        >
+        <Button asChild variant='secondary' className='mt-4 gap-2'>
           <a
             href='https://posthog.com'
             target='_blank'
@@ -101,17 +104,8 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
               View heatmaps and session recordings in PostHog
             </p>
           </div>
-          <Button
-            asChild
-            variant='secondary'
-            size='sm'
-            className='gap-2'
-          >
-            <a
-              href={heatmapUrl}
-              target='_blank'
-              rel='noopener noreferrer'
-            >
+          <Button asChild variant='secondary' size='sm' className='gap-2'>
+            <a href={heatmapUrl} target='_blank' rel='noopener noreferrer'>
               <ExternalLink className='h-4 w-4' />
               Open in PostHog
             </a>
@@ -136,8 +130,9 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
           </div>
         </div>
         <div className='mt-4 text-xs text-zinc-500'>
-          💡 Tip: PostHog heatmaps show where users click, scroll, and interact on your pages.
-          Access the full dashboard for detailed insights and session recordings.
+          💡 Tip: PostHog heatmaps show where users click, scroll, and interact
+          on your pages. Access the full dashboard for detailed insights and
+          session recordings.
         </div>
       </div>
     </div>

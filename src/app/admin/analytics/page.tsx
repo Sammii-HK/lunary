@@ -335,9 +335,7 @@ export default function AnalyticsPage() {
       value: activity?.returning_users ?? 0,
       subtitle: `${
         activity?.dau
-          ? Math.round(
-              ((activity.returning_users ?? 0) / activity.dau) * 100,
-            )
+          ? Math.round(((activity.returning_users ?? 0) / activity.dau) * 100)
           : 0
       }% of DAU`,
     },
@@ -495,7 +493,10 @@ export default function AnalyticsPage() {
       )}
 
       <section>
-        <SuccessMetrics data={successMetrics} loading={loading && !successMetrics} />
+        <SuccessMetrics
+          data={successMetrics}
+          loading={loading && !successMetrics}
+        />
       </section>
 
       <section className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
