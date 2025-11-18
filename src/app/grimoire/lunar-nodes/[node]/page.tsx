@@ -194,6 +194,14 @@ Keywords: ${nodeData.keywords.join(', ')}`}
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Birth Chart', href: '/grimoire/birth-chart' },
+          {
+            label: nodeData.name,
+            href: `/grimoire/lunar-nodes/${node}`,
+          },
+        ]}
         internalLinks={[
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
           { text: "View Today's Horoscope", href: '/horoscope' },

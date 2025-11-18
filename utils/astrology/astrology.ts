@@ -48,13 +48,13 @@ type Bodies =
   | 'Neptune'
   | 'Pluto';
 
-function getZodiacSign(longitude: number): string {
+export function getZodiacSign(longitude: number): string {
   const index =
     Math.floor((longitude < 0 ? longitude + 360 : longitude) / 30) % 12;
   return ZODIAC_SIGNS[index];
 }
 
-function formatDegree(longitude: number): FormattedDegree {
+export function formatDegree(longitude: number): FormattedDegree {
   const degreesInSign = longitude % 30;
   const degree = Math.floor(degreesInSign);
   const minute = Math.floor((degreesInSign - degree) * 60);

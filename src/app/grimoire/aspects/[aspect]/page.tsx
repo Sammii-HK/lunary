@@ -180,6 +180,14 @@ Nature: ${aspectData.nature}`}
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Birth Chart', href: '/grimoire/birth-chart' },
+          {
+            label: aspectData.name,
+            href: `/grimoire/aspects/${aspect}`,
+          },
+        ]}
         internalLinks={[
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
           { text: 'Explore Aspects', href: '/grimoire/birth-chart#aspects' },

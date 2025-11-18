@@ -180,22 +180,30 @@ export default async function TarotCardPage({
     const suitCardKeys = Object.keys(suitCards);
     const currentIndex = suitCardKeys.indexOf(cardData.key);
     if (currentIndex > 0) {
-      const prevCard =
-        suitCards[suitCardKeys[currentIndex - 1] as keyof typeof suitCards];
-      relatedCards.push({
-        name: prevCard.name,
-        href: `/grimoire/tarot/${stringToKebabCase(prevCard.name)}`,
-        type: suitInfo?.name || 'Minor Arcana',
-      });
+      const prevKey = suitCardKeys[currentIndex - 1];
+      const prevCard = suitCards[prevKey as keyof typeof suitCards] as
+        | { name: string }
+        | undefined;
+      if (prevCard && 'name' in prevCard) {
+        relatedCards.push({
+          name: prevCard.name,
+          href: `/grimoire/tarot/${stringToKebabCase(prevCard.name)}`,
+          type: suitInfo?.name || 'Minor Arcana',
+        });
+      }
     }
     if (currentIndex < suitCardKeys.length - 1) {
-      const nextCard =
-        suitCards[suitCardKeys[currentIndex + 1] as keyof typeof suitCards];
-      relatedCards.push({
-        name: nextCard.name,
-        href: `/grimoire/tarot/${stringToKebabCase(nextCard.name)}`,
-        type: suitInfo?.name || 'Minor Arcana',
-      });
+      const nextKey = suitCardKeys[currentIndex + 1];
+      const nextCard = suitCards[nextKey as keyof typeof suitCards] as
+        | { name: string }
+        | undefined;
+      if (nextCard && 'name' in nextCard) {
+        relatedCards.push({
+          name: nextCard.name,
+          href: `/grimoire/tarot/${stringToKebabCase(nextCard.name)}`,
+          type: suitInfo?.name || 'Minor Arcana',
+        });
+      }
     }
   }
 
@@ -214,7 +222,7 @@ export default async function TarotCardPage({
     },
     {
       question: `What does ${cardData.card.name} reversed mean?`,
-      answer: `When ${cardData.card.name} appears reversed, it suggests blocked or inverted energy. ${reversedMeaning}`,
+      answer: reversedMeaning,
     },
     {
       question: `Is ${cardData.card.name} a positive or negative card?`,
@@ -292,6 +300,14 @@ Mystical Properties: ${suitInfo.mysticalProperties}`
             name: 'Daily Tarot',
             href: '/tarot',
             type: 'Reading',
+          },
+        ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Tarot', href: '/grimoire/tarot' },
+          {
+            label: cardData.card.name,
+            href: `/grimoire/tarot/${card}`,
           },
         ]}
         internalLinks={[

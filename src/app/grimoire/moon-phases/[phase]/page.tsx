@@ -250,6 +250,14 @@ Working with the ${phaseName} Moon consciously allows you to harness its unique 
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Moon Phases', href: '/grimoire/moon' },
+          {
+            label: phaseName,
+            href: `/grimoire/moon-phases/${phase}`,
+          },
+        ]}
         internalLinks={[
           { text: "View Today's Moon Phase", href: '/horoscope' },
           { text: 'Explore Moon Rituals', href: '/grimoire/moon#rituals' },

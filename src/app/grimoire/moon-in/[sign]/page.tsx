@@ -204,6 +204,14 @@ Emotional Expression: ${signData.element.toLowerCase()}`}
             type: 'Daily Reading',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Moon Phases', href: '/grimoire/moon' },
+          {
+            label: `Moon in ${signData.name}`,
+            href: `/grimoire/moon-in/${sign}`,
+          },
+        ]}
         internalLinks={[
           { text: "View Today's Moon Sign", href: '/horoscope' },
           { text: 'Explore Moon Phases', href: '/grimoire/moon' },

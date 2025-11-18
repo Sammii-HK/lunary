@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 const CandleMagic = () => {
@@ -18,9 +19,9 @@ const CandleMagic = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Candle Magic
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Candle Magic Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Learn the art of candle magic: color meanings, carving techniques,
           anointing, safety, and rituals. Candle magic is one of the most
@@ -203,9 +204,12 @@ const CandleMagic = () => {
       {/* Anointing Section */}
       <section id='anointing' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/anointing-candles'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Anointing Candles with Oils
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Anointing candles with oils adds another layer of intention and
             energy to your spellwork. Essential oils carry specific properties
@@ -332,9 +336,12 @@ const CandleMagic = () => {
       {/* Lighting Candles on Altar Section */}
       <section id='altar-lighting' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/lighting-candles-on-altar'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Lighting Candles on Your Altar
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             The order and method of lighting candles on your altar creates a
             powerful ritual structure. Each step builds energy and intention.
@@ -436,9 +443,12 @@ const CandleMagic = () => {
       {/* Candle Color Incantations Section */}
       <section id='color-incantations' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/incantations-by-candle-color'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Incantations by Candle Color
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Specific incantations to use when lighting candles of different
             colors. Speak with conviction and feel the energy of each color.

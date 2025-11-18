@@ -198,6 +198,14 @@ Mystical Properties: ${planetData.mysticalProperties}`}
             type: 'Daily Reading',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Astronomy & Astrology', href: '/grimoire/astronomy' },
+          {
+            label: planetData.name,
+            href: `/grimoire/planets/${planet}`,
+          },
+        ]}
         internalLinks={[
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
           { text: "View Today's Horoscope", href: '/horoscope' },

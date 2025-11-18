@@ -1,7 +1,9 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
 
 export interface FAQItem {
   question: string;
@@ -42,9 +44,15 @@ export interface SEOContentTemplateProps {
   // Internal links
   internalLinks?: Array<{ text: string; href: string }>;
 
+  // Breadcrumbs
+  breadcrumbs?: BreadcrumbItem[];
+
   // CTA
   ctaText?: string;
   ctaHref?: string;
+
+  // Children (for custom content)
+  children?: React.ReactNode;
 }
 
 export function SEOContentTemplate({
@@ -71,8 +79,10 @@ export function SEOContentTemplate({
   examplePlacements,
   faqs,
   internalLinks,
+  breadcrumbs,
   ctaText,
   ctaHref,
+  children,
 }: SEOContentTemplateProps) {
   // Generate JSON-LD schema for FAQ
   const faqSchema = faqs
@@ -113,6 +123,11 @@ export function SEOContentTemplate({
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
+
+      {/* Breadcrumbs */}
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <Breadcrumbs items={breadcrumbs} />
+      )}
 
       {/* H1 */}
       <header className='mb-8'>
@@ -450,6 +465,9 @@ export function SEOContentTemplate({
           </div>
         </section>
       )}
+
+      {/* Children (custom content) */}
+      {children && <div className='mt-8'>{children}</div>}
     </article>
   );
 }

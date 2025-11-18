@@ -158,6 +158,14 @@ The ${moonData.name} Full Moon carries the energy of ${monthKey.toLowerCase()} a
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Moon Phases', href: '/grimoire/moon' },
+          {
+            label: moonData.name,
+            href: `/grimoire/full-moons/${month}`,
+          },
+        ]}
         internalLinks={[
           { text: "View Today's Moon Phase", href: '/horoscope' },
           { text: 'Explore Moon Phases', href: '/grimoire/moon' },

@@ -212,19 +212,21 @@ export async function fetchSubscriptionFromStripe(customerId: string) {
     }
 
     const result = await response.json();
-    
+
     if (result.success && result.subscription) {
       const sub = result.subscription;
-      
+
       console.log('🔍 Processing subscription data:', {
         id: sub.id,
         status: sub.status,
         trial_end: sub.trial_end,
         current_period_end: sub.current_period_end,
       });
-      
+
       // Format to match our internal structure with safe timestamp handling
-      const safeTimestamp = (timestamp: number | null | undefined): string | null => {
+      const safeTimestamp = (
+        timestamp: number | null | undefined,
+      ): string | null => {
         if (!timestamp || timestamp <= 0) return null;
         try {
           return new Date(timestamp * 1000).toISOString();
@@ -238,9 +240,13 @@ export async function fetchSubscriptionFromStripe(customerId: string) {
         customerId,
         stripeSubscriptionId: sub.id,
         status: mapStripeStatus(sub.status),
-        plan: sub.items.data[0]?.price?.recurring?.interval === 'month' ? 'monthly' : 'yearly',
+        plan:
+          sub.items.data[0]?.price?.recurring?.interval === 'month'
+            ? 'monthly'
+            : 'yearly',
         trialEndsAt: safeTimestamp(sub.trial_end),
-        currentPeriodEnd: safeTimestamp(sub.current_period_end) || new Date().toISOString(),
+        currentPeriodEnd:
+          safeTimestamp(sub.current_period_end) || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         stripeCustomerId: customerId,
       };
@@ -261,13 +267,16 @@ export async function syncSubscriptionToProfile(
   try {
     // First try stored data (from webhooks)
     let subscriptionData = getStoredSubscriptionData(customerId);
-    
+
     // If no stored data, fetch directly from Stripe (more reliable)
     if (!subscriptionData) {
-      console.log('No stored data, fetching directly from Stripe for customer:', customerId);
+      console.log(
+        'No stored data, fetching directly from Stripe for customer:',
+        customerId,
+      );
       subscriptionData = await fetchSubscriptionFromStripe(customerId);
     }
-    
+
     if (!subscriptionData) {
       console.log('No subscription data found for customer:', customerId);
       return { success: false, message: 'No subscription data found' };
@@ -277,10 +286,16 @@ export async function syncSubscriptionToProfile(
 
     const subscriptionCoValue = Subscription.create(
       {
-        status: subscriptionData.status as "free" | "trial" | "active" | "cancelled" | "past_due",
-        plan: subscriptionData.plan as "free" | "monthly" | "yearly",
+        status: subscriptionData.status as
+          | 'free'
+          | 'trial'
+          | 'active'
+          | 'cancelled'
+          | 'past_due',
+        plan: subscriptionData.plan as 'free' | 'monthly' | 'yearly',
         stripeCustomerId: subscriptionData.stripeCustomerId || undefined,
-        stripeSubscriptionId: subscriptionData.stripeSubscriptionId || undefined,
+        stripeSubscriptionId:
+          subscriptionData.stripeSubscriptionId || undefined,
         currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
         trialEndsAt: subscriptionData.trialEndsAt || undefined,
         createdAt: subscriptionData.updatedAt || new Date().toISOString(),

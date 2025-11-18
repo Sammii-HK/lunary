@@ -226,6 +226,14 @@ Season: (varies by sign)`}
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Astronomy & Astrology', href: '/grimoire/astronomy' },
+          {
+            label: signData.name,
+            href: `/grimoire/zodiac/${sign}`,
+          },
+        ]}
         internalLinks={[
           { text: "View Today's Horoscope", href: '/horoscope' },
           { text: 'Calculate Birth Chart', href: '/birth-chart' },

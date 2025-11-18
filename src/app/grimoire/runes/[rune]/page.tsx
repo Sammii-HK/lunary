@@ -171,6 +171,14 @@ In runic traditions, ${runeData.name} is associated with specific energies and c
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Runes', href: '/grimoire/runes' },
+          {
+            label: runeData.name,
+            href: `/grimoire/runes/${rune}`,
+          },
+        ]}
         internalLinks={[
           { text: 'Explore All Runes', href: '/grimoire/runes' },
           { text: 'Learn Divination', href: '/grimoire/divination' },

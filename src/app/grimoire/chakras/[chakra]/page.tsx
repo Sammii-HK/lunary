@@ -171,6 +171,14 @@ Properties: ${chakraData.properties}`}
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Chakras', href: '/grimoire/chakras' },
+          {
+            label: chakraData.name,
+            href: `/grimoire/chakras/${chakra}`,
+          },
+        ]}
         internalLinks={[
           { text: 'Explore All Chakras', href: '/grimoire/chakras' },
           { text: 'Find Crystals by Chakra', href: '/grimoire/crystals' },

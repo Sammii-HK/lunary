@@ -166,6 +166,14 @@ Keywords: ${numberData.keywords.join(', ')}`}
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Numerology', href: '/grimoire/numerology' },
+          {
+            label: numberData.name,
+            href: `/grimoire/angel-numbers/${number}`,
+          },
+        ]}
         internalLinks={[
           { text: 'Explore Numerology', href: '/grimoire/numerology' },
           { text: "View Today's Horoscope", href: '/horoscope' },

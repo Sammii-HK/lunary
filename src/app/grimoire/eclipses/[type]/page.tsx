@@ -157,6 +157,14 @@ Eclipses occur in cycles, typically in pairs (solar and lunar), and their effect
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Moon Phases', href: '/grimoire/moon' },
+          {
+            label: eclipseData.name,
+            href: `/grimoire/eclipses/${type}`,
+          },
+        ]}
         internalLinks={[
           { text: "View Today's Horoscope", href: '/horoscope' },
           { text: 'Explore Moon Phases', href: '/grimoire/moon' },

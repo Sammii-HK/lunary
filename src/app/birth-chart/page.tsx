@@ -1072,6 +1072,70 @@ const BirthChartPage = () => {
             Your Cosmic Blueprint
           </h3>
           <div className='space-y-4'>
+            {/* Big Three - Sun, Moon, Rising */}
+            {(() => {
+              const sun = birthChartData.find((p) => p.body === 'Sun');
+              const moon = birthChartData.find((p) => p.body === 'Moon');
+              const rising = birthChartData.find((p) => p.body === 'Ascendant');
+
+              if (sun || moon || rising) {
+                return (
+                  <div className='mb-4 pb-4 border-b border-zinc-700'>
+                    <h4 className='text-xs font-medium text-purple-400 mb-3 uppercase tracking-wide'>
+                      The Big Three
+                    </h4>
+                    <div className='grid grid-cols-1 gap-3'>
+                      {sun && (
+                        <div className='bg-zinc-700 rounded p-3'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <span className='text-lg'>{bodiesSymbols.sun}</span>
+                            <span className='text-sm font-medium text-white'>
+                              Sun in {sun.sign}
+                            </span>
+                          </div>
+                          <p className='text-xs text-zinc-300'>
+                            Your core identity and life purpose. This is who you
+                            are at your essence.
+                          </p>
+                        </div>
+                      )}
+                      {moon && (
+                        <div className='bg-zinc-700 rounded p-3'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <span className='text-lg'>
+                              {bodiesSymbols.moon}
+                            </span>
+                            <span className='text-sm font-medium text-white'>
+                              Moon in {moon.sign}
+                            </span>
+                          </div>
+                          <p className='text-xs text-zinc-300'>
+                            Your emotional nature and inner needs. This is how
+                            you feel and what you need to feel secure.
+                          </p>
+                        </div>
+                      )}
+                      {rising && (
+                        <div className='bg-zinc-700 rounded p-3'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <span className='text-lg'>⬆️</span>
+                            <span className='text-sm font-medium text-white'>
+                              Rising in {rising.sign}
+                            </span>
+                          </div>
+                          <p className='text-xs text-zinc-300'>
+                            Your outer personality and how others see you. This
+                            is your mask and first impression.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             {/* Personal Planets */}
             <div>
               <h4 className='text-xs font-medium text-blue-400 mb-2 uppercase tracking-wide'>

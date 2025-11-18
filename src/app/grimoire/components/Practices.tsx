@@ -77,9 +77,9 @@ const Practices = () => {
   return (
     <div className='space-y-6 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Spells & Rituals
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Spells & Rituals Collection
+        </h2>
         <p className='text-sm text-zinc-400'>
           A comprehensive collection of magical practices, rituals, and spells
           organized by purpose and moon phase
@@ -262,7 +262,12 @@ const Practices = () => {
       <section id='spellcraft-fundamentals' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-            Spellcraft Fundamentals
+            <a
+              href='/grimoire/spellcraft-fundamentals'
+              className='hover:text-purple-400 transition-colors'
+            >
+              Spellcraft Fundamentals
+            </a>
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
             Before casting spells, understand the foundational principles of

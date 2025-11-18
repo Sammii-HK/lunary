@@ -183,6 +183,14 @@ Keywords: ${numberData.keywords.join(', ')}`}
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Numerology', href: '/grimoire/numerology' },
+          {
+            label: numberData.name,
+            href: `/grimoire/life-path/${number}`,
+          },
+        ]}
         internalLinks={[
           { text: 'Explore Numerology', href: '/grimoire/numerology' },
           { text: 'Calculate Your Life Path', href: '/birth-chart' },

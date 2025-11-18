@@ -196,6 +196,14 @@ Rarity: ${crystalData.rarity}`}
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Crystals', href: '/grimoire/crystals' },
+          {
+            label: crystalData.name,
+            href: `/grimoire/crystals/${crystal}`,
+          },
+        ]}
         internalLinks={[
           { text: 'Explore All Crystals', href: '/grimoire/crystals' },
           { text: 'Find Crystals by Chakra', href: '/grimoire/chakras' },

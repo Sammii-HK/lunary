@@ -35,13 +35,13 @@ export function middleware(request: NextRequest) {
   const isAdminSubdomain =
     hostname.startsWith('admin.') || configuredAdminHosts.includes(hostname);
 
-  console.log('🔍 Middleware check:', {
-    hostname,
-    isAdminSubdomain,
-    pathname: url.pathname,
-    configuredAdminHosts,
-    nodeEnv: process.env.NODE_ENV,
-  });
+  // console.log('🔍 Middleware check:', {
+  //   hostname,
+  //   isAdminSubdomain,
+  //   pathname: url.pathname,
+  //   configuredAdminHosts,
+  //   nodeEnv: process.env.NODE_ENV,
+  // });
 
   const adminPrefix = '/admin';
   const skipAdminRewritePrefixes = ['/auth', '/api', '/_next'];

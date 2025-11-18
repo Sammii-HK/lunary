@@ -162,6 +162,14 @@ Understanding ${retrogradeData.name} helps you navigate this period consciously,
             type: 'Guide',
           },
         ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Birth Chart', href: '/grimoire/birth-chart' },
+          {
+            label: retrogradeData.name,
+            href: `/grimoire/retrogrades/${planet}`,
+          },
+        ]}
         internalLinks={[
           { text: "View Today's Horoscope", href: '/horoscope' },
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
