@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MoonPackGenerator } from '../../../../../scripts/generate-moon-packs';
-import {
-  sendAdminNotification,
-  NotificationTemplates,
-} from '../../../../../utils/notifications/pushNotifications';
+import { NotificationTemplates } from '../../../../../utils/notifications/pushNotifications';
+import { sendDiscordAdminNotification } from '@/lib/discord';
 
 export const runtime = 'nodejs';
 
@@ -64,11 +62,39 @@ export async function POST(request: NextRequest) {
       );
       for (const pack of createdPacks) {
         try {
-          await sendAdminNotification(
-            NotificationTemplates.packCreated(pack.name, pack.sku, {
+          const packTemplate = NotificationTemplates.packCreated(
+            pack.name,
+            pack.sku,
+            {
               amount: pack.price,
-            }),
+            },
           );
+
+          const fields = [
+            {
+              name: 'SKU',
+              value: pack.sku,
+              inline: true,
+            },
+            {
+              name: 'Price',
+              value: `$${(pack.price / 100).toFixed(2)}`,
+              inline: true,
+            },
+            {
+              name: 'Status',
+              value: 'Stripe synced',
+              inline: true,
+            },
+          ];
+
+          await sendDiscordAdminNotification({
+            title: packTemplate.title,
+            message: packTemplate.message,
+            priority: packTemplate.priority,
+            url: packTemplate.url,
+            fields,
+          });
           console.log(`✅ Notification sent for pack: ${pack.name}`);
         } catch (error) {
           console.error(
