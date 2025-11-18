@@ -36,8 +36,16 @@ const normalizePlan = (
   planType?: string | null,
   status?: string | null,
 ): TarotPlan => {
+  // Preserve specific plan identifiers first
+  if (planType === 'lunary_plus_ai_annual') return 'yearly';
+  if (planType === 'lunary_plus_ai') return 'monthly';
+  if (planType === 'lunary_plus') return 'monthly';
+
+  // Normalize generic terms
   if (planType === 'yearly') return 'yearly';
   if (planType === 'monthly') return 'monthly';
+
+  // Fallback to status-based detection
   if (status === 'trial') return 'monthly';
   if (status === 'active' && planType) {
     return planType as TarotPlan;

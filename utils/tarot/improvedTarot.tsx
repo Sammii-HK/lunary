@@ -206,7 +206,7 @@ const analyzeTrends = (
   const pastReadings: TarotCard[] = [];
   const today = dayjs();
 
-  // Collect past readings
+  // Collect past readings - ensure we always have data even if minimal
   for (let i = 1; i <= timeFrameDays; i++) {
     const date = today.subtract(i, 'day');
     const card = getTarotCard(
@@ -215,6 +215,17 @@ const analyzeTrends = (
       userBirthday,
     );
     pastReadings.push(card);
+  }
+
+  // Ensure we have at least some readings to analyze
+  if (pastReadings.length === 0) {
+    // Fallback: use today's card if no past readings
+    const todayCard = getTarotCard(
+      today.toDate().toDateString(),
+      userName,
+      userBirthday,
+    );
+    pastReadings.push(todayCard);
   }
 
   // Count frequencies
@@ -270,16 +281,39 @@ const analyzeTrends = (
   const cardPatternLimit =
     timeFrameDays >= 90 ? 8 : timeFrameDays >= 30 ? 6 : 4;
 
+  // Track card details for frequent cards
+  const cardDetailsMap: { [name: string]: { keywords: string[] } } = {};
+  pastReadings.forEach((card) => {
+    if (!cardDetailsMap[card.name]) {
+      const details = getCardDetails(card);
+      cardDetailsMap[card.name] = { keywords: details.keywords };
+    }
+  });
+
   // Find frequent cards with readings (top repeats, including doubles)
   const frequentCards = Object.entries(cardCounts)
     .filter(([, count]) => count >= 2)
     .sort((a, b) => b[1] - a[1])
     .slice(0, cardPatternLimit)
-    .map(([name, count]) => ({
-      name,
-      count,
-      reading: getPatternReading(name, count),
-    }));
+    .map(([name, count]) => {
+      const cardDetails = cardDetailsMap[name];
+      const keywords = cardDetails?.keywords || [];
+      // Use first keyword as theme, or fallback to pattern reading
+      const theme =
+        keywords.length > 0
+          ? keywords[0].charAt(0).toUpperCase() +
+            keywords[0].slice(1).toLowerCase() +
+            (keywords.length > 1
+              ? ` and ${keywords.slice(1, 2).join(' ').toLowerCase()}`
+              : '')
+          : getPatternReading(name, count);
+
+      return {
+        name,
+        count,
+        reading: theme,
+      };
+    });
 
   // Enhanced suit patterns with card breakdown
   const suitPatterns = Object.entries(suitCounts)
@@ -396,7 +430,7 @@ export const getImprovedTarotReading = (
   userBirthday?: string,
 ): ImprovedReading => {
   const today = new Date();
-  const todayString = today.toDateString();
+  const todayString = today.toISOString().split('T')[0];
 
   // Calculate week start and week number for unique weekly seed
   const weekStart = new Date(today);
@@ -423,9 +457,9 @@ export const getImprovedTarotReading = (
   // Generate guidance
   const guidance = generateClearGuidance(daily, weekly, userName);
 
-  // Get trends if requested
+  // Always generate trends if requested (ensures data is always available)
   let trendAnalysis: TrendAnalysis | undefined;
-  if (includeTrends) {
+  if (includeTrends && userName && userBirthday) {
     trendAnalysis = analyzeTrends(userName, timeFrameDays, userBirthday);
   }
 

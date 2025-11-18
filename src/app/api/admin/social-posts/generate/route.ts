@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
       tone,
       includeCTA,
       count = 3,
+      weekOffset = 0,
     } = await request.json();
 
     // Check for all OpenAI-related env vars
@@ -495,6 +496,11 @@ Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}
         : snippet + '...';
     };
 
+    // Calculate scheduled_date based on weekOffset
+    const now = new Date();
+    const scheduledDate = new Date(now);
+    scheduledDate.setDate(now.getDate() + weekOffset * 7);
+
     for (const postContent of postsArray) {
       // Generate catchy quote for Instagram posts
       const quote =
@@ -506,8 +512,8 @@ Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}
         : null;
       try {
         const insertResult = await sql`
-          INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, created_at)
-          VALUES (${postContent}, ${platform}, ${postType}, ${topic || null}, 'pending', ${imageUrl || null}, NOW())
+          INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, created_at)
+          VALUES (${postContent}, ${platform}, ${postType}, ${topic || null}, 'pending', ${imageUrl || null}, ${scheduledDate.toISOString()}, NOW())
           RETURNING id
         `;
         savedPostIds.push(insertResult.rows[0].id);

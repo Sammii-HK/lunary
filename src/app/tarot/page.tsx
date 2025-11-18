@@ -19,7 +19,11 @@ import {
   ChevronRight,
   Sparkles,
   Share2,
+  Lock,
+  X,
 } from 'lucide-react';
+import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
+import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
@@ -32,6 +36,7 @@ import {
 } from '@/components/tarot/TarotSpreadExperience';
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
+import { cn } from '@/lib/utils';
 
 const SUIT_ELEMENTS: Record<string, string> = {
   Cups: 'Water',
@@ -158,12 +163,34 @@ const TarotReadings = () => {
     plan: subscription.plan as TarotPlan,
     status: subscription.status as SubscriptionStatus,
   };
-  const hasChartAccess = hasBirthChartAccess(subscription.status);
+  const hasChartAccess = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
 
   const [shareOrigin, setShareOrigin] = useState('https://lunary.app');
   const [sharePopover, setSharePopover] = useState<string | null>(null);
-  const [timeFrame, setTimeFrame] = useState(30);
+  const [selectedView, setSelectedView] = useState<number | 'year-over-year'>(
+    30,
+  );
+  const [isMultidimensionalMode, setIsMultidimensionalMode] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
+
+  // Handle ESC key to close upgrade modal
+  useEffect(() => {
+    if (!showUpgradeModal) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowUpgradeModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showUpgradeModal]);
   const [selectedCard, setSelectedCard] = useState<{
     name: string;
     keywords: string[];
@@ -200,11 +227,12 @@ const TarotReadings = () => {
       return {
         day: day.format('dddd'),
         date: day.format('MMM D'),
-        card: getTarotCard(seed, 'cosmic-daily-energy'),
+        card: getTarotCard(seed),
       };
     });
   }, [hasChartAccess]);
 
+  const timeFrame = typeof selectedView === 'number' ? selectedView : 30;
   const personalizedReading = useMemo(
     () =>
       hasChartAccess && userName && userBirthday
@@ -269,7 +297,7 @@ const TarotReadings = () => {
         day: day.format('dddd'),
         date: day.format('MMM D'),
         card: getTarotCard(
-          dayjs(day).toDate().toDateString(),
+          `daily-${day.format('YYYY-MM-DD')}`,
           userName,
           userBirthday,
         ),
@@ -658,12 +686,19 @@ const TarotReadings = () => {
             </div>
           </div>
 
-          <TarotSpreadExperience
-            userId={userId}
-            userName={userName}
-            subscriptionPlan={tarotPlan}
-            onCardPreview={(card) => setSelectedCard(card)}
-          />
+          {subscription.hasAccess('tarot_patterns') && (
+            <HoroscopeSection
+              title={`Your ${timeFrame}-Day Tarot Patterns`}
+              color='zinc'
+            >
+              <AdvancedPatterns
+                basicPatterns={undefined}
+                selectedView={30}
+                isMultidimensionalMode={false}
+                onMultidimensionalModeChange={() => {}}
+              />
+            </HoroscopeSection>
+          )}
 
           <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
             <h3 className='text-lg font-medium text-zinc-100 mb-2'>
@@ -705,6 +740,15 @@ const TarotReadings = () => {
             </ul>
             <SmartTrialButton />
           </div>
+
+          <CollapsibleSection title='Tarot Spreads' defaultCollapsed={true}>
+            <TarotSpreadExperience
+              userId={userId}
+              userName={userName}
+              subscriptionPlan={tarotPlan}
+              onCardPreview={(card) => setSelectedCard(card)}
+            />
+          </CollapsibleSection>
 
           <div>
             <div className='flex justify-between items-center mb-4'>
@@ -901,303 +945,160 @@ const TarotReadings = () => {
           </div>
         </HoroscopeSection>
 
-        <TarotSpreadExperience
-          userId={userId}
-          userName={userName}
-          subscriptionPlan={tarotPlan}
-          onCardPreview={(card) => setSelectedCard(card)}
-        />
-
-        {personalizedReading.trendAnalysis && (
+        {subscription.hasAccess('tarot_patterns') && (
           <HoroscopeSection
-            title={`Your ${timeFrame}-Day Tarot Patterns`}
+            title={
+              selectedView === 'year-over-year'
+                ? 'Year-over-Year Patterns'
+                : timeFrame === 365
+                  ? '12-Month Patterns'
+                  : timeFrame === 180
+                    ? '6-Month Patterns'
+                    : timeFrame === 90
+                      ? '90-Day Patterns'
+                      : timeFrame === 30
+                        ? '30-Day Patterns'
+                        : timeFrame === 14
+                          ? '14-Day Patterns'
+                          : '7-Day Patterns'
+            }
             color='zinc'
           >
-            <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4'>
-              <div className='flex flex-wrap gap-2'>
-                {[7, 14, 30, 60, 90].map((days) => (
+            <div className='mb-4 flex flex-wrap gap-2'>
+              {[7, 14, 30, 90, 180, 365].map((days) => {
+                const needsAdvancedAccess = days === 180 || days === 365;
+                const hasAccess = needsAdvancedAccess
+                  ? subscription.hasAccess('advanced_patterns')
+                  : subscription.hasAccess('tarot_patterns');
+                const isLocked = needsAdvancedAccess && !hasAccess;
+
+                return (
                   <button
                     key={days}
-                    onClick={() => setTimeFrame(days)}
-                    className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                      timeFrame === days
-                        ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
-                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
-                    }`}
-                  >
-                    {days}d
-                  </button>
-                ))}
-              </div>
-
-              {patternShare && (
-                <div className='sm:text-right'>
-                  <button
-                    type='button'
-                    onClick={() =>
-                      handleShareClick({
-                        id: 'tarot-personal-patterns',
-                        title: patternShare.title,
-                        url: patternShare.url,
-                        text: patternShare.text,
-                      })
+                    onClick={() => {
+                      if (isLocked) {
+                        setUpgradeFeature('advanced_patterns');
+                        setShowUpgradeModal(true);
+                        return;
+                      }
+                      setSelectedView(days);
+                    }}
+                    className={cn(
+                      'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                      isLocked
+                        ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                        : selectedView === days
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                    )}
+                    title={
+                      isLocked
+                        ? 'Upgrade to Lunary+ AI Annual to unlock'
+                        : undefined
                     }
-                    className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
                   >
-                    <Share2 className='w-4 h-4' />
-                    Share your patterns
+                    {days === 180
+                      ? '6 months'
+                      : days === 365
+                        ? '12 months'
+                        : `${days} days`}
+                    {isLocked && (
+                      <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                    )}
                   </button>
-                  {sharePopover === 'tarot-personal-patterns' && (
-                    <div className='mt-3 sm:flex sm:justify-end'>
-                      <SocialShareButtons
-                        url={patternShare.url}
-                        title={patternShare.title}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
+                );
+              })}
+              <button
+                onClick={() => {
+                  const hasAccess = subscription.hasAccess('advanced_patterns');
+                  if (!hasAccess) {
+                    setUpgradeFeature('advanced_patterns');
+                    setShowUpgradeModal(true);
+                    return;
+                  }
+                  setSelectedView('year-over-year');
+                  setIsMultidimensionalMode(true); // Year-over-year requires advanced mode
+                }}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                    : selectedView === 'year-over-year'
+                      ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                )}
+                title={
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'Upgrade to Lunary+ AI Annual to unlock'
+                    : undefined
+                }
+              >
+                Year-over-Year
+                {!subscription.hasAccess('advanced_patterns') && (
+                  <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  const hasAccess = subscription.hasAccess('advanced_patterns');
+                  if (!hasAccess) {
+                    setUpgradeFeature('advanced_patterns');
+                    setShowUpgradeModal(true);
+                    return;
+                  }
+                  setIsMultidimensionalMode(!isMultidimensionalMode);
+                }}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative flex items-center gap-1.5',
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                    : isMultidimensionalMode
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                )}
+                title={
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'Upgrade to Lunary+ AI Annual to unlock advanced patterns'
+                    : isMultidimensionalMode
+                      ? 'Turn off multidimensional analysis'
+                      : 'Turn on multidimensional analysis'
+                }
+              >
+                <Sparkles className='w-3 h-3' />
+                Advanced
+                {!subscription.hasAccess('advanced_patterns') && (
+                  <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                )}
+              </button>
             </div>
-
-            {personalizedReading.trendAnalysis.dominantThemes.length > 0 && (
-              <div>
-                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                  Dominant Themes
-                </h3>
-                <div className='flex flex-wrap gap-2'>
-                  {personalizedReading.trendAnalysis.dominantThemes.map(
-                    (theme, index) => (
-                      <span
-                        key={theme}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
-                          index === 0
-                            ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
-                            : index === 1
-                              ? 'bg-purple-500/15 text-purple-300/80 border border-purple-500/20'
-                              : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50'
-                        }`}
-                      >
-                        {theme}
-                      </span>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
-
-            {personalizedReading.trendAnalysis.frequentCards.length > 0 && (
-              <div>
-                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                  Card Patterns
-                </h3>
-                <div className='space-y-3'>
-                  {personalizedReading.trendAnalysis.frequentCards.map(
-                    (card, index) => (
-                      <div
-                        key={index}
-                        className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'
-                      >
-                        <p
-                          className='font-medium text-zinc-100 mb-1 cursor-pointer hover:text-indigo-300 transition-colors inline-block'
-                          onClick={() => {
-                            const cardData = getTarotCardByName(card.name);
-                            if (cardData) setSelectedCard(cardData);
-                          }}
-                        >
-                          {card.name} ({card.count} times)
-                        </p>
-                        <p className='text-sm text-zinc-400 leading-relaxed'>
-                          {card.reading}
-                        </p>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
-
-            {personalizedReading.trendAnalysis.suitPatterns.length > 0 && (
-              <div>
-                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                  Suit Patterns
-                </h3>
-                <div className='space-y-3'>
-                  {personalizedReading.trendAnalysis.suitPatterns.map(
-                    (pattern, index) => (
-                      <div
-                        key={index}
-                        className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'
-                      >
-                        <div
-                          className='flex justify-between items-center cursor-pointer'
-                          onClick={() =>
-                            setExpandedSuit(
-                              expandedSuit === pattern.suit
-                                ? null
-                                : pattern.suit,
-                            )
-                          }
-                        >
-                          <p className='font-medium text-zinc-100'>
-                            {pattern.suit} ({pattern.count}/
-                            {personalizedReading.trendAnalysis?.timeFrame} days)
-                          </p>
-                          {expandedSuit === pattern.suit ? (
-                            <ChevronDown
-                              className='w-4 h-4 text-zinc-400'
-                              strokeWidth={2}
-                            />
-                          ) : (
-                            <ChevronRight
-                              className='w-4 h-4 text-zinc-400'
-                              strokeWidth={2}
-                            />
-                          )}
-                        </div>
-                        <p className='text-sm text-zinc-400 leading-relaxed mt-2'>
-                          {pattern.reading}
-                        </p>
-
-                        {expandedSuit === pattern.suit && (
-                          <div className='mt-4 pt-4 border-t border-zinc-800/50'>
-                            <p className='text-xs font-medium text-zinc-400 mb-3'>
-                              Individual Cards:
-                            </p>
-                            <div className='grid grid-cols-1 gap-2'>
-                              {pattern.cards.map((card, cardIndex) => (
-                                <div
-                                  key={cardIndex}
-                                  className='flex justify-between items-center text-sm py-1.5 px-2 rounded bg-zinc-900/50'
-                                >
-                                  <span className='text-zinc-300'>
-                                    <span
-                                      className='cursor-pointer hover:text-purple-300 transition-colors'
-                                      onClick={() => {
-                                        const cardData = getTarotCardByName(
-                                          card.name,
-                                        );
-                                        if (cardData) setSelectedCard(cardData);
-                                      }}
-                                    >
-                                      {card.name}
-                                    </span>
-                                  </span>
-                                  <span className='text-zinc-500'>
-                                    {card.count}x
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
-
-            {personalizedReading.trendAnalysis.numberPatterns.length > 0 && (
-              <div>
-                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                  Number Patterns
-                </h3>
-                <div className='space-y-3'>
-                  {personalizedReading.trendAnalysis.numberPatterns.map(
-                    (pattern, index) => (
-                      <div
-                        key={index}
-                        className='rounded-lg border border-amber-500/20 bg-amber-500/10 p-4'
-                      >
-                        <p className='font-medium text-zinc-100 mb-1'>
-                          {pattern.number}s ({pattern.count} times)
-                        </p>
-                        <p className='text-sm text-zinc-400 leading-relaxed mb-2'>
-                          {pattern.reading}
-                        </p>
-                        <p className='text-xs text-zinc-500'>
-                          Cards:{' '}
-                          {pattern.cards.map((cardName, idx) => (
-                            <span key={idx}>
-                              <span
-                                className='cursor-pointer hover:text-amber-300 transition-colors'
-                                onClick={() => {
-                                  const card = getTarotCardByName(cardName);
-                                  if (card) setSelectedCard(card);
-                                }}
-                              >
-                                {cardName}
-                              </span>
-                              {idx < pattern.cards.length - 1 && ', '}
-                            </span>
-                          ))}
-                        </p>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
-
-            {personalizedReading.trendAnalysis.arcanaPatterns.length > 0 && (
-              <div>
-                <h3 className='text-sm font-medium text-zinc-300 mb-3'>
-                  Arcana Balance
-                </h3>
-                <div className='space-y-3'>
-                  {personalizedReading.trendAnalysis.arcanaPatterns.map(
-                    (pattern, index) => (
-                      <div
-                        key={index}
-                        className='rounded-lg border border-violet-500/20 bg-violet-500/10 p-4'
-                      >
-                        <p className='font-medium text-zinc-100 mb-1'>
-                          {pattern.type} ({pattern.count}/
-                          {personalizedReading.trendAnalysis?.timeFrame} days)
-                        </p>
-                        <p className='text-sm text-zinc-400 leading-relaxed'>
-                          {pattern.reading}
-                        </p>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
+            <AdvancedPatterns
+              basicPatterns={
+                hasChartAccess ? personalizedReading?.trendAnalysis : undefined
+              }
+              selectedView={selectedView}
+              isMultidimensionalMode={isMultidimensionalMode}
+              onMultidimensionalModeChange={setIsMultidimensionalMode}
+              recentReadings={
+                typeof selectedView === 'number' && selectedView === 7
+                  ? personalizedPreviousReadings
+                  : undefined
+              }
+              onCardClick={(card: { name: string }) => {
+                const tarotCard = getTarotCardByName(card.name);
+                if (tarotCard) setSelectedCard(tarotCard);
+              }}
+            />
           </HoroscopeSection>
         )}
 
-        <HoroscopeSection title='Recent Daily Cards' color='zinc'>
-          <div className='space-y-3'>
-            {personalizedPreviousReadings.map((reading) => (
-              <div
-                key={reading.date}
-                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 flex justify-between items-center hover:bg-zinc-900/50 transition-colors'
-              >
-                <div>
-                  <span className='font-medium text-zinc-100'>
-                    {reading.day}
-                  </span>{' '}
-                  <span className='text-sm text-zinc-400'>{reading.date}</span>
-                </div>
-                <div className='text-right'>
-                  <p
-                    className='font-medium text-zinc-100 cursor-pointer hover:text-purple-300 transition-colors'
-                    onClick={() => {
-                      const card = getTarotCardByName(reading.card.name);
-                      if (card) setSelectedCard(card);
-                    }}
-                  >
-                    {reading.card.name}
-                  </p>
-                  <p className='text-sm text-zinc-400'>
-                    {reading.card.keywords[0]}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </HoroscopeSection>
+        <CollapsibleSection title='Tarot Spreads' defaultCollapsed={true}>
+          <TarotSpreadExperience
+            userId={userId}
+            userName={userName}
+            subscriptionPlan={tarotPlan}
+            onCardPreview={(card) => setSelectedCard(card)}
+          />
+        </CollapsibleSection>
       </div>
 
       <TarotCardModal
@@ -1205,6 +1106,33 @@ const TarotReadings = () => {
         isOpen={!!selectedCard}
         onClose={() => setSelectedCard(null)}
       />
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm'
+          onClick={() => setShowUpgradeModal(false)}
+        >
+          <div
+            className='relative w-full max-w-md bg-zinc-900 rounded-lg border border-zinc-800/50 p-6'
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowUpgradeModal(false)}
+              className='absolute top-4 right-4 text-zinc-400 hover:text-zinc-100 transition-colors'
+            >
+              <X className='w-5 h-5' />
+            </button>
+            <UpgradePrompt
+              variant='card'
+              featureName={upgradeFeature || 'advanced_patterns'}
+              title='Unlock Advanced Patterns'
+              description='Upgrade to Lunary+ AI Annual to access year-over-year comparisons, multi-dimensional analysis, and extended timeline insights.'
+              requiredPlan='lunary_plus_ai_annual'
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

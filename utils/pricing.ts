@@ -47,7 +47,9 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Moon Circles (New & Full Moon)',
       'Ritual generator',
       'Unlimited cosmic profile access',
+      'Cosmic State (shareable astrological snapshot)',
       'Collections & saved insights',
+      'Access to shop & moon packs',
       '7-day free trial',
     ],
   },
@@ -61,32 +63,32 @@ export const PRICING_PLANS: PricingPlan[] = [
     features: [
       'Everything in Lunary+',
       'Unlimited AI chat (Lunary Copilot)',
-      'Deeper tarot readings',
+      'Advanced pattern analysis',
       'Personalized weekly reports',
       'Saved chat threads',
-      'Downloadable cosmic reports',
+      'Cosmic Report Generator (downloadable PDF reports)',
       'AI ritual & reading generation',
       'Unlimited collections & folders',
       '7-day free trial',
     ],
   },
   {
-    id: 'yearly',
+    id: 'lunary_plus_ai_annual',
     name: 'Lunary+ AI Annual',
     description: 'Full year of cosmic wisdom with AI',
-    price: 79.99,
+    price: 89.99,
     interval: 'year',
-    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID || '',
-    savings: 'Save 26%',
+    stripePriceId:
+      process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID || '',
+    savings: 'Save 17%',
     features: [
       'Everything in Lunary+ AI',
       'Unlimited tarot spreads',
-      'Priority access to new features',
-      'Advanced pattern analysis',
+      'Extended timeline analysis (6 & 12-month trends)',
       'Yearly cosmic forecast',
       'Export your cosmic data',
       'Unlimited collections & folders',
-      'Email support',
+      'Customer support',
       '14-day free trial',
     ],
   },
@@ -141,8 +143,9 @@ export const FEATURE_ACCESS = {
     'ai_ritual_generation',
     'collections',
     'unlimited_collections',
+    'advanced_patterns',
   ],
-  yearly: [
+  lunary_plus_ai_annual: [
     'birth_chart',
     'birthday_collection',
     'personalized_horoscope',
@@ -166,9 +169,72 @@ export const FEATURE_ACCESS = {
     'advanced_patterns',
     'yearly_forecast',
     'data_export',
-    'priority_support',
   ],
 };
+
+/**
+ * Normalizes plan type to one of the four valid plans:
+ * - 'free'
+ * - 'lunary_plus' (Plus)
+ * - 'lunary_plus_ai' (Plus AI)
+ * - 'lunary_plus_ai_annual' (Plus AI Annual)
+ *
+ * IMPORTANT: This function preserves specific plan identifiers.
+ * Only converts generic 'monthly'/'yearly' when specific plan isn't available.
+ * WARNING: Converting 'monthly' to 'lunary_plus' may be incorrect if user has 'lunary_plus_ai'.
+ * Always prefer fetching specific plan name from Stripe via price ID mapping.
+ */
+export function normalizePlanType(planType: string | undefined): string {
+  if (!planType) return 'free';
+
+  // Preserve specific plan identifiers first - these are the four valid plans
+  if (
+    planType === 'lunary_plus_ai' ||
+    planType === 'lunary_plus_ai_annual' ||
+    planType === 'lunary_plus' ||
+    planType === 'free'
+  ) {
+    return planType;
+  }
+
+  // Normalize generic terms only when specific plan isn't available
+  // WARNING: This is a fallback - prefer using specific plan names from Stripe
+  if (planType === 'yearly' || planType === 'annual') {
+    return 'lunary_plus_ai_annual';
+  }
+
+  // WARNING: 'monthly' could be either 'lunary_plus' or 'lunary_plus_ai'
+  // Defaulting to 'lunary_plus' is conservative but may be incorrect
+  // Always prefer fetching from Stripe to get exact plan name
+  if (planType === 'monthly') {
+    return 'lunary_plus';
+  }
+
+  return planType;
+}
+
+export function getPlanIdFromPriceId(priceId: string): string | null {
+  const envVars: Record<string, string> = {};
+
+  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID) {
+    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID] =
+      'lunary_plus';
+  }
+  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID) {
+    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID] =
+      'lunary_plus_ai';
+  }
+  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID) {
+    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID] =
+      'lunary_plus_ai_annual';
+  }
+  // Legacy Cosmic Guide monthly price still maps to Lunary+ access
+  if (process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID) {
+    envVars[process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID] = 'lunary_plus';
+  }
+
+  return envVars[priceId] || null;
+}
 
 export function hasFeatureAccess(
   subscriptionStatus: string | undefined,
@@ -179,12 +245,23 @@ export function hasFeatureAccess(
     return FEATURE_ACCESS.free.includes(feature);
   }
 
-  if (subscriptionStatus === 'trial' || subscriptionStatus === 'active') {
+  // Normalize status: 'trialing' -> 'trial' for consistency
+  const normalizedStatus =
+    subscriptionStatus === 'trialing' ? 'trial' : subscriptionStatus;
+
+  if (normalizedStatus === 'trial' || normalizedStatus === 'active') {
+    const normalizedPlan = normalizePlanType(planType);
+
+    // CRITICAL: 'yearly' should always map to annual plan features
+    // This ensures any yearly subscription gets annual plan access
+    const effectivePlan =
+      normalizedPlan === 'yearly' ? 'lunary_plus_ai_annual' : normalizedPlan;
+
     const planFeatures =
-      planType === 'lunary_plus_ai'
-        ? FEATURE_ACCESS.lunary_plus_ai
-        : planType === 'yearly'
-          ? FEATURE_ACCESS.yearly
+      effectivePlan === 'lunary_plus_ai_annual'
+        ? FEATURE_ACCESS.lunary_plus_ai_annual
+        : effectivePlan === 'lunary_plus_ai'
+          ? FEATURE_ACCESS.lunary_plus_ai
           : FEATURE_ACCESS.lunary_plus;
 
     return (
@@ -198,8 +275,9 @@ export function hasFeatureAccess(
 // Helper function to check if user has access to birth chart features
 export function hasBirthChartAccess(
   subscriptionStatus: string | undefined,
+  planType?: string | undefined,
 ): boolean {
-  return hasFeatureAccess(subscriptionStatus, undefined, 'birth_chart');
+  return hasFeatureAccess(subscriptionStatus, planType, 'birth_chart');
 }
 
 // Helper function to check if user can collect birthday
@@ -279,7 +357,7 @@ export async function getPricingPlansWithStripeData(): Promise<PricingPlan[]> {
           ),
         };
       }
-      if (plan.id === 'yearly') {
+      if (plan.id === 'lunary_plus_ai_annual') {
         return {
           ...plan,
           features: plan.features.map((feature) =>
