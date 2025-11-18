@@ -54,7 +54,7 @@ function parseWeekParam(weekParam: string): WeekInfo {
   return {
     weekNumber,
     year,
-    slug: `${weekNumber}-${year}`,
+    slug: `week-${weekNumber}-${year}`,
   };
 }
 
@@ -774,7 +774,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               ].filter((w) => w.week > 0);
 
               return relatedWeeks.map((related) => {
-                const weekSlug = `${related.week}-${related.year}`;
+                const weekSlug = `week-${related.week}-${related.year}`;
                 return (
                   <Link
                     key={weekSlug}

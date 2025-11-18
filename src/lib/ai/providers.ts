@@ -246,9 +246,9 @@ export const getTarotLastReading = async ({
   try {
     const { sql } = await import('@vercel/postgres');
 
-    // Fetch the most recent tarot reading from database
+    // Fetch the most recent tarot reading from database (including all spreads and daily pulls)
     const result = await sql`
-      SELECT cards, spread_name, created_at
+      SELECT cards, spread_name, spread_slug, created_at
       FROM tarot_readings
       WHERE user_id = ${userId}
         AND archived_at IS NULL
@@ -262,22 +262,150 @@ export const getTarotLastReading = async ({
         ? row.cards
         : JSON.parse(row.cards || '[]');
 
-      return {
+      const reading = {
         spread: row.spread_name || 'Three Card Insight',
-        cards: cards.map((card: any) => ({
-          name: card.name,
-          position: card.position,
-          reversed: card.reversed || false,
-        })),
+        cards: cards
+          .map((card: any) => {
+            // Handle nested card structure (card.card.name) or direct structure (card.name)
+            const cardName = card.card?.name || card.name;
+            const cardPosition =
+              card.positionId || card.positionLabel || card.position;
+            const cardReversed = card.card?.reversed || card.reversed || false;
+
+            if (!cardName) {
+              console.warn('[Tarot Provider] Card missing name:', card);
+              return null;
+            }
+
+            return {
+              name: cardName,
+              position: cardPosition,
+              reversed: cardReversed,
+            };
+          })
+          .filter(
+            (
+              card: {
+                name: string;
+                position?: string;
+                reversed: boolean;
+              } | null,
+            ): card is { name: string; position?: string; reversed: boolean } =>
+              card !== null,
+          ),
         timestamp: row.created_at || dayjs(now).toISOString(),
       };
+
+      console.log(
+        `[Tarot Provider] Found reading for user ${userId}: spread=${reading.spread}, cards=${reading.cards.length}`,
+      );
+      return reading;
     }
+
+    console.log(`[Tarot Provider] No tarot readings found for user ${userId}`);
   } catch (error) {
     console.error('[Tarot Provider] Failed to fetch from database:', error);
   }
 
   // Fallback: return null if no reading found (don't generate mock data)
   return null;
+};
+
+export type TarotRecentReadingsParams = {
+  userId: string;
+  limit?: number;
+  now?: Date;
+};
+
+export type TarotReadingWithInsights = TarotReading & {
+  summary?: string;
+  highlights?: string[];
+  journalingPrompts?: string[];
+};
+
+export const getTarotRecentReadings = async ({
+  userId,
+  limit = 5,
+  now = new Date(),
+}: TarotRecentReadingsParams): Promise<TarotReadingWithInsights[]> => {
+  try {
+    const { sql } = await import('@vercel/postgres');
+
+    // Fetch recent tarot readings with summaries and insights
+    const result = await sql`
+      SELECT cards, spread_name, spread_slug, summary, highlights, journaling_prompts, created_at
+      FROM tarot_readings
+      WHERE user_id = ${userId}
+        AND archived_at IS NULL
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `;
+
+    if (result.rows.length > 0) {
+      const readings: TarotReadingWithInsights[] = result.rows.map((row) => {
+        const cards = Array.isArray(row.cards)
+          ? row.cards
+          : JSON.parse(row.cards || '[]');
+
+        return {
+          spread: row.spread_name || 'Three Card Insight',
+          cards: cards
+            .map((card: any) => {
+              const cardName = card.card?.name || card.name;
+              const cardPosition =
+                card.positionId || card.positionLabel || card.position;
+              const cardReversed =
+                card.card?.reversed || card.reversed || false;
+
+              if (!cardName) {
+                return null;
+              }
+
+              return {
+                name: cardName,
+                position: cardPosition,
+                reversed: cardReversed,
+              };
+            })
+            .filter(
+              (
+                card: {
+                  name: string;
+                  position?: string;
+                  reversed: boolean;
+                } | null,
+              ): card is {
+                name: string;
+                position?: string;
+                reversed: boolean;
+              } => card !== null,
+            ),
+          timestamp: row.created_at || dayjs(now).toISOString(),
+          summary: row.summary || undefined,
+          highlights: Array.isArray(row.highlights)
+            ? row.highlights
+            : row.highlights
+              ? JSON.parse(row.highlights)
+              : undefined,
+          journalingPrompts: Array.isArray(row.journaling_prompts)
+            ? row.journaling_prompts
+            : row.journaling_prompts
+              ? JSON.parse(row.journaling_prompts)
+              : undefined,
+        };
+      });
+
+      console.log(
+        `[Tarot Provider] Found ${readings.length} recent readings for user ${userId}`,
+      );
+      return readings;
+    }
+
+    return [];
+  } catch (error) {
+    console.error('[Tarot Provider] Failed to fetch recent readings:', error);
+    return [];
+  }
 };
 
 export type TarotPatternAnalysisParams = {

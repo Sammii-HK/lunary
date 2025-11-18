@@ -39,6 +39,8 @@ type ComposeReplyParams = {
   context: LunaryContext;
   userMessage: string;
   memorySnippets?: string[];
+  threadId?: string | null;
+  promptSectionsOverride?: ReturnType<typeof buildPromptSections>;
 };
 
 export type ComposedReply = {
@@ -52,12 +54,16 @@ export const composeAssistantReply = async ({
   context,
   userMessage,
   memorySnippets = [],
+  threadId,
+  promptSectionsOverride,
 }: ComposeReplyParams): Promise<ComposedReply> => {
-  const promptSections = buildPromptSections({
-    context,
-    memorySnippets,
-    userMessage,
-  });
+  const promptSections =
+    promptSectionsOverride ||
+    buildPromptSections({
+      context,
+      memorySnippets,
+      userMessage,
+    });
 
   const assistCommand = detectAssistCommand(userMessage);
   const assistSnippet = runAssistCommand(assistCommand, context);
@@ -109,11 +115,83 @@ export const composeAssistantReply = async ({
       content: userMessage,
     });
 
+    // Include recent conversation history from thread for personalized context
+    if (threadId) {
+      try {
+        const { loadThreadFromDatabase } = await import('./threads');
+        const thread = await loadThreadFromDatabase(threadId);
+        if (thread && thread.messages.length > 0) {
+          // Get last 3 exchanges (6 messages: 3 user + 3 assistant)
+          // Clean assistant messages to remove any reflection prompts that might have been appended
+          const recentMessages = thread.messages
+            .slice(-6)
+            .map((msg) => {
+              let content = msg.content;
+              // Clean reflection prompts from assistant messages in history
+              if (msg.role === 'assistant') {
+                content = content
+                  .replace(/You could journal on.*?\./gi, '')
+                  .replace(/You could journal on.*$/gim, '')
+                  .replace(/You could journal.*?\./gi, '')
+                  .replace(/You could journal.*$/gim, '')
+                  .replace(/is inviting you to explore.*?\./gi, '')
+                  .replace(/inviting you to explore.*$/gim, '')
+                  .replace(/inviting you.*?\./gi, '')
+                  .replace(/inviting you.*$/gim, '')
+                  .replace(/on this \w+day.*$/gim, '')
+                  .trim();
+              }
+              return {
+                role: (msg.role === 'user' ? 'user' : 'assistant') as
+                  | 'user'
+                  | 'assistant',
+                content,
+              };
+            })
+            .filter((msg) => msg.content.trim().length > 0);
+
+          if (recentMessages.length > 0) {
+            // Insert history before the current user message
+            messages.splice(
+              messages.length - 1,
+              0,
+              ...(recentMessages as Array<{
+                role: 'user' | 'assistant';
+                content: string;
+              }>),
+            );
+          }
+        }
+      } catch (error) {
+        console.error('[AI Responder] Failed to load thread history:', error);
+        // Continue without history if loading fails
+      }
+    }
+
+    // Determine max_tokens based on content type
+    const isWeeklyOverview =
+      userMessage.toLowerCase().includes('weekly overview') ||
+      userMessage.toLowerCase().includes('summarise my week');
+    const isRitualRequest =
+      userMessage.toLowerCase().includes('ritual') &&
+      (userMessage.toLowerCase().includes('moon') ||
+        userMessage.toLowerCase().includes('tonight'));
+    const isJournalEntry =
+      userMessage.toLowerCase().includes('journal entry') ||
+      userMessage.toLowerCase().includes('format as journal');
+
+    let maxTokens = 400; // Default for quick questions
+    if (isWeeklyOverview) {
+      maxTokens = 1200; // Much longer for comprehensive weekly overviews (15-20 sentences)
+    } else if (isRitualRequest || isJournalEntry) {
+      maxTokens = 500; // Medium length for rituals and journal entries
+    }
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
-      max_tokens: 500,
-      temperature: 0.9, // Increased from 0.7 to 0.9 for more varied responses
+      max_tokens: maxTokens,
+      temperature: 0.9,
     });
 
     const aiResponse = completion.choices[0]?.message?.content || '';
@@ -124,25 +202,15 @@ export const composeAssistantReply = async ({
       );
     }
 
-    // Clean up AI response - remove any journal prompts it might have added
-    const cleanedResponse = aiResponse
-      .replace(/You could journal on.*?\./gi, '')
-      .replace(/\n\n+/g, '\n\n')
-      .trim();
+    // Clean up AI response - the AI should never include journal/reflection prompts
+    // but we clean them just in case (they're sent separately as a different event)
+    // This is a safety net - the system prompt should prevent this
+    const cleanedResponse = aiResponse.replace(/\n\n+/g, '\n\n').trim();
 
-    // Only include AI response and assist/reflection - no generic cosmic paragraph
-    // Only add reflection if it's meaningful (has moon or tarot context)
-    const responseParts = [
-      cleanedResponse,
-      assistSnippet,
-      reflection &&
-      (context.moon || context.tarot.daily || context.tarot.lastReading)
-        ? reflection
-        : null,
-    ].filter(Boolean);
-
+    // Only include AI response - assistSnippet and reflection are returned separately
+    // Don't include them in message content to avoid duplication
     return {
-      message: responseParts.join('\n\n'),
+      message: cleanedResponse,
       assistSnippet: assistSnippet ?? null,
       reflection,
       promptSections,

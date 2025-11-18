@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
@@ -16,6 +16,8 @@ import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
 import { Check, Star, Zap } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { useCurrency, formatPrice } from '../../hooks/useCurrency';
+import { getPriceForCurrency } from '../../../utils/stripe-prices';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
 import { useConversionTracking } from '@/hooks/useConversionTracking';
 import { conversionTracking } from '@/lib/analytics';
@@ -24,12 +26,15 @@ import {
   AB_TESTS,
   trackABTestConversion,
 } from '@/lib/ab-testing';
+import { SocialProof } from '@/components/SocialProof';
 
+// Metadata is handled in layout.tsx for client components
 export default function PricingPage() {
   const { me } = useAccount();
   const subscription = useSubscription();
   const authState = useAuthStatus();
   const { trackEvent } = useConversionTracking();
+  const currency = useCurrency();
   const [loading, setLoading] = useState<string | null>(null);
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
@@ -62,6 +67,43 @@ export default function PricingPage() {
 
   const subscriptionStatus = subscription.status || 'free';
   const trialDaysRemaining = subscription.trialDaysRemaining;
+
+  // Compute prices with currency mapping
+  const plansWithCurrency = useMemo(() => {
+    return pricingPlans.map((plan) => {
+      if (plan.price === 0) return plan;
+
+      const currencyPrice = getPriceForCurrency(plan.id as any, currency);
+      const displayPrice = currencyPrice?.amount || plan.price;
+      const displayCurrency = currencyPrice?.currency.toUpperCase() || currency;
+
+      // Calculate dynamic savings for annual plan
+      let calculatedSavings: string | undefined = plan.savings;
+      if (plan.interval === 'year' && plan.id === 'lunary_plus_ai_annual') {
+        // Find the monthly AI plan price in the same currency
+        const monthlyAIPrice = getPriceForCurrency(
+          'lunary_plus_ai' as any,
+          currency,
+        );
+        if (monthlyAIPrice) {
+          const yearlyCost = monthlyAIPrice.amount * 12;
+          const savings = yearlyCost - displayPrice;
+          const savingsPercent = Math.round((savings / yearlyCost) * 100);
+          calculatedSavings = `Save ${savingsPercent}%`;
+        }
+      }
+
+      // Always prefer currency-specific price ID, never fall back to env var
+      // as it might point to old prices
+      return {
+        ...plan,
+        displayPrice,
+        displayCurrency,
+        currencyPriceId: currencyPrice?.priceId || undefined, // Don't fall back to old env var
+        calculatedSavings,
+      };
+    });
+  }, [pricingPlans, currency]);
 
   const handleSubscribe = async (priceId: string, planId: string) => {
     if (!priceId) return;
@@ -153,6 +195,12 @@ export default function PricingPage() {
                   Blog
                 </Link>
                 <Link
+                  href='/pricing'
+                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+                >
+                  Pricing
+                </Link>
+                <Link
                   href='/welcome'
                   className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
                 >
@@ -163,6 +211,12 @@ export default function PricingPage() {
                   className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
                 >
                   Daily Insights
+                </Link>
+                <Link
+                  href='/help'
+                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+                >
+                  Help
                 </Link>
               </div>
             </div>
@@ -225,7 +279,7 @@ export default function PricingPage() {
               </div>
             ) : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-6 xl:gap-8 max-w-6xl mx-auto'>
-                {pricingPlans.map((plan) => (
+                {plansWithCurrency.map((plan: any) => (
                   <div
                     key={plan.id}
                     className={`relative rounded-xl p-6 md:p-6 lg:p-7 border transition-all duration-300 flex flex-col ${
@@ -249,11 +303,11 @@ export default function PricingPage() {
                       </div>
                     )}
 
-                    {plan.savings && (
+                    {(plan.calculatedSavings || plan.savings) && (
                       <div className='absolute -top-3 right-3 z-20'>
                         <div className='px-2.5 py-1 rounded-full border border-zinc-700/50 bg-zinc-800/80 backdrop-blur-sm'>
                           <span className='text-xs font-semibold text-zinc-300'>
-                            {plan.savings}
+                            {plan.calculatedSavings || plan.savings}
                           </span>
                         </div>
                       </div>
@@ -279,14 +333,22 @@ export default function PricingPage() {
                         ) : (
                           <div className='space-y-1'>
                             <div className='text-5xl md:text-6xl font-light text-zinc-100 leading-none'>
-                              ${plan.price}
+                              {formatPrice(
+                                plan.displayPrice,
+                                plan.displayCurrency,
+                              )}
                               <span className='text-xl md:text-2xl font-normal text-zinc-400 ml-2'>
                                 /{plan.interval}
                               </span>
                             </div>
                             {plan.interval === 'year' && (
                               <div className='text-sm text-zinc-500'>
-                                Just $3.33/month billed annually
+                                Just{' '}
+                                {formatPrice(
+                                  plan.displayPrice / 12,
+                                  plan.displayCurrency,
+                                )}
+                                /month billed annually
                               </div>
                             )}
                           </div>
@@ -295,7 +357,7 @@ export default function PricingPage() {
 
                       {/* Features */}
                       <div className='space-y-2.5 pt-4 border-t border-zinc-800/50 flex-1'>
-                        {plan.features.map((feature, index) => (
+                        {plan.features.map((feature: string, index: number) => (
                           <div key={index} className='flex items-start gap-3'>
                             <Check
                               className='w-4 h-4 text-zinc-500 mt-0.5 flex-shrink-0'
@@ -331,11 +393,28 @@ export default function PricingPage() {
                           </Link>
                         ) : (
                           <button
-                            onClick={() =>
-                              handleSubscribe(plan.stripePriceId, plan.id)
-                            }
+                            onClick={() => {
+                              const priceId =
+                                (plan as any).currencyPriceId ||
+                                plan.stripePriceId;
+                              if (!priceId) {
+                                console.error(
+                                  'No price ID available for plan:',
+                                  plan.id,
+                                );
+                                alert(
+                                  'Price not available. Please refresh the page.',
+                                );
+                                return;
+                              }
+                              handleSubscribe(priceId, plan.id);
+                            }}
                             disabled={
-                              loading === plan.id || !plan.stripePriceId
+                              loading === plan.id ||
+                              !(
+                                (plan as any).currencyPriceId ||
+                                plan.stripePriceId
+                              )
                             }
                             className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
                               plan.popular
@@ -361,6 +440,300 @@ export default function PricingPage() {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Social Proof */}
+        <section className='py-12 sm:py-16 md:py-20 border-b border-zinc-800/50'>
+          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+            <SocialProof />
+          </div>
+        </section>
+
+        {/* Feature Comparison Table */}
+        <section className='py-12 sm:py-16 md:py-20 border-b border-zinc-800/50 bg-zinc-900/20'>
+          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+            <div className='text-center mb-10 md:mb-16 space-y-3 sm:space-y-4'>
+              <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
+                Compare Plans
+              </h2>
+              <p className='text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+                Find the perfect plan for your cosmic journey
+              </p>
+            </div>
+
+            <div className='overflow-x-auto'>
+              <table className='w-full border-collapse'>
+                <thead>
+                  <tr className='border-b border-zinc-800/50'>
+                    <th className='text-left py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Features
+                    </th>
+                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Free
+                    </th>
+                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Lunary+
+                    </th>
+                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Lunary+ AI
+                    </th>
+                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
+                      Annual
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-zinc-800/50'>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Daily moon phases & basic insights
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      General tarot card of the day
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Tarot spreads per month
+                    </td>
+                    <td className='py-4 px-4 text-center text-zinc-400'>2</td>
+                    <td className='py-4 px-4 text-center text-zinc-400'>10</td>
+                    <td className='py-4 px-4 text-center text-zinc-400'>10</td>
+                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
+                      Unlimited
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Complete birth chart analysis
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Personalized daily horoscopes
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Personal tarot card & guidance
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Daily transit calendar
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Crystal & herb recommendations
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Moon Circles (New & Full Moon)
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Unlimited AI chat (Lunary Copilot)
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Deeper tarot readings
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Personalized weekly reports
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Downloadable cosmic reports
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Yearly cosmic forecast
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <span className='text-zinc-600'>—</span>
+                    </td>
+                    <td className='py-4 px-4 text-center'>
+                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='py-4 px-4 text-sm text-zinc-300'>
+                      Free trial period
+                    </td>
+                    <td className='py-4 px-4 text-center text-zinc-400'>—</td>
+                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
+                      7 days
+                    </td>
+                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
+                      7 days
+                    </td>
+                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
+                      14 days
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 

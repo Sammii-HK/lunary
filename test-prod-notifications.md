@@ -65,22 +65,25 @@ Should return notification sent status.
 - Verify service worker is "activated and is running"
 - Look for push event listener in service worker code
 
+### 7. Verify Discord Notification Mirror
+
+1. Ensure `DISCORD_WEBHOOK_URL` is configured for the current environment (Vercel + Cloudflare Worker)
+2. Run the notification test endpoint (`curl -X POST https://lunary.app/api/notifications/test -H "Content-Type: application/json"`)
+3. Confirm a concise embed appears in the configured Discord channel with the event title, recipient counts, and source metadata
+
 ## Common Production Issues
 
 1. **VAPID Keys Not Set**
-
    - Check environment variables in hosting platform
    - Verify `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is set
    - Verify `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` are set
 
 2. **Service Worker Not Registering**
-
    - Check HTTPS is working
    - Verify `/sw.js` is accessible: `https://lunary.app/sw.js`
    - Check for CORS or security policy issues
 
 3. **Notifications Not Showing**
-
    - Check browser notification permissions
    - Verify subscription exists in database
    - Check service worker push event listener is active

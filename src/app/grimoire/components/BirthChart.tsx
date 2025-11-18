@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
+import { stringToKebabCase } from '../../../../utils/string';
 
 const BirthChart = () => {
   // Enhanced planet data with unique, detailed information
@@ -178,9 +180,9 @@ const BirthChart = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Birth Chart
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Birth Chart Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Learn about planets, houses, aspects, retrogrades, and astrological
           components
@@ -199,67 +201,73 @@ const BirthChart = () => {
           </p>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {planets.map((planet) => (
-            <div
-              key={planet.name}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 transition-colors'
-            >
-              <div className='flex items-start gap-3 mb-3'>
-                <span className='text-2xl flex-shrink-0'>{planet.symbol}</span>
-                <div className='flex-1 min-w-0'>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1'>
-                    {planet.name}
-                  </h3>
-                  <div className='flex flex-wrap gap-1 mb-2'>
-                    <span className='text-xs px-2 py-0.5 rounded bg-purple-900/20 text-purple-300'>
-                      {planet.element}
-                    </span>
-                    <span className='text-xs px-2 py-0.5 rounded bg-zinc-800/50 text-zinc-300'>
-                      {planet.rulingSign}
-                    </span>
+          {planets.map((planet) => {
+            const planetSlug = stringToKebabCase(planet.name);
+            return (
+              <Link
+                key={planet.name}
+                href={`/grimoire/planets/${planetSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <div className='flex items-start gap-3 mb-3'>
+                  <span className='text-2xl flex-shrink-0'>
+                    {planet.symbol}
+                  </span>
+                  <div className='flex-1 min-w-0'>
+                    <h3 className='text-lg font-medium text-zinc-100 mb-1'>
+                      {planet.name}
+                    </h3>
+                    <div className='flex flex-wrap gap-1 mb-2'>
+                      <span className='text-xs px-2 py-0.5 rounded bg-purple-900/20 text-purple-300'>
+                        {planet.element}
+                      </span>
+                      <span className='text-xs px-2 py-0.5 rounded bg-zinc-800/50 text-zinc-300'>
+                        {planet.rulingSign}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className='space-y-2'>
-                <div>
-                  <p className='text-xs text-zinc-400 mb-1 font-medium'>
-                    In Your Birth Chart:
-                  </p>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
-                    {planet.inBirthChart}
-                  </p>
-                </div>
+                <div className='space-y-2'>
+                  <div>
+                    <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                      In Your Birth Chart:
+                    </p>
+                    <p className='text-sm text-zinc-300 leading-relaxed'>
+                      {planet.inBirthChart}
+                    </p>
+                  </div>
 
-                <div>
-                  <p className='text-xs text-zinc-400 mb-1 font-medium'>
-                    Characteristics:
-                  </p>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
-                    {planet.characteristics}
-                  </p>
-                </div>
+                  <div>
+                    <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                      Characteristics:
+                    </p>
+                    <p className='text-sm text-zinc-300 leading-relaxed'>
+                      {planet.characteristics}
+                    </p>
+                  </div>
 
-                <div>
-                  <p className='text-xs text-zinc-400 mb-1 font-medium'>
-                    In Transits:
-                  </p>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
-                    {planet.inTransits}
-                  </p>
-                </div>
+                  <div>
+                    <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                      In Transits:
+                    </p>
+                    <p className='text-sm text-zinc-300 leading-relaxed'>
+                      {planet.inTransits}
+                    </p>
+                  </div>
 
-                <div className='pt-2 border-t border-zinc-700'>
-                  <p className='text-xs text-zinc-400 mb-1 font-medium'>
-                    Retrograde:
-                  </p>
-                  <p className='text-xs text-zinc-400 leading-relaxed'>
-                    {planet.retrograde}
-                  </p>
+                  <div className='pt-2 border-t border-zinc-700'>
+                    <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                      Retrograde:
+                    </p>
+                    <p className='text-xs text-zinc-400 leading-relaxed'>
+                      {planet.retrograde}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -268,19 +276,43 @@ const BirthChart = () => {
           Houses — &quot;The Where&quot;
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          {houses.map((house) => (
-            <div
-              key={house.number}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <div className='flex items-start gap-3'>
-                <span className='font-medium text-zinc-100 text-sm'>
-                  {house.number}
-                </span>
-                <p className='text-sm text-zinc-300 flex-1'>{house.area}</p>
-              </div>
-            </div>
-          ))}
+          {houses.map((house) => {
+            const houseNumber = house.number
+              .replace('st', '')
+              .replace('nd', '')
+              .replace('rd', '')
+              .replace('th', '');
+            const houseMap: Record<string, string> = {
+              '1': 'first',
+              '2': 'second',
+              '3': 'third',
+              '4': 'fourth',
+              '5': 'fifth',
+              '6': 'sixth',
+              '7': 'seventh',
+              '8': 'eighth',
+              '9': 'ninth',
+              '10': 'tenth',
+              '11': 'eleventh',
+              '12': 'twelfth',
+            };
+            const houseSlug =
+              houseMap[houseNumber] || house.number.toLowerCase();
+            return (
+              <Link
+                key={house.number}
+                href={`/grimoire/houses/${houseSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <div className='flex items-start gap-3'>
+                  <span className='font-medium text-zinc-100 text-sm group-hover:text-purple-400 transition-colors'>
+                    {house.number}
+                  </span>
+                  <p className='text-sm text-zinc-300 flex-1'>{house.area}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -294,17 +326,23 @@ const BirthChart = () => {
           interactions.
         </p>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>
+          <Link
+            href='/grimoire/aspects/conjunction'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-green-400 mb-2 group-hover:text-green-300 transition-colors'>
               Conjunction (0°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Planets merge their energies, intensifying their influence. Can be
               harmonious or challenging depending on the planets involved.
             </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-red-400 mb-2'>
+          </Link>
+          <Link
+            href='/grimoire/aspects/opposition'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-red-400 mb-2 group-hover:text-red-300 transition-colors'>
               Opposition (180°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -312,27 +350,36 @@ const BirthChart = () => {
               represents internal conflict or complementary forces needing
               integration.
             </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-blue-400 mb-2'>
+          </Link>
+          <Link
+            href='/grimoire/aspects/trine'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-blue-400 mb-2 group-hover:text-blue-300 transition-colors'>
               Trine (120°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Harmonious flow between planets. Natural talents and ease, but can
               lead to complacency if not actively developed.
             </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+          </Link>
+          <Link
+            href='/grimoire/aspects/square'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-yellow-400 mb-2 group-hover:text-yellow-300 transition-colors'>
               Square (90°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Creates friction and challenges that force growth. While
               difficult, squares build strength, resilience, and determination.
             </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-400 mb-2'>
+          </Link>
+          <Link
+            href='/grimoire/aspects/sextile'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-purple-400 mb-2 group-hover:text-purple-300 transition-colors'>
               Sextile (60°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -340,7 +387,7 @@ const BirthChart = () => {
               requiring some effort to activate. Good for creative
               opportunities.
             </p>
-          </div>
+          </Link>
         </div>
       </section>
 
@@ -354,8 +401,11 @@ const BirthChart = () => {
           action.
         </p>
         <div className='space-y-3'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/retrogrades/mercury'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
               Mercury Retrograde
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -367,9 +417,12 @@ const BirthChart = () => {
             <p className='text-xs text-zinc-400'>
               Best for: Reflection, reconnection, editing, planning
             </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+          </Link>
+          <Link
+            href='/grimoire/retrogrades/venus'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
               Venus Retrograde
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -381,9 +434,12 @@ const BirthChart = () => {
               Best for: Relationship review, value clarification, financial
               planning
             </p>
-          </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+          </Link>
+          <Link
+            href='/grimoire/retrogrades/mars'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+          >
+            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
               Mars Retrograde
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -395,14 +451,17 @@ const BirthChart = () => {
               Best for: Internal reflection, building energy, planning rather
               than action
             </p>
-          </div>
+          </Link>
         </div>
       </section>
 
       <section id='transits' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>
+        <Link
+          href='/grimoire/transits'
+          className='block text-xl font-medium text-zinc-100 hover:text-purple-400 transition-colors'
+        >
           Transits — Current Planetary Movements
-        </h2>
+        </Link>
         <p className='text-sm text-zinc-400 mb-4'>
           Transits are current planetary positions in relation to your birth
           chart. They show current influences and timing for events and personal
@@ -446,9 +505,12 @@ const BirthChart = () => {
       {/* Rising Sign Section */}
       <section id='rising-sign' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/rising-sign'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Rising Sign (Ascendant)
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Your rising sign, also called the Ascendant, is the zodiac sign that
             was rising on the eastern horizon at your exact moment of birth. It
@@ -570,9 +632,12 @@ const BirthChart = () => {
       {/* Synastry Section */}
       <section id='synastry' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <Link
+            href='/grimoire/synastry'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+          >
             Synastry: Relationship Compatibility
-          </h2>
+          </Link>
           <p className='text-sm text-zinc-400 mb-4'>
             Synastry is the comparison of two birth charts to understand
             relationship dynamics, compatibility, and how two people interact.
@@ -697,10 +762,23 @@ const BirthChart = () => {
               How do I find my birth chart?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
-              You need your exact birth date, time, and location. Use online
-              birth chart calculators or astrology software. The more accurate
-              your birth time, the more precise your chart will be, especially
-              for houses and rising sign.
+              Lunary automatically generates your birth chart from your profile
+              information. You can view your complete birth chart at{' '}
+              <a
+                href='/birth-chart'
+                className='text-purple-400 hover:text-purple-300 underline'
+              >
+                /birth-chart
+              </a>{' '}
+              or complete your birth details in your{' '}
+              <a
+                href='/profile'
+                className='text-purple-400 hover:text-purple-300 underline'
+              >
+                profile
+              </a>
+              . The more accurate your birth time, the more precise your chart
+              will be, especially for houses and rising sign.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>

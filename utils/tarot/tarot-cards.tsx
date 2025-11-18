@@ -2,14 +2,14 @@ export const tarotCards = {
   majorArcana: {
     theFool: {
       name: 'The Fool',
-      keywords: ['New beginnings', 'innocence', 'spontaneity', 'a free spirit'],
+      keywords: ['new beginnings', 'innocence', 'spontaneity', 'a free spirit'],
       information:
         'The Fool represents new beginnings, taking a leap of faith, and embracing the unknown. It encourages spontaneity and a sense of adventure, reminding you to trust in the journey ahead and remain open to the possibilities that lie ahead.',
     },
     theMagician: {
       name: 'The Magician',
       keywords: [
-        'Manifestation',
+        'manifestation',
         'resourcefulness',
         'power',
         'inspired action',
@@ -20,7 +20,7 @@ export const tarotCards = {
     theHighPriestess: {
       name: 'The High Priestess',
       keywords: [
-        'Intuition',
+        'intuition',
         'sacred knowledge',
         'divine feminine',
         'the subconscious mind',
@@ -30,20 +30,20 @@ export const tarotCards = {
     },
     theEmpress: {
       name: 'The Empress',
-      keywords: ['Femininity', 'beauty', 'nature', 'nurturing', 'abundance'],
+      keywords: ['femininity', 'beauty', 'nature', 'nurturing', 'abundance'],
       information:
         'The Empress represents fertility, nurturing, and the beauty of nature. She signifies abundance, creativity, and the power of the feminine. This card encourages you to connect with your nurturing side and appreciate the beauty and bounty around you.',
     },
     theEmperor: {
       name: 'The Emperor',
-      keywords: ['Authority', 'establishment', 'structure', 'a father figure'],
+      keywords: ['authority', 'establishment', 'structure', 'a father figure'],
       information:
         'The Emperor stands for authority, structure, and control. He embodies the qualities of a strong leader and a father figure. This card suggests a need for discipline, order, and strategic planning to achieve your goals.',
     },
     theHierophant: {
       name: 'The Hierophant',
       keywords: [
-        'Spiritual wisdom',
+        'spiritual wisdom',
         'religious beliefs',
         'conformity',
         'tradition',
@@ -55,7 +55,7 @@ export const tarotCards = {
     theLovers: {
       name: 'The Lovers',
       keywords: [
-        'Love',
+        'love',
         'harmony',
         'relationships',
         'values alignment',
@@ -66,20 +66,20 @@ export const tarotCards = {
     },
     theChariot: {
       name: 'The Chariot',
-      keywords: ['Control', 'willpower', 'success', 'action', 'determination'],
+      keywords: ['control', 'willpower', 'success', 'action', 'determination'],
       information:
         "The Chariot signifies triumph through determination and willpower. It represents control over one's direction and the drive to succeed. This card encourages focused action and confidence in overcoming obstacles to reach your goals.",
     },
     strength: {
       name: 'Strength',
-      keywords: ['Courage', 'persuasion', 'influence', 'compassion'],
+      keywords: ['courage', 'persuasion', 'influence', 'compassion'],
       information:
         'Strength embodies courage, compassion, and inner resilience. It highlights the power of gentle persuasion and the importance of self-control. This card suggests that true strength lies in understanding and mastering your emotions and reactions.',
     },
     theHermit: {
       name: 'The Hermit',
       keywords: [
-        'Soul-searching',
+        'soul-searching',
         'introspection',
         'being alone',
         'inner guidance',
@@ -90,7 +90,7 @@ export const tarotCards = {
     wheelOfFortune: {
       name: 'Wheel of Fortune',
       keywords: [
-        'Good luck',
+        'good luck',
         'karma',
         'life cycles',
         'destiny',
@@ -101,25 +101,25 @@ export const tarotCards = {
     },
     justice: {
       name: 'Justice',
-      keywords: ['Justice', 'fairness', 'truth', 'cause and effect', 'law'],
+      keywords: ['justice', 'fairness', 'truth', 'cause and effect', 'law'],
       information:
         'Justice represents fairness, truth, and the law of cause and effect. It signifies the need for balance and ethical decisions. This card encourages you to act with integrity and seek fairness in all your interactions.',
     },
     theHangedMan: {
       name: 'The Hanged Man',
-      keywords: ['Pause', 'surrender', 'letting go', 'new perspectives'],
+      keywords: ['pause', 'surrender', 'letting go', 'new perspectives'],
       information:
         'The Hanged Man symbolizes a voluntary pause and the need to let go of control to gain a new perspective. It suggests surrendering to the process and allowing time for contemplation and insight. This card often indicates a period of waiting or suspension.',
     },
     death: {
       name: 'Death',
-      keywords: ['Endings', 'change', 'transformation', 'transition'],
+      keywords: ['endings', 'change', 'transformation', 'transition'],
       information:
         'Death signifies the end of a cycle and the beginning of transformation. It represents significant change and the shedding of the old to make way for the new. This card encourages acceptance of endings as a natural part of growth and renewal.',
     },
     temperance: {
       name: 'Temperance',
-      keywords: ['Balance', 'moderation', 'patience', 'purpose'],
+      keywords: ['balance', 'moderation', 'patience', 'purpose'],
       information:
         'Temperance symbolizes balance, harmony, and moderation. It encourages patience and finding the middle path. This card suggests the importance of blending different aspects of your life to create a cohesive and fulfilling whole.',
     },
@@ -138,7 +138,7 @@ export const tarotCards = {
     theTower: {
       name: 'The Tower',
       keywords: [
-        'Sudden change',
+        'sudden change',
         'upheaval',
         'chaos',
         'revelation',
@@ -149,31 +149,31 @@ export const tarotCards = {
     },
     theStar: {
       name: 'The Star',
-      keywords: ['Hope', 'faith', 'purpose', 'renewal', 'spirituality'],
+      keywords: ['hope', 'faith', 'purpose', 'renewal', 'spirituality'],
       information:
         'The Star represents hope, inspiration, and a renewed sense of purpose. It encourages faith in the future and trust in the universe. This card suggests a period of healing and spiritual growth, bringing clarity and tranquility.',
     },
     theMoon: {
       name: 'The Moon',
-      keywords: ['Illusion', 'fear', 'anxiety', 'subconscious', 'intuition'],
+      keywords: ['illusion', 'fear', 'anxiety', 'subconscious', 'intuition'],
       information:
         'The Moon signifies illusion, intuition, and the subconscious. It highlights the murky and uncertain aspects of life, encouraging you to trust your intuition and confront your fears. This card often indicates confusion and the need to navigate through emotional depths.',
     },
     theSun: {
       name: 'The Sun',
-      keywords: ['Positivity', 'fun', 'warmth', 'success', 'vitality'],
+      keywords: ['positivity', 'fun', 'warmth', 'success', 'vitality'],
       information:
         'The Sun symbolizes joy, success, and vitality. It represents positive energy, happiness, and a sense of accomplishment. This card encourages you to embrace life with enthusiasm and confidence, knowing that you are on the right path.',
     },
     judgement: {
       name: 'Judgement',
-      keywords: ['Judgement', 'rebirth', 'inner calling', 'absolution'],
+      keywords: ['judgement', 'rebirth', 'inner calling', 'absolution'],
       information:
         'Judgement signifies a period of reflection and evaluation. It represents rebirth, awakening, and the call to a higher purpose. This card encourages you to make amends, seek forgiveness, and embrace new opportunities with a clear conscience.',
     },
     theWorld: {
       name: 'The World',
-      keywords: ['Completion', 'integration', 'accomplishment', 'travel'],
+      keywords: ['completion', 'integration', 'accomplishment', 'travel'],
       information:
         'The World represents the completion of a journey and the achievement of your goals. It signifies wholeness, integration, and a sense of fulfillment. This card encourages you to celebrate your successes and prepare for the next phase of your journey.',
     },
@@ -182,31 +182,31 @@ export const tarotCards = {
     cups: {
       aceOfCups: {
         name: 'Ace of Cups',
-        keywords: ['Love', 'new relationships', 'compassion', 'creativity'],
+        keywords: ['love', 'new relationships', 'compassion', 'creativity'],
         information:
           'The Ace of Cups represents the beginning of emotional fulfillment, new relationships, and the flow of love and creativity. It signifies an outpouring of positive emotions and the potential for deep, meaningful connections.',
       },
       twoOfCups: {
         name: 'Two of Cups',
-        keywords: ['Unified love', 'partnership', 'mutual attraction'],
+        keywords: ['unified love', 'partnership', 'mutual attraction'],
         information:
           'The Two of Cups symbolizes harmonious partnerships and mutual attraction. It represents the balance and unity found in a loving relationship, whether romantic or platonic, and highlights the importance of emotional connections and shared feelings.',
       },
       threeOfCups: {
         name: 'Three of Cups',
-        keywords: ['Celebration', 'friendship', 'creativity', 'collaborations'],
+        keywords: ['celebration', 'friendship', 'creativity', 'collaborations'],
         information:
           'The Three of Cups signifies celebration, friendship, and joyous gatherings. It highlights the importance of social connections, creative collaborations, and the support of your community. This card encourages you to enjoy the moment and share your happiness with others.',
       },
       fourOfCups: {
         name: 'Four of Cups',
-        keywords: ['Meditation', 'contemplation', 'apathy', 'reevaluation'],
+        keywords: ['meditation', 'contemplation', 'apathy', 'reevaluation'],
         information:
           'The Four of Cups represents introspection and contemplation. It suggests a period of apathy or dissatisfaction, urging you to reevaluate your situation and explore new opportunities. This card encourages mindfulness and a shift in perspective to find renewed purpose.',
       },
       fiveOfCups: {
         name: 'Five of Cups',
-        keywords: ['Regret', 'failure', 'disappointment', 'pessimism'],
+        keywords: ['regret', 'failure', 'disappointment', 'pessimism'],
         information:
           'The Five of Cups symbolizes loss, regret, and disappointment. It highlights the emotional impact of setbacks and encourages you to process your grief and move forward. This card reminds you to focus on what remains and seek out new possibilities for healing and growth.',
       },
@@ -223,13 +223,13 @@ export const tarotCards = {
       },
       sevenOfCups: {
         name: 'Seven of Cups',
-        keywords: ['Opportunities', 'choices', 'wishful thinking', 'illusion'],
+        keywords: ['opportunities', 'choices', 'wishful thinking', 'illusion'],
         information:
           'The Seven of Cups signifies a multitude of choices and opportunities, often accompanied by confusion or wishful thinking. It encourages you to carefully consider your options and avoid getting lost in illusions or unrealistic expectations. This card highlights the need for clarity and discernment.',
       },
       eightOfCups: {
         name: 'Eight of Cups',
-        keywords: ['Disappointment', 'abandonment', 'withdrawal', 'escapism'],
+        keywords: ['disappointment', 'abandonment', 'withdrawal', 'escapism'],
         information:
           'The Eight of Cups represents a decision to leave behind something unfulfilling and seek a more meaningful path. It signifies disappointment and the need for introspection, encouraging you to let go of what no longer serves you and to pursue personal growth and fulfillment.',
       },
@@ -268,7 +268,7 @@ export const tarotCards = {
       },
       sonOfCups: {
         name: 'Son of Cups',
-        keywords: ['Romance', 'charm', 'imagination', 'beauty'],
+        keywords: ['romance', 'charm', 'imagination', 'beauty'],
         information:
           'The Son of Cups represents the pursuit of romance, beauty, and emotional fulfillment. It signifies charm, creativity, and a deep appreciation for the finer things in life. This card encourages you to follow your heart and express your feelings with grace and passion.',
       },
@@ -286,7 +286,7 @@ export const tarotCards = {
       },
       fatherOfCups: {
         name: 'Father of Cups',
-        keywords: ['Emotionally balanced', 'compassionate', 'diplomatic'],
+        keywords: ['emotionally balanced', 'compassionate', 'diplomatic'],
         information:
           'The Father of Cups symbolizes emotional balance, compassion, and diplomatic leadership. He represents the ability to navigate complex emotions with grace and understanding. This card encourages you to lead with empathy and to maintain harmony in your relationships.',
       },
@@ -315,7 +315,7 @@ export const tarotCards = {
       },
       threeOfPentacles: {
         name: 'Three of Pentacles',
-        keywords: ['Teamwork', 'collaboration', 'learning', 'implementation'],
+        keywords: ['teamwork', 'collaboration', 'learning', 'implementation'],
         information:
           'The Three of Pentacles represents teamwork, collaboration, and the implementation of skills and knowledge. It signifies the value of working together to achieve common goals and the importance of learning and growth through cooperation. This card encourages you to seek out partnerships and to build on your collective strengths.',
       },
@@ -412,7 +412,7 @@ export const tarotCards = {
       },
       sonOfPentacles: {
         name: 'Son of Pentacles',
-        keywords: ['Hard work', 'productivity', 'routine', 'conservatism'],
+        keywords: ['hard work', 'productivity', 'routine', 'conservatism'],
         information:
           'The Son of Pentacles symbolizes diligence, productivity, and a methodical approach to achieving goals. It represents the value of routine and consistency in building success. This card encourages you to remain disciplined and to approach your tasks with a steady, patient mindset.',
       },
@@ -444,7 +444,7 @@ export const tarotCards = {
     swords: {
       aceOfSwords: {
         name: 'Ace of Swords',
-        keywords: ['Breakthroughs', 'new ideas', 'mental clarity', 'success'],
+        keywords: ['breakthroughs', 'new ideas', 'mental clarity', 'success'],
         information:
           'The Ace of Swords represents new ideas, breakthroughs, and mental clarity. It signifies the power of intellect and the ability to cut through confusion to find truth and solutions. This card encourages you to embrace new opportunities for intellectual growth and success.',
       },
@@ -461,7 +461,7 @@ export const tarotCards = {
       },
       threeOfSwords: {
         name: 'Three of Swords',
-        keywords: ['Heartbreak', 'emotional pain', 'sorrow', 'grief', 'hurt'],
+        keywords: ['heartbreak', 'emotional pain', 'sorrow', 'grief', 'hurt'],
         information:
           'The Three of Swords represents heartbreak, emotional pain, and sorrow. It signifies the impact of loss and the need to process and heal from grief. This card encourages you to acknowledge your feelings and to seek support as you work through difficult emotions.',
       },
@@ -524,7 +524,7 @@ export const tarotCards = {
       },
       nineOfSwords: {
         name: 'Nine of Swords',
-        keywords: ['Anxiety', 'worry', 'fear', 'depression', 'nightmares'],
+        keywords: ['anxiety', 'worry', 'fear', 'depression', 'nightmares'],
         information:
           'The Nine of Swords represents anxiety, worry, and fear. It signifies the mental anguish and sleepless nights caused by stress and negative thoughts. This card encourages you to address your fears and to seek solutions to alleviate your worries, reminding you that much of your anxiety may be unfounded.',
       },
@@ -588,13 +588,13 @@ export const tarotCards = {
     wands: {
       aceOfWands: {
         name: 'Ace of Wands',
-        keywords: ['Inspiration', 'new opportunities', 'growth', 'potential'],
+        keywords: ['inspiration', 'new opportunities', 'growth', 'potential'],
         information:
           'The Ace of Wands represents new beginnings, inspiration, and the potential for growth. It signifies the spark of creativity and the emergence of new opportunities. This card encourages you to embrace your passions and to pursue new ventures with enthusiasm and confidence.',
       },
       twoOfWands: {
         name: 'Two of Wands',
-        keywords: ['Future planning', 'progress', 'decisions', 'discovery'],
+        keywords: ['future planning', 'progress', 'decisions', 'discovery'],
         information:
           'The Two of Wands symbolizes future planning, progress, and the exploration of new possibilities. It represents the need to make decisions and to take steps toward your goals. This card encourages you to think ahead and to be open to discovering new opportunities and paths.',
       },
@@ -611,7 +611,7 @@ export const tarotCards = {
       },
       fourOfWands: {
         name: 'Four of Wands',
-        keywords: ['Celebration', 'joy', 'harmony', 'relaxation', 'homecoming'],
+        keywords: ['celebration', 'joy', 'harmony', 'relaxation', 'homecoming'],
         information:
           'The Four of Wands symbolizes celebration, joy, and harmony. It represents the happiness and fulfillment that come from achieving milestones and creating a sense of community and belonging. This card encourages you to enjoy the moment and to celebrate your accomplishments with loved ones.',
       },
@@ -640,7 +640,7 @@ export const tarotCards = {
       },
       sevenOfWands: {
         name: 'Seven of Wands',
-        keywords: ['Challenge', 'competition', 'protection', 'perseverance'],
+        keywords: ['challenge', 'competition', 'protection', 'perseverance'],
         information:
           'The Seven of Wands represents challenges, competition, and the need for perseverance. It signifies the obstacles and opposition you may face in pursuing your goals. This card encourages you to stand your ground and to protect your position with determination and resilience.',
       },
@@ -670,7 +670,7 @@ export const tarotCards = {
       },
       tenOfWands: {
         name: 'Ten of Wands',
-        keywords: ['Burden', 'extra responsibility', 'hard work', 'completion'],
+        keywords: ['burden', 'extra responsibility', 'hard work', 'completion'],
         information:
           'The Ten of Wands symbolizes burdens, extra responsibilities, and the hard work required to reach completion. It represents the weight of your obligations and the effort needed to achieve your goals. This card encourages you to manage your responsibilities wisely and to seek balance in your efforts.',
       },
@@ -712,7 +712,7 @@ export const tarotCards = {
       },
       fatherOfWands: {
         name: 'Father of Wands',
-        keywords: ['Natural-born leader', 'vision', 'entrepreneur', 'honor'],
+        keywords: ['natural-born leader', 'vision', 'entrepreneur', 'honor'],
         information:
           'The Father of Wands symbolizes leadership, vision, and entrepreneurial spirit. He represents the ability to inspire and guide others with integrity and honor. This card encourages you to embrace your leadership qualities and to pursue your vision with confidence and determination.',
       },

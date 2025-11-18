@@ -1,7 +1,8 @@
 'use client';
 
-import { FormEvent, useEffect, useRef, useState, Suspense } from 'react';
+import React, { FormEvent, useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
@@ -9,17 +10,93 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { AuthComponent } from '@/components/Auth';
 import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
+import { parseMessageContent } from '@/utils/messageParser';
 
 const MessageBubble = ({
   role,
   content,
   messageId,
+  onEntityClick,
 }: {
   role: 'user' | 'assistant';
   content: string;
   messageId?: string;
+  onEntityClick?: (entity: {
+    type: 'tarot' | 'ritual' | 'spell';
+    name: string;
+  }) => void;
 }) => {
   const isUser = role === 'user';
+  // Only parse assistant messages for entities (user messages don't need parsing)
+  // Use useMemo to re-parse when component re-renders (e.g., after cache initialization)
+  const parsed = React.useMemo(
+    () =>
+      !isUser ? parseMessageContent(content) : { text: content, entities: [] },
+    [content, isUser],
+  );
+
+  const renderContent = () => {
+    if (parsed.entities.length === 0) {
+      const lines = content.split('\n');
+      return lines.map((line, index) => (
+        <span key={index}>
+          {line}
+          {index < lines.length - 1 && '\n'}
+        </span>
+      ));
+    }
+
+    const parts: Array<{
+      text: string;
+      isEntity: boolean;
+      entity?: { type: 'tarot' | 'ritual' | 'spell'; name: string };
+    }> = [];
+    let lastIndex = 0;
+
+    parsed.entities.forEach((entity) => {
+      if (entity.startIndex > lastIndex) {
+        parts.push({
+          text: content.slice(lastIndex, entity.startIndex),
+          isEntity: false,
+        });
+      }
+      parts.push({
+        text: content.slice(entity.startIndex, entity.endIndex),
+        isEntity: true,
+        entity: { type: entity.type, name: entity.name },
+      });
+      lastIndex = entity.endIndex;
+    });
+
+    if (lastIndex < content.length) {
+      parts.push({ text: content.slice(lastIndex), isEntity: false });
+    }
+
+    const result: React.ReactNode[] = [];
+    parts.forEach((part, partIndex) => {
+      const lines = part.text.split('\n');
+      lines.forEach((line, lineIndex) => {
+        if (lineIndex > 0) {
+          result.push('\n');
+        }
+        if (part.isEntity && part.entity && onEntityClick) {
+          result.push(
+            <button
+              key={`${partIndex}-${lineIndex}`}
+              onClick={() => onEntityClick(part.entity!)}
+              className='underline decoration-dotted decoration-purple-400/60 hover:decoration-purple-400 text-purple-300 hover:text-purple-200 transition-colors cursor-pointer'
+            >
+              {line}
+            </button>,
+          );
+        } else {
+          result.push(<span key={`${partIndex}-${lineIndex}`}>{line}</span>);
+        }
+      });
+    });
+    return result;
+  };
+
   return (
     <div
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
@@ -32,11 +109,7 @@ const MessageBubble = ({
               : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
           }`}
         >
-          {content.split('\n').map((line, index) => (
-            <p key={index} className='whitespace-pre-wrap'>
-              {line}
-            </p>
-          ))}
+          {renderContent()}
         </div>
         {!isUser && (
           <div className='opacity-0 group-hover:opacity-100 transition-opacity'>
@@ -63,6 +136,8 @@ function BookOfShadowsContent() {
     messages,
     sendMessage,
     isStreaming,
+    isLoadingHistory,
+    stop,
     assistSnippet,
     reflectionPrompt,
     usage,
@@ -70,10 +145,34 @@ function BookOfShadowsContent() {
     dailyHighlight,
     error,
     clearError,
+    addMessage,
+    threadId,
   } = useAssistantChat();
+
+  const [cacheInitialized, setCacheInitialized] = useState(false);
+
+  // Initialize tarot card parser on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Pre-load tarot cards to populate parser cache
+      import('../../../utils/tarot/tarot-cards')
+        .then((module) => {
+          const tarotCards = module.tarotCards;
+          // Initialize the cache in messageParser
+          import('@/utils/messageParser').then((module) => {
+            module.initializeTarotCardCache(tarotCards);
+            setCacheInitialized(true);
+          });
+        })
+        .catch(() => {
+          // Ignore errors - parser will handle gracefully
+        });
+    }
+  }, []);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [promptHandled, setPromptHandled] = useState(false);
+  const [isAssistExpanded, setIsAssistExpanded] = useState(true);
   const lastSendTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -269,26 +368,142 @@ function BookOfShadowsContent() {
               className='flex-1 overflow-y-auto px-4 py-6 md:px-6'
             >
               <div className='mx-auto flex max-w-2xl flex-col gap-4 md:gap-6'>
-                {messages.length === 0 ? (
-                  <>
-                    <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
-                      Begin by sharing how you're feeling, what you're
-                      exploring, or what guidance you're seeking. I'll answer
-                      with gentle, grounded insight.
-                    </div>
-                    <CopilotQuickActions
-                      onActionClick={(prompt) => sendMessage(prompt)}
-                      disabled={isStreaming}
-                    />
-                  </>
+                {isLoadingHistory ? (
+                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                    Loading your conversation...
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                    Begin by sharing how you're feeling, what you're exploring,
+                    or what guidance you're seeking. I'll answer with gentle,
+                    grounded insight.
+                  </div>
                 ) : (
                   <>
-                    {messages.map((message) => (
+                    {messages.map((message, index) => (
                       <MessageBubble
-                        key={message.id}
+                        key={`${message.id}-${index}-${cacheInitialized}`}
                         role={message.role}
                         content={message.content}
                         messageId={message.id}
+                        onEntityClick={async (entity) => {
+                          try {
+                            let content = '';
+
+                            if (entity.type === 'tarot') {
+                              // Fetch tarot card data directly from grimoire
+                              const { getTarotCardByName } = await import(
+                                '@/utils/tarot/getCardByName'
+                              );
+                              const cardData = getTarotCardByName(entity.name);
+
+                              if (cardData) {
+                                // Just show the description, no heading or keywords
+                                content = cardData.information;
+                              } else {
+                                content = `I couldn't find information about "${entity.name}" in the grimoire.`;
+                              }
+                            } else if (
+                              entity.type === 'ritual' ||
+                              entity.type === 'spell'
+                            ) {
+                              // Fetch spell/ritual data directly from grimoire
+                              const { spellDatabase } = await import(
+                                '@/constants/grimoire/spells'
+                              );
+                              const spell = spellDatabase.find(
+                                (s) =>
+                                  s.title.toLowerCase() ===
+                                    entity.name.toLowerCase() ||
+                                  s.alternativeNames?.some(
+                                    (n) =>
+                                      n.toLowerCase() ===
+                                      entity.name.toLowerCase(),
+                                  ),
+                              );
+
+                              if (spell) {
+                                const typeLabel =
+                                  spell.type === 'ritual' ? 'Ritual' : 'Spell';
+                                const difficulty = spell.difficulty
+                                  ? `**Difficulty:** ${spell.difficulty.charAt(0).toUpperCase() + spell.difficulty.slice(1)}\n\n`
+                                  : '';
+                                const purpose = spell.purpose
+                                  ? `**Purpose:** ${spell.purpose}\n\n`
+                                  : '';
+                                const description =
+                                  spell.fullDescription || spell.description;
+                                const timing = spell.timing?.bestTiming
+                                  ? `**Best Timing:** ${spell.timing.bestTiming}\n\n`
+                                  : '';
+
+                                content = `## ${spell.title} (${typeLabel})\n\n${difficulty}${purpose}${timing}${description}`;
+
+                                if (spell.steps && spell.steps.length > 0) {
+                                  content += `\n\n**Steps:**\n${spell.steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}`;
+                                }
+                              } else {
+                                content = `I couldn't find information about "${entity.name}" in the grimoire.`;
+                              }
+                            }
+
+                            if (content) {
+                              // Generate ID
+                              const messageId =
+                                typeof crypto !== 'undefined' &&
+                                crypto.randomUUID
+                                  ? crypto.randomUUID()
+                                  : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+                              // Add message to UI
+                              addMessage({
+                                id: messageId,
+                                role: 'assistant',
+                                content,
+                              });
+
+                              // Save to thread history
+                              if (threadId) {
+                                try {
+                                  await fetch('/api/ai/thread/append', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    credentials: 'include',
+                                    body: JSON.stringify({
+                                      threadId,
+                                      assistantMessage: {
+                                        role: 'assistant',
+                                        content,
+                                        entityName: entity.name,
+                                        ts: new Date().toISOString(),
+                                        tokens: 0,
+                                      },
+                                    }),
+                                  });
+                                } catch (err) {
+                                  console.error(
+                                    '[EntityClick] Failed to save to thread:',
+                                    err,
+                                  );
+                                }
+                              }
+
+                              // Scroll to bottom
+                              setTimeout(() => {
+                                messagesEndRef.current?.scrollIntoView({
+                                  behavior: 'smooth',
+                                });
+                              }, 100);
+                            }
+                          } catch (error) {
+                            console.error(
+                              '[MessageBubble] Failed to fetch entity data:',
+                              error,
+                            );
+                          }
+                        }}
                       />
                     ))}
                     {error && (
@@ -311,21 +526,27 @@ function BookOfShadowsContent() {
               </div>
             </div>
 
-            {(assistSnippet || reflectionPrompt) && (
-              <div className='border-t border-zinc-800/70 bg-zinc-900/40 px-4 py-3 text-sm text-zinc-300 md:px-6 md:py-4'>
-                {assistSnippet ? (
-                  <p className='mb-2 text-zinc-200'>
-                    <span className='font-semibold text-purple-300/90'>
-                      Assist
-                    </span>{' '}
-                    {assistSnippet}
-                  </p>
-                ) : null}
-                {reflectionPrompt ? (
-                  <p className='italic text-zinc-400'>{reflectionPrompt}</p>
-                ) : null}
-              </div>
-            )}
+            <div className='border-t border-zinc-800/70 bg-zinc-900/40'>
+              <button
+                onClick={() => setIsAssistExpanded(!isAssistExpanded)}
+                className='flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-purple-300/90 transition hover:bg-zinc-800/40 md:px-6'
+              >
+                <span>Assist</span>
+                {isAssistExpanded ? (
+                  <ChevronUp className='w-4 h-4' />
+                ) : (
+                  <ChevronDown className='w-4 h-4' />
+                )}
+              </button>
+              {isAssistExpanded && (
+                <div className='px-4 pb-3 text-sm text-zinc-300 md:px-6 md:pb-4'>
+                  <CopilotQuickActions
+                    onActionClick={(prompt) => sendMessage(prompt)}
+                    disabled={isStreaming}
+                  />
+                </div>
+              )}
+            </div>
           </section>
 
           <form
@@ -346,13 +567,23 @@ function BookOfShadowsContent() {
                 className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 md:text-base'
               />
             </div>
-            <Button
-              type='submit'
-              disabled={isStreaming || input.trim().length === 0}
-              className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-zinc-700 md:self-end'
-            >
-              {isStreaming ? 'Listening…' : 'Ask Lunary'}
-            </Button>
+            {isStreaming ? (
+              <Button
+                type='button'
+                onClick={stop}
+                className='inline-flex items-center gap-2 rounded-xl bg-red-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-red-500 md:self-end'
+              >
+                Stop
+              </Button>
+            ) : (
+              <Button
+                type='submit'
+                disabled={input.trim().length === 0}
+                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-zinc-700 md:self-end'
+              >
+                Ask Lunary
+              </Button>
+            )}
           </form>
         </main>
       </div>

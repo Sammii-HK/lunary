@@ -7,6 +7,20 @@ export const metadata: Metadata = {
     'Best Personalized Astrology Apps 2025: Lunary vs Moonly vs Lunar Guide',
   description:
     'Compare Lunary vs Moonly vs Lunar Guide. See which astrology app uses real astronomical data, offers personalized birth charts, and includes a complete grimoire. Free 7-day trial available.',
+  keywords: [
+    'best astrology apps',
+    'personalized astrology apps',
+    'astrology app comparison',
+    'Lunary vs Moonly',
+    'Lunary vs Lunar Guide',
+    'best birth chart app',
+    'astrology app review',
+    'personalized horoscope app',
+    'astrology app 2025',
+  ],
+  authors: [{ name: 'Lunary' }],
+  creator: 'Lunary',
+  publisher: 'Lunary',
   openGraph: {
     title:
       'Best Personalized Astrology Apps 2025: Lunary vs Moonly vs Lunar Guide',
@@ -14,9 +28,38 @@ export const metadata: Metadata = {
       'Compare Lunary vs Moonly vs Lunar Guide. See which app uses real astronomical data and offers the most personalized insights.',
     url: 'https://lunary.app/comparison/best-personalized-astrology-apps',
     siteName: 'Lunary',
+    images: [
+      {
+        url: '/api/og/cosmic',
+        width: 1200,
+        height: 630,
+        alt: 'Best Personalized Astrology Apps Comparison',
+      },
+    ],
+    locale: 'en_US',
+    type: 'article',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title:
+      'Best Personalized Astrology Apps 2025: Lunary vs Moonly vs Lunar Guide',
+    description:
+      'Compare Lunary vs Moonly vs Lunar Guide. See which app uses real astronomical data and offers the most personalized insights.',
+    images: ['/api/og/cosmic'],
   },
   alternates: {
     canonical: 'https://lunary.app/comparison/best-personalized-astrology-apps',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 

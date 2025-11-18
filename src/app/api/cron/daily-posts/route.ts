@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
 async function runDailyPosts(dateStr: string) {
   console.log('📱 Generating daily social media posts...');
 
-  const productionUrl = 'https://www.lunary.app';
+  const productionUrl = 'https://lunary.app';
 
   // Fetch dynamic content for all post types
   const [cosmicResponse] = await Promise.all([
@@ -351,7 +351,7 @@ async function runDailyPosts(dateStr: string) {
       imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
-      reddit: {
+      redditOptions: {
         title: redditTitle,
         subreddit: subreddit.name,
       },
@@ -440,7 +440,7 @@ async function runDailyPosts(dateStr: string) {
           alt: post.alt,
         })),
         variants: post.variants,
-        reddit: post.reddit,
+        redditOptions: post.redditOptions,
       };
 
       if (pinterestOptions) {
