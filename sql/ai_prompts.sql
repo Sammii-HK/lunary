@@ -1,7 +1,7 @@
 -- AI Prompts table for daily/weekly personalized prompts
 CREATE TABLE IF NOT EXISTS ai_prompts (
   id SERIAL PRIMARY KEY,
-  user_id VARCHAR(255) NOT NULL,
+  user_id TEXT NOT NULL,
   prompt_type VARCHAR(50) NOT NULL, -- 'daily' or 'weekly'
   prompt_text TEXT NOT NULL,
   cosmic_context JSONB, -- Stores moon phase, transits, tarot, etc.

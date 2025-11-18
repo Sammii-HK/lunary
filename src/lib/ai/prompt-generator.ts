@@ -260,6 +260,9 @@ async function getWeekMoonPhases(
       console.error('[Prompt Generator] Failed to get moon phase:', error);
     }
     current.add(1, 'day');
+    
+    // Limit iterations to prevent infinite loops
+    if (phases.length > 10) break;
   }
 
   return phases;
