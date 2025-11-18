@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     await sendEmail({
       to: email,
-      subject: '🌙 Welcome to Your Free Trial - Lunary',
+      subject: '✨ Your Astral Guide is Ready - Lunary',
       html,
       text,
       tracking: {
