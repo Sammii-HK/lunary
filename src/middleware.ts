@@ -13,11 +13,25 @@ export function middleware(request: NextRequest) {
     !!process.env.CI ||
     process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined ||
     process.env.GITHUB_ACTIONS === 'true';
-  const isLocalhost =
-    hostname.includes('localhost') || hostname === '127.0.0.1';
 
-  // Early return for test/CI/localhost - skip all redirect logic
-  if (isTestOrCI || isLocalhost) {
+  // Detect localhost (CI and local dev both use localhost:3000)
+  const isLocalhost =
+    hostname.includes('localhost') ||
+    hostname === '127.0.0.1' ||
+    hostname.startsWith('127.') ||
+    hostname.includes('0.0.0.0');
+
+  // Only allow redirects for production domains (lunary.app, www.lunary.app)
+  // This is a whitelist approach: if it's not a known production domain, skip redirects
+  // This ensures CI/localhost/dev environments never trigger redirects
+  const isProductionDomain =
+    hostname === 'lunary.app' || hostname === 'www.lunary.app';
+
+  // Skip redirects if:
+  // 1. It's a test/CI environment (env var check - may not work in Edge Runtime)
+  // 2. It's localhost (CI uses localhost:3000, local dev uses localhost:3000)
+  // 3. It's NOT a production domain (safety net - only lunary.app domains get redirects)
+  if (isTestOrCI || isLocalhost || !isProductionDomain) {
     // Only allow blog week and grimoire redirects (these are safe path redirects)
     const blogWeekMatch = url.pathname.match(/^\/blog\/week\/(\d+)-(\d{4})$/);
     if (blogWeekMatch) {
