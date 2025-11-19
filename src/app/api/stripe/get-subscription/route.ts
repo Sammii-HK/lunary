@@ -139,9 +139,115 @@ export async function POST(request: NextRequest) {
 
     const { customerId, userId, forceRefresh } = body;
 
-    if (!customerId) {
+    // If userId is provided but no customerId, try to find customer by userId metadata
+    let resolvedCustomerId = customerId;
+    if (!resolvedCustomerId && userId) {
+      try {
+        // Search for customer by userId in metadata
+        const customers = await stripe.customers.search({
+          query: `metadata['userId']:'${userId}'`,
+          limit: 1,
+        });
+        if (customers.data.length > 0) {
+          resolvedCustomerId = customers.data[0].id;
+          console.log(
+            `[get-subscription] Found customer ${resolvedCustomerId} by userId ${userId}`,
+          );
+        }
+      } catch (error) {
+        console.warn(
+          '[get-subscription] Failed to search for customer by userId:',
+          error,
+        );
+      }
+    }
+
+    // If still no customerId but we have userId, try email lookup as fallback
+    if (!resolvedCustomerId && userId) {
+      try {
+        // Get user email from database
+        const { sql } = await import('@vercel/postgres');
+        const userResult = await sql`
+          SELECT email FROM users WHERE id = ${userId} LIMIT 1
+        `;
+        if (userResult.rows.length > 0 && userResult.rows[0].email) {
+          const userEmail = userResult.rows[0].email;
+          // Get ALL customers with this email (Stripe allows multiple)
+          const customers = await stripe.customers.list({
+            email: userEmail,
+            limit: 100, // Get all to find the right one
+          });
+
+          if (customers.data.length > 0) {
+            // Priority 1: Find customer with matching userId in metadata
+            let matchingCustomer = customers.data.find(
+              (c) => (c.metadata as any)?.userId === userId,
+            );
+
+            // Priority 2: If no match, find customer with active subscription
+            if (!matchingCustomer) {
+              for (const customer of customers.data) {
+                const subscriptions = await stripe.subscriptions.list({
+                  customer: customer.id,
+                  status: 'all',
+                  limit: 1,
+                });
+                const hasActiveSub = subscriptions.data.some(
+                  (sub) =>
+                    sub.status === 'active' ||
+                    sub.status === 'trialing' ||
+                    sub.status === 'past_due',
+                );
+                if (hasActiveSub) {
+                  matchingCustomer = customer;
+                  break;
+                }
+              }
+            }
+
+            // Priority 3: If still no match, use most recently created customer
+            if (!matchingCustomer) {
+              matchingCustomer = customers.data.sort(
+                (a, b) => b.created - a.created,
+              )[0];
+            }
+
+            resolvedCustomerId = matchingCustomer.id;
+            console.log(
+              `[get-subscription] Found customer ${resolvedCustomerId} by email ${userEmail} (from ${customers.data.length} customers with same email)`,
+            );
+
+            // Update customer metadata with userId for future lookups
+            try {
+              await stripe.customers.update(resolvedCustomerId, {
+                metadata: { userId: userId },
+              });
+              console.log(
+                `[get-subscription] Updated customer ${resolvedCustomerId} metadata with userId ${userId}`,
+              );
+            } catch (updateError) {
+              console.warn(
+                '[get-subscription] Failed to update customer metadata:',
+                updateError,
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(
+          '[get-subscription] Failed to lookup customer by email:',
+          error,
+        );
+      }
+    }
+
+    if (!resolvedCustomerId) {
       return NextResponse.json(
-        { error: 'Customer ID is required' },
+        {
+          error: 'Customer ID is required',
+          message:
+            'Could not find Stripe customer. Please ensure you have completed checkout.',
+        },
         { status: 400 },
       );
     }
@@ -150,7 +256,7 @@ export async function POST(request: NextRequest) {
     let userIdToUse: string | null = userId || null;
     let userEmail: string | null = null;
     try {
-      const customer = await stripe.customers.retrieve(customerId);
+      const customer = await stripe.customers.retrieve(resolvedCustomerId);
       if (!userIdToUse) {
         userIdToUse = (customer as any).metadata?.userId || null;
       }
@@ -161,7 +267,7 @@ export async function POST(request: NextRequest) {
 
     // Get all subscriptions for this customer
     const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
+      customer: resolvedCustomerId,
       status: 'all', // Include all statuses
       limit: 10,
     });
@@ -219,7 +325,7 @@ export async function POST(request: NextRequest) {
               stripe_subscription_id, trial_ends_at, current_period_end
             ) VALUES (
               ${userIdToUse}, ${userEmail}, ${mappedStatus}, ${planType},
-              ${customerId}, ${subscription.id}, ${trialEndsAt}, ${currentPeriodEnd}
+              ${resolvedCustomerId}, ${subscription.id}, ${trialEndsAt}, ${currentPeriodEnd}
             )
             ON CONFLICT (user_id) DO UPDATE SET
               status = EXCLUDED.status,
@@ -241,7 +347,7 @@ export async function POST(request: NextRequest) {
             SET
               status = ${mappedStatus},
               plan_type = ${planType},
-              stripe_customer_id = ${customerId},
+              stripe_customer_id = ${resolvedCustomerId},
               stripe_subscription_id = ${subscription.id},
               trial_ends_at = ${trialEndsAt},
               current_period_end = ${currentPeriodEnd},

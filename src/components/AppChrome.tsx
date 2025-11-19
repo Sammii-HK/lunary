@@ -64,8 +64,9 @@ export function AppChrome() {
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );
 
-  // Show marketing nav/footer for unauthenticated users or on marketing pages
-  const showMarketingNav = !authState.isAuthenticated || isMarketingRoute;
+  // Show marketing nav/footer ONLY for unauthenticated users on marketing pages
+  // When authenticated, only show app nav on app pages (no marketing nav)
+  const showMarketingNav = !authState.isAuthenticated && isMarketingRoute;
   // Show app nav only for authenticated users on app pages
   const showAppNav = authState.isAuthenticated && isAppPage && !isAdminSurface;
 
@@ -76,8 +77,8 @@ export function AppChrome() {
           {showMarketingNav && <MarketingNavbar />}
           {showAppNav && (
             <>
-              <Navbar />
               <TrialCountdownBanner />
+              <Navbar />
             </>
           )}
         </>
@@ -95,7 +96,6 @@ export function AppChrome() {
           </>
         )}
       </ErrorBoundaryWrapper>
-      {showMarketingNav && !isAdminSurface && <MarketingFooter />}
     </>
   );
 }
