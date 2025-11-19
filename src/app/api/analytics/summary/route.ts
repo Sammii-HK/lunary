@@ -109,6 +109,7 @@ export async function GET(request: NextRequest) {
       activeTrialsResult,
       subscriptionsResult,
       monthlySubscriptionsResult,
+      monthlyAISubscriptionsResult,
       yearlySubscriptionsResult,
       trialConversions30dResult,
       totalTrials30dResult,
@@ -152,12 +153,20 @@ export async function GET(request: NextRequest) {
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
         FROM subscriptions
-        WHERE status = 'active' AND plan_type = 'monthly'
+        WHERE status = 'active' 
+          AND (plan_type = 'monthly' OR plan_type = 'lunary_plus')
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
         FROM subscriptions
-        WHERE status = 'active' AND plan_type = 'yearly'
+        WHERE status = 'active' 
+          AND plan_type = 'lunary_plus_ai'
+      `,
+      sql`
+        SELECT COUNT(DISTINCT user_id) AS count
+        FROM subscriptions
+        WHERE status = 'active' 
+          AND (plan_type = 'yearly' OR plan_type = 'lunary_plus_ai_annual')
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
@@ -196,8 +205,9 @@ export async function GET(request: NextRequest) {
           COUNT(DISTINCT user_id) AS user_count,
           AVG(
             CASE
-              WHEN plan_type = 'monthly' THEN 4.99 * 12
-              WHEN plan_type = 'yearly' THEN 39.99
+              WHEN plan_type = 'monthly' OR plan_type = 'lunary_plus' THEN 4.99 * 12
+              WHEN plan_type = 'lunary_plus_ai' THEN 8.99 * 12
+              WHEN plan_type = 'yearly' OR plan_type = 'lunary_plus_ai_annual' THEN 89.99
               ELSE 0
             END
           ) AS avg_ltv
@@ -275,12 +285,21 @@ export async function GET(request: NextRequest) {
     const monthlySubscriptions = Number(
       monthlySubscriptionsResult.rows[0]?.count || 0,
     );
+    const monthlyAISubscriptions = Number(
+      monthlyAISubscriptionsResult.rows[0]?.count || 0,
+    );
     const yearlySubscriptions = Number(
       yearlySubscriptionsResult.rows[0]?.count || 0,
     );
 
+    // Correct pricing:
+    // - lunary_plus (monthly): $4.99/month
+    // - lunary_plus_ai (monthly): $8.99/month
+    // - lunary_plus_ai_annual (yearly): $89.99/year = $7.50/month
     const mrr =
-      monthlySubscriptions * 4.99 + (yearlySubscriptions * 39.99) / 12;
+      monthlySubscriptions * 4.99 +
+      monthlyAISubscriptions * 8.99 +
+      (yearlySubscriptions * 89.99) / 12;
     const arpu = activeSubscriptions > 0 ? mrr / activeSubscriptions : 0;
 
     const trialConversions30d = Number(
@@ -293,18 +312,29 @@ export async function GET(request: NextRequest) {
     const retention = retentionResult;
     const churnRate = Math.max(0, 100 - retention.day_30);
 
-    const mrrMonthly = monthlySubscriptions * 4.99;
-    const mrrYearly = (yearlySubscriptions * 39.99) / 12;
-    const arpuMonthly =
-      monthlySubscriptions > 0 ? mrrMonthly / monthlySubscriptions : 0;
+    // Correct pricing:
+    // - lunary_plus (monthly): $4.99/month
+    // - lunary_plus_ai (monthly): $8.99/month
+    // - lunary_plus_ai_annual (yearly): $89.99/year = $7.50/month
+    const mrrMonthlyBasic = monthlySubscriptions * 4.99;
+    const mrrMonthlyAI = monthlyAISubscriptions * 8.99;
+    const mrrYearly = (yearlySubscriptions * 89.99) / 12;
+
+    const arpuMonthlyBasic =
+      monthlySubscriptions > 0 ? mrrMonthlyBasic / monthlySubscriptions : 0;
+    const arpuMonthlyAI =
+      monthlyAISubscriptions > 0 ? mrrMonthlyAI / monthlyAISubscriptions : 0;
     const arpuYearly =
       yearlySubscriptions > 0 ? mrrYearly / yearlySubscriptions : 0;
 
-    const ltvMonthly = 4.99 * 12;
-    const ltvYearly = 39.99;
+    // LTV calculations (assuming average customer lifetime)
+    const ltvMonthlyBasic = 4.99 * 12; // $59.88/year
+    const ltvMonthlyAI = 8.99 * 12; // $107.88/year
+    const ltvYearly = 89.99; // $89.99/year
     const ltvPerUser =
       activeSubscriptions > 0
-        ? (monthlySubscriptions * ltvMonthly +
+        ? (monthlySubscriptions * ltvMonthlyBasic +
+            monthlyAISubscriptions * ltvMonthlyAI +
             yearlySubscriptions * ltvYearly) /
           activeSubscriptions
         : 0;
@@ -388,9 +418,11 @@ export async function GET(request: NextRequest) {
       retentionDay7: retention.day_7,
       retentionDay30: retention.day_30,
       ltvPerUser: Number(ltvPerUser.toFixed(2)),
-      ltvMonthly: Number(ltvMonthly.toFixed(2)),
+      ltvMonthlyBasic: Number(ltvMonthlyBasic.toFixed(2)),
+      ltvMonthlyAI: Number(ltvMonthlyAI.toFixed(2)),
       ltvYearly: Number(ltvYearly.toFixed(2)),
-      arpuMonthly: Number(arpuMonthly.toFixed(2)),
+      arpuMonthlyBasic: Number(arpuMonthlyBasic.toFixed(2)),
+      arpuMonthlyAI: Number(arpuMonthlyAI.toFixed(2)),
       arpuYearly: Number(arpuYearly.toFixed(2)),
       churnReasons,
       marketingAttribution,
