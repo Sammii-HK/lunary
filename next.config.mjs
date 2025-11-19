@@ -1,9 +1,17 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
+// Bundle analyzer (only enabled when ANALYZE env var is set)
+const withBundleAnalyzer =
+  process.env.ANALYZE === 'true'
+    ? require('@next/bundle-analyzer')({
+      enabled: true,
+    })
+    : (config) => config;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer, nextRuntime }) => {
+  webpack: (config, { isServer, nextRuntime, dev }) => {
     // Exclude Playwright from bundling (server-only, Node.js runtime)
     if (isServer) {
       config.externals = config.externals || [];
@@ -106,6 +114,54 @@ const nextConfig = {
         url: false,
         buffer: require.resolve('buffer'),
       };
+
+      // Optimize chunk splitting for client-side bundles
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk for common dependencies
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/]/,
+              priority: 20,
+              minChunks: 2, // Only create vendor chunk if used in 2+ chunks
+            },
+            // Separate chunk for MUI (large library)
+            mui: {
+              name: 'mui',
+              test: /[\\/]node_modules[\\/]@mui[\\/]/,
+              chunks: 'all',
+              priority: 30,
+            },
+            // Separate chunk for astrochart (large library)
+            astrochart: {
+              name: 'astrochart',
+              test: /[\\/]node_modules[\\/]@astrodraw[\\/]/,
+              chunks: 'all',
+              priority: 30,
+            },
+            // Separate chunk for Radix UI
+            radix: {
+              name: 'radix',
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              chunks: 'all',
+              priority: 25,
+            },
+            // Separate chunk for Jazz/Cojson (user wants to remove eventually)
+            jazz: {
+              name: 'jazz',
+              test: /[\\/]node_modules[\\/](jazz|cojson)[\\/]/,
+              chunks: 'all',
+              priority: 25,
+            },
+          },
+        },
+      };
     }
 
     // Edge runtime: Allow buffer but exclude Node.js-only modules
@@ -172,6 +228,16 @@ const nextConfig = {
   // Compression and optimization
   compress: true,
 
+  // SWC compiler configuration - remove console statements in production
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+          exclude: ['error', 'warn'], // Keep console.error and console.warn
+        }
+        : false,
+  },
+
   // Experimental optimizations for faster builds
   experimental: {
     // Optimize package imports (tree-shake unused exports)
@@ -183,6 +249,14 @@ const nextConfig = {
       '@radix-ui/react-label',
       '@radix-ui/react-switch',
     ],
+  },
+
+  // Image optimization
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
   // PWA Configuration
@@ -286,4 +360,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

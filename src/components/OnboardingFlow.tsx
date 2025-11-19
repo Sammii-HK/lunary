@@ -137,7 +137,7 @@ export function OnboardingFlow() {
       <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto'>
         <button
           onClick={handleSkip}
-          className='absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors'
+          className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors'
           aria-label='Skip onboarding'
         >
           <X className='w-5 h-5' />

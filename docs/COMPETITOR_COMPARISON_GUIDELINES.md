@@ -102,17 +102,14 @@
 ### Pages to Create:
 
 1. **"Lunary vs Moonly"** ✅ Created
-
    - Target: "lunary vs moonly", "moonly alternative"
    - Focus: Real astronomy, personalized charts, grimoire
 
 2. **"Lunary vs Lunar Guide"**
-
    - Target: "lunary vs lunar guide", "lunar guide alternative"
    - Focus: Real astronomy vs AI-powered generic astrology
 
 3. **"Best Personalized Astrology Apps"**
-
    - Target: "best personalized astrology app", "astrology app comparison"
    - Include: Lunary, Moonly, Lunar Guide, others
    - Position Lunary as #1 choice
@@ -176,11 +173,13 @@
 ### Lunary vs Arcarae
 
 **Arcarae:**
+
 - Community-focused platform
 - Angel numbers content
 - Generic spiritual content
 
 **Lunary:**
+
 - Deeply personalized analysis based on birth chart
 - AI astral guide for personalized insights
 - Complete magical tools ecosystem (grimoire, tarot, rituals)
@@ -191,11 +190,13 @@
 ### Lunary vs Co–Star
 
 **Co–Star:**
+
 - Aesthetic design
 - Generic astrology content
 - Social features
 
 **Lunary:**
+
 - Tailored insights based on exact birth chart
 - Personalized tarot readings
 - Rituals and magical practices
@@ -207,10 +208,12 @@
 ### Lunary vs Pattern
 
 **Pattern:**
+
 - Psychology-based pattern analysis
 - Behavioral insights
 
 **Lunary:**
+
 - Full magical ecosystem
 - Astrological pattern analysis
 - Tarot pattern insights

@@ -31,6 +31,27 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/shop',
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  keywords: [
+    'digital grimoire',
+    'moon phase guides',
+    'spell collections',
+    'cosmic resources',
+    'witchcraft guides',
+    'astrology PDFs',
+    'magical practice',
+    'spiritual resources',
+  ],
 };
 
 export default function ShopLayout({

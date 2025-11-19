@@ -1,141 +1,100 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { auth } from '@/lib/auth';
+import { Metadata } from 'next';
+import WelcomePage from './welcome/page';
 
-import { useEffect, Suspense } from 'react';
-import dynamic from 'next/dynamic';
-import { AstronomyContextProvider } from '@/context/AstronomyContext';
-import { PostTrialMessaging } from '@/components/PostTrialMessaging';
-import { WeeklyUsageCounter } from '@/components/WeeklyUsageCounter';
-import { useAccount } from 'jazz-tools/react';
-import { conversionTracking } from '@/lib/analytics';
-import { useAuthStatus } from '@/components/AuthStatus';
-import { usePathname } from 'next/navigation';
+export const metadata: Metadata = {
+  title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
+  description:
+    "Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today. Understand today's energy based on your birth chart. Daily tarot, lunar cycles and planetary transits personalized to you.",
+  keywords: [
+    'AI astrology',
+    'personalized astrology',
+    'AI astral guide',
+    'personalized horoscope',
+    'birth chart astrology',
+    'tarot readings',
+    'lunar cycles',
+    'planetary transits',
+    'cosmic guidance',
+    'astrological insights',
+    'personalized tarot',
+    'astrology app',
+    'natal chart analysis',
+  ],
+  authors: [{ name: 'Lunary' }],
+  creator: 'Lunary',
+  publisher: 'Lunary',
+  alternates: {
+    canonical: 'https://lunary.app',
+  },
+  openGraph: {
+    title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
+    description:
+      'Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today.',
+    url: 'https://lunary.app',
+    siteName: 'Lunary',
+    images: [
+      {
+        url: '/api/og/cosmic',
+        width: 1200,
+        height: 630,
+        alt: 'Lunary - Your AI-Powered Astral Guide',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
+    description:
+      'Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today.',
+    images: ['/api/og/cosmic'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
 
-// Critical widgets loaded immediately
-import { DateWidget } from '@/components/DateWidget';
-import { AstronomyWidget } from '@/components/AstronomyWidget';
+export default async function HomePage() {
+  const cookieStore = await cookies();
 
-// Heavy widgets loaded dynamically with lazy loading
-const TarotWidget = dynamic(
-  () =>
-    import('@/components/TarotWidget').then((mod) => ({
-      default: mod.TarotWidget,
-    })),
-  {
-    loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
-    ),
-  },
-);
-const MoonWidget = dynamic(
-  () =>
-    import('../components/MoonWidget').then((mod) => ({
-      default: mod.MoonWidget,
-    })),
-  {
-    loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
-    ),
-  },
-);
-const HoroscopeWidget = dynamic(
-  () =>
-    import('@/components/HoroscopeWidget').then((mod) => ({
-      default: mod.HoroscopeWidget,
-    })),
-  {
-    loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
-    ),
-  },
-);
-const CrystalWidget = dynamic(
-  () =>
-    import('@/components/CrystalWidget').then((mod) => ({
-      default: mod.CrystalWidget,
-    })),
-  {
-    loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
-    ),
-  },
-);
-const MoonSpellsWidget = dynamic(
-  () =>
-    import('@/components/MoonSpellsWidget').then((mod) => ({
-      default: mod.MoonSpellsWidget,
-    })),
-  {
-    loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
-    ),
-  },
-);
-const EphemerisWidget = dynamic(() => import('@/components/EphemerisWidget'), {
-  loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
-  ),
-});
-const ConditionalWheel = dynamic(
-  () => import('@/components/ConditionalWheel'),
-  {
-    loading: () => null, // ConditionalWheel handles its own loading state
-  },
-);
+  // Build cookie header string for Better Auth
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join('; ');
 
-export default function Home() {
-  const { me } = useAccount();
-  const authState = useAuthStatus();
+  try {
+    // Check if user is authenticated
+    const sessionResponse = await auth.api.getSession({
+      headers: new Headers({
+        cookie: cookieHeader,
+      }),
+    });
 
-  useEffect(() => {
-    // Track app opened event
-    if (authState.isAuthenticated) {
-      const userId = (me as any)?.id;
-      conversionTracking.appOpened(userId, '/');
-    } else if (!authState.loading) {
-      conversionTracking.appOpened(undefined, '/');
+    // Check if session exists and has user
+    const user = sessionResponse?.user;
+
+    if (user?.id) {
+      // User is authenticated, redirect to app dashboard
+      redirect('/app');
     }
-  }, [authState.isAuthenticated, authState.loading, me]);
+  } catch (error) {
+    // Not authenticated or error checking session, continue to show welcome page
+    // This is expected for unauthenticated users and Google crawlers
+  }
 
-  return (
-    <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl mx-auto px-4'>
-      <AstronomyContextProvider>
-        {/* Post-trial messaging for expired trial users */}
-        <PostTrialMessaging />
-
-        {/* Weekly Usage Counter */}
-        <WeeklyUsageCounter />
-
-        {/* Top Row - Date and Astronomy (always full width) */}
-        <div className='w-full space-y-4'>
-          <DateWidget />
-          <AstronomyWidget />
-        </div>
-
-        {/* Main Content Grid - Responsive 2-Column Layout */}
-        {/* Mobile: Single column maintains natural order */}
-        {/* Desktop: 2 columns - flows naturally */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full'>
-          <div className='flex flex-col h-full'>
-            <MoonWidget />
-          </div>
-          <div className='flex flex-col h-full'>
-            <CrystalWidget />
-          </div>
-          <div className='flex flex-col h-full'>
-            <TarotWidget />
-          </div>
-          <div className='flex flex-col h-full'>
-            <HoroscopeWidget />
-          </div>
-          <ConditionalWheel />
-          <div className='flex flex-col h-full'>
-            <MoonSpellsWidget />
-          </div>
-          <div className='flex flex-col h-full'>
-            <EphemerisWidget />
-          </div>
-        </div>
-      </AstronomyContextProvider>
-    </div>
-  );
+  // Show welcome page for unauthenticated users (and Google crawlers)
+  return <WelcomePage />;
 }

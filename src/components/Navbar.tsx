@@ -17,6 +17,7 @@ export const Navbar = () => {
 
   // Hide navbar on marketing pages
   const isMarketingRoute =
+    pathname === '/' ||
     pathname === '/welcome' ||
     pathname === '/pricing' ||
     pathname?.startsWith('/admin');
@@ -28,7 +29,12 @@ export const Navbar = () => {
   return (
     <nav className='sticky bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
       <div className='flex w-full max-w-3xl items-center justify-between px-4 py-3 text-white md:justify-evenly md:px-6'>
-        <NavLink href='/' icon={Eclipse} label='Home' activePath={pathname} />
+        <NavLink
+          href='/app'
+          icon={Eclipse}
+          label='Home'
+          activePath={pathname}
+        />
         <NavLink
           href='/tarot'
           icon={Sparkles}
@@ -67,6 +73,7 @@ export const Navbar = () => {
 
 const isActive = (pathname: string | null, href: string) => {
   if (!pathname) return false;
+  if (href === '/app') return pathname === '/app' || pathname === '/';
   if (href === '/') return pathname === '/';
   return pathname === href || pathname.startsWith(`${href}/`);
 };

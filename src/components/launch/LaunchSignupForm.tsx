@@ -85,7 +85,11 @@ export function LaunchSignupForm({
           className='rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-purple-400 focus:outline-none'
         />
         <div className='flex gap-3'>
+          <label htmlFor='launch-email' className='sr-only'>
+            Email address
+          </label>
           <input
+            id='launch-email'
             type='email'
             required
             placeholder='Email'

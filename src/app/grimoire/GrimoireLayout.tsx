@@ -20,11 +20,8 @@ import { tarotSuits, tarotSpreads } from '@/constants/tarot';
 import { spells } from '@/constants/spells';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { chakras } from '@/constants/chakras';
-import {
-  crystalCategories,
-  getCrystalsByCategory,
-  crystalDatabase,
-} from '@/constants/grimoire/crystals';
+// Crystal database imports - lazy loaded to reduce initial bundle size
+// Only loaded when user searches or navigates to crystals section
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import {
   MonthlyMoonPhase,
@@ -669,28 +666,10 @@ export default function GrimoireLayout({
       }
     });
 
-    // Search crystals - link to individual pages
-    crystalDatabase.forEach((crystal) => {
-      if (
-        crystal.name.toLowerCase().includes(query) ||
-        crystal.alternativeNames?.some((name) =>
-          name.toLowerCase().includes(query),
-        ) ||
-        crystal.properties.some((prop) => prop.toLowerCase().includes(query)) ||
-        crystal.description.toLowerCase().includes(query) ||
-        crystal.intentions.some((intent) =>
-          intent.toLowerCase().includes(query),
-        )
-      ) {
-        results.push({
-          type: 'crystal',
-          title: `Crystal - ${crystal.name}`,
-          section: 'crystals',
-          href: `/grimoire/crystals/${stringToKebabCase(crystal.name)}`,
-          match: `Properties: ${crystal.properties.slice(0, 3).join(', ')}`,
-        });
-      }
-    });
+    // Search crystals - removed to reduce bundle size
+    // Crystal search is handled by the Crystals component when loaded
+    // This prevents importing the large crystal database (~200KB) into GrimoireLayout
+    // Users can navigate to /grimoire/crystals to search crystals
 
     // Search sabbats - link to individual pages
     wheelOfTheYearSabbats.forEach((sabbat) => {

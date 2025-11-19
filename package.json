@@ -40,6 +40,12 @@
     "test:all": "pnpm test && pnpm test:e2e",
     "test:cors": "tsx scripts/test-cors.ts",
     "test:middleware": "tsx scripts/test-middleware.ts",
+    "qa:check": "tsx scripts/qa-checklist.ts",
+    "qa:check:prod": "BASE_URL=https://lunary.app tsx scripts/qa-checklist.ts",
+    "qa:check:lighthouse": "USE_LIGHTHOUSE_CLI=true tsx scripts/qa-checklist.ts",
+    "qa:e2e": "playwright test e2e/qa-checklist.spec.ts",
+    "qa:e2e:prod": "BASE_URL=https://lunary.app playwright test e2e/qa-checklist.spec.ts",
+    "analyze": "ANALYZE=true pnpm build",
     "generate-price-mapping": "tsx scripts/generate-price-mapping.ts",
     "update-yearly-pricing": "tsx scripts/update-yearly-pricing.ts",
     "fix-usd-yearly-price": "tsx scripts/fix-usd-yearly-price.ts",
@@ -80,6 +86,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/blob": "^2.0.0",
     "@vercel/postgres": "^0.10.0",
+    "@vercel/speed-insights": "^1.2.0",
     "ai": "^5.0.93",
     "astronomy-engine": "^2.1.19",
     "better-auth": "^1.3.25",
@@ -110,6 +117,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.3",
     "@playwright/test": "^1.56.1",
     "@prisma/client": "^6.19.0",
     "@stylistic/eslint-plugin-js": "^2.10.1",

@@ -134,11 +134,14 @@ export function middleware(request: NextRequest) {
         url.pathname === '/' ? adminPrefix : `${adminPrefix}${url.pathname}`;
       url.pathname = newPathname;
 
-      console.log('🔄 Rewriting admin subdomain:', {
-        from: request.nextUrl.pathname,
-        to: newPathname,
-        hostname,
-      });
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Rewriting admin subdomain:', {
+          from: request.nextUrl.pathname,
+          to: newPathname,
+          hostname,
+        });
+      }
 
       return NextResponse.rewrite(url);
     }
