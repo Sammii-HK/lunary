@@ -1,11 +1,12 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSubscription } from '../hooks/useSubscription';
 import { FEATURE_ACCESS } from '../../utils/pricing';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
+import { X } from 'lucide-react';
 
 type FeatureName =
   | 'moon_phases'
@@ -154,6 +155,9 @@ function getFeatureDescription(feature: string): string {
   }
 }
 
+const TRIAL_UPSELL_DISMISSAL_KEY = 'trialUpsellDismissed';
+const TRIAL_UPSELL_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 // Simple upgrade prompt component
 export function UpgradePrompt() {
   const {
@@ -164,6 +168,28 @@ export function UpgradePrompt() {
     status,
   } = useSubscription();
   const authState = useAuthStatus();
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  // Check if trial upsell was dismissed recently
+  useEffect(() => {
+    if (isTrialActive) {
+      const dismissedData = localStorage.getItem(TRIAL_UPSELL_DISMISSAL_KEY);
+      if (dismissedData) {
+        try {
+          const { timestamp } = JSON.parse(dismissedData);
+          const timeSinceDismissed = Date.now() - timestamp;
+          if (timeSinceDismissed < TRIAL_UPSELL_COOLDOWN_MS) {
+            // Still in cooldown period
+            setIsDismissed(true);
+            return;
+          }
+        } catch (e) {
+          // Invalid data, continue
+        }
+      }
+      setIsDismissed(false);
+    }
+  }, [isTrialActive]);
 
   console.log('UpgradePrompt render:', {
     showUpgradePrompt,
@@ -171,12 +197,36 @@ export function UpgradePrompt() {
     trialDaysRemaining,
     isSubscribed,
     status,
+    isDismissed,
   });
 
-  if (!showUpgradePrompt) return null;
+  // Only show trial-specific messaging if user is actually on trial AND not dismissed
+  // Otherwise, only show if showUpgradePrompt is true (free users)
+  if (isTrialActive && isDismissed) return null;
+  if (!isTrialActive && !showUpgradePrompt) return null;
+
+  const handleDismiss = () => {
+    if (isTrialActive) {
+      // Store dismissal timestamp for trial upsells
+      localStorage.setItem(
+        TRIAL_UPSELL_DISMISSAL_KEY,
+        JSON.stringify({ timestamp: Date.now() }),
+      );
+      setIsDismissed(true);
+    }
+  };
 
   return (
-    <div className='fixed bottom-4 right-4 bg-gray-900 border border-gray-700 rounded-lg p-4 max-w-sm z-50'>
+    <div className='fixed bottom-4 right-4 bg-gray-900 border border-gray-700 rounded-lg p-4 max-w-sm z-50 relative'>
+      {isTrialActive && (
+        <button
+          onClick={handleDismiss}
+          className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-100 transition-colors p-1'
+          aria-label='Dismiss'
+        >
+          <X className='w-4 h-4' />
+        </button>
+      )}
       <div className='text-sm'>
         {isTrialActive ? (
           <>

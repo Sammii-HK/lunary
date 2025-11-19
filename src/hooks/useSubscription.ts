@@ -78,148 +78,167 @@ export function useSubscription(): SubscriptionStatus {
     return null;
   }, [me?.profile]);
 
-  const fetchFromStripe = useCallback(async (customerId: string) => {
-    try {
-      setSubscriptionState((prev) => ({ ...prev, loading: true }));
+  const fetchFromStripe = useCallback(
+    async (customerId: string, userId?: string | null) => {
+      try {
+        setSubscriptionState((prev) => ({ ...prev, loading: true }));
 
-      const response = await fetch('/api/stripe/get-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId }),
-        cache: 'no-store', // Prevent service worker caching
-      });
+        // Get userId from me if not provided
+        const userIdToSend = userId || (me as any)?.id || null;
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.subscription) {
-          const sub = data.subscription;
-          const status = sub.status === 'trialing' ? 'trial' : sub.status;
-          const trialEnd = sub.trial_end || sub.trialEnd;
-          const trialDaysRemaining = trialEnd
-            ? Math.max(
-                0,
-                Math.ceil(
-                  (trialEnd * 1000 - Date.now()) / (1000 * 60 * 60 * 24),
-                ),
-              )
-            : 0;
-          const isTrialActive = status === 'trial' && trialDaysRemaining > 0;
-          const isSubscribed = status === 'active' || isTrialActive;
+        const response = await fetch('/api/stripe/get-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerId,
+            userId: userIdToSend,
+          }),
+          cache: 'no-store', // Prevent service worker caching
+        });
 
-          // Use plan from API response - should be specific plan name (lunary_plus, lunary_plus_ai, or lunary_plus_ai_annual)
-          // Stripe API should return specific plan name via price ID mapping, not generic 'monthly'/'yearly'
-          const planFromApi = sub.plan || 'free';
-          const normalizedPlan = normalizePlanType(planFromApi);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.subscription) {
+            const sub = data.subscription;
+            const status = sub.status === 'trialing' ? 'trial' : sub.status;
+            const trialEnd = sub.trial_end || sub.trialEnd;
+            const trialDaysRemaining = trialEnd
+              ? Math.max(
+                  0,
+                  Math.ceil(
+                    (trialEnd * 1000 - Date.now()) / (1000 * 60 * 60 * 24),
+                  ),
+                )
+              : 0;
+            const isTrialActive = status === 'trial' && trialDaysRemaining > 0;
+            const isSubscribed = status === 'active' || isTrialActive;
 
-          // Map to simplified plan state for UI (free/monthly/yearly)
-          // Note: Both lunary_plus and lunary_plus_ai map to 'monthly' for UI purposes
-          const planForState =
-            normalizedPlan === 'lunary_plus_ai_annual'
-              ? 'yearly'
-              : normalizedPlan === 'lunary_plus_ai'
-                ? 'monthly'
-                : normalizedPlan === 'lunary_plus'
+            // Use plan from API response - should be specific plan name (lunary_plus, lunary_plus_ai, or lunary_plus_ai_annual)
+            // Stripe API should return specific plan name via price ID mapping, not generic 'monthly'/'yearly'
+            const planFromApi = sub.plan || 'free';
+            const normalizedPlan = normalizePlanType(planFromApi);
+
+            // Map to simplified plan state for UI (free/monthly/yearly)
+            // Note: Both lunary_plus and lunary_plus_ai map to 'monthly' for UI purposes
+            const planForState =
+              normalizedPlan === 'lunary_plus_ai_annual'
+                ? 'yearly'
+                : normalizedPlan === 'lunary_plus_ai'
                   ? 'monthly'
-                  : 'free';
+                  : normalizedPlan === 'lunary_plus'
+                    ? 'monthly'
+                    : 'free';
 
-          const stripeBasedState: SubscriptionStatus = {
-            isSubscribed,
-            isTrialActive,
-            trialDaysRemaining,
-            plan: planForState as 'free' | 'monthly' | 'yearly',
-            planName: sub.planName,
-            status: status as
-              | 'free'
-              | 'trial'
-              | 'active'
-              | 'cancelled'
-              | 'past_due',
-            hasAccess: (feature) => {
-              // Defensive check: if plan is lunary_plus_ai_annual or yearly and status is trial/active, always grant access
-              // Check both normalized and raw plan to handle cases where normalization might not have occurred
-              if (
-                (normalizedPlan === 'lunary_plus_ai_annual' ||
-                  planFromApi === 'lunary_plus_ai_annual' ||
-                  planFromApi === 'yearly') &&
-                (status === 'trial' || status === 'active')
-              ) {
-                const hasAccess =
-                  FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
-                return hasAccess;
+            const stripeBasedState: SubscriptionStatus = {
+              isSubscribed,
+              isTrialActive,
+              trialDaysRemaining,
+              plan: planForState as 'free' | 'monthly' | 'yearly',
+              planName: sub.planName,
+              status: status as
+                | 'free'
+                | 'trial'
+                | 'active'
+                | 'cancelled'
+                | 'past_due',
+              hasAccess: (feature) => {
+                // Defensive check: if plan is lunary_plus_ai_annual or yearly and status is trial/active, always grant access
+                // Check both normalized and raw plan to handle cases where normalization might not have occurred
+                if (
+                  (normalizedPlan === 'lunary_plus_ai_annual' ||
+                    planFromApi === 'lunary_plus_ai_annual' ||
+                    planFromApi === 'yearly') &&
+                  (status === 'trial' || status === 'active')
+                ) {
+                  const hasAccess =
+                    FEATURE_ACCESS.lunary_plus_ai_annual.includes(feature);
+                  return hasAccess;
+                }
+
+                if (
+                  (normalizedPlan === 'lunary_plus_ai' ||
+                    planFromApi === 'lunary_plus_ai') &&
+                  (status === 'trial' || status === 'active')
+                ) {
+                  const hasAccess =
+                    FEATURE_ACCESS.lunary_plus_ai.includes(feature);
+                  return hasAccess;
+                }
+
+                const access = hasFeatureAccess(
+                  status,
+                  normalizedPlan,
+                  feature,
+                );
+                return access;
+              },
+              showUpgradePrompt: !isSubscribed && status !== 'cancelled',
+              customerId: sub.customerId,
+              subscriptionId: sub.id,
+              loading: false,
+            };
+
+            // Store Stripe data for comparison with profile
+            setStripeSubscriptionData({
+              plan: planFromApi,
+              status: sub.status,
+              customerId: sub.customerId,
+            });
+
+            // Sync to profile if plan differs (to prevent infinite loops)
+            if (me?.profile?.subscription && !hasSyncedProfile) {
+              const profilePlan = me.profile.subscription.plan;
+              const needsSync =
+                (profilePlan === 'monthly' || profilePlan === 'yearly') &&
+                !profilePlan.includes('lunary') &&
+                planFromApi !== profilePlan;
+
+              if (needsSync) {
+                setHasSyncedProfile(true);
+                // Sync in background - don't await to prevent blocking
+                syncSubscriptionToProfile(me.profile, sub.customerId).catch(
+                  (err) => {
+                    console.error(
+                      '[useSubscription] Failed to sync profile:',
+                      err,
+                    );
+                    setHasSyncedProfile(false); // Allow retry on error
+                  },
+                );
               }
-
-              if (
-                (normalizedPlan === 'lunary_plus_ai' ||
-                  planFromApi === 'lunary_plus_ai') &&
-                (status === 'trial' || status === 'active')
-              ) {
-                const hasAccess =
-                  FEATURE_ACCESS.lunary_plus_ai.includes(feature);
-                return hasAccess;
-              }
-
-              const access = hasFeatureAccess(status, normalizedPlan, feature);
-              return access;
-            },
-            showUpgradePrompt: !isSubscribed && status !== 'cancelled',
-            customerId: sub.customerId,
-            subscriptionId: sub.id,
-            loading: false,
-          };
-
-          // Store Stripe data for comparison with profile
-          setStripeSubscriptionData({
-            plan: planFromApi,
-            status: sub.status,
-            customerId: sub.customerId,
-          });
-
-          // Sync to profile if plan differs (to prevent infinite loops)
-          if (me?.profile?.subscription && !hasSyncedProfile) {
-            const profilePlan = me.profile.subscription.plan;
-            const needsSync =
-              (profilePlan === 'monthly' || profilePlan === 'yearly') &&
-              !profilePlan.includes('lunary') &&
-              planFromApi !== profilePlan;
-
-            if (needsSync) {
-              setHasSyncedProfile(true);
-              // Sync in background - don't await to prevent blocking
-              syncSubscriptionToProfile(me.profile, sub.customerId).catch(
-                (err) => {
-                  console.error(
-                    '[useSubscription] Failed to sync profile:',
-                    err,
-                  );
-                  setHasSyncedProfile(false); // Allow retry on error
-                },
-              );
             }
-          }
 
-          setSubscriptionState(stripeBasedState);
-          return;
+            setSubscriptionState(stripeBasedState);
+            return;
+          } else {
+            // Stripe returned success: false or no subscription - default to free
+            console.log(
+              '[useSubscription] No subscription found in Stripe, defaulting to free',
+            );
+            setSubscriptionState(defaultState);
+            return;
+          }
         } else {
+          console.warn(
+            '[useSubscription] Failed to fetch subscription:',
+            response.status,
+          );
         }
-      } else {
-        console.warn(
-          '[useSubscription] Failed to fetch subscription:',
-          response.status,
+      } catch (error) {
+        console.error(
+          '[useSubscription] Error fetching subscription from Stripe:',
+          error,
         );
       }
-    } catch (error) {
-      console.error(
-        '[useSubscription] Error fetching subscription from Stripe:',
-        error,
-      );
-    }
 
-    // If we get here, Stripe fetch failed or returned no subscription
-    // Fall back to profile subscription or default state
-    setSubscriptionState((prev) => ({ ...prev, loading: false }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // hasSyncedProfile and me.profile are intentionally excluded to prevent infinite loops
-  }, []); // hasSyncedProfile and me.profile intentionally excluded
+      // If we get here, Stripe fetch failed or returned no subscription
+      // Explicitly default to free tier
+      setSubscriptionState(defaultState);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // hasSyncedProfile and me.profile are intentionally excluded to prevent infinite loops
+    },
+    [],
+  ); // hasSyncedProfile and me.profile intentionally excluded
 
   useEffect(() => {
     if (!hasJazzProvider) {
@@ -318,6 +337,13 @@ export function useSubscription(): SubscriptionStatus {
       // Normalize status: 'trialing' -> 'trial' for consistency
       const rawStatus = profileSubscription.status;
       const status = rawStatus === 'trialing' ? 'trial' : rawStatus;
+
+      // If status is cancelled or past_due, default to free
+      if (status === 'cancelled' || status === 'past_due') {
+        setSubscriptionState(defaultState);
+        return;
+      }
+
       const plan = profileSubscription.plan || 'free';
 
       // If profile has generic plan (monthly/yearly) but we have customer ID, fetch from Stripe to get exact plan
@@ -329,7 +355,8 @@ export function useSubscription(): SubscriptionStatus {
         !plan.includes('lunary')
       ) {
         setHasCheckedStripe(true);
-        fetchFromStripe(customerId);
+        const userId = (me as any)?.id || null;
+        fetchFromStripe(customerId, userId);
         return;
       }
       const isTrialActive =
@@ -418,7 +445,8 @@ export function useSubscription(): SubscriptionStatus {
 
       if (customerId && !profileSubscription) {
         // No profile subscription but we have customer ID - fetch from Stripe
-        fetchFromStripe(customerId);
+        const userId = (me as any)?.id || null;
+        fetchFromStripe(customerId, userId);
         return;
       } else {
         // No customer ID or no profile subscription - use default state
