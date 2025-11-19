@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine cache headers based on forceRefresh
-    const cacheHeaders = forceRefresh
+    const cacheHeaders: Record<string, string> = forceRefresh
       ? {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
