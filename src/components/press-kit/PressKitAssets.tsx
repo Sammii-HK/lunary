@@ -18,22 +18,23 @@ interface PressAssetGroup {
 const assetGroups: PressAssetGroup[] = [
   {
     title: 'Logos',
-    description: 'Primary and alternate marks for light/dark backgrounds.',
+    description:
+      'Primary Lunary Logo (Light), Primary Lunary Logo (Dark), Wordmark, Icon (Moon Symbol), App Icon (Square).',
     assets: [
       {
-        name: 'Lunary Logo – Light',
+        name: 'Primary Lunary Logo – Light',
         file: '/press-kit/lunary-logo-light.png',
         size: '3200 × 1200',
         format: 'PNG',
       },
       {
-        name: 'Lunary Logo – Dark',
+        name: 'Primary Lunary Logo – Dark',
         file: '/press-kit/lunary-logo-dark.png',
         size: '3200 × 1200',
         format: 'PNG',
       },
       {
-        name: 'Lunary Symbol',
+        name: 'Icon (Moon Symbol)',
         file: '/press-kit/lunary-glyph.svg',
         size: 'Vector',
         format: 'SVG',
@@ -41,33 +42,37 @@ const assetGroups: PressAssetGroup[] = [
     ],
   },
   {
-    title: 'App Screens',
-    description: 'High-res marketing captures of the Lunary experience.',
+    title: 'Product Screenshots',
+    description:
+      'Home Dashboard, Daily Horoscope, Tarot Reader, Crystal Identifier, Ritual Generator, Emotional Reflection UI, Birth Chart View, AI Astral Companion, Book of Shadows, Cosmic Event Pages.',
     assets: [
       {
-        name: 'Cosmic Dashboard',
+        name: 'Home Dashboard',
         file: '/press-kit/screenshot-dashboard.png',
         size: '2400 × 1800',
         format: 'PNG',
-        description: 'Home experience with widgets',
+        description: 'Daily astro + tarot widgets',
       },
       {
-        name: 'Cosmic Report Generator',
+        name: 'Daily Horoscope',
         file: '/press-kit/screenshot-report.png',
         size: '2400 × 1800',
         format: 'PNG',
+        description: 'Personalised cosmic insights',
       },
       {
-        name: 'Mobile Moon Ritual',
+        name: 'Mobile Experience',
         file: '/press-kit/screenshot-mobile.png',
         size: '1284 × 2778',
         format: 'PNG',
+        description: 'Tarot readings and rituals',
       },
     ],
   },
   {
-    title: 'Founder',
-    description: 'Portraits and bio-ready assets.',
+    title: 'Founder Assets',
+    description:
+      'Portraits, headshots, and bio-ready materials for Sammii H-K.',
     assets: [
       {
         name: 'Founder Portrait',
@@ -94,8 +99,8 @@ export function PressKitAssets() {
         </p>
         <h3 className='text-3xl font-semibold text-white'>Press Kit Assets</h3>
         <p className='text-sm text-zinc-300'>
-          Logos, screenshots, founder portraits, and ready-to-use bios for
-          coverage.
+          Download logos, product screenshots, founder portraits, brand assets,
+          and ready-to-use materials for media coverage.
         </p>
         <Link
           href='/press-kit/lunary-press-kit.zip'
