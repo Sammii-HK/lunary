@@ -354,7 +354,9 @@ export default function WelcomePage() {
           </div>
         </section>
       </div>
-      <MarketingFooter />
+      <div className='mt-auto'>
+        <MarketingFooter />
+      </div>
     </main>
   );
 }

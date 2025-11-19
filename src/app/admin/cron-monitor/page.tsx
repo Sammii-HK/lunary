@@ -86,6 +86,49 @@ export default function CronMonitorPage() {
     }
   };
 
+  const triggerMoonCircle = async (date?: string, force?: boolean) => {
+    setLoading(true);
+    const dateStr = date || new Date().toISOString().split('T')[0];
+    setLogs(
+      `🌙 Creating Moon Circle for ${dateStr}${force ? ' (force)' : ''}...\n`,
+    );
+
+    try {
+      const response = await fetch('/api/cron/moon-circles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date: dateStr, force }),
+      });
+
+      const result = await response.json();
+      setLastResult(result);
+
+      if (result.success) {
+        setLogs(
+          (prev) =>
+            prev +
+            `\n✅ Moon Circle ${result.moonCircleGenerated ? 'created' : 'check completed'}\n${JSON.stringify(result, null, 2)}`,
+        );
+      } else {
+        setLogs(
+          (prev) =>
+            prev +
+            `\n❌ Moon Circle creation failed: ${result.error || result.message}\n${JSON.stringify(result, null, 2)}`,
+        );
+      }
+    } catch (error) {
+      setLogs(
+        (prev) =>
+          prev +
+          `\n❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const checkCronStatus = async () => {
     setLoading(true);
     try {
@@ -136,7 +179,7 @@ export default function CronMonitorPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'>
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-8'>
         <Card>
           <CardHeader className='pb-3'>
             <CardTitle className='text-lg flex items-center gap-2'>
@@ -153,6 +196,35 @@ export default function CronMonitorPage() {
             >
               <Play className='h-4 w-4 mr-2' />
               {loading ? 'Running...' : 'Trigger Now'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className='pb-3'>
+            <CardTitle className='text-lg flex items-center gap-2'>
+              🌙 Moon Circle
+            </CardTitle>
+            <CardDescription>Create Moon Circle for today</CardDescription>
+          </CardHeader>
+          <CardContent className='space-y-2'>
+            <Button
+              onClick={() => triggerMoonCircle()}
+              disabled={loading}
+              className='w-full'
+              variant='outline'
+            >
+              <Play className='h-4 w-4 mr-2' />
+              Check/Create
+            </Button>
+            <Button
+              onClick={() => triggerMoonCircle(undefined, true)}
+              disabled={loading}
+              className='w-full'
+              variant='destructive'
+              size='sm'
+            >
+              Force Recreate
             </Button>
           </CardContent>
         </Card>

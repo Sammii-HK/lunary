@@ -1,12 +1,12 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
 import { conversionTracking } from '@/lib/analytics';
-import { Sparkles, Zap, Star } from 'lucide-react';
+import { Sparkles, Zap, Star, X } from 'lucide-react';
 
 export type UpgradePromptVariant =
   | 'banner'
@@ -39,6 +39,9 @@ const PLAN_LABELS: Record<PlanType, string> = {
   lunary_plus_ai_annual: 'Lunary+ AI Annual',
 };
 
+const TRIAL_UPSELL_DISMISSAL_KEY = 'trialUpsellDismissed';
+const TRIAL_UPSELL_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 export function UpgradePrompt({
   variant = 'card',
   featureName,
@@ -51,11 +54,37 @@ export function UpgradePrompt({
 }: UpgradePromptProps) {
   const subscription = useSubscription();
   const authState = useAuthStatus();
+  const [isDismissed, setIsDismissed] = useState(false);
 
   const { showUpgradePrompt, isTrialActive, trialDaysRemaining, isSubscribed } =
     subscription;
 
-  if (!showUpgradePrompt && !isTrialActive) return null;
+  // Check if trial upsell was dismissed recently
+  useEffect(() => {
+    if (isTrialActive) {
+      const dismissedData = localStorage.getItem(TRIAL_UPSELL_DISMISSAL_KEY);
+      if (dismissedData) {
+        try {
+          const { timestamp } = JSON.parse(dismissedData);
+          const timeSinceDismissed = Date.now() - timestamp;
+          if (timeSinceDismissed < TRIAL_UPSELL_COOLDOWN_MS) {
+            // Still in cooldown period
+            setIsDismissed(true);
+            return;
+          }
+        } catch (e) {
+          // Invalid data, continue
+        }
+      }
+      setIsDismissed(false);
+    }
+  }, [isTrialActive]);
+
+  // For trial-specific prompts, only show if user is actually on trial AND not dismissed
+  // For general upgrade prompts, show if showUpgradePrompt is true (free users)
+  // This prevents showing trial upsells to paid users who are not on trial
+  if (isTrialActive && isDismissed) return null;
+  if (!isTrialActive && !showUpgradePrompt) return null;
 
   if (onShow && showUpgradePrompt) {
     onShow();
@@ -82,12 +111,32 @@ export function UpgradePrompt({
     conversionTracking.upgradeClicked(featureName);
   };
 
+  const handleDismiss = () => {
+    if (isTrialActive) {
+      // Store dismissal timestamp for trial upsells
+      localStorage.setItem(
+        TRIAL_UPSELL_DISMISSAL_KEY,
+        JSON.stringify({ timestamp: Date.now() }),
+      );
+      setIsDismissed(true);
+    }
+  };
+
   switch (variant) {
     case 'banner':
       return (
         <div
-          className={`bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-lg p-4 ${className}`}
+          className={`bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-lg p-4 relative ${className}`}
         >
+          {isTrialActive && (
+            <button
+              onClick={handleDismiss}
+              className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-100 transition-colors p-1'
+              aria-label='Dismiss'
+            >
+              <X className='w-4 h-4' />
+            </button>
+          )}
           <div className='flex items-center justify-between gap-4'>
             <div className='flex items-center gap-3'>
               <Zap className='w-5 h-5 text-purple-400' />
@@ -138,8 +187,17 @@ export function UpgradePrompt({
     case 'floating':
       return (
         <div
-          className={`fixed bottom-4 right-4 bg-zinc-900 border border-zinc-700 rounded-lg p-4 max-w-sm z-50 shadow-lg ${className}`}
+          className={`fixed bottom-4 right-4 bg-zinc-900 border border-zinc-700 rounded-lg p-4 max-w-sm z-50 shadow-lg relative ${className}`}
         >
+          {isTrialActive && (
+            <button
+              onClick={handleDismiss}
+              className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-100 transition-colors p-1'
+              aria-label='Dismiss'
+            >
+              <X className='w-4 h-4' />
+            </button>
+          )}
           <div className='flex items-start gap-3'>
             <Sparkles className='w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0' />
             <div className='flex-1'>

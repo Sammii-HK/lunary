@@ -326,6 +326,13 @@ export function useSubscription(): SubscriptionStatus {
       // Normalize status: 'trialing' -> 'trial' for consistency
       const rawStatus = profileSubscription.status;
       const status = rawStatus === 'trialing' ? 'trial' : rawStatus;
+
+      // If status is cancelled or past_due, default to free
+      if (status === 'cancelled' || status === 'past_due') {
+        setSubscriptionState(defaultState);
+        return;
+      }
+
       const plan = profileSubscription.plan || 'free';
 
       // If profile has generic plan (monthly/yearly) but we have customer ID, fetch from Stripe to get exact plan
@@ -337,7 +344,8 @@ export function useSubscription(): SubscriptionStatus {
         !plan.includes('lunary')
       ) {
         setHasCheckedStripe(true);
-        fetchFromStripe(customerId);
+        const userId = (me as any)?.id || null;
+        fetchFromStripe(customerId, userId);
         return;
       }
       const isTrialActive =
@@ -426,7 +434,8 @@ export function useSubscription(): SubscriptionStatus {
 
       if (customerId && !profileSubscription) {
         // No profile subscription but we have customer ID - fetch from Stripe
-        fetchFromStripe(customerId);
+        const userId = (me as any)?.id || null;
+        fetchFromStripe(customerId, userId);
         return;
       } else {
         // No customer ID or no profile subscription - use default state

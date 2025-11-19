@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getSentEvents,
-  markEventAsSent,
   cleanupOldDates,
   getSentEventsCount,
 } from '@/app/api/cron/shared-notification-tracker';
+import {
+  sendUnifiedNotification,
+  NotificationEvent,
+} from '@/lib/notifications/unified-service';
 
 // This endpoint runs every 4 hours to check for astronomical events
 export async function GET(request: NextRequest) {
@@ -63,7 +66,7 @@ export async function GET(request: NextRequest) {
     // Filter out events that have already been notified about today
     // This includes events sent by daily cron AND events sent in previous 4-hourly checks
     const newEvents = currentEvents.filter((event: any) => {
-      const eventKey = `${event.type}-${event.name}-${event.priority}`;
+      const eventKey = `${event.type || 'unknown'}-${event.name || 'unknown'}-${event.priority || 0}`;
       // Event is new if it hasn't been sent yet
       return !sentToday.has(eventKey);
     });
@@ -92,18 +95,18 @@ export async function GET(request: NextRequest) {
 
     for (const event of newEvents) {
       try {
-        const eventKey = `${event.type}-${event.name}-${event.priority}`;
-
-        // Map event type to notification type format
-        const getNotificationType = (type: string): string => {
-          const mapping: Record<string, string> = {
-            moon: 'moon_phase',
-            aspect: 'major_aspect',
-            ingress: 'planetary_transit',
-            seasonal: 'sabbat',
-            retrograde: 'retrograde',
-          };
-          return mapping[type] || 'moon_phase';
+        const notificationEvent: NotificationEvent = {
+          name: event.name || 'Cosmic Event',
+          type: event.type || 'unknown',
+          priority: event.priority || 0,
+          planet: event.planet,
+          sign: event.sign,
+          planetA: event.planetA,
+          planetB: event.planetB,
+          aspect: event.aspect,
+          emoji: event.emoji,
+          energy: event.energy,
+          description: event.description,
         };
 
         const response = await fetch(`${baseUrl}/api/notifications/send`, {
@@ -142,6 +145,16 @@ export async function GET(request: NextRequest) {
           event.priority,
           '4-hourly',
         );
+
+        totalSent += result.recipientCount || 0;
+        results.push({
+          success: result.success,
+          recipientCount: result.recipientCount,
+          successful: result.successful,
+          failed: result.failed,
+          eventName: event.name,
+          eventKey: result.eventKey,
+        });
       } catch (eventError) {
         console.error(
           `Failed to send notification for event ${event.name}:`,
@@ -184,9 +197,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Same logic as daily-posts but for 4-hourly checks
-function getNotificationWorthyEvents(cosmicData: any) {
-  const events: any[] = [];
-
+function getNotificationWorthyEvents(cosmicData: any): any[] {
   // Build allEvents array from available data (same as daily-posts)
   const allEvents: any[] = [];
 
@@ -274,14 +285,8 @@ function getNotificationWorthyEvents(cosmicData: any) {
     return isEventNotificationWorthy(event);
   });
 
-  // Create notification objects for only 1 most significant event (limit for 4-hourly)
-  const eventsToSend = notificationWorthyEvents.slice(0, 1);
-
-  for (const event of eventsToSend) {
-    events.push(createNotificationFromEvent(event, cosmicData));
-  }
-
-  return events;
+  // Return raw events (not notification objects) - unified service will create notifications
+  return notificationWorthyEvents.slice(0, 1);
 }
 
 function isEventNotificationWorthy(event: any): boolean {
@@ -328,12 +333,12 @@ function createNotificationFromEvent(event: any, cosmicData?: any) {
 
     switch (event.type) {
       case 'moon':
-        return eventName;
+        return eventName || 'Moon Phase';
 
       case 'aspect':
         if (event.planetA && event.planetB && event.aspect) {
-          const planetAName = event.planetA.name || event.planetA;
-          const planetBName = event.planetB.name || event.planetB;
+          const planetAName = event.planetA.name || event.planetA || 'Planet';
+          const planetBName = event.planetB.name || event.planetB || 'Planet';
           const aspectName =
             event.aspect.charAt(0).toUpperCase() + event.aspect.slice(1);
           return `${planetAName}-${planetBName} ${aspectName}`;
@@ -341,17 +346,23 @@ function createNotificationFromEvent(event: any, cosmicData?: any) {
         return eventName || 'Planetary Aspect';
 
       case 'seasonal':
-        return eventName;
+        return eventName || 'Seasonal Event';
 
       case 'ingress':
         if (event.planet && event.sign) {
           return `${event.planet} Enters ${event.sign}`;
+        }
+        if (eventName && eventName.includes('Enters')) {
+          return eventName;
         }
         return eventName || 'Planetary Ingress';
 
       case 'retrograde':
         if (event.planet) {
           return `${event.planet} Retrograde Begins`;
+        }
+        if (eventName && eventName.includes('Retrograde')) {
+          return eventName;
         }
         return eventName || 'Planetary Retrograde';
 
@@ -364,23 +375,31 @@ function createNotificationFromEvent(event: any, cosmicData?: any) {
     let body = '';
     switch (event.type) {
       case 'moon':
-        body = getMoonPhaseDescription(event.name, cosmicData);
+        body = getMoonPhaseDescription(event.name || 'Moon Phase', cosmicData);
         break;
 
       case 'aspect':
-        body = getAspectDescription(event);
+        body =
+          getAspectDescription(event) ||
+          'Powerful cosmic alignment creating new opportunities';
         break;
 
       case 'seasonal':
-        body = getSeasonalDescription(event.name);
+        body = getSeasonalDescription(event.name || 'Seasonal Event');
         break;
 
       case 'ingress':
-        body = getIngressDescription(event.planet, event.sign);
+        body = getIngressDescription(
+          event.planet || event.name?.split(' ')[0],
+          event.sign || event.name?.split(' ')[2],
+        );
         break;
 
       case 'retrograde':
-        body = getRetrogradeDescription(event.planet, event.sign);
+        body = getRetrogradeDescription(
+          event.planet || event.name?.split(' ')[0],
+          event.sign,
+        );
         break;
 
       default:
@@ -498,7 +517,11 @@ function createNotificationFromEvent(event: any, cosmicData?: any) {
     return description;
   };
 
-  const getIngressDescription = (planet: string, sign: string): string => {
+  const getIngressDescription = (planet?: string, sign?: string): string => {
+    if (!planet || !sign) {
+      return 'Planetary energy shift creating new opportunities';
+    }
+
     // Use the same influence mappings as horoscope code for consistency
     const planetInfluences: Record<string, Record<string, string>> = {
       Mars: {

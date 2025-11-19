@@ -20,6 +20,7 @@ export const PushSubscription = co.map({
     sabbats: z.boolean(),
     eclipses: z.boolean(),
     majorAspects: z.boolean(),
+    moonCircles: z.boolean(),
   }),
 });
 

@@ -45,7 +45,23 @@ export function SignOutButton() {
           'jazz',
           'co-',
           'account',
+          'subscription',
+          'stripe_subscription',
+          'subscription_data',
+          'trialUpgradeModalDismissed',
+          'exitIntentDismissed',
         ];
+
+        // Clear subscription-related keys with prefixes
+        Object.keys(localStorage).forEach((key) => {
+          if (
+            key.startsWith('weekly_insights_') ||
+            key.startsWith('subscription_') ||
+            key.startsWith('stripe_')
+          ) {
+            localStorage.removeItem(key);
+          }
+        });
 
         specificKeys.forEach((key) => {
           localStorage.removeItem(key);
@@ -69,9 +85,23 @@ export function SignOutButton() {
         console.log('✅ Cleared cookies');
       }
 
-      console.log('🎉 Complete sign out finished');
+      // Step 4: Clear service worker caches for subscription API responses
+      try {
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(
+            cacheNames.map((cacheName) => caches.delete(cacheName)),
+          );
+          console.log('✅ Cleared service worker caches');
+        }
+      } catch (e) {
+        console.warn('Could not clear service worker caches:', e);
+      }
 
-      console.log('✅ Sign out completed');
+      // Step 5: Force page reload to clear React state
+      window.location.href = '/';
+
+      console.log('🎉 Complete sign out finished');
     } catch (error) {
       console.error('❌ Sign out error:', error);
     } finally {
