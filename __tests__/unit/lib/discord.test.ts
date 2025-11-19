@@ -1,6 +1,12 @@
 const originalWebhook = process.env.DISCORD_WEBHOOK_URL;
 const originalFetch = global.fetch;
 
+const mockSql = jest.fn();
+
+jest.mock('@vercel/postgres', () => ({
+  sql: (...args: any[]) => mockSql(...args),
+}));
+
 const setFetchMock = () => {
   const fetchMock = jest.fn();
   (global as any).fetch = fetchMock;
@@ -17,6 +23,20 @@ const resetEnvironment = () => {
 };
 
 describe('sendDiscordNotification', () => {
+  beforeEach(() => {
+    mockSql.mockReset();
+    mockSql.mockImplementation(async () => {
+      return { rows: [{ count: '0' }] };
+    });
+    jest.useFakeTimers();
+    const mockDate = new Date('2024-01-15T12:00:00Z');
+    jest.setSystemTime(mockDate);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   afterEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
@@ -89,10 +109,14 @@ describe('sendDiscordNotification', () => {
 
     const { sendDiscordNotification } = await import('@/lib/discord');
 
-    const result = await sendDiscordNotification({
+    const resultPromise = sendDiscordNotification({
       title: 'Retry Event',
       description: 'Attempt twice',
     });
+
+    await jest.advanceTimersByTimeAsync(500);
+
+    const result = await resultPromise;
 
     expect(result.ok).toBe(true);
     expect(fetchMock).toHaveBeenCalledTimes(2);
