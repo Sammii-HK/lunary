@@ -187,15 +187,16 @@ export async function GET(request: NextRequest) {
     try {
       const dauResult = await sql`
         SELECT COUNT(DISTINCT user_id) as count
-        FROM user_sessions
-        WHERE session_date = CURRENT_DATE
+        FROM analytics_user_activity
+        WHERE activity_type = 'session' AND activity_date = CURRENT_DATE
       `;
       dau = parseInt(dauResult.rows[0]?.count || '0');
 
       const wauResult = await sql`
         SELECT COUNT(DISTINCT user_id) as count
-        FROM user_sessions
-        WHERE session_timestamp >= NOW() - INTERVAL '7 days'
+        FROM analytics_user_activity
+        WHERE activity_type = 'session'
+          AND activity_date >= CURRENT_DATE - INTERVAL '6 days'
       `;
       wau = parseInt(wauResult.rows[0]?.count || '0');
 

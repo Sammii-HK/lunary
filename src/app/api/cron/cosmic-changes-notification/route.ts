@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
       WHERE is_active = true
       AND (
         preferences->>'cosmicChanges' = 'true'
+        OR (preferences->>'cosmicChanges')::boolean = true
         OR preferences->>'cosmicChanges' IS NULL
       )
       AND (
@@ -133,6 +134,16 @@ export async function GET(request: NextRequest) {
             ? 'https://lunary.app'
             : 'http://localhost:3000';
 
+        const hour = now.getUTCHours();
+        const isQuietHours = hour >= 22 || hour < 8;
+
+        if (isQuietHours) {
+          console.log(
+            `[cosmic-changes] Skipped during quiet hours (${hour}:00 UTC)`,
+          );
+          continue;
+        }
+
         const pushNotification = {
           title: notificationTitle,
           body: notificationText,
@@ -144,6 +155,7 @@ export async function GET(request: NextRequest) {
             url: `${baseUrl}/cosmic-state`,
             type: 'cosmic_changes',
             date: dateStr,
+            isScheduled: true,
           },
           actions: [
             {

@@ -154,6 +154,77 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Helper function to extract discount and payment info from Stripe subscription
+function extractDiscountInfo(subscription: Stripe.Subscription) {
+  const discounts = subscription.discounts || [];
+  const hasDiscount = discounts.length > 0;
+
+  // Get total discount percent (if multiple discounts, sum them)
+  let totalDiscountPercent = 0;
+  let couponId: string | null = null;
+
+  if (hasDiscount && discounts.length > 0) {
+    const discount = discounts[0];
+    if (typeof discount !== 'string' && discount?.coupon) {
+      couponId = discount.coupon.id;
+      if (discount.coupon.percent_off) {
+        totalDiscountPercent = discount.coupon.percent_off;
+      } else if (discount.coupon.amount_off) {
+        // For fixed amount discounts, we'd need the subscription amount to calculate percent
+        // For now, mark as having discount but don't calculate percent
+        totalDiscountPercent = 0; // Will be calculated from amount_due
+      }
+    }
+  }
+
+  // Calculate monthly amount due (after discounts)
+  // Get amount from subscription items (price * quantity) and apply discounts
+  const subscriptionItem = subscription.items.data[0];
+  const price = subscriptionItem?.price;
+  const unitAmount = price?.unit_amount || 0; // Price in cents
+  const quantity = subscriptionItem?.quantity || 1;
+  const currency = price?.currency || 'gbp';
+  const interval = price?.recurring?.interval || 'month';
+
+  // Calculate base amount before discounts
+  let baseAmount = (unitAmount * quantity) / 100; // Convert cents to GBP
+
+  // Apply discount if present
+  let monthlyAmountDue = baseAmount;
+  if (hasDiscount && discounts.length > 0) {
+    const discount = discounts[0];
+    if (typeof discount !== 'string' && discount?.coupon) {
+      if (discount.coupon.percent_off) {
+        monthlyAmountDue = baseAmount * (1 - discount.coupon.percent_off / 100);
+      } else if (discount.coupon.amount_off) {
+        // Fixed amount discount
+        const discountAmount = discount.coupon.amount_off / 100; // Convert cents to GBP
+        monthlyAmountDue = Math.max(0, baseAmount - discountAmount);
+      }
+    }
+  }
+
+  // Convert yearly to monthly if needed
+  if (interval === 'year') {
+    monthlyAmountDue = monthlyAmountDue / 12;
+  }
+
+  // If we have a 100% discount, calculate percent
+  if (hasDiscount && monthlyAmountDue === 0 && totalDiscountPercent === 0) {
+    if (baseAmount > 0) {
+      totalDiscountPercent = 100;
+    }
+  }
+
+  return {
+    hasDiscount,
+    discountPercent: totalDiscountPercent,
+    monthlyAmountDue,
+    couponId,
+    isPaying: monthlyAmountDue > 0,
+  };
+}
+
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const stripe = getStripe();
   console.log('Subscription created:', subscription.id);
@@ -165,6 +236,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
   const status = subscription.status;
   const planType = await getPlanTypeFromSubscription(subscription);
+  const discountInfo = extractDiscountInfo(subscription);
 
   // Get customer to retrieve user_id and email for database sync
   let userId: string | null = null;
@@ -250,7 +322,11 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
             stripe_customer_id,
             stripe_subscription_id,
             trial_ends_at,
-            current_period_end
+            current_period_end,
+            has_discount,
+            discount_percent,
+            monthly_amount_due,
+            coupon_id
           ) VALUES (
             ${userId},
             ${userEmail},
@@ -259,7 +335,11 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
             ${customerId},
             ${subscription.id},
             ${trialEndsAt},
-            ${currentPeriodEnd}
+            ${currentPeriodEnd},
+            ${discountInfo.hasDiscount},
+            ${discountInfo.discountPercent || null},
+            ${discountInfo.monthlyAmountDue || null},
+            ${discountInfo.couponId || null}
           )
           ON CONFLICT (user_id) DO UPDATE SET
             status = EXCLUDED.status,
@@ -268,6 +348,10 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
             stripe_subscription_id = EXCLUDED.stripe_subscription_id,
             trial_ends_at = EXCLUDED.trial_ends_at,
             current_period_end = EXCLUDED.current_period_end,
+            has_discount = EXCLUDED.has_discount,
+            discount_percent = EXCLUDED.discount_percent,
+            monthly_amount_due = EXCLUDED.monthly_amount_due,
+            coupon_id = EXCLUDED.coupon_id,
             user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
             updated_at = NOW()
         `;
@@ -348,6 +432,7 @@ async function handleSubscriptionUpdated(
   const customerId = subscription.customer as string;
   const status = subscription.status;
   const planType = await getPlanTypeFromSubscription(subscription);
+  const discountInfo = extractDiscountInfo(subscription);
 
   // Get customer to retrieve user_id and email for database sync
   let userId: string | null = null;
@@ -393,6 +478,10 @@ async function handleSubscriptionUpdated(
             stripe_subscription_id = ${subscription.id},
             trial_ends_at = ${trialEndsAt},
             current_period_end = ${currentPeriodEnd},
+            has_discount = ${discountInfo.hasDiscount},
+            discount_percent = ${discountInfo.discountPercent || null},
+            monthly_amount_due = ${discountInfo.monthlyAmountDue || null},
+            coupon_id = ${discountInfo.couponId || null},
             user_email = COALESCE(${userEmail}, subscriptions.user_email),
             updated_at = NOW()
           WHERE user_id = ${userId}
@@ -407,6 +496,10 @@ async function handleSubscriptionUpdated(
             stripe_subscription_id = ${subscription.id},
             trial_ends_at = ${trialEndsAt},
             current_period_end = ${currentPeriodEnd},
+            has_discount = ${discountInfo.hasDiscount},
+            discount_percent = ${discountInfo.discountPercent || null},
+            monthly_amount_due = ${discountInfo.monthlyAmountDue || null},
+            coupon_id = ${discountInfo.couponId || null},
             updated_at = NOW()
           WHERE user_email = ${userEmail}
         `;

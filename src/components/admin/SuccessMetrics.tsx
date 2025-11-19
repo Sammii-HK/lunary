@@ -39,7 +39,10 @@ interface SuccessMetricsData {
   weekly_returning_users: MetricData;
   conversion_rate: MetricData;
   search_impressions_clicks: SearchMetricData;
-  grimoire_articles_indexed: MetricData;
+  monthly_recurring_revenue: MetricData;
+  annual_recurring_revenue: MetricData;
+  active_subscriptions: MetricData;
+  trial_conversion_rate: MetricData;
   ai_chat_messages: MetricData;
   substack_subscribers: MetricData;
 }
@@ -106,12 +109,38 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
       subtitle: data.search_impressions_clicks.note,
     },
     {
-      label: 'Grimoire Articles Indexed',
-      value: data.grimoire_articles_indexed.value,
-      trend: data.grimoire_articles_indexed.trend,
-      change: data.grimoire_articles_indexed.change,
+      label: 'Monthly Recurring Revenue',
+      value: data.monthly_recurring_revenue.value,
+      trend: data.monthly_recurring_revenue.trend,
+      change: data.monthly_recurring_revenue.change,
+      target: null,
+      format: (v: number) =>
+        `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    },
+    {
+      label: 'Annual Recurring Revenue',
+      value: data.annual_recurring_revenue.value,
+      trend: data.annual_recurring_revenue.trend,
+      change: data.annual_recurring_revenue.change,
+      target: null,
+      format: (v: number) =>
+        `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    },
+    {
+      label: 'Active Subscriptions',
+      value: data.active_subscriptions.value,
+      trend: data.active_subscriptions.trend,
+      change: data.active_subscriptions.change,
       target: null,
       format: (v: number) => v.toLocaleString(),
+    },
+    {
+      label: 'Trial Conversion Rate',
+      value: data.trial_conversion_rate.value,
+      trend: data.trial_conversion_rate.trend,
+      change: data.trial_conversion_rate.change,
+      target: data.trial_conversion_rate.target,
+      format: (v: number) => `${v.toFixed(2)}%`,
     },
     {
       label: 'AI Chat Messages',
@@ -122,7 +151,7 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
       format: (v: number) => v.toLocaleString(),
     },
     {
-      label: 'Substack Subscribers',
+      label: 'Push Subscribers',
       value: data.substack_subscribers.value,
       trend: data.substack_subscribers.trend,
       change: data.substack_subscribers.change,

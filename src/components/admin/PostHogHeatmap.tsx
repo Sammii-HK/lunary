@@ -87,10 +87,20 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
   }
 
   // PostHog heatmaps are best accessed via their web dashboard
-  // We'll provide a direct link to the heatmaps view
+  // Convert API host (us.i.posthog.com) to app host (app.posthog.com)
+  // For EU: eu.i.posthog.com -> eu.posthog.com
+  // For US: us.i.posthog.com -> app.posthog.com
+  const getAppHost = (host: string): string => {
+    if (host.includes('eu.i.posthog.com')) {
+      return 'https://eu.posthog.com';
+    }
+    return 'https://app.posthog.com';
+  };
+
+  const appHost = getAppHost(posthogHost);
   const heatmapUrl = pagePath
-    ? `${posthogHost.replace('/i', '')}/insights?insight=TRENDS&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&properties=%5B%7B%22key%22%3A%22%24current_path%22%2C%22value%22%3A%22${encodeURIComponent(pagePath)}%22%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22event%22%7D%5D`
-    : `${posthogHost.replace('/i', '')}/insights?insight=TRENDS&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D`;
+    ? `${appHost}/insights?insight=TRENDS&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&properties=%5B%7B%22key%22%3A%22%24current_path%22%2C%22value%22%3A%22${encodeURIComponent(pagePath)}%22%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22event%22%7D%5D`
+    : `${appHost}/insights?insight=TRENDS&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D`;
 
   return (
     <div className='space-y-4'>

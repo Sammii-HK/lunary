@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { trackActivity } from '@/lib/analytics/tracking';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,42 +14,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await sql`
-      INSERT INTO user_sessions (
-        user_id,
-        session_date,
-        session_timestamp,
-        page_path,
-        metadata,
-        created_at
-      ) VALUES (
-        ${userId},
-        CURRENT_DATE,
-        NOW(),
-        ${pagePath || null},
-        ${metadata ? JSON.stringify(metadata) : null},
-        NOW()
-      )
-    `;
+    // Write to analytics_user_activity for session tracking and DAU/WAU/MAU calculations
+    await trackActivity({
+      userId,
+      activityType: 'session',
+      metadata: {
+        page_path: pagePath,
+        ...(metadata || {}),
+      },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error tracking session:', error);
-
-    if (
-      error instanceof Error &&
-      error.message.includes('relation "user_sessions" does not exist')
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'User sessions table not initialized',
-          message:
-            'Run the database setup script to create the user_sessions table',
-        },
-        { status: 500 },
-      );
-    }
 
     return NextResponse.json(
       {

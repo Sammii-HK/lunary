@@ -135,6 +135,17 @@ export async function GET(request: NextRequest) {
 
         const deepLinkUrl = `${baseUrl}/book-of-shadows?prompt=${encodeURIComponent(cosmicPulse.aiPrompt)}`;
 
+        const now = new Date();
+        const hour = now.getUTCHours();
+        const isQuietHours = hour >= 22 || hour < 8;
+
+        if (isQuietHours) {
+          console.log(
+            `[cosmic-pulse] Skipped during quiet hours (${hour}:00 UTC)`,
+          );
+          continue;
+        }
+
         const pushNotification = {
           title: `🌙 Daily Cosmic Pulse: ${cosmicPulse.moonEnergy}`,
           body: `${cosmicPulse.mainTransit} - Tap to ask Lunary AI`,
@@ -147,6 +158,7 @@ export async function GET(request: NextRequest) {
             type: 'cosmic_pulse',
             date: dateStr,
             moonSign: cosmicPulse.moonSign,
+            isScheduled: true,
           },
           actions: [
             {

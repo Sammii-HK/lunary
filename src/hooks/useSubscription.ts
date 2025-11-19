@@ -83,16 +83,10 @@ export function useSubscription(): SubscriptionStatus {
       try {
         setSubscriptionState((prev) => ({ ...prev, loading: true }));
 
-        // Get userId from me if not provided
-        const userIdToSend = userId || (me as any)?.id || null;
-
         const response = await fetch('/api/stripe/get-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customerId,
-            userId: userIdToSend,
-          }),
+          body: JSON.stringify({ customerId, userId }),
           cache: 'no-store', // Prevent service worker caching
         });
 
@@ -211,12 +205,6 @@ export function useSubscription(): SubscriptionStatus {
             setSubscriptionState(stripeBasedState);
             return;
           } else {
-            // Stripe returned success: false or no subscription - default to free
-            console.log(
-              '[useSubscription] No subscription found in Stripe, defaulting to free',
-            );
-            setSubscriptionState(defaultState);
-            return;
           }
         } else {
           console.warn(
@@ -232,13 +220,14 @@ export function useSubscription(): SubscriptionStatus {
       }
 
       // If we get here, Stripe fetch failed or returned no subscription
-      // Explicitly default to free tier
-      setSubscriptionState(defaultState);
+      // Fall back to profile subscription or default state
+      setSubscriptionState((prev) => ({ ...prev, loading: false }));
       // eslint-disable-next-line react-hooks/exhaustive-deps
       // hasSyncedProfile and me.profile are intentionally excluded to prevent infinite loops
+      // Adding them would cause the callback to recreate on every render, triggering infinite fetch loops
     },
-    [],
-  ); // hasSyncedProfile and me.profile intentionally excluded
+    [getCustomerId],
+  );
 
   useEffect(() => {
     if (!hasJazzProvider) {

@@ -92,13 +92,12 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Count free users from analytics_user_activity
     const freeUsersResult = await sql`
       SELECT COUNT(DISTINCT user_id) AS count
       FROM analytics_user_activity
       WHERE activity_type = 'session'
-        AND activity_date BETWEEN ${formatDate(range.start)} AND ${formatDate(
-          range.end,
-        )}
+        AND activity_date BETWEEN ${formatDate(range.start)} AND ${formatDate(range.end)}
     `;
 
     const trialUsersResult = await sql`

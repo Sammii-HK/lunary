@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendDiscordAdminNotification } from '@/lib/discord';
+import {
+  sendDiscordAdminNotification,
+  queueAnalyticsEvent,
+} from '@/lib/discord';
+
+const HIGH_VALUE_EVENTS = ['trial_converted', 'subscription_started'];
 
 export async function POST(request: NextRequest) {
   try {
-    // Handle empty body gracefully
     const bodyText = await request.text();
     if (!bodyText || bodyText.trim() === '') {
       return NextResponse.json(
@@ -15,51 +19,66 @@ export async function POST(request: NextRequest) {
     const body = JSON.parse(bodyText);
     const { eventType, userId, userEmail, planType, metadata } = body;
 
+    if (eventType === 'signup' || eventType === 'trial_started') {
+      await queueAnalyticsEvent({
+        category: 'analytics',
+        eventType: 'conversion',
+        title: `${eventType}: ${userEmail || 'Unknown'}`,
+        dedupeKey: `conversion-${eventType}-${userId || userEmail || Date.now()}`,
+        metadata: {
+          eventType,
+          userId,
+          userEmail,
+          planType,
+          metadata,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `${eventType} event queued for daily analytics summary`,
+      });
+    }
+
+    if (!HIGH_VALUE_EVENTS.includes(eventType)) {
+      await queueAnalyticsEvent({
+        category: 'analytics',
+        eventType: 'conversion',
+        title: `${eventType}: ${userEmail || 'Unknown'}`,
+        dedupeKey: `conversion-${eventType}-${userId || userEmail || Date.now()}`,
+        metadata: {
+          eventType,
+          userId,
+          userEmail,
+          planType,
+          metadata,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `${eventType} event queued for daily analytics summary`,
+      });
+    }
+
     let title = '';
     let message = '';
-    let priority = 0;
 
     switch (eventType) {
-      case 'signup':
-        // Skip signup notifications - too noisy, only notify on conversions
-        return NextResponse.json({
-          success: true,
-          message: 'Signup event logged (notification skipped)',
-        });
-
-      case 'trial_started':
-        title = '✨ Free Trial Started';
-        message = `User started ${planType || 'monthly'} trial: ${userEmail || 'Unknown email'}`;
-        priority = 1;
-        break;
-
       case 'trial_converted':
         title = '💰 Trial Converted!';
         message = `Trial converted to ${planType || 'monthly'} subscription: ${userEmail || 'Unknown email'}`;
-        priority = 1;
         break;
 
       case 'subscription_started':
         title = '💳 New Subscription!';
         message = `New ${planType || 'monthly'} subscription: ${userEmail || 'Unknown email'}`;
-        priority = 1;
         break;
 
       default:
         title = '📊 Conversion Event';
         message = `${eventType}: ${userEmail || 'Unknown email'}`;
-        priority = 0;
     }
-
-    const priorityMap: Record<string, 'low' | 'normal' | 'high' | 'emergency'> =
-      {
-        '-1': 'low',
-        '0': 'normal',
-        '1': 'high',
-        '2': 'emergency',
-      };
-
-    const pushoverPriority = priorityMap[priority.toString()] || 'normal';
 
     const fields = [
       {
@@ -85,12 +104,14 @@ export async function POST(request: NextRequest) {
     const result = await sendDiscordAdminNotification({
       title,
       message,
-      priority: pushoverPriority,
+      priority: 'high',
       url:
         process.env.NODE_ENV === 'production'
           ? 'https://lunary.app/admin/analytics'
           : 'http://localhost:3000/admin/analytics',
       fields,
+      category: 'urgent',
+      dedupeKey: `conversion-${eventType}-${userId || userEmail || Date.now()}`,
     });
 
     return NextResponse.json({

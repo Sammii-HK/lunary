@@ -28,7 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     const preferences = result.rows[0].preferences || {};
-    const enabled = preferences.tarotNotifications === true;
+    const tarotPref = preferences.tarotNotifications;
+    const enabled = tarotPref === true || tarotPref === 'true';
 
     return NextResponse.json({
       enabled,

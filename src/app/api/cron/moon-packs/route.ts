@@ -94,6 +94,8 @@ export async function POST(request: NextRequest) {
             priority: packTemplate.priority,
             url: packTemplate.url,
             fields,
+            category: 'todo',
+            dedupeKey: `moon-pack-${pack.sku}`,
           });
           console.log(`✅ Notification sent for pack: ${pack.name}`);
         } catch (error) {

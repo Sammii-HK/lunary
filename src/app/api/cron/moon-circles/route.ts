@@ -205,6 +205,21 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
     let emailsSent = 0;
     let emailsFailed = 0;
 
+    const now = new Date();
+    const hour = now.getUTCHours();
+    const isQuietHours = hour >= 22 || hour < 8;
+
+    if (isQuietHours) {
+      console.log(`[moon-circles] Skipped during quiet hours (${hour}:00 UTC)`);
+      return NextResponse.json({
+        success: true,
+        moonCircleGenerated: true,
+        message:
+          'Moon Circle generated but notifications skipped (quiet hours)',
+        date: dateStr,
+      });
+    }
+
     for (const sub of subscriptions.rows) {
       try {
         const preferences = sub.preferences || {};
@@ -224,6 +239,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
             type: 'moon_circle',
             date: dateStr,
             phase: moonCircle.moonPhase,
+            isScheduled: true,
           },
           actions: [
             {

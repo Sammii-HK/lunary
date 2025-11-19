@@ -16,7 +16,7 @@ Next.js 15 full-stack application delivering personalized astrological insights,
 
 **Payments**: Stripe
 
-**Services**: Brevo (Email), Astronomy Engine, pdf-lib
+**Services**: Brevo (Email), Astronomy Engine, pdf-lib, Google Search Console API
 
 **AI**: OpenAI GPT-4o-mini (chat, content generation, conversion optimization)
 
@@ -90,11 +90,60 @@ Real-time planetary position calculations using Astronomy Engine with ecliptic c
 
 **Delivery**: Parallel notification dispatch with Promise.allSettled for error handling, tracks delivery success/failure, marks inactive subscriptions.
 
+### Google Search Console Integration
+
+**Setup**: See `docs/GOOGLE_SEARCH_CONSOLE_SETUP.md` for complete setup instructions.
+
+**Environment Variables**:
+
+- `GOOGLE_CLIENT_ID` - OAuth 2.0 Client ID
+- `GOOGLE_CLIENT_SECRET` - OAuth 2.0 Client Secret
+- `GOOGLE_REFRESH_TOKEN` - OAuth refresh token
+- `GOOGLE_SEARCH_CONSOLE_SITE_URL` - Site URL (e.g., `https://lunary.app`)
+
+**Features**:
+
+- Search performance metrics (impressions, clicks, CTR, position)
+- Top performing queries and pages
+- Integration with analytics dashboard
+- Success metrics tracking
+
 ### Discord Notifications
 
-- Configure a Discord incoming webhook (Server Settings → Integrations → Webhooks) and store the URL in the `DISCORD_WEBHOOK_URL` environment variable for every deployment target (Vercel dashboard, local `.env`, etc.).
-- Mirror the same secret in the Cloudflare Worker by adding `DISCORD_WEBHOOK_URL` to the worker variables so cron-based alerts can reach Discord even when Vercel functions are idle.
-- The backend automatically detects when `DISCORD_WEBHOOK_URL` is present and posts concise cosmic updates to the linked Discord channel alongside push/email sends.
+**Categorized Webhooks** (Recommended Setup):
+
+Configure multiple Discord webhooks for different notification categories:
+
+1. **`DISCORD_WEBHOOK_URGENT`** - Critical alerts (health checks, failures, high-value conversions)
+   - Always delivered (bypasses rate limits, deduplication, quiet hours)
+   - Use for: Site down alerts, trial conversions, subscription starts
+
+2. **`DISCORD_WEBHOOK_ANALYTICS`** - Analytics summaries (condensed daily reports)
+   - Queued events aggregated into daily summaries at 2 AM UTC
+   - Use for: Daily posts summaries, conversion metrics, weekly digests
+
+3. **`DISCORD_WEBHOOK_TODO`** - Tasks requiring action
+   - Rate limited: 5/hour
+   - Use for: Moon pack generation (needs approval), manual review items
+
+4. **`DISCORD_WEBHOOK_GENERAL`** - General notifications
+   - Rate limited: 15/hour
+   - Use for: Miscellaneous notifications
+
+**Fallback**: `DISCORD_WEBHOOK_URL` - Used if category-specific webhooks aren't set (backward compatibility)
+
+**Setup**:
+
+- Create webhooks in Discord (Server Settings → Integrations → Webhooks)
+- Add URLs to environment variables in Vercel dashboard and Cloudflare Worker
+- System automatically routes notifications to appropriate webhooks based on category
+
+**Features**:
+
+- Database-backed deduplication (48h retention)
+- Rate limiting per category (urgent: unlimited)
+- Quiet hours filtering (10 PM - 8 AM UTC, urgent bypasses)
+- Analytics events queued for daily aggregation
 
 ### Automation & Cron Jobs
 

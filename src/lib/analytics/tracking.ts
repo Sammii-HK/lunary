@@ -281,3 +281,65 @@ export async function recordFeatureUsage(
     },
   });
 }
+
+export interface TrackDiscordInteractionInput {
+  discordId: string;
+  lunaryUserId?: string;
+  interactionType:
+    | 'command'
+    | 'button_click'
+    | 'account_linked'
+    | 'account_created';
+  commandName?: string;
+  buttonAction?: string;
+  destinationUrl?: string;
+  feature?: string;
+  campaign?: string;
+  metadata?: Record<string, any>;
+}
+
+export async function trackDiscordInteraction(
+  input: TrackDiscordInteractionInput,
+) {
+  try {
+    await sql`
+      INSERT INTO analytics_discord_interactions (
+        discord_id,
+        lunary_user_id,
+        interaction_type,
+        command_name,
+        button_action,
+        destination_url,
+        feature,
+        campaign,
+        metadata
+      ) VALUES (
+        ${input.discordId},
+        ${input.lunaryUserId || null},
+        ${input.interactionType},
+        ${input.commandName || null},
+        ${input.buttonAction || null},
+        ${input.destinationUrl || null},
+        ${input.feature || null},
+        ${input.campaign || null},
+        ${input.metadata ? JSON.stringify(input.metadata) : null}
+      )
+    `;
+
+    // Also track as user activity if lunary_user_id exists
+    if (input.lunaryUserId && input.interactionType === 'command') {
+      await trackActivity({
+        userId: input.lunaryUserId,
+        activityType: `discord_${input.commandName || 'interaction'}`,
+        metadata: {
+          discord_id: input.discordId,
+          source: 'discord',
+          feature: input.feature,
+          campaign: input.campaign,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('[analytics] Failed to track Discord interaction:', error);
+  }
+}

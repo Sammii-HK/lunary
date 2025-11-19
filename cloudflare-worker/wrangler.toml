@@ -3,13 +3,20 @@ main = "notification-cron.js"
 compatibility_date = "2024-10-30"
 
 # Multiple cron triggers for different tasks - spread throughout the day
+# Free tier limit: 3 crons max
 [triggers]
 crons = [
-  "0 * * * *",    # Every hour - routes to specific tasks based on hour (8 AM cosmic pulse, 2 PM changes, 8 PM moon circles, every 4h snapshots)
+  "0 * * * *",    # Every hour - routes to specific tasks based on hour (8 AM cosmic pulse, 2 PM changes, 6 PM tarot, 8 PM moon circles, every 4h snapshots)
+  "0 2 * * *",    # Daily at 2 AM - cleanup Discord logs and send analytics summary
   "0 10 * * SUN"  # Sunday at 10 AM - weekly cosmic report
 ]
 
 # Environment variables (set these in Cloudflare dashboard)
 [vars]
 # CRON_SECRET
-# DISCORD_WEBHOOK_URL
+# DISCORD_WEBHOOK_URL (fallback, backward compatibility)
+# DISCORD_WEBHOOK_URGENT (recommended - critical alerts)
+# DISCORD_WEBHOOK_ANALYTICS (recommended - daily summaries)
+# DISCORD_WEBHOOK_TODO (optional - tasks requiring action)
+# DISCORD_WEBHOOK_GENERAL (optional - general notifications)
+# DISCORD_WEBHOOK_USER_INTERACTIONS (for Discord bot user interactions)

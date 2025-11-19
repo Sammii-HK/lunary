@@ -52,6 +52,31 @@ export default {
       return await handleCosmicChangesNotification(baseUrl, env, today);
     }
 
+    // Daily at 6 PM - personalized tarot
+    if (hour === 18) {
+      return await handlePersonalizedTarot(baseUrl, env, today);
+    }
+
+    // Daily at 2 AM - cleanup and analytics summary
+    if (hour === 2) {
+      const results = await Promise.allSettled([
+        handleDiscordLogsCleanup(baseUrl, env),
+        handleDiscordAnalyticsDaily(baseUrl, env),
+      ]);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          results: results.map((r) =>
+            r.status === 'fulfilled' ? r.value : { error: r.reason },
+          ),
+          timestamp: now.toISOString(),
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    }
+
     // Daily at 10 AM - moon circles check and cosmic snapshot update
     if (hour === 10) {
       const results = await Promise.allSettled([
@@ -125,8 +150,20 @@ export default {
       return await handleDailyPosts(baseUrl, env, today);
     }
 
+    if (url.pathname === '/personalized-tarot' && request.method === 'POST') {
+      return await handlePersonalizedTarot(baseUrl, env, today);
+    }
+
+    if (url.pathname === '/discord-cleanup' && request.method === 'POST') {
+      return await handleDiscordLogsCleanup(baseUrl, env);
+    }
+
+    if (url.pathname === '/discord-analytics' && request.method === 'POST') {
+      return await handleDiscordAnalyticsDaily(baseUrl, env);
+    }
+
     return new Response(
-      'Lunary Notification Worker - Use POST /trigger, /cosmic-changes, /cosmic-snapshots, /daily-cosmic-pulse, /weekly-report, /moon-circles, or /daily-posts to test',
+      'Lunary Notification Worker - Use POST /trigger, /cosmic-changes, /cosmic-snapshots, /daily-cosmic-pulse, /weekly-report, /moon-circles, /daily-posts, /personalized-tarot, /discord-cleanup, or /discord-analytics to test',
       {
         status: 200,
         headers: { 'Content-Type': 'text/plain' },
@@ -976,6 +1013,93 @@ async function handleDailyPosts(baseUrl, env, today) {
     });
   } catch (error) {
     console.error('[daily-posts] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handlePersonalizedTarot(baseUrl, env, today) {
+  try {
+    console.log('[personalized-tarot] Starting personalized tarot');
+    const response = await fetch(`${baseUrl}/api/cron/personalized-tarot`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[personalized-tarot] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleDiscordLogsCleanup(baseUrl, env) {
+  try {
+    console.log('[discord-cleanup] Starting Discord logs cleanup');
+    const response = await fetch(`${baseUrl}/api/cron/cleanup-discord-logs`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[discord-cleanup] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleDiscordAnalyticsDaily(baseUrl, env) {
+  try {
+    console.log('[discord-analytics] Starting Discord analytics daily summary');
+    const response = await fetch(
+      `${baseUrl}/api/cron/discord-analytics-daily`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${env.CRON_SECRET}`,
+        },
+      },
+    );
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[discord-analytics] Error:', error);
     return new Response(
       JSON.stringify({
         success: false,

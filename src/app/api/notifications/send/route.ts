@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 
 import { trackNotificationEvent } from '@/lib/analytics/tracking';
-import { sendDiscordNotification } from '@/lib/discord';
+import { queueAnalyticsEvent } from '@/lib/discord';
 
 // Lazy initialization of VAPID keys (only when actually needed)
 function ensureVapidConfigured() {
@@ -154,8 +154,75 @@ export async function POST(request: NextRequest) {
     console.log(`📱 Sending to ${subscriptions.rows.length} subscribers`);
 
     // Send notifications using web-push
-    const notificationType =
-      payload.data?.eventType || payload.type || 'notification';
+    // Map notification types to analytics-friendly names
+    const typeMapping: Record<string, string> = {
+      moon_phase: 'moon_circle',
+      planetary_transit: 'cosmic_pulse',
+      retrograde: 'cosmic_pulse',
+      major_aspect: 'cosmic_pulse',
+      eclipse: 'cosmic_pulse',
+      sabbat: 'cosmic_pulse',
+      cosmic_pulse: 'cosmic_pulse',
+      moon_circle: 'moon_circle',
+      weekly_report: 'weekly_report',
+      personalized_tarot: 'cosmic_pulse',
+      cosmic_changes: 'cosmic_pulse',
+    };
+
+    const rawType = payload.data?.eventType || payload.type || 'notification';
+    const notificationType = typeMapping[rawType] || 'cosmic_pulse';
+
+    const timeSpecificTypes = [
+      'retrograde',
+      'planetary_transit',
+      'major_aspect',
+      'eclipse',
+      'sabbat',
+      'moon_phase',
+    ];
+    const isTimeSpecific =
+      timeSpecificTypes.includes(payload.type) ||
+      timeSpecificTypes.includes(payload.data?.eventType || '');
+
+    const nonTimeSpecificTypes = [
+      'cosmic_pulse',
+      'cosmic_changes',
+      'moon_circle',
+      'weekly_report',
+      'personalized_tarot',
+    ];
+    const isScheduledNotification =
+      nonTimeSpecificTypes.includes(payload.type) ||
+      nonTimeSpecificTypes.includes(payload.data?.eventType || '') ||
+      payload.data?.isScheduled === true;
+
+    function shouldSendPwaNotification(): boolean {
+      if (isTimeSpecific) return true;
+
+      if (isScheduledNotification) {
+        const now = new Date();
+        const hour = now.getUTCHours();
+        const isQuietHours = hour >= 22 || hour < 8;
+        return !isQuietHours;
+      }
+
+      const now = new Date();
+      const hour = now.getUTCHours();
+      const isQuietHours = hour >= 22 || hour < 8;
+      return !isQuietHours;
+    }
+
+    if (!shouldSendPwaNotification()) {
+      console.log(
+        `[notifications] Skipped during quiet hours: ${payload.type}`,
+      );
+      return NextResponse.json({
+        success: true,
+        message: `Notification skipped (quiet hours)`,
+        recipientCount: subscriptions.rows.length,
+        skipped: true,
+      });
+    }
 
     const sendPromises = subscriptions.rows.map(async (sub: any) => {
       try {
@@ -177,17 +244,25 @@ export async function POST(request: NextRequest) {
           WHERE endpoint = ${sub.endpoint}
         `;
 
-        if (sub.user_id) {
+        // Track notification sent (use user_id if available, otherwise use endpoint hash)
+        try {
           await trackNotificationEvent({
-            userId: sub.user_id,
+            userId: sub.user_id || `anon_${sub.endpoint.slice(-20)}`,
             notificationType,
             eventType: 'sent',
             notificationId: payload.data?.notification_id,
             metadata: {
               endpoint: sub.endpoint,
               delivery: 'push',
+              raw_type: rawType,
             },
           });
+        } catch (trackError) {
+          // Don't fail notification send if tracking fails
+          console.error(
+            '[notifications] Failed to track sent event:',
+            trackError,
+          );
         }
 
         return { success: true, endpoint: sub.endpoint };
@@ -279,17 +354,23 @@ export async function POST(request: NextRequest) {
       footerParts.push(`Source: ${payload.data.source}`);
     }
 
-    const discordResult = await sendDiscordNotification({
-      content: `Cosmic alert: ${payload.title}`,
-      title: payload.title,
-      description: truncate(payload.body, 1500),
-      url: payload.data?.url,
-      fields: discordFields,
-      footer: footerParts.length ? footerParts.join(' • ') : undefined,
-    });
-
-    if (!discordResult.ok && !discordResult.skipped) {
-      console.error('[discord] notification send failed:', discordResult.error);
+    if (successful > 0 && subscriptions.rows.length >= 10) {
+      await queueAnalyticsEvent({
+        category: 'analytics',
+        eventType: 'cosmic_alert',
+        title: payload.title,
+        dedupeKey: `cosmic-alert-${payload.type}-${payload.data?.date || new Date().toISOString().split('T')[0]}`,
+        metadata: {
+          content: `Cosmic alert: ${payload.title}`,
+          description: truncate(payload.body, 1500),
+          url: payload.data?.url,
+          fields: discordFields,
+          footer: footerParts.length ? footerParts.join(' • ') : undefined,
+          recipientCount: subscriptions.rows.length,
+          successful,
+          failed,
+        },
+      });
     }
 
     return NextResponse.json({

@@ -206,6 +206,47 @@ export async function POST(request: NextRequest) {
       END $$;
     `;
 
+    // Add discount/coupon tracking columns if they don't exist
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'has_discount') THEN
+          ALTER TABLE subscriptions ADD COLUMN has_discount BOOLEAN DEFAULT false;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'discount_percent') THEN
+          ALTER TABLE subscriptions ADD COLUMN discount_percent DECIMAL(5,2);
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'monthly_amount_due') THEN
+          ALTER TABLE subscriptions ADD COLUMN monthly_amount_due DECIMAL(10,2);
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'coupon_id') THEN
+          ALTER TABLE subscriptions ADD COLUMN coupon_id TEXT;
+        END IF;
+      END $$;
+    `;
+
+    // Add generated column for is_paying (computed from monthly_amount_due)
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'is_paying') THEN
+          ALTER TABLE subscriptions ADD COLUMN is_paying BOOLEAN GENERATED ALWAYS AS (monthly_amount_due > 0) STORED;
+        END IF;
+      END $$;
+    `;
+
+    // Create indexes for discount tracking
+    await sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_is_paying ON subscriptions(is_paying) WHERE is_paying = true`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_has_discount ON subscriptions(has_discount) WHERE has_discount = true`;
+
     // Create update timestamp trigger function for subscriptions
     await sql`
       CREATE OR REPLACE FUNCTION update_subscriptions_updated_at()
@@ -402,12 +443,102 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ AI usage table created');
 
+    // Create the discord_notification_log table for deduplication and rate limiting
+    await sql`
+      CREATE TABLE IF NOT EXISTS discord_notification_log (
+        id SERIAL PRIMARY KEY,
+        dedupe_key TEXT NOT NULL,
+        category TEXT NOT NULL,
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        title TEXT,
+        recipient_count INTEGER DEFAULT 0,
+        UNIQUE(dedupe_key, category, sent_at)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_dedupe_key ON discord_notification_log(dedupe_key)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_category ON discord_notification_log(category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_sent_at ON discord_notification_log(sent_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_category_sent_at ON discord_notification_log(category, sent_at)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION cleanup_old_discord_logs()
+      RETURNS void AS $$
+      BEGIN
+        DELETE FROM discord_notification_log
+        WHERE sent_at < NOW() - INTERVAL '48 hours';
+      END;
+      $$ LANGUAGE plpgsql
+    `;
+
+    console.log('✅ Discord notification log table created');
+
+    // Create the discord_notification_analytics table for analytics queue
+    await sql`
+      CREATE TABLE IF NOT EXISTS discord_notification_analytics (
+        id SERIAL PRIMARY KEY,
+        category TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        title TEXT,
+        dedupe_key TEXT,
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        metadata JSONB,
+        skipped_reason TEXT,
+        rate_limited BOOLEAN DEFAULT false,
+        quiet_hours_skipped BOOLEAN DEFAULT false
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_category ON discord_notification_analytics(category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_event_type ON discord_notification_analytics(event_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_sent_at ON discord_notification_analytics(sent_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_dedupe_key ON discord_notification_analytics(dedupe_key)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION cleanup_old_discord_analytics()
+      RETURNS void AS $$
+      BEGIN
+        DELETE FROM discord_notification_analytics
+        WHERE sent_at < NOW() - INTERVAL '7 days';
+      END;
+      $$ LANGUAGE plpgsql
+    `;
+
+    console.log('✅ Discord notification analytics table created');
+
+    // Create the analytics_discord_interactions table for Discord bot analytics
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_discord_interactions (
+        id SERIAL PRIMARY KEY,
+        discord_id TEXT NOT NULL,
+        lunary_user_id TEXT,
+        interaction_type TEXT NOT NULL,
+        command_name TEXT,
+        button_action TEXT,
+        destination_url TEXT,
+        source TEXT DEFAULT 'discord',
+        feature TEXT,
+        campaign TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_discord_id ON analytics_discord_interactions(discord_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_lunary_user_id ON analytics_discord_interactions(lunary_user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_type ON analytics_discord_interactions(interaction_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_command ON analytics_discord_interactions(command_name)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_created_at ON analytics_discord_interactions(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_feature ON analytics_discord_interactions(feature)`;
+
+    console.log('✅ Discord interactions analytics table created');
+
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions)',
+        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, discord_notification_log, discord_notification_analytics, analytics_discord_interactions)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

@@ -256,6 +256,47 @@ async function setupDatabase() {
       END $$;
     `;
 
+    // Add discount/coupon tracking columns if they don't exist
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'has_discount') THEN
+          ALTER TABLE subscriptions ADD COLUMN has_discount BOOLEAN DEFAULT false;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'discount_percent') THEN
+          ALTER TABLE subscriptions ADD COLUMN discount_percent DECIMAL(5,2);
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'monthly_amount_due') THEN
+          ALTER TABLE subscriptions ADD COLUMN monthly_amount_due DECIMAL(10,2);
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'coupon_id') THEN
+          ALTER TABLE subscriptions ADD COLUMN coupon_id TEXT;
+        END IF;
+      END $$;
+    `;
+
+    // Add generated column for is_paying (computed from monthly_amount_due)
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'is_paying') THEN
+          ALTER TABLE subscriptions ADD COLUMN is_paying BOOLEAN GENERATED ALWAYS AS (COALESCE(monthly_amount_due, 0) > 0) STORED;
+        END IF;
+      END $$;
+    `;
+
+    // Create indexes for discount tracking
+    await sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_is_paying ON subscriptions(is_paying) WHERE is_paying = true`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_has_discount ON subscriptions(has_discount) WHERE has_discount = true`;
+
     // Create update timestamp trigger function for subscriptions
     await sql`
       CREATE OR REPLACE FUNCTION update_subscriptions_updated_at()
@@ -1032,6 +1073,33 @@ async function setupDatabase() {
     await sql`CREATE INDEX IF NOT EXISTS idx_user_referrals_code ON user_referrals(referral_code)`;
 
     console.log('✅ Referral tables created');
+
+    // Create analytics_discord_interactions table
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_discord_interactions (
+        id SERIAL PRIMARY KEY,
+        discord_id TEXT NOT NULL,
+        lunary_user_id TEXT,
+        interaction_type TEXT NOT NULL,
+        command_name TEXT,
+        button_action TEXT,
+        destination_url TEXT,
+        source TEXT DEFAULT 'discord',
+        feature TEXT,
+        campaign TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_discord_id ON analytics_discord_interactions(discord_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_lunary_user_id ON analytics_discord_interactions(lunary_user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_type ON analytics_discord_interactions(interaction_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_command ON analytics_discord_interactions(command_name)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_created_at ON analytics_discord_interactions(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_feature ON analytics_discord_interactions(feature)`;
+
+    console.log('✅ Discord interactions analytics table created');
 
     console.log('✅ Database setup complete!');
     console.log(

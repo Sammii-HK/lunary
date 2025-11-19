@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
             jsonb_set(
               COALESCE(preferences, '{}'::jsonb),
               '{tarotNotifications}',
-              'true'::jsonb
+              true::jsonb
             ),
             '{birthday}',
             ${JSON.stringify(birthday)}::jsonb
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
           jsonb_set(
             COALESCE(preferences, '{}'::jsonb),
             '{tarotNotifications}',
-            'true'::jsonb
+            true::jsonb
           ),
           '{birthday}',
           ${JSON.stringify(birthday)}::jsonb
@@ -101,7 +101,7 @@ export async function DELETE(request: NextRequest) {
       SET preferences = jsonb_set(
         COALESCE(preferences, '{}'::jsonb),
         '{tarotNotifications}',
-        'false'::jsonb
+        false::jsonb
       )
       WHERE endpoint = ${endpoint}
       RETURNING endpoint, preferences
