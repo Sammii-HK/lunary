@@ -34,7 +34,7 @@ export function ConversionCTA({
     if (!authState.isAuthenticated) return 'Sign In to Unlock';
     if (isTrialActive) return 'Continue Trial';
     if (isSubscribed) return 'Manage Subscription';
-    return 'Start Free Trial';
+    return 'Upgrade now';
   };
 
   const getLinkText = () => {

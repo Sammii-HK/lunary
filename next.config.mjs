@@ -252,6 +252,9 @@ const nextConfig = {
 
   // PWA Configuration
   async headers() {
+    // In development, disable service worker caching
+    const isDev = process.env.NODE_ENV === 'development';
+    
     return [
       {
         source: '/sw.js',
@@ -262,7 +265,9 @@ const nextConfig = {
           },
           {
             key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
+            value: isDev 
+              ? 'no-cache, no-store, must-revalidate' 
+              : 'public, max-age=0, must-revalidate',
           },
           {
             key: 'Service-Worker-Allowed',

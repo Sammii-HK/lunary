@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --fix",
-    "lint:check": "next lint",
+    "lint": "eslint . --fix --ext .ts,.tsx",
+    "lint:check": "eslint . --ext .ts,.tsx",
     "setup-db": "tsx scripts/setup-database.ts",
+    "create-pricing-tiers": "tsx scripts/create-stripe-pricing-tiers.ts",
+    "create-pricing-tiers:dry": "tsx scripts/create-stripe-pricing-tiers.ts --dry-run",
     "migrate:subscriptions": "tsx scripts/migrate-subscriptions.ts",
     "migrate:subscriptions:check": "tsx scripts/migrate-subscriptions.ts --check",
     "prisma:generate": "prisma generate",
@@ -43,7 +45,14 @@
     "qa:check:lighthouse": "USE_LIGHTHOUSE_CLI=true tsx scripts/qa-checklist.ts",
     "qa:e2e": "playwright test e2e/qa-checklist.spec.ts",
     "qa:e2e:prod": "BASE_URL=https://lunary.app playwright test e2e/qa-checklist.spec.ts",
-    "analyze": "ANALYZE=true pnpm build"
+    "analyze": "ANALYZE=true pnpm build",
+    "generate-price-mapping": "tsx scripts/generate-price-mapping.ts",
+    "update-yearly-pricing": "tsx scripts/update-yearly-pricing.ts",
+    "fix-usd-yearly-price": "tsx scripts/fix-usd-yearly-price.ts",
+    "seed:yearly": "tsx scripts/seed-yearly-forecast.ts",
+    "cleanup": "bash scripts/dev-cleanup.sh",
+    "cleanup:port": "bash scripts/cleanup-port-3000.sh",
+    "clear-cache": "bash scripts/clear-all-cache.sh"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -55,6 +64,8 @@
     ]
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.67",
+    "@ai-sdk/react": "^2.0.93",
     "@astrodraw/astrochart": "^3.0.2",
     "@base-ui-components/react": "^1.0.0-beta.2",
     "@emotion/react": "^11.13.3",
@@ -76,6 +87,7 @@
     "@vercel/blob": "^2.0.0",
     "@vercel/postgres": "^0.10.0",
     "@vercel/speed-insights": "^1.2.0",
+    "ai": "^5.0.93",
     "astronomy-engine": "^2.1.19",
     "better-auth": "^1.3.25",
     "better-sqlite3": "^12.4.1",

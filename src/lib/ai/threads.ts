@@ -2,26 +2,32 @@ import { randomUUID } from 'crypto';
 
 import { prisma } from '@/lib/prisma';
 
-import { AiMessageRole } from './types';
-
 export type ThreadMessage = {
-  role: AiMessageRole;
+  role: 'user' | 'assistant';
   content: string;
   ts: string;
-  tokens: number;
+  tokens?: number;
 };
 
 export type ThreadRecord = {
   id: string;
   userId: string;
-  title?: string | null;
+  title: string | null;
   messages: ThreadMessage[];
+};
+
+type AppendThreadParams = {
+  userId: string;
+  threadId?: string | null;
+  userMessage: ThreadMessage;
+  assistantMessage: ThreadMessage;
+  titleHint?: string;
 };
 
 const memoryThreads = new Map<string, ThreadRecord>();
 
-const fetchThreadFromMemory = (threadId: string): ThreadRecord | undefined =>
-  memoryThreads.get(threadId);
+const fetchThreadFromMemory = (threadId: string): ThreadRecord | null =>
+  memoryThreads.get(threadId) ?? null;
 
 const persistThreadToMemory = (thread: ThreadRecord): ThreadRecord => {
   memoryThreads.set(thread.id, thread);
@@ -74,17 +80,7 @@ const saveThreadToDatabase = async (thread: ThreadRecord): Promise<void> => {
   }
 };
 
-const sanitiseTitle = (content: string): string => {
-  return content.slice(0, 80).replace(/\s+/g, ' ').trim();
-};
-
-export type AppendThreadParams = {
-  userId: string;
-  threadId?: string | null;
-  userMessage: ThreadMessage;
-  assistantMessage: ThreadMessage;
-  titleHint?: string;
-};
+const sanitiseTitle = (content: string): string => content.slice(0, 100).trim();
 
 export type AppendThreadResult = {
   thread: ThreadRecord;
@@ -129,4 +125,62 @@ export const appendToThread = async ({
     thread,
     created: shouldCreate,
   };
+};
+
+/**
+ * Clean up old threads - keep threads updated in the last 7 days
+ * This runs periodically to prevent database bloat
+ */
+export const cleanupOldThreads = async (): Promise<number> => {
+  try {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const result = await prisma.aiThread.deleteMany({
+      where: {
+        updatedAt: {
+          lt: sevenDaysAgo,
+        },
+      },
+    });
+
+    if (result.count > 0) {
+      console.log(`[AI Thread] Cleaned up ${result.count} old threads`);
+    }
+
+    return result.count;
+  } catch (error) {
+    console.error('[AI Thread] Failed to cleanup old threads', error);
+    return 0;
+  }
+};
+
+/**
+ * Get the most recent thread for a user (fallback if localStorage is lost)
+ */
+export const getMostRecentThread = async (
+  userId: string,
+): Promise<ThreadRecord | null> => {
+  try {
+    const record = await prisma.aiThread.findFirst({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    if (!record) return null;
+
+    const messages = Array.isArray(record.messages)
+      ? (record.messages as ThreadMessage[])
+      : [];
+
+    return {
+      id: record.id,
+      userId: record.userId,
+      title: record.title,
+      messages,
+    };
+  } catch (error) {
+    console.error('[AI Thread] Failed to get most recent thread', error);
+    return null;
+  }
 };

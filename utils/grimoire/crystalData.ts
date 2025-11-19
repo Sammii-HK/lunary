@@ -22,64 +22,70 @@ export const crystalCategories = {
     element: 'Earth',
     chakras: ['Root', 'Solar Plexus'],
     colors: ['Black', 'Brown', 'Red', 'Dark Green'],
-    intentions: ['protection', 'grounding', 'stability', 'strength']
+    intentions: ['protection', 'grounding', 'stability', 'strength'],
   },
   'Love & Heart Healing': {
     description: 'Crystals for love, relationships, and emotional healing',
     element: 'Water',
     chakras: ['Heart'],
     colors: ['Pink', 'Green', 'Rose'],
-    intentions: ['love', 'compassion', 'emotional healing', 'relationships']
+    intentions: ['love', 'compassion', 'emotional healing', 'relationships'],
   },
   'Spiritual & Intuitive': {
     description: 'Crystals for spiritual development and psychic abilities',
     element: 'Air',
     chakras: ['Third Eye', 'Crown'],
     colors: ['Purple', 'Blue', 'Clear', 'White'],
-    intentions: ['intuition', 'spiritual growth', 'psychic abilities', 'meditation']
+    intentions: [
+      'intuition',
+      'spiritual growth',
+      'psychic abilities',
+      'meditation',
+    ],
   },
   'Manifestation & Abundance': {
     description: 'Crystals for prosperity, success, and manifesting goals',
     element: 'Fire',
     chakras: ['Solar Plexus', 'Sacral'],
     colors: ['Gold', 'Yellow', 'Orange', 'Green'],
-    intentions: ['abundance', 'manifestation', 'success', 'confidence']
+    intentions: ['abundance', 'manifestation', 'success', 'confidence'],
   },
   'Healing & Wellness': {
     description: 'Crystals for physical, emotional, and spiritual healing',
     element: 'Water',
     chakras: ['Heart', 'Throat'],
     colors: ['Blue', 'Green', 'Clear', 'Pink'],
-    intentions: ['healing', 'wellness', 'balance', 'restoration']
+    intentions: ['healing', 'wellness', 'balance', 'restoration'],
   },
   'Communication & Clarity': {
     description: 'Crystals for clear communication and mental clarity',
     element: 'Air',
     chakras: ['Throat', 'Third Eye'],
     colors: ['Blue', 'Clear', 'Light Blue'],
-    intentions: ['communication', 'clarity', 'truth', 'expression']
+    intentions: ['communication', 'clarity', 'truth', 'expression'],
   },
   'Creativity & Inspiration': {
     description: 'Crystals for artistic expression and creative flow',
     element: 'Fire',
     chakras: ['Sacral', 'Solar Plexus'],
     colors: ['Orange', 'Yellow', 'Red', 'Multi-colored'],
-    intentions: ['creativity', 'inspiration', 'artistic expression', 'passion']
+    intentions: ['creativity', 'inspiration', 'artistic expression', 'passion'],
   },
   'Balance & Harmony': {
     description: 'Crystals for creating balance and harmony in life',
     element: 'Earth',
     chakras: ['All Chakras'],
     colors: ['Multi-colored', 'Green', 'Clear'],
-    intentions: ['balance', 'harmony', 'peace', 'equilibrium']
-  }
+    intentions: ['balance', 'harmony', 'peace', 'equilibrium'],
+  },
 };
 
 export const crystalDatabase: CrystalData[] = [
   // Protection & Grounding
   {
     name: 'Black Tourmaline',
-    properties: 'Shields from negativity, grounds excess energy, creates protective barrier',
+    properties:
+      'Shields from negativity, grounds excess energy, creates protective barrier',
     category: 'Protection & Grounding',
     chakra: 'Root',
     element: 'Earth',
@@ -90,8 +96,8 @@ export const crystalDatabase: CrystalData[] = [
     astrological: {
       sunSigns: ['Scorpio', 'Capricorn', 'Aries'],
       moonSigns: ['Capricorn', 'Scorpio', 'Virgo'],
-      aspects: ['mars-aspects', 'saturn-aspects', 'square']
-    }
+      aspects: ['mars-aspects', 'saturn-aspects', 'square'],
+    },
   },
   {
     name: 'Obsidian',
@@ -130,7 +136,8 @@ export const crystalDatabase: CrystalData[] = [
   // Love & Heart Healing
   {
     name: 'Rose Quartz',
-    properties: 'Unconditional love, emotional healing, self-love, heart opening',
+    properties:
+      'Unconditional love, emotional healing, self-love, heart opening',
     category: 'Love & Heart Healing',
     chakra: 'Heart',
     element: 'Water',
@@ -141,8 +148,8 @@ export const crystalDatabase: CrystalData[] = [
     astrological: {
       sunSigns: ['Taurus', 'Libra', 'Cancer'],
       moonSigns: ['Cancer', 'Libra', 'Taurus'],
-      aspects: ['venus-aspects', 'trine', 'moon-aspects']
-    }
+      aspects: ['venus-aspects', 'trine', 'moon-aspects'],
+    },
   },
   {
     name: 'Green Aventurine',
@@ -181,8 +188,8 @@ export const crystalDatabase: CrystalData[] = [
     astrological: {
       sunSigns: ['Pisces', 'Aquarius', 'Sagittarius'],
       moonSigns: ['Pisces', 'Cancer', 'Scorpio'],
-      aspects: ['opposition', 'square', 'conjunction-neptune']
-    }
+      aspects: ['opposition', 'square', 'conjunction-neptune'],
+    },
   },
   {
     name: 'Labradorite',
@@ -210,7 +217,8 @@ export const crystalDatabase: CrystalData[] = [
   // Manifestation & Abundance
   {
     name: 'Citrine',
-    properties: 'Amplifies personal power, manifests abundance, enhances confidence',
+    properties:
+      'Amplifies personal power, manifests abundance, enhances confidence',
     category: 'Manifestation & Abundance',
     chakra: 'Solar Plexus',
     element: 'Fire',
@@ -221,8 +229,8 @@ export const crystalDatabase: CrystalData[] = [
     astrological: {
       sunSigns: ['Leo', 'Sagittarius', 'Aries'],
       moonSigns: ['Leo', 'Aries', 'Sagittarius'],
-      aspects: ['sun-aspects', 'jupiter-aspects', 'trine']
-    }
+      aspects: ['sun-aspects', 'jupiter-aspects', 'trine'],
+    },
   },
   {
     name: 'Pyrite',
@@ -306,37 +314,40 @@ export const crystalDatabase: CrystalData[] = [
     moonPhases: ['Any'],
     intentions: ['truth', 'communication', 'emotional balance'],
     colors: ['Blue-Green', 'Turquoise'],
-  }
+  },
 ];
 
 // Helper functions for crystal selection
 export const getCrystalsByCategory = (category: string): CrystalData[] => {
-  return crystalDatabase.filter(crystal => crystal.category === category);
+  return crystalDatabase.filter((crystal) => crystal.category === category);
 };
 
 export const getCrystalsByIntention = (intention: string): CrystalData[] => {
-  return crystalDatabase.filter(crystal => 
-    crystal.intentions?.includes(intention.toLowerCase())
+  return crystalDatabase.filter((crystal) =>
+    crystal.intentions?.includes(intention.toLowerCase()),
   );
 };
 
 export const getCrystalsByZodiacSign = (sign: string): CrystalData[] => {
-  return crystalDatabase.filter(crystal => 
-    crystal.zodiacSigns?.includes(sign) || crystal.zodiacSigns?.includes('All Signs')
+  return crystalDatabase.filter(
+    (crystal) =>
+      crystal.zodiacSigns?.includes(sign) ||
+      crystal.zodiacSigns?.includes('All Signs'),
   );
 };
 
 export const getCrystalsByMoonPhase = (phase: string): CrystalData[] => {
-  return crystalDatabase.filter(crystal => 
-    crystal.moonPhases?.includes(phase) || 
-    crystal.moonPhases?.includes('All Moon Phases') ||
-    crystal.moonPhases?.includes('Any')
+  return crystalDatabase.filter(
+    (crystal) =>
+      crystal.moonPhases?.includes(phase) ||
+      crystal.moonPhases?.includes('All Moon Phases') ||
+      crystal.moonPhases?.includes('Any'),
   );
 };
 
 export const getCrystalsByChakra = (chakra: string): CrystalData[] => {
-  return crystalDatabase.filter(crystal => 
-    crystal.chakra === chakra || crystal.chakra === 'All Chakras'
+  return crystalDatabase.filter(
+    (crystal) => crystal.chakra === chakra || crystal.chakra === 'All Chakras',
   );
 };
 
@@ -346,7 +357,7 @@ export const getRandomCrystal = (): CrystalData => {
 };
 
 export const getCrystalByName = (name: string): CrystalData | undefined => {
-  return crystalDatabase.find(crystal => 
-    crystal.name.toLowerCase() === name.toLowerCase()
+  return crystalDatabase.find(
+    (crystal) => crystal.name.toLowerCase() === name.toLowerCase(),
   );
 };

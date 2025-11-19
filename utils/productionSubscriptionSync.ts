@@ -17,7 +17,7 @@ export interface SubscriptionSyncResult {
  */
 export async function robustSubscriptionSync(
   profile: any,
-  email: string
+  email: string,
 ): Promise<SubscriptionSyncResult> {
   try {
     console.log('🔄 Starting robust subscription sync for:', email);
@@ -30,11 +30,12 @@ export async function robustSubscriptionSync(
     });
 
     const customerResult = await customerResponse.json();
-    
+
     if (!customerResult.found || !customerResult.customer) {
       return {
         success: false,
-        message: 'No Stripe customer found for this email address. Please ensure you completed the Stripe checkout.',
+        message:
+          'No Stripe customer found for this email address. Please ensure you completed the Stripe checkout.',
       };
     }
 
@@ -43,11 +44,12 @@ export async function robustSubscriptionSync(
 
     // Step 2: Fetch subscription directly from Stripe
     const subscriptionData = await fetchSubscriptionFromStripe(customerId);
-    
+
     if (!subscriptionData) {
       return {
         success: false,
-        message: 'Customer found but no active subscription. The subscription might be cancelled or expired.',
+        message:
+          'Customer found but no active subscription. The subscription might be cancelled or expired.',
       };
     }
 
@@ -66,17 +68,26 @@ export async function robustSubscriptionSync(
 
     // Create and save subscription object
     const { Subscription } = await import('../schema');
-    
-    const subscriptionCoValue = Subscription.create({
-      status: subscriptionData.status as "free" | "trial" | "active" | "cancelled" | "past_due",
-      plan: subscriptionData.plan as "free" | "monthly" | "yearly",
-      stripeCustomerId: customerId || undefined,
-      stripeSubscriptionId: subscriptionData.stripeSubscriptionId || undefined,
-      currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
-      trialEndsAt: subscriptionData.trialEndsAt || undefined,
-      createdAt: subscriptionData.updatedAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }, profile._owner || profile);
+
+    const subscriptionCoValue = Subscription.create(
+      {
+        status: subscriptionData.status as
+          | 'free'
+          | 'trial'
+          | 'active'
+          | 'cancelled'
+          | 'past_due',
+        plan: subscriptionData.plan as 'free' | 'monthly' | 'yearly',
+        stripeCustomerId: customerId || undefined,
+        stripeSubscriptionId:
+          subscriptionData.stripeSubscriptionId || undefined,
+        currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
+        trialEndsAt: subscriptionData.trialEndsAt || undefined,
+        createdAt: subscriptionData.updatedAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      profile._owner || profile,
+    );
 
     profile.$jazz.set('subscription', subscriptionCoValue);
 
@@ -87,7 +98,6 @@ export async function robustSubscriptionSync(
       message: `Successfully synced ${subscriptionData.plan} subscription`,
       subscriptionData,
     };
-
   } catch (error) {
     console.error('❌ Robust subscription sync failed:', error);
     return {
@@ -103,20 +113,20 @@ export async function robustSubscriptionSync(
  */
 export async function syncSubscriptionAfterCheckout(
   profile: any,
-  sessionId: string
+  sessionId: string,
 ): Promise<SubscriptionSyncResult> {
   try {
     console.log('🔄 Syncing subscription after checkout, session:', sessionId);
 
     // Get session data from Stripe
     const sessionResponse = await fetch(`/api/stripe/session/${sessionId}`);
-    
+
     if (!sessionResponse.ok) {
       throw new Error('Failed to fetch checkout session');
     }
 
     const sessionData = await sessionResponse.json();
-    
+
     if (!sessionData.customer_id) {
       throw new Error('No customer ID in session data');
     }
@@ -131,21 +141,32 @@ export async function syncSubscriptionAfterCheckout(
 
     // If there's subscription data, sync it
     if (sessionData.subscription) {
-      const subscriptionData = await fetchSubscriptionFromStripe(sessionData.customer_id);
-      
+      const subscriptionData = await fetchSubscriptionFromStripe(
+        sessionData.customer_id,
+      );
+
       if (subscriptionData) {
         const { Subscription } = await import('../schema');
-        
-        const subscriptionCoValue = Subscription.create({
-          status: subscriptionData.status as "free" | "trial" | "active" | "cancelled" | "past_due",
-          plan: subscriptionData.plan as "free" | "monthly" | "yearly",
-          stripeCustomerId: sessionData.customer_id || undefined,
-          stripeSubscriptionId: subscriptionData.stripeSubscriptionId || undefined,
-          currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
-          trialEndsAt: subscriptionData.trialEndsAt || undefined,
-          createdAt: subscriptionData.updatedAt || new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }, profile._owner || profile);
+
+        const subscriptionCoValue = Subscription.create(
+          {
+            status: subscriptionData.status as
+              | 'free'
+              | 'trial'
+              | 'active'
+              | 'cancelled'
+              | 'past_due',
+            plan: subscriptionData.plan as 'free' | 'monthly' | 'yearly',
+            stripeCustomerId: sessionData.customer_id || undefined,
+            stripeSubscriptionId:
+              subscriptionData.stripeSubscriptionId || undefined,
+            currentPeriodEnd: subscriptionData.currentPeriodEnd || undefined,
+            trialEndsAt: subscriptionData.trialEndsAt || undefined,
+            createdAt: subscriptionData.updatedAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          profile._owner || profile,
+        );
 
         profile.$jazz.set('subscription', subscriptionCoValue);
 
@@ -163,7 +184,6 @@ export async function syncSubscriptionAfterCheckout(
       success: true,
       message: 'Customer ID saved, subscription will sync when available',
     };
-
   } catch (error) {
     console.error('❌ Checkout subscription sync failed:', error);
     return {

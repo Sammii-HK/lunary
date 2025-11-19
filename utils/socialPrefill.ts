@@ -24,7 +24,7 @@ export const socialPrefillUrls = {
   facebook: (postData: PostData): string => {
     const text = encodeURIComponent(postData.content);
     return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-      window?.location.origin || 'https://lunary.app'
+      window?.location.origin || 'https://lunary.app',
     )}&quote=${text}`;
   },
 
@@ -33,7 +33,9 @@ export const socialPrefillUrls = {
    */
   linkedin: (postData: PostData): string => {
     const text = encodeURIComponent(postData.content);
-    const url = encodeURIComponent(window?.location.origin || 'https://lunary.app');
+    const url = encodeURIComponent(
+      window?.location.origin || 'https://lunary.app',
+    );
     return `https://www.linkedin.com/sharing/share-offsite/?url=${url}&summary=${text}`;
   },
 
@@ -46,9 +48,9 @@ export const socialPrefillUrls = {
       navigator.clipboard.writeText(postData.content).then(() => {
         alert(
           '📋 Content copied to clipboard!\n\n' +
-          'Instagram doesn\'t support prefilled posts via URL. ' +
-          'Please open Instagram manually and paste the content.\n\n' +
-          `Image URL: ${postData.imageUrl || 'Check the generated cosmic image'}`
+            "Instagram doesn't support prefilled posts via URL. " +
+            'Please open Instagram manually and paste the content.\n\n' +
+            `Image URL: ${postData.imageUrl || 'Check the generated cosmic image'}`,
         );
       });
     } else {
@@ -59,12 +61,12 @@ export const socialPrefillUrls = {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      
+
       alert(
         '📋 Content copied to clipboard!\n\n' +
-        'Instagram doesn\'t support prefilled posts via URL. ' +
-        'Please open Instagram manually and paste the content.\n\n' +
-        `Image URL: ${postData.imageUrl || 'Check the generated cosmic image'}`
+          "Instagram doesn't support prefilled posts via URL. " +
+          'Please open Instagram manually and paste the content.\n\n' +
+          `Image URL: ${postData.imageUrl || 'Check the generated cosmic image'}`,
       );
     }
   },
@@ -76,8 +78,8 @@ export const socialPrefillUrls = {
     const subject = encodeURIComponent('Daily Cosmic Guidance');
     const body = encodeURIComponent(
       `${postData.content}\n\n` +
-      `Generated on: ${new Date().toLocaleDateString()}\n` +
-      `${postData.imageUrl ? `Image: ${postData.imageUrl}` : ''}`
+        `Generated on: ${new Date().toLocaleDateString()}\n` +
+        `${postData.imageUrl ? `Image: ${postData.imageUrl}` : ''}`,
     );
     return `mailto:?subject=${subject}&body=${body}`;
   },
@@ -104,7 +106,9 @@ export const socialPrefillUrls = {
   pinterest: (postData: PostData): string => {
     const description = encodeURIComponent(postData.content);
     const media = encodeURIComponent(postData.imageUrl || '');
-    const url = encodeURIComponent(window?.location.origin || 'https://lunary.app');
+    const url = encodeURIComponent(
+      window?.location.origin || 'https://lunary.app',
+    );
     return `https://pinterest.com/pin/create/button/?url=${url}&media=${media}&description=${description}`;
   },
 
@@ -124,7 +128,7 @@ export const socialPrefillUrls = {
     const title = encodeURIComponent('Daily Cosmic Guidance');
     const body = encodeURIComponent(postData.content);
     return `https://www.tumblr.com/widgets/share/tool?canonicalUrl=${encodeURIComponent(
-      window?.location.origin || 'https://lunary.app'
+      window?.location.origin || 'https://lunary.app',
     )}&title=${title}&caption=${body}`;
   },
 };
@@ -158,7 +162,10 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 /**
  * Generate a downloadable text file with the post content
  */
-export const downloadAsTextFile = (postData: PostData, filename: string = 'cosmic-post.txt'): void => {
+export const downloadAsTextFile = (
+  postData: PostData,
+  filename: string = 'cosmic-post.txt',
+): void => {
   const content = [
     'COSMIC POST CONTENT',
     '===================',
