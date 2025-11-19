@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
           "retrogrades": true,
           "sabbats": true,
           "eclipses": true,
-          "majorAspects": true
+          "majorAspects": true,
+          "moonCircles": true
         }'::jsonb,
         
         -- Metadata

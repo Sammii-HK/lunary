@@ -46,7 +46,8 @@ async function setupDatabase() {
           "retrogrades": true,
           "sabbats": true,
           "eclipses": true,
-          "majorAspects": true
+          "majorAspects": true,
+          "moonCircles": true
         }'::jsonb,
         
         -- Metadata
