@@ -139,26 +139,78 @@ export async function POST(request: NextRequest) {
 
     const { customerId, userId, forceRefresh } = body;
 
-    // If userId is provided but no customerId, try to find customer by userId metadata
+    // ALWAYS prioritize userId-based lookup if userId is provided
+    // This ensures we get the correct customer even if customerId is from another account
     let resolvedCustomerId = customerId;
-    if (!resolvedCustomerId && userId) {
+
+    if (userId) {
       try {
-        // Search for customer by userId in metadata
+        // Search for customer by userId in metadata (this is the source of truth)
         const customers = await stripe.customers.search({
           query: `metadata['userId']:'${userId}'`,
           limit: 1,
         });
         if (customers.data.length > 0) {
-          resolvedCustomerId = customers.data[0].id;
+          const userIdMatchedCustomer = customers.data[0].id;
+
+          // If we found a customer by userId, use it (even if different from provided customerId)
+          if (userIdMatchedCustomer !== customerId) {
+            console.log(
+              `[get-subscription] userId ${userId} maps to customer ${userIdMatchedCustomer}, but provided customerId was ${customerId}. Using userId-matched customer.`,
+            );
+          }
+          resolvedCustomerId = userIdMatchedCustomer;
           console.log(
             `[get-subscription] Found customer ${resolvedCustomerId} by userId ${userId}`,
           );
+        } else if (customerId) {
+          // No customer found by userId, but we have customerId - verify it matches userId
+          try {
+            const providedCustomer =
+              await stripe.customers.retrieve(customerId);
+            const providedCustomerUserId = (providedCustomer as any).metadata
+              ?.userId;
+
+            if (providedCustomerUserId && providedCustomerUserId !== userId) {
+              // Customer ID belongs to a different user - don't use it
+              console.warn(
+                `[get-subscription] Provided customerId ${customerId} belongs to userId ${providedCustomerUserId}, but request is for userId ${userId}. Ignoring customerId.`,
+              );
+              resolvedCustomerId = null; // Force email lookup
+            } else if (!providedCustomerUserId) {
+              // Customer exists but has no userId metadata - update it
+              try {
+                await stripe.customers.update(customerId, {
+                  metadata: { userId: userId },
+                });
+                console.log(
+                  `[get-subscription] Updated customer ${customerId} metadata with userId ${userId}`,
+                );
+                resolvedCustomerId = customerId;
+              } catch (updateError) {
+                console.warn(
+                  '[get-subscription] Failed to update customer metadata:',
+                  updateError,
+                );
+              }
+            } else {
+              // Customer matches userId - use it
+              resolvedCustomerId = customerId;
+            }
+          } catch (retrieveError) {
+            console.warn(
+              '[get-subscription] Failed to retrieve provided customer:',
+              retrieveError,
+            );
+            resolvedCustomerId = null; // Force email lookup
+          }
         }
       } catch (error) {
         console.warn(
           '[get-subscription] Failed to search for customer by userId:',
           error,
         );
+        // Continue with customerId if provided, or fall back to email lookup
       }
     }
 
@@ -382,14 +434,18 @@ export async function POST(request: NextRequest) {
             'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
         };
 
+    // Check if resolved customerId differs from provided customerId
+    const customerIdChanged =
+      customerId && resolvedCustomerId !== customerId ? true : false;
+
     return NextResponse.json(
       {
         success: true,
         subscription: {
           id: subscription.id,
           status: subscription.status,
-          customerId: subscription.customer,
-          customer: subscription.customer,
+          customerId: resolvedCustomerId, // Use resolved customerId, not subscription.customer
+          customer: resolvedCustomerId,
           plan: planType,
           planName: planType, // Include planName for compatibility
           rawPlan: rawPlanType,
@@ -400,6 +456,8 @@ export async function POST(request: NextRequest) {
           created: subscription.created,
         },
         message: `Found ${subscription.status} subscription`,
+        customerIdChanged, // Flag to indicate customerId was resolved differently
+        resolvedCustomerId, // Always include resolved customerId
       },
       {
         headers: cacheHeaders,
