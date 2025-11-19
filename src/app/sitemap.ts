@@ -546,6 +546,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   };
 
+  // Add all zodiac sign pages
+  const zodiacRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/grimoire/zodiac/${stringToKebabCase(sign)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all planet pages
+  const planetRoutes = Object.keys(planetaryBodies).map((planet) => ({
+    url: `${baseUrl}/grimoire/planets/${stringToKebabCase(planet)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
   // Add all house pages
   const houseRoutes = Object.keys(astrologicalHouses).map((house) => ({
     url: `${baseUrl}/grimoire/houses/${stringToKebabCase(house)}`,
