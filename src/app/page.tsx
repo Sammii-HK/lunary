@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
+import { WeeklyUsageCounter } from '@/components/WeeklyUsageCounter';
 import { useAccount } from 'jazz-tools/react';
 import { conversionTracking } from '@/lib/analytics';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -124,6 +125,9 @@ export default function Home() {
         <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
         {/* Post-trial messaging for expired trial users */}
         <PostTrialMessaging />
+
+        {/* Weekly Usage Counter */}
+        <WeeklyUsageCounter />
 
         {/* Top Row - Date and Astronomy (always full width) - Above the fold, load immediately */}
         <div className='w-full space-y-4'>

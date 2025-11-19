@@ -38,6 +38,8 @@ const sectionDescriptions: Record<string, string> = {
     'Discover different paths of modern witchcraft, essential tools, ethics, coven vs solitary practice, and creating your Book of Shadows.',
   meditation:
     'Meditation and mindfulness practices for spiritual growth: techniques, breathwork, grounding exercises, centering, and magical journaling.',
+  'compatibility-chart':
+    'Interactive compatibility chart for zodiac signs, elements, moon phases, and crystal categories. Discover how different energies interact and complement each other.',
 };
 
 export async function generateMetadata({
@@ -64,6 +66,7 @@ export async function generateMetadata({
   const sectionKeywords: Record<string, string[]> = {
     moon: [
       'moon phases',
+      'lunar cycles',
       'lunar calendar',
       'full moon',
       'new moon',
@@ -71,7 +74,7 @@ export async function generateMetadata({
       'lunar wisdom',
       'moon rituals',
       'moon signs',
-      'void of course',
+      'void of course moon',
       'lunar eclipse',
     ],
     'wheel-of-the-year': [
@@ -84,15 +87,20 @@ export async function generateMetadata({
       'samhain',
       'yule',
       'witchcraft holidays',
+      'pagan calendar',
     ],
     astronomy: [
+      'astronomy',
       'astrology',
-      'zodiac signs',
       'planets',
+      'zodiac signs',
       'astronomical knowledge',
+      'astronomical data',
       'cosmic forces',
       'planetary influences',
       'astrological signs',
+      'celestial bodies',
+      'astronomical calculations',
     ],
     tarot: [
       'tarot cards',
@@ -119,6 +127,7 @@ export async function generateMetadata({
       'chakra balancing',
       'chakra healing',
       'spiritual energy',
+      'seven chakras',
       'chakra colors',
       'chakra meditation',
     ],
@@ -141,6 +150,8 @@ export async function generateMetadata({
     ],
     correspondences: [
       'magical correspondences',
+      'elemental correspondences',
+      'astrological correspondences',
       'elements',
       'colors',
       'herbs',
@@ -152,9 +163,12 @@ export async function generateMetadata({
       'spells',
       'rituals',
       'witchcraft',
+      'witchcraft practices',
       'magic practices',
+      'magical practices',
       'spellcraft',
       'protection spells',
+      'protection magic',
       'love magic',
       'prosperity spells',
     ],
@@ -162,6 +176,8 @@ export async function generateMetadata({
       'birth chart',
       'astrology chart',
       'natal chart',
+      'astrological chart',
+      'birth chart reading',
       'planets',
       'houses',
       'aspects',
@@ -178,6 +194,7 @@ export async function generateMetadata({
     divination: [
       'divination',
       'pendulum',
+      'pendulum reading',
       'scrying',
       'dream interpretation',
       'omen reading',
@@ -185,6 +202,7 @@ export async function generateMetadata({
     ],
     'modern-witchcraft': [
       'modern witchcraft',
+      'witchcraft',
       'witch types',
       'witchcraft tools',
       'witchcraft ethics',
@@ -197,16 +215,20 @@ export async function generateMetadata({
       'mindfulness',
       'breathwork',
       'grounding',
+      'grounding exercises',
       'centering',
       'spiritual practice',
+      'spiritual meditation',
       'meditation techniques',
     ],
   };
 
-  const keywords = sectionKeywords[sectionSlug] || [
+  const keywords = [
+    ...(sectionKeywords[sectionSlug] || []),
     'grimoire',
     'mystical knowledge',
     'cosmic wisdom',
+    'astrology guide',
     'spiritual guide',
   ];
 
@@ -214,6 +236,9 @@ export async function generateMetadata({
     title,
     description,
     keywords,
+    authors: [{ name: 'Lunary' }],
+    creator: 'Lunary',
+    publisher: 'Lunary',
     openGraph: {
       title,
       description,

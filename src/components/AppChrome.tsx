@@ -8,6 +8,7 @@ import { NotificationManager } from '@/components/NotificationManager';
 import { ExitIntent } from '@/components/ExitIntent';
 import { OnboardingFlow } from '@/components/OnboardingFlow';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
+import { TrialCountdownBanner } from '@/components/TrialCountdownBanner';
 
 export function AppChrome() {
   const pathname = usePathname();
@@ -34,7 +35,12 @@ export function AppChrome() {
 
   return (
     <>
-      {!isAdminSurface && <Navbar />}
+      {!isAdminSurface && (
+        <>
+          <Navbar />
+          <TrialCountdownBanner />
+        </>
+      )}
       <ErrorBoundaryWrapper>
         <PWAHandler
           allowUnauthenticatedInstall={isAdminSurface}

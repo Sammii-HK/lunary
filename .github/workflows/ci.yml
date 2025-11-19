@@ -61,6 +61,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm prisma:generate
+        env:
+          PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: 1
 
       - name: Run unit tests
         run: pnpm test:unit
@@ -111,6 +113,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm prisma:generate
+        env:
+          PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: 1
 
       - name: Build application
         id: build
@@ -158,6 +162,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm prisma:generate
+        env:
+          PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: 1
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -167,6 +173,9 @@ jobs:
         env:
           NODE_ENV: test
           PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000' }}
+          # Bypass Better Auth if flag is set (or if TEST_EMAIL is invalid)
+          BYPASS_AUTH: ${{ secrets.BYPASS_AUTH || 'false' }}
+          SKIP_AUTH: ${{ secrets.SKIP_AUTH || 'false' }}
           TEST_EMAIL: ${{ secrets.TEST_EMAIL || secrets.TEST_USER_EMAIL || 'test@test.lunary.app' }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD || secrets.TEST_USER_PASSWORD || 'TestPassword123!' }}
           TEST_USER_EMAIL: ${{ secrets.TEST_EMAIL || secrets.TEST_USER_EMAIL || 'test@test.lunary.app' }}

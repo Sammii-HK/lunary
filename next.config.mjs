@@ -210,6 +210,15 @@ const nextConfig = {
       };
     }
 
+    // Suppress "Critical dependency" warnings for intentional dynamic imports
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module: /posthog-js/,
+        message: /Critical dependency/,
+      },
+    ];
+
     return config;
   },
 
@@ -254,7 +263,7 @@ const nextConfig = {
   async headers() {
     // In development, disable service worker caching
     const isDev = process.env.NODE_ENV === 'development';
-    
+
     return [
       {
         source: '/sw.js',
@@ -265,8 +274,8 @@ const nextConfig = {
           },
           {
             key: 'Cache-Control',
-            value: isDev 
-              ? 'no-cache, no-store, must-revalidate' 
+            value: isDev
+              ? 'no-cache, no-store, must-revalidate'
               : 'public, max-age=0, must-revalidate',
           },
           {

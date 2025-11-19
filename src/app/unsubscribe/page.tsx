@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Mail, CheckCircle, XCircle } from 'lucide-react';
 
-export default function UnsubscribePage() {
+function UnsubscribeContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
@@ -95,5 +95,24 @@ export default function UnsubscribePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function UnsubscribePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4'>
+          <div className='max-w-md w-full bg-zinc-800 rounded-lg p-8 border border-zinc-700'>
+            <div className='text-center py-8'>
+              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-4'></div>
+              <p className='text-zinc-400'>Loading...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <UnsubscribeContent />
+    </Suspense>
   );
 }

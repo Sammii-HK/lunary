@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     // Use the same endpoint that the real cron job uses
     const baseUrl =
       process.env.NODE_ENV === 'production'
-        ? 'https://www.lunary.app'
+        ? 'https://lunary.app'
         : 'http://localhost:3000';
 
     // Call the real notification check endpoint
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     // Same as GET but allows custom date in body
     const baseUrl =
       process.env.NODE_ENV === 'production'
-        ? 'https://www.lunary.app'
+        ? 'https://lunary.app'
         : 'http://localhost:3000';
 
     const response = await fetch(

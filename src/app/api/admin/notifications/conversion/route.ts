@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendPushoverNotification } from '../../../../../../utils/notifications/pushNotifications';
+import { sendDiscordAdminNotification } from '@/lib/discord';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,23 +59,43 @@ export async function POST(request: NextRequest) {
         '2': 'emergency',
       };
 
-    const result = await sendPushoverNotification({
+    const pushoverPriority = priorityMap[priority.toString()] || 'normal';
+
+    const fields = [
+      {
+        name: 'Event Type',
+        value: eventType,
+        inline: true,
+      },
+      {
+        name: 'Plan Type',
+        value: planType || 'N/A',
+        inline: true,
+      },
+    ];
+
+    if (userId) {
+      fields.push({
+        name: 'User ID',
+        value: userId,
+        inline: true,
+      });
+    }
+
+    const result = await sendDiscordAdminNotification({
       title,
       message,
-      priority: priorityMap[priority.toString()] || 'normal',
-      sound:
-        eventType.includes('converted') || eventType.includes('subscription')
-          ? 'cashregister'
-          : 'default',
+      priority: pushoverPriority,
       url:
         process.env.NODE_ENV === 'production'
           ? 'https://lunary.app/admin/analytics'
           : 'http://localhost:3000/admin/analytics',
+      fields,
     });
 
     return NextResponse.json({
-      success: result.success,
-      message: result.success
+      success: result.ok,
+      message: result.ok
         ? 'Notification sent successfully'
         : result.error || 'Failed to send notification',
     });

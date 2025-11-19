@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 const Numerology = () => {
@@ -133,9 +134,9 @@ const Numerology = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Numerology
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Numerology Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Discover core numbers, master numbers, planetary days, and
           numerological calculations
@@ -146,16 +147,17 @@ const Numerology = () => {
         <h2 className='text-xl font-medium text-zinc-100'>Core Numbers</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           {coreNumbers.map((number) => (
-            <div
+            <Link
               key={number.number}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+              href={`/grimoire/life-path/${number.number}`}
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
                 {number.number} - {number.meaning}
               </h3>
               <p className='text-sm text-zinc-300 mb-2'>{number.traits}</p>
               <p className='text-sm text-zinc-400'>Best for: {number.day}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -164,17 +166,18 @@ const Numerology = () => {
         <h2 className='text-xl font-medium text-zinc-100'>Master Numbers</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           {masterNumbers.map((master) => (
-            <div
+            <Link
               key={master.number}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+              href={`/grimoire/life-path/${master.number}`}
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
                 {master.number} - {master.meaning}
               </h3>
               <p className='text-sm text-zinc-300 leading-relaxed'>
                 {master.description}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

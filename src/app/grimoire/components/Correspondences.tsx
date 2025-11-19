@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
+import Link from 'next/link';
+import { stringToKebabCase } from '../../../../utils/string';
 
 const Correspondences = () => {
   useEffect(() => {
@@ -19,9 +21,9 @@ const Correspondences = () => {
   return (
     <div className='space-y-8 pb-20'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Magical Correspondences
-        </h1>
+        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+          Complete Correspondence Guide
+        </h2>
         <p className='text-sm text-zinc-400'>
           Explore the symbolic connections between elements, colors, planets,
           and magical practices
@@ -73,26 +75,30 @@ const Correspondences = () => {
       <section id='colors' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Colors</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {Object.entries(correspondencesData.colors).map(([color, data]) => (
-            <div
-              key={color}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                {color}
-              </h3>
-              <div className='space-y-2 text-sm text-zinc-300'>
-                <div>
-                  <span className='text-zinc-400'>Uses: </span>
-                  {data.uses.join(', ')}
+          {Object.entries(correspondencesData.colors).map(([color, data]) => {
+            const colorSlug = stringToKebabCase(color);
+            return (
+              <Link
+                key={color}
+                href={`/grimoire/correspondences/colors/${colorSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                  {color}
+                </h3>
+                <div className='space-y-2 text-sm text-zinc-300'>
+                  <div>
+                    <span className='text-zinc-400'>Uses: </span>
+                    {data.uses.join(', ')}
+                  </div>
+                  <div>
+                    <span className='text-zinc-400'>Planets: </span>
+                    {data.planets.join(', ')}
+                  </div>
                 </div>
-                <div>
-                  <span className='text-zinc-400'>Planets: </span>
-                  {data.planets.join(', ')}
-                </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -130,26 +136,38 @@ const Correspondences = () => {
         <h2 className='text-xl font-medium text-zinc-100'>Deities</h2>
         <div className='space-y-6'>
           {Object.entries(correspondencesData.deities).map(
-            ([pantheon, gods]) => (
-              <div key={pantheon}>
-                <h3 className='text-lg font-medium text-zinc-200 mb-3'>
-                  {pantheon}
-                </h3>
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-                  {Object.entries(gods).map(([name, data]) => (
-                    <div
-                      key={name}
-                      className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-                    >
-                      <h4 className='font-medium text-zinc-100 mb-2'>{name}</h4>
-                      <div className='text-sm text-zinc-400'>
-                        Domain: {data.domain.join(', ')}
-                      </div>
-                    </div>
-                  ))}
+            ([pantheon, gods]) => {
+              const pantheonSlug = stringToKebabCase(pantheon);
+              return (
+                <div key={pantheon}>
+                  <Link
+                    href={`/grimoire/correspondences/deities/${pantheonSlug}`}
+                    className='block text-lg font-medium text-zinc-200 mb-3 hover:text-purple-400 transition-colors'
+                  >
+                    {pantheon}
+                  </Link>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+                    {Object.entries(gods).map(([name, data]) => {
+                      const deitySlug = stringToKebabCase(name);
+                      return (
+                        <Link
+                          key={name}
+                          href={`/grimoire/correspondences/deities/${pantheonSlug}/${deitySlug}`}
+                          className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                        >
+                          <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                            {name}
+                          </h4>
+                          <div className='text-sm text-zinc-400'>
+                            Domain: {data.domain.join(', ')}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ),
+              );
+            },
           )}
         </div>
       </section>
@@ -158,26 +176,30 @@ const Correspondences = () => {
       <section id='flowers' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Flowers</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {Object.entries(correspondencesData.flowers).map(([flower, data]) => (
-            <div
-              key={flower}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                {flower}
-              </h3>
-              <div className='space-y-2 text-sm text-zinc-300'>
-                <div>
-                  <span className='text-zinc-400'>Uses: </span>
-                  {data.uses.join(', ')}
+          {Object.entries(correspondencesData.flowers).map(([flower, data]) => {
+            const flowerSlug = stringToKebabCase(flower);
+            return (
+              <Link
+                key={flower}
+                href={`/grimoire/correspondences/flowers/${flowerSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                  {flower}
+                </h3>
+                <div className='space-y-2 text-sm text-zinc-300'>
+                  <div>
+                    <span className='text-zinc-400'>Uses: </span>
+                    {data.uses.join(', ')}
+                  </div>
+                  <div>
+                    <span className='text-zinc-400'>Planets: </span>
+                    {data.planets.join(', ')}
+                  </div>
                 </div>
-                <div>
-                  <span className='text-zinc-400'>Planets: </span>
-                  {data.planets.join(', ')}
-                </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -185,24 +207,30 @@ const Correspondences = () => {
       <section id='numbers' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Numbers</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {Object.entries(correspondencesData.numbers).map(([num, data]) => (
-            <div
-              key={num}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>{num}</h3>
-              <div className='space-y-2 text-sm text-zinc-300'>
-                <div>
-                  <span className='text-zinc-400'>Uses: </span>
-                  {data.uses.join(', ')}
+          {Object.entries(correspondencesData.numbers).map(([num, data]) => {
+            const numSlug = stringToKebabCase(num);
+            return (
+              <Link
+                key={num}
+                href={`/grimoire/correspondences/numbers/${numSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                  {num}
+                </h3>
+                <div className='space-y-2 text-sm text-zinc-300'>
+                  <div>
+                    <span className='text-zinc-400'>Uses: </span>
+                    {data.uses.join(', ')}
+                  </div>
+                  <div>
+                    <span className='text-zinc-400'>Planet: </span>
+                    {data.planets[0]}
+                  </div>
                 </div>
-                <div>
-                  <span className='text-zinc-400'>Planet: </span>
-                  {data.planets[0]}
-                </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -210,24 +238,30 @@ const Correspondences = () => {
       <section id='wood' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Wood</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {Object.entries(correspondencesData.wood).map(([wood, data]) => (
-            <div
-              key={wood}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>{wood}</h3>
-              <div className='space-y-2 text-sm text-zinc-300'>
-                <div>
-                  <span className='text-zinc-400'>Uses: </span>
-                  {data.uses.join(', ')}
+          {Object.entries(correspondencesData.wood).map(([wood, data]) => {
+            const woodSlug = stringToKebabCase(wood);
+            return (
+              <Link
+                key={wood}
+                href={`/grimoire/correspondences/wood/${woodSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                  {wood}
+                </h3>
+                <div className='space-y-2 text-sm text-zinc-300'>
+                  <div>
+                    <span className='text-zinc-400'>Uses: </span>
+                    {data.uses.join(', ')}
+                  </div>
+                  <div>
+                    <span className='text-zinc-400'>Planets: </span>
+                    {data.planets.join(', ')}
+                  </div>
                 </div>
-                <div>
-                  <span className='text-zinc-400'>Planets: </span>
-                  {data.planets.join(', ')}
-                </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -235,24 +269,30 @@ const Correspondences = () => {
       <section id='herbs' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Herbs</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {Object.entries(correspondencesData.herbs).map(([herb, data]) => (
-            <div
-              key={herb}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>{herb}</h3>
-              <div className='space-y-2 text-sm text-zinc-300'>
-                <div>
-                  <span className='text-zinc-400'>Uses: </span>
-                  {data.uses.join(', ')}
+          {Object.entries(correspondencesData.herbs).map(([herb, data]) => {
+            const herbSlug = stringToKebabCase(herb);
+            return (
+              <Link
+                key={herb}
+                href={`/grimoire/correspondences/herbs/${herbSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                  {herb}
+                </h3>
+                <div className='space-y-2 text-sm text-zinc-300'>
+                  <div>
+                    <span className='text-zinc-400'>Uses: </span>
+                    {data.uses.join(', ')}
+                  </div>
+                  <div>
+                    <span className='text-zinc-400'>Planet: </span>
+                    {data.planets[0]}
+                  </div>
                 </div>
-                <div>
-                  <span className='text-zinc-400'>Planet: </span>
-                  {data.planets[0]}
-                </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -260,26 +300,30 @@ const Correspondences = () => {
       <section id='animals' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Animals</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {Object.entries(correspondencesData.animals).map(([animal, data]) => (
-            <div
-              key={animal}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                {animal}
-              </h3>
-              <div className='space-y-2 text-sm text-zinc-300'>
-                <div>
-                  <span className='text-zinc-400'>Uses: </span>
-                  {data.uses.join(', ')}
+          {Object.entries(correspondencesData.animals).map(([animal, data]) => {
+            const animalSlug = stringToKebabCase(animal);
+            return (
+              <Link
+                key={animal}
+                href={`/grimoire/correspondences/animals/${animalSlug}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                  {animal}
+                </h3>
+                <div className='space-y-2 text-sm text-zinc-300'>
+                  <div>
+                    <span className='text-zinc-400'>Uses: </span>
+                    {data.uses.join(', ')}
+                  </div>
+                  <div>
+                    <span className='text-zinc-400'>Planet: </span>
+                    {data.planets[0]}
+                  </div>
                 </div>
-                <div>
-                  <span className='text-zinc-400'>Planet: </span>
-                  {data.planets[0]}
-                </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 

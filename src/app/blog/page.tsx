@@ -206,7 +206,7 @@ export default function BlogPage() {
               </span>
             </div>
             <Link
-              href={`/blog/week/${currentWeekData.weekNumber}-${currentWeekData.year}`}
+              href={`/blog/week/week-${currentWeekData.weekNumber}-${currentWeekData.year}`}
               className='inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors text-sm font-medium'
             >
               Read Full Forecast
@@ -239,7 +239,7 @@ export default function BlogPage() {
               {sortedPosts.map((post) => (
                 <Link
                   key={post.id}
-                  href={`/blog/week/${post.weekNumber}-${post.year}`}
+                  href={`/blog/week/week-${post.weekNumber}-${post.year}`}
                   className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
                 >
                   <div className='flex items-start justify-between mb-3'>

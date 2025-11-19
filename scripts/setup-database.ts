@@ -229,6 +229,32 @@ async function setupDatabase() {
       END $$;
     `;
 
+    // Add trial nurture tracking columns if they don't exist
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day2_sent') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day2_sent BOOLEAN DEFAULT false;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day3_sent') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day3_sent BOOLEAN DEFAULT false;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day5_sent') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day5_sent BOOLEAN DEFAULT false;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day7_sent') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day7_sent BOOLEAN DEFAULT false;
+        END IF;
+      END $$;
+    `;
+
     // Create update timestamp trigger function for subscriptions
     await sql`
       CREATE OR REPLACE FUNCTION update_subscriptions_updated_at()
@@ -898,6 +924,23 @@ async function setupDatabase() {
     await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_type ON analytics_conversions(conversion_type)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_created_at ON analytics_conversions(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_analytics_conversions_trigger_feature ON analytics_conversions(trigger_feature)`;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_notification_events (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        notification_type TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        notification_id TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_user_id ON analytics_notification_events(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_type ON analytics_notification_events(notification_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_event_type ON analytics_notification_events(event_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_created_at ON analytics_notification_events(created_at)`;
 
     console.log('✅ Analytics tables created');
 

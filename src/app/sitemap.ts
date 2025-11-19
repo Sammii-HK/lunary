@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { grimoire } from '@/constants/grimoire';
+import { sectionToSlug } from '@/utils/grimoire';
 import { spells } from '@/constants/spells';
 import { crystalDatabase } from '@/constants/grimoire/crystals';
 import { runesList } from '@/constants/runes';
@@ -11,19 +12,31 @@ import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import { zodiacSigns, planetaryBodies } from '../../utils/zodiac/zodiac';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
+import {
+  astrologicalHouses,
+  astrologicalAspects,
+  retrogradeInfo,
+  eclipseInfo,
+} from '@/constants/grimoire/seo-data';
+import {
+  angelNumbers,
+  lifePathNumbers,
+} from '@/constants/grimoire/numerology-data';
+import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  // Use canonical domain (non-www)
   const baseUrl = 'https://lunary.app';
   const now = new Date();
 
-  // Static routes
+  // Static routes - ordered by priority
   const routes = [
     {
       url: baseUrl,
       lastModified: now,
       changeFrequency: 'daily' as const,
-      priority: 1,
+      priority: 1.0,
     },
     {
       url: `${baseUrl}/welcome`,
@@ -38,9 +51,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/comparison/best-personalized-astrology-apps`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/blog`,
       lastModified: now,
       changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
@@ -50,7 +75,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire`,
+      url: `${baseUrl}/comparison`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -164,10 +189,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all grimoire sections
   const grimoireItems = Object.keys(grimoire);
   const grimoireRoutes = grimoireItems.map((item) => ({
-    url: `${baseUrl}/grimoire/${item
-      .replace(/([A-Z])/g, '-$1')
-      .toLowerCase()
-      .replace(/^-/, '')}`,
+    url: `${baseUrl}/grimoire/${sectionToSlug(item)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
@@ -524,6 +546,78 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   };
 
+  // Add all house pages
+  const houseRoutes = Object.keys(astrologicalHouses).map((house) => ({
+    url: `${baseUrl}/grimoire/houses/${stringToKebabCase(house)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all moon in sign pages
+  const moonInSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/grimoire/moon-in/${stringToKebabCase(sign)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all angel number pages
+  const angelNumberRoutes = Object.keys(angelNumbers).map((number) => ({
+    url: `${baseUrl}/grimoire/angel-numbers/${number}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all life path number pages
+  const lifePathRoutes = Object.keys(lifePathNumbers).map((number) => ({
+    url: `${baseUrl}/grimoire/life-path/${number}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all aspect pages
+  const aspectRoutes = Object.keys(astrologicalAspects).map((aspect) => ({
+    url: `${baseUrl}/grimoire/aspects/${stringToKebabCase(aspect)}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all retrograde pages
+  const retrogradeRoutes = Object.keys(retrogradeInfo).map((planet) => ({
+    url: `${baseUrl}/grimoire/retrogrades/${planet}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add all eclipse pages
+  const eclipseRoutes = Object.keys(eclipseInfo).map((type) => ({
+    url: `${baseUrl}/grimoire/eclipses/${type}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  // Add lunar node pages
+  const lunarNodeRoutes = [
+    {
+      url: `${baseUrl}/grimoire/lunar-nodes/north-node`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire/lunar-nodes/south-node`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+  ];
+
   return [
     ...routes,
     ...blogRoutes,
@@ -563,5 +657,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     pendulumRoute,
     dreamInterpretationRoute,
     omenReadingRoute,
+    ...houseRoutes,
+    ...moonInSignRoutes,
+    ...angelNumberRoutes,
+    ...lifePathRoutes,
+    ...aspectRoutes,
+    ...retrogradeRoutes,
+    ...eclipseRoutes,
+    ...lunarNodeRoutes,
   ];
 }

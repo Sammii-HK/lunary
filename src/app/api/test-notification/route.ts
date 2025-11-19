@@ -119,7 +119,7 @@ async function handleTestNotification(testType: string) {
     // Send test notification via the notifications API
     const baseUrl =
       process.env.NODE_ENV === 'production'
-        ? 'https://www.lunary.app'
+        ? 'https://lunary.app'
         : 'http://localhost:3000';
 
     // Send notification - use CRON_SECRET if available, otherwise skip auth (for local testing)
