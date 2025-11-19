@@ -44,11 +44,23 @@ export default function SubscriptionManagement({
     if (!customerIdToUse) return;
 
     try {
-      const response = await fetch('/api/stripe/get-subscription', {
+      // Add cache-busting query parameter and headers when force refresh
+      const url = forceRefresh
+        ? `/api/stripe/get-subscription?t=${Date.now()}`
+        : '/api/stripe/get-subscription';
+
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (forceRefresh) {
+        headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        headers['Pragma'] = 'no-cache';
+      }
+
+      const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           customerId: customerIdToUse,
+          forceRefresh,
         }),
         cache: 'no-store',
       });
@@ -114,14 +126,39 @@ export default function SubscriptionManagement({
           cacheNames.map((cacheName) => caches.delete(cacheName)),
         );
       }
+
+      // Clear subscription-related localStorage keys
+      const subscriptionKeys = [
+        'subscription',
+        'stripe_subscription',
+        'subscription_data',
+        'weekly_insights_',
+      ];
+      subscriptionKeys.forEach((key) => {
+        if (key.endsWith('_')) {
+          // Clear all keys starting with prefix
+          Object.keys(localStorage).forEach((k) => {
+            if (k.startsWith(key)) {
+              localStorage.removeItem(k);
+            }
+          });
+        } else {
+          localStorage.removeItem(key);
+        }
+      });
     } catch (e) {
       // Ignore cache clearing errors
       console.warn('Could not clear caches:', e);
     }
 
+    // Clear in-memory subscription state
+    setStripeSubscription(null);
+
     // Force refresh with cache-busting
     await fetchStripeSubscription(true);
 
+    // Trigger subscription hook refresh by updating customerId dependency
+    // This will cause useSubscription to re-fetch
     setLoading(null);
   };
 

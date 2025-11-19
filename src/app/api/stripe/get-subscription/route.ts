@@ -137,11 +137,169 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { customerId, userId } = body;
+    const { customerId, userId, forceRefresh } = body;
 
-    if (!customerId) {
+    // ALWAYS prioritize userId-based lookup if userId is provided
+    // This ensures we get the correct customer even if customerId is from another account
+    let resolvedCustomerId = customerId;
+
+    if (userId) {
+      try {
+        // Search for customer by userId in metadata (this is the source of truth)
+        const customers = await stripe.customers.search({
+          query: `metadata['userId']:'${userId}'`,
+          limit: 1,
+        });
+        if (customers.data.length > 0) {
+          const userIdMatchedCustomer = customers.data[0].id;
+
+          // If we found a customer by userId, use it (even if different from provided customerId)
+          if (userIdMatchedCustomer !== customerId) {
+            console.log(
+              `[get-subscription] userId ${userId} maps to customer ${userIdMatchedCustomer}, but provided customerId was ${customerId}. Using userId-matched customer.`,
+            );
+          }
+          resolvedCustomerId = userIdMatchedCustomer;
+          console.log(
+            `[get-subscription] Found customer ${resolvedCustomerId} by userId ${userId}`,
+          );
+        } else if (customerId) {
+          // No customer found by userId, but we have customerId - verify it matches userId
+          try {
+            const providedCustomer =
+              await stripe.customers.retrieve(customerId);
+            const providedCustomerUserId = (providedCustomer as any).metadata
+              ?.userId;
+
+            if (providedCustomerUserId && providedCustomerUserId !== userId) {
+              // Customer ID belongs to a different user - don't use it
+              console.warn(
+                `[get-subscription] Provided customerId ${customerId} belongs to userId ${providedCustomerUserId}, but request is for userId ${userId}. Ignoring customerId.`,
+              );
+              resolvedCustomerId = null; // Force email lookup
+            } else if (!providedCustomerUserId) {
+              // Customer exists but has no userId metadata - update it
+              try {
+                await stripe.customers.update(customerId, {
+                  metadata: { userId: userId },
+                });
+                console.log(
+                  `[get-subscription] Updated customer ${customerId} metadata with userId ${userId}`,
+                );
+                resolvedCustomerId = customerId;
+              } catch (updateError) {
+                console.warn(
+                  '[get-subscription] Failed to update customer metadata:',
+                  updateError,
+                );
+              }
+            } else {
+              // Customer matches userId - use it
+              resolvedCustomerId = customerId;
+            }
+          } catch (retrieveError) {
+            console.warn(
+              '[get-subscription] Failed to retrieve provided customer:',
+              retrieveError,
+            );
+            resolvedCustomerId = null; // Force email lookup
+          }
+        }
+      } catch (error) {
+        console.warn(
+          '[get-subscription] Failed to search for customer by userId:',
+          error,
+        );
+        // Continue with customerId if provided, or fall back to email lookup
+      }
+    }
+
+    // If still no customerId but we have userId, try email lookup as fallback
+    if (!resolvedCustomerId && userId) {
+      try {
+        // Get user email from database
+        const { sql } = await import('@vercel/postgres');
+        const userResult = await sql`
+          SELECT email FROM users WHERE id = ${userId} LIMIT 1
+        `;
+        if (userResult.rows.length > 0 && userResult.rows[0].email) {
+          const userEmail = userResult.rows[0].email;
+          // Get ALL customers with this email (Stripe allows multiple)
+          const customers = await stripe.customers.list({
+            email: userEmail,
+            limit: 100, // Get all to find the right one
+          });
+
+          if (customers.data.length > 0) {
+            // Priority 1: Find customer with matching userId in metadata
+            let matchingCustomer = customers.data.find(
+              (c) => (c.metadata as any)?.userId === userId,
+            );
+
+            // Priority 2: If no match, find customer with active subscription
+            if (!matchingCustomer) {
+              for (const customer of customers.data) {
+                const subscriptions = await stripe.subscriptions.list({
+                  customer: customer.id,
+                  status: 'all',
+                  limit: 1,
+                });
+                const hasActiveSub = subscriptions.data.some(
+                  (sub) =>
+                    sub.status === 'active' ||
+                    sub.status === 'trialing' ||
+                    sub.status === 'past_due',
+                );
+                if (hasActiveSub) {
+                  matchingCustomer = customer;
+                  break;
+                }
+              }
+            }
+
+            // Priority 3: If still no match, use most recently created customer
+            if (!matchingCustomer) {
+              matchingCustomer = customers.data.sort(
+                (a, b) => b.created - a.created,
+              )[0];
+            }
+
+            resolvedCustomerId = matchingCustomer.id;
+            console.log(
+              `[get-subscription] Found customer ${resolvedCustomerId} by email ${userEmail} (from ${customers.data.length} customers with same email)`,
+            );
+
+            // Update customer metadata with userId for future lookups
+            try {
+              await stripe.customers.update(resolvedCustomerId, {
+                metadata: { userId: userId },
+              });
+              console.log(
+                `[get-subscription] Updated customer ${resolvedCustomerId} metadata with userId ${userId}`,
+              );
+            } catch (updateError) {
+              console.warn(
+                '[get-subscription] Failed to update customer metadata:',
+                updateError,
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(
+          '[get-subscription] Failed to lookup customer by email:',
+          error,
+        );
+      }
+    }
+
+    if (!resolvedCustomerId) {
       return NextResponse.json(
-        { error: 'Customer ID is required' },
+        {
+          error: 'Customer ID is required',
+          message:
+            'Could not find Stripe customer. Please ensure you have completed checkout.',
+        },
         { status: 400 },
       );
     }
@@ -150,7 +308,7 @@ export async function POST(request: NextRequest) {
     let userIdToUse: string | null = userId || null;
     let userEmail: string | null = null;
     try {
-      const customer = await stripe.customers.retrieve(customerId);
+      const customer = await stripe.customers.retrieve(resolvedCustomerId);
       if (!userIdToUse) {
         userIdToUse = (customer as any).metadata?.userId || null;
       }
@@ -161,7 +319,7 @@ export async function POST(request: NextRequest) {
 
     // Get all subscriptions for this customer
     const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
+      customer: resolvedCustomerId,
       status: 'all', // Include all statuses
       limit: 10,
     });
@@ -219,7 +377,7 @@ export async function POST(request: NextRequest) {
               stripe_subscription_id, trial_ends_at, current_period_end
             ) VALUES (
               ${userIdToUse}, ${userEmail}, ${mappedStatus}, ${planType},
-              ${customerId}, ${subscription.id}, ${trialEndsAt}, ${currentPeriodEnd}
+              ${resolvedCustomerId}, ${subscription.id}, ${trialEndsAt}, ${currentPeriodEnd}
             )
             ON CONFLICT (user_id) DO UPDATE SET
               status = EXCLUDED.status,
@@ -241,7 +399,7 @@ export async function POST(request: NextRequest) {
             SET
               status = ${mappedStatus},
               plan_type = ${planType},
-              stripe_customer_id = ${customerId},
+              stripe_customer_id = ${resolvedCustomerId},
               stripe_subscription_id = ${subscription.id},
               trial_ends_at = ${trialEndsAt},
               current_period_end = ${currentPeriodEnd},
@@ -262,14 +420,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Determine cache headers based on forceRefresh
+    const cacheHeaders: Record<string, string> = forceRefresh
+      ? {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        }
+      : {
+          // Cache for 5 minutes, allow stale-while-revalidate for 10 minutes
+          // Reduces Stripe API calls significantly - users can force refresh via button
+          'Cache-Control':
+            'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
+        };
+
+    // Check if resolved customerId differs from provided customerId
+    const customerIdChanged =
+      customerId && resolvedCustomerId !== customerId ? true : false;
+
     return NextResponse.json(
       {
         success: true,
         subscription: {
           id: subscription.id,
           status: subscription.status,
-          customerId: subscription.customer,
-          customer: subscription.customer,
+          customerId: resolvedCustomerId, // Use resolved customerId, not subscription.customer
+          customer: resolvedCustomerId,
           plan: planType,
           planName: planType, // Include planName for compatibility
           rawPlan: rawPlanType,
@@ -280,14 +456,11 @@ export async function POST(request: NextRequest) {
           created: subscription.created,
         },
         message: `Found ${subscription.status} subscription`,
+        customerIdChanged, // Flag to indicate customerId was resolved differently
+        resolvedCustomerId, // Always include resolved customerId
       },
       {
-        headers: {
-          // Cache for 5 minutes, allow stale-while-revalidate for 10 minutes
-          // Reduces Stripe API calls significantly - users can force refresh via button
-          'Cache-Control':
-            'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
-        },
+        headers: cacheHeaders,
       },
     );
   } catch (error) {

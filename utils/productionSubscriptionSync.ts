@@ -22,11 +22,12 @@ export async function robustSubscriptionSync(
   try {
     console.log('🔄 Starting robust subscription sync for:', email);
 
-    // Step 1: Find Stripe customer by email
+    // Step 1: Find Stripe customer by email (and userId if available from profile)
+    const userId = (profile as any)?.userId || null;
     const customerResponse = await fetch('/api/stripe/find-customer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, userId }),
     });
 
     const customerResult = await customerResponse.json();
@@ -40,6 +41,13 @@ export async function robustSubscriptionSync(
     }
 
     const customerId = customerResult.customer.id;
+
+    // If multiple customers found with same email, log a warning
+    if (customerResult.totalCustomersWithEmail > 1) {
+      console.warn(
+        `⚠️ Found ${customerResult.totalCustomersWithEmail} Stripe customers with email ${email}. Using customer ${customerId}${userId ? ` (matched by userId ${userId})` : ' (selected by active subscription or most recent)'}`,
+      );
+    }
     console.log('✅ Found Stripe customer:', customerId);
 
     // Step 2: Fetch subscription directly from Stripe

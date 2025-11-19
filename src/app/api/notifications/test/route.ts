@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     const testNotification = {
-      title: '🔔 Test Notification from Lunary',
+      title: '🔔 Test Notification',
       body: 'This is a test notification! If you received this, push notifications are working correctly.',
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-72x72.png',
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       actions: [
         {
           action: 'view',
-          title: 'View in Lunary',
+          title: 'View',
           icon: '/icons/icon-72x72.png',
         },
       ],

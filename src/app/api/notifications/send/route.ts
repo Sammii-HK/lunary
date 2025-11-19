@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       actions: [
         {
           action: 'view',
-          title: 'View in Lunary',
+          title: 'View',
           icon: '/icons/icon-72x72.png',
         },
       ],

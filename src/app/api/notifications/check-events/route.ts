@@ -171,7 +171,7 @@ function createNotificationFromEvent(event: any, cosmicData: any) {
     actions: [
       {
         action: 'view',
-        title: 'View in Lunary',
+        title: 'View',
         icon: '/icons/icon-72x72.png',
       },
     ],
@@ -182,25 +182,25 @@ function createNotificationFromEvent(event: any, cosmicData: any) {
     case 'moon':
       const moonSign = cosmicData?.astronomicalData?.planets?.moon?.sign;
       const moonBody = getMoonDescriptionWithConstellation(
-        event.name,
+        event.name || 'Moon Phase',
         moonSign,
       );
       return {
         ...baseNotification,
-        title: `${event.emoji || '🌙'} ${event.name}`,
+        title: `${event.emoji || '🌙'} ${event.name || 'Moon Phase'}`,
         body: moonBody,
         tag: 'lunary-moon-phase',
-        data: { ...baseNotification.data, phase: event.name },
+        data: { ...baseNotification.data, phase: event.name || 'moon' },
       };
 
     case 'aspect':
       const aspectBody = getAspectDescriptionDetailed(event);
       return {
         ...baseNotification,
-        title: `${getPlanetEmoji(event)} ${event.name}`,
+        title: `${getPlanetEmoji(event)} ${event.name || 'Planetary Aspect'}`,
         body: aspectBody,
         tag: 'lunary-planetary-aspect',
-        data: { ...baseNotification.data, aspect: event.name },
+        data: { ...baseNotification.data, aspect: event.name || 'aspect' },
       };
 
     case 'seasonal':
@@ -215,22 +215,25 @@ function createNotificationFromEvent(event: any, cosmicData: any) {
 
     case 'ingress':
       const ingressBody = getIngressDescriptionDetailed(
-        event.planet,
-        event.sign,
+        event.planet || event.name?.split(' ')[0],
+        event.sign || event.name?.split(' ')[2],
       );
       return {
         ...baseNotification,
-        title: `${getPlanetEmoji(event)} ${event.name}`,
+        title: `${getPlanetEmoji(event)} ${event.name || 'Planetary Ingress'}`,
         body: ingressBody,
         tag: 'lunary-planetary-ingress',
-        data: { ...baseNotification.data, ingress: event.name },
+        data: { ...baseNotification.data, ingress: event.name || 'ingress' },
       };
 
     default:
       return {
         ...baseNotification,
-        title: `✨ ${event.name}`,
-        body: event.energy || 'Significant cosmic event occurring',
+        title: `✨ ${event.name || 'Cosmic Event'}`,
+        body:
+          event.energy ||
+          event.description ||
+          'Significant cosmic event occurring',
         tag: 'lunary-cosmic-event',
       };
   }
@@ -339,7 +342,11 @@ function getMoonDescriptionWithConstellation(
   return description;
 }
 
-function getIngressDescriptionDetailed(planet: string, sign: string): string {
+function getIngressDescriptionDetailed(planet?: string, sign?: string): string {
+  if (!planet || !sign) {
+    return 'Planetary energy shift creating new opportunities';
+  }
+
   const planetInfluences: Record<string, Record<string, string>> = {
     Mars: {
       Aries: 'action, courage, and pioneering initiative',

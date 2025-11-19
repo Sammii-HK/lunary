@@ -161,9 +161,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If we have a customer ID, use it
+    // If we have a customer ID, use it and update metadata
     if (customerId) {
       sessionConfig.customer = customerId;
+      // Update customer metadata with userId if provided
+      if (userId) {
+        try {
+          await stripe.customers.update(customerId, {
+            metadata: {
+              userId: userId,
+            },
+          });
+        } catch (error) {
+          console.warn('Failed to update customer metadata:', error);
+        }
+      }
+    } else if (userId) {
+      // If no customer ID but we have userId, store it in customer metadata
+      // Stripe will create the customer, and we'll update metadata via webhook
+      sessionConfig.customer_email = undefined; // Let Stripe collect email
+      // Store userId in session metadata so webhook can update customer
+      metadata.userId = userId;
     }
     // Note: For subscription mode, Stripe automatically creates customers
     // so we don't need to set customer_creation

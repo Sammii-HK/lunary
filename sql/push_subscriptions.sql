@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
     "retrogrades": true,
     "sabbats": true,
     "eclipses": true,
-    "majorAspects": true
+    "majorAspects": true,
+    "moonCircles": true
   }'::jsonb,
   
   -- Metadata

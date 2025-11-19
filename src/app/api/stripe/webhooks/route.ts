@@ -245,6 +245,26 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     const customer = await stripe.customers.retrieve(customerId);
     userId = (customer as any).metadata?.userId || null;
     userEmail = (customer as any).email || null;
+
+    // If userId is in subscription metadata but not customer metadata, update customer
+    const subscriptionUserId = subscription.metadata?.userId;
+    if (subscriptionUserId && !userId) {
+      try {
+        await stripe.customers.update(customerId, {
+          metadata: { userId: subscriptionUserId },
+        });
+        userId = subscriptionUserId;
+        console.log(
+          `[webhook] Updated customer ${customerId} metadata with userId ${subscriptionUserId}`,
+        );
+      } catch (updateError) {
+        console.warn(
+          '[webhook] Failed to update customer metadata:',
+          updateError,
+        );
+      }
+    }
+
     console.log('Customer data:', { customerId, userId, userEmail });
   } catch (error) {
     console.error('Failed to retrieve customer:', error);
