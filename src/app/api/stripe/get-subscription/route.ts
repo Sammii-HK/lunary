@@ -80,14 +80,21 @@ async function getPlanTypeFromSubscription(
   // Final fallback: use interval-based mapping for backward compatibility
   // Note: This is less ideal - prefer using price ID mapping or metadata
   // WARNING: This fallback cannot distinguish between lunary_plus and lunary_plus_ai monthly plans
-  const interval = subscription.items.data[0]?.price?.recurring?.interval;
-  if (interval) {
-    console.warn(
-      `[getPlanTypeFromSubscription] Using interval-based fallback for ${interval} subscription. Price ID mapping should have caught this.`,
-    );
-    // For monthly, default to lunary_plus (lower tier) - this is conservative
-    // For yearly, default to lunary_plus_ai_annual (only yearly plan available)
-    return interval === 'month' ? 'lunary_plus' : 'lunary_plus_ai_annual';
+  // Only use this fallback if we have actual subscription items (subscription exists)
+  if (
+    subscription.items &&
+    subscription.items.data &&
+    subscription.items.data.length > 0
+  ) {
+    const interval = subscription.items.data[0]?.price?.recurring?.interval;
+    if (interval) {
+      console.warn(
+        `[getPlanTypeFromSubscription] Using interval-based fallback for ${interval} subscription. Price ID mapping should have caught this.`,
+      );
+      // For monthly, default to lunary_plus (lower tier) - this is conservative
+      // For yearly, default to lunary_plus_ai_annual (only yearly plan available)
+      return interval === 'month' ? 'lunary_plus' : 'lunary_plus_ai_annual';
+    }
   }
 
   // If we truly can't determine, return free as safest default

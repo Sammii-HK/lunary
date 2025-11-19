@@ -1,6 +1,8 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { getAccurateMoonPhase } from '../../../../../utils/astrology/cosmic-og';
 
+export const runtime = 'nodejs'; // Node.js runtime required for astronomy-engine calculations
 export const dynamic = 'force-dynamic';
 export const revalidate = 86400; // Cache for 24 hours (content updates daily)
 
@@ -53,13 +55,20 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
 
-  const targetDate = dateParam || new Date().toISOString().split('T')[0];
-  const dateObj = new Date(targetDate);
-  const seed = dateObj.getDate() + dateObj.getMonth() * 31;
-  const crystal = crystals[seed % crystals.length];
+  // Normalize date to noon UTC for consistent moon phase calculation
+  let targetDate: Date;
+  if (dateParam) {
+    targetDate = new Date(dateParam + 'T12:00:00Z');
+  } else {
+    const todayStr = new Date().toISOString().split('T')[0];
+    targetDate = new Date(todayStr + 'T12:00:00Z');
+  }
+
+  // Get actual moon phase data for the date
+  const moonPhase = getAccurateMoonPhase(targetDate);
 
   // Format date for display
-  const formattedDate = dateObj
+  const formattedDate = targetDate
     .toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
@@ -68,7 +77,7 @@ export async function GET(request: NextRequest) {
     .replace(/\//g, '/');
 
   // Blue lunar backgrounds (not crystal colors)
-  const dayVariation = dateObj.getDate() % 5;
+  const dayVariation = targetDate.getDate() % 5;
   const themes = [
     'linear-gradient(135deg, #1e3a8a15, #0a0a1a)', // Deep blue
     'linear-gradient(135deg, #1a1a2e, #1e40af20)', // Navy blue
@@ -113,7 +122,7 @@ export async function GET(request: NextRequest) {
               opacity: 0.7,
             }}
           >
-            75% ILLUMINATED
+            {Math.round(moonPhase.illumination)}% ILLUMINATED
           </div>
         </div>
 
@@ -128,7 +137,9 @@ export async function GET(request: NextRequest) {
             width: '100%',
           }}
         >
-          <div style={{ fontSize: '120px', marginBottom: '30px' }}>🌔</div>
+          <div style={{ fontSize: '120px', marginBottom: '30px' }}>
+            {moonPhase.emoji}
+          </div>
           <div
             style={{
               fontSize: '64px',
@@ -139,7 +150,7 @@ export async function GET(request: NextRequest) {
               marginBottom: '30px',
             }}
           >
-            Waxing Gibbous
+            {moonPhase.name}
           </div>
           <div
             style={{
@@ -150,7 +161,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.1em',
             }}
           >
-            Refinement
+            {moonPhase.energy}
           </div>
         </div>
 

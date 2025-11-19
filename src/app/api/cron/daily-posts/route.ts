@@ -66,67 +66,50 @@ export async function GET(request: NextRequest) {
       allHeaders,
     });
 
-    // If not from Vercel cron or internal test, require CRON_SECRET
     if (!isVercelCron && !isInternalTest) {
-      // If CRON_SECRET is set, require it to match
-      if (cronSecret) {
-        const expectedAuth = `Bearer ${cronSecret.trim()}`;
-        // Normalize both headers for comparison (trim whitespace)
-        const normalizedAuthHeader = authHeader?.trim() || '';
-        const normalizedExpected = expectedAuth.trim();
-
-        console.log('🔐 Comparing auth:', {
-          received: normalizedAuthHeader.substring(0, 30) + '...',
-          expected: normalizedExpected.substring(0, 30) + '...',
-          match: normalizedAuthHeader === normalizedExpected,
-        });
-
-        if (normalizedAuthHeader !== normalizedExpected) {
-          console.error('❌ Authorization failed - returning 401 immediately');
-          console.warn('⚠️ Authorization failed:', {
-            hasAuthHeader: !!authHeader,
-            authHeaderLength: authHeader?.length || 0,
-            expectedLength: expectedAuth.length,
-            cronSecretSet: !!cronSecret,
-            authHeaderStart: authHeader?.substring(0, 30) || 'none',
-            expectedStart: expectedAuth.substring(0, 30),
-            headersMatch: normalizedAuthHeader === normalizedExpected,
-          });
-          return NextResponse.json(
-            {
-              error: 'Unauthorized',
-              message:
-                'Invalid or missing Authorization header. Ensure CRON_SECRET matches.',
-            },
-            { status: 401 },
-          );
-        }
-        console.log('✅ Authorization successful - CRON_SECRET matched');
-      } else {
-        // If CRON_SECRET is not set, allow the request (for local development)
-        const isProduction = process.env.NODE_ENV === 'production';
-        if (isProduction) {
-          console.error(
-            '❌ CRON_SECRET not set in production - this should not happen',
-          );
-          return NextResponse.json(
-            {
-              error: 'Configuration error',
-              message: 'CRON_SECRET must be set in production',
-            },
-            { status: 500 },
-          );
-        }
-        console.warn(
-          '⚠️ CRON_SECRET not set - allowing request (local dev mode)',
+      if (!cronSecret) {
+        console.error('❌ CRON_SECRET not set - configuration error');
+        return NextResponse.json(
+          {
+            error: 'Configuration error',
+            message: 'CRON_SECRET must be set',
+          },
+          { status: 500 },
         );
       }
-    } else if (isVercelCron) {
-      console.log(
-        '✅ Vercel cron detected - allowing request (x-vercel-cron header present)',
-      );
-    } else if (isInternalTest) {
-      console.log('✅ Internal test call detected - allowing request');
+
+      const expectedAuth = `Bearer ${cronSecret.trim()}`;
+      // Normalize both headers for comparison (trim whitespace)
+      const normalizedAuthHeader = authHeader?.trim() || '';
+      const normalizedExpected = expectedAuth.trim();
+
+      console.log('🔐 Comparing auth:', {
+        received: normalizedAuthHeader.substring(0, 30) + '...',
+        expected: normalizedExpected.substring(0, 30) + '...',
+        match: normalizedAuthHeader === normalizedExpected,
+      });
+
+      if (normalizedAuthHeader !== normalizedExpected) {
+        console.error('❌ Authorization failed - returning 401 immediately');
+        console.warn('⚠️ Authorization failed:', {
+          hasAuthHeader: !!authHeader,
+          authHeaderLength: authHeader?.length || 0,
+          expectedLength: expectedAuth.length,
+          cronSecretSet: !!cronSecret,
+          authHeaderStart: authHeader?.substring(0, 30) || 'none',
+          expectedStart: expectedAuth.substring(0, 30),
+          headersMatch: normalizedAuthHeader === normalizedExpected,
+        });
+        return NextResponse.json(
+          {
+            error: 'Unauthorized',
+            message:
+              'Invalid or missing Authorization header. Ensure CRON_SECRET matches.',
+          },
+          { status: 401 },
+        );
+      }
+      console.log('✅ Authorization successful - CRON_SECRET matched');
     }
 
     console.log('✅ Auth check passed - proceeding with cron execution');
