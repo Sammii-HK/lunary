@@ -29,7 +29,6 @@ import { AuthComponent } from '@/components/Auth';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { TrialReminder } from '@/components/TrialReminder';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
 import { YearlyForecast } from '@/components/forecast/YearlyForecast';
@@ -320,8 +319,6 @@ export default function ProfilePage() {
 
   return (
     <div className='flex flex-col items-center gap-6 py-8'>
-      <TrialReminder variant='banner' className='w-full max-w-3xl' />
-
       <div className='flex items-center justify-between w-full max-w-3xl'>
         <h1 className='text-2xl font-bold text-white text-center md:text-left'>
           Your Profile

@@ -36,6 +36,28 @@ export interface YearlyForecast {
     planets: string[];
     description: string;
   }>;
+  monthlyForecast?: Array<{
+    month: number;
+    monthName: string;
+    majorTransits: Array<{
+      date: string;
+      event: string;
+      description: string;
+      significance: string;
+    }>;
+    eclipses: Array<{
+      date: string;
+      type: 'solar' | 'lunar';
+      sign: string;
+      description: string;
+    }>;
+    keyAspects: Array<{
+      date: string;
+      aspect: string;
+      planets: string[];
+      description: string;
+    }>;
+  }>;
   summary: string;
 }
 
@@ -75,96 +97,133 @@ export async function generateYearlyForecast(
   userBirthday?: string,
   observer: Observer = DEFAULT_OBSERVER,
 ): Promise<YearlyForecast> {
+  const startTime = Date.now();
   const startDate = new Date(year, 0, 1);
   const endDate = new Date(year, 11, 31);
 
   const majorTransits: YearlyForecast['majorTransits'] = [];
   const retrogrades: YearlyForecast['retrogrades'] = [];
   const keyAspects: YearlyForecast['keyAspects'] = [];
-
-  let currentDate = new Date(startDate);
-  const checkedDates = new Set<string>();
-  const retrogradeStartMap = new Map<
-    string,
-    { startDate: string; planet: string }
+  const monthlyData = new Map<
+    number,
+    {
+      majorTransits: YearlyForecast['majorTransits'];
+      eclipses: YearlyForecast['eclipses'];
+      keyAspects: YearlyForecast['keyAspects'];
+    }
   >();
 
+  // Initialize monthly data structure
+  for (let month = 0; month < 12; month++) {
+    monthlyData.set(month, {
+      majorTransits: [],
+      eclipses: [],
+      keyAspects: [],
+    });
+  }
+
+  // Track retrograde periods by comparing day-to-day
+  const retrogradeStartMap = new Map<
+    string,
+    { startDate: string; planet: string; startSign: string }
+  >();
+  const previousPositions = new Map<string, boolean>();
+
+  let currentDate = new Date(startDate);
+
+  // Scan day by day to catch all retrograde transitions
   while (currentDate <= endDate) {
     const dateStr = currentDate.toISOString().split('T')[0];
-
-    if (checkedDates.has(dateStr)) {
-      currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
-      continue;
-    }
-    checkedDates.add(dateStr);
-
+    const month = currentDate.getMonth();
     const positions = getRealPlanetaryPositions(currentDate, observer);
     const aspects = calculateRealAspects(positions);
-    const ingresses = checkSignIngress(positions, currentDate);
-    const retrogradeEvents = checkRetrogradeEvents(positions);
 
-    retrogradeEvents.forEach((event) => {
-      const planetKey = event.planet || 'Unknown';
-      if (event.type === 'starts') {
-        if (!retrogradeStartMap.has(planetKey)) {
-          retrogradeStartMap.set(planetKey, {
-            startDate: dateStr,
-            planet: planetKey,
-          });
-        }
-      } else if (event.type === 'ends' && retrogradeStartMap.has(planetKey)) {
-        const startInfo = retrogradeStartMap.get(planetKey)!;
-        const existingRetrograde = retrogrades.find(
-          (r) => r.planet === planetKey && r.startDate === startInfo.startDate,
-        );
-        if (existingRetrograde) {
-          existingRetrograde.endDate = dateStr;
-          existingRetrograde.description = `${planetKey} retrograde period`;
-        } else {
-          retrogrades.push({
-            planet: planetKey,
-            startDate: startInfo.startDate,
-            endDate: dateStr,
-            description: `${planetKey} retrograde period`,
-          });
-        }
-        retrogradeStartMap.delete(planetKey);
+    // Detect retrograde changes by comparing with previous day
+    Object.entries(positions).forEach(([planet, data]: [string, any]) => {
+      // Skip Sun and Moon (they don't retrograde)
+      if (planet === 'Sun' || planet === 'Moon') {
+        return;
       }
+
+      const wasRetrograde = previousPositions.get(planet) || false;
+      const isRetrograde = data.retrograde || false;
+
+      if (!wasRetrograde && isRetrograde) {
+        // Retrograde starts
+        retrogradeStartMap.set(planet, {
+          startDate: dateStr,
+          planet,
+          startSign: data.sign,
+        });
+      } else if (wasRetrograde && !isRetrograde) {
+        // Retrograde ends
+        const startInfo = retrogradeStartMap.get(planet);
+        if (startInfo) {
+          const existingRetrograde = retrogrades.find(
+            (r) => r.planet === planet && r.startDate === startInfo.startDate,
+          );
+          if (existingRetrograde) {
+            existingRetrograde.endDate = dateStr;
+            existingRetrograde.description = `${planet} retrograde period (${startInfo.startSign} → ${data.sign})`;
+          } else {
+            retrogrades.push({
+              planet,
+              startDate: startInfo.startDate,
+              endDate: dateStr,
+              description: `${planet} retrograde period (${startInfo.startSign} → ${data.sign})`,
+            });
+          }
+          retrogradeStartMap.delete(planet);
+        }
+      }
+
+      previousPositions.set(planet, isRetrograde);
     });
 
+    // Process aspects with correct property names
     aspects
       .filter((a) => a.priority >= 6)
       .forEach((aspect) => {
+        const planetA = aspect.planetA?.name || '';
+        const planetB = aspect.planetB?.name || '';
+        const aspectDescription =
+          aspect.energy || `${planetA} ${aspect.aspect} ${planetB}`;
+
         if (
           !keyAspects.find(
             (a) =>
               a.date === dateStr &&
               a.aspect === aspect.aspect &&
-              a.planets.includes(aspect.planet1 || '') &&
-              a.planets.includes(aspect.planet2 || ''),
+              a.planets.includes(planetA) &&
+              a.planets.includes(planetB),
           )
         ) {
-          keyAspects.push({
+          const keyAspect = {
             date: dateStr,
             aspect: aspect.aspect || '',
-            planets: [aspect.planet1 || '', aspect.planet2 || ''],
-            description: aspect.description || '',
-          });
+            planets: [planetA, planetB],
+            description: aspectDescription,
+          };
+          keyAspects.push(keyAspect);
+          monthlyData.get(month)!.keyAspects.push(keyAspect);
 
           if (aspect.priority >= 7) {
-            majorTransits.push({
+            const majorTransit = {
               date: dateStr,
               event: aspect.aspect || '',
-              description: aspect.description || '',
-              significance: `Major ${aspect.aspect} between ${aspect.planet1} and ${aspect.planet2}`,
-            });
+              description: aspectDescription,
+              significance: `Major ${aspect.aspect} between ${planetA} and ${planetB}`,
+            };
+            majorTransits.push(majorTransit);
+            monthlyData.get(month)!.majorTransits.push(majorTransit);
           }
         }
       });
 
-    currentDate = new Date(currentDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+    currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
   }
 
+  // Handle retrogrades that start but don't end within the year
   for (const [planetKey, startInfo] of retrogradeStartMap.entries()) {
     if (
       !retrogrades.find(
@@ -175,12 +234,19 @@ export async function generateYearlyForecast(
         planet: planetKey,
         startDate: startInfo.startDate,
         endDate: '',
-        description: `${planetKey} retrograde begins`,
+        description: `${planetKey} retrograde begins in ${startInfo.startSign}`,
       });
     }
   }
 
   const eclipses = calculateEclipses(year, observer);
+
+  // Group eclipses by month
+  eclipses.forEach((eclipse) => {
+    const eclipseDate = new Date(eclipse.date);
+    const month = eclipseDate.getMonth();
+    monthlyData.get(month)!.eclipses.push(eclipse);
+  });
 
   const summary = `Your ${year} cosmic forecast reveals ${majorTransits.length} major planetary transits, ${retrogrades.length} planetary retrogrades, ${eclipses.length} eclipses, and ${keyAspects.length} significant aspects. This year brings transformative energies and opportunities for growth.`;
 
@@ -206,12 +272,68 @@ export async function generateYearlyForecast(
       ),
   );
 
+  // Build monthly forecast array
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  const monthlyForecast = Array.from(monthlyData.entries())
+    .map(([month, data]) => ({
+      month,
+      monthName: monthNames[month],
+      majorTransits: data.majorTransits.filter(
+        (transit, index, self) =>
+          index ===
+          self.findIndex(
+            (t) =>
+              t.date === transit.date &&
+              t.event === transit.event &&
+              t.description === transit.description,
+          ),
+      ),
+      eclipses: data.eclipses,
+      keyAspects: data.keyAspects.filter(
+        (aspect, index, self) =>
+          index ===
+          self.findIndex(
+            (a) =>
+              a.date === aspect.date &&
+              a.aspect === aspect.aspect &&
+              a.planets.every((p) => aspect.planets.includes(p)),
+          ),
+      ),
+    }))
+    .filter(
+      (month) =>
+        month.majorTransits.length > 0 ||
+        month.eclipses.length > 0 ||
+        month.keyAspects.length > 0,
+    );
+
+  const endTime = Date.now();
+  const duration = ((endTime - startTime) / 1000).toFixed(2);
+  console.log(
+    `[generateYearlyForecast] Generated forecast for ${year} in ${duration}s: ${majorTransits.length} transits, ${retrogrades.length} retrogrades, ${eclipses.length} eclipses, ${keyAspects.length} aspects`,
+  );
+
   return {
     year,
     majorTransits: deduplicatedMajorTransits.slice(0, 30),
     eclipses,
     retrogrades: retrogrades.slice(0, 15),
     keyAspects: deduplicatedKeyAspects.slice(0, 30),
+    monthlyForecast,
     summary,
   };
 }

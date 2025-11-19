@@ -32,6 +32,28 @@ interface YearlyForecast {
     planets: string[];
     description: string;
   }>;
+  monthlyForecast?: Array<{
+    month: number;
+    monthName: string;
+    majorTransits: Array<{
+      date: string;
+      event: string;
+      description: string;
+      significance: string;
+    }>;
+    eclipses: Array<{
+      date: string;
+      type: 'solar' | 'lunar';
+      sign: string;
+      description: string;
+    }>;
+    keyAspects: Array<{
+      date: string;
+      aspect: string;
+      planets: string[];
+      description: string;
+    }>;
+  }>;
   summary: string;
 }
 
@@ -271,74 +293,128 @@ export function YearlyForecast() {
               )}
             </CollapsibleSection>
 
-            <CollapsibleSection title='Major Transits'>
-              {forecast.majorTransits.length > 0 ? (
-                <div className='space-y-3'>
-                  {forecast.majorTransits.map((transit, index) => (
-                    <div
-                      key={index}
-                      className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4'
-                    >
-                      <div className='flex items-center justify-between mb-2'>
-                        <span className='text-sm font-medium text-zinc-100'>
-                          {transit.event}
-                        </span>
-                        <span className='text-xs text-zinc-400'>
-                          {formatDate(transit.date, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </span>
-                      </div>
-                      <p className='text-sm text-zinc-400'>
-                        {transit.description}
-                      </p>
-                      {transit.significance && (
-                        <p className='text-xs text-zinc-500 mt-2'>
-                          {transit.significance}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyCard message='No major planetary transits registered for this forecast.' />
-              )}
-            </CollapsibleSection>
+            {forecast.monthlyForecast &&
+              forecast.monthlyForecast.length > 0 && (
+                <CollapsibleSection title='Monthly Forecast'>
+                  <div className='space-y-6'>
+                    {forecast.monthlyForecast.map((monthData) => (
+                      <CollapsibleSection
+                        key={monthData.month}
+                        title={`${monthData.monthName} ${forecast.year}`}
+                      >
+                        <div className='space-y-4'>
+                          {monthData.eclipses.length > 0 && (
+                            <div>
+                              <h4 className='text-sm font-semibold text-zinc-200 mb-2'>
+                                Eclipses
+                              </h4>
+                              <div className='space-y-2'>
+                                {monthData.eclipses.map((eclipse, index) => (
+                                  <div
+                                    key={index}
+                                    className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-3'
+                                  >
+                                    <div className='flex items-center justify-between mb-1'>
+                                      <span className='text-xs font-medium text-zinc-100'>
+                                        {formatDate(eclipse.date)}
+                                      </span>
+                                      <span className='rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300'>
+                                        {eclipse.type === 'solar'
+                                          ? 'Solar'
+                                          : 'Lunar'}{' '}
+                                        Eclipse
+                                      </span>
+                                    </div>
+                                    <p className='text-xs text-zinc-400'>
+                                      {eclipse.description}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
-            <CollapsibleSection title='Significant Aspects'>
-              {forecast.keyAspects.length > 0 ? (
-                <div className='space-y-3'>
-                  {forecast.keyAspects.map((aspect, index) => (
-                    <div
-                      key={`${aspect.aspect}-${index}`}
-                      className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4'
-                    >
-                      <div className='flex items-center justify-between mb-2'>
-                        <span className='text-sm font-medium text-zinc-100'>
-                          {aspect.aspect}
-                        </span>
-                        <span className='text-xs text-zinc-400'>
-                          {formatDate(aspect.date, {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </span>
-                      </div>
-                      <p className='text-xs uppercase tracking-wide text-zinc-500 mb-2'>
-                        {aspect.planets.filter(Boolean).join(' • ')}
-                      </p>
-                      <p className='text-sm text-zinc-400'>
-                        {aspect.description || 'Energetic emphasis peaks here.'}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyCard message='No high-priority aspects were detected for this year.' />
+                          {monthData.majorTransits.length > 0 && (
+                            <div>
+                              <h4 className='text-sm font-semibold text-zinc-200 mb-2'>
+                                Major Transits
+                              </h4>
+                              <div className='space-y-2'>
+                                {monthData.majorTransits.map(
+                                  (transit, index) => (
+                                    <div
+                                      key={index}
+                                      className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-3'
+                                    >
+                                      <div className='flex items-center justify-between mb-1'>
+                                        <span className='text-xs font-medium text-zinc-100'>
+                                          {transit.event}
+                                        </span>
+                                        <span className='text-xs text-zinc-400'>
+                                          {formatDate(transit.date, {
+                                            month: 'short',
+                                            day: 'numeric',
+                                          })}
+                                        </span>
+                                      </div>
+                                      <p className='text-xs text-zinc-400'>
+                                        {transit.description}
+                                      </p>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {monthData.keyAspects.length > 0 && (
+                            <div>
+                              <h4 className='text-sm font-semibold text-zinc-200 mb-2'>
+                                Key Aspects
+                              </h4>
+                              <div className='space-y-2'>
+                                {monthData.keyAspects.map((aspect, index) => (
+                                  <div
+                                    key={`${aspect.aspect}-${index}`}
+                                    className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-3'
+                                  >
+                                    <div className='flex items-center justify-between mb-1'>
+                                      <span className='text-xs font-medium text-zinc-100'>
+                                        {aspect.aspect}
+                                      </span>
+                                      <span className='text-xs text-zinc-400'>
+                                        {formatDate(aspect.date, {
+                                          month: 'short',
+                                          day: 'numeric',
+                                        })}
+                                      </span>
+                                    </div>
+                                    <p className='text-xs uppercase tracking-wide text-zinc-500 mb-1'>
+                                      {aspect.planets
+                                        .filter(Boolean)
+                                        .join(' • ')}
+                                    </p>
+                                    <p className='text-xs text-zinc-400'>
+                                      {aspect.description ||
+                                        'Energetic emphasis peaks here.'}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {monthData.eclipses.length === 0 &&
+                            monthData.majorTransits.length === 0 &&
+                            monthData.keyAspects.length === 0 && (
+                              <EmptyCard message='No significant events this month.' />
+                            )}
+                        </div>
+                      </CollapsibleSection>
+                    ))}
+                  </div>
+                </CollapsibleSection>
               )}
-            </CollapsibleSection>
           </div>
         )}
       </div>
