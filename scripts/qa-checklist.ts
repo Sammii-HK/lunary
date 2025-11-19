@@ -1,14 +1,14 @@
 #!/usr/bin/env tsx
 /**
  * Pre-Launch Quality Assurance Checklist
- * 
+ *
  * Validates:
  * - Lighthouse scores > 90
  * - Mobile-first responsiveness
  * - Metadata validation
  * - Structured data testing
  * - Indexing (robots.txt, sitemap.xml)
- * 
+ *
  * Usage:
  *   BASE_URL=https://lunary.app pnpm qa:check
  *   BASE_URL=http://localhost:3000 pnpm qa:check
@@ -45,10 +45,10 @@ function logResult(result: QAResult) {
  */
 async function runLighthouseTests() {
   console.log('\n🔍 Running Lighthouse Tests...\n');
-  
+
   try {
     let lighthouseAvailable = false;
-    
+
     // Try to use lighthouse CLI if available
     if (USE_LIGHTHOUSE_CLI) {
       try {
@@ -58,7 +58,8 @@ async function runLighthouseTests() {
         logResult({
           name: 'Lighthouse CLI',
           passed: false,
-          message: 'Lighthouse CLI not found. Set USE_LIGHTHOUSE_CLI=false to skip or install: npm install -g lighthouse',
+          message:
+            'Lighthouse CLI not found. Set USE_LIGHTHOUSE_CLI=false to skip or install: npm install -g lighthouse',
         });
       }
     }
@@ -67,9 +68,12 @@ async function runLighthouseTests() {
       logResult({
         name: 'Lighthouse Tests',
         passed: false,
-        message: 'Lighthouse CLI not available. Install globally or use online Lighthouse tools. Skipping automated tests.',
+        message:
+          'Lighthouse CLI not available. Install globally or use online Lighthouse tools. Skipping automated tests.',
       });
-      console.log('   💡 Tip: Use Chrome DevTools Lighthouse or PageSpeed Insights for manual testing');
+      console.log(
+        '   💡 Tip: Use Chrome DevTools Lighthouse or PageSpeed Insights for manual testing',
+      );
       return;
     }
 
@@ -88,7 +92,9 @@ async function runLighthouseTests() {
       try {
         // Test if URL is accessible first
         try {
-          execSync(`curl -s -o /dev/null -w "%{http_code}" ${url}`, { stdio: 'pipe' });
+          execSync(`curl -s -o /dev/null -w "%{http_code}" ${url}`, {
+            stdio: 'pipe',
+          });
         } catch {
           logResult({
             name: `Lighthouse: ${page.name}`,
@@ -101,25 +107,33 @@ async function runLighthouseTests() {
         // Run lighthouse with mobile emulation
         const reportPath = `/tmp/lighthouse-${page.path.replace(/\//g, '-') || 'home'}.json`;
         const lighthouseCmd = `lighthouse ${url} --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=${reportPath} --chrome-flags="--headless --no-sandbox" --quiet 2>&1 || true`;
-        
+
         execSync(lighthouseCmd, { stdio: 'pipe', timeout: 60000 });
-        
+
         if (existsSync(reportPath)) {
           const report = JSON.parse(readFileSync(reportPath, 'utf-8'));
           const scores = {
-            performance: Math.round((report.categories?.performance?.score || 0) * 100),
-            accessibility: Math.round((report.categories?.accessibility?.score || 0) * 100),
-            bestPractices: Math.round((report.categories?.['best-practices']?.score || 0) * 100),
+            performance: Math.round(
+              (report.categories?.performance?.score || 0) * 100,
+            ),
+            accessibility: Math.round(
+              (report.categories?.accessibility?.score || 0) * 100,
+            ),
+            bestPractices: Math.round(
+              (report.categories?.['best-practices']?.score || 0) * 100,
+            ),
             seo: Math.round((report.categories?.seo?.score || 0) * 100),
           };
 
-          const allPassed = Object.values(scores).every(score => score >= LIGHTHOUSE_THRESHOLD);
-          
+          const allPassed = Object.values(scores).every(
+            (score) => score >= LIGHTHOUSE_THRESHOLD,
+          );
+
           logResult({
             name: `Lighthouse: ${page.name}`,
             passed: allPassed,
-            message: allPassed 
-              ? `All scores ≥ ${LIGHTHOUSE_THRESHOLD}` 
+            message: allPassed
+              ? `All scores ≥ ${LIGHTHOUSE_THRESHOLD}`
               : `Some scores below ${LIGHTHOUSE_THRESHOLD}`,
             details: scores,
           });
@@ -163,15 +177,20 @@ async function checkMobileResponsiveness() {
     const layoutPath = join(process.cwd(), 'src/app/layout.tsx');
     if (existsSync(layoutPath)) {
       const layoutContent = readFileSync(layoutPath, 'utf-8');
-      const hasViewport = layoutContent.includes('viewport') || layoutContent.includes('Viewport');
-      const hasMobileMeta = layoutContent.includes('device-width') || layoutContent.includes('initialScale');
-      
+      const hasViewport =
+        layoutContent.includes('viewport') ||
+        layoutContent.includes('Viewport');
+      const hasMobileMeta =
+        layoutContent.includes('device-width') ||
+        layoutContent.includes('initialScale');
+
       logResult({
         name: 'Mobile Viewport Meta Tag',
         passed: hasViewport && hasMobileMeta,
-        message: hasViewport && hasMobileMeta 
-          ? 'Viewport meta tag configured correctly'
-          : 'Missing or incorrect viewport configuration',
+        message:
+          hasViewport && hasMobileMeta
+            ? 'Viewport meta tag configured correctly'
+            : 'Missing or incorrect viewport configuration',
       });
     }
 
@@ -179,12 +198,13 @@ async function checkMobileResponsiveness() {
     const tailwindPath = join(process.cwd(), 'tailwind.config.ts');
     if (existsSync(tailwindPath)) {
       const tailwindContent = readFileSync(tailwindPath, 'utf-8');
-      const hasMobileFirst = tailwindContent.includes('screens') || tailwindContent.includes('sm:');
-      
+      const hasMobileFirst =
+        tailwindContent.includes('screens') || tailwindContent.includes('sm:');
+
       logResult({
         name: 'Tailwind Mobile-First Config',
         passed: hasMobileFirst,
-        message: hasMobileFirst 
+        message: hasMobileFirst
           ? 'Tailwind configured for mobile-first'
           : 'Tailwind config may not be mobile-first',
       });
@@ -195,11 +215,11 @@ async function checkMobileResponsiveness() {
     if (existsSync(pagePath)) {
       const pageContent = readFileSync(pagePath, 'utf-8');
       const hasResponsiveClasses = /(sm:|md:|lg:|xl:|2xl:)/.test(pageContent);
-      
+
       logResult({
         name: 'Responsive CSS Classes',
         passed: hasResponsiveClasses,
-        message: hasResponsiveClasses 
+        message: hasResponsiveClasses
           ? 'Responsive utility classes found'
           : 'May need more responsive classes',
       });
@@ -223,35 +243,36 @@ async function validateMetadata() {
     const layoutPath = join(process.cwd(), 'src/app/layout.tsx');
     if (existsSync(layoutPath)) {
       const layoutContent = readFileSync(layoutPath, 'utf-8');
-      
+
       const checks = {
         title: layoutContent.includes('title:'),
         description: layoutContent.includes('description:'),
         openGraph: layoutContent.includes('openGraph:'),
         twitter: layoutContent.includes('twitter:'),
-        canonical: layoutContent.includes('canonical') || layoutContent.includes('alternates:'),
+        canonical:
+          layoutContent.includes('canonical') ||
+          layoutContent.includes('alternates:'),
         keywords: layoutContent.includes('keywords:'),
       };
 
       const allPresent = Object.values(checks).every(Boolean);
-      
+
       logResult({
         name: 'Metadata Completeness',
         passed: allPresent,
-        message: allPresent 
+        message: allPresent
           ? 'All required metadata fields present'
           : 'Some metadata fields missing',
         details: checks,
       });
 
       // Check for OG image
-      const hasOGImage = layoutContent.includes('og:') && layoutContent.includes('image');
+      const hasOGImage =
+        layoutContent.includes('og:') && layoutContent.includes('image');
       logResult({
         name: 'Open Graph Image',
         passed: hasOGImage,
-        message: hasOGImage 
-          ? 'OG image configured'
-          : 'OG image missing',
+        message: hasOGImage ? 'OG image configured' : 'OG image missing',
       });
     }
 
@@ -259,12 +280,13 @@ async function validateMetadata() {
     const manifestPath = join(process.cwd(), 'public/manifest.json');
     if (existsSync(manifestPath)) {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
-      const hasRequiredFields = manifest.name && manifest.short_name && manifest.icons;
-      
+      const hasRequiredFields =
+        manifest.name && manifest.short_name && manifest.icons;
+
       logResult({
         name: 'PWA Manifest',
         passed: hasRequiredFields,
-        message: hasRequiredFields 
+        message: hasRequiredFields
           ? 'PWA manifest valid'
           : 'PWA manifest missing required fields',
       });
@@ -286,20 +308,25 @@ async function testStructuredData() {
 
   try {
     // Check StructuredData component
-    const structuredDataPath = join(process.cwd(), 'src/components/StructuredData.tsx');
+    const structuredDataPath = join(
+      process.cwd(),
+      'src/components/StructuredData.tsx',
+    );
     if (existsSync(structuredDataPath)) {
       const content = readFileSync(structuredDataPath, 'utf-8');
-      
-      const hasOrganization = content.includes('Organization') || content.includes('@type');
+
+      const hasOrganization =
+        content.includes('Organization') || content.includes('@type');
       const hasSchemaOrg = content.includes('schema.org');
       const hasJSONLD = content.includes('application/ld+json');
-      
+
       logResult({
         name: 'Structured Data Component',
         passed: hasOrganization && hasSchemaOrg && hasJSONLD,
-        message: hasOrganization && hasSchemaOrg && hasJSONLD
-          ? 'Structured data component configured'
-          : 'Structured data component incomplete',
+        message:
+          hasOrganization && hasSchemaOrg && hasJSONLD
+            ? 'Structured data component configured'
+            : 'Structured data component incomplete',
         details: { hasOrganization, hasSchemaOrg, hasJSONLD },
       });
     }
@@ -308,12 +335,13 @@ async function testStructuredData() {
     const faqPath = join(process.cwd(), 'src/components/FAQStructuredData.tsx');
     if (existsSync(faqPath)) {
       const content = readFileSync(faqPath, 'utf-8');
-      const hasFAQSchema = content.includes('FAQPage') || content.includes('Question');
-      
+      const hasFAQSchema =
+        content.includes('FAQPage') || content.includes('Question');
+
       logResult({
         name: 'FAQ Structured Data',
         passed: hasFAQSchema,
-        message: hasFAQSchema 
+        message: hasFAQSchema
           ? 'FAQ structured data component found'
           : 'FAQ structured data component missing',
       });
@@ -360,16 +388,18 @@ async function testIndexing() {
     const robotsPath = join(process.cwd(), 'src/app/robots.ts');
     if (existsSync(robotsPath)) {
       const content = readFileSync(robotsPath, 'utf-8');
-      const hasRules = content.includes('rules:') || content.includes('userAgent');
+      const hasRules =
+        content.includes('rules:') || content.includes('userAgent');
       const hasSitemap = content.includes('sitemap');
       const hasDisallow = content.includes('disallow');
-      
+
       logResult({
         name: 'Robots.txt Configuration',
         passed: hasRules && hasSitemap,
-        message: hasRules && hasSitemap
-          ? 'Robots.txt properly configured'
-          : 'Robots.txt configuration incomplete',
+        message:
+          hasRules && hasSitemap
+            ? 'Robots.txt properly configured'
+            : 'Robots.txt configuration incomplete',
         details: { hasRules, hasSitemap, hasDisallow },
       });
     }
@@ -381,50 +411,61 @@ async function testIndexing() {
       const hasRoutes = content.includes('url:') || content.includes('routes');
       const hasPriority = content.includes('priority');
       const hasLastModified = content.includes('lastModified');
-      
+
       logResult({
         name: 'Sitemap Configuration',
         passed: hasRoutes && hasPriority,
-        message: hasRoutes && hasPriority
-          ? 'Sitemap properly configured'
-          : 'Sitemap configuration incomplete',
+        message:
+          hasRoutes && hasPriority
+            ? 'Sitemap properly configured'
+            : 'Sitemap configuration incomplete',
         details: { hasRoutes, hasPriority, hasLastModified },
       });
     }
 
     // Test if robots.txt is accessible (if server is running)
     try {
-      const robotsResponse = execSync(`curl -s -o /dev/null -w "%{http_code}" ${BASE_URL}/robots.txt`, { encoding: 'utf-8' });
+      const robotsResponse = execSync(
+        `curl -s -o /dev/null -w "%{http_code}" ${BASE_URL}/robots.txt`,
+        { encoding: 'utf-8' },
+      );
       logResult({
         name: 'Robots.txt Accessibility',
         passed: robotsResponse.trim() === '200',
-        message: robotsResponse.trim() === '200'
-          ? 'Robots.txt accessible'
-          : `Robots.txt returned ${robotsResponse.trim()}`,
+        message:
+          robotsResponse.trim() === '200'
+            ? 'Robots.txt accessible'
+            : `Robots.txt returned ${robotsResponse.trim()}`,
       });
     } catch {
       logResult({
         name: 'Robots.txt Accessibility',
         passed: false,
-        message: 'Cannot test robots.txt accessibility (server may not be running)',
+        message:
+          'Cannot test robots.txt accessibility (server may not be running)',
       });
     }
 
     // Test if sitemap.xml is accessible
     try {
-      const sitemapResponse = execSync(`curl -s -o /dev/null -w "%{http_code}" ${BASE_URL}/sitemap.xml`, { encoding: 'utf-8' });
+      const sitemapResponse = execSync(
+        `curl -s -o /dev/null -w "%{http_code}" ${BASE_URL}/sitemap.xml`,
+        { encoding: 'utf-8' },
+      );
       logResult({
         name: 'Sitemap.xml Accessibility',
         passed: sitemapResponse.trim() === '200',
-        message: sitemapResponse.trim() === '200'
-          ? 'Sitemap.xml accessible'
-          : `Sitemap.xml returned ${sitemapResponse.trim()}`,
+        message:
+          sitemapResponse.trim() === '200'
+            ? 'Sitemap.xml accessible'
+            : `Sitemap.xml returned ${sitemapResponse.trim()}`,
       });
     } catch {
       logResult({
         name: 'Sitemap.xml Accessibility',
         passed: false,
-        message: 'Cannot test sitemap.xml accessibility (server may not be running)',
+        message:
+          'Cannot test sitemap.xml accessibility (server may not be running)',
       });
     }
   } catch (error: any) {
@@ -442,7 +483,7 @@ async function testIndexing() {
 async function main() {
   console.log('🚀 Pre-Launch Quality Assurance Checklist\n');
   console.log(`Base URL: ${BASE_URL}\n`);
-  console.log('=' .repeat(60));
+  console.log('='.repeat(60));
 
   await runLighthouseTests();
   await checkMobileResponsiveness();
@@ -453,10 +494,10 @@ async function main() {
   // Summary
   console.log('\n' + '='.repeat(60));
   console.log('\n📊 QA Checklist Summary\n');
-  
-  const passed = results.filter(r => r.passed).length;
+
+  const passed = results.filter((r) => r.passed).length;
   const total = results.length;
-  const failed = results.filter(r => !r.passed);
+  const failed = results.filter((r) => !r.passed);
 
   console.log(`Total Checks: ${total}`);
   console.log(`Passed: ${passed}`);
@@ -464,16 +505,18 @@ async function main() {
 
   if (failed.length > 0) {
     console.log('❌ Failed Checks:');
-    failed.forEach(result => {
+    failed.forEach((result) => {
       console.log(`   - ${result.name}: ${result.message}`);
     });
     console.log('');
   }
 
   const allPassed = failed.length === 0;
-  console.log(allPassed 
-    ? '✅ All QA checks passed! Ready for launch.' 
-    : '⚠️  Some QA checks failed. Please address the issues above before launching.');
+  console.log(
+    allPassed
+      ? '✅ All QA checks passed! Ready for launch.'
+      : '⚠️  Some QA checks failed. Please address the issues above before launching.',
+  );
 
   process.exit(allPassed ? 0 : 1);
 }

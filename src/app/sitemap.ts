@@ -264,14 +264,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  // Add all zodiac sign pages
-  const zodiacRoutes = Object.keys(zodiacSigns).map((signId) => ({
-    url: `${baseUrl}/grimoire/astronomy/zodiac/${signId}`,
-    lastModified: now,
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
-
   // Add all planet pages
   const planetRoutes = Object.keys(planetaryBodies).map((planetId) => ({
     url: `${baseUrl}/grimoire/astronomy/planets/${planetId}`,
@@ -549,14 +541,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all zodiac sign pages
   const zodiacRoutes = Object.keys(zodiacSigns).map((sign) => ({
     url: `${baseUrl}/grimoire/zodiac/${stringToKebabCase(sign)}`,
-    lastModified: now,
-    changeFrequency: 'monthly' as const,
-    priority: 0.8,
-  }));
-
-  // Add all planet pages
-  const planetRoutes = Object.keys(planetaryBodies).map((planet) => ({
-    url: `${baseUrl}/grimoire/planets/${stringToKebabCase(planet)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
