@@ -3,6 +3,7 @@ import {
   getSentEvents,
   cleanupOldDates,
   getSentEventsCount,
+  markEventAsSent,
 } from '@/app/api/cron/shared-notification-tracker';
 import {
   sendUnifiedNotification,
@@ -95,6 +96,8 @@ export async function GET(request: NextRequest) {
 
     for (const event of newEvents) {
       try {
+        const eventKey = `${event.type || 'unknown'}-${event.name || 'unknown'}-${event.priority || 0}`;
+
         const notificationEvent: NotificationEvent = {
           name: event.name || 'Cosmic Event',
           type: event.type || 'unknown',
@@ -109,6 +112,11 @@ export async function GET(request: NextRequest) {
           description: event.description,
         };
 
+        const notification = createNotificationFromEvent(
+          notificationEvent,
+          cosmicData,
+        );
+
         const response = await fetch(`${baseUrl}/api/notifications/send`, {
           method: 'POST',
           headers: {
@@ -118,8 +126,10 @@ export async function GET(request: NextRequest) {
           body: JSON.stringify({
             payload: {
               type: getNotificationType(event.type),
-              title: event.title,
-              body: event.body,
+              title: notification.title,
+              body: notification.body,
+              icon: '/icons/icon-192x192.png',
+              badge: '/icons/icon-72x72.png',
               data: {
                 date: today,
                 eventName: event.name,
@@ -134,7 +144,14 @@ export async function GET(request: NextRequest) {
 
         const result = await response.json();
         totalSent += result.recipientCount || 0;
-        results.push(result);
+        results.push({
+          success: result.success,
+          recipientCount: result.recipientCount,
+          successful: result.successful,
+          failed: result.failed,
+          eventName: event.name,
+          eventKey: result.eventKey,
+        });
 
         // Mark this event as sent in database tracker (so it won't be sent again)
         await markEventAsSent(
@@ -145,16 +162,6 @@ export async function GET(request: NextRequest) {
           event.priority,
           '4-hourly',
         );
-
-        totalSent += result.recipientCount || 0;
-        results.push({
-          success: result.success,
-          recipientCount: result.recipientCount,
-          successful: result.successful,
-          failed: result.failed,
-          eventName: event.name,
-          eventKey: result.eventKey,
-        });
       } catch (eventError) {
         console.error(
           `Failed to send notification for event ${event.name}:`,
@@ -194,6 +201,17 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+function getNotificationType(type: string): string {
+  const mapping: Record<string, string> = {
+    moon: 'moon_phase',
+    aspect: 'major_aspect',
+    ingress: 'planetary_transit',
+    seasonal: 'sabbat',
+    retrograde: 'retrograde',
+  };
+  return mapping[type] || 'moon_phase';
 }
 
 // Same logic as daily-posts but for 4-hourly checks

@@ -79,14 +79,14 @@ export function useSubscription(): SubscriptionStatus {
   }, [me?.profile]);
 
   const fetchFromStripe = useCallback(
-    async (customerId: string) => {
+    async (customerId: string, userId?: string | null) => {
       try {
         setSubscriptionState((prev) => ({ ...prev, loading: true }));
 
         const response = await fetch('/api/stripe/get-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ customerId }),
+          body: JSON.stringify({ customerId, userId }),
           cache: 'no-store', // Prevent service worker caching
         });
 
