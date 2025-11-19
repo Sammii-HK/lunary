@@ -401,15 +401,441 @@ export async function GET(request: NextRequest) {
       crystalUsers > 0 ? crystalTotalLookups / crystalUsers : 0;
 
     const stickiness = mau > 0 ? (dau / mau) * 100 : 0;
+    const arr = mrr * 12;
+
+    // Calculate returning users percentage
+    const returningUsersResult = await sql`
+      SELECT COUNT(DISTINCT a.user_id) AS value
+      FROM analytics_user_activity a
+      WHERE a.activity_type = 'session'
+        AND a.activity_date = ${endDate}
+        AND EXISTS (
+          SELECT 1
+          FROM analytics_user_activity b
+          WHERE b.user_id = a.user_id
+            AND b.activity_type = 'session'
+            AND b.activity_date < ${endDate}
+        )
+    `;
+    const returningUsers = Number(returningUsersResult.rows[0]?.value || 0);
+    const returningUsersPercent = dau > 0 ? (returningUsers / dau) * 100 : 0;
+
+    // Calculate conversion rate (Free → Paid)
+    const freeUsersResult = await sql`
+      SELECT COUNT(DISTINCT user_id) AS count
+      FROM conversion_events
+      WHERE event_type = 'signup'
+        AND created_at >= ${thirtyDaysAgoTimestamp}
+    `;
+    const freeUsers = Number(freeUsersResult.rows[0]?.count || 0);
+    const conversionRate =
+      freeUsers > 0 ? (activeSubscriptions / freeUsers) * 100 : 0;
+
+    // Financial metrics: New MRR, Expansion MRR, Churned MRR
+    const thisMonthStart = formatTimestamp(
+      new Date(today.getFullYear(), today.getMonth(), 1),
+    );
+    const lastMonthStart = formatTimestamp(
+      new Date(today.getFullYear(), today.getMonth() - 1, 1),
+    );
+    const lastMonthEnd = formatTimestamp(
+      new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59),
+    );
+
+    const newSubscriptionsThisMonth = await sql`
+      SELECT COUNT(DISTINCT user_id) AS count,
+        SUM(CASE
+          WHEN plan_type = 'monthly' OR plan_type = 'lunary_plus' THEN 4.99
+          WHEN plan_type = 'lunary_plus_ai' THEN 8.99
+          WHEN plan_type = 'yearly' OR plan_type = 'lunary_plus_ai_annual' THEN 89.99 / 12
+          ELSE 0
+        END) AS new_mrr
+      FROM subscriptions
+      WHERE status = 'active'
+        AND created_at >= ${thisMonthStart}
+    `;
+    const newMrr = Number(newSubscriptionsThisMonth.rows[0]?.new_mrr || 0);
+
+    // Expansion MRR (upgrades from plus to AI, or monthly to yearly)
+    const expansionMrrResult = await sql`
+      SELECT SUM(CASE
+        WHEN old_plan IN ('monthly', 'lunary_plus') AND new_plan = 'lunary_plus_ai' THEN 8.99 - 4.99
+        WHEN old_plan IN ('monthly', 'lunary_plus') AND new_plan IN ('yearly', 'lunary_plus_ai_annual') THEN (89.99 / 12) - 4.99
+        WHEN old_plan = 'lunary_plus_ai' AND new_plan IN ('yearly', 'lunary_plus_ai_annual') THEN (89.99 / 12) - 8.99
+        ELSE 0
+      END) AS expansion_mrr
+      FROM (
+        SELECT DISTINCT ON (user_id)
+          user_id,
+          LAG(plan_type) OVER (PARTITION BY user_id ORDER BY updated_at) AS old_plan,
+          plan_type AS new_plan
+        FROM subscriptions
+        WHERE updated_at >= ${thisMonthStart}
+          AND status = 'active'
+        ORDER BY user_id, updated_at DESC
+      ) upgrades
+      WHERE old_plan IS NOT NULL
+        AND old_plan != new_plan
+    `;
+    const expansionMrr = Number(expansionMrrResult.rows[0]?.expansion_mrr || 0);
+
+    // Churned MRR (cancellations this month)
+    const churnedMrrResult = await sql`
+      SELECT SUM(CASE
+        WHEN plan_type = 'monthly' OR plan_type = 'lunary_plus' THEN 4.99
+        WHEN plan_type = 'lunary_plus_ai' THEN 8.99
+        WHEN plan_type = 'yearly' OR plan_type = 'lunary_plus_ai_annual' THEN 89.99 / 12
+        ELSE 0
+      END) AS churned_mrr
+      FROM subscriptions
+      WHERE status IN ('cancelled', 'canceled')
+        AND updated_at >= ${thisMonthStart}
+    `;
+    const churnedMrr = Number(churnedMrrResult.rows[0]?.churned_mrr || 0);
+    const netRevenue = mrr - churnedMrr;
+
+    // Stripe fees estimate (2.9% + $0.30 per transaction, approximate)
+    const estimatedTransactions = activeSubscriptions;
+    const stripeFees =
+      estimatedTransactions > 0 ? mrr * 0.029 + estimatedTransactions * 0.3 : 0;
+
+    // Infrastructure costs (placeholder - would need Vercel API or manual input)
+    const infraCosts = null; // TODO: Integrate with Vercel billing API
+
+    const grossMargin =
+      infraCosts !== null && stripeFees !== null
+        ? mrr - stripeFees - (infraCosts || 0)
+        : null;
+    const netMargin = grossMargin !== null ? (grossMargin / mrr) * 100 : null;
+
+    // Cohort retention (group by signup week)
+    const cohortRetentionResult = await sql`
+      WITH signup_cohorts AS (
+        SELECT
+          DATE_TRUNC('week', created_at) AS cohort_start,
+          COUNT(DISTINCT user_id) AS day0_users
+        FROM conversion_events
+        WHERE event_type = 'signup'
+          AND created_at >= ${formatTimestamp(new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000))}
+        GROUP BY DATE_TRUNC('week', created_at)
+      ),
+      retention_metrics AS (
+        SELECT
+          sc.cohort_start,
+          sc.day0_users,
+          COUNT(DISTINCT CASE WHEN a.activity_date = sc.cohort_start + INTERVAL '1 day' THEN a.user_id END) AS day1_users,
+          COUNT(DISTINCT CASE WHEN a.activity_date BETWEEN sc.cohort_start + INTERVAL '7 days' AND sc.cohort_start + INTERVAL '13 days' THEN a.user_id END) AS day7_users,
+          COUNT(DISTINCT CASE WHEN a.activity_date BETWEEN sc.cohort_start + INTERVAL '30 days' AND sc.cohort_start + INTERVAL '36 days' THEN a.user_id END) AS day30_users,
+          COUNT(DISTINCT CASE WHEN a.activity_date BETWEEN sc.cohort_start + INTERVAL '90 days' AND sc.cohort_start + INTERVAL '96 days' THEN a.user_id END) AS day90_users
+        FROM signup_cohorts sc
+        LEFT JOIN conversion_events ce ON DATE_TRUNC('week', ce.created_at) = sc.cohort_start AND ce.event_type = 'signup'
+        LEFT JOIN analytics_user_activity a ON a.user_id = ce.user_id AND a.activity_type = 'session'
+        GROUP BY sc.cohort_start, sc.day0_users
+      )
+      SELECT
+        cohort_start,
+        day0_users,
+        CASE WHEN day0_users > 0 THEN (day1_users::float / day0_users * 100) ELSE 0 END AS day1_retention,
+        CASE WHEN day0_users > 0 THEN (day7_users::float / day0_users * 100) ELSE 0 END AS day7_retention,
+        CASE WHEN day0_users > 0 THEN (day30_users::float / day0_users * 100) ELSE 0 END AS day30_retention,
+        CASE WHEN day0_users > 0 THEN (day90_users::float / day0_users * 100) ELSE 0 END AS day90_retention
+      FROM retention_metrics
+      ORDER BY cohort_start DESC
+      LIMIT 12
+    `;
+
+    const cohorts = cohortRetentionResult.rows.map((row) => ({
+      startDate: formatDate(new Date(row.cohort_start)),
+      day0Users: Number(row.day0_users || 0),
+      day1Retention: Number(Number(row.day1_retention || 0).toFixed(2)),
+      day7Retention: Number(Number(row.day7_retention || 0).toFixed(2)),
+      day30Retention: Number(Number(row.day30_retention || 0).toFixed(2)),
+      day90Retention: Number(Number(row.day90_retention || 0).toFixed(2)),
+    }));
+
+    // AI Engagement metrics
+    const aiEngagementResult = await sql`
+      SELECT
+        COUNT(*) AS sessions,
+        COUNT(DISTINCT user_id) AS unique_users,
+        COALESCE(SUM(token_count), 0) AS total_tokens,
+        COUNT(*) FILTER (WHERE completed) AS completed_sessions
+      FROM analytics_ai_usage
+      WHERE created_at >= ${thirtyDaysAgoTimestamp}
+    `;
+    const aiSessions = Number(aiEngagementResult.rows[0]?.sessions || 0);
+    const aiUniqueUsers = Number(aiEngagementResult.rows[0]?.unique_users || 0);
+    const aiTotalTokens = Number(aiEngagementResult.rows[0]?.total_tokens || 0);
+    const aiCompletedSessions = Number(
+      aiEngagementResult.rows[0]?.completed_sessions || 0,
+    );
+    const aiTokensPerUser =
+      aiUniqueUsers > 0 ? aiTotalTokens / aiUniqueUsers : 0;
+    const aiCompletionRate =
+      aiSessions > 0 ? (aiCompletedSessions / aiSessions) * 100 : 0;
+
+    const aiModesResult = await sql`
+      SELECT COALESCE(mode, 'unknown') AS mode, COUNT(*) AS count
+      FROM analytics_ai_usage
+      WHERE created_at >= ${thirtyDaysAgoTimestamp}
+      GROUP BY COALESCE(mode, 'unknown')
+      ORDER BY count DESC
+      LIMIT 10
+    `;
+    const topAIModes = aiModesResult.rows.map((row) => ({
+      mode: row.mode as string,
+      count: Number(row.count || 0),
+    }));
+
+    // Funnel metrics
+    const funnelResult = await sql`
+      SELECT
+        COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) AS free_users,
+        COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) AS trial_starts,
+        COUNT(DISTINCT CASE WHEN event_type IN ('trial_converted', 'subscription_started') THEN user_id END) AS paid_users
+      FROM conversion_events
+      WHERE created_at >= ${thirtyDaysAgoTimestamp}
+    `;
+    const funnelFreeUsers = Number(funnelResult.rows[0]?.free_users || 0);
+    const funnelTrialStarts = Number(funnelResult.rows[0]?.trial_starts || 0);
+    const funnelPaidUsers = Number(funnelResult.rows[0]?.paid_users || 0);
+
+    // Upsells (Plus → AI)
+    const upsellsResult = await sql`
+      SELECT COUNT(DISTINCT user_id) AS count
+      FROM subscriptions
+      WHERE plan_type = 'lunary_plus_ai'
+        AND updated_at >= ${thirtyDaysAgoTimestamp}
+        AND EXISTS (
+          SELECT 1 FROM subscriptions s2
+          WHERE s2.user_id = subscriptions.user_id
+            AND s2.plan_type IN ('monthly', 'lunary_plus')
+            AND s2.updated_at < subscriptions.updated_at
+        )
+    `;
+    const upsells = Number(upsellsResult.rows[0]?.count || 0);
+
+    // Annual plan conversions
+    const annualConversions = yearlySubscriptions;
+
+    // Free → Plus conversion
+    const freeToPlusResult = await sql`
+      SELECT COUNT(DISTINCT user_id) AS count
+      FROM conversion_events
+      WHERE event_type IN ('trial_started', 'subscription_started')
+        AND created_at >= ${thirtyDaysAgoTimestamp}
+        AND EXISTS (
+          SELECT 1 FROM conversion_events ce2
+          WHERE ce2.user_id = conversion_events.user_id
+            AND ce2.event_type = 'signup'
+            AND ce2.created_at < conversion_events.created_at
+        )
+    `;
+    const freeToPlus = Number(freeToPlusResult.rows[0]?.count || 0);
+
+    // Plus → AI conversion
+    const plusToAI = upsells;
+
+    // SEO metrics
+    const seoResult = await sql`
+      SELECT COUNT(*) AS article_count
+      FROM grimoire_articles
+      WHERE published = true
+    `;
+    const articleCount = Number(seoResult.rows[0]?.article_count || 0);
+    // Pages indexed, clicks, impressions would come from Search Console API
+    const pagesIndexed = null;
+    const monthlyClicks = null;
+    const monthlyImpressions = null;
+    const seoCtr = null;
+    const topPages: Array<{ url: string; clicks: number }> = [];
+
+    // Notification metrics (by date and type)
+    const notificationMetricsResult = await sql`
+      SELECT
+        DATE(created_at) AS date,
+        notification_type,
+        COUNT(*) FILTER (WHERE event_type = 'sent') AS sent,
+        COUNT(*) FILTER (WHERE event_type = 'opened') AS opened,
+        COUNT(*) FILTER (WHERE event_type = 'clicked') AS clicked
+      FROM analytics_notification_events
+      WHERE created_at >= ${thirtyDaysAgoTimestamp}
+      GROUP BY DATE(created_at), notification_type
+      ORDER BY date DESC, notification_type
+    `;
+
+    const notifications = notificationMetricsResult.rows.map((row) => {
+      const sent = Number(row.sent || 0);
+      const opened = Number(row.opened || 0);
+      const clicked = Number(row.clicked || 0);
+      return {
+        date: formatDate(new Date(row.date)),
+        type: row.notification_type as string,
+        sent,
+        openRate: sent > 0 ? (opened / sent) * 100 : 0,
+        ctr: sent > 0 ? (clicked / sent) * 100 : 0,
+        signupsAttributed: 0, // Would need attribution tracking
+      };
+    });
+
+    // Product usage metrics
+    const productUsageResult = await sql`
+      SELECT
+        activity_type,
+        COUNT(*) AS count
+      FROM analytics_user_activity
+      WHERE activity_date >= ${thirtyDaysAgoDate}
+        AND activity_type IN ('birth_chart', 'tarot', 'ritual', 'crystal', 'collection', 'report')
+      GROUP BY activity_type
+    `;
+
+    const productUsage: Record<string, number> = {};
+    for (const row of productUsageResult.rows) {
+      const type = (row.activity_type as string) || 'unknown';
+      productUsage[type] = Number(row.count || 0);
+    }
+
+    const birthChartViews = productUsage['birth_chart'] || 0;
+    const tarotPulls = productUsage['tarot'] || 0;
+    const ritualsGenerated = productUsage['ritual'] || 0;
+    const crystalSearches = crystalTotalLookups;
+    const collectionsCreated = productUsage['collection'] || 0;
+    const reportsDownloaded = productUsage['report'] || 0;
+
+    // Pricing tier breakdown
+    const freeUsersCount = await sql`
+      SELECT COUNT(DISTINCT user_id) AS count
+      FROM conversion_events
+      WHERE event_type = 'signup'
+    `;
+    const freeUsersTotal = Number(freeUsersCount.rows[0]?.count || 0);
+    const arppu = activeSubscriptions > 0 ? mrr / activeSubscriptions : 0;
+    const annualVsMonthlySplit =
+      monthlySubscriptions + monthlyAISubscriptions > 0
+        ? (yearlySubscriptions /
+            (monthlySubscriptions +
+              monthlyAISubscriptions +
+              yearlySubscriptions)) *
+          100
+        : 0;
+
+    // API costs
+    // Estimate AI costs: ~$0.002 per 1K tokens (GPT-4o-mini pricing)
+    const aiCost = (aiTotalTokens / 1000) * 0.002;
+    const aiCostPerEngagedUser = aiUniqueUsers > 0 ? aiCost / aiUniqueUsers : 0;
+    const infraMinutes = null; // Would need Vercel API
+    const storage = null; // Would need Vercel API
+    const compute = null; // Would need Vercel API
 
     return NextResponse.json({
+      // Sheet 1: High-Level KPIs
+      highLevelKPIs: {
+        dau,
+        wau,
+        mau,
+        returningUsersPercent: Number(returningUsersPercent.toFixed(2)),
+        conversionRate: Number(conversionRate.toFixed(2)),
+        churnPercent: Number(churnRate.toFixed(2)),
+        mrr: Number(mrr.toFixed(2)),
+        arr: Number(arr.toFixed(2)),
+        arpu: Number(arpu.toFixed(2)),
+        cac: null, // Would need marketing spend data
+        ltv: Number(ltvPerUser.toFixed(2)),
+      },
+
+      // Sheet 2: Financial Metrics
+      financial: {
+        mrr: Number(mrr.toFixed(2)),
+        newMrr: Number(newMrr.toFixed(2)),
+        expansionMrr: Number(expansionMrr.toFixed(2)),
+        churnedMrr: Number(churnedMrr.toFixed(2)),
+        netRevenue: Number(netRevenue.toFixed(2)),
+        stripeFees: Number(stripeFees.toFixed(2)),
+        infraCosts,
+        grossMargin:
+          grossMargin !== null ? Number(grossMargin.toFixed(2)) : null,
+        netMargin: netMargin !== null ? Number(netMargin.toFixed(2)) : null,
+      },
+
+      // Sheet 3: Cohort Retention
+      cohorts,
+
+      // Sheet 4: AI Engagement
+      aiEngagement: {
+        sessions: aiSessions,
+        uniqueUsers: aiUniqueUsers,
+        tokensPerUser: Number(aiTokensPerUser.toFixed(2)),
+        completionRate: Number(aiCompletionRate.toFixed(2)),
+        topModes: topAIModes,
+      },
+
+      // Sheet 5: Funnel Performance
+      funnel: {
+        freeUsers: funnelFreeUsers,
+        trialStarts: funnelTrialStarts,
+        trialToPaidConversion: Number(trialToPaidConversionRate30d.toFixed(2)),
+        paidUsers: funnelPaidUsers,
+        upsells,
+        annualConversions,
+        freeToPlus,
+        plusToAI,
+      },
+
+      // Sheet 6: SEO
+      seo: {
+        articleCount,
+        pagesIndexed,
+        monthlyClicks,
+        monthlyImpressions,
+        ctr: seoCtr,
+        topPages,
+      },
+
+      // Sheet 7: Notifications
+      notifications,
+
+      // Sheet 8: Product Usage
+      productUsage: {
+        birthChartViews,
+        tarotPulls,
+        ritualsGenerated,
+        crystalSearches,
+        collectionsCreated,
+        reportsDownloaded,
+      },
+
+      // Sheet 9: Pricing Tier Breakdown
+      pricingTiers: {
+        freeUsers: freeUsersTotal,
+        plusSubscribers: monthlySubscriptions,
+        aiSubscribers: monthlyAISubscriptions,
+        annualSubscribers: yearlySubscriptions,
+        arppu: Number(arppu.toFixed(2)),
+        annualVsMonthlySplit: Number(annualVsMonthlySplit.toFixed(2)),
+      },
+
+      // Sheet 10: API Costs
+      apiCosts: {
+        aiTokensUsed: aiTotalTokens,
+        aiCost: Number(aiCost.toFixed(2)),
+        perUserCost: Number(aiCostPerEngagedUser.toFixed(2)),
+        infraMinutes,
+        storage,
+        compute,
+      },
+
+      // Legacy flat structure for backward compatibility and History sheet
       mrr: Number(mrr.toFixed(2)),
+      arr: Number(arr.toFixed(2)),
       dau,
       wau,
       mau,
       stickiness: Number(stickiness.toFixed(2)),
+      returningUsersPercent: Number(returningUsersPercent.toFixed(2)),
       activeTrials,
+      activePayingUsers: activeSubscriptions,
       churnRate: Number(churnRate.toFixed(2)),
+      conversionRate: Number(conversionRate.toFixed(2)),
       arpu: Number(arpu.toFixed(2)),
       trialToPaidConversionRate30d: Number(
         trialToPaidConversionRate30d.toFixed(2),
@@ -424,15 +850,27 @@ export async function GET(request: NextRequest) {
       arpuMonthlyBasic: Number(arpuMonthlyBasic.toFixed(2)),
       arpuMonthlyAI: Number(arpuMonthlyAI.toFixed(2)),
       arpuYearly: Number(arpuYearly.toFixed(2)),
+      newMrr: Number(newMrr.toFixed(2)),
+      expansionMrr: Number(expansionMrr.toFixed(2)),
+      churnedMrr: Number(churnedMrr.toFixed(2)),
+      netRevenue: Number(netRevenue.toFixed(2)),
+      stripeFees: Number(stripeFees.toFixed(2)),
       churnReasons,
       marketingAttribution,
-      aiCostPerEngagedUser: null,
+      aiCostPerEngagedUser: Number(aiCostPerEngagedUser.toFixed(2)),
+      aiSessions,
+      aiUniqueUsers,
+      aiTokensPerUser: Number(aiTokensPerUser.toFixed(2)),
       featureRetention,
       topUserJourneys,
-      seoCtr: null,
+      seoCtr,
       tarotEngagementType,
       crystalLookupsPerUser: Number(crystalLookupsPerUser.toFixed(2)),
-      activePayingUsers: activeSubscriptions,
+      birthChartViews,
+      tarotPulls,
+      ritualsGenerated,
+      collectionsCreated,
+      reportsDownloaded,
     });
   } catch (error) {
     console.error('[analytics/summary] Failed to load metrics:', error);
