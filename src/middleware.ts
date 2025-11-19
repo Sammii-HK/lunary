@@ -21,11 +21,26 @@ export function middleware(request: NextRequest) {
     hostname.startsWith('127.') ||
     hostname.includes('0.0.0.0');
 
-  // Only allow redirects for production domains (lunary.app, www.lunary.app)
+  // Check for admin subdomains early (before production domain check)
+  const configuredAdminHosts = [
+    process.env.ADMIN_DASHBOARD_HOST,
+    process.env.ADMIN_APP_HOST,
+    process.env.NEXT_PUBLIC_ADMIN_APP_HOST,
+  ]
+    .filter(Boolean)
+    .map((host) => host!.toLowerCase());
+
+  const isAdminSubdomain =
+    hostname.startsWith('admin.') || configuredAdminHosts.includes(hostname);
+
+  // Only allow redirects for production domains (lunary.app, www.lunary.app, admin.lunary.app)
   // This is a whitelist approach: if it's not a known production domain, skip redirects
   // This ensures CI/localhost/dev environments never trigger redirects
   const isProductionDomain =
-    hostname === 'lunary.app' || hostname === 'www.lunary.app';
+    hostname === 'lunary.app' ||
+    hostname === 'www.lunary.app' ||
+    hostname === 'admin.lunary.app' ||
+    isAdminSubdomain;
 
   // Skip redirects if:
   // 1. It's a test/CI environment (env var check - may not work in Edge Runtime)
@@ -86,17 +101,6 @@ export function middleware(request: NextRequest) {
     url.port = '';
     return NextResponse.redirect(url);
   }
-
-  const configuredAdminHosts = [
-    process.env.ADMIN_DASHBOARD_HOST,
-    process.env.ADMIN_APP_HOST,
-    process.env.NEXT_PUBLIC_ADMIN_APP_HOST,
-  ]
-    .filter(Boolean)
-    .map((host) => host!.toLowerCase());
-
-  const isAdminSubdomain =
-    hostname.startsWith('admin.') || configuredAdminHosts.includes(hostname);
 
   // console.log('🔍 Middleware check:', {
   //   hostname,

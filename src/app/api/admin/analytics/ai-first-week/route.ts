@@ -1,0 +1,132 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
+
+import {
+  formatDate,
+  formatTimestamp,
+  resolveDateRange,
+} from '@/lib/analytics/date-range';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const range = resolveDateRange(searchParams, 30);
+
+    const endDate = formatDate(range.end);
+    const startDate = formatDate(range.start);
+
+    const usersWithAiAfterWeekResult = await sql`
+      WITH user_signup_dates AS (
+        SELECT DISTINCT
+          user_id,
+          MIN(activity_date) AS signup_date
+        FROM analytics_user_activity
+        WHERE activity_type = 'session'
+          AND activity_date BETWEEN ${startDate} AND ${endDate}
+        GROUP BY user_id
+      ),
+      users_with_ai_after_week AS (
+        SELECT DISTINCT
+          usd.user_id,
+          usd.signup_date
+        FROM user_signup_dates usd
+        WHERE EXISTS (
+          SELECT 1
+          FROM analytics_user_activity aua
+          WHERE aua.user_id = usd.user_id
+            AND aua.activity_type = 'ai_chat'
+            AND aua.activity_date BETWEEN (usd.signup_date + INTERVAL '7 days') AND (usd.signup_date + INTERVAL '14 days')
+        )
+      )
+      SELECT
+        COUNT(*) AS count,
+        COUNT(*) FILTER (WHERE signup_date BETWEEN ${startDate} AND ${endDate}) AS in_range_count
+      FROM users_with_ai_after_week
+    `;
+
+    const totalNewUsersResult = await sql`
+      WITH user_signup_dates AS (
+        SELECT DISTINCT
+          user_id,
+          MIN(activity_date) AS signup_date
+        FROM analytics_user_activity
+        WHERE activity_type = 'session'
+          AND activity_date BETWEEN ${startDate} AND ${endDate}
+        GROUP BY user_id
+      )
+      SELECT COUNT(*) AS count
+      FROM user_signup_dates
+      WHERE signup_date BETWEEN ${startDate} AND ${endDate}
+    `;
+
+    const totalNewUsers = Number(totalNewUsersResult.rows[0]?.count || 0);
+    const usersWithAiAfterWeek = Number(
+      usersWithAiAfterWeekResult.rows[0]?.in_range_count || 0,
+    );
+    const percentage =
+      totalNewUsers > 0
+        ? Number(((usersWithAiAfterWeek / totalNewUsers) * 100).toFixed(2))
+        : 0;
+
+    const weeklyBreakdownResult = await sql`
+      WITH user_signup_dates AS (
+        SELECT DISTINCT
+          user_id,
+          MIN(activity_date) AS signup_date
+        FROM analytics_user_activity
+        WHERE activity_type = 'session'
+          AND activity_date BETWEEN ${startDate} AND ${endDate}
+        GROUP BY user_id
+      ),
+      weekly_cohorts AS (
+        SELECT
+          DATE_TRUNC('week', signup_date) AS week_start,
+          COUNT(DISTINCT user_id) AS total_users,
+          COUNT(DISTINCT CASE
+            WHEN EXISTS (
+              SELECT 1
+              FROM analytics_user_activity aua
+              WHERE aua.user_id = usd.user_id
+                AND aua.activity_type = 'ai_chat'
+                AND aua.activity_date BETWEEN (usd.signup_date + INTERVAL '7 days') AND (usd.signup_date + INTERVAL '14 days')
+            ) THEN user_id
+          END) AS users_with_ai
+        FROM user_signup_dates usd
+        WHERE signup_date BETWEEN ${startDate} AND ${endDate}
+        GROUP BY DATE_TRUNC('week', signup_date)
+      )
+      SELECT
+        week_start::date AS week_start,
+        total_users,
+        users_with_ai,
+        CASE
+          WHEN total_users > 0 THEN ROUND((users_with_ai::numeric / total_users::numeric) * 100, 2)
+          ELSE 0
+        END AS percentage
+      FROM weekly_cohorts
+      ORDER BY week_start DESC
+    `;
+
+    const breakdown = weeklyBreakdownResult.rows.map((row) => ({
+      week_start: formatDate(new Date(row.week_start)),
+      total_users: Number(row.total_users || 0),
+      users_with_ai: Number(row.users_with_ai || 0),
+      percentage: Number(row.percentage || 0),
+    }));
+
+    return NextResponse.json({
+      total_new_users: totalNewUsers,
+      users_with_ai_after_week: usersWithAiAfterWeek,
+      percentage,
+      breakdown,
+    });
+  } catch (error) {
+    console.error('[analytics/ai-first-week] Failed to load metrics', error);
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
+  }
+}

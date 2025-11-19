@@ -132,18 +132,20 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
   ];
 
   return (
-    <Card className='border-zinc-800 bg-zinc-950/40'>
+    <Card className='border-zinc-800/30 bg-zinc-900/10'>
       <CardHeader>
         <div className='flex items-center gap-2'>
-          <Target className='h-5 w-5 text-purple-400' />
-          <CardTitle>Success Metrics</CardTitle>
+          <Target className='h-4 w-4 text-purple-400/70' />
+          <CardTitle className='text-base font-medium'>
+            Success Metrics
+          </CardTitle>
         </div>
-        <CardDescription>
-          Key performance indicators with trend analysis
+        <CardDescription className='text-xs text-zinc-500'>
+          Key performance indicators
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
+        <div className='grid gap-3 md:grid-cols-2 lg:grid-cols-3'>
           {metrics.map((metric) => (
             <MetricCard
               key={metric.label}
@@ -199,18 +201,18 @@ function MetricCard({
   return (
     <div
       className={cn(
-        'rounded-2xl border p-4 transition-colors',
+        'rounded-xl border p-3 transition-colors',
         trendBgColors[trend],
       )}
     >
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
-          <div className='text-xs font-medium text-zinc-400'>{label}</div>
-          <div className='mt-2 text-2xl font-semibold text-white'>
+          <div className='text-xs font-medium text-zinc-500'>{label}</div>
+          <div className='mt-2 text-xl font-light tracking-tight text-white'>
             {formattedValue}
           </div>
           {subtitle && (
-            <div className='mt-1 text-xs text-zinc-500'>{subtitle}</div>
+            <div className='mt-1 text-xs text-zinc-600'>{subtitle}</div>
           )}
         </div>
         <div className='flex flex-col items-end gap-1'>
