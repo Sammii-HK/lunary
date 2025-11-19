@@ -31,6 +31,27 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/pricing',
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  keywords: [
+    'astrology pricing',
+    'birth chart pricing',
+    'horoscope subscription',
+    'astrology app pricing',
+    'cosmic guidance pricing',
+    'personalized astrology',
+    'astrology trial',
+    'free astrology trial',
+  ],
 };
 
 export default function PricingLayout({

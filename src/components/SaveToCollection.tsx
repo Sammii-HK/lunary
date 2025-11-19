@@ -144,7 +144,8 @@ export function SaveToCollection({
           <div className='relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl'>
             <button
               onClick={() => setShowFolderDialog(false)}
-              className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-200'
+              className='absolute right-4 top-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-zinc-200'
+              aria-label='Close dialog'
             >
               ×
             </button>

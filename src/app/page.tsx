@@ -3,7 +3,6 @@
 import { useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
-import { PostTrialMessaging } from '@/components/PostTrialMessaging';
 import { useAccount } from 'jazz-tools/react';
 import { conversionTracking } from '@/lib/analytics';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -13,18 +12,19 @@ import { usePathname } from 'next/navigation';
 import { DateWidget } from '@/components/DateWidget';
 import { AstronomyWidget } from '@/components/AstronomyWidget';
 
-// Heavy widgets loaded dynamically with lazy loading
-const TarotWidget = dynamic(
+// Post-trial messaging - lazy loaded since it's conditional (only shows for expired trial users)
+const PostTrialMessaging = dynamic(
   () =>
-    import('@/components/TarotWidget').then((mod) => ({
-      default: mod.TarotWidget,
+    import('@/components/PostTrialMessaging').then((mod) => ({
+      default: mod.PostTrialMessaging,
     })),
   {
-    loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
-    ),
+    ssr: false, // Client-side only since it depends on user state
   },
 );
+
+// Heavy widgets loaded dynamically with lazy loading
+// First row widgets (Moon, Crystal) - load with higher priority
 const MoonWidget = dynamic(
   () =>
     import('../components/MoonWidget').then((mod) => ({
@@ -34,17 +34,7 @@ const MoonWidget = dynamic(
     loading: () => (
       <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
     ),
-  },
-);
-const HoroscopeWidget = dynamic(
-  () =>
-    import('@/components/HoroscopeWidget').then((mod) => ({
-      default: mod.HoroscopeWidget,
-    })),
-  {
-    loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
-    ),
+    ssr: true, // Enable SSR for first row widgets
   },
 );
 const CrystalWidget = dynamic(
@@ -56,8 +46,37 @@ const CrystalWidget = dynamic(
     loading: () => (
       <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
     ),
+    ssr: true, // Enable SSR for first row widgets
   },
 );
+
+// Second row widgets - load after first row
+const TarotWidget = dynamic(
+  () =>
+    import('@/components/TarotWidget').then((mod) => ({
+      default: mod.TarotWidget,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+    ssr: false, // Client-side only for below-fold content
+  },
+);
+const HoroscopeWidget = dynamic(
+  () =>
+    import('@/components/HoroscopeWidget').then((mod) => ({
+      default: mod.HoroscopeWidget,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+    ssr: false, // Client-side only for below-fold content
+  },
+);
+
+// Third row widgets - lowest priority
 const MoonSpellsWidget = dynamic(
   () =>
     import('@/components/MoonSpellsWidget').then((mod) => ({
@@ -67,17 +86,20 @@ const MoonSpellsWidget = dynamic(
     loading: () => (
       <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
     ),
+    ssr: false,
   },
 );
 const EphemerisWidget = dynamic(() => import('@/components/EphemerisWidget'), {
   loading: () => (
     <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
   ),
+  ssr: false,
 });
 const ConditionalWheel = dynamic(
   () => import('@/components/ConditionalWheel'),
   {
     loading: () => null, // ConditionalWheel handles its own loading state
+    ssr: false,
   },
 );
 
@@ -98,10 +120,12 @@ export default function Home() {
   return (
     <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl mx-auto px-4'>
       <AstronomyContextProvider>
+        {/* Screen reader only H1 for accessibility */}
+        <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
         {/* Post-trial messaging for expired trial users */}
         <PostTrialMessaging />
 
-        {/* Top Row - Date and Astronomy (always full width) */}
+        {/* Top Row - Date and Astronomy (always full width) - Above the fold, load immediately */}
         <div className='w-full space-y-4'>
           <DateWidget />
           <AstronomyWidget />

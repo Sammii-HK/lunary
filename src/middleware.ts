@@ -16,13 +16,16 @@ export function middleware(request: NextRequest) {
   const isAdminSubdomain =
     hostname.startsWith('admin.') || configuredAdminHosts.includes(hostname);
 
-  console.log('🔍 Middleware check:', {
-    hostname,
-    isAdminSubdomain,
-    pathname: url.pathname,
-    configuredAdminHosts,
-    nodeEnv: process.env.NODE_ENV,
-  });
+  // Only log in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 Middleware check:', {
+      hostname,
+      isAdminSubdomain,
+      pathname: url.pathname,
+      configuredAdminHosts,
+      nodeEnv: process.env.NODE_ENV,
+    });
+  }
 
   const adminPrefix = '/admin';
   const skipAdminRewritePrefixes = ['/auth', '/api', '/_next'];
@@ -51,11 +54,14 @@ export function middleware(request: NextRequest) {
       url.pathname === '/' ? adminPrefix : `${adminPrefix}${url.pathname}`;
     url.pathname = newPathname;
 
-    console.log('🔄 Rewriting admin subdomain:', {
-      from: request.nextUrl.pathname,
-      to: newPathname,
-      hostname,
-    });
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Rewriting admin subdomain:', {
+        from: request.nextUrl.pathname,
+        to: newPathname,
+        hostname,
+      });
+    }
 
     return NextResponse.rewrite(url);
   }

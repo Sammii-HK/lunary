@@ -82,7 +82,8 @@ const NavLink = ({ href, icon: Icon, label, activePath }: NavLinkProps) => {
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition ${
+      aria-label={label}
+      className={`flex flex-col items-center justify-center gap-1 rounded-xl min-h-[48px] min-w-[48px] px-2 py-2 text-xs transition ${
         active
           ? isBookOfShadows
             ? 'text-purple-300'

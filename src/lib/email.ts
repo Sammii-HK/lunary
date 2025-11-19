@@ -51,7 +51,7 @@ export interface BatchEmailResult {
 }
 
 const getFromEmail = () => {
-  return process.env.EMAIL_FROM || 'Lunary <cosmic@lunary.app>';
+  return process.env.EMAIL_FROM || 'Lunary <help@lunary.app>';
 };
 
 const parseFromEmail = (from: string) => {

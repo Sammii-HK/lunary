@@ -43,7 +43,8 @@ export function TarotCardModal({ card, isOpen, onClose }: TarotCardModalProps) {
       >
         <button
           onClick={onClose}
-          className='absolute top-4 right-4 text-zinc-400 hover:text-zinc-100 transition-colors'
+          className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-zinc-100 transition-colors'
+          aria-label='Close tarot card modal'
         >
           <X className='w-5 h-5' />
         </button>

@@ -97,7 +97,7 @@ export function ExitIntent() {
       <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-md w-full shadow-xl'>
         <button
           onClick={handleClose}
-          className='absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors'
+          className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors'
           aria-label='Close'
         >
           <X className='w-5 h-5' />

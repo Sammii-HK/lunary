@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -88,8 +89,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   themeColor: '#18181b',
 };
 
@@ -100,6 +101,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning>
+      <head>
+        {/* Preload critical API endpoint */}
+        <link
+          rel='preload'
+          href='/api/cosmic/global'
+          as='fetch'
+          crossOrigin='anonymous'
+        />
+        {/* DNS prefetch for external resources */}
+        <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
+      </head>
       <body
         className={`${inter.className} w-full h-screen flex flex-col align-middle items-center bg-zinc-950 text-white`}
         suppressHydrationWarning
@@ -110,6 +122,7 @@ export default function RootLayout({
             <ConditionalMainWrapper>
               <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
               <Analytics />
+              <SpeedInsights />
             </ConditionalMainWrapper>
             <AppChrome />
           </LunaryJazzProvider>
