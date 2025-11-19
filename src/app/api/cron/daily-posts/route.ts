@@ -1354,8 +1354,8 @@ async function runNotificationCheck(dateStr: string) {
       success: totalSent > 0,
       notificationsSent: totalSent,
       primaryEvent: cosmicData.primaryEvent?.name,
-      eventsSent: eventsToTrack.map((e) => e.key),
-      eventsSentCount: eventsToTrack.length,
+      eventsSent: results.map((r) => r.eventKey || r.eventName).filter(Boolean),
+      eventsSentCount: results.length,
       results,
     };
   } catch (error) {
