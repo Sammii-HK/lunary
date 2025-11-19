@@ -239,11 +239,14 @@ export async function fetchSubscriptionFromStripe(customerId: string) {
       // Use plan from API response if available (preserves specific plan types like 'lunary_plus_ai_annual')
       // Otherwise fall back to interval-based detection
       const planFromApi = sub.plan;
+      const interval = sub.items.data[0]?.price?.recurring?.interval;
       const plan =
         planFromApi ||
-        (sub.items.data[0]?.price?.recurring?.interval === 'month'
+        (interval === 'month'
           ? 'monthly'
-          : 'yearly');
+          : interval === 'year'
+            ? 'lunary_plus_ai_annual' // Only yearly plan available, map directly
+            : 'free');
 
       return {
         customerId,
@@ -295,9 +298,10 @@ export async function syncSubscriptionToProfile(
     let schemaPlan: string = subscriptionData.plan;
 
     // If plan is generic, try to infer from context (but prefer specific types)
-    if (schemaPlan === 'yearly' && !subscriptionData.plan.includes('lunary')) {
-      // If we have a customer ID, we could fetch from Stripe to get exact plan
-      // But for now, default yearly to annual AI plan (most common)
+    // Note: 'yearly' should already be mapped to 'lunary_plus_ai_annual' by fetchSubscriptionFromStripe
+    // This is a safety check in case it wasn't mapped
+    if (schemaPlan === 'yearly' || schemaPlan === 'annual') {
+      // Only yearly plan available is lunary_plus_ai_annual
       schemaPlan = 'lunary_plus_ai_annual';
     } else if (
       schemaPlan === 'monthly' &&
@@ -317,9 +321,9 @@ export async function syncSubscriptionToProfile(
     ];
     if (!allowedPlans.includes(schemaPlan)) {
       console.warn(
-        `[syncSubscriptionToProfile] Unknown plan type: ${schemaPlan}, defaulting to yearly`,
+        `[syncSubscriptionToProfile] Unknown plan type: ${schemaPlan}, defaulting to free`,
       );
-      schemaPlan = 'lunary_plus_ai_annual';
+      schemaPlan = 'free';
     }
 
     const subscriptionCoValue = Subscription.create(
