@@ -8,7 +8,6 @@ export function generateMetadata(): Metadata {
     description:
       'Manage Lunary automations, content, and notifications with a streamlined mobile workspace.',
     manifest: ADMIN_PWA_MANIFEST_URL,
-    themeColor: '#0b0b0f',
     alternates: {},
     robots: {
       index: false,

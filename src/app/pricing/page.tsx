@@ -27,6 +27,7 @@ import {
   trackABTestConversion,
 } from '@/lib/ab-testing';
 import { SocialProof } from '@/components/SocialProof';
+import { MarketingFooter } from '@/components/MarketingFooter';
 
 // Metadata is handled in layout.tsx for client components
 export default function PricingPage() {
@@ -176,7 +177,7 @@ export default function PricingPage() {
   return (
     <>
       <FAQStructuredData faqs={faqs} />
-      <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col'>
         {/* Navigation */}
         <nav className='sticky top-0 z-10 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -864,34 +865,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className='border-t border-zinc-800/50 py-8 sm:py-10 md:py-12'>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <div className='flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm md:text-base text-zinc-500'>
-              <div>© {new Date().getFullYear()} Lunary</div>
-              <div className='flex gap-4 sm:gap-6 md:gap-8'>
-                <Link
-                  href='/blog'
-                  className='hover:text-zinc-400 transition-colors'
-                >
-                  Blog
-                </Link>
-                <Link
-                  href='/welcome'
-                  className='hover:text-zinc-400 transition-colors'
-                >
-                  Features
-                </Link>
-                <Link
-                  href='/'
-                  className='hover:text-zinc-400 transition-colors'
-                >
-                  Daily Insights
-                </Link>
-              </div>
-            </div>
-          </div>
-        </footer>
+        <MarketingFooter />
       </div>
     </>
   );
