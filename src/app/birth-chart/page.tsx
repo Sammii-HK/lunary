@@ -13,7 +13,6 @@ import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 import Link from 'next/link';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
-import { TrialReminder } from '@/components/TrialReminder';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Share2 } from 'lucide-react';
@@ -952,7 +951,6 @@ const BirthChartPage = () => {
   if (!hasChartAccess) {
     return (
       <div className='min-h-screen space-y-6 pb-20 px-4'>
-        <TrialReminder variant='banner' />
         <div className='flex items-center justify-center min-h-[60vh]'>
           <div className='text-center max-w-lg px-4'>
             <h1 className='text-3xl font-bold text-white mb-6'>
@@ -1033,7 +1031,6 @@ const BirthChartPage = () => {
 
   return (
     <div className='h-[91vh] space-y-6 pb-4 overflow-auto'>
-      <TrialReminder variant='banner' />
       <BirthChart
         birthChart={birthChartData}
         userName={userName}

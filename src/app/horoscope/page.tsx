@@ -6,7 +6,6 @@ import { hasBirthChartAccess } from '../../../utils/pricing';
 import { FreeHoroscopeView } from './components/FreeHoroscopeView';
 import { PaidHoroscopeView } from './components/PaidHoroscopeView';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
-import { TrialReminder } from '@/components/TrialReminder';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 
@@ -44,7 +43,6 @@ export default function HoroscopePage() {
   if (!hasChartAccess) {
     return (
       <div className='space-y-6'>
-        <TrialReminder variant='banner' />
         <FreeHoroscopeView />
         <UpgradePrompt
           variant='card'
@@ -59,7 +57,6 @@ export default function HoroscopePage() {
 
   return (
     <div className='space-y-6'>
-      <TrialReminder variant='banner' />
       <PaidHoroscopeView
         userBirthday={userBirthday}
         userName={userName}

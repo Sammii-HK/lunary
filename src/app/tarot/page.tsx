@@ -27,7 +27,6 @@ import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
-import { TrialReminder } from '@/components/TrialReminder';
 import { conversionTracking } from '@/lib/analytics';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import {
@@ -566,7 +565,6 @@ const TarotReadings = () => {
 
     return (
       <div className='min-h-screen space-y-6 pb-20 px-4'>
-        <TrialReminder variant='banner' />
         <div className='pt-6'>
           <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
             Your Tarot Readings
@@ -821,7 +819,6 @@ const TarotReadings = () => {
 
   return (
     <div className='min-h-screen space-y-6 pb-20 px-4'>
-      <TrialReminder variant='banner' />
       <div className='pt-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           {userName ? `${userName}'s Tarot Readings` : 'Your Tarot Readings'}
