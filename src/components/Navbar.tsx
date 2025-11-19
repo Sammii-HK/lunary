@@ -11,18 +11,41 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { ExploreMenu } from './ExploreMenu';
+import { useAuthStatus } from './AuthStatus';
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const authState = useAuthStatus();
 
-  // Hide navbar on marketing pages
+  // Define app pages where navbar should show
+  const appPages = [
+    '/app',
+    '/tarot',
+    '/horoscope',
+    '/birth-chart',
+    '/book-of-shadows',
+    '/grimoire',
+    '/profile',
+    '/cosmic-state',
+    '/cosmic-report-generator',
+  ];
+
+  // Define marketing pages
   const isMarketingRoute =
     pathname === '/' ||
     pathname === '/welcome' ||
     pathname === '/pricing' ||
+    pathname === '/help' ||
+    pathname === '/auth' ||
+    pathname?.startsWith('/blog') ||
     pathname?.startsWith('/admin');
 
-  if (isMarketingRoute) {
+  // Only show navbar for authenticated users on app pages
+  const isAppPage = appPages.some(
+    (page) => pathname === page || pathname?.startsWith(`${page}/`),
+  );
+
+  if (isMarketingRoute || !authState.isAuthenticated || !isAppPage) {
     return null;
   }
 

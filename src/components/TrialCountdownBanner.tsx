@@ -16,7 +16,7 @@ export function TrialCountdownBanner() {
   }
 
   return (
-    <div className='sticky top-0 z-50 border-b border-purple-500/30 bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-sm'>
+    <div className='fixed top-0 left-0 right-0 z-50 border-b border-purple-500/30 bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-sm'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between gap-4 py-3'>
           <div className='flex items-center gap-3 flex-1'>

@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { customerId, userId } = body;
+    const { customerId, userId, forceRefresh } = body;
 
     if (!customerId) {
       return NextResponse.json(
@@ -262,6 +262,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Determine cache headers based on forceRefresh
+    const cacheHeaders = forceRefresh
+      ? {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        }
+      : {
+          // Cache for 5 minutes, allow stale-while-revalidate for 10 minutes
+          // Reduces Stripe API calls significantly - users can force refresh via button
+          'Cache-Control':
+            'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
+        };
+
     return NextResponse.json(
       {
         success: true,
@@ -282,12 +296,7 @@ export async function POST(request: NextRequest) {
         message: `Found ${subscription.status} subscription`,
       },
       {
-        headers: {
-          // Cache for 5 minutes, allow stale-while-revalidate for 10 minutes
-          // Reduces Stripe API calls significantly - users can force refresh via button
-          'Cache-Control':
-            'private, s-maxage=300, stale-while-revalidate=600, must-revalidate',
-        },
+        headers: cacheHeaders,
       },
     );
   } catch (error) {

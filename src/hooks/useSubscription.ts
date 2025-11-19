@@ -200,6 +200,12 @@ export function useSubscription(): SubscriptionStatus {
           setSubscriptionState(stripeBasedState);
           return;
         } else {
+          // Stripe returned success: false or no subscription - default to free
+          console.log(
+            '[useSubscription] No subscription found in Stripe, defaulting to free',
+          );
+          setSubscriptionState(defaultState);
+          return;
         }
       } else {
         console.warn(
@@ -215,8 +221,8 @@ export function useSubscription(): SubscriptionStatus {
     }
 
     // If we get here, Stripe fetch failed or returned no subscription
-    // Fall back to profile subscription or default state
-    setSubscriptionState((prev) => ({ ...prev, loading: false }));
+    // Explicitly default to free tier
+    setSubscriptionState(defaultState);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     // hasSyncedProfile and me.profile are intentionally excluded to prevent infinite loops
   }, []); // hasSyncedProfile and me.profile intentionally excluded
@@ -318,6 +324,13 @@ export function useSubscription(): SubscriptionStatus {
       // Normalize status: 'trialing' -> 'trial' for consistency
       const rawStatus = profileSubscription.status;
       const status = rawStatus === 'trialing' ? 'trial' : rawStatus;
+
+      // If status is cancelled or past_due, default to free
+      if (status === 'cancelled' || status === 'past_due') {
+        setSubscriptionState(defaultState);
+        return;
+      }
+
       const plan = profileSubscription.plan || 'free';
 
       // If profile has generic plan (monthly/yearly) but we have customer ID, fetch from Stripe to get exact plan
