@@ -1,11 +1,24 @@
 import { auth } from '@/lib/auth';
 import { withCors } from '@/lib/auth-cors';
 
-// Skip auth checks in test/CI mode - return immediately
-const isTestMode =
-  process.env.NODE_ENV === 'test' ||
-  process.env.CI === 'true' ||
-  !!process.env.CI;
+// Skip auth checks ONLY in explicit test environments
+// Never activate test mode in production
+const isTestMode = (() => {
+  // Explicitly prevent test mode in production
+  if (process.env.VERCEL_ENV === 'production') return false;
+  if (process.env.NODE_ENV === 'production') return false;
+
+  // Only activate test mode in explicit test environments
+  if (process.env.NODE_ENV === 'test') return true;
+  if (process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined) return true;
+
+  // Only check CI if explicitly set to 'true' AND not in production
+  if (process.env.CI === 'true' && process.env.VERCEL_ENV !== 'production') {
+    return true;
+  }
+
+  return false;
+})();
 
 async function handleAuthRequest(request: Request) {
   // In test mode, return mock session immediately without any processing
