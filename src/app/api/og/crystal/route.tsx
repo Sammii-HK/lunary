@@ -1,13 +1,32 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { getGeneralCrystalRecommendation } from '../../../../../utils/crystals/generalCrystals';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const crystal = searchParams.get('crystal') || 'Crystal';
-  const reason = searchParams.get('reason') || '';
-  const chakra = searchParams.get('chakra') || '';
+  const dateParam = searchParams.get('date');
+  const sizeParam = searchParams.get('size');
+
+  // Normalize date to noon UTC for consistent seeding
+  let targetDate: Date;
+  if (dateParam) {
+    targetDate = new Date(dateParam + 'T12:00:00Z');
+  } else {
+    const todayStr = new Date().toISOString().split('T')[0];
+    targetDate = new Date(todayStr + 'T12:00:00Z');
+  }
+
+  // Get seeded crystal recommendation for the date
+  const crystalRec = getGeneralCrystalRecommendation(targetDate);
+  const crystal = crystalRec.name;
+  const reason = crystalRec.reason;
+
+  // Support landscape size (similar to cosmic route)
+  const isLandscape = sizeParam === 'landscape';
+  const imageWidth = isLandscape ? 1920 : 1200;
+  const imageHeight = isLandscape ? 1080 : 630;
 
   return new ImageResponse(
     (
@@ -73,18 +92,6 @@ export async function GET(request: NextRequest) {
               {reason.substring(0, 150)}...
             </div>
           )}
-          {chakra && (
-            <div
-              style={{
-                fontSize: '24px',
-                color: '#a855f7',
-                marginTop: '20px',
-                textAlign: 'center',
-              }}
-            >
-              {chakra} Chakra
-            </div>
-          )}
           <div
             style={{
               fontSize: '20px',
@@ -99,8 +106,8 @@ export async function GET(request: NextRequest) {
       </div>
     ),
     {
-      width: 1200,
-      height: 630,
+      width: imageWidth,
+      height: imageHeight,
     },
   );
 }

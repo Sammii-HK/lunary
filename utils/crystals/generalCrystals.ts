@@ -120,7 +120,17 @@ const getMoonPhaseGuidance = (moonPhase: string, crystal: string): string => {
 export const getGeneralCrystalRecommendation = (
   date?: Date,
 ): GeneralCrystalRecommendation => {
-  const today = date ? dayjs(date) : dayjs();
+  // Normalize date to noon UTC to ensure static seeding per day (remove time component)
+  let normalizedDate: Date;
+  if (date) {
+    const dateStr = dayjs(date).format('YYYY-MM-DD');
+    normalizedDate = new Date(dateStr + 'T12:00:00Z');
+  } else {
+    const todayStr = dayjs().format('YYYY-MM-DD');
+    normalizedDate = new Date(todayStr + 'T12:00:00Z');
+  }
+
+  const today = dayjs(normalizedDate);
   const observer = new Observer(51.4769, 0.0005, 0); // Default location
   const currentChart = getAstrologicalChart(today.toDate(), observer);
   const moonPhase = getMoonPhase(today.toDate());
