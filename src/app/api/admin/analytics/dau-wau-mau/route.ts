@@ -30,8 +30,7 @@ export async function GET(request: NextRequest) {
     const dauPromise = sql`
       SELECT COUNT(DISTINCT user_id) AS value
       FROM analytics_user_activity
-      WHERE activity_type = 'session'
-        AND activity_date = ${endDate}
+      WHERE activity_type = 'session' AND activity_date = ${endDate}
     `;
 
     const wauPromise = sql`
@@ -62,11 +61,9 @@ export async function GET(request: NextRequest) {
     const returningUsersPromise = sql`
       SELECT COUNT(DISTINCT a.user_id) AS value
       FROM analytics_user_activity a
-      WHERE a.activity_type = 'session'
-        AND a.activity_date = ${endDate}
+      WHERE a.activity_type = 'session' AND a.activity_date = ${endDate}
         AND EXISTS (
-          SELECT 1
-          FROM analytics_user_activity b
+          SELECT 1 FROM analytics_user_activity b
           WHERE b.user_id = a.user_id
             AND b.activity_type = 'session'
             AND b.activity_date < ${endDate}
@@ -93,8 +90,7 @@ export async function GET(request: NextRequest) {
         (
           SELECT COUNT(DISTINCT user_id)
           FROM analytics_user_activity
-          WHERE activity_type = 'session'
-            AND activity_date = bucket_date::date
+          WHERE activity_type = 'session' AND activity_date = bucket_date::date
         ) AS dau,
         (
           SELECT COUNT(DISTINCT user_id)
@@ -113,7 +109,9 @@ export async function GET(request: NextRequest) {
     `;
 
     const retention = await calculateRetention(startDate, range, endDate);
-    const churnRate = Math.max(0, 100 - retention.day_30);
+    // Churn is inverse of 30-day retention, but only if we have retention data
+    const churnRate =
+      retention.day_30 !== null ? Math.max(0, 100 - retention.day_30) : null;
 
     return NextResponse.json({
       dau,
@@ -145,11 +143,21 @@ async function calculateRetention(
   range: { start: Date; end: Date },
   endDate: string,
 ) {
+  // Get base cohort: users active in the first 3 days of the range
+  // This makes retention more robust - if no one was active on the exact start date,
+  // we still get a cohort from the first few days
+  const cohortStartDate = formatDate(range.start);
+  const cohortEndDateObj = new Date(range.start);
+  cohortEndDateObj.setDate(cohortEndDateObj.getDate() + 2);
+  const cohortEndDate = formatDate(
+    cohortEndDateObj > range.end ? range.end : cohortEndDateObj,
+  );
+
   const baseUsersResult = await sql`
     SELECT DISTINCT user_id
     FROM analytics_user_activity
-    WHERE activity_type = 'session'
-      AND activity_date = ${startDate}
+    WHERE activity_type = 'session' 
+      AND activity_date BETWEEN ${cohortStartDate} AND ${cohortEndDate}
   `;
 
   const baseUsers = new Set(
@@ -170,29 +178,44 @@ async function calculateRetention(
     day_30: 0,
   };
 
+  // Use the cohort end date as the reference point for retention calculations
+  const cohortReferenceDate = new Date(cohortEndDate);
+
   for (const [key, offset] of Object.entries(DAY_OFFSETS) as Array<
     [keyof typeof DAY_OFFSETS, number]
   >) {
-    const target = new Date(range.start);
+    const target = new Date(cohortReferenceDate);
     target.setDate(target.getDate() + offset);
 
     if (target > range.end) {
+      // Can't calculate retention if target date is beyond our data range
       retentionValues[keyMap(key)] = 0;
       continue;
     }
 
     const targetDate = formatDate(target);
 
-    const result = await sql`
-      SELECT DISTINCT user_id
-      FROM analytics_user_activity
-      WHERE activity_type = 'session'
-        AND activity_date = ${targetDate}
-    `;
+    // Check if users from the cohort returned on the target date
+    const baseUsersArray = Array.from(baseUsers);
 
-    const returning = result.rows
-      .map((row) => row.user_id)
-      .filter((id) => id && baseUsers.has(id)).length;
+    if (baseUsersArray.length === 0) {
+      retentionValues[keyMap(key)] = 0;
+      continue;
+    }
+
+    // Use IN clause with unnest() for Vercel Postgres compatibility
+    // Convert array to PostgreSQL array literal format
+    const arrayLiteral = `{${baseUsersArray.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(',')}}`;
+    const result = await (sql as any).unsafe(
+      `SELECT DISTINCT user_id
+       FROM analytics_user_activity
+       WHERE activity_type = 'session' 
+         AND activity_date = $1
+         AND user_id = ANY($2::text[])`,
+      [targetDate, arrayLiteral],
+    );
+
+    const returning = result.rows.length;
 
     retentionValues[keyMap(key)] = Math.round(
       (returning / baseUsers.size) * 100,

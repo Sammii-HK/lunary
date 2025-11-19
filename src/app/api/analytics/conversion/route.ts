@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { trackActivity } from '@/lib/analytics/tracking';
 
 const EXCLUDED_EMAILS = new Set(['kellow.sammii@gmail.com']);
 
@@ -96,6 +97,41 @@ export async function POST(request: NextRequest) {
         NOW()
       )
     `;
+
+    // Also track activity for feature views to populate feature usage analytics
+    if (safeUserId) {
+      const activityTypeMap: Record<string, string> = {
+        tarot_viewed: 'tarot',
+        birth_chart_viewed: 'birth_chart',
+        horoscope_viewed: 'cosmic_state',
+        personalized_horoscope_viewed: 'cosmic_state',
+        personalized_tarot_viewed: 'tarot',
+        app_opened: 'session',
+        ai_chat: 'ai_chat',
+      };
+
+      const activityType = activityTypeMap[event] || featureName || event;
+
+      // Only track activity for feature-related events, not conversion events
+      if (
+        activityType !== 'signup' &&
+        activityType !== 'trial_started' &&
+        activityType !== 'trial_converted' &&
+        activityType !== 'subscription_started' &&
+        activityType !== 'trial_expired'
+      ) {
+        try {
+          await trackActivity({
+            userId: safeUserId,
+            activityType,
+            metadata: metadata || {},
+          });
+        } catch (activityError) {
+          // Don't fail the conversion tracking if activity tracking fails
+          console.error('[analytics] Failed to track activity:', activityError);
+        }
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

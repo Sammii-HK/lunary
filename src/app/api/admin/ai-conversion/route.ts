@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { formatTimestamp } from '@/lib/analytics/date-range';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -198,7 +199,7 @@ async function analyzeConversionFunnel(data: {
       COUNT(DISTINCT user_id) as users,
       COUNT(*) as events
     FROM conversion_events
-    WHERE created_at >= ${thresholdDate.toISOString()}::timestamp with time zone
+    WHERE created_at >= ${formatTimestamp(thresholdDate)}
     GROUP BY event_type
     ORDER BY 
       CASE event_type

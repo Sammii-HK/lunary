@@ -21,6 +21,7 @@ import { MetricsCard } from '@/components/admin/MetricsCard';
 import { ConversionFunnel } from '@/components/admin/ConversionFunnel';
 import { PostHogHeatmap } from '@/components/admin/PostHogHeatmap';
 import { SuccessMetrics } from '@/components/admin/SuccessMetrics';
+import { SearchConsoleMetrics } from '@/components/admin/SearchConsoleMetrics';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -147,14 +148,16 @@ export default function AnalyticsPage() {
     null,
   );
   const [successMetrics, setSuccessMetrics] = useState<any | null>(null);
+  const [discordAnalytics, setDiscordAnalytics] = useState<any | null>(null);
+  const [searchConsoleData, setSearchConsoleData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const queryParams = `start_date=${startDate}&end_date=${endDate}`;
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    const queryParams = `start_date=${startDate}&end_date=${endDate}`;
 
     try {
       const [
@@ -164,6 +167,8 @@ export default function AnalyticsPage() {
         notificationsRes,
         featureUsageRes,
         successMetricsRes,
+        discordRes,
+        searchConsoleRes,
       ] = await Promise.all([
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
@@ -173,6 +178,8 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/notifications?${queryParams}`),
         fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
         fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
+        fetch(`/api/analytics/discord-interactions?range=7d`),
+        fetch(`/api/admin/analytics/search-console?${queryParams}`),
       ]);
 
       if (!activityRes.ok) {
@@ -200,6 +207,19 @@ export default function AnalyticsPage() {
       setNotifications(await notificationsRes.json());
       setFeatureUsage(await featureUsageRes.json());
       setSuccessMetrics(await successMetricsRes.json());
+
+      // Discord analytics is optional - don't fail if it doesn't exist
+      if (discordRes.ok) {
+        setDiscordAnalytics(await discordRes.json());
+      }
+
+      // Search Console is optional - don't fail if it doesn't exist
+      if (searchConsoleRes.ok) {
+        const searchData = await searchConsoleRes.json();
+        if (searchData.success) {
+          setSearchConsoleData(searchData.data);
+        }
+      }
     } catch (err) {
       setError(
         err instanceof Error
@@ -209,7 +229,7 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  }, [granularity, queryParams]);
+  }, [granularity, startDate, endDate]);
 
   useEffect(() => {
     fetchAnalytics();
@@ -499,6 +519,15 @@ export default function AnalyticsPage() {
         />
       </section>
 
+      {searchConsoleData && (
+        <section>
+          <SearchConsoleMetrics
+            data={searchConsoleData}
+            loading={loading && !searchConsoleData}
+          />
+        </section>
+      )}
+
       <section className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
         {overviewCards.map((card) => (
           <MetricsCard
@@ -522,6 +551,29 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <MultiLineChart data={activity?.trends ?? []} />
+            <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
+              <div className='flex items-center gap-2'>
+                <div className='h-3 w-3 rounded-full bg-purple-400/80' />
+                <span className='text-xs text-zinc-400'>
+                  <span className='font-medium text-zinc-300'>DAU</span> - Daily
+                  Active Users
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <div className='h-2 w-2 rounded-full bg-indigo-400/90' />
+                <span className='text-xs text-zinc-400'>
+                  <span className='font-medium text-zinc-300'>WAU</span> -
+                  Weekly Active Users
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <div className='h-2 w-2 rounded-full bg-sky-400/90' />
+                <span className='text-xs text-zinc-400'>
+                  <span className='font-medium text-zinc-300'>MAU</span> -
+                  Monthly Active Users
+                </span>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -750,6 +802,102 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
       </section>
+
+      {discordAnalytics && (
+        <section className='grid gap-6 lg:grid-cols-2'>
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                Discord Bot Engagement
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-500'>
+                Command usage and interactions (last 7 days)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='grid gap-4 md:grid-cols-2'>
+                <MiniStat
+                  label='Total Commands'
+                  value={discordAnalytics.stats?.funnel?.totalCommands ?? 0}
+                  icon={<Activity className='h-5 w-5 text-purple-300' />}
+                />
+                <MiniStat
+                  label='Button Clicks'
+                  value={discordAnalytics.stats?.funnel?.buttonClicks ?? 0}
+                  icon={<Target className='h-5 w-5 text-emerald-300' />}
+                />
+                <MiniStat
+                  label='Click-Through Rate'
+                  value={
+                    discordAnalytics.stats?.funnel?.clickThroughRate
+                      ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
+                      : '—'
+                  }
+                  icon={<Sparkles className='h-5 w-5 text-sky-300' />}
+                />
+                <MiniStat
+                  label='Accounts Linked'
+                  value={discordAnalytics.stats?.funnel?.accountsLinked ?? 0}
+                  icon={<Bell className='h-5 w-5 text-amber-300' />}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                Top Discord Commands
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-500'>
+                Most popular bot interactions
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              {(discordAnalytics.stats?.commands ?? [])
+                .slice(0, 5)
+                .map((cmd: any) => (
+                  <div key={cmd.command_name} className='space-y-2'>
+                    <div className='flex items-center justify-between text-sm text-zinc-400'>
+                      <span className='capitalize'>
+                        {cmd.command_name || 'Unknown'}
+                      </span>
+                      <span>{cmd.total_uses.toLocaleString()}</span>
+                    </div>
+                    <div className='h-2 w-full rounded-full bg-zinc-800'>
+                      <div
+                        className='h-2 rounded-full bg-gradient-to-r from-purple-400 to-fuchsia-500'
+                        style={{
+                          width: `${
+                            discordAnalytics.stats?.commands?.[0]?.total_uses >
+                            0
+                              ? (
+                                  (cmd.total_uses /
+                                    discordAnalytics.stats.commands[0]
+                                      .total_uses) *
+                                  100
+                                ).toFixed(2)
+                              : 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+                    <div className='flex items-center justify-between text-xs text-zinc-500'>
+                      <span>{cmd.unique_users} users</span>
+                      <span>{cmd.linked_users} linked</span>
+                    </div>
+                  </div>
+                ))}
+              {(!discordAnalytics.stats?.commands ||
+                discordAnalytics.stats.commands.length === 0) && (
+                <div className='text-sm text-zinc-500'>
+                  No Discord interactions yet
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+      )}
     </div>
   );
 }
@@ -819,9 +967,15 @@ function MultiLineChart({ data }: { data: ActivityTrend[] }) {
           const x =
             padding +
             (index / Math.max(data.length - 1, 1)) * (width - padding * 2);
+          // Format date: show MM/DD or just day number if too many points
+          const date = new Date(point.date);
+          const label =
+            data.length > 14
+              ? date.getDate().toString()
+              : `${date.getMonth() + 1}/${date.getDate()}`;
           return (
             <text key={point.date} x={x} y={height - 10} textAnchor='middle'>
-              {point.date.slice(5)}
+              {label}
             </text>
           );
         })}

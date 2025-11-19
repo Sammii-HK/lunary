@@ -7,6 +7,7 @@ import {
 } from '@/app/api/cron/shared-notification-tracker';
 import { sql } from '@vercel/postgres';
 import { sendEmail } from '@/lib/email';
+import { formatDate } from '@/lib/analytics/date-range';
 import {
   generateTrialReminderEmailHTML,
   generateTrialReminderEmailText,
@@ -519,6 +520,8 @@ async function runDailyPosts(dateStr: string) {
         message: dailyPreview.message,
         priority: dailyPreview.priority,
         url: dailyPreview.url,
+        category: 'analytics',
+        dedupeKey: `daily-preview-${dateStr}`,
       });
 
       // Send success summary
@@ -547,6 +550,8 @@ async function runDailyPosts(dateStr: string) {
         priority: successTemplate.priority,
         url: successTemplate.url,
         fields: successFields,
+        category: 'analytics',
+        dedupeKey: `daily-posts-success-${dateStr}`,
       });
     } else {
       const failureTemplate = NotificationTemplates.cronFailure(
@@ -575,6 +580,8 @@ async function runDailyPosts(dateStr: string) {
         priority: failureTemplate.priority,
         url: failureTemplate.url,
         fields: failureFields,
+        category: 'urgent',
+        dedupeKey: `daily-posts-failure-${dateStr}`,
       });
     }
   } catch (notificationError) {
@@ -754,6 +761,8 @@ async function runWeeklyTasks(request: NextRequest) {
         priority: weeklyTemplate.priority,
         url: weeklyTemplate.url,
         fields: weeklyFields,
+        category: 'analytics',
+        dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,
       });
       console.log(
         `✅ Weekly notification sent: ${socialPostsResult?.savedIds?.length || 0} social posts ready for approval`,
@@ -1109,6 +1118,8 @@ async function runNotificationCheck(dateStr: string) {
           priority: 'normal',
           url: `${baseUrl}/admin/analytics`,
           fields,
+          category: 'analytics',
+          dedupeKey: `weekly-conversion-digest-${new Date().toISOString().split('T')[0]}`,
         });
 
         console.log('✅ Weekly conversion digest sent');
@@ -1134,7 +1145,7 @@ async function runNotificationCheck(dateStr: string) {
           s.plan_type
         FROM subscriptions s
         WHERE s.status = 'trial'
-        AND s.trial_ends_at::date = ${threeDaysFromNow.toISOString().split('T')[0]}
+        AND s.trial_ends_at::date = ${formatDate(threeDaysFromNow)}
         AND (s.trial_reminder_3d_sent = false OR s.trial_reminder_3d_sent IS NULL)
         AND s.user_email IS NOT NULL
       `;
@@ -1149,7 +1160,7 @@ async function runNotificationCheck(dateStr: string) {
           s.plan_type
         FROM subscriptions s
         WHERE s.status = 'trial'
-        AND s.trial_ends_at::date = ${oneDayFromNow.toISOString().split('T')[0]}
+        AND s.trial_ends_at::date = ${formatDate(oneDayFromNow)}
         AND (s.trial_reminder_1d_sent = false OR s.trial_reminder_1d_sent IS NULL)
         AND s.user_email IS NOT NULL
       `;
@@ -1279,7 +1290,7 @@ async function runNotificationCheck(dateStr: string) {
           s.trial_ends_at
         FROM subscriptions s
         WHERE s.status = 'trial'
-        AND s.trial_ends_at::date = ${yesterday.toISOString().split('T')[0]}
+        AND s.trial_ends_at::date = ${formatDate(yesterday)}
         AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
         AND s.user_email IS NOT NULL
       `;

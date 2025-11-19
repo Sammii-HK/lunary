@@ -131,6 +131,8 @@ export async function GET(request: NextRequest) {
         fields,
         color: statusColor,
         footer: `Checked at ${new Date().toISOString()}`,
+        category: 'urgent',
+        dedupeKey: `health-check-${anyDown ? 'down' : anySlow ? 'slow' : 'ok'}-${new Date().toISOString().split('T')[0]}`,
       });
 
       if (allHealthy) {

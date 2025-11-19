@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { sendDiscordAdminNotification } from '@/lib/discord';
+import { queueAnalyticsEvent } from '@/lib/discord';
 
 export async function POST(request: NextRequest) {
   try {
@@ -85,19 +85,36 @@ export async function POST(request: NextRequest) {
       },
     ];
 
-    const result = await sendDiscordAdminNotification({
+    await queueAnalyticsEvent({
+      category: 'analytics',
+      eventType: 'weekly_digest',
       title,
-      message: `Weekly conversion statistics for the past 7 and 30 days.`,
-      priority: 'normal',
-      url:
-        process.env.NODE_ENV === 'production'
-          ? 'https://lunary.app/admin/analytics'
-          : 'http://localhost:3000/admin/analytics',
-      fields,
+      dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,
+      metadata: {
+        weekly: {
+          signups: weeklySignups,
+          trials: weeklyTrials,
+          conversions: weeklyConversions,
+        },
+        monthly: {
+          signups: monthlySignups,
+          trials: monthlyTrials,
+          conversions: monthlyConversions,
+          conversionRate,
+          trialConversionRate,
+          mrr,
+        },
+        fields,
+        url:
+          process.env.NODE_ENV === 'production'
+            ? 'https://lunary.app/admin/analytics'
+            : 'http://localhost:3000/admin/analytics',
+      },
     });
 
     return NextResponse.json({
-      success: result.ok,
+      success: true,
+      message: 'Weekly digest queued for daily analytics summary',
       data: {
         weekly: {
           signups: weeklySignups,

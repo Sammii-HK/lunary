@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { sendEmail } from '@/lib/email';
+import { formatDate } from '@/lib/analytics/date-range';
 import {
   generateTrialDay2EmailHTML,
   generateTrialDay2EmailText,
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       FROM subscriptions s
       WHERE s.status = 'trial'
       AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.created_at) = ${day2Date.toISOString().split('T')[0]}
+      AND DATE(s.created_at) = ${formatDate(day2Date)}
       AND (s.trial_nurture_day2_sent = false OR s.trial_nurture_day2_sent IS NULL)
       AND s.user_email IS NOT NULL
     `;
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
       FROM subscriptions s
       WHERE s.status = 'trial'
       AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.created_at) = ${day3Date.toISOString().split('T')[0]}
+      AND DATE(s.created_at) = ${formatDate(day3Date)}
       AND (s.trial_nurture_day3_sent = false OR s.trial_nurture_day3_sent IS NULL)
       AND s.user_email IS NOT NULL
     `;
@@ -189,7 +190,7 @@ export async function GET(request: NextRequest) {
       FROM subscriptions s
       WHERE s.status = 'trial'
       AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.created_at) = ${day5Date.toISOString().split('T')[0]}
+      AND DATE(s.created_at) = ${formatDate(day5Date)}
       AND (s.trial_nurture_day5_sent = false OR s.trial_nurture_day5_sent IS NULL)
       AND s.user_email IS NOT NULL
     `;
@@ -254,8 +255,8 @@ export async function GET(request: NextRequest) {
       FROM subscriptions s
       WHERE s.status = 'trial'
       AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.trial_ends_at) <= ${today.toISOString().split('T')[0]}
-      AND DATE(s.created_at) = ${day7Date.toISOString().split('T')[0]}
+      AND DATE(s.trial_ends_at) <= ${formatDate(today)}
+      AND DATE(s.created_at) = ${formatDate(day7Date)}
       AND (s.trial_nurture_day7_sent = false OR s.trial_nurture_day7_sent IS NULL)
       AND s.user_email IS NOT NULL
     `;

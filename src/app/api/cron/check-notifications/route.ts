@@ -123,6 +123,7 @@ export async function GET(request: NextRequest) {
                 priority: event.priority,
                 eventType: event.type,
                 checkType: '4-hourly',
+                isTimeSpecific: true,
               },
             },
           }),

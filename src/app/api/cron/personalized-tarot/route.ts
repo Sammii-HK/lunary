@@ -50,7 +50,10 @@ export async function GET(request: NextRequest) {
       SELECT endpoint, p256dh, auth, user_id, preferences
       FROM push_subscriptions 
       WHERE is_active = true 
-      AND preferences->>'tarotNotifications' = 'true'
+      AND (
+        preferences->>'tarotNotifications' = 'true'
+        OR (preferences->>'tarotNotifications')::boolean = true
+      )
       AND preferences->>'birthday' IS NOT NULL
       AND preferences->>'birthday' != ''
     `;
@@ -91,6 +94,17 @@ export async function GET(request: NextRequest) {
           birthday,
         );
 
+        const now = new Date();
+        const hour = now.getUTCHours();
+        const isQuietHours = hour >= 22 || hour < 8;
+
+        if (isQuietHours) {
+          console.log(
+            `[personalized-tarot] Skipped during quiet hours (${hour}:00 UTC) for ${sub.user_id}`,
+          );
+          continue;
+        }
+
         // Create personalized notification
         const notification = {
           title: `🔮 Your Daily Tarot: ${dailyCard.name}`,
@@ -104,6 +118,7 @@ export async function GET(request: NextRequest) {
             type: 'personalized_tarot',
             date: dateStr,
             cardName: dailyCard.name,
+            isScheduled: true,
           },
           actions: [
             {
