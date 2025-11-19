@@ -125,9 +125,10 @@ export async function GET(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
         troubleshooting: [
-          'Check PUSHOVER_API_TOKEN and PUSHOVER_USER_KEY are set',
+          // 'Check PUSHOVER_API_TOKEN and PUSHOVER_USER_KEY are set', // Pushover deprecated - using Discord now
           'Verify cosmic API is working',
-          'Ensure Pushover account is active',
+          'Check DISCORD_WEBHOOK_URL is configured',
+          // 'Ensure Pushover account is active', // Pushover deprecated
         ],
       },
       { status: 500 },

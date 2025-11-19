@@ -418,6 +418,7 @@ export function NotificationSettings() {
           sabbats: true,
           eclipses: true,
           majorAspects: true,
+          moonCircles: true,
         },
       });
 

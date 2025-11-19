@@ -149,6 +149,7 @@ export function NotificationManager() {
           sabbats: true,
           eclipses: true,
           majorAspects: true,
+          moonCircles: true,
         },
       });
 

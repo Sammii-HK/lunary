@@ -261,7 +261,7 @@ export default function SocialPostsPage() {
                     const data = await response.json();
                     if (data.success) {
                       alert(
-                        `✅ Generated ${data.savedIds.length} posts for the week!\n\nWeek: ${data.weekRange}\n\nYou'll receive a Pushover notification.`,
+                        `✅ Generated ${data.savedIds.length} posts for the week!\n\nWeek: ${data.weekRange}\n\nYou'll receive a Discord notification.`,
                       );
                     } else {
                       alert(`Failed: ${data.error}`);
