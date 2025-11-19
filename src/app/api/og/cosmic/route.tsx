@@ -10,7 +10,7 @@ import {
   getAspectGlyph,
   loadAstronomiconFont,
   loadGoogleFont,
-} from '../../../../utils/astrology/cosmic-og';
+} from '../../../../../utils/astrology/cosmic-og';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600; // Cache for 1 hour - base OG image updates hourly
