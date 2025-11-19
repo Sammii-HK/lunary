@@ -415,38 +415,38 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className='space-y-8 px-4 pb-12 pt-6'>
-      <header className='flex flex-col gap-4 border-b border-zinc-800 pb-6 lg:flex-row lg:items-center lg:justify-between'>
-        <div>
-          <div className='flex items-center gap-3 text-sm uppercase tracking-wide text-purple-300'>
-            <Activity className='h-5 w-5 text-purple-400' />
-            Analytics Command Center
+    <div className='space-y-12 px-4 pb-16 pt-8 md:px-6'>
+      <header className='flex flex-col gap-6 border-b border-zinc-800/50 pb-8 lg:flex-row lg:items-start lg:justify-between'>
+        <div className='space-y-2'>
+          <div className='flex items-center gap-2 text-xs uppercase tracking-wider text-purple-400/70'>
+            <Activity className='h-4 w-4' />
+            Analytics
           </div>
-          <h1 className='mt-2 text-3xl font-semibold text-white'>
-            Engagement & Growth Dashboard
+          <h1 className='text-2xl font-light tracking-tight text-white md:text-3xl'>
+            Engagement & Growth
           </h1>
-          <p className='mt-2 text-sm text-zinc-400'>
-            Monitor active usage, AI engagement, conversions, notifications, and
-            feature adoption in one place.
+          <p className='text-sm text-zinc-500'>
+            Monitor active usage, AI engagement, conversions, and feature
+            adoption
           </p>
         </div>
 
-        <div className='flex flex-wrap gap-3'>
-          <div className='flex items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-3'>
-            <CalendarRange className='h-4 w-4 text-purple-300' />
-            <div className='flex gap-2 text-sm text-zinc-300'>
+        <div className='flex flex-wrap gap-2'>
+          <div className='flex items-center gap-2 rounded-xl border border-zinc-800/30 bg-zinc-900/20 px-3 py-2'>
+            <CalendarRange className='h-3.5 w-3.5 text-zinc-500' />
+            <div className='flex items-center gap-1.5 text-xs text-zinc-400'>
               <input
                 type='date'
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
-                className='rounded-lg border border-zinc-800 bg-transparent px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-purple-500'
+                className='rounded border-0 bg-transparent px-1.5 py-0.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-0'
               />
-              <span className='text-zinc-500'>→</span>
+              <span className='text-zinc-600'>→</span>
               <input
                 type='date'
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
-                className='rounded-lg border border-zinc-800 bg-transparent px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-purple-500'
+                className='rounded border-0 bg-transparent px-1.5 py-0.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-0'
               />
             </div>
           </div>
@@ -456,7 +456,7 @@ export default function AnalyticsPage() {
             onChange={(event) =>
               setGranularity(event.target.value as 'day' | 'week' | 'month')
             }
-            className='rounded-2xl border border-zinc-800 bg-zinc-950/60 px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-purple-500'
+            className='rounded-xl border border-zinc-800/30 bg-zinc-900/20 px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-purple-500/50'
           >
             <option value='day'>Daily</option>
             <option value='week'>Weekly</option>
@@ -464,22 +464,22 @@ export default function AnalyticsPage() {
           </select>
 
           <Button
-            variant='secondary'
+            variant='ghost'
             onClick={handleExport}
-            className='gap-2 rounded-2xl border border-zinc-700 bg-zinc-900/80 text-white hover:bg-zinc-800'
+            className='h-9 gap-1.5 rounded-xl border-0 bg-transparent px-3 text-xs text-zinc-400 hover:bg-zinc-900/30 hover:text-zinc-300'
           >
-            <Download className='h-4 w-4' />
-            Export CSV
+            <Download className='h-3.5 w-3.5' />
+            Export
           </Button>
 
           <Button
             onClick={fetchAnalytics}
-            className='gap-2 rounded-2xl bg-purple-600 text-white hover:bg-purple-500'
+            className='h-9 gap-1.5 rounded-xl bg-purple-600/90 px-3 text-xs text-white hover:bg-purple-600'
           >
             {loading ? (
-              <Loader2 className='h-4 w-4 animate-spin' />
+              <Loader2 className='h-3.5 w-3.5 animate-spin' />
             ) : (
-              <Activity className='h-4 w-4' />
+              <Activity className='h-3.5 w-3.5' />
             )}
             Refresh
           </Button>
@@ -487,7 +487,7 @@ export default function AnalyticsPage() {
       </header>
 
       {error && (
-        <div className='rounded-xl border border-rose-700/50 bg-rose-950/40 p-4 text-rose-200'>
+        <div className='rounded-lg border border-rose-800/30 bg-rose-950/20 px-4 py-3 text-sm text-rose-300'>
           {error}
         </div>
       )}
@@ -499,7 +499,7 @@ export default function AnalyticsPage() {
         />
       </section>
 
-      <section className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
+      <section className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
         {overviewCards.map((card) => (
           <MetricsCard
             key={card.title}
@@ -513,7 +513,7 @@ export default function AnalyticsPage() {
       </section>
 
       <section className='grid gap-6 lg:grid-cols-2'>
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
             <CardTitle>Active User Trends</CardTitle>
             <CardDescription>
@@ -525,11 +525,13 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
-            <CardTitle>Retention & Churn</CardTitle>
-            <CardDescription>
-              Cohort retention and churn ({startDate} → {endDate})
+            <CardTitle className='text-base font-medium'>
+              Retention & Churn
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-500'>
+              Cohort retention ({startDate} → {endDate})
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -557,10 +559,14 @@ export default function AnalyticsPage() {
       </section>
 
       <section className='grid gap-6 lg:grid-cols-2'>
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
-            <CardTitle>Conversion Funnel</CardTitle>
-            <CardDescription>Free → Trial → Paid journey</CardDescription>
+            <CardTitle className='text-base font-medium'>
+              Conversion Funnel
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-500'>
+              Free → Trial → Paid
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ConversionFunnel
@@ -586,11 +592,13 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
-            <CardTitle>Trigger Features</CardTitle>
-            <CardDescription>
-              Top features prompting conversions
+            <CardTitle className='text-base font-medium'>
+              Trigger Features
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-500'>
+              Top conversion drivers
             </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
@@ -617,20 +625,28 @@ export default function AnalyticsPage() {
       </section>
 
       <section className='grid gap-6 lg:grid-cols-2'>
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
-            <CardTitle>AI Mode Breakdown</CardTitle>
-            <CardDescription>Usage by Copilot mode</CardDescription>
+            <CardTitle className='text-base font-medium'>
+              AI Mode Breakdown
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-500'>
+              Usage by mode
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ModeBreakdown modes={aiMetrics?.mode_breakdown ?? []} />
           </CardContent>
         </Card>
 
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
-            <CardTitle>Feature Usage Heatmap</CardTitle>
-            <CardDescription>Past 7 days activity per feature</CardDescription>
+            <CardTitle className='text-base font-medium'>
+              Feature Usage Heatmap
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-500'>
+              Past 7 days activity
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <HeatmapGrid data={heatmapData} />
@@ -639,10 +655,14 @@ export default function AnalyticsPage() {
       </section>
 
       <section className='grid gap-6 lg:grid-cols-2'>
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
-            <CardTitle>Notification Health</CardTitle>
-            <CardDescription>Open rates and CTR by channel</CardDescription>
+            <CardTitle className='text-base font-medium'>
+              Notification Health
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-500'>
+              Open rates by channel
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className='grid gap-4 md:grid-cols-2'>
@@ -675,10 +695,14 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
-            <CardTitle>AI Usage Summary</CardTitle>
-            <CardDescription>Engagement trendline</CardDescription>
+            <CardTitle className='text-base font-medium'>
+              AI Usage Summary
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-500'>
+              Engagement metrics
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className='grid gap-4 md:grid-cols-2'>
@@ -712,11 +736,13 @@ export default function AnalyticsPage() {
       </section>
 
       <section>
-        <Card className='border-zinc-800 bg-zinc-950/40'>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
-            <CardTitle>Page-Level Heatmaps</CardTitle>
-            <CardDescription>
-              Visual insights into user interactions and behavior patterns
+            <CardTitle className='text-base font-medium'>
+              Page-Level Heatmaps
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-500'>
+              User interaction patterns
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -815,15 +841,13 @@ function RetentionCard({
 }) {
   const color =
     variant === 'negative'
-      ? 'text-rose-300 border-rose-900/60 bg-rose-900/10'
-      : 'text-emerald-300 border-emerald-900/60 bg-emerald-900/10';
+      ? 'text-rose-300 border-rose-800/20 bg-rose-900/5'
+      : 'text-emerald-300 border-emerald-800/20 bg-emerald-900/5';
 
   return (
-    <div className={`rounded-2xl border px-4 py-3 ${color}`}>
-      <div className='text-xs uppercase tracking-wide text-zinc-400'>
-        {label}
-      </div>
-      <div className='text-3xl font-semibold text-white'>
+    <div className={`rounded-xl border px-3 py-2.5 ${color}`}>
+      <div className='text-xs font-medium text-zinc-500'>{label}</div>
+      <div className='mt-1.5 text-2xl font-light tracking-tight text-white'>
         {value.toFixed(1)}%
       </div>
     </div>
@@ -936,12 +960,12 @@ function MiniStat({
   icon: ReactNode;
 }) {
   return (
-    <div className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-3'>
-      <div className='flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-500'>
+    <div className='rounded-xl border border-zinc-800/20 bg-zinc-900/5 p-3'>
+      <div className='flex items-center gap-1.5 text-xs font-medium text-zinc-500'>
         {icon}
         {label}
       </div>
-      <div className='mt-2 text-2xl font-semibold text-white'>
+      <div className='mt-2 text-xl font-light tracking-tight text-white'>
         {typeof value === 'number' ? value.toLocaleString() : value}
       </div>
     </div>
