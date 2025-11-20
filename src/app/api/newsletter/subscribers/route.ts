@@ -88,12 +88,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate verification token
-    const verificationToken = Array.from(
-      crypto.getRandomValues(new Uint8Array(32)),
-    )
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
+    // Auto-verify if subscription comes from authenticated profile settings
+    const isFromProfile = source === 'profile_settings' && userId;
+    const shouldAutoVerify = isFromProfile;
+
+    // Generate verification token (only needed if not auto-verifying)
+    const verificationToken = shouldAutoVerify
+      ? null
+      : Array.from(crypto.getRandomValues(new Uint8Array(32)))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+
+    const verifiedAt = shouldAutoVerify ? new Date().toISOString() : null;
 
     const result = await sql`
       INSERT INTO newsletter_subscribers (
@@ -101,18 +107,31 @@ export async function POST(request: NextRequest) {
         user_id,
         preferences,
         source,
-        verification_token
+        verification_token,
+        is_verified,
+        verified_at
       ) VALUES (
         ${email.toLowerCase()},
         ${userId || null},
         ${JSON.stringify(preferences || { weeklyNewsletter: true })},
         ${source || 'signup'},
-        ${verificationToken}
+        ${verificationToken},
+        ${shouldAutoVerify},
+        ${verifiedAt}
       )
       ON CONFLICT (email) 
       DO UPDATE SET
         user_id = COALESCE(EXCLUDED.user_id, newsletter_subscribers.user_id),
         is_active = true,
+        is_verified = CASE 
+          WHEN ${shouldAutoVerify} THEN true
+          WHEN newsletter_subscribers.is_verified THEN true
+          ELSE newsletter_subscribers.is_verified
+        END,
+        verified_at = CASE
+          WHEN ${shouldAutoVerify} AND newsletter_subscribers.verified_at IS NULL THEN NOW()
+          ELSE newsletter_subscribers.verified_at
+        END,
         updated_at = NOW(),
         preferences = COALESCE(EXCLUDED.preferences, newsletter_subscribers.preferences)
       RETURNING id, email, is_verified, verification_token
@@ -120,8 +139,12 @@ export async function POST(request: NextRequest) {
 
     const subscriber = result.rows[0];
 
-    // Send verification email if not already verified
-    if (!subscriber.is_verified && subscriber.verification_token) {
+    // Send verification email if not already verified and not auto-verified
+    if (
+      !subscriber.is_verified &&
+      subscriber.verification_token &&
+      !shouldAutoVerify
+    ) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
         const verificationUrl = `${baseUrl}/api/newsletter/verify?token=${subscriber.verification_token}&email=${encodeURIComponent(subscriber.email)}`;

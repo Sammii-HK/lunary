@@ -35,6 +35,8 @@ export interface YearlyForecast {
     aspect: string;
     planets: string[];
     description: string;
+    startDate?: string;
+    endDate?: string;
   }>;
   monthlyForecast?: Array<{
     month: number;
@@ -129,6 +131,13 @@ export async function generateYearlyForecast(
   >();
   const previousPositions = new Map<string, boolean>();
 
+  // Track conjunction periods (when planets are within 8 degrees)
+  const conjunctionStartMap = new Map<
+    string,
+    { startDate: string; planetA: string; planetB: string; startSign: string }
+  >();
+  const previousConjunctions = new Map<string, boolean>();
+
   let currentDate = new Date(startDate);
 
   // Scan day by day to catch all retrograde transitions
@@ -180,9 +189,60 @@ export async function generateYearlyForecast(
       previousPositions.set(planet, isRetrograde);
     });
 
-    // Process aspects with correct property names
+    // Track conjunctions with start/end dates (similar to retrogrades)
+    const conjunctionKey = (planetA: string, planetB: string) =>
+      [planetA, planetB].sort().join('-');
+
     aspects
-      .filter((a) => a.priority >= 6)
+      .filter((a) => a.aspect === 'conjunction')
+      .forEach((aspect) => {
+        const planetA = aspect.planetA?.name || '';
+        const planetB = aspect.planetB?.name || '';
+        const key = conjunctionKey(planetA, planetB);
+        const wasConjunction = previousConjunctions.get(key) || false;
+        const isConjunction = true;
+
+        if (!wasConjunction && isConjunction) {
+          // Conjunction starts
+          conjunctionStartMap.set(key, {
+            startDate: dateStr,
+            planetA,
+            planetB,
+            startSign: aspect.planetA?.constellation || '',
+          });
+        } else if (wasConjunction && !isConjunction) {
+          // Conjunction ends
+          const startInfo = conjunctionStartMap.get(key);
+          if (startInfo) {
+            const existingAspect = keyAspects.find(
+              (a) =>
+                a.aspect === 'conjunction' &&
+                a.planets.includes(planetA) &&
+                a.planets.includes(planetB) &&
+                a.startDate === startInfo.startDate,
+            );
+            if (existingAspect) {
+              existingAspect.endDate = dateStr;
+            } else {
+              keyAspects.push({
+                date: startInfo.startDate,
+                aspect: 'conjunction',
+                planets: [planetA, planetB],
+                description: `${planetA} conjunction ${planetB}`,
+                startDate: startInfo.startDate,
+                endDate: dateStr,
+              });
+            }
+            conjunctionStartMap.delete(key);
+          }
+        }
+
+        previousConjunctions.set(key, isConjunction);
+      });
+
+    // Process other aspects (non-conjunctions) with correct property names
+    aspects
+      .filter((a) => a.priority >= 6 && a.aspect !== 'conjunction')
       .forEach((aspect) => {
         const planetA = aspect.planetA?.name || '';
         const planetB = aspect.planetB?.name || '';
@@ -220,6 +280,52 @@ export async function generateYearlyForecast(
         }
       });
 
+    // Process conjunctions that are active (add to keyAspects if not already added)
+    aspects
+      .filter((a) => a.aspect === 'conjunction' && a.priority >= 6)
+      .forEach((aspect) => {
+        const planetA = aspect.planetA?.name || '';
+        const planetB = aspect.planetB?.name || '';
+        const key = conjunctionKey(planetA, planetB);
+        const startInfo = conjunctionStartMap.get(key);
+
+        if (startInfo) {
+          // Check if we already have this conjunction period
+          const existingAspect = keyAspects.find(
+            (a) =>
+              a.aspect === 'conjunction' &&
+              a.planets.includes(planetA) &&
+              a.planets.includes(planetB) &&
+              a.startDate === startInfo.startDate,
+          );
+
+          if (!existingAspect) {
+            const aspectDescription =
+              aspect.energy || `${planetA} conjunction ${planetB}`;
+            const keyAspect = {
+              date: dateStr,
+              aspect: 'conjunction',
+              planets: [planetA, planetB],
+              description: aspectDescription,
+              startDate: startInfo.startDate,
+            };
+            keyAspects.push(keyAspect);
+            monthlyData.get(month)!.keyAspects.push(keyAspect);
+
+            if (aspect.priority >= 7) {
+              const majorTransit = {
+                date: dateStr,
+                event: 'conjunction',
+                description: aspectDescription,
+                significance: `Major conjunction between ${planetA} and ${planetB}`,
+              };
+              majorTransits.push(majorTransit);
+              monthlyData.get(month)!.majorTransits.push(majorTransit);
+            }
+          }
+        }
+      });
+
     currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
   }
 
@@ -235,6 +341,27 @@ export async function generateYearlyForecast(
         startDate: startInfo.startDate,
         endDate: '',
         description: `${planetKey} retrograde begins in ${startInfo.startSign}`,
+      });
+    }
+  }
+
+  // Handle conjunctions that start but don't end within the year
+  for (const [conjunctionKey, startInfo] of conjunctionStartMap.entries()) {
+    const existingAspect = keyAspects.find(
+      (a) =>
+        a.aspect === 'conjunction' &&
+        a.planets.includes(startInfo.planetA) &&
+        a.planets.includes(startInfo.planetB) &&
+        a.startDate === startInfo.startDate,
+    );
+    if (!existingAspect) {
+      keyAspects.push({
+        date: startInfo.startDate,
+        aspect: 'conjunction',
+        planets: [startInfo.planetA, startInfo.planetB],
+        description: `${startInfo.planetA} conjunction ${startInfo.planetB}`,
+        startDate: startInfo.startDate,
+        endDate: '',
       });
     }
   }

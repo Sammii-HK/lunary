@@ -1,6 +1,6 @@
-const CACHE_NAME = 'lunary-v13'; // Ensure start_url cached first for iOS PWA
+const CACHE_NAME = 'lunary-v14'; // Ensure start_url cached first for iOS PWA
 const STATIC_CACHE_URLS = [
-  '/',
+  '/app',
   '/manifest.json?v=20251103-1',
   '/admin-manifest.json?v=20251114-1',
   '/icons/icon-192x192.png',
@@ -20,11 +20,13 @@ self.addEventListener('install', (event) => {
         console.log('Caching static assets, prioritizing start_url');
         // Cache start_url FIRST - this is critical for iOS PWA
         return cache
-          .add('/')
+          .add('/app')
           .then(() => {
             console.log('✅ Start URL cached');
             // Then cache other assets
-            return cache.addAll(STATIC_CACHE_URLS.filter((url) => url !== '/'));
+            return cache.addAll(
+              STATIC_CACHE_URLS.filter((url) => url !== '/app'),
+            );
           })
           .catch((err) => {
             console.error('Failed to cache assets:', err);
@@ -41,7 +43,7 @@ self.addEventListener('install', (event) => {
       .then(() => {
         console.log('✅ Service worker installed - all assets cached');
         // Verify start_url is cached
-        return caches.match('/').then((cached) => {
+        return caches.match('/app').then((cached) => {
           if (!cached) {
             console.error('❌ CRITICAL: Start URL not cached after install!');
             throw new Error('Start URL not cached');
@@ -129,7 +131,7 @@ self.addEventListener('fetch', (event) => {
         // Only fallback to cache if network fails
         return caches
           .match(event.request)
-          .then((cached) => cached || caches.match('/'));
+          .then((cached) => cached || caches.match('/app'));
       }),
     );
     return;
@@ -164,7 +166,7 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => {
           // Return offline fallback for failed requests
-          return caches.match('/');
+          return caches.match('/app');
         });
     }),
   );
@@ -256,7 +258,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   const notificationData = event.notification.data || {};
-  const urlToOpen = notificationData.url || '/';
+  const urlToOpen = notificationData.url || '/app';
 
   event.waitUntil(
     clients

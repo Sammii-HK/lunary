@@ -37,18 +37,35 @@ export async function POST(request: NextRequest) {
     } else if (authHeader && process.env.CRON_SECRET) {
       isAuthorized = authHeader === `Bearer ${process.env.CRON_SECRET}`;
     } else {
-      const { betterAuthClient } = await import('@/lib/auth-client');
-      const session = await betterAuthClient.getSession();
-      const userEmail = session?.data?.user?.email?.toLowerCase();
-      const adminEmails = (
-        process.env.ADMIN_EMAILS ||
-        process.env.ADMIN_EMAIL ||
-        ''
-      )
-        .split(',')
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean);
-      isAuthorized = Boolean(userEmail && adminEmails.includes(userEmail));
+      // Use server-side auth API for server routes
+      const { auth } = await import('@/lib/auth');
+      const { cookies } = await import('next/headers');
+      const cookieStore = await cookies();
+      const cookieHeader = cookieStore
+        .getAll()
+        .map((cookie) => `${cookie.name}=${cookie.value}`)
+        .join('; ');
+
+      try {
+        const sessionResponse = await auth.api.getSession({
+          headers: new Headers({
+            cookie: cookieHeader,
+          }),
+        });
+        const userEmail = sessionResponse?.user?.email?.toLowerCase();
+        const adminEmails = (
+          process.env.ADMIN_EMAILS ||
+          process.env.ADMIN_EMAIL ||
+          ''
+        )
+          .split(',')
+          .map((e) => e.trim().toLowerCase())
+          .filter(Boolean);
+        isAuthorized = Boolean(userEmail && adminEmails.includes(userEmail));
+      } catch (error) {
+        console.error('Failed to check session:', error);
+        isAuthorized = false;
+      }
     }
 
     if (!isAuthorized) {
