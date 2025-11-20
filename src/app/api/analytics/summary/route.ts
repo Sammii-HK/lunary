@@ -192,12 +192,11 @@ export async function GET(request: NextRequest) {
       `,
       sql`
         SELECT
-          COALESCE(metadata->>'churn_reason', 'unknown') AS reason,
+          'cancelled' AS reason,
           COUNT(*) AS count
         FROM subscriptions
         WHERE status IN ('cancelled', 'canceled')
           AND updated_at >= ${thirtyDaysAgoTimestamp}
-        GROUP BY COALESCE(metadata->>'churn_reason', 'unknown')
       `,
       sql`
         SELECT

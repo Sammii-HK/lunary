@@ -145,6 +145,46 @@ Configure multiple Discord webhooks for different notification categories:
 - Quiet hours filtering (10 PM - 8 AM UTC, urgent bypasses)
 - Analytics events queued for daily aggregation
 
+### Discord Interaction Bot
+
+**Slash Commands**:
+
+The Discord bot provides slash commands for cosmic information and community engagement:
+
+- `/moon` - Current moon phase with energy and sign
+- `/events` - Today's cosmic events (retrogrades, aspects, ingresses)
+- `/retrograde` - Current active retrogrades
+- `/horoscope <sign>` - Daily horoscope for zodiac sign
+- `/cosmic` - Today's primary cosmic event with link to app
+- `/share-reading` - Instructions for sharing readings in channel
+- `/app` - Quick link to Lunary app with UTM tracking
+
+**Setup**:
+
+1. Create a Discord application at https://discord.com/developers/applications
+2. Get your credentials:
+   - `DISCORD_APPLICATION_ID` - Application ID from General Information
+   - `DISCORD_BOT_TOKEN` - Bot token from Bot section
+   - `DISCORD_PUBLIC_KEY` - Public key from General Information (for signature verification)
+3. Add bot to your server with appropriate permissions
+4. Set environment variables in Vercel dashboard and local `.env`
+5. Register commands: `pnpm discord:register`
+6. Configure interaction endpoint URL in Discord Developer Portal:
+   - Go to your application → General Information
+   - Add interaction endpoint: `https://yourdomain.com/api/discord/interactions`
+
+**Environment Variables**:
+
+- `DISCORD_APPLICATION_ID` - Discord application ID
+- `DISCORD_BOT_TOKEN` - Bot token
+- `DISCORD_PUBLIC_KEY` - Public key for signature verification (hex format)
+
+**Deployment**:
+
+- Interaction handler is deployed as Vercel serverless function at `/api/discord/interactions`
+- Uses Discord Interactions API (webhook-based, no long-running process)
+- Commands are registered via Discord REST API using the registration script
+
 ### Automation & Cron Jobs
 
 **Daily Posts** (8 AM UTC - Vercel Cron):
