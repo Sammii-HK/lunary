@@ -37,6 +37,7 @@ const authClient = createAuthClient({
 });
 
 // Create a proxy that intercepts getSession calls in test mode
+// We only proxy at the top level to avoid interfering with Better Auth's internal structures
 export const betterAuthClient = new Proxy(authClient, {
   get(target, prop) {
     // Intercept getSession in test mode
@@ -49,7 +50,9 @@ export const betterAuthClient = new Proxy(authClient, {
         });
       };
     }
-    // Return original property for everything else
+
+    // For all other properties, return them directly without proxying
+    // This ensures Better Auth's internal methods (like jazz.setJazzContext) work correctly
     return (target as any)[prop];
   },
 }) as typeof authClient;

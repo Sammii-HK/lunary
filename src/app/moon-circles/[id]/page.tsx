@@ -267,6 +267,10 @@ export default async function MoonCircleDetailPage({
           moonCircleId={circle.id}
           autoFocus={shouldAutoFocusShare}
           className='h-fit'
+          onSuccess={() => {
+            // Trigger a page refresh to show the new insight
+            window.location.reload();
+          }}
         />
       </section>
 

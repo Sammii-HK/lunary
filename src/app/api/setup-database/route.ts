@@ -506,6 +506,28 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Discord notification analytics table created');
 
+    // Create the admin_activity_log table for tracking admin actions and automation
+    await sql`
+      CREATE TABLE IF NOT EXISTS admin_activity_log (
+        id SERIAL PRIMARY KEY,
+        activity_type TEXT NOT NULL,
+        activity_category TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        message TEXT,
+        metadata JSONB DEFAULT '{}'::jsonb,
+        error_message TEXT,
+        execution_time_ms INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_type ON admin_activity_log(activity_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_category ON admin_activity_log(activity_category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_status ON admin_activity_log(status)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_created_at ON admin_activity_log(created_at DESC)`;
+
+    console.log('✅ Admin activity log table created');
+
     // Create the analytics_discord_interactions table for Discord bot analytics
     await sql`
       CREATE TABLE IF NOT EXISTS analytics_discord_interactions (
@@ -538,7 +560,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, discord_notification_log, discord_notification_analytics, analytics_discord_interactions)',
+        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, discord_notification_log, discord_notification_analytics, admin_activity_log, analytics_discord_interactions)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

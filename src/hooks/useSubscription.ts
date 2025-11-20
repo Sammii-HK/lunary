@@ -226,6 +226,7 @@ export function useSubscription(): SubscriptionStatus {
       // hasSyncedProfile and me.profile are intentionally excluded to prevent infinite loops
       // Adding them would cause the callback to recreate on every render, triggering infinite fetch loops
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [getCustomerId],
   );
 
@@ -443,7 +444,7 @@ export function useSubscription(): SubscriptionStatus {
       }
     }
   }, [
-    me?.profile,
+    me,
     hasCheckedStripe,
     hasJazzProvider,
     defaultState,

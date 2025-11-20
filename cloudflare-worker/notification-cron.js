@@ -57,11 +57,12 @@ export default {
       return await handlePersonalizedTarot(baseUrl, env, today);
     }
 
-    // Daily at 2 AM - cleanup and analytics summary
+    // Daily at 2 AM - cleanup, analytics summary, and SEO metrics sync
     if (hour === 2) {
       const results = await Promise.allSettled([
         handleDiscordLogsCleanup(baseUrl, env),
         handleDiscordAnalyticsDaily(baseUrl, env),
+        handleSEOMetricsSync(baseUrl, env),
       ]);
       return new Response(
         JSON.stringify({
@@ -1100,6 +1101,34 @@ async function handleDiscordAnalyticsDaily(baseUrl, env) {
     });
   } catch (error) {
     console.error('[discord-analytics] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleSEOMetricsSync(baseUrl, env) {
+  try {
+    console.log('[seo-sync] Starting SEO metrics sync');
+    const response = await fetch(`${baseUrl}/api/cron/sync-seo-metrics`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[seo-sync] Error:', error);
     return new Response(
       JSON.stringify({
         success: false,

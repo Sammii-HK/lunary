@@ -44,15 +44,28 @@ export async function withCors(
 
     // Log if we get an error response
     if (response.status >= 400) {
-      const clonedResponse = response.clone();
-      const responseText = await clonedResponse.text();
-      console.error('❌ Auth handler returned error:', {
-        status: response.status,
-        method: request.method,
-        url: request.url,
-        origin,
-        responseText: responseText.substring(0, 500),
-      });
+      const url = new URL(request.url);
+      const pathname = url.pathname;
+
+      // Suppress errors for internal Better Auth endpoints that don't exist
+      // These are likely client-side normalization attempts that fail gracefully
+      const isInternalEndpoint =
+        pathname.includes('/fetch-options/') ||
+        pathname.includes('/method/') ||
+        pathname.includes('/to-upper-case');
+
+      let responseText = '';
+      if (!isInternalEndpoint) {
+        const clonedResponse = response.clone();
+        responseText = await clonedResponse.text();
+        console.error('❌ Auth handler returned error:', {
+          status: response.status,
+          method: request.method,
+          url: request.url,
+          origin,
+          responseText: responseText.substring(0, 500),
+        });
+      }
 
       // If it's a 500 error with "invalid tag", it's likely a secret mismatch
       if (response.status === 500 && responseText.includes('invalid tag')) {

@@ -229,10 +229,18 @@ async function analyzeConversionFunnel(data: {
     events: r.events,
   }));
 
-  const prompt = `Analyze funnel (${timeRange}):
-${JSON.stringify(funnelData)}
+  const prompt = `Analyze conversion funnel (${timeRange}) using ONLY the real data provided below. Do NOT invent or estimate any numbers - only reference the actual data shown.
 
-Provide: 1) Drop-off points, 2) Opportunities, 3) Actionable recommendations, 4) Impact estimates. Be data-driven.`;
+Real Funnel Data:
+${JSON.stringify(funnelData, null, 2)}
+
+Provide analysis:
+1) Drop-off points (identify where users drop off based on the data above)
+2) Opportunities (based on actual user counts)
+3) Actionable recommendations (qualitative suggestions, no fake numbers)
+4) Focus areas (what to prioritize based on the real data)
+
+IMPORTANT: Do NOT include any percentage estimates, conversion rate predictions, or impact numbers. Only reference the actual user/event counts from the data above.`;
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
@@ -247,9 +255,26 @@ Provide: 1) Drop-off points, 2) Opportunities, 3) Actionable recommendations, 4)
     temperature: 0.5,
   });
 
+  // Validate that analysis doesn't contain fake stats
+  let analysis = completion.choices[0]?.message?.content || '';
+
+  // Add data disclaimer if funnel has no data
+  if (funnel.rows.length === 0) {
+    analysis = `⚠️ No funnel data available for the selected time range (${timeRange}).\n\nPlease ensure conversion events are being tracked. The analysis below is based on no data and should be treated as general recommendations only.\n\n${analysis}`;
+  } else {
+    // Prepend actual data summary
+    const dataSummary = funnel.rows
+      .map(
+        (r: any) => `- ${r.event_type}: ${r.users} users, ${r.events} events`,
+      )
+      .join('\n');
+    analysis = `📊 Actual Funnel Data (${timeRange}):\n${dataSummary}\n\n---\n\n${analysis}`;
+  }
+
   return NextResponse.json({
     funnel: funnel.rows,
-    analysis: completion.choices[0]?.message?.content,
+    analysis,
+    dataAvailable: funnel.rows.length > 0,
   });
 }
 
@@ -278,13 +303,19 @@ async function suggestABTests(data: {
   `;
 
   const rates = currentRates.rows[0];
-  const prompt = `Suggest 5 A/B tests.
+  const prompt = `Suggest 5 A/B tests based on REAL data only. Do NOT invent conversion rates or impact numbers.
 
-Current (30d): Signups ${rates?.signups || 0}, Trials ${rates?.trials || 0}, Conversions ${rates?.conversions || 0}
+ACTUAL Current Stats (30d):
+- Signups: ${rates?.signups || 0} unique users
+- Trials: ${rates?.trials || 0} unique users  
+- Conversions: ${rates?.conversions || 0} unique users
+
 Goals: ${data.conversionGoals?.join(', ') || 'Increase trial conversions'}
-${data.currentTests?.length ? `Current: ${data.currentTests.join(', ')}` : ''}
+${data.currentTests?.length ? `Current tests: ${data.currentTests.join(', ')}` : ''}
 
-For each: name, hypothesis, variantA, variantB, expectedImpact, difficulty (easy/medium/hard). Return JSON: {"tests": [...]}`;
+For each test provide: name, hypothesis, variantA, variantB, difficulty (easy/medium/hard), and why it might help (qualitative reasoning only).
+
+CRITICAL: Do NOT include "expectedImpact", "conversionRate", or any numeric predictions. Only provide qualitative reasoning based on the actual numbers above. Return JSON: {"tests": [...]}`;
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
@@ -303,7 +334,17 @@ For each: name, hypothesis, variantA, variantB, expectedImpact, difficulty (easy
   const suggestions = JSON.parse(
     completion.choices[0]?.message?.content || '{}',
   );
-  return NextResponse.json({ suggestions: suggestions.tests || suggestions });
+
+  // Add actual stats to response for transparency
+  return NextResponse.json({
+    suggestions: suggestions.tests || suggestions,
+    actualStats: {
+      signups: rates?.signups || 0,
+      trials: rates?.trials || 0,
+      conversions: rates?.conversions || 0,
+      timeRange: '30d',
+    },
+  });
 }
 
 async function optimizeEmailCopy(data: {
@@ -378,10 +419,18 @@ async function predictChurn(data: { userId?: string }): Promise<NextResponse> {
       uniqueEvents: r.unique_events,
     }));
 
-    const prompt = `Predict churn risk from activity:
-${JSON.stringify(activityData)}
+    const prompt = `Analyze churn risk from REAL user activity data. Do NOT invent statistics or percentages.
 
-Provide: highRiskUsers (array), patterns, interventions, reEngagement. Return JSON.`;
+Real User Activity Data (last 90 days):
+${JSON.stringify(activityData, null, 2)}
+
+Provide analysis:
+- highRiskUsers: Array of user IDs with low activity (based on actual activity patterns
+- patterns: Qualitative patterns observed in the data (no fake percentages)
+- interventions: Actionable recommendations (qualitative only)
+- reEngagement: Suggestions for re-engaging users (no numeric predictions)
+
+IMPORTANT: Only reference the actual data provided. Do NOT include conversion rates, churn percentages, or any invented statistics. Return JSON.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -400,7 +449,16 @@ Provide: highRiskUsers (array), patterns, interventions, reEngagement. Return JS
     const predictions = JSON.parse(
       completion.choices[0]?.message?.content || '{}',
     );
-    return NextResponse.json({ predictions });
+
+    // Add actual data summary for transparency
+    return NextResponse.json({
+      predictions,
+      actualData: {
+        usersAnalyzed: userActivity.rows.length,
+        sampleSize: Math.min(50, userActivity.rows.length),
+        timeRange: '90 days',
+      },
+    });
   }
 
   // Single user analysis

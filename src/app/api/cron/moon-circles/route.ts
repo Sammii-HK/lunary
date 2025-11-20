@@ -6,7 +6,6 @@ import {
   generateMoonCircleEmailText,
 } from '@/lib/moon-circles/email-template';
 import { sendEmail } from '@/lib/email';
-import { trackConversion } from '@/lib/analytics';
 import { sendDiscordNotification } from '@/lib/discord';
 import webpush from 'web-push';
 
@@ -107,6 +106,9 @@ export async function POST(request: NextRequest) {
 }
 
 async function createMoonCircle(dateStr: string, force: boolean = false) {
+  const startTime = Date.now();
+  const { logActivity } = await import('@/lib/admin-activity');
+
   try {
     ensureVapidConfigured();
 
@@ -117,6 +119,14 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
         : 'http://localhost:3000';
 
     console.log('🌙 Creating Moon Circle for:', dateStr);
+
+    await logActivity({
+      activityType: 'moon_circle_creation',
+      activityCategory: 'notifications',
+      status: 'pending',
+      message: `Moon circle creation started for ${dateStr}`,
+      metadata: { date: dateStr, force },
+    });
 
     const moonCircle = await generateMoonCircle(date);
 
@@ -316,16 +326,33 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
 
               emailsSent++;
 
-              await trackConversion('moon_circle_opened', {
-                userId,
-                userEmail,
-                metadata: {
-                  date: dateStr,
-                  phase: moonCircle.moonPhase,
-                  sign: moonCircle.moonSign,
-                  source: 'email',
-                },
-              });
+              // Track conversion via API (server-side)
+              try {
+                const baseUrl =
+                  process.env.NODE_ENV === 'production'
+                    ? 'https://lunary.app'
+                    : 'http://localhost:3000';
+                await fetch(`${baseUrl}/api/analytics/conversion`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    event: 'moon_circle_opened',
+                    userId,
+                    userEmail,
+                    metadata: {
+                      date: dateStr,
+                      phase: moonCircle.moonPhase,
+                      sign: moonCircle.moonSign,
+                      source: 'email',
+                    },
+                  }),
+                }).catch((err) => {
+                  console.error('Failed to track moon_circle_opened:', err);
+                });
+              } catch (trackError) {
+                // Don't fail email sending if tracking fails
+                console.error('Failed to track conversion:', trackError);
+              }
             } catch (emailError) {
               console.error(
                 `Failed to send email to ${userEmail}:`,
@@ -335,16 +362,33 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
             }
           }
 
-          await trackConversion('moon_circle_sent', {
-            userId,
-            userEmail,
-            metadata: {
-              date: dateStr,
-              phase: moonCircle.moonPhase,
-              sign: moonCircle.moonSign,
-              source: 'push',
-            },
-          });
+          // Track conversion via API (server-side)
+          try {
+            const baseUrl =
+              process.env.NODE_ENV === 'production'
+                ? 'https://lunary.app'
+                : 'http://localhost:3000';
+            await fetch(`${baseUrl}/api/analytics/conversion`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                event: 'moon_circle_sent',
+                userId,
+                userEmail,
+                metadata: {
+                  date: dateStr,
+                  phase: moonCircle.moonPhase,
+                  sign: moonCircle.moonSign,
+                  source: 'push',
+                },
+              }),
+            }).catch((err) => {
+              console.error('Failed to track moon_circle_sent:', err);
+            });
+          } catch (trackError) {
+            // Don't fail push sending if tracking fails
+            console.error('Failed to track conversion:', trackError);
+          }
         } catch (pushError) {
           console.error(
             `Failed to send push to ${sub.endpoint.substring(0, 50)}...`,
@@ -377,6 +421,25 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
     console.log(
       `✅ Moon Circle notifications: ${pushSent} push sent, ${pushFailed} push failed, ${emailsSent} emails sent, ${emailsFailed} emails failed`,
     );
+
+    const executionTime = Date.now() - startTime;
+    await logActivity({
+      activityType: 'moon_circle_creation',
+      activityCategory: 'notifications',
+      status: 'success',
+      message: `Moon circle created: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
+      metadata: {
+        phase: moonCircle.moonPhase,
+        sign: moonCircle.moonSign,
+        date: dateStr,
+        pushSent,
+        pushFailed,
+        emailsSent,
+        emailsFailed,
+        moonCircleId,
+      },
+      executionTimeMs: executionTime,
+    });
 
     await sendDiscordNotification({
       title: '🌙 Moon Circle Created',
@@ -433,6 +496,50 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
       date: dateStr,
     });
   } catch (error) {
+    const executionTime = Date.now() - startTime;
+    await logActivity({
+      activityType: 'moon_circle_creation',
+      activityCategory: 'notifications',
+      status: 'failed',
+      message: `Moon circle creation failed for ${dateStr}`,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      executionTimeMs: executionTime,
+    });
+
+    // Send urgent Discord notification for failure
+    try {
+      await sendDiscordNotification({
+        title: '🚨 Moon Circle Creation Failed',
+        description: `Failed to create moon circle for ${dateStr}`,
+        color: 'error',
+        category: 'urgent',
+        fields: [
+          {
+            name: 'Date',
+            value: dateStr,
+            inline: true,
+          },
+          {
+            name: 'Error',
+            value: (error instanceof Error
+              ? error.message
+              : 'Unknown error'
+            ).substring(0, 500),
+            inline: false,
+          },
+          {
+            name: 'Execution Time',
+            value: `${executionTime}ms`,
+            inline: true,
+          },
+        ],
+        footer: `Failed at ${new Date().toISOString()}`,
+        dedupeKey: `moon-circle-failed-${dateStr}`,
+      });
+    } catch (discordError) {
+      console.error('Failed to send Discord notification:', discordError);
+    }
+
     throw error;
   }
 }
@@ -482,7 +589,9 @@ export async function GET(request: NextRequest) {
           : []),
       ],
       color: 'error',
+      category: 'urgent',
       footer: `Failed at ${new Date().toISOString()}`,
+      dedupeKey: `moon-circle-cron-failed-${new Date().toISOString().split('T')[0]}`,
     });
 
     return NextResponse.json(

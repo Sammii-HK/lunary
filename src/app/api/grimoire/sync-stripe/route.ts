@@ -243,7 +243,7 @@ async function getStripeProducts() {
       fullName: product.name,
       subtitle: product.metadata?.subtitle,
       description: product.description || '',
-      category: product.metadata?.category || 'spells',
+      category: product.metadata?.category || 'uncategorized',
       sku: product.metadata?.sku || product.id,
       slug: product.metadata?.slug || product.id,
       series: product.metadata?.series || 'Uncategorized',

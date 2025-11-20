@@ -601,8 +601,17 @@ async function runDailyPosts(dateStr: string) {
 async function runWeeklyTasks(request: NextRequest) {
   console.log('📅 Running weekly tasks...');
   const baseUrl = getBaseUrl(request);
+  const startTime = Date.now();
 
   try {
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'pending',
+      message: 'Weekly tasks started',
+    });
+
     // 1. Generate weekly blog content
     const blogResponse = await fetch(`${baseUrl}/api/blog/weekly`, {
       headers: { 'User-Agent': 'Lunary-Master-Cron/1.0' },
@@ -614,6 +623,17 @@ async function runWeeklyTasks(request: NextRequest) {
 
     const blogData = await blogResponse.json();
     console.log('✅ Weekly blog content generated:', blogData.data?.title);
+
+    await logActivity({
+      activityType: 'content_creation',
+      activityCategory: 'content',
+      status: 'success',
+      message: `Weekly blog generated: ${blogData.data?.title}`,
+      metadata: {
+        title: blogData.data?.title,
+        weekNumber: blogData.data?.weekNumber,
+      },
+    });
 
     // 2. Send weekly newsletter
     const newsletterResponse = await fetch(`${baseUrl}/api/newsletter/weekly`, {
@@ -630,6 +650,18 @@ async function runWeeklyTasks(request: NextRequest) {
 
     const newsletterData = await newsletterResponse.json();
     console.log('📧 Weekly newsletter result:', newsletterData.message);
+
+    await logActivity({
+      activityType: 'content_creation',
+      activityCategory: 'content',
+      status: newsletterData.success ? 'success' : 'failed',
+      message: `Weekly newsletter ${newsletterData.success ? 'sent' : 'failed'}`,
+      metadata: {
+        recipients: newsletterData.data?.recipients || 0,
+        subject: newsletterData.data?.subject,
+      },
+      errorMessage: newsletterData.error || null,
+    });
 
     // 3. Publish to Substack (free and paid posts)
     console.log('📬 Publishing to Substack...');
@@ -653,14 +685,47 @@ async function runWeeklyTasks(request: NextRequest) {
         console.log(
           `✅ Substack posts published: Free ${substackResult.results?.free?.success ? '✓' : '✗'}, Paid ${substackResult.results?.paid?.success ? '✓' : '✗'}`,
         );
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status:
+            substackResult.results?.free?.success ||
+            substackResult.results?.paid?.success
+              ? 'success'
+              : 'failed',
+          message: `Substack posts published: Free ${substackResult.results?.free?.success ? '✓' : '✗'}, Paid ${substackResult.results?.paid?.success ? '✓' : '✗'}`,
+          metadata: {
+            freeSuccess: substackResult.results?.free?.success || false,
+            paidSuccess: substackResult.results?.paid?.success || false,
+            freeUrl: substackResult.results?.free?.postUrl,
+            paidUrl: substackResult.results?.paid?.postUrl,
+          },
+        });
       } else {
         console.error(
           '❌ Substack publishing failed:',
           substackResponse.status,
         );
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'failed',
+          message: 'Substack publishing failed',
+          errorMessage: `HTTP ${substackResponse.status}`,
+        });
       }
     } catch (substackError) {
       console.error('❌ Substack publishing error:', substackError);
+      await logActivity({
+        activityType: 'content_creation',
+        activityCategory: 'content',
+        status: 'failed',
+        message: 'Substack publishing error',
+        errorMessage:
+          substackError instanceof Error
+            ? substackError.message
+            : 'Unknown error',
+      });
     }
 
     // 4. Generate social media posts for the week ahead (7 days in advance)
@@ -698,14 +763,41 @@ async function runWeeklyTasks(request: NextRequest) {
         console.log(
           `✅ Generated ${socialPostsResult.savedIds?.length || 0} social media posts for next week`,
         );
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'success',
+          message: `Generated ${socialPostsResult.savedIds?.length || 0} social media posts`,
+          metadata: {
+            postsGenerated: socialPostsResult.savedIds?.length || 0,
+            weekRange: socialPostsResult.weekRange,
+          },
+        });
       } else {
         console.error(
           '❌ Social posts generation failed:',
           socialPostsResponse.status,
         );
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'failed',
+          message: 'Social posts generation failed',
+          errorMessage: `HTTP ${socialPostsResponse.status}`,
+        });
       }
     } catch (socialPostsError) {
       console.error('❌ Social posts generation error:', socialPostsError);
+      await logActivity({
+        activityType: 'content_creation',
+        activityCategory: 'content',
+        status: 'failed',
+        message: 'Social posts generation error',
+        errorMessage:
+          socialPostsError instanceof Error
+            ? socialPostsError.message
+            : 'Unknown error',
+      });
     }
 
     // Generate blog preview image URL (use first day of the week)
@@ -772,6 +864,24 @@ async function runWeeklyTasks(request: NextRequest) {
       console.warn('📱 Weekly notification failed:', notificationError);
     }
 
+    const executionTime = Date.now() - startTime;
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'success',
+      message: 'Weekly tasks completed',
+      metadata: {
+        blogTitle: blogData.data?.title,
+        newsletterSent: newsletterData.success,
+        socialPostsGenerated: socialPostsResult?.savedIds?.length || 0,
+        substackPublished:
+          substackResult?.results?.free?.success ||
+          substackResult?.results?.paid?.success ||
+          false,
+      },
+      executionTimeMs: executionTime,
+    });
+
     return {
       success: true,
       blog: {
@@ -799,6 +909,46 @@ async function runWeeklyTasks(request: NextRequest) {
         : null,
     };
   } catch (error) {
+    const executionTime = Date.now() - startTime;
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'failed',
+      message: 'Weekly tasks failed',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      executionTimeMs: executionTime,
+    });
+
+    // Send urgent Discord notification for failure
+    try {
+      const { sendDiscordAdminNotification } = await import('@/lib/discord');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await sendDiscordAdminNotification({
+        title: '🚨 Weekly Automation Failed',
+        message:
+          'Weekly content creation failed (blog, newsletter, Substack, social posts)',
+        priority: 'emergency',
+        category: 'urgent',
+        fields: [
+          {
+            name: 'Task',
+            value: 'Weekly content generation',
+            inline: true,
+          },
+          {
+            name: 'Error',
+            value: errorMessage.substring(0, 500),
+            inline: false,
+          },
+        ],
+        dedupeKey: `weekly-automation-failed-${new Date().toISOString().split('T')[0]}`,
+      });
+    } catch (discordError) {
+      console.error('Failed to send Discord notification:', discordError);
+    }
+
     console.error('❌ Weekly tasks failed:', error);
     return {
       success: false,
@@ -811,23 +961,97 @@ async function runWeeklyTasks(request: NextRequest) {
 async function runMonthlyTasks(request: NextRequest) {
   console.log('📅 Running monthly tasks...');
   const baseUrl = getBaseUrl(request);
+  const startTime = Date.now();
 
   try {
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'pending',
+      message: 'Monthly tasks started - moon pack generation',
+    });
+
     const response = await fetch(
       `${baseUrl}/api/cron/moon-packs?type=monthly`,
       {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${process.env.CRON_SECRET}`,
           'User-Agent': 'Lunary-Master-Cron/1.0',
+          'Content-Type': 'application/json',
         },
       },
     );
 
     const result = await response.json();
-    console.log('✅ Monthly moon packs generated');
+    const executionTime = Date.now() - startTime;
 
-    return { success: true, moonPacks: result };
+    if (result.success) {
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'automation',
+        status: 'success',
+        message: `Monthly moon packs generated: ${result.packsCreated || 0} packs`,
+        metadata: {
+          packsCreated: result.packsCreated || 0,
+          packs: result.packs || [],
+        },
+        executionTimeMs: executionTime,
+      });
+      console.log('✅ Monthly moon packs generated');
+    } else {
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'automation',
+        status: 'failed',
+        message: 'Monthly moon pack generation failed',
+        errorMessage: result.error || 'Unknown error',
+        executionTimeMs: executionTime,
+      });
+    }
+
+    return { success: result.success, moonPacks: result };
   } catch (error) {
+    const executionTime = Date.now() - startTime;
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'failed',
+      message: 'Monthly tasks failed',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      executionTimeMs: executionTime,
+    });
+
+    // Send urgent Discord notification for failure
+    try {
+      const { sendDiscordAdminNotification } = await import('@/lib/discord');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await sendDiscordAdminNotification({
+        title: '🚨 Monthly Automation Failed',
+        message: 'Monthly moon pack generation failed',
+        priority: 'emergency',
+        category: 'urgent',
+        fields: [
+          {
+            name: 'Task',
+            value: 'Monthly moon pack generation',
+            inline: true,
+          },
+          {
+            name: 'Error',
+            value: errorMessage.substring(0, 500),
+            inline: false,
+          },
+        ],
+        dedupeKey: `monthly-automation-failed-${new Date().toISOString().split('T')[0]}`,
+      });
+    } catch (discordError) {
+      console.error('Failed to send Discord notification:', discordError);
+    }
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -839,23 +1063,97 @@ async function runMonthlyTasks(request: NextRequest) {
 async function runQuarterlyTasks(request: NextRequest) {
   console.log('📅 Running quarterly tasks...');
   const baseUrl = getBaseUrl(request);
+  const startTime = Date.now();
 
   try {
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'pending',
+      message: 'Quarterly tasks started - moon pack generation',
+    });
+
     const response = await fetch(
       `${baseUrl}/api/cron/moon-packs?type=quarterly`,
       {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${process.env.CRON_SECRET}`,
           'User-Agent': 'Lunary-Master-Cron/1.0',
+          'Content-Type': 'application/json',
         },
       },
     );
 
     const result = await response.json();
-    console.log('✅ Quarterly moon packs generated');
+    const executionTime = Date.now() - startTime;
 
-    return { success: true, moonPacks: result };
+    if (result.success) {
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'automation',
+        status: 'success',
+        message: `Quarterly moon packs generated: ${result.packsCreated || 0} packs`,
+        metadata: {
+          packsCreated: result.packsCreated || 0,
+          packs: result.packs || [],
+        },
+        executionTimeMs: executionTime,
+      });
+      console.log('✅ Quarterly moon packs generated');
+    } else {
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'automation',
+        status: 'failed',
+        message: 'Quarterly moon pack generation failed',
+        errorMessage: result.error || 'Unknown error',
+        executionTimeMs: executionTime,
+      });
+    }
+
+    return { success: result.success, moonPacks: result };
   } catch (error) {
+    const executionTime = Date.now() - startTime;
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'failed',
+      message: 'Quarterly tasks failed',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      executionTimeMs: executionTime,
+    });
+
+    // Send urgent Discord notification for failure
+    try {
+      const { sendDiscordAdminNotification } = await import('@/lib/discord');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await sendDiscordAdminNotification({
+        title: '🚨 Quarterly Automation Failed',
+        message: 'Quarterly moon pack generation failed',
+        priority: 'emergency',
+        category: 'urgent',
+        fields: [
+          {
+            name: 'Task',
+            value: 'Quarterly moon pack generation',
+            inline: true,
+          },
+          {
+            name: 'Error',
+            value: errorMessage.substring(0, 500),
+            inline: false,
+          },
+        ],
+        dedupeKey: `quarterly-automation-failed-${new Date().toISOString().split('T')[0]}`,
+      });
+    } catch (discordError) {
+      console.error('Failed to send Discord notification:', discordError);
+    }
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -867,20 +1165,153 @@ async function runQuarterlyTasks(request: NextRequest) {
 async function runYearlyTasks(request: NextRequest) {
   console.log('📅 Running yearly tasks...');
   const baseUrl = getBaseUrl(request);
+  const startTime = Date.now();
 
   try {
-    const response = await fetch(`${baseUrl}/api/cron/moon-packs?type=yearly`, {
-      headers: {
-        Authorization: `Bearer ${process.env.CRON_SECRET}`,
-        'User-Agent': 'Lunary-Master-Cron/1.0',
-      },
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'pending',
+      message: 'Yearly tasks started - moon pack and calendar generation',
     });
 
-    const result = await response.json();
-    console.log('✅ Yearly moon packs generated');
+    // Generate yearly moon packs
+    const packResponse = await fetch(
+      `${baseUrl}/api/cron/moon-packs?type=yearly`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.CRON_SECRET}`,
+          'User-Agent': 'Lunary-Master-Cron/1.0',
+          'Content-Type': 'application/json',
+        },
+      },
+    );
 
-    return { success: true, moonPacks: result };
+    const packResult = await packResponse.json();
+    let calendarResult = null;
+
+    // Generate calendar for next year
+    const nextYear = new Date().getFullYear() + 1;
+    try {
+      const calendarResponse = await fetch(
+        `${baseUrl}/api/shop/calendar/generate-and-sync`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Lunary-Master-Cron/1.0',
+          },
+          body: JSON.stringify({
+            year: nextYear,
+            dryRun: false,
+            autoPublish: true,
+          }),
+        },
+      );
+
+      if (calendarResponse.ok) {
+        calendarResult = await calendarResponse.json();
+        await logActivity({
+          activityType: 'calendar_creation',
+          activityCategory: 'shop',
+          status: calendarResult.success ? 'success' : 'failed',
+          message: `Calendar for ${nextYear} ${calendarResult.success ? 'created' : 'failed'}`,
+          metadata: {
+            year: nextYear,
+            calendar: calendarResult.calendar || null,
+          },
+          errorMessage: calendarResult.error || null,
+        });
+        console.log(`✅ Calendar for ${nextYear} generated`);
+      }
+    } catch (calendarError) {
+      console.error('❌ Calendar generation failed:', calendarError);
+      await logActivity({
+        activityType: 'calendar_creation',
+        activityCategory: 'shop',
+        status: 'failed',
+        message: `Calendar generation for ${nextYear} failed`,
+        errorMessage:
+          calendarError instanceof Error
+            ? calendarError.message
+            : 'Unknown error',
+      });
+    }
+
+    const executionTime = Date.now() - startTime;
+
+    if (packResult.success) {
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'automation',
+        status: 'success',
+        message: `Yearly moon packs generated: ${packResult.packsCreated || 0} packs`,
+        metadata: {
+          packsCreated: packResult.packsCreated || 0,
+          packs: packResult.packs || [],
+          calendarCreated: calendarResult?.success || false,
+        },
+        executionTimeMs: executionTime,
+      });
+      console.log('✅ Yearly moon packs generated');
+    } else {
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'automation',
+        status: 'failed',
+        message: 'Yearly moon pack generation failed',
+        errorMessage: packResult.error || 'Unknown error',
+        executionTimeMs: executionTime,
+      });
+    }
+
+    return {
+      success: packResult.success,
+      moonPacks: packResult,
+      calendar: calendarResult,
+    };
   } catch (error) {
+    const executionTime = Date.now() - startTime;
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'cron_execution',
+      activityCategory: 'automation',
+      status: 'failed',
+      message: 'Yearly tasks failed',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      executionTimeMs: executionTime,
+    });
+
+    // Send urgent Discord notification for failure
+    try {
+      const { sendDiscordAdminNotification } = await import('@/lib/discord');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await sendDiscordAdminNotification({
+        title: '🚨 Yearly Automation Failed',
+        message: 'Yearly moon pack and calendar generation failed',
+        priority: 'emergency',
+        category: 'urgent',
+        fields: [
+          {
+            name: 'Task',
+            value: 'Yearly moon pack & calendar generation',
+            inline: true,
+          },
+          {
+            name: 'Error',
+            value: errorMessage.substring(0, 500),
+            inline: false,
+          },
+        ],
+        dedupeKey: `yearly-automation-failed-${new Date().toISOString().split('T')[0]}`,
+      });
+    } catch (discordError) {
+      console.error('Failed to send Discord notification:', discordError);
+    }
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

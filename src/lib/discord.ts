@@ -469,6 +469,40 @@ export async function queueAnalyticsEvent(
 ): Promise<void> {
   try {
     const { sql } = await import('@vercel/postgres');
+
+    // Try to create table if it doesn't exist (idempotent)
+    try {
+      await sql`
+        CREATE TABLE IF NOT EXISTS discord_notification_analytics (
+          id SERIAL PRIMARY KEY,
+          category TEXT NOT NULL,
+          event_type TEXT NOT NULL,
+          title TEXT,
+          dedupe_key TEXT,
+          sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          metadata JSONB,
+          skipped_reason TEXT,
+          rate_limited BOOLEAN DEFAULT false,
+          quiet_hours_skipped BOOLEAN DEFAULT false
+        )
+      `;
+
+      // Create indexes if they don't exist
+      await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_category ON discord_notification_analytics(category)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_event_type ON discord_notification_analytics(event_type)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_sent_at ON discord_notification_analytics(sent_at)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_dedupe_key ON discord_notification_analytics(dedupe_key)`;
+    } catch (createError: any) {
+      // Table might already exist, or we don't have CREATE permissions
+      if (createError?.code !== '42P07') {
+        // 42P07 is "relation already exists" - that's fine
+        console.warn(
+          '[discord] Could not ensure analytics table exists:',
+          createError?.message,
+        );
+      }
+    }
+
     await sql`
       INSERT INTO discord_notification_analytics (
         category, event_type, title, dedupe_key, metadata
@@ -481,8 +515,18 @@ export async function queueAnalyticsEvent(
         ${input.metadata ? JSON.stringify(input.metadata) : null}
       )
     `;
-  } catch (error) {
-    console.error('[discord] Failed to queue analytics event:', error);
+  } catch (error: any) {
+    // Don't fail the main operation if analytics logging fails
+    if (error?.code === '42P01') {
+      console.warn(
+        '[discord] Analytics table does not exist. Run the database setup script to create it.',
+      );
+    } else {
+      console.error(
+        '[discord] Failed to queue analytics event:',
+        error?.message || error,
+      );
+    }
   }
 }
 
@@ -495,6 +539,41 @@ async function logAnalyticsEvent(
 ): Promise<void> {
   try {
     const { sql } = await import('@vercel/postgres');
+
+    // Try to create table if it doesn't exist (idempotent)
+    try {
+      await sql`
+        CREATE TABLE IF NOT EXISTS discord_notification_analytics (
+          id SERIAL PRIMARY KEY,
+          category TEXT NOT NULL,
+          event_type TEXT NOT NULL,
+          title TEXT,
+          dedupe_key TEXT,
+          sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          metadata JSONB,
+          skipped_reason TEXT,
+          rate_limited BOOLEAN DEFAULT false,
+          quiet_hours_skipped BOOLEAN DEFAULT false
+        )
+      `;
+
+      // Create indexes if they don't exist
+      await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_category ON discord_notification_analytics(category)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_event_type ON discord_notification_analytics(event_type)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_sent_at ON discord_notification_analytics(sent_at)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_dedupe_key ON discord_notification_analytics(dedupe_key)`;
+    } catch (createError: any) {
+      // Table might already exist, or we don't have CREATE permissions
+      // Continue anyway - the INSERT will fail gracefully if table doesn't exist
+      if (createError?.code !== '42P07') {
+        // 42P07 is "relation already exists" - that's fine
+        console.warn(
+          '[discord] Could not ensure analytics table exists:',
+          createError?.message,
+        );
+      }
+    }
+
     await sql`
       INSERT INTO discord_notification_analytics (
         category, event_type, title, dedupe_key, skipped_reason, rate_limited, quiet_hours_skipped
@@ -509,7 +588,19 @@ async function logAnalyticsEvent(
         ${input.quietHoursSkipped || false}
       )
     `;
-  } catch (error) {
-    console.error('[discord] Failed to log analytics event:', error);
+  } catch (error: any) {
+    // Don't fail the main operation if analytics logging fails
+    // This is a non-critical operation
+    if (error?.code === '42P01') {
+      // Table doesn't exist and we couldn't create it
+      console.warn(
+        '[discord] Analytics table does not exist. Run the database setup script to create it.',
+      );
+    } else {
+      console.error(
+        '[discord] Failed to log analytics event:',
+        error?.message || error,
+      );
+    }
   }
 }

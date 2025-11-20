@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatDate, formatTimestamp } from '@/lib/analytics/date-range';
+import { getSearchConsoleData, getTopPages } from '@/lib/google/search-console';
+import generateSitemap from '@/app/sitemap';
 
 async function calculateRetention() {
   const today = new Date();
@@ -635,19 +637,81 @@ export async function GET(request: NextRequest) {
     // Plus → AI conversion
     const plusToAI = upsells;
 
-    // SEO metrics
-    const seoResult = await sql`
-      SELECT COUNT(*) AS article_count
-      FROM grimoire_articles
-      WHERE published = true
-    `;
-    const articleCount = Number(seoResult.rows[0]?.article_count || 0);
-    // Pages indexed, clicks, impressions would come from Search Console API
-    const pagesIndexed = null;
-    const monthlyClicks = null;
-    const monthlyImpressions = null;
-    const seoCtr = null;
-    const topPages: Array<{ url: string; clicks: number }> = [];
+    // SEO metrics - Use database table if available, fallback to API
+    let articleCount = 0;
+    let pagesIndexed = 0;
+    let monthlyClicks = 0;
+    let monthlyImpressions = 0;
+    let seoCtr = 0;
+    let topPages: Array<{ url: string; clicks: number }> = [];
+
+    try {
+      // Count pages from sitemap (always use current sitemap)
+      const sitemapData = generateSitemap();
+      pagesIndexed = sitemapData.length;
+      // Count articles (grimoire + blog pages)
+      articleCount = sitemapData.filter(
+        (entry) =>
+          entry.url.includes('/grimoire/') || entry.url.includes('/blog/week/'),
+      ).length;
+
+      // Try to get data from database table first
+      const seoMetricsResult = await sql`
+        SELECT
+          SUM(clicks) AS total_clicks,
+          SUM(impressions) AS total_impressions,
+          AVG(ctr) AS avg_ctr,
+          jsonb_agg(DISTINCT jsonb_array_elements(top_pages)) FILTER (WHERE top_pages IS NOT NULL) AS all_top_pages
+        FROM analytics_seo_metrics
+        WHERE metric_date >= ${thirtyDaysAgoDate}::DATE
+          AND metric_date <= ${endDate}::DATE
+      `;
+
+      const row = seoMetricsResult.rows[0];
+      if (row && row.total_clicks !== null) {
+        // Use database data
+        monthlyClicks = Number(row.total_clicks || 0);
+        monthlyImpressions = Number(row.total_impressions || 0);
+        seoCtr = Number(row.avg_ctr || 0) * 100; // Convert to percentage
+
+        // Aggregate top pages from all days
+        if (row.all_top_pages) {
+          const pagesMap = new Map<string, number>();
+          row.all_top_pages.forEach((page: { url: string; clicks: number }) => {
+            if (page?.url && page?.clicks) {
+              const current = pagesMap.get(page.url) || 0;
+              pagesMap.set(page.url, current + page.clicks);
+            }
+          });
+          topPages = Array.from(pagesMap.entries())
+            .map(([url, clicks]) => ({ url, clicks }))
+            .sort((a, b) => b.clicks - a.clicks)
+            .slice(0, 10);
+        }
+      } else {
+        // Fallback to API if no database data
+        const searchConsoleData = await getSearchConsoleData(
+          thirtyDaysAgoDate,
+          endDate,
+        );
+        monthlyClicks = searchConsoleData.totalClicks;
+        monthlyImpressions = searchConsoleData.totalImpressions;
+        seoCtr = searchConsoleData.averageCtr * 100; // Convert to percentage
+
+        // Get top 10 pages
+        const topPagesData = await getTopPages(thirtyDaysAgoDate, endDate, 10);
+        topPages = topPagesData.map((page) => ({
+          url: page.page,
+          clicks: page.clicks,
+        }));
+      }
+    } catch (error) {
+      // If Search Console API is not configured, use defaults
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error('[analytics/summary] SEO metrics error:', errorMessage);
+      // Keep defaults (0 values)
+    }
 
     // Notification metrics (by date and type)
     const notificationMetricsResult = await sql`
