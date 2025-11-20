@@ -84,13 +84,11 @@ wrangler deploy
 wrangler cron list
 ```
 
-You should see all 5 cron triggers:
+You should see 3 cron triggers:
 
-- `0 */4 * * *` - Every 4 hours
-- `0 8 * * *` - Daily at 8 AM
-- `0 14 * * *` - Daily at 2 PM
-- `0 20 * * *` - Daily at 8 PM
-- `0 10 * * 0` - Sunday at 10 AM
+- `0 * * * *` - Every hour (routes to specific tasks: 8 AM cosmic pulse, 2 PM daily posts + changes, 6 PM tarot, 8 PM moon circles, every 4h snapshots)
+- `0 2 * * *` - Daily at 2 AM (cleanup and analytics)
+- `0 10 * * SUN` - Sunday at 10 AM (weekly cosmic report)
 
 ### Test Manually
 
@@ -123,13 +121,13 @@ wrangler secret put CRON_SECRET
 
 ## Schedule Overview
 
-| Time (UTC)   | Task                             | Frequency  |
-| ------------ | -------------------------------- | ---------- |
-| 8:00 AM      | Daily Cosmic Pulse + Daily Posts | Daily      |
-| 2:00 PM      | Cosmic Changes Notification      | Daily      |
-| 8:00 PM      | Moon Circles Check               | Daily      |
-| Every 4h     | Cosmic Snapshot Updates          | Continuous |
-| Sunday 10 AM | Weekly Cosmic Report             | Weekly     |
+| Time (UTC)   | Task                                                                        | Frequency  |
+| ------------ | --------------------------------------------------------------------------- | ---------- |
+| 8:00 AM      | Daily Cosmic Pulse                                                          | Daily      |
+| 2:00 PM      | Daily Posts (created day before for next day) + Cosmic Changes Notification | Daily      |
+| 8:00 PM      | Moon Circles Check                                                          | Daily      |
+| Every 4h     | Cosmic Snapshot Updates                                                     | Continuous |
+| Sunday 10 AM | Weekly Cosmic Report                                                        | Weekly     |
 
 ## Troubleshooting
 

@@ -204,6 +204,9 @@ function initializeAuth() {
       },
 
       // Session configuration
+      // IMPORTANT: BETTER_AUTH_SECRET must be stable across deployments
+      // If it changes, all existing sessions will be invalidated and users logged out
+      // Ensure this env var is set in Vercel and doesn't change between deployments
       session: {
         expiresIn: 60 * 60 * 24 * 7, // 7 days
         updateAge: 60 * 60 * 24, // 1 day

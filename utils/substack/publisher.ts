@@ -104,7 +104,7 @@ async function loadCookies(): Promise<any[] | null> {
   return null;
 }
 
-async function saveCookies(context: BrowserContext): Promise<void> {
+export async function saveCookies(context: BrowserContext): Promise<void> {
   const cookies = await context.cookies();
 
   if (process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL) {
@@ -119,7 +119,7 @@ async function saveCookies(context: BrowserContext): Promise<void> {
   await saveCookiesToFile(cookies);
 }
 
-async function authenticateWithCookies(
+export async function authenticateWithCookies(
   context: BrowserContext,
   page: Page,
 ): Promise<boolean> {

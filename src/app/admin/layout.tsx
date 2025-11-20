@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { ADMIN_PWA_MANIFEST_URL } from '@/constants/pwa';
 import { AdminCanonicalRemover } from '@/components/AdminCanonicalRemover';
+import { AdminBreadcrumbs } from '@/components/admin/AdminBreadcrumbs';
 
 export function generateMetadata(): Metadata {
   return {
@@ -67,6 +68,7 @@ export default function AdminLayout({
   return (
     <>
       <AdminCanonicalRemover />
+      <AdminBreadcrumbs />
       {children}
     </>
   );

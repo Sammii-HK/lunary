@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import { WeeklyUsageCounter } from '@/components/WeeklyUsageCounter';
 import { useAccount } from 'jazz-tools/react';
@@ -104,9 +105,42 @@ const ConditionalWheel = dynamic(
   },
 );
 
+function isTestMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.navigator.userAgent.includes('HeadlessChrome') ||
+    (window as any).__PLAYWRIGHT_TEST__ === true ||
+    (window.location.hostname === 'localhost' &&
+      window.navigator.userAgent.includes('Playwright'))
+  );
+}
+
 export default function AppDashboard() {
   const { me } = useAccount();
   const authState = useAuthStatus();
+  const router = useRouter();
+  const redirectExecuted = useRef(false);
+
+  useEffect(() => {
+    // Skip redirect logic in Playwright e2e test mode
+    if (isTestMode()) return;
+
+    if (typeof window === 'undefined') return;
+    if (redirectExecuted.current) return;
+
+    // Check if running in PWA mode
+    const isPWA =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      (window.navigator as any).standalone === true;
+
+    // Only redirect PWA users who are not authenticated
+    if (isPWA && !authState.loading && !authState.isAuthenticated) {
+      redirectExecuted.current = true;
+      router.replace('/auth');
+      return;
+    }
+  }, [authState.isAuthenticated, authState.loading, router]);
 
   useEffect(() => {
     // Track app opened event

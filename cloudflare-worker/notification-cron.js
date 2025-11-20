@@ -26,11 +26,10 @@ export default {
       return await handleWeeklyCosmicReport(baseUrl, env, today);
     }
 
-    // Daily at 8 AM - cosmic pulse, daily posts, and cosmic snapshot update
+    // Daily at 8 AM - cosmic pulse and cosmic snapshot update
     if (hour === 8) {
       const results = await Promise.allSettled([
         handleDailyCosmicPulse(baseUrl, env, today),
-        handleDailyPosts(baseUrl, env, today),
         handleCosmicSnapshotUpdates(baseUrl, env, today),
       ]);
       return new Response(
@@ -47,9 +46,27 @@ export default {
       );
     }
 
-    // Daily at 2 PM - cosmic changes notification
+    // Daily at 2 PM - daily posts (created the day before for next day) and cosmic changes notification
     if (hour === 14) {
-      return await handleCosmicChangesNotification(baseUrl, env, today);
+      const tomorrow = new Date(now);
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      const results = await Promise.allSettled([
+        handleDailyPosts(baseUrl, env, tomorrowStr),
+        handleCosmicChangesNotification(baseUrl, env, today),
+      ]);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          results: results.map((r) =>
+            r.status === 'fulfilled' ? r.value : { error: r.reason },
+          ),
+          timestamp: now.toISOString(),
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     // Daily at 6 PM - personalized tarot
@@ -57,11 +74,12 @@ export default {
       return await handlePersonalizedTarot(baseUrl, env, today);
     }
 
-    // Daily at 2 AM - cleanup and analytics summary
+    // Daily at 2 AM - cleanup, analytics summary, and SEO metrics sync
     if (hour === 2) {
       const results = await Promise.allSettled([
         handleDiscordLogsCleanup(baseUrl, env),
         handleDiscordAnalyticsDaily(baseUrl, env),
+        handleSEOMetricsSync(baseUrl, env),
       ]);
       return new Response(
         JSON.stringify({
@@ -1100,6 +1118,34 @@ async function handleDiscordAnalyticsDaily(baseUrl, env) {
     });
   } catch (error) {
     console.error('[discord-analytics] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleSEOMetricsSync(baseUrl, env) {
+  try {
+    console.log('[seo-sync] Starting SEO metrics sync');
+    const response = await fetch(`${baseUrl}/api/cron/sync-seo-metrics`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[seo-sync] Error:', error);
     return new Response(
       JSON.stringify({
         success: false,

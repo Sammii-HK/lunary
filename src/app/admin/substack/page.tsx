@@ -50,6 +50,15 @@ export default function SubstackManagerPage() {
     paid?: PublishResult;
   }>({});
   const [weekOffset, setWeekOffset] = useState(0);
+  const [verificationStatus, setVerificationStatus] = useState<{
+    checking: boolean;
+    authenticated: boolean | null;
+    message: string;
+  }>({
+    checking: false,
+    authenticated: null,
+    message: '',
+  });
 
   const loadPreview = async () => {
     setLoading('preview');
@@ -67,6 +76,30 @@ export default function SubstackManagerPage() {
       alert('Failed to load preview. Check console for details.');
     } finally {
       setLoading(null);
+    }
+  };
+
+  const verifyConnection = async () => {
+    setVerificationStatus({
+      checking: true,
+      authenticated: null,
+      message: 'Checking connection...',
+    });
+    try {
+      const response = await fetch('/api/substack/verify');
+      const data = await response.json();
+
+      setVerificationStatus({
+        checking: false,
+        authenticated: data.authenticated || false,
+        message: data.message || data.error || 'Verification completed',
+      });
+    } catch (error) {
+      setVerificationStatus({
+        checking: false,
+        authenticated: false,
+        message: 'Failed to verify connection',
+      });
     }
   };
 
@@ -113,11 +146,51 @@ export default function SubstackManagerPage() {
               Back to Admin
             </Button>
           </Link>
-          <h1 className='text-3xl font-bold mb-2'>Substack Manager</h1>
-          <p className='text-zinc-400'>
-            Generate and publish weekly Substack posts (Free: $0, Paid:
-            $3/month)
-          </p>
+          <div className='flex items-start justify-between'>
+            <div>
+              <h1 className='text-3xl font-bold mb-2'>Substack Manager</h1>
+              <p className='text-zinc-400'>
+                Generate and publish weekly Substack posts (Free: $0, Paid:
+                $3/month)
+              </p>
+            </div>
+            <Button
+              onClick={verifyConnection}
+              disabled={verificationStatus.checking}
+              variant='outline'
+              className='bg-zinc-800 hover:bg-zinc-700'
+            >
+              {verificationStatus.checking ? (
+                <>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2'></div>
+                  Checking...
+                </>
+              ) : (
+                <>
+                  <Eye className='h-4 w-4 mr-2' />
+                  Verify Connection
+                </>
+              )}
+            </Button>
+          </div>
+          {verificationStatus.authenticated !== null && (
+            <div
+              className={`mt-4 p-3 rounded-lg border ${
+                verificationStatus.authenticated
+                  ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                  : 'bg-red-500/10 border-red-500/20 text-red-400'
+              }`}
+            >
+              <p className='text-sm font-medium'>
+                {verificationStatus.authenticated
+                  ? '✓ Connected'
+                  : '✗ Not Connected'}
+              </p>
+              <p className='text-xs mt-1 opacity-80'>
+                {verificationStatus.message}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6'>

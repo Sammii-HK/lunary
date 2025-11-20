@@ -34,6 +34,7 @@ import {
   Sparkles,
   CheckCircle,
   XCircle,
+  Trash2,
 } from 'lucide-react';
 
 interface ShopPack {
@@ -88,7 +89,57 @@ export default function ShopManagerPage() {
     'banishing',
     'crystals',
     'moon',
+    'spells',
+    'tarot',
+    'astrology',
+    'seasonal',
+    'moon_phases',
+    'calendar',
   ];
+
+  const updateCategory = async (productId: string, newCategory: string) => {
+    try {
+      const response = await fetch('/api/admin/shop/update-category', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId,
+          category: newCategory,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state immediately for better UX
+        setPacks((prevPacks) =>
+          prevPacks.map((pack) =>
+            pack.stripeProductId === productId
+              ? { ...pack, category: newCategory }
+              : pack,
+          ),
+        );
+        // Refresh from server to ensure consistency
+        await fetchExistingPacks();
+      } else {
+        throw new Error(data.error || 'Failed to update category');
+      }
+    } catch (error) {
+      console.error('Error updating category:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      alert(`❌ Failed to update category: ${errorMessage}`);
+      // Refresh to revert UI state
+      await fetchExistingPacks();
+    }
+  };
 
   useEffect(() => {
     fetchExistingPacks();
@@ -110,6 +161,60 @@ export default function ShopManagerPage() {
       console.error('Error fetching packs:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteProduct = async (productId: string, productName: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to remove "${productName}" from the shop? This will deactivate it in Stripe.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/shop/stripe/create-product?productId=${productId}`,
+        {
+          method: 'DELETE',
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`✅ "${productName}" removed from shop`);
+        await fetchExistingPacks(); // Refresh the list
+      } else {
+        alert(`❌ Failed to remove product: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('❌ Error removing product');
+    }
+  };
+
+  const fixCalendar = async (year: number) => {
+    try {
+      const response = await fetch('/api/admin/shop/fix-calendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(
+          `✅ Calendar for ${year} fixed! It should now appear in the shop.`,
+        );
+      } else {
+        alert(`❌ Failed to fix calendar: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error fixing calendar:', error);
+      alert('❌ Error fixing calendar');
     }
   };
 
@@ -349,6 +454,45 @@ export default function ShopManagerPage() {
               </Button>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className='flex items-center gap-2'>
+                <Calendar className='h-5 w-5' />
+                Fix Calendar Product
+              </CardTitle>
+              <CardDescription>
+                Fix existing calendar products to show in shop (sets
+                default_price)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <div className='flex gap-2'>
+                <Input
+                  type='number'
+                  placeholder='Year (e.g., 2026)'
+                  id='calendar-year'
+                  min='2025'
+                  max='2100'
+                />
+                <Button
+                  onClick={() => {
+                    const yearInput = document.getElementById(
+                      'calendar-year',
+                    ) as HTMLInputElement;
+                    const year = parseInt(yearInput.value);
+                    if (year && year >= 2025 && year <= 2100) {
+                      fixCalendar(year);
+                    } else {
+                      alert('Please enter a valid year (2025-2100)');
+                    }
+                  }}
+                >
+                  Fix Calendar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value='catalog' className='space-y-6'>
@@ -396,7 +540,7 @@ export default function ShopManagerPage() {
                             </p>
                           )}
 
-                          <div className='flex items-center gap-4 text-sm text-muted-foreground'>
+                          <div className='flex items-center gap-4 text-sm text-muted-foreground flex-wrap mb-2'>
                             <span>SKU: {pack.sku || 'N/A'}</span>
                             <span>Edition: {pack.edition || 'N/A'}</span>
                             <span>
@@ -407,6 +551,34 @@ export default function ShopManagerPage() {
                                   ? `${pack.contentCount.spells || 0}S • ${pack.contentCount.crystals || 0}C • ${pack.contentCount.herbs || 0}H`
                                   : 'No content info'}
                             </span>
+                          </div>
+                          <div className='flex flex-col gap-2 mt-2'>
+                            <span className='text-sm font-medium'>
+                              Category:
+                            </span>
+                            <Select
+                              value={pack.category || 'uncategorized'}
+                              onValueChange={(value) => {
+                                if (pack.stripeProductId) {
+                                  updateCategory(pack.stripeProductId, value);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className='w-full h-10 text-base cursor-pointer'>
+                                <SelectValue placeholder='Select category' />
+                              </SelectTrigger>
+                              <SelectContent className='z-[100]'>
+                                {categories.map((cat) => (
+                                  <SelectItem
+                                    key={cat}
+                                    value={cat}
+                                    className='cursor-pointer'
+                                  >
+                                    {cat.replace(/_/g, ' ')}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
 
@@ -425,15 +597,30 @@ export default function ShopManagerPage() {
                               <Eye className='h-4 w-4' />
                             </Button>
                             {pack.stripeProductId && (
-                              <Button size='sm' variant='outline' asChild>
-                                <a
-                                  href={`https://dashboard.stripe.com/products/${pack.stripeProductId}`}
-                                  target='_blank'
-                                  rel='noopener noreferrer'
+                              <>
+                                <Button size='sm' variant='outline' asChild>
+                                  <a
+                                    href={`https://dashboard.stripe.com/products/${pack.stripeProductId}`}
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                  >
+                                    <ExternalLink className='h-4 w-4' />
+                                  </a>
+                                </Button>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  onClick={() =>
+                                    deleteProduct(
+                                      pack.stripeProductId!,
+                                      pack.title,
+                                    )
+                                  }
+                                  className='text-red-600 hover:text-red-700 hover:bg-red-50'
                                 >
-                                  <ExternalLink className='h-4 w-4' />
-                                </a>
-                              </Button>
+                                  <Trash2 className='h-4 w-4' />
+                                </Button>
+                              </>
                             )}
                           </div>
                         </div>

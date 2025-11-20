@@ -77,7 +77,7 @@ export function MoonCircleInsights({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(collapsedByDefault);
-  const [hasFetched, setHasFetched] = useState(initialInsights.length > 0);
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
     setInsights(initialInsights);
@@ -108,11 +108,20 @@ export function MoonCircleInsights({
             data?.error ?? 'We could not load community insights right now.',
           );
         }
-        setInsights(data.insights ?? []);
-        setTotal(data.total ?? 0);
+        const fetchedInsights = data.insights ?? [];
+        const fetchedTotal = data.total ?? 0;
+        setInsights(fetchedInsights);
+        setTotal(fetchedTotal);
         setPage(overridePage);
         setSort(sortOrder);
         setHasFetched(true);
+
+        // Debug logging
+        if (fetchedTotal > 0 && fetchedInsights.length === 0) {
+          console.warn(
+            `[MoonCircleInsights] Total is ${fetchedTotal} but fetched ${fetchedInsights.length} insights`,
+          );
+        }
       } catch (fetchError) {
         console.error('Failed to load insights', fetchError);
         setError(
@@ -128,10 +137,11 @@ export function MoonCircleInsights({
   );
 
   useEffect(() => {
-    if (!isCollapsed && autoFetch && !hasFetched) {
+    if (!isCollapsed && autoFetch) {
+      // Always fetch if collapsed state changes or on mount
       fetchInsights(0, sort);
     }
-  }, [autoFetch, fetchInsights, hasFetched, isCollapsed, sort]);
+  }, [autoFetch, fetchInsights, isCollapsed, sort]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -140,7 +150,10 @@ export function MoonCircleInsights({
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<{ moonCircleId: number }>).detail;
       if (detail?.moonCircleId === moonCircleId) {
-        fetchInsights(0, 'newest');
+        // Small delay to ensure database has updated
+        setTimeout(() => {
+          fetchInsights(0, 'newest');
+        }, 500);
       }
     };
     window.addEventListener(

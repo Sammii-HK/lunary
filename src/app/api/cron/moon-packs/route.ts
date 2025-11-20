@@ -21,6 +21,13 @@ export const runtime = 'nodejs';
  * - Monthly (July+) for yearly packs
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const { searchParams } = new URL(request.url);
+  const type =
+    (searchParams.get('type') as 'monthly' | 'quarterly' | 'yearly' | 'all') ||
+    'all';
+  const dryRun = searchParams.get('dry-run') === 'true';
+
   try {
     // Verify this is being called by an authorized source
     const authHeader = request.headers.get('authorization');
@@ -30,18 +37,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const type =
-      (searchParams.get('type') as
-        | 'monthly'
-        | 'quarterly'
-        | 'yearly'
-        | 'all') || 'all';
-    const dryRun = searchParams.get('dry-run') === 'true';
-
     console.log(
       `🌙 Cron job triggered: Moon pack generation (${type})${dryRun ? ' [DRY RUN]' : ''}`,
     );
+
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'pack_generation',
+      activityCategory: 'shop',
+      status: 'pending',
+      message: `Moon pack generation started: ${type}`,
+      metadata: { type, dryRun },
+    });
 
     const generator = new MoonPackGenerator(dryRun);
 
@@ -50,10 +57,29 @@ export async function POST(request: NextRequest) {
     await generator.cleanup();
 
     const createdPacks = generator.getCreatedPacks();
+    const executionTime = Date.now() - startTime;
 
     console.log(
       `✅ Cron job completed successfully. Created ${createdPacks.length} packs`,
     );
+
+    await logActivity({
+      activityType: 'pack_generation',
+      activityCategory: 'shop',
+      status: 'success',
+      message: `Moon pack generation completed: ${createdPacks.length} packs created`,
+      metadata: {
+        type,
+        packsCreated: createdPacks.length,
+        packs: createdPacks.map((p) => ({
+          name: p.name,
+          sku: p.sku,
+          price: p.price,
+        })),
+        dryRun,
+      },
+      executionTimeMs: executionTime,
+    });
 
     // Send notifications for created packs
     if (createdPacks.length > 0 && !dryRun) {
@@ -117,6 +143,46 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('❌ Cron job failed:', error);
+    const executionTime = Date.now() - startTime;
+    const { logActivity } = await import('@/lib/admin-activity');
+    await logActivity({
+      activityType: 'pack_generation',
+      activityCategory: 'shop',
+      status: 'failed',
+      message: 'Moon pack generation failed',
+      errorMessage: error.message || 'Moon pack generation failed',
+      executionTimeMs: executionTime,
+    });
+
+    // Send urgent Discord notification for failure
+    try {
+      await sendDiscordAdminNotification({
+        title: '🚨 Moon Pack Generation Failed',
+        message: `Automated moon pack generation failed for type: ${type}`,
+        priority: 'emergency',
+        category: 'urgent',
+        fields: [
+          {
+            name: 'Type',
+            value: type,
+            inline: true,
+          },
+          {
+            name: 'Error',
+            value: (error.message || 'Unknown error').substring(0, 500),
+            inline: false,
+          },
+          {
+            name: 'Execution Time',
+            value: `${executionTime}ms`,
+            inline: true,
+          },
+        ],
+        dedupeKey: `moon-pack-failed-${type}-${new Date().toISOString().split('T')[0]}`,
+      });
+    } catch (discordError) {
+      console.error('Failed to send Discord notification:', discordError);
+    }
 
     return NextResponse.json(
       {

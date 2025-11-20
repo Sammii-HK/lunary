@@ -110,6 +110,32 @@ export async function POST(request: NextRequest) {
         packData.sku ||
         `MOON-${packYear}${month ? `-${month.toString().padStart(2, '0')}` : ''}${quarter ? `-Q${quarter}` : ''}`;
 
+      // Check for duplicate pack before creating
+      if (!dryRun) {
+        const stripe = getStripe();
+        const existingProducts = await stripe.products.search({
+          query: `metadata['packId']:'${sku}' OR metadata['sku']:'${sku}'`,
+          limit: 1,
+        });
+
+        if (existingProducts.data.length > 0) {
+          const existing = existingProducts.data[0];
+          console.log(
+            `⚠️ Pack already exists: ${packName} (SKU: ${sku}, Product ID: ${existing.id})`,
+          );
+          return NextResponse.json({
+            success: false,
+            error: 'Pack already exists',
+            message: `A pack with SKU "${sku}" already exists in Stripe`,
+            existingProduct: {
+              id: existing.id,
+              name: existing.name,
+              sku: sku,
+            },
+          });
+        }
+      }
+
       packData = {
         ...packData,
         id: packId,
@@ -145,6 +171,11 @@ export async function POST(request: NextRequest) {
         includeRituals,
         customNaming,
       );
+
+      // Ensure category is set (should already be set, but double-check)
+      if (!packData.category) {
+        packData.category = category;
+      }
 
       // Ensure pricing structure is normalized for Stripe
       if (packData.pricing && typeof packData.pricing === 'object') {

@@ -31,7 +31,6 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
-import { YearlyForecast } from '@/components/forecast/YearlyForecast';
 import { Download } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -767,12 +766,6 @@ export default function ProfilePage() {
               (me?.profile as any)?.subscription?.stripeSubscriptionId
             }
           />
-
-          {subscription.hasAccess('yearly_forecast') && (
-            <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg p-6'>
-              <YearlyForecast />
-            </div>
-          )}
 
           {subscription.hasAccess('data_export') && (
             <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg p-6'>

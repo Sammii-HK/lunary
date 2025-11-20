@@ -89,10 +89,19 @@ export function ShareInsightForm({
           );
         }
 
+        // Reset form state immediately
         setInsightText('');
+        if (textareaRef.current) {
+          textareaRef.current.value = '';
+        }
+
         setStatus('success');
         setMessage('✨ Insight shared with the circle!');
+
+        // Dispatch event for other components to listen
         dispatchInsightSharedEvent(moonCircleId);
+
+        // Call success callback
         onSuccess?.();
       } catch (error) {
         console.error('Share insight failed', error);
@@ -170,12 +179,15 @@ export function ShareInsightForm({
         </div>
       </div>
 
-      <div className='flex items-center justify-between rounded-2xl border border-purple-500/20 bg-purple-500/5 px-4 py-3'>
-        <div>
-          <Label htmlFor='share-anonymous' className='text-sm text-white'>
+      <div className='flex items-center justify-between gap-4 rounded-2xl border border-purple-500/20 bg-purple-500/5 px-4 py-3'>
+        <div className='flex-1'>
+          <Label
+            htmlFor='share-anonymous'
+            className='text-sm font-medium text-white cursor-pointer'
+          >
             Share anonymously
           </Label>
-          <p className='text-xs text-purple-100/60'>
+          <p className='text-xs text-purple-100/60 mt-0.5'>
             Your name and profile stay hidden unless toggled off.
           </p>
         </div>
@@ -184,6 +196,7 @@ export function ShareInsightForm({
           checked={isAnonymous}
           onCheckedChange={setIsAnonymous}
           aria-label='Toggle anonymous sharing'
+          className='shrink-0'
         />
       </div>
 

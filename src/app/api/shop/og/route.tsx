@@ -34,6 +34,7 @@ function getCategoryEmoji(category: string): string {
     tarot: '🔮',
     astrology: '⭐',
     seasonal: '🌸',
+    calendar: '📅',
   };
   return emojis[category] || '📦';
 }
@@ -46,6 +47,7 @@ function getCategoryColor(category: string): string {
     tarot: 'linear-gradient(135deg, #1a2332, #1e3c72)',
     astrology: 'linear-gradient(135deg, #0a0a1a, #1a1a2e)',
     seasonal: 'linear-gradient(135deg, #2d5016, #4a7c59)',
+    calendar: 'linear-gradient(135deg, #1e3a5f, #2d4a7a)',
   };
   return colors[category] || 'linear-gradient(135deg, #1a1a2e, #2d3561)';
 }

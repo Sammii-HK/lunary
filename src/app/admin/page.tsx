@@ -7,7 +7,6 @@ import { useAccount } from 'jazz-tools/react';
 import { betterAuthClient } from '@/lib/auth-client';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { AdminInstallPrompt } from './components/AdminInstallPrompt';
 import {
   Card,
   CardContent,
@@ -41,6 +40,8 @@ import {
   Download,
   Eye,
   Play,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -161,6 +162,9 @@ export default function AdminDashboard() {
   const [substackLoading, setSubstackLoading] = useState(false);
   const [substackWeekOffset, setSubstackWeekOffset] = useState(0);
   const [substackPublishing, setSubstackPublishing] = useState(false);
+  const [showDebugTools, setShowDebugTools] = useState(false);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [activityLoading, setActivityLoading] = useState(true);
   const [authIssue, setAuthIssue] = useState<AdminAuthIssueState>({
     type: 'none',
   });
@@ -376,6 +380,31 @@ export default function AdminDashboard() {
 
     checkAdminAccess();
   }, [router, me, authState.isAuthenticated, authState.loading]);
+
+  // Fetch recent activity
+  useEffect(() => {
+    if (!isAuthorized) return;
+
+    const fetchActivity = async () => {
+      try {
+        setActivityLoading(true);
+        const response = await fetch('/api/admin/activity?limit=20');
+        const data = await response.json();
+        if (data.success) {
+          setRecentActivity(data.activities || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch activity:', error);
+      } finally {
+        setActivityLoading(false);
+      }
+    };
+
+    fetchActivity();
+    const interval = setInterval(fetchActivity, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [isAuthorized]);
 
   // Show loading state while checking authorization
   if (isAuthorized === null) {
@@ -614,8 +643,17 @@ This is exactly what you'll get every day at 8 AM UTC!`);
     }
   };
 
-  // Essential tools - most frequently used
-  const essentialTools: AdminTool[] = [
+  // Vital tools - most important, always at top
+  const vitalTools: AdminTool[] = [
+    {
+      title: 'Post Approval Queue',
+      description:
+        'Review and approve generated posts before sending to Succulent',
+      href: '/admin/social-posts/approve',
+      icon: <Bell className='h-6 w-6' />,
+      category: 'content',
+      status: 'active',
+    },
     {
       title: 'Cron Monitor',
       description:
@@ -626,23 +664,17 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       status: 'active',
     },
     {
-      title: 'Blog Manager',
-      description:
-        'Generate weekly cosmic content and newsletters with retrograde tracking',
-      href: '/admin/blog-manager',
-      icon: <BookOpen className='h-6 w-6' />,
-      category: 'content',
-      status: 'new',
+      title: 'Conversion Analytics',
+      description: 'Track user conversions, trials, and subscription metrics',
+      href: '/admin/analytics',
+      icon: <Activity className='h-6 w-6' />,
+      category: 'monitoring',
+      status: 'active',
     },
-    {
-      title: 'Newsletter Manager',
-      description:
-        'Manage email subscribers and send weekly newsletters with Brevo',
-      href: '/admin/newsletter-manager',
-      icon: <Mail className='h-6 w-6' />,
-      category: 'content',
-      status: 'new',
-    },
+  ];
+
+  // Essential tools - frequently used
+  const essentialTools: AdminTool[] = [
     {
       title: 'Shop Manager',
       description:
@@ -651,10 +683,45 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       icon: <Store className='h-6 w-6' />,
       category: 'shop',
     },
+    {
+      title: 'Substack Manager',
+      description:
+        'Generate and publish weekly Substack posts (Free: newsletter content, Paid: $3/month enhanced)',
+      href: '/admin/substack',
+      icon: <Send className='h-6 w-6' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
+      title: 'Social Media Posts',
+      description: 'AI-powered social media post generator for marketing',
+      href: '/admin/social-posts',
+      icon: <Send className='h-6 w-6' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
+      title: 'Blog Manager',
+      description:
+        'Generate weekly cosmic content and newsletters with retrograde tracking',
+      href: '/admin/blog-manager',
+      icon: <BookOpen className='h-6 w-6' />,
+      category: 'content',
+      status: 'new',
+    },
   ];
 
   // Frequently used tools
   const frequentlyUsedTools: AdminTool[] = [
+    {
+      title: 'Newsletter Manager',
+      description:
+        'Manage email subscribers and send weekly newsletters with Brevo',
+      href: '/admin/newsletter-manager',
+      icon: <Mail className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
     {
       title: 'Scheduler',
       description: 'Schedule and manage automated content publishing',
@@ -668,23 +735,6 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       href: '/admin/notifications',
       icon: <Bell className='h-5 w-5' />,
       category: 'monitoring',
-    },
-    {
-      title: 'Social Media Posts',
-      description: 'AI-powered social media post generator for marketing',
-      href: '/admin/social-posts',
-      icon: <Send className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Post Approval Queue',
-      description:
-        'Review and approve generated posts before sending to Succulent',
-      href: '/admin/social-posts/approve',
-      icon: <Bell className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
     },
   ];
 
@@ -735,14 +785,6 @@ This is exactly what you'll get every day at 8 AM UTC!`);
   // Monitoring & Analytics
   const monitoringTools: AdminTool[] = [
     {
-      title: 'Conversion Analytics',
-      description: 'Track user conversions, trials, and subscription metrics',
-      href: '/admin/analytics',
-      icon: <Activity className='h-5 w-5' />,
-      category: 'monitoring',
-      status: 'new',
-    },
-    {
       title: 'A/B Testing',
       description: 'Analyze experiments with AI-powered insights',
       href: '/admin/ab-testing',
@@ -752,11 +794,12 @@ This is exactly what you'll get every day at 8 AM UTC!`);
     },
     {
       title: 'AI Conversion Optimizer',
-      description: 'AI-powered conversion optimization tools',
+      description:
+        'AI-powered conversion optimization tools (uses real data only)',
       href: '/admin/ai-conversion',
       icon: <Zap className='h-5 w-5' />,
       category: 'monitoring',
-      status: 'new',
+      status: 'beta',
     },
   ];
 
@@ -870,22 +913,18 @@ This is exactly what you'll get every day at 8 AM UTC!`);
           </div>
         </div>
 
-        <div className='mb-6 md:mb-8 lg:mb-10'>
-          <AdminInstallPrompt />
-        </div>
-
-        {/* Essential Tools - Large Prominent Cards */}
+        {/* Vital Tools - Most Important */}
         <div className='mb-8 md:mb-10 lg:mb-12'>
           <div className='flex items-center gap-3 mb-6'>
             <h2 className='text-2xl md:text-3xl lg:text-4xl font-bold'>
-              Essential Tools
+              Vital Tools
             </h2>
-            <Badge className='bg-purple-500/20 text-purple-400 border-purple-500/30'>
-              Most Used
+            <Badge className='bg-red-500/20 text-red-400 border-red-500/30'>
+              Priority
             </Badge>
           </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-            {essentialTools.map((tool) => (
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
+            {vitalTools.map((tool) => (
               <Card
                 key={tool.href}
                 className='group hover:shadow-xl transition-all bg-gradient-to-br from-zinc-900 to-zinc-800 border-zinc-700 hover:border-purple-500/50 cursor-pointer'
@@ -912,6 +951,52 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                     >
                       Open Tool
                       <ExternalLink className='h-4 w-4 ml-2' />
+                    </Button>
+                  </CardContent>
+                </Link>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Essential Tools */}
+        <div className='mb-8 md:mb-10 lg:mb-12'>
+          <div className='flex items-center gap-3 mb-6'>
+            <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
+              Essential Tools
+            </h2>
+            <Badge className='bg-purple-500/20 text-purple-400 border-purple-500/30'>
+              Most Used
+            </Badge>
+          </div>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
+            {essentialTools.map((tool) => (
+              <Card
+                key={tool.href}
+                className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+              >
+                <Link href={tool.href} className='block'>
+                  <CardHeader className='pb-3'>
+                    <div className='flex items-center justify-between mb-2'>
+                      <div className='flex items-center gap-2'>
+                        <div className='text-zinc-400'>{tool.icon}</div>
+                        <CardTitle className='text-base md:text-lg'>
+                          {tool.title}
+                        </CardTitle>
+                      </div>
+                      {getStatusBadge(tool.status)}
+                    </div>
+                    <CardDescription className='text-xs md:text-sm text-zinc-400'>
+                      {tool.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      variant='outline'
+                      className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
+                    >
+                      Open
+                      <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
                     </Button>
                   </CardContent>
                 </Link>
@@ -1061,338 +1146,559 @@ This is exactly what you'll get every day at 8 AM UTC!`);
           </div>
         )}
 
-        {/* Testing & Utilities - Low Priority Section */}
-        {testingTools.length > 0 && (
-          <div className='mb-8 md:mb-10 lg:mb-12'>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-                Testing & Utilities
+        {/* Debug & Testing Utilities - Collapsible */}
+        <div className='mb-8 md:mb-10 lg:mb-12'>
+          <button
+            onClick={() => setShowDebugTools(!showDebugTools)}
+            className='flex items-center justify-between w-full mb-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:bg-zinc-900 transition-colors'
+          >
+            <div className='flex items-center gap-3'>
+              <h2 className='text-lg md:text-xl lg:text-2xl font-bold text-zinc-400'>
+                Debug & Testing Utilities
               </h2>
-              <Badge className='bg-gray-500/10 text-gray-400 border-gray-500/20'>
-                {testingTools.length}
+              <Badge className='bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs'>
+                Low Priority
               </Badge>
             </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-              {testingTools.map((tool) => (
-                <Card
-                  key={tool.href}
-                  className='hover:shadow-lg transition-all bg-zinc-900/50 border-zinc-800/50 hover:border-zinc-700/50'
-                >
-                  <Link href={tool.href} className='block'>
-                    <CardHeader className='pb-3'>
-                      <div className='flex items-center justify-between mb-2'>
-                        <div className='flex items-center gap-2'>
-                          <div className='text-zinc-500'>{tool.icon}</div>
-                          <CardTitle className='text-sm md:text-base text-zinc-400'>
-                            {tool.title}
-                          </CardTitle>
-                        </div>
-                        {getStatusBadge(tool.status)}
-                      </div>
-                      <CardDescription className='text-xs text-zinc-500'>
-                        {tool.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
+            {showDebugTools ? (
+              <ChevronUp className='h-5 w-5 text-zinc-400' />
+            ) : (
+              <ChevronDown className='h-5 w-5 text-zinc-400' />
+            )}
+          </button>
+
+          {showDebugTools && (
+            <div className='space-y-6'>
+              {/* Testing Tools Grid */}
+              {testingTools.length > 0 && (
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
+                  {testingTools.map((tool) => (
+                    <Card
+                      key={tool.href}
+                      className='hover:shadow-lg transition-all bg-zinc-900/50 border-zinc-800/50 hover:border-zinc-700/50'
+                    >
+                      <Link href={tool.href} className='block'>
+                        <CardHeader className='pb-3'>
+                          <div className='flex items-center justify-between mb-2'>
+                            <div className='flex items-center gap-2'>
+                              <div className='text-zinc-500'>{tool.icon}</div>
+                              <CardTitle className='text-sm md:text-base text-zinc-400'>
+                                {tool.title}
+                              </CardTitle>
+                            </div>
+                            {getStatusBadge(tool.status)}
+                          </div>
+                          <CardDescription className='text-xs text-zinc-500'>
+                            {tool.description}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Button
+                            variant='outline'
+                            className='w-full bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 border-zinc-700/50 text-sm'
+                          >
+                            Open
+                            <ExternalLink className='h-3 w-3 ml-2' />
+                          </Button>
+                        </CardContent>
+                      </Link>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {/* Email Testing */}
+              <Card className='bg-zinc-900/50 border-zinc-800/50'>
+                <CardHeader className='pb-4'>
+                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
+                    <Mail className='h-5 w-5' />
+                    Email Testing (Brevo)
+                  </CardTitle>
+                  <CardDescription className='text-xs md:text-sm text-zinc-500'>
+                    Test email sending with Brevo
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div className='flex flex-col md:flex-row gap-4'>
+                      <input
+                        type='email'
+                        placeholder='Enter your email address'
+                        value={testEmailAddress}
+                        onChange={(e) => setTestEmailAddress(e.target.value)}
+                        className='flex-1 px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500/50 text-sm'
+                        disabled={testingEmail}
+                      />
                       <Button
+                        onClick={testEmail}
+                        disabled={testingEmail || !testEmailAddress}
                         variant='outline'
-                        className='w-full bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 border-zinc-700/50 text-sm'
+                        className='h-auto px-6 py-2 bg-blue-600/50 hover:bg-blue-700/50 border-blue-500/50 text-white transition-all disabled:opacity-50 text-sm'
                       >
-                        Open
-                        <ExternalLink className='h-3 w-3 ml-2' />
+                        <Send className='h-4 w-4 mr-2' />
+                        {testingEmail ? 'Sending...' : 'Send Test Email'}
                       </Button>
-                    </CardContent>
-                  </Link>
-                </Card>
-              ))}
+                    </div>
+                    <p className='text-xs text-zinc-600'>
+                      Make sure BREVO_API_KEY is set in your environment
+                      variables. The email will be sent from{' '}
+                      <code className='bg-zinc-800/50 px-2 py-1 rounded text-zinc-400'>
+                        cosmic@lunary.app
+                      </code>
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* PWA Notification Testing */}
+              <Card className='bg-zinc-900/50 border-zinc-800/50'>
+                <CardHeader className='pb-4'>
+                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
+                    <Bell className='h-5 w-5' />
+                    PWA Notification Testing
+                  </CardTitle>
+                  <CardDescription className='text-xs md:text-sm text-zinc-500'>
+                    Test push notifications on your device
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                    <Button
+                      onClick={testRealNotification}
+                      disabled={testingRealNotification}
+                      variant='outline'
+                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-purple-500/30 text-white transition-all text-sm'
+                    >
+                      <div className='flex flex-col items-center gap-2 w-full'>
+                        <Bell className='h-6 w-6 text-purple-400/70' />
+                        <div className='text-center'>
+                          <div className='font-semibold text-sm mb-1'>
+                            {testingRealNotification
+                              ? 'Sending...'
+                              : 'Test Real Event'}
+                          </div>
+                          <div className='text-xs text-zinc-500'>
+                            Uses today's actual cosmic events
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      onClick={testDailyNotification}
+                      disabled={testingDaily}
+                      variant='outline'
+                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-blue-500/30 text-white transition-all text-sm'
+                    >
+                      <div className='flex flex-col items-center gap-2 w-full'>
+                        <Calendar className='h-6 w-6 text-blue-400/70' />
+                        <div className='text-center'>
+                          <div className='font-semibold text-sm mb-1'>
+                            {testingDaily ? 'Sending...' : 'Test Daily Preview'}
+                          </div>
+                          <div className='text-xs text-zinc-500'>
+                            Rich notifications with images
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      onClick={testPushNotification}
+                      disabled={testingNotification}
+                      variant='outline'
+                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-green-500/30 text-white transition-all text-sm'
+                    >
+                      <div className='flex flex-col items-center gap-2 w-full'>
+                        <Smartphone className='h-6 w-6 text-green-400/70' />
+                        <div className='text-center'>
+                          <div className='font-semibold text-sm mb-1'>
+                            {testingNotification ? 'Sending...' : 'Test Basic'}
+                          </div>
+                          <div className='text-xs text-zinc-500'>
+                            Simple notification test
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Substack Testing */}
+              <Card className='bg-zinc-900/50 border-zinc-800/50'>
+                <CardHeader className='pb-4'>
+                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
+                    <FileText className='h-5 w-5' />
+                    Substack Post Testing
+                  </CardTitle>
+                  <CardDescription className='text-xs md:text-sm text-zinc-500'>
+                    Preview and test Substack posts without publishing
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div className='flex flex-col sm:flex-row gap-4 items-start sm:items-center'>
+                      <div className='flex-1'>
+                        <label className='text-xs text-zinc-500 mb-2 block'>
+                          Week Offset (0 = current week, 1 = next week)
+                        </label>
+                        <input
+                          type='number'
+                          value={substackWeekOffset}
+                          onChange={(e) =>
+                            setSubstackWeekOffset(parseInt(e.target.value) || 0)
+                          }
+                          className='w-full px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded text-white text-sm'
+                          min='0'
+                        />
+                      </div>
+                      <Button
+                        onClick={testSubstackPreview}
+                        disabled={substackLoading}
+                        variant='outline'
+                        className='h-auto px-6 py-2 bg-purple-600/50 hover:bg-purple-700/50 border-purple-500/50 text-white transition-all disabled:opacity-50 mt-6 sm:mt-0 text-sm'
+                      >
+                        <Eye className='h-4 w-4 mr-2' />
+                        {substackLoading ? 'Generating...' : 'Preview Posts'}
+                      </Button>
+                    </div>
+
+                    {substackPreview && (
+                      <div className='mt-6 space-y-6'>
+                        <div className='p-4 bg-zinc-800 rounded border border-zinc-700'>
+                          <div className='flex items-center justify-between mb-4'>
+                            <h3 className='text-lg font-semibold text-white'>
+                              Preview Results
+                            </h3>
+                            <Badge variant='outline' className='text-zinc-300'>
+                              Week{' '}
+                              {substackPreview.metadata?.weekNumber || 'N/A'}
+                            </Badge>
+                          </div>
+                          <div className='text-sm text-zinc-400 mb-4'>
+                            <p>
+                              Week:{' '}
+                              {substackPreview.metadata?.weekStart
+                                ? new Date(
+                                    substackPreview.metadata.weekStart,
+                                  ).toLocaleDateString()
+                                : 'N/A'}{' '}
+                              -{' '}
+                              {substackPreview.metadata?.weekEnd
+                                ? new Date(
+                                    substackPreview.metadata.weekEnd,
+                                  ).toLocaleDateString()
+                                : 'N/A'}
+                            </p>
+                            <p>
+                              Free:{' '}
+                              {substackPreview.metadata?.freeWordCount || 0}{' '}
+                              words | Paid:{' '}
+                              {substackPreview.metadata?.paidWordCount || 0}{' '}
+                              words
+                            </p>
+                          </div>
+
+                          {/* Free Post */}
+                          <div className='mb-6'>
+                            <div className='flex items-center gap-2 mb-3'>
+                              <Badge className='bg-green-600'>Free Tier</Badge>
+                              <span className='text-sm text-zinc-400'>
+                                {substackPreview.free?.title || 'No title'}
+                              </span>
+                            </div>
+                            <div className='bg-zinc-900 p-4 rounded border border-zinc-700 max-h-96 overflow-y-auto'>
+                              <h4 className='text-white font-semibold mb-2'>
+                                {substackPreview.free?.title}
+                              </h4>
+                              {substackPreview.free?.subtitle && (
+                                <p className='text-zinc-300 text-sm mb-2 italic'>
+                                  {substackPreview.free.subtitle}
+                                </p>
+                              )}
+                              <div className='text-zinc-400 text-sm whitespace-pre-wrap'>
+                                {substackPreview.free?.content || 'No content'}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Paid Post */}
+                          <div>
+                            <div className='flex items-center gap-2 mb-3'>
+                              <Badge className='bg-purple-600'>Paid Tier</Badge>
+                              <span className='text-sm text-zinc-400'>
+                                {substackPreview.paid?.title || 'No title'}
+                              </span>
+                            </div>
+                            <div className='bg-zinc-900 p-4 rounded border border-zinc-700 max-h-96 overflow-y-auto'>
+                              <h4 className='text-white font-semibold mb-2'>
+                                {substackPreview.paid?.title}
+                              </h4>
+                              {substackPreview.paid?.subtitle && (
+                                <p className='text-zinc-300 text-sm mb-2 italic'>
+                                  {substackPreview.paid.subtitle}
+                                </p>
+                              )}
+                              <div className='text-zinc-400 text-sm whitespace-pre-wrap'>
+                                {substackPreview.paid?.content || 'No content'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Publish Buttons */}
+                        <div className='flex gap-4 pt-4 border-t border-zinc-700'>
+                          <Button
+                            onClick={() => testSubstackPublish('free')}
+                            disabled={substackPublishing || !substackPreview}
+                            variant='outline'
+                            className='flex-1 bg-green-600 hover:bg-green-700 border-green-500 text-white disabled:opacity-50'
+                          >
+                            <Play className='h-4 w-4 mr-2' />
+                            {substackPublishing
+                              ? 'Publishing...'
+                              : 'Publish Free Post'}
+                          </Button>
+                          <Button
+                            onClick={() => testSubstackPublish('paid')}
+                            disabled={substackPublishing || !substackPreview}
+                            variant='outline'
+                            className='flex-1 bg-purple-600 hover:bg-purple-700 border-purple-500 text-white disabled:opacity-50'
+                          >
+                            <Play className='h-4 w-4 mr-2' />
+                            {substackPublishing
+                              ? 'Publishing...'
+                              : 'Publish Paid Post'}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    <p className='text-xs text-zinc-600'>
+                      Preview shows full post content. Use publish buttons to
+                      actually post to Substack (opens in new tab when
+                      published).
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-        )}
-
-        {/* Testing Utilities - Email, Notifications, Substack */}
-        <div className='mb-8 md:mb-10 lg:mb-12 space-y-6'>
-          <div className='flex items-center gap-3 mb-6'>
-            <h2 className='text-lg md:text-xl lg:text-2xl font-bold text-zinc-400'>
-              Testing Utilities
-            </h2>
-            <Badge className='bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs'>
-              Low Priority
-            </Badge>
-          </div>
-
-          {/* Email Testing */}
-          <Card className='bg-zinc-900/50 border-zinc-800/50'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
-                <Mail className='h-5 w-5' />
-                Email Testing (Brevo)
-              </CardTitle>
-              <CardDescription className='text-xs md:text-sm text-zinc-500'>
-                Test email sending with Brevo
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <div className='flex flex-col md:flex-row gap-4'>
-                  <input
-                    type='email'
-                    placeholder='Enter your email address'
-                    value={testEmailAddress}
-                    onChange={(e) => setTestEmailAddress(e.target.value)}
-                    className='flex-1 px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500/50 text-sm'
-                    disabled={testingEmail}
-                  />
-                  <Button
-                    onClick={testEmail}
-                    disabled={testingEmail || !testEmailAddress}
-                    variant='outline'
-                    className='h-auto px-6 py-2 bg-blue-600/50 hover:bg-blue-700/50 border-blue-500/50 text-white transition-all disabled:opacity-50 text-sm'
-                  >
-                    <Send className='h-4 w-4 mr-2' />
-                    {testingEmail ? 'Sending...' : 'Send Test Email'}
-                  </Button>
-                </div>
-                <p className='text-xs text-zinc-600'>
-                  Make sure BREVO_API_KEY is set in your environment variables.
-                  The email will be sent from{' '}
-                  <code className='bg-zinc-800/50 px-2 py-1 rounded text-zinc-400'>
-                    cosmic@lunary.app
-                  </code>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* PWA Notification Testing */}
-          <Card className='bg-zinc-900/50 border-zinc-800/50'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
-                <Bell className='h-5 w-5' />
-                PWA Notification Testing
-              </CardTitle>
-              <CardDescription className='text-xs md:text-sm text-zinc-500'>
-                Test push notifications on your device
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                <Button
-                  onClick={testRealNotification}
-                  disabled={testingRealNotification}
-                  variant='outline'
-                  className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-purple-500/30 text-white transition-all text-sm'
-                >
-                  <div className='flex flex-col items-center gap-2 w-full'>
-                    <Bell className='h-6 w-6 text-purple-400/70' />
-                    <div className='text-center'>
-                      <div className='font-semibold text-sm mb-1'>
-                        {testingRealNotification
-                          ? 'Sending...'
-                          : 'Test Real Event'}
-                      </div>
-                      <div className='text-xs text-zinc-500'>
-                        Uses today's actual cosmic events
-                      </div>
-                    </div>
-                  </div>
-                </Button>
-
-                <Button
-                  onClick={testDailyNotification}
-                  disabled={testingDaily}
-                  variant='outline'
-                  className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-blue-500/30 text-white transition-all text-sm'
-                >
-                  <div className='flex flex-col items-center gap-2 w-full'>
-                    <Calendar className='h-6 w-6 text-blue-400/70' />
-                    <div className='text-center'>
-                      <div className='font-semibold text-sm mb-1'>
-                        {testingDaily ? 'Sending...' : 'Test Daily Preview'}
-                      </div>
-                      <div className='text-xs text-zinc-500'>
-                        Rich notifications with images
-                      </div>
-                    </div>
-                  </div>
-                </Button>
-
-                <Button
-                  onClick={testPushNotification}
-                  disabled={testingNotification}
-                  variant='outline'
-                  className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-green-500/30 text-white transition-all text-sm'
-                >
-                  <div className='flex flex-col items-center gap-2 w-full'>
-                    <Smartphone className='h-6 w-6 text-green-400/70' />
-                    <div className='text-center'>
-                      <div className='font-semibold text-sm mb-1'>
-                        {testingNotification ? 'Sending...' : 'Test Basic'}
-                      </div>
-                      <div className='text-xs text-zinc-500'>
-                        Simple notification test
-                      </div>
-                    </div>
-                  </div>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Substack Testing */}
-          <Card className='bg-zinc-900/50 border-zinc-800/50'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
-                <FileText className='h-5 w-5' />
-                Substack Post Testing
-              </CardTitle>
-              <CardDescription className='text-xs md:text-sm text-zinc-500'>
-                Preview and test Substack posts without publishing
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <div className='flex flex-col sm:flex-row gap-4 items-start sm:items-center'>
-                  <div className='flex-1'>
-                    <label className='text-xs text-zinc-500 mb-2 block'>
-                      Week Offset (0 = current week, 1 = next week)
-                    </label>
-                    <input
-                      type='number'
-                      value={substackWeekOffset}
-                      onChange={(e) =>
-                        setSubstackWeekOffset(parseInt(e.target.value) || 0)
-                      }
-                      className='w-full px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded text-white text-sm'
-                      min='0'
-                    />
-                  </div>
-                  <Button
-                    onClick={testSubstackPreview}
-                    disabled={substackLoading}
-                    variant='outline'
-                    className='h-auto px-6 py-2 bg-purple-600/50 hover:bg-purple-700/50 border-purple-500/50 text-white transition-all disabled:opacity-50 mt-6 sm:mt-0 text-sm'
-                  >
-                    <Eye className='h-4 w-4 mr-2' />
-                    {substackLoading ? 'Generating...' : 'Preview Posts'}
-                  </Button>
-                </div>
-
-                {substackPreview && (
-                  <div className='mt-6 space-y-6'>
-                    <div className='p-4 bg-zinc-800 rounded border border-zinc-700'>
-                      <div className='flex items-center justify-between mb-4'>
-                        <h3 className='text-lg font-semibold text-white'>
-                          Preview Results
-                        </h3>
-                        <Badge variant='outline' className='text-zinc-300'>
-                          Week {substackPreview.metadata?.weekNumber || 'N/A'}
-                        </Badge>
-                      </div>
-                      <div className='text-sm text-zinc-400 mb-4'>
-                        <p>
-                          Week:{' '}
-                          {substackPreview.metadata?.weekStart
-                            ? new Date(
-                                substackPreview.metadata.weekStart,
-                              ).toLocaleDateString()
-                            : 'N/A'}{' '}
-                          -{' '}
-                          {substackPreview.metadata?.weekEnd
-                            ? new Date(
-                                substackPreview.metadata.weekEnd,
-                              ).toLocaleDateString()
-                            : 'N/A'}
-                        </p>
-                        <p>
-                          Free: {substackPreview.metadata?.freeWordCount || 0}{' '}
-                          words | Paid:{' '}
-                          {substackPreview.metadata?.paidWordCount || 0} words
-                        </p>
-                      </div>
-
-                      {/* Free Post */}
-                      <div className='mb-6'>
-                        <div className='flex items-center gap-2 mb-3'>
-                          <Badge className='bg-green-600'>Free Tier</Badge>
-                          <span className='text-sm text-zinc-400'>
-                            {substackPreview.free?.title || 'No title'}
-                          </span>
-                        </div>
-                        <div className='bg-zinc-900 p-4 rounded border border-zinc-700 max-h-96 overflow-y-auto'>
-                          <h4 className='text-white font-semibold mb-2'>
-                            {substackPreview.free?.title}
-                          </h4>
-                          {substackPreview.free?.subtitle && (
-                            <p className='text-zinc-300 text-sm mb-2 italic'>
-                              {substackPreview.free.subtitle}
-                            </p>
-                          )}
-                          <div className='text-zinc-400 text-sm whitespace-pre-wrap'>
-                            {substackPreview.free?.content || 'No content'}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Paid Post */}
-                      <div>
-                        <div className='flex items-center gap-2 mb-3'>
-                          <Badge className='bg-purple-600'>Paid Tier</Badge>
-                          <span className='text-sm text-zinc-400'>
-                            {substackPreview.paid?.title || 'No title'}
-                          </span>
-                        </div>
-                        <div className='bg-zinc-900 p-4 rounded border border-zinc-700 max-h-96 overflow-y-auto'>
-                          <h4 className='text-white font-semibold mb-2'>
-                            {substackPreview.paid?.title}
-                          </h4>
-                          {substackPreview.paid?.subtitle && (
-                            <p className='text-zinc-300 text-sm mb-2 italic'>
-                              {substackPreview.paid.subtitle}
-                            </p>
-                          )}
-                          <div className='text-zinc-400 text-sm whitespace-pre-wrap'>
-                            {substackPreview.paid?.content || 'No content'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Publish Buttons */}
-                    <div className='flex gap-4 pt-4 border-t border-zinc-700'>
-                      <Button
-                        onClick={() => testSubstackPublish('free')}
-                        disabled={substackPublishing || !substackPreview}
-                        variant='outline'
-                        className='flex-1 bg-green-600 hover:bg-green-700 border-green-500 text-white disabled:opacity-50'
-                      >
-                        <Play className='h-4 w-4 mr-2' />
-                        {substackPublishing
-                          ? 'Publishing...'
-                          : 'Publish Free Post'}
-                      </Button>
-                      <Button
-                        onClick={() => testSubstackPublish('paid')}
-                        disabled={substackPublishing || !substackPreview}
-                        variant='outline'
-                        className='flex-1 bg-purple-600 hover:bg-purple-700 border-purple-500 text-white disabled:opacity-50'
-                      >
-                        <Play className='h-4 w-4 mr-2' />
-                        {substackPublishing
-                          ? 'Publishing...'
-                          : 'Publish Paid Post'}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                <p className='text-xs text-zinc-600'>
-                  Preview shows full post content. Use publish buttons to
-                  actually post to Substack (opens in new tab when published).
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          )}
         </div>
+
+        {/* Automation Manual Triggers */}
+        <Card className='mb-8 md:mb-10 lg:mb-12 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <Zap className='h-5 w-5 md:h-6 md:w-6' />
+              Manual Automation Triggers
+            </CardTitle>
+            <CardDescription className='text-sm md:text-base text-zinc-400'>
+              Manually trigger automated creation tasks
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
+              {/* Moon Circle Trigger */}
+              <Button
+                onClick={async () => {
+                  if (
+                    !confirm(
+                      'Create moon circle for today? (Will skip if already exists)',
+                    )
+                  )
+                    return;
+                  try {
+                    const response = await fetch(
+                      '/api/admin/trigger/moon-circle',
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          date: new Date().toISOString().split('T')[0],
+                        }),
+                      },
+                    );
+                    const result = await response.json();
+                    if (result.success) {
+                      alert(
+                        `✅ Moon circle ${result.moonCircleGenerated ? 'created' : 'already exists'}\n\nPhase: ${result.moonCircle?.phase || 'N/A'}\nSign: ${result.moonCircle?.sign || 'N/A'}`,
+                      );
+                    } else {
+                      alert(`❌ Failed: ${result.error || result.message}`);
+                    }
+                  } catch (error: any) {
+                    alert(`❌ Error: ${error.message || 'Unknown error'}`);
+                  }
+                }}
+                variant='outline'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-purple-500/50 text-white transition-all'
+              >
+                <div className='flex flex-col items-center gap-3 w-full'>
+                  <Sparkles className='h-8 w-8 text-purple-400' />
+                  <div className='text-center'>
+                    <div className='font-semibold text-base mb-1'>
+                      Moon Circle
+                    </div>
+                    <div className='text-xs text-zinc-400'>
+                      Create for today
+                    </div>
+                  </div>
+                </div>
+              </Button>
+
+              {/* Calendar Trigger */}
+              <Button
+                onClick={async () => {
+                  const year = prompt('Enter year (e.g., 2026):', '2026');
+                  if (!year || !/^\d{4}$/.test(year)) {
+                    alert('Invalid year');
+                    return;
+                  }
+                  if (
+                    !confirm(
+                      `Generate calendar for ${year}? This will create a Stripe product.`,
+                    )
+                  )
+                    return;
+                  try {
+                    const response = await fetch(
+                      '/api/shop/calendar/generate-and-sync',
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          year: parseInt(year),
+                          dryRun: false,
+                          autoPublish: true,
+                        }),
+                      },
+                    );
+                    const result = await response.json();
+                    if (result.success) {
+                      alert(
+                        `✅ Calendar created: ${result.calendar.name}\n\nStripe Product: ${result.stripe.productId}\nEvents: ${result.calendar.eventCount}`,
+                      );
+                    } else {
+                      alert(`❌ Failed: ${result.error || result.details}`);
+                    }
+                  } catch (error: any) {
+                    alert(`❌ Error: ${error.message || 'Unknown error'}`);
+                  }
+                }}
+                variant='outline'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 text-white transition-all'
+              >
+                <div className='flex flex-col items-center gap-3 w-full'>
+                  <Calendar className='h-8 w-8 text-blue-400' />
+                  <div className='text-center'>
+                    <div className='font-semibold text-base mb-1'>Calendar</div>
+                    <div className='text-xs text-zinc-400'>Generate year</div>
+                  </div>
+                </div>
+              </Button>
+
+              {/* Monthly Pack Trigger */}
+              <Button
+                onClick={async () => {
+                  const currentYear = new Date().getFullYear();
+                  const currentMonth = new Date().getMonth() + 1;
+                  const monthName = new Date(
+                    currentYear,
+                    currentMonth - 1,
+                  ).toLocaleString('default', { month: 'long' });
+
+                  if (
+                    !confirm(
+                      `Generate monthly moon pack for ${monthName} ${currentYear}?`,
+                    )
+                  )
+                    return;
+
+                  try {
+                    const response = await fetch(
+                      '/api/admin/trigger/moon-packs',
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'monthly' }),
+                      },
+                    );
+                    const result = await response.json();
+                    if (result.success) {
+                      alert(
+                        `✅ Monthly packs generated: ${result.packsCreated || 0} packs`,
+                      );
+                    } else {
+                      alert(`❌ Failed: ${result.error || 'Unknown error'}`);
+                    }
+                  } catch (error: any) {
+                    alert(`❌ Error: ${error.message || 'Unknown error'}`);
+                  }
+                }}
+                variant='outline'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-green-500/50 text-white transition-all'
+              >
+                <div className='flex flex-col items-center gap-3 w-full'>
+                  <Package className='h-8 w-8 text-green-400' />
+                  <div className='text-center'>
+                    <div className='font-semibold text-base mb-1'>
+                      Monthly Packs
+                    </div>
+                    <div className='text-xs text-zinc-400'>
+                      Generate next 3 months
+                    </div>
+                  </div>
+                </div>
+              </Button>
+
+              {/* Yearly Pack Trigger */}
+              <Button
+                onClick={async () => {
+                  const currentYear = new Date().getFullYear();
+                  if (!confirm(`Generate yearly moon pack for ${currentYear}?`))
+                    return;
+
+                  try {
+                    const response = await fetch(
+                      '/api/admin/trigger/moon-packs',
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'yearly' }),
+                      },
+                    );
+                    const result = await response.json();
+                    if (result.success) {
+                      alert(
+                        `✅ Yearly pack generated: ${result.packsCreated || 0} packs`,
+                      );
+                    } else {
+                      alert(`❌ Failed: ${result.error || 'Unknown error'}`);
+                    }
+                  } catch (error: any) {
+                    alert(`❌ Error: ${error.message || 'Unknown error'}`);
+                  }
+                }}
+                variant='outline'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 text-white transition-all'
+              >
+                <div className='flex flex-col items-center gap-3 w-full'>
+                  <Package className='h-8 w-8 text-yellow-400' />
+                  <div className='text-center'>
+                    <div className='font-semibold text-base mb-1'>
+                      Yearly Pack
+                    </div>
+                    <div className='text-xs text-zinc-400'>
+                      Generate this year
+                    </div>
+                  </div>
+                </div>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Moon Pack Quick Generator */}
         <Card className='mb-8 md:mb-10 lg:mb-12 bg-zinc-900 border-zinc-800'>
@@ -1584,7 +1890,7 @@ This is exactly what you'll get every day at 8 AM UTC!`);
           </CardContent>
         </Card>
 
-        {/* Recent Activity Placeholder */}
+        {/* Recent Activity */}
         <Card className='mt-6 md:mt-8 lg:mt-10 bg-zinc-900 border-zinc-800'>
           <CardHeader className='pb-4 md:pb-6'>
             <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
@@ -1596,15 +1902,122 @@ This is exactly what you'll get every day at 8 AM UTC!`);
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='text-center py-6 md:py-8 lg:py-10 text-zinc-400'>
-              <Users className='h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50' />
-              <p className='text-sm md:text-base'>
-                Activity tracking coming soon!
-              </p>
-              <p className='text-xs md:text-sm mt-2'>
-                Monitor cron jobs, pack generation, and content creation
-              </p>
-            </div>
+            {activityLoading ? (
+              <div className='text-center py-6 md:py-8 lg:py-10 text-zinc-400'>
+                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-4'></div>
+                <p className='text-sm md:text-base'>Loading activity...</p>
+              </div>
+            ) : recentActivity.length === 0 ? (
+              <div className='text-center py-6 md:py-8 lg:py-10 text-zinc-400'>
+                <Activity className='h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50' />
+                <p className='text-sm md:text-base'>No activity yet</p>
+                <p className='text-xs md:text-sm mt-2'>
+                  Activity will appear here as automation runs
+                </p>
+              </div>
+            ) : (
+              <div className='space-y-3'>
+                {recentActivity.map((activity: any) => {
+                  const statusColor =
+                    activity.status === 'success'
+                      ? 'text-green-400'
+                      : activity.status === 'failed'
+                        ? 'text-red-400'
+                        : activity.status === 'pending'
+                          ? 'text-yellow-400'
+                          : 'text-zinc-400';
+                  const statusBg =
+                    activity.status === 'success'
+                      ? 'bg-green-500/10 border-green-500/20'
+                      : activity.status === 'failed'
+                        ? 'bg-red-500/10 border-red-500/20'
+                        : activity.status === 'pending'
+                          ? 'bg-yellow-500/10 border-yellow-500/20'
+                          : 'bg-zinc-500/10 border-zinc-500/20';
+
+                  const activityTypeLabels: Record<string, string> = {
+                    cron_execution: 'Cron Job',
+                    pack_generation: 'Pack Generation',
+                    calendar_creation: 'Calendar Creation',
+                    moon_circle_creation: 'Moon Circle',
+                    content_creation: 'Content Creation',
+                    admin_action: 'Admin Action',
+                  };
+
+                  const categoryIcons: Record<string, React.ReactNode> = {
+                    automation: <Activity className='h-4 w-4' />,
+                    content: <FileText className='h-4 w-4' />,
+                    shop: <Store className='h-4 w-4' />,
+                    notifications: <Bell className='h-4 w-4' />,
+                    admin: <Settings className='h-4 w-4' />,
+                  };
+
+                  const timeAgo = (date: string) => {
+                    const now = new Date();
+                    const then = new Date(date);
+                    const diffMs = now.getTime() - then.getTime();
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    if (diffMins < 1) return 'Just now';
+                    if (diffMins < 60) return `${diffMins}m ago`;
+                    if (diffHours < 24) return `${diffHours}h ago`;
+                    return `${diffDays}d ago`;
+                  };
+
+                  return (
+                    <div
+                      key={activity.id}
+                      className='flex items-start gap-3 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 transition-colors'
+                    >
+                      <div
+                        className={`p-2 rounded-lg ${statusBg} ${statusColor} flex-shrink-0`}
+                      >
+                        {categoryIcons[activity.activity_category] || (
+                          <Activity className='h-4 w-4' />
+                        )}
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <div className='flex items-center gap-2 mb-1'>
+                          <span className='text-sm font-medium text-white'>
+                            {activityTypeLabels[activity.activity_type] ||
+                              activity.activity_type}
+                          </span>
+                          <Badge
+                            className={`text-xs ${statusBg} ${statusColor} border-0`}
+                          >
+                            {activity.status}
+                          </Badge>
+                        </div>
+                        <p className='text-xs text-zinc-400 line-clamp-1'>
+                          {activity.message || 'No message'}
+                        </p>
+                        {activity.error_message && (
+                          <p className='text-xs text-red-400 mt-1 line-clamp-1'>
+                            Error: {activity.error_message}
+                          </p>
+                        )}
+                        {activity.metadata &&
+                          typeof activity.metadata === 'object' && (
+                            <div className='text-xs text-zinc-500 mt-1'>
+                              {activity.metadata.packsCreated &&
+                                `${activity.metadata.packsCreated} packs`}
+                              {activity.metadata.postsGenerated &&
+                                ` ${activity.metadata.postsGenerated} posts`}
+                              {activity.metadata.year &&
+                                ` ${activity.metadata.year}`}
+                            </div>
+                          )}
+                      </div>
+                      <div className='flex-shrink-0 text-xs text-zinc-500'>
+                        {timeAgo(activity.created_at)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

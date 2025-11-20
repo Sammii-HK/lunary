@@ -10,6 +10,7 @@ import {
   FileText,
   Globe,
   ChevronDown,
+  Calendar,
 } from 'lucide-react';
 
 type ExploreItem = {
@@ -33,6 +34,11 @@ const exploreItems: ExploreItem[] = [
     href: '/collections',
     label: 'Collections',
     icon: FolderOpen,
+  },
+  {
+    href: '/forecast',
+    label: '2026 Forecast',
+    icon: Calendar,
   },
   {
     href: '/cosmic-report-generator',

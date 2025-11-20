@@ -27,10 +27,14 @@ export const useLocation = () => {
   });
 
   useEffect(() => {
-    // First try to get from Jazz profile
+    // First try to get from Jazz profile (most reliable source)
     if (me?.profile) {
       const profileLocation = (me.profile as any)?.location;
-      if (profileLocation) {
+      if (
+        profileLocation &&
+        profileLocation.latitude &&
+        profileLocation.longitude
+      ) {
         const locationData: LocationData = {
           latitude: profileLocation.latitude,
           longitude: profileLocation.longitude,
@@ -43,25 +47,30 @@ export const useLocation = () => {
           location: locationData,
           hasPermission: true,
         }));
+        // Also update localStorage as backup
+        storeLocation(locationData);
         return;
       }
     }
 
-    // Fallback to localStorage
+    // Fallback to localStorage (persists across sessions)
     const storedLocation = getStoredLocation();
-    if (storedLocation) {
+    if (storedLocation && storedLocation.latitude && storedLocation.longitude) {
       setState((prev) => ({
         ...prev,
         location: storedLocation,
         hasPermission: true,
       }));
-    } else {
-      // Use default location
-      setState((prev) => ({
-        ...prev,
-        location: getDefaultLocation(),
-      }));
+      return;
     }
+
+    // Only use default location if no saved location exists
+    // This prevents unnecessary location requests
+    setState((prev) => ({
+      ...prev,
+      location: getDefaultLocation(),
+      hasPermission: false, // Default location doesn't mean we have permission
+    }));
   }, [me?.profile]);
 
   const saveLocationToProfile = useCallback(

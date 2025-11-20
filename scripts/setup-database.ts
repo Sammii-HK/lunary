@@ -984,6 +984,26 @@ async function setupDatabase() {
     await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_event_type ON analytics_notification_events(event_type)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_analytics_notification_events_created_at ON analytics_notification_events(created_at)`;
 
+    // Create analytics_seo_metrics table
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_seo_metrics (
+        id SERIAL PRIMARY KEY,
+        metric_date DATE NOT NULL UNIQUE,
+        clicks INTEGER DEFAULT 0,
+        impressions INTEGER DEFAULT 0,
+        ctr DECIMAL(10, 4) DEFAULT 0,
+        average_position DECIMAL(10, 2) DEFAULT 0,
+        pages_indexed INTEGER DEFAULT 0,
+        article_count INTEGER DEFAULT 0,
+        top_pages JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_seo_metrics_date ON analytics_seo_metrics(metric_date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_seo_metrics_created_at ON analytics_seo_metrics(created_at)`;
+
     console.log('✅ Analytics tables created');
 
     // Create weekly_ritual_usage table
@@ -1100,6 +1120,90 @@ async function setupDatabase() {
     await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_feature ON analytics_discord_interactions(feature)`;
 
     console.log('✅ Discord interactions analytics table created');
+
+    // Create the discord_notification_log table for tracking sent notifications
+    await sql`
+      CREATE TABLE IF NOT EXISTS discord_notification_log (
+        id SERIAL PRIMARY KEY,
+        dedupe_key TEXT,
+        category TEXT NOT NULL,
+        title TEXT,
+        recipient_count INTEGER DEFAULT 0,
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_category ON discord_notification_log(category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_sent_at ON discord_notification_log(sent_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_category_sent_at ON discord_notification_log(category, sent_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_dedupe_key ON discord_notification_log(dedupe_key)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION cleanup_old_discord_logs()
+      RETURNS void AS $$
+      BEGIN
+        DELETE FROM discord_notification_log
+        WHERE sent_at < NOW() - INTERVAL '48 hours';
+      END;
+      $$ LANGUAGE plpgsql
+    `;
+
+    console.log('✅ Discord notification log table created');
+
+    // Create the discord_notification_analytics table for analytics queue
+    await sql`
+      CREATE TABLE IF NOT EXISTS discord_notification_analytics (
+        id SERIAL PRIMARY KEY,
+        category TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        title TEXT,
+        dedupe_key TEXT,
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        metadata JSONB,
+        skipped_reason TEXT,
+        rate_limited BOOLEAN DEFAULT false,
+        quiet_hours_skipped BOOLEAN DEFAULT false
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_category ON discord_notification_analytics(category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_event_type ON discord_notification_analytics(event_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_sent_at ON discord_notification_analytics(sent_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_dedupe_key ON discord_notification_analytics(dedupe_key)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION cleanup_old_discord_analytics()
+      RETURNS void AS $$
+      BEGIN
+        DELETE FROM discord_notification_analytics
+        WHERE sent_at < NOW() - INTERVAL '7 days';
+      END;
+      $$ LANGUAGE plpgsql
+    `;
+
+    console.log('✅ Discord notification analytics table created');
+
+    // Create the admin_activity_log table for tracking admin actions and automation
+    await sql`
+      CREATE TABLE IF NOT EXISTS admin_activity_log (
+        id SERIAL PRIMARY KEY,
+        activity_type TEXT NOT NULL,
+        activity_category TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        message TEXT,
+        metadata JSONB DEFAULT '{}'::jsonb,
+        error_message TEXT,
+        execution_time_ms INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_type ON admin_activity_log(activity_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_category ON admin_activity_log(activity_category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_status ON admin_activity_log(status)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_created_at ON admin_activity_log(created_at DESC)`;
+
+    console.log('✅ Admin activity log table created');
 
     console.log('✅ Database setup complete!');
     console.log(

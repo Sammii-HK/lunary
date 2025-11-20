@@ -148,6 +148,12 @@ export default function AIConversionPage() {
               </button>
               {results['analyze-funnel']?.analysis && (
                 <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700'>
+                  {!results['analyze-funnel']?.dataAvailable && (
+                    <div className='mb-3 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-xs text-yellow-400'>
+                      ⚠️ No data available - analysis is based on general
+                      recommendations only
+                    </div>
+                  )}
                   <p className='text-xs text-zinc-400 mb-2'>AI Analysis:</p>
                   <div className='text-sm text-zinc-300 whitespace-pre-wrap'>
                     {results['analyze-funnel'].analysis}
@@ -191,24 +197,54 @@ export default function AIConversionPage() {
                 )}
               </button>
               {results['suggest-tests']?.suggestions && (
-                <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700 max-h-60 overflow-y-auto'>
-                  <p className='text-xs text-zinc-400 mb-2'>Suggested Tests:</p>
-                  <div className='space-y-3'>
-                    {(Array.isArray(results['suggest-tests'].suggestions)
-                      ? results['suggest-tests'].suggestions
-                      : Object.values(results['suggest-tests'].suggestions)
-                    )
-                      .slice(0, 5)
-                      .map((test: any, idx: number) => (
-                        <div key={idx} className='text-xs text-zinc-300'>
-                          <p className='font-semibold text-white mb-1'>
-                            {test.name || test.testName || `Test ${idx + 1}`}
-                          </p>
-                          <p className='text-zinc-400'>
-                            {test.hypothesis || test.description}
-                          </p>
-                        </div>
-                      ))}
+                <div className='mt-4 space-y-3'>
+                  {results['suggest-tests']?.actualStats && (
+                    <div className='p-2 bg-zinc-800/70 rounded border border-zinc-700 text-xs'>
+                      <p className='text-zinc-400 mb-1'>
+                        📊 Actual Stats (30d):
+                      </p>
+                      <div className='text-zinc-300 space-y-0.5'>
+                        <p>
+                          Signups:{' '}
+                          {results['suggest-tests'].actualStats.signups}
+                        </p>
+                        <p>
+                          Trials: {results['suggest-tests'].actualStats.trials}
+                        </p>
+                        <p>
+                          Conversions:{' '}
+                          {results['suggest-tests'].actualStats.conversions}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <div className='p-3 bg-zinc-800/50 rounded border border-zinc-700 max-h-60 overflow-y-auto'>
+                    <p className='text-xs text-zinc-400 mb-2'>
+                      Suggested Tests:
+                    </p>
+                    <div className='space-y-3'>
+                      {(Array.isArray(results['suggest-tests'].suggestions)
+                        ? results['suggest-tests'].suggestions
+                        : Object.values(results['suggest-tests'].suggestions)
+                      )
+                        .slice(0, 5)
+                        .map((test: any, idx: number) => (
+                          <div key={idx} className='text-xs text-zinc-300'>
+                            <p className='font-semibold text-white mb-1'>
+                              {test.name || test.testName || `Test ${idx + 1}`}
+                            </p>
+                            <p className='text-zinc-400'>
+                              {test.hypothesis || test.description}
+                            </p>
+                            {test.expectedImpact && (
+                              <p className='text-yellow-400 text-xs mt-1'>
+                                ⚠️ Note: Impact estimates are AI-generated
+                                suggestions, not real predictions
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 </div>
               )}
