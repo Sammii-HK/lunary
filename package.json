@@ -52,7 +52,8 @@
     "seed:yearly": "tsx scripts/seed-yearly-forecast.ts",
     "cleanup": "bash scripts/dev-cleanup.sh",
     "cleanup:port": "bash scripts/cleanup-port-3000.sh",
-    "clear-cache": "bash scripts/clear-all-cache.sh"
+    "clear-cache": "bash scripts/clear-all-cache.sh",
+    "discord:register": "tsx scripts/register-discord-commands.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -114,6 +115,7 @@
     "seed-random": "^2.2.0",
     "stripe": "^18.4.0",
     "tailwind-merge": "^3.3.1",
+    "tweetnacl": "^1.0.3",
     "web-push": "^3.6.7",
     "zod": "^4.1.12"
   },
