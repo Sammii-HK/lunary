@@ -187,9 +187,10 @@ The Discord bot provides slash commands for cosmic information and community eng
 
 ### Automation & Cron Jobs
 
-**Daily Posts** (8 AM UTC - Vercel Cron):
+**Daily Posts** (2 PM UTC - Cloudflare Worker):
 
-- Generates daily social media posts with dynamic cosmic data
+- Generates daily social media posts with dynamic cosmic data for the next day
+- Runs the day before at 2 PM UTC to allow time for review and troubleshooting
 - Creates OG images via internal API calls
 - Schedules posts across platforms with proper timing buffers
 

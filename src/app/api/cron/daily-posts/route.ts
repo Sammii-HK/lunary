@@ -115,23 +115,27 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Auth check passed - proceeding with cron execution');
 
-    const today = new Date().toISOString().split('T')[0];
+    // Calculate target date: create posts for tomorrow (run the day before at 2 PM)
+    const now = new Date();
+    const tomorrowDate = new Date(now);
+    tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
+    const targetDateStr = tomorrowDate.toISOString().split('T')[0];
 
-    // Atomic check-and-set: Prevent duplicate execution on the same day
+    // Atomic check-and-set: Prevent duplicate execution for the same target date
     // This works better in serverless than separate checks
-    if (executionTracker.has(today)) {
+    if (executionTracker.has(targetDateStr)) {
       console.log(
-        `⚠️ Cron already executed today (${today}), skipping duplicate execution`,
+        `⚠️ Cron already executed for target date (${targetDateStr}), skipping duplicate execution`,
       );
       return NextResponse.json({
         success: false,
-        message: `Already executed today (${today})`,
+        message: `Already executed for target date (${targetDateStr})`,
         skipped: true,
       });
     }
 
-    // Immediately mark as executing for this date (atomic operation)
-    executionTracker.set(today, true);
+    // Immediately mark as executing for this target date (atomic operation)
+    executionTracker.set(targetDateStr, true);
 
     // Clean up old entries (keep only last 7 days to prevent memory leak)
     const cutoffDate = new Date();
@@ -145,12 +149,13 @@ export async function GET(request: NextRequest) {
 
     console.log('🕐 Master cron job started at:', new Date().toISOString());
     console.log('🔐 Auth check passed - proceeding with cron execution');
+    console.log(`📅 Creating posts for tomorrow: ${targetDateStr}`);
 
     const todayDate = new Date();
     const dayOfWeek = todayDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const dayOfMonth = todayDate.getDate();
     const month = todayDate.getMonth() + 1;
-    const dateStr = todayDate.toISOString().split('T')[0];
+    const dateStr = targetDateStr; // Use tomorrow's date for post creation
 
     console.log('📅 Cron execution context:', {
       date: dateStr,
@@ -167,27 +172,135 @@ export async function GET(request: NextRequest) {
 
     // DAILY TASKS (Every day) - Social Media Posts
     console.log('📱 Running daily social media tasks...');
+    const dailyPostsStartTime = Date.now();
     try {
+      const { logActivity } = await import('@/lib/admin-activity');
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'content',
+        status: 'pending',
+        message: `Starting daily posts generation for ${dateStr}`,
+        metadata: { targetDate: dateStr },
+      });
+
       const dailyResult = await runDailyPosts(dateStr);
+      const executionTime = Date.now() - dailyPostsStartTime;
+
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'content',
+        status: dailyResult.success ? 'success' : 'failed',
+        message: dailyResult.message || `Daily posts completed for ${dateStr}`,
+        metadata: {
+          targetDate: dateStr,
+          summary: dailyResult.summary,
+          results: dailyResult.results,
+        },
+        errorMessage: dailyResult.success ? undefined : dailyResult.message,
+        executionTimeMs: executionTime,
+      });
+
       cronResults.dailyPosts = dailyResult;
     } catch (error) {
+      const executionTime = Date.now() - dailyPostsStartTime;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       console.error('❌ Daily posts failed:', error);
+
+      try {
+        const { logActivity } = await import('@/lib/admin-activity');
+        await logActivity({
+          activityType: 'cron_execution',
+          activityCategory: 'content',
+          status: 'failed',
+          message: `Daily posts failed for ${dateStr}`,
+          metadata: {
+            targetDate: dateStr,
+            errorType:
+              error instanceof Error ? error.constructor.name : 'Unknown',
+            errorStack,
+          },
+          errorMessage,
+          executionTimeMs: executionTime,
+        });
+      } catch (logError) {
+        console.error('Failed to log activity:', logError);
+      }
+
       cronResults.dailyPosts = {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
       };
     }
 
     // DAILY TASKS (Every day) - Push Notifications for Cosmic Events
     console.log('🔔 Checking for notification-worthy cosmic events...');
+    const notificationStartTime = Date.now();
     try {
+      const { logActivity } = await import('@/lib/admin-activity');
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'notifications',
+        status: 'pending',
+        message: `Starting notification check for ${dateStr}`,
+        metadata: { targetDate: dateStr },
+      });
+
       const notificationResult = await runNotificationCheck(dateStr);
+      const executionTime = Date.now() - notificationStartTime;
+
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'notifications',
+        status: notificationResult.success ? 'success' : 'failed',
+        message:
+          notificationResult.message ||
+          `Notification check completed for ${dateStr}`,
+        metadata: {
+          targetDate: dateStr,
+          notificationsSent: notificationResult.notificationsSent || 0,
+          eventsSent: notificationResult.eventsSent || [],
+        },
+        errorMessage: notificationResult.success
+          ? undefined
+          : notificationResult.message,
+        executionTimeMs: executionTime,
+      });
+
       cronResults.notifications = notificationResult;
     } catch (error) {
+      const executionTime = Date.now() - notificationStartTime;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       console.error('❌ Notification check failed:', error);
+
+      try {
+        const { logActivity } = await import('@/lib/admin-activity');
+        await logActivity({
+          activityType: 'cron_execution',
+          activityCategory: 'notifications',
+          status: 'failed',
+          message: `Notification check failed for ${dateStr}`,
+          metadata: {
+            targetDate: dateStr,
+            errorType:
+              error instanceof Error ? error.constructor.name : 'Unknown',
+            errorStack,
+          },
+          errorMessage,
+          executionTimeMs: executionTime,
+        });
+      } catch (logError) {
+        console.error('Failed to log activity:', logError);
+      }
+
       cronResults.notifications = {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
       };
     }
 
@@ -280,11 +393,38 @@ export async function GET(request: NextRequest) {
     // On error, we could optionally remove the flag to allow retry
     // But keeping it prevents duplicate posts if there are network issues
     // executionTracker.delete(today); // Uncomment if you want retries on error
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
     console.error('❌ Master cron job failed:', error);
+
+    // Log master cron failure
+    try {
+      const { logActivity } = await import('@/lib/admin-activity');
+      // Get targetDateStr from execution tracker or use 'unknown'
+      const targetDateStr = Array.from(executionTracker.keys())[0] || 'unknown';
+      await logActivity({
+        activityType: 'cron_execution',
+        activityCategory: 'automation',
+        status: 'failed',
+        message: 'Master cron job failed',
+        metadata: {
+          targetDate: targetDateStr,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'Unknown',
+          errorStack,
+        },
+        errorMessage,
+      });
+    } catch (logError) {
+      console.error('Failed to log master cron error:', logError);
+    }
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
         timestamp: new Date().toISOString(),
       },
       { status: 500 },
@@ -308,15 +448,38 @@ async function runDailyPosts(dateStr: string) {
   console.log('cosmicResponse', cosmicResponse);
 
   if (!cosmicResponse.ok) {
-    throw new Error(`Failed to fetch cosmic content: ${cosmicResponse.status}`);
+    const errorText = await cosmicResponse.text().catch(() => '');
+    const errorDetails = {
+      status: cosmicResponse.status,
+      statusText: cosmicResponse.statusText,
+      url: `${productionUrl}/api/og/cosmic-post/${dateStr}`,
+      responseBody: errorText.substring(0, 500), // Limit response body size
+    };
+
+    try {
+      const { logActivity } = await import('@/lib/admin-activity');
+      await logActivity({
+        activityType: 'content_creation',
+        activityCategory: 'content',
+        status: 'failed',
+        message: `Failed to fetch cosmic content for ${dateStr}`,
+        metadata: errorDetails,
+        errorMessage: `HTTP ${cosmicResponse.status}: ${cosmicResponse.statusText}`,
+      });
+    } catch (logError) {
+      console.error('Failed to log cosmic fetch error:', logError);
+    }
+
+    throw new Error(
+      `Failed to fetch cosmic content: ${cosmicResponse.status} ${cosmicResponse.statusText}`,
+    );
   }
 
   const cosmicContent = await cosmicResponse.json();
 
-  // Calculate proper scheduling times with buffer for Vercel cron delays
-  // Cron runs at 8 AM UTC, schedule posts starting at 12 PM UTC (4 hour buffer)
-  const scheduleBase = new Date();
-  scheduleBase.setHours(12, 0, 0, 0); // Start at 12 PM UTC
+  // Calculate proper scheduling times
+  // Cron runs at 2 PM UTC the day before, schedule posts starting at 12 PM UTC next day
+  const scheduleBase = new Date(dateStr + 'T12:00:00Z'); // Start at 12 PM UTC on target date
 
   // Get next subreddit for rotation
   const subreddit = getNextSubreddit();
@@ -450,7 +613,33 @@ async function runDailyPosts(dateStr: string) {
           scheduledDate: post.scheduledDate,
         });
       } else {
+        const errorDetails = {
+          postName: post.name,
+          platforms: post.platforms,
+          status: response.status,
+          statusText: response.statusText,
+          error: result.error || result.message || `HTTP ${response.status}`,
+          responseBody: JSON.stringify(result).substring(0, 500),
+        };
+
         console.error(`❌ ${post.name} post failed:`, result);
+
+        // Log individual post failures
+        try {
+          const { logActivity } = await import('@/lib/admin-activity');
+          await logActivity({
+            activityType: 'content_creation',
+            activityCategory: 'content',
+            status: 'failed',
+            message: `Failed to schedule post "${post.name}" for ${dateStr}`,
+            metadata: errorDetails,
+            errorMessage:
+              result.error || result.message || `HTTP ${response.status}`,
+          });
+        } catch (logError) {
+          console.error('Failed to log post error:', logError);
+        }
+
         postResults.push({
           name: post.name,
           platforms: post.platforms,
@@ -462,12 +651,38 @@ async function runDailyPosts(dateStr: string) {
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       console.error(`❌ ${post.name} post error:`, error);
+
+      // Log individual post errors
+      try {
+        const { logActivity } = await import('@/lib/admin-activity');
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'failed',
+          message: `Error scheduling post "${post.name}" for ${dateStr}`,
+          metadata: {
+            postName: post.name,
+            platforms: post.platforms,
+            errorType:
+              error instanceof Error ? error.constructor.name : 'Unknown',
+            errorStack,
+          },
+          errorMessage,
+        });
+      } catch (logError) {
+        console.error('Failed to log post error:', logError);
+      }
+
       postResults.push({
         name: post.name,
         platforms: post.platforms,
         status: 'error',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
       });
     }
   }

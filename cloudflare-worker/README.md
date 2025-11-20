@@ -32,8 +32,8 @@ wrangler deploy
 
 ## ⏰ Schedule (Spread Throughout the Day)
 
-- **8:00 AM** - Daily cosmic pulse + Daily posts (blog/Substack)
-- **2:00 PM** - Cosmic changes notification
+- **8:00 AM** - Daily cosmic pulse
+- **2:00 PM** - Daily posts (created the day before for next day) + Cosmic changes notification
 - **8:00 PM** - Moon circles check
 - **Every 4 hours** (0, 4, 8, 12, 16, 20) - Cosmic snapshot updates
 - **Sunday 10:00 AM** - Weekly cosmic report
@@ -79,7 +79,7 @@ wrangler tail
 ## 📋 All Cron Jobs
 
 1. **Daily Cosmic Pulse** (8 AM) - Personalized daily notifications
-2. **Daily Posts** (8 AM) - Blog/Substack content generation
+2. **Daily Posts** (2 PM) - Blog/Substack content generation (created the day before for next day)
 3. **Cosmic Changes** (2 PM) - Afternoon notification about cosmic shifts
 4. **Moon Circles** (8 PM) - Evening check for New/Full Moon events
 5. **Cosmic Snapshots** (Every 4 hours) - Update cached cosmic data

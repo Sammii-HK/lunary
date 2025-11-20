@@ -26,11 +26,10 @@ export default {
       return await handleWeeklyCosmicReport(baseUrl, env, today);
     }
 
-    // Daily at 8 AM - cosmic pulse, daily posts, and cosmic snapshot update
+    // Daily at 8 AM - cosmic pulse and cosmic snapshot update
     if (hour === 8) {
       const results = await Promise.allSettled([
         handleDailyCosmicPulse(baseUrl, env, today),
-        handleDailyPosts(baseUrl, env, today),
         handleCosmicSnapshotUpdates(baseUrl, env, today),
       ]);
       return new Response(
@@ -47,9 +46,27 @@ export default {
       );
     }
 
-    // Daily at 2 PM - cosmic changes notification
+    // Daily at 2 PM - daily posts (created the day before for next day) and cosmic changes notification
     if (hour === 14) {
-      return await handleCosmicChangesNotification(baseUrl, env, today);
+      const tomorrow = new Date(now);
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      const results = await Promise.allSettled([
+        handleDailyPosts(baseUrl, env, tomorrowStr),
+        handleCosmicChangesNotification(baseUrl, env, today),
+      ]);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          results: results.map((r) =>
+            r.status === 'fulfilled' ? r.value : { error: r.reason },
+          ),
+          timestamp: now.toISOString(),
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     // Daily at 6 PM - personalized tarot
