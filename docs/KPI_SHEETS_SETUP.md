@@ -111,6 +111,7 @@ function updateLunaryKPIs() {
     'ARPU',
     'CAC',
     'LTV',
+    'DAUWAUStickiness',
   ]);
   appendRow(kpiSheet, [
     today,
@@ -125,6 +126,7 @@ function updateLunaryKPIs() {
     data.highLevelKPIs.arpu,
     data.highLevelKPIs.cac || 0,
     data.highLevelKPIs.ltv,
+    data.highLevelKPIs.dauWauStickiness || 0,
   ]);
 
   // Sheet 2: Financial Metrics
@@ -153,6 +155,91 @@ function updateLunaryKPIs() {
     data.financial.grossMargin || 0,
     data.financial.netMargin || 0,
   ]);
+
+  // New Sheet: Churn Metrics
+  const churnSheet = getOrCreateSheet('ChurnMetrics');
+  ensureHeaders(churnSheet, [
+    'Date',
+    'MonthlySubscriberChurn',
+    'AnnualSubscriberChurn',
+    'OverallChurn',
+  ]);
+  appendRow(churnSheet, [
+    today,
+    data.churn.monthlySubscriberChurn,
+    data.churn.annualSubscriberChurn,
+    data.churn.overallChurn,
+  ]);
+
+  // New Sheet: Acquisition Metrics
+  const acquisitionSheet = getOrCreateSheet('AcquisitionMetrics');
+  ensureHeaders(acquisitionSheet, [
+    'Date',
+    'ARPNU',
+    'NewPaidUsers',
+    'NewUserRevenue',
+    'OrganicSignups',
+    'PaidSignups',
+    'SocialSignups',
+    'SEOSignups',
+    'ReferralSignups',
+    'DirectSignups',
+    'ActivationRate',
+    'CostPerActivatedUser',
+    'PaybackPeriodMonths',
+  ]);
+  appendRow(acquisitionSheet, [
+    today,
+    data.acquisition.arpnu,
+    data.acquisition.newPaidUsers,
+    data.acquisition.newUserRevenue,
+    data.acquisition.organic,
+    data.acquisition.paid,
+    data.acquisition.social,
+    data.acquisition.seo,
+    data.acquisition.referral,
+    data.acquisition.direct,
+    data.acquisition.activationRate,
+    data.acquisition.costPerActivatedUser || 0,
+    data.acquisition.paybackPeriodMonths || 0,
+  ]);
+
+  // New Sheet: Subscription Cohorts
+  const subscriptionCohortsSheet = getOrCreateSheet('SubscriptionCohorts');
+  ensureHeaders(subscriptionCohortsSheet, [
+    'CohortMonth',
+    'InitialSubscribers',
+    'InitialMRR',
+    'CurrentSubscribers',
+    'CurrentMRR',
+    'ChurnedSubscribers',
+    'RetentionRate',
+    'ExpansionMRR',
+  ]);
+  data.subscriptionCohorts.forEach((cohort) => {
+    const existingRow = findRowByValue(
+      subscriptionCohortsSheet,
+      1,
+      cohort.cohortMonth,
+    );
+    const rowData = [
+      cohort.cohortMonth,
+      cohort.initialSubscribers,
+      cohort.initialMRR,
+      cohort.currentSubscribers,
+      cohort.currentMRR,
+      cohort.churnedSubscribers,
+      cohort.retentionRate,
+      cohort.expansionMRR,
+    ];
+    if (existingRow > 0) {
+      subscriptionCohortsSheet
+        .getRange(existingRow, 1, 1, 8)
+        .setValues([rowData]);
+    } else {
+      appendRow(subscriptionCohortsSheet, rowData);
+    }
+  });
 
   // Sheet 3: Cohort Retention (weekly updates)
   const cohortSheet = getOrCreateSheet('CohortRetention');
@@ -327,6 +414,7 @@ function updateLunaryKPIs() {
     'AITokensUsed',
     'AICost',
     'PerUserCost',
+    'AICostPerPaidUser',
     'InfraMinutes',
     'Storage',
     'Compute',
@@ -336,6 +424,7 @@ function updateLunaryKPIs() {
     data.apiCosts.aiTokensUsed,
     data.apiCosts.aiCost,
     data.apiCosts.perUserCost,
+    data.apiCosts.aiCostPerPaidUser || 0,
     data.apiCosts.infraMinutes || 0,
     data.apiCosts.storage || 0,
     data.apiCosts.compute || 0,
