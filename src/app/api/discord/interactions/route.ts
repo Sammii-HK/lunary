@@ -8,6 +8,8 @@ import {
 } from '@/lib/discord-bot/types';
 import { handleCommand } from '@/lib/discord-bot/commands';
 
+export const runtime = 'nodejs';
+
 const DISCORD_PUBLIC_KEY = process.env.DISCORD_PUBLIC_KEY || '';
 
 function verifySignature(

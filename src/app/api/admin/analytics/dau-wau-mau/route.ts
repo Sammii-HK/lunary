@@ -3,6 +3,11 @@ import { sql } from '@vercel/postgres';
 
 import { formatDate, resolveDateRange } from '@/lib/analytics/date-range';
 
+// Test user exclusion patterns - matches filtering in analytics summary
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
+const EXCLUDED_EMAIL = 'kellow.sammii@gmail.com';
+
 type Granularity = 'day' | 'week' | 'month';
 
 const GRANULARITY_STEPS: Record<Granularity, string> = {
@@ -31,6 +36,10 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(DISTINCT user_id) AS value
       FROM analytics_user_activity
       WHERE activity_type = 'session' AND activity_date = ${endDate}
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+          UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+        )
     `;
 
     const wauPromise = sql`
@@ -38,6 +47,10 @@ export async function GET(request: NextRequest) {
       FROM analytics_user_activity
       WHERE activity_type = 'session'
         AND activity_date BETWEEN (${endDate}::date - INTERVAL '6 days') AND ${endDate}
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+          UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+        )
     `;
 
     const mauPromise = sql`
@@ -45,6 +58,10 @@ export async function GET(request: NextRequest) {
       FROM analytics_user_activity
       WHERE activity_type = 'session'
         AND activity_date BETWEEN (${endDate}::date - INTERVAL '29 days') AND ${endDate}
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+          UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+        )
     `;
 
     const [dauResult, wauResult, mauResult] = await Promise.all([
@@ -62,11 +79,19 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(DISTINCT a.user_id) AS value
       FROM analytics_user_activity a
       WHERE a.activity_type = 'session' AND a.activity_date = ${endDate}
+        AND a.user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+          UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+        )
         AND EXISTS (
           SELECT 1 FROM analytics_user_activity b
           WHERE b.user_id = a.user_id
             AND b.activity_type = 'session'
             AND b.activity_date < ${endDate}
+            AND b.user_id NOT IN (
+              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+              UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+            )
         )
     `;
 
@@ -91,18 +116,30 @@ export async function GET(request: NextRequest) {
           SELECT COUNT(DISTINCT user_id)
           FROM analytics_user_activity
           WHERE activity_type = 'session' AND activity_date = bucket_date::date
+            AND user_id NOT IN (
+              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+              UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+            )
         ) AS dau,
         (
           SELECT COUNT(DISTINCT user_id)
           FROM analytics_user_activity
           WHERE activity_type = 'session'
             AND activity_date BETWEEN (bucket_date::date - INTERVAL '6 days') AND bucket_date::date
+            AND user_id NOT IN (
+              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+              UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+            )
         ) AS wau,
         (
           SELECT COUNT(DISTINCT user_id)
           FROM analytics_user_activity
           WHERE activity_type = 'session'
             AND activity_date BETWEEN (bucket_date::date - INTERVAL '29 days') AND bucket_date::date
+            AND user_id NOT IN (
+              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+              UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+            )
         ) AS mau
       FROM buckets
       ORDER BY bucket_date ASC
@@ -158,6 +195,10 @@ async function calculateRetention(
     FROM analytics_user_activity
     WHERE activity_type = 'session' 
       AND activity_date BETWEEN ${cohortStartDate} AND ${cohortEndDate}
+      AND user_id NOT IN (
+        SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+        UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+      )
   `;
 
   const baseUsers = new Set(
@@ -184,18 +225,25 @@ async function calculateRetention(
   for (const [key, offset] of Object.entries(DAY_OFFSETS) as Array<
     [keyof typeof DAY_OFFSETS, number]
   >) {
-    const target = new Date(cohortReferenceDate);
-    target.setDate(target.getDate() + offset);
+    // Use a window for retention checks (e.g., day 1 = days 1-3, day 7 = days 7-9, day 30 = days 30-32)
+    // This accounts for users who might not return on the exact day
+    const windowStart = new Date(cohortReferenceDate);
+    windowStart.setDate(windowStart.getDate() + offset);
+    const windowEnd = new Date(windowStart);
+    windowEnd.setDate(windowEnd.getDate() + 2); // 3-day window
 
-    if (target > range.end) {
-      // Can't calculate retention if target date is beyond our data range
+    // If window start is beyond our data range, can't calculate retention
+    if (windowStart > range.end) {
       retentionValues[keyMap(key)] = 0;
       continue;
     }
 
-    const targetDate = formatDate(target);
+    // Clamp window end to range end if needed
+    const actualWindowEnd = windowEnd > range.end ? range.end : windowEnd;
+    const windowStartDate = formatDate(windowStart);
+    const windowEndDate = formatDate(actualWindowEnd);
 
-    // Check if users from the cohort returned on the target date
+    // Check if users from the cohort returned within the window
     const baseUsersArray = Array.from(baseUsers);
 
     if (baseUsersArray.length === 0) {
@@ -203,16 +251,27 @@ async function calculateRetention(
       continue;
     }
 
-    // Use IN clause with unnest() for Vercel Postgres compatibility
+    // Use sql.unsafe() for array handling with proper test user filtering
     // Convert array to PostgreSQL array literal format
     const arrayLiteral = `{${baseUsersArray.map((id) => `"${id.replace(/"/g, '\\"')}"`).join(',')}}`;
     const result = await (sql as any).unsafe(
-      `SELECT DISTINCT user_id
-       FROM analytics_user_activity
-       WHERE activity_type = 'session' 
-         AND activity_date = $1
-         AND user_id = ANY($2::text[])`,
-      [targetDate, arrayLiteral],
+      `SELECT DISTINCT a.user_id
+       FROM analytics_user_activity a
+       WHERE a.activity_type = 'session' 
+         AND a.activity_date BETWEEN $1 AND $2
+         AND a.user_id = ANY($3::text[])
+         AND a.user_id NOT IN (
+           SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE $4 OR user_email = $5 OR user_email = $6
+           UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE $4 OR user_email = $5 OR user_email = $6
+         )`,
+      [
+        windowStartDate,
+        windowEndDate,
+        arrayLiteral,
+        TEST_EMAIL_PATTERN,
+        TEST_EMAIL_EXACT,
+        EXCLUDED_EMAIL,
+      ],
     );
 
     const returning = result.rows.length;
