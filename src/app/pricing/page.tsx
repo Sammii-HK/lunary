@@ -178,52 +178,6 @@ export default function PricingPage() {
     <>
       <FAQStructuredData faqs={faqs} />
       <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col'>
-        {/* Navigation */}
-        <nav className='sticky top-0 z-50 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm'>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <div className='flex justify-between items-center h-16'>
-              <Link
-                href='/'
-                className='text-xl font-medium text-zinc-100 tracking-tight'
-              >
-                Lunary
-              </Link>
-              <div className='hidden sm:flex items-center gap-6'>
-                <Link
-                  href='/blog'
-                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-                >
-                  Blog
-                </Link>
-                <Link
-                  href='/pricing'
-                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href='/welcome'
-                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-                >
-                  Features
-                </Link>
-                <Link
-                  href='/'
-                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-                >
-                  Daily Insights
-                </Link>
-                <Link
-                  href='/help'
-                  className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-                >
-                  Help
-                </Link>
-              </div>
-            </div>
-          </div>
-        </nav>
-
         {/* Header */}
         <section className='relative overflow-hidden border-b border-zinc-800/50'>
           <div className='absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-transparent'></div>

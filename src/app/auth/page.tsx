@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { MarketingNavbar } from '@/components/MarketingNavbar';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
 // Skip auth redirects ONLY in Playwright e2e tests (NOT Jest unit tests)
@@ -55,7 +54,6 @@ export default function AuthPage() {
 
   return (
     <div className='min-h-screen bg-black text-white flex flex-col'>
-      <MarketingNavbar />
       <div className='flex-1 flex items-center justify-center p-4'>
         <div className='w-full max-w-md'>
           <div className='text-center mb-8'>

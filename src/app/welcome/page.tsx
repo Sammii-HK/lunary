@@ -1,12 +1,10 @@
 import Link from 'next/link';
 import { Calendar, Sparkles, MessageSquare } from 'lucide-react';
-import { MarketingNavbar } from '@/components/MarketingNavbar';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
 export default function WelcomePage() {
   return (
     <main className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
-      <MarketingNavbar />
       <div className='max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16 space-y-16 flex-1'>
         {/* Hero Section */}
         <section className='grid gap-10 md:grid-cols-2 items-center'>

@@ -11,11 +11,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { ExploreMenu } from './ExploreMenu';
-import { useAuthStatus } from './AuthStatus';
 
 export const Navbar = () => {
   const pathname = usePathname();
-  const authState = useAuthStatus();
+
+  // Early return if pathname is not available yet
+  if (!pathname) {
+    return null;
+  }
 
   // Define app pages where navbar should show
   const appPages = [
@@ -28,6 +31,7 @@ export const Navbar = () => {
     '/profile',
     '/cosmic-state',
     '/cosmic-report-generator',
+    '/blog',
   ];
 
   // Define marketing pages
@@ -37,20 +41,27 @@ export const Navbar = () => {
     pathname === '/pricing' ||
     pathname === '/help' ||
     pathname === '/auth' ||
-    pathname?.startsWith('/blog') ||
-    pathname?.startsWith('/admin');
+    pathname.startsWith('/admin');
 
-  // Only show navbar for authenticated users on app pages
+  // Show navbar on app pages for all users (including unauthenticated for SEO)
   const isAppPage = appPages.some(
-    (page) => pathname === page || pathname?.startsWith(`${page}/`),
+    (page) => pathname === page || pathname.startsWith(`${page}/`),
   );
 
-  if (isMarketingRoute || !authState.isAuthenticated || !isAppPage) {
+  // CRITICAL: Never show on marketing routes - this is a safety check
+  // Marketing routes take precedence - if it's a marketing route, never show app nav
+  if (isMarketingRoute) {
+    return null;
+  }
+
+  // Only show on app pages (and ensure it's not a marketing route)
+  // This ensures marketing and app routes are mutually exclusive
+  if (!isAppPage || isMarketingRoute) {
     return null;
   }
 
   return (
-    <nav className='sticky bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
+    <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
       <div className='flex w-full max-w-3xl items-center justify-between px-4 py-3 text-white md:justify-evenly md:px-6'>
         <NavLink
           href='/app'

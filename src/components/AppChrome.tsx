@@ -10,7 +10,6 @@ import { NotificationManager } from '@/components/NotificationManager';
 import { ExitIntent } from '@/components/ExitIntent';
 import { OnboardingFlow } from '@/components/OnboardingFlow';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
-import { TrialCountdownBanner } from '@/components/TrialCountdownBanner';
 import { useAuthStatus } from './AuthStatus';
 
 export function AppChrome() {
@@ -48,6 +47,7 @@ export function AppChrome() {
     '/profile',
     '/cosmic-state',
     '/cosmic-report-generator',
+    '/blog',
   ];
 
   // Define marketing pages
@@ -57,18 +57,21 @@ export function AppChrome() {
     pathname === '/pricing' ||
     pathname === '/help' ||
     pathname === '/auth' ||
-    pathname?.startsWith('/blog') ||
     pathname?.startsWith('/admin');
 
   const isAppPage = appPages.some(
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );
 
-  // Show marketing nav/footer ONLY for unauthenticated users on marketing pages
-  // When authenticated, only show app nav on app pages (no marketing nav)
-  const showMarketingNav = !authState.isAuthenticated && isMarketingRoute;
-  // Show app nav only for authenticated users on app pages
-  const showAppNav = authState.isAuthenticated && isAppPage && !isAdminSurface;
+  // Ensure marketing and app routes are mutually exclusive
+  // Marketing routes take precedence - if it's a marketing route, it's NOT an app page
+  const isActuallyAppPage = isAppPage && !isMarketingRoute;
+
+  // Show marketing nav ONLY on marketing pages (top nav)
+  const showMarketingNav = isMarketingRoute && !isAdminSurface;
+  // Show app nav ONLY on app pages (bottom nav)
+  // Never show on marketing routes, even if user becomes authenticated
+  const showAppNav = isActuallyAppPage && !isAdminSurface;
 
   return (
     <>
@@ -77,7 +80,7 @@ export function AppChrome() {
           {showMarketingNav && <MarketingNavbar />}
           {showAppNav && (
             <>
-              <TrialCountdownBanner />
+              {/* <TrialCountdownBanner /> */}
               <Navbar />
             </>
           )}
