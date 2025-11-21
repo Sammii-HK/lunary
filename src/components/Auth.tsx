@@ -189,15 +189,15 @@ export function AuthComponent({
           return;
         }
 
-        // If on /auth page (not in modal), redirect to home
+        // If on /auth page (not in modal), redirect to app
         if (
           typeof window !== 'undefined' &&
           window.location.pathname === '/auth'
         ) {
-          console.log('🔄 Redirecting to home after sign-in');
+          console.log('🔄 Redirecting to app after sign-in');
           setSuccess('Signed in successfully! Redirecting...');
           setTimeout(() => {
-            window.location.href = '/';
+            window.location.href = '/app';
           }, 500);
           return;
         }

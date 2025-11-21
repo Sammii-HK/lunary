@@ -33,7 +33,7 @@ export default function AuthPage() {
 
     if (!authState.loading && authState.isAuthenticated) {
       redirectExecuted.current = true;
-      window.location.replace('/');
+      window.location.replace('/app');
     }
   }, [authState.isAuthenticated, authState.loading]);
 
