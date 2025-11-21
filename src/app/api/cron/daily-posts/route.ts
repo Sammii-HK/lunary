@@ -736,7 +736,7 @@ async function runDailyPosts(dateStr: string) {
         message: dailyPreview.message,
         priority: dailyPreview.priority,
         url: dailyPreview.url,
-        category: 'analytics',
+        category: 'general',
         dedupeKey: `daily-preview-${dateStr}`,
       });
 
@@ -766,7 +766,7 @@ async function runDailyPosts(dateStr: string) {
         priority: successTemplate.priority,
         url: successTemplate.url,
         fields: successFields,
-        category: 'analytics',
+        category: 'general',
         dedupeKey: `daily-posts-success-${dateStr}`,
       });
     } else {

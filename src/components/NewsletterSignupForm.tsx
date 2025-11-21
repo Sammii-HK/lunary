@@ -2,8 +2,21 @@
 
 import { useState, useEffect, useId, useRef, FormEvent } from 'react';
 import { Mail, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { betterAuthClient } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
+
+// Lazy load auth client to avoid webpack issues
+let betterAuthClient: any = null;
+const loadAuthClient = async () => {
+  if (betterAuthClient) return betterAuthClient;
+  try {
+    const authModule = await import('@/lib/auth-client');
+    betterAuthClient = authModule.betterAuthClient;
+    return betterAuthClient;
+  } catch (error) {
+    console.warn('Failed to load auth client:', error);
+    return null;
+  }
+};
 
 type SignupStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -41,7 +54,10 @@ export function NewsletterSignupForm({
 
     const prefillEmailFromSession = async () => {
       try {
-        const session = await betterAuthClient.getSession();
+        const authClient = await loadAuthClient();
+        if (!authClient) return;
+
+        const session = await authClient.getSession();
         const sessionUser =
           (session as any)?.data?.user || (session as any)?.user || null;
 

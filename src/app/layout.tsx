@@ -1,10 +1,15 @@
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Roboto_Mono } from 'next/font/google';
+import { Suspense } from 'react';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const roboto = Roboto_Mono({
+  weight: ['300', '400', '500', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 import { getMoonSymbol } from '../../utils/moon/moonPhases';
 import { LunaryJazzProvider } from '@/components/JazzProvider';
@@ -125,22 +130,34 @@ export default function RootLayout({
         <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
       </head>
       <body
-        className={`${inter.className} w-full min-h-screen bg-zinc-950 text-white`}
+        className={`${roboto.className} w-full min-h-screen bg-zinc-950 text-white`}
         suppressHydrationWarning
       >
         <StructuredData />
-        <PostHogProvider>
-          <ErrorBoundaryWrapper>
-            <LunaryJazzProvider>
-              <ConditionalMainWrapper>
-                <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                <Analytics />
-                <SpeedInsights />
-              </ConditionalMainWrapper>
-              <AppChrome />
-            </LunaryJazzProvider>
-          </ErrorBoundaryWrapper>
-        </PostHogProvider>
+        <Suspense fallback={null}>
+          <PostHogProvider>
+            <ErrorBoundaryWrapper>
+              <LunaryJazzProvider>
+                <Suspense
+                  fallback={
+                    <main className='flex flex-col w-full font-mono text-sm gap-4 overflow-y-auto px-4 h-screen'>
+                      {children}
+                    </main>
+                  }
+                >
+                  <ConditionalMainWrapper>
+                    <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                    <Analytics />
+                    <SpeedInsights />
+                  </ConditionalMainWrapper>
+                </Suspense>
+                <Suspense fallback={null}>
+                  <AppChrome />
+                </Suspense>
+              </LunaryJazzProvider>
+            </ErrorBoundaryWrapper>
+          </PostHogProvider>
+        </Suspense>
       </body>
     </html>
   );

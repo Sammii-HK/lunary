@@ -37,7 +37,7 @@ function buildConfirmationEmail({
 
   return {
     html: `
-      <div style="font-family:Inter,Helvetica,sans-serif;background:#05020c;color:#f4f4ff;padding:32px;border-radius:16px">
+      <div style="font-family:Roboto,Helvetica,sans-serif;background:#05020c;color:#f4f4ff;padding:32px;border-radius:16px">
         <h1 style="margin-top:0">${headline}</h1>
         ${body}
         <p style="font-size:12px;color:#a1a1b5;margin-top:24px">

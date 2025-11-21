@@ -4,6 +4,7 @@
   "description": "Manage Lunary content, notifications, and automation from a focused mobile workspace.",
   "start_url": "/admin",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#050505",
   "theme_color": "#0b0b0f",
   "orientation": "portrait-primary",

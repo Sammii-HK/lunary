@@ -61,6 +61,8 @@ export async function POST(request: NextRequest) {
       automatic_tax: { enabled: false },
       // Collect customer email for receipt
       customer_email: undefined, // Will be collected during checkout
+      // Enable promo codes in Stripe Checkout
+      allow_promotion_codes: true,
     });
 
     console.log(`✅ Stripe checkout session created: ${session.id}`);

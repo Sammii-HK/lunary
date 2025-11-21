@@ -9,13 +9,13 @@ export function MarketingNavbar() {
   const authState = useAuthStatus();
 
   return (
-    <nav className='sticky top-0 z-50 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm'>
+    <nav className='fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
           {/* Logo */}
           <Link
             href='/'
-            className='text-xl font-medium text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
+            className='text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
           >
             Lunary
           </Link>
@@ -35,16 +35,16 @@ export function MarketingNavbar() {
               Pricing
             </Link>
             <Link
-              href='/welcome'
-              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Features
-            </Link>
-            <Link
               href='/help'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
             >
               Help
+            </Link>
+            <Link
+              href='/app'
+              className='text-sm text-purple-400 hover:text-purple-300 transition-colors font-medium'
+            >
+              App
             </Link>
           </div>
 

@@ -4,18 +4,46 @@ import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Paywall } from '@/components/Paywall';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
-import { Calendar, Loader2, Download } from 'lucide-react';
+import {
+  Calendar,
+  Loader2,
+  Download,
+  CalendarDays,
+  RotateCcw,
+  CalendarRange,
+  Eclipse,
+} from 'lucide-react';
+
+const getAspectColor = (aspect: string): string => {
+  const aspectLower = aspect.toLowerCase();
+  if (aspectLower.includes('conjunction')) {
+    return 'text-blue-300';
+  } else if (aspectLower.includes('trine')) {
+    return 'text-green-300';
+  } else if (aspectLower.includes('opposition')) {
+    return 'text-red-300';
+  } else if (aspectLower.includes('square')) {
+    return 'text-orange-300';
+  } else if (aspectLower.includes('sextile')) {
+    return 'text-purple-300';
+  }
+  return 'text-zinc-100';
+};
 
 interface YearlyForecast {
   year: number;
   majorTransits: Array<{
     date: string;
+    startDate: string;
+    endDate: string;
     event: string;
     description: string;
     significance: string;
   }>;
   eclipses: Array<{
     date: string;
+    startDate: string;
+    endDate: string;
     type: 'solar' | 'lunar';
     sign: string;
     description: string;
@@ -28,6 +56,8 @@ interface YearlyForecast {
   }>;
   keyAspects: Array<{
     date: string;
+    startDate: string;
+    endDate: string;
     aspect: string;
     planets: string[];
     description: string;
@@ -37,18 +67,24 @@ interface YearlyForecast {
     monthName: string;
     majorTransits: Array<{
       date: string;
+      startDate: string;
+      endDate: string;
       event: string;
       description: string;
       significance: string;
     }>;
     eclipses: Array<{
       date: string;
+      startDate: string;
+      endDate: string;
       type: 'solar' | 'lunar';
       sign: string;
       description: string;
     }>;
     keyAspects: Array<{
       date: string;
+      startDate: string;
+      endDate: string;
       aspect: string;
       planets: string[];
       description: string;
@@ -114,6 +150,9 @@ export function YearlyForecast() {
     if (!endDate || endDate.trim() === '') {
       return `${start} onward`;
     }
+    if (startDate === endDate) {
+      return start;
+    }
     const end = formatDate(endDate, { month: 'short', day: 'numeric' });
     return `${start} – ${end}`;
   };
@@ -160,24 +199,58 @@ export function YearlyForecast() {
               : 'Yearly Cosmic Forecast'}
           </h2>
           {forecast && (
-            <button
-              onClick={() => {
-                const dataStr = JSON.stringify(forecast, null, 2);
-                const dataBlob = new Blob([dataStr], {
-                  type: 'application/json',
-                });
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `lunary-forecast-${forecast.year}.json`;
-                link.click();
-                URL.revokeObjectURL(url);
-              }}
-              className='inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800'
-            >
-              <Download className='h-4 w-4' />
-              Export
-            </button>
+            <div className='flex items-center gap-2'>
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch(
+                      `/api/forecast/yearly/calendar?year=${forecast.year}`,
+                    );
+                    if (!response.ok) {
+                      if (response.status === 403) {
+                        setError(
+                          'Calendar export requires Lunary+ AI Annual subscription',
+                        );
+                      } else {
+                        setError('Failed to download calendar');
+                      }
+                      return;
+                    }
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `lunary-forecast-calendar-${forecast.year}.ics`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                  } catch (err) {
+                    setError('Unable to download calendar');
+                  }
+                }}
+                className='inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800'
+              >
+                <CalendarDays className='h-4 w-4' />
+                Download Calendar
+              </button>
+              <button
+                onClick={() => {
+                  const dataStr = JSON.stringify(forecast, null, 2);
+                  const dataBlob = new Blob([dataStr], {
+                    type: 'application/json',
+                  });
+                  const url = URL.createObjectURL(dataBlob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `lunary-forecast-${forecast.year}.json`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className='inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800'
+              >
+                <Download className='h-4 w-4' />
+                Export JSON
+              </button>
+            </div>
           )}
         </div>
 
@@ -227,10 +300,11 @@ export function YearlyForecast() {
             <CollapsibleSection
               title={
                 <span className='flex items-center gap-2'>
-                  <Calendar className='h-5 w-5' />
+                  <Eclipse className='h-5 w-5' />
                   Eclipses
                 </span>
               }
+              defaultCollapsed={true}
             >
               {forecast.eclipses.length > 0 ? (
                 <div className='space-y-3'>
@@ -241,15 +315,10 @@ export function YearlyForecast() {
                     >
                       <div className='flex items-center justify-between mb-2'>
                         <span className='text-sm font-medium text-zinc-100'>
-                          {formatDate(eclipse.date)}
+                          {eclipse.sign || 'Eclipse'}
                         </span>
-                        <span className='rounded-full bg-purple-500/20 px-2 py-1 text-xs text-purple-300'>
-                          {eclipse.type === 'solar' ? 'Solar' : 'Lunar'} Eclipse
-                        </span>
-                      </div>
-                      <div className='mb-2 flex flex-wrap gap-2 text-xs text-purple-200/70'>
-                        <span className='rounded-full border border-purple-500/30 px-2 py-0.5'>
-                          {eclipse.sign || 'Unknown'} focus
+                        <span className='text-xs text-zinc-400'>
+                          {formatDateRange(eclipse.startDate, eclipse.endDate)}
                         </span>
                       </div>
                       <p className='text-sm text-zinc-400'>
@@ -263,7 +332,15 @@ export function YearlyForecast() {
               )}
             </CollapsibleSection>
 
-            <CollapsibleSection title='Retrograde Periods'>
+            <CollapsibleSection
+              title={
+                <span className='flex items-center gap-2'>
+                  <RotateCcw className='h-5 w-5' />
+                  Retrograde Periods
+                </span>
+              }
+              defaultCollapsed={true}
+            >
               {forecast.retrogrades.length > 0 ? (
                 <div className='space-y-3'>
                   {forecast.retrogrades.map((retrograde, index) => (
@@ -295,12 +372,21 @@ export function YearlyForecast() {
 
             {forecast.monthlyForecast &&
               forecast.monthlyForecast.length > 0 && (
-                <CollapsibleSection title='Monthly Forecast'>
+                <CollapsibleSection
+                  title={
+                    <span className='flex items-center gap-2'>
+                      <CalendarRange className='h-5 w-5' />
+                      Monthly Forecast
+                    </span>
+                  }
+                  defaultCollapsed={true}
+                >
                   <div className='space-y-6'>
                     {forecast.monthlyForecast.map((monthData) => (
                       <CollapsibleSection
                         key={monthData.month}
                         title={`${monthData.monthName} ${forecast.year}`}
+                        defaultCollapsed={true}
                       >
                         <div className='space-y-4'>
                           {monthData.eclipses.length > 0 && (
@@ -316,13 +402,13 @@ export function YearlyForecast() {
                                   >
                                     <div className='flex items-center justify-between mb-1'>
                                       <span className='text-xs font-medium text-zinc-100'>
-                                        {formatDate(eclipse.date)}
+                                        {eclipse.sign || 'Eclipse'}
                                       </span>
-                                      <span className='rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300'>
-                                        {eclipse.type === 'solar'
-                                          ? 'Solar'
-                                          : 'Lunar'}{' '}
-                                        Eclipse
+                                      <span className='text-xs text-zinc-400'>
+                                        {formatDateRange(
+                                          eclipse.startDate,
+                                          eclipse.endDate,
+                                        )}
                                       </span>
                                     </div>
                                     <p className='text-xs text-zinc-400'>
@@ -347,14 +433,16 @@ export function YearlyForecast() {
                                       className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-3'
                                     >
                                       <div className='flex items-center justify-between mb-1'>
-                                        <span className='text-xs font-medium text-zinc-100'>
+                                        <span
+                                          className={`text-xs font-medium ${getAspectColor(transit.event)}`}
+                                        >
                                           {transit.event}
                                         </span>
                                         <span className='text-xs text-zinc-400'>
-                                          {formatDate(transit.date, {
-                                            month: 'short',
-                                            day: 'numeric',
-                                          })}
+                                          {formatDateRange(
+                                            transit.startDate,
+                                            transit.endDate,
+                                          )}
                                         </span>
                                       </div>
                                       <p className='text-xs text-zinc-400'>
@@ -379,14 +467,16 @@ export function YearlyForecast() {
                                     className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-3'
                                   >
                                     <div className='flex items-center justify-between mb-1'>
-                                      <span className='text-xs font-medium text-zinc-100'>
+                                      <span
+                                        className={`text-xs font-medium ${getAspectColor(aspect.aspect)}`}
+                                      >
                                         {aspect.aspect}
                                       </span>
                                       <span className='text-xs text-zinc-400'>
-                                        {formatDate(aspect.date, {
-                                          month: 'short',
-                                          day: 'numeric',
-                                        })}
+                                        {formatDateRange(
+                                          aspect.startDate,
+                                          aspect.endDate,
+                                        )}
                                       </span>
                                     </div>
                                     <p className='text-xs uppercase tracking-wide text-zinc-500 mb-1'>

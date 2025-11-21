@@ -88,7 +88,7 @@ export function MarketingFooter() {
           <div className='space-y-4'>
             <Link
               href='/'
-              className='text-xl font-medium text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
+              className='text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
             >
               Lunary
             </Link>

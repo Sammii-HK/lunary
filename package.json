@@ -53,7 +53,8 @@
     "cleanup": "bash scripts/dev-cleanup.sh",
     "cleanup:port": "bash scripts/cleanup-port-3000.sh",
     "clear-cache": "bash scripts/clear-all-cache.sh",
-    "discord:register": "tsx scripts/register-discord-commands.ts"
+    "discord:register": "tsx scripts/register-discord-commands.ts",
+    "check": "pnpm lint && pnpm test && pnpm build"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

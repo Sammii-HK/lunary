@@ -11,23 +11,92 @@ const APP_URL =
 
 async function getCosmicData(date?: string) {
   const dateStr = date || new Date().toISOString().split('T')[0];
+
+  // Use production URL (with www) for consistency with other cron jobs
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    'https://lunary.app';
+    (process.env.NODE_ENV === 'production'
+      ? 'https://www.lunary.app'
+      : 'https://lunary.app');
 
-  try {
-    const response = await fetch(
-      `${baseUrl}/api/og/cosmic-post?date=${dateStr}`,
-    );
-    if (!response.ok) {
-      throw new Error(`Failed to fetch cosmic data: ${response.status}`);
+  // Try both URL formats
+  const urls = [
+    `${baseUrl}/api/og/cosmic-post/${dateStr}`, // Path parameter
+    `${baseUrl}/api/og/cosmic-post?date=${dateStr}`, // Query parameter (fallback)
+  ];
+
+  for (const url of urls) {
+    try {
+      // Create timeout manually for compatibility
+      // Use longer timeout since cosmic calculations can take time
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      console.log(`[discord-bot] Fetching cosmic data from: ${url}`);
+      const startTime = Date.now();
+
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Lunary-Discord-Bot/1.0',
+          Accept: 'application/json',
+        },
+        signal: controller.signal,
+      });
+
+      const fetchTime = Date.now() - startTime;
+      console.log(
+        `[discord-bot] Fetch completed in ${fetchTime}ms, status: ${response.status}`,
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        console.error(
+          `[discord-bot] Failed to fetch cosmic data from ${url}: ${response.status} ${response.statusText}`,
+          errorText.substring(0, 200),
+        );
+        // Try next URL if this one failed
+        continue;
+      }
+
+      const data = await response.json();
+
+      // Validate we got the expected data structure
+      if (!data || typeof data !== 'object') {
+        console.error('[discord-bot] Invalid response format from cosmic API');
+        continue; // Try next URL
+      }
+
+      console.log(`[discord-bot] Successfully fetched cosmic data from ${url}`);
+      return data;
+    } catch (error) {
+      console.error(
+        `[discord-bot] Error fetching cosmic data from ${url}:`,
+        error,
+      );
+      // Log more details for debugging
+      if (error instanceof Error) {
+        console.error('[discord-bot] Error details:', {
+          message: error.message,
+          name: error.name,
+          url,
+        });
+
+        // Check for specific error types
+        if (error.name === 'AbortError') {
+          console.error('[discord-bot] Request timed out after 15 seconds');
+        }
+      }
+      // Try next URL if this one failed
+      continue;
     }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching cosmic data:', error);
-    return null;
   }
+
+  // All URLs failed
+  console.error('[discord-bot] All attempts to fetch cosmic data failed');
+  return null;
 }
 
 function createAppLink(campaign: string): string {
@@ -39,7 +108,8 @@ export async function handleMoonCommand(): Promise<InteractionResponseData> {
 
   if (!cosmicData) {
     return {
-      content: 'Unable to fetch moon phase data at this time.',
+      content:
+        'Unable to fetch moon phase data at this time. Please try again in a moment.',
     };
   }
 
@@ -78,7 +148,8 @@ export async function handleEventsCommand(): Promise<InteractionResponseData> {
 
   if (!cosmicData) {
     return {
-      content: 'Unable to fetch cosmic events at this time.',
+      content:
+        'Unable to fetch cosmic events at this time. Please try again in a moment.',
     };
   }
 
@@ -132,7 +203,8 @@ export async function handleRetrogradeCommand(): Promise<InteractionResponseData
 
   if (!cosmicData) {
     return {
-      content: 'Unable to fetch retrograde data at this time.',
+      content:
+        'Unable to fetch retrograde data at this time. Please try again in a moment.',
     };
   }
 
@@ -224,9 +296,9 @@ export async function handleHoroscopeCommand(
   const cosmicData = await getCosmicData();
   const horoscope = cosmicData?.horoscope;
 
-  if (!horoscope) {
+  if (!cosmicData || !horoscope) {
     return {
-      content: `Unable to fetch horoscope for ${normalizedSign} at this time.`,
+      content: `Unable to fetch horoscope for ${normalizedSign} at this time. Please try again in a moment.`,
     };
   }
 
@@ -265,7 +337,8 @@ export async function handleCosmicCommand(): Promise<InteractionResponseData> {
 
   if (!cosmicData) {
     return {
-      content: 'Unable to fetch cosmic data at this time.',
+      content:
+        'Unable to fetch cosmic data at this time. Please try again in a moment.',
     };
   }
 
@@ -303,9 +376,17 @@ export async function handleCosmicCommand(): Promise<InteractionResponseData> {
 }
 
 export async function handleShareReadingCommand(): Promise<InteractionResponseData> {
-  const cosmicData = await getCosmicData();
-  const moonPhase =
-    cosmicData?.astronomicalData?.moonPhase?.name || 'current moon';
+  // Try to get moon phase, but don't fail if we can't
+  let moonPhase = 'current moon';
+  try {
+    const cosmicData = await getCosmicData();
+    moonPhase = cosmicData?.astronomicalData?.moonPhase?.name || 'current moon';
+  } catch (error) {
+    console.warn(
+      '[discord-bot] Could not fetch moon phase for share-reading command:',
+      error,
+    );
+  }
 
   return {
     embeds: [

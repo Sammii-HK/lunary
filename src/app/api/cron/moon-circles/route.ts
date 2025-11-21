@@ -299,11 +299,13 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
                 day: 'numeric',
                 year: 'numeric',
               }).format(date);
+              const dateSlug = date.toISOString().split('T')[0];
 
               const emailHtml = generateMoonCircleEmailHTML({
                 moonCircleId,
                 moonPhase: moonCircle.moonPhase,
                 dateLabel,
+                dateSlug,
                 title: `Moon Circle: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
                 summary: moonCircle.moonSignInfo,
                 appUrl: baseUrl,
@@ -312,6 +314,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
                 moonCircleId,
                 moonPhase: moonCircle.moonPhase,
                 dateLabel,
+                dateSlug,
                 title: `Moon Circle: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
                 summary: moonCircle.moonSignInfo,
                 appUrl: baseUrl,

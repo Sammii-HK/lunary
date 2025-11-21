@@ -1,4 +1,10 @@
-import { Observer } from 'astronomy-engine';
+import {
+  Observer,
+  AstroTime,
+  Body,
+  GeoVector,
+  Ecliptic,
+} from 'astronomy-engine';
 import {
   calculateRealAspects,
   checkRetrogradeEvents,
@@ -6,20 +12,69 @@ import {
   checkSignIngress,
   getAccurateMoonPhase,
   getRealPlanetaryPositions,
+  getZodiacSign,
 } from '../../../utils/astrology/cosmic-og';
 
 export const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
+
+function getEclipseDescriptionBySign(sign: string, isSolar: boolean): string {
+  const signLower = sign.toLowerCase();
+  const eclipseType = isSolar ? 'Solar' : 'Lunar';
+
+  const solarDescriptions: Record<string, string> = {
+    aries: 'Bold new beginnings and courageous initiatives',
+    taurus: 'Grounded foundations and material stability',
+    gemini: 'Communication breakthroughs and mental expansion',
+    cancer: 'Emotional renewal and nurturing growth',
+    leo: 'Creative expression and confident leadership',
+    virgo: 'Practical refinement and service to others',
+    libra: 'Harmonious partnerships and balanced decisions',
+    scorpio: 'Deep transformation and powerful rebirth',
+    sagittarius: 'Philosophical expansion and adventurous journeys',
+    capricorn: 'Ambitious structures and disciplined achievement',
+    aquarius: 'Innovative visions and humanitarian progress',
+    pisces: 'Spiritual awakening and intuitive flow',
+  };
+
+  const lunarDescriptions: Record<string, string> = {
+    aries: 'Releasing impulsive energy and finding balance',
+    taurus: 'Letting go of material attachments and finding freedom',
+    gemini: 'Releasing scattered thoughts and finding clarity',
+    cancer: 'Emotional release and healing deep wounds',
+    leo: 'Releasing ego and finding authentic expression',
+    virgo: 'Letting go of perfectionism and finding acceptance',
+    libra: 'Releasing codependency and finding independence',
+    scorpio: 'Deep emotional release and transformation',
+    sagittarius: 'Releasing dogmatic beliefs and finding truth',
+    capricorn: 'Letting go of rigid structures and finding flexibility',
+    aquarius: 'Releasing isolation and finding community',
+    pisces: 'Releasing illusions and finding spiritual clarity',
+  };
+
+  const descriptions = isSolar ? solarDescriptions : lunarDescriptions;
+  const description =
+    descriptions[signLower] ||
+    (isSolar
+      ? 'New beginnings and cosmic alignment'
+      : 'Release and completion');
+
+  return `${eclipseType} Eclipse in ${sign} - ${description}`;
+}
 
 export interface YearlyForecast {
   year: number;
   majorTransits: Array<{
     date: string;
+    startDate: string;
+    endDate: string;
     event: string;
     description: string;
     significance: string;
   }>;
   eclipses: Array<{
     date: string;
+    startDate: string;
+    endDate: string;
     type: 'solar' | 'lunar';
     sign: string;
     description: string;
@@ -32,29 +87,35 @@ export interface YearlyForecast {
   }>;
   keyAspects: Array<{
     date: string;
+    startDate: string;
+    endDate: string;
     aspect: string;
     planets: string[];
     description: string;
-    startDate?: string;
-    endDate?: string;
   }>;
   monthlyForecast?: Array<{
     month: number;
     monthName: string;
     majorTransits: Array<{
       date: string;
+      startDate: string;
+      endDate: string;
       event: string;
       description: string;
       significance: string;
     }>;
     eclipses: Array<{
       date: string;
+      startDate: string;
+      endDate: string;
       type: 'solar' | 'lunar';
       sign: string;
       description: string;
     }>;
     keyAspects: Array<{
       date: string;
+      startDate: string;
+      endDate: string;
       aspect: string;
       planets: string[];
       description: string;
@@ -70,28 +131,246 @@ export function calculateEclipses(
   const eclipses: YearlyForecast['eclipses'] = [];
   const startDate = new Date(year, 0, 1);
   const endDate = new Date(year, 11, 31);
+  const seenEclipses = new Set<string>();
 
   let currentDate = new Date(startDate);
-  while (currentDate <= endDate) {
-    const moonPhase = getAccurateMoonPhase(currentDate);
-    const positions = getRealPlanetaryPositions(currentDate, observer);
+  currentDate.setHours(0, 0, 0, 0);
 
-    if (
-      moonPhase.isSignificant &&
-      (moonPhase.name === 'New Moon' || moonPhase.name === 'Full Moon')
-    ) {
-      eclipses.push({
-        date: currentDate.toISOString().split('T')[0],
-        type: moonPhase.name === 'New Moon' ? 'solar' : 'lunar',
-        sign: positions.moon?.sign || 'Unknown',
-        description: `${moonPhase.name === 'New Moon' ? 'Solar' : 'Lunar'} Eclipse in ${positions.moon?.sign || 'Unknown'} - ${moonPhase.energy || 'A powerful cosmic event'}`,
-      });
+  while (currentDate <= endDate) {
+    let foundEclipse = false;
+
+    for (let hour = 0; hour < 24; hour += 3) {
+      const checkTime = new Date(currentDate);
+      checkTime.setHours(hour, 0, 0, 0);
+
+      const moonPhase = getAccurateMoonPhase(checkTime);
+
+      const isNewMoon = moonPhase.name === 'New Moon';
+      const isFullMoon =
+        moonPhase.isSignificant &&
+        moonPhase.name !== 'New Moon' &&
+        moonPhase.name !== 'First Quarter' &&
+        moonPhase.name !== 'Third Quarter' &&
+        moonPhase.name !== 'Waxing Crescent' &&
+        moonPhase.name !== 'Waning Crescent' &&
+        moonPhase.name !== 'Waxing Gibbous' &&
+        moonPhase.name !== 'Waning Gibbous' &&
+        moonPhase.illumination >= 99;
+
+      if (isNewMoon || isFullMoon) {
+        const isSolar = isNewMoon;
+        const phaseDate = checkTime.toISOString().split('T')[0];
+
+        const astroTime = new AstroTime(checkTime);
+        const moonVector = GeoVector(Body.Moon, astroTime, true);
+        const moonEcliptic = Ecliptic(moonVector);
+        const sunVector = GeoVector(Body.Sun, astroTime, true);
+        const sunEcliptic = Ecliptic(sunVector);
+
+        const moonLatitudeRad = moonEcliptic.elat;
+        const phaseLatitudeDegrees = Math.abs(
+          moonLatitudeRad * (180 / Math.PI),
+        );
+
+        const distanceFromEcliptic = Math.abs(moonVector.z);
+        const moonDistance = Math.sqrt(moonVector.x ** 2 + moonVector.y ** 2);
+        const distanceFromEclipticDegrees =
+          Math.atan2(distanceFromEcliptic, moonDistance) * (180 / Math.PI);
+
+        const moonLongitude = moonEcliptic.elon;
+        const sunLongitude = sunEcliptic.elon;
+        const longitudeDiff = Math.abs(moonLongitude - sunLongitude);
+        const longitudeSeparation =
+          longitudeDiff > Math.PI ? 2 * Math.PI - longitudeDiff : longitudeDiff;
+        const longitudeSeparationDegrees =
+          longitudeSeparation * (180 / Math.PI);
+
+        const phaseLatitude = distanceFromEclipticDegrees;
+
+        const isAligned = isSolar
+          ? longitudeSeparationDegrees < 10.0
+          : longitudeSeparationDegrees > 170.0 &&
+            longitudeSeparationDegrees < 190.0;
+
+        let bestDate: Date | null = null;
+        let minLatitude = phaseLatitude;
+
+        const initialThreshold = 18.0;
+        if (phaseLatitude <= initialThreshold) {
+          bestDate = checkTime;
+          minLatitude = phaseLatitude;
+
+          for (let offset = -1; offset <= 1; offset++) {
+            const checkDate = new Date(checkTime);
+            checkDate.setDate(checkDate.getDate() + offset);
+            checkDate.setHours(12, 0, 0, 0);
+
+            const checkMoonPhase = getAccurateMoonPhase(checkDate);
+            const isCorrectPhase = isSolar
+              ? checkMoonPhase.name === 'New Moon'
+              : checkMoonPhase.isSignificant &&
+                checkMoonPhase.name !== 'New Moon' &&
+                checkMoonPhase.illumination >= 99;
+
+            if (!isCorrectPhase) continue;
+
+            const checkAstroTime = new AstroTime(checkDate);
+            const checkMoonVector = GeoVector(Body.Moon, checkAstroTime, true);
+            const checkMoonEcliptic = Ecliptic(checkMoonVector);
+
+            const checkLatitudeDegrees = Math.abs(
+              checkMoonEcliptic.elat * (180 / Math.PI),
+            );
+            const checkDistance = Math.abs(checkMoonVector.z);
+            const checkMoonDist = Math.sqrt(
+              checkMoonVector.x ** 2 + checkMoonVector.y ** 2,
+            );
+            const checkDistFromEclipticDegrees =
+              Math.atan2(checkDistance, checkMoonDist) * (180 / Math.PI);
+            const checkLatitude = checkDistFromEclipticDegrees;
+
+            if (checkLatitude < minLatitude) {
+              minLatitude = checkLatitude;
+              bestDate = checkDate;
+            }
+          }
+        }
+
+        const expectedDates = [
+          '2026-02-17',
+          '2026-03-03',
+          '2026-08-12',
+          '2026-08-27',
+          '2026-08-28',
+        ];
+        if (
+          expectedDates.includes(phaseDate) ||
+          expectedDates.includes(bestDate?.toISOString().split('T')[0] || '')
+        ) {
+          console.log(
+            `[calculateEclipses] ${isSolar ? 'New' : 'Full'} Moon on ${phaseDate} at ${hour}:00, phaseLatitude: ${phaseLatitude.toFixed(3)}° (elat: ${phaseLatitudeDegrees.toFixed(3)}°, dist: ${distanceFromEclipticDegrees.toFixed(3)}°), best date: ${bestDate?.toISOString().split('T')[0]}, minLatitude: ${minLatitude.toFixed(3)}°, passes: ${bestDate && minLatitude <= 5.0}`,
+          );
+        }
+
+        const latitudeThreshold = 18.0;
+        if (bestDate && minLatitude <= latitudeThreshold) {
+          const dateStr = bestDate.toISOString().split('T')[0];
+
+          const eclipseKey = `${dateStr}-${isSolar ? 'solar' : 'lunar'}`;
+          if (seenEclipses.has(eclipseKey)) {
+            continue;
+          }
+          const positions = getRealPlanetaryPositions(bestDate, observer);
+
+          let eclipseSign: string | undefined;
+          if (isSolar) {
+            eclipseSign =
+              positions?.Sun?.sign ||
+              positions?.Moon?.sign ||
+              (positions?.Sun?.longitude !== undefined
+                ? getZodiacSign(positions.Sun.longitude)
+                : positions?.Moon?.longitude !== undefined
+                  ? getZodiacSign(positions.Moon.longitude)
+                  : undefined);
+          } else {
+            eclipseSign =
+              positions?.Moon?.sign ||
+              positions?.Sun?.sign ||
+              (positions?.Moon?.longitude !== undefined
+                ? getZodiacSign(positions.Moon.longitude)
+                : positions?.Sun?.longitude !== undefined
+                  ? getZodiacSign(positions.Sun.longitude)
+                  : undefined);
+          }
+
+          if (eclipseSign) {
+            seenEclipses.add(eclipseKey);
+            eclipses.push({
+              date: dateStr,
+              startDate: dateStr,
+              endDate: dateStr,
+              type: (isSolar ? 'solar' : 'lunar') as 'solar' | 'lunar',
+              sign: eclipseSign,
+              description: `${getEclipseDescriptionBySign(eclipseSign, isSolar)} (latitude: ${minLatitude.toFixed(3)}°)`,
+            });
+            console.log(
+              `[calculateEclipses] Found ${isSolar ? 'SOLAR' : 'LUNAR'} eclipse: ${dateStr} in ${eclipseSign}, latitude: ${minLatitude.toFixed(3)}°`,
+            );
+
+            foundEclipse = true;
+            currentDate = new Date(
+              bestDate.getTime() + 14 * 24 * 60 * 60 * 1000,
+            );
+            break;
+          }
+        }
+      }
     }
 
-    currentDate = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+    if (foundEclipse) {
+      continue;
+    }
+
+    currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
   }
 
-  return eclipses;
+  const deduplicated: YearlyForecast['eclipses'] = [];
+  const processed = new Set<string>();
+
+  const sortedEclipses = [...eclipses].sort((a, b) => {
+    const aLat = parseFloat(
+      a.description.match(/latitude: ([\d.]+)°/)?.[1] || '999',
+    );
+    const bLat = parseFloat(
+      b.description.match(/latitude: ([\d.]+)°/)?.[1] || '999',
+    );
+    return aLat - bLat;
+  });
+
+  for (const eclipse of sortedEclipses) {
+    const eclipseDate = new Date(eclipse.date);
+    const dateKey = `${eclipse.date}-${eclipse.type}`;
+
+    if (processed.has(dateKey)) continue;
+
+    const eclipseLatitude = parseFloat(
+      eclipse.description.match(/latitude: ([\d.]+)°/)?.[1] || '999',
+    );
+
+    const nearbyEclipses = eclipses.filter(
+      (e) =>
+        e.type === eclipse.type &&
+        e.date !== eclipse.date &&
+        Math.abs(new Date(e.date).getTime() - eclipseDate.getTime()) <
+          35 * 24 * 60 * 60 * 1000,
+    );
+
+    if (nearbyEclipses.length > 0) {
+      const minNearbyLatitude = Math.min(
+        ...nearbyEclipses.map((e) =>
+          parseFloat(e.description.match(/latitude: ([\d.]+)°/)?.[1] || '999'),
+        ),
+      );
+      if (eclipseLatitude >= minNearbyLatitude) {
+        continue;
+      }
+      for (const nearby of nearbyEclipses) {
+        processed.add(`${nearby.date}-${nearby.type}`);
+      }
+    }
+
+    processed.add(dateKey);
+    deduplicated.push({
+      ...eclipse,
+      description: eclipse.description.replace(/\s*\(latitude: [\d.]+°\)/, ''),
+    });
+  }
+
+  deduplicated.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
+
+  return deduplicated;
 }
 
 export async function generateYearlyForecast(
@@ -131,12 +410,18 @@ export async function generateYearlyForecast(
   >();
   const previousPositions = new Map<string, boolean>();
 
-  // Track conjunction periods (when planets are within 8 degrees)
-  const conjunctionStartMap = new Map<
+  // Track all aspect periods (conjunction, square, trine, opposition, sextile)
+  const aspectStartMap = new Map<
     string,
-    { startDate: string; planetA: string; planetB: string; startSign: string }
+    {
+      startDate: string;
+      planetA: string;
+      planetB: string;
+      aspect: string;
+      startSign: string;
+    }
   >();
-  const previousConjunctions = new Map<string, boolean>();
+  const previousAspects = new Map<string, boolean>();
 
   let currentDate = new Date(startDate);
 
@@ -189,111 +474,81 @@ export async function generateYearlyForecast(
       previousPositions.set(planet, isRetrograde);
     });
 
-    // Track conjunctions with start/end dates (similar to retrogrades)
-    const conjunctionKey = (planetA: string, planetB: string) =>
-      [planetA, planetB].sort().join('-');
+    // Track all aspects with start/end dates (similar to retrogrades)
+    const aspectKey = (planetA: string, planetB: string, aspectType: string) =>
+      `${[planetA, planetB].sort().join('-')}-${aspectType}`;
 
+    // Build set of currently active aspect keys
+    const currentAspectKeys = new Set<string>();
     aspects
-      .filter((a) => a.aspect === 'conjunction')
+      .filter((a) => a.priority >= 6)
       .forEach((aspect) => {
         const planetA = aspect.planetA?.name || '';
         const planetB = aspect.planetB?.name || '';
-        const key = conjunctionKey(planetA, planetB);
-        const wasConjunction = previousConjunctions.get(key) || false;
-        const isConjunction = true;
+        const aspectType = aspect.aspect || '';
+        const key = aspectKey(planetA, planetB, aspectType);
+        currentAspectKeys.add(key);
+      });
 
-        if (!wasConjunction && isConjunction) {
-          // Conjunction starts
-          conjunctionStartMap.set(key, {
+    // Check for aspects that ended (were active yesterday but not today)
+    previousAspects.forEach((wasActive, key) => {
+      if (wasActive && !currentAspectKeys.has(key)) {
+        // Aspect ended (exited orb)
+        const startInfo = aspectStartMap.get(key);
+        if (startInfo) {
+          const existingAspect = keyAspects.find(
+            (a) =>
+              a.aspect === startInfo.aspect &&
+              a.planets.includes(startInfo.planetA) &&
+              a.planets.includes(startInfo.planetB) &&
+              a.startDate === startInfo.startDate,
+          );
+          if (existingAspect) {
+            existingAspect.endDate = dateStr;
+            // Update corresponding major transit
+            const existingTransit = majorTransits.find(
+              (t) =>
+                t.event === startInfo.aspect &&
+                t.startDate === startInfo.startDate &&
+                t.description.includes(startInfo.planetA) &&
+                t.description.includes(startInfo.planetB),
+            );
+            if (existingTransit) {
+              existingTransit.endDate = dateStr;
+            }
+          }
+          aspectStartMap.delete(key);
+        }
+      }
+    });
+
+    // Process currently active aspects
+    aspects
+      .filter((a) => a.priority >= 6)
+      .forEach((aspect) => {
+        const planetA = aspect.planetA?.name || '';
+        const planetB = aspect.planetB?.name || '';
+        const aspectType = aspect.aspect || '';
+        const key = aspectKey(planetA, planetB, aspectType);
+        const wasAspect = previousAspects.get(key) || false;
+
+        if (!wasAspect) {
+          // Aspect starts (enters orb)
+          aspectStartMap.set(key, {
             startDate: dateStr,
             planetA,
             planetB,
+            aspect: aspectType,
             startSign: aspect.planetA?.constellation || '',
           });
-        } else if (wasConjunction && !isConjunction) {
-          // Conjunction ends
-          const startInfo = conjunctionStartMap.get(key);
-          if (startInfo) {
-            const existingAspect = keyAspects.find(
-              (a) =>
-                a.aspect === 'conjunction' &&
-                a.planets.includes(planetA) &&
-                a.planets.includes(planetB) &&
-                a.startDate === startInfo.startDate,
-            );
-            if (existingAspect) {
-              existingAspect.endDate = dateStr;
-            } else {
-              keyAspects.push({
-                date: startInfo.startDate,
-                aspect: 'conjunction',
-                planets: [planetA, planetB],
-                description: `${planetA} conjunction ${planetB}`,
-                startDate: startInfo.startDate,
-                endDate: dateStr,
-              });
-            }
-            conjunctionStartMap.delete(key);
-          }
         }
 
-        previousConjunctions.set(key, isConjunction);
-      });
-
-    // Process other aspects (non-conjunctions) with correct property names
-    aspects
-      .filter((a) => a.priority >= 6 && a.aspect !== 'conjunction')
-      .forEach((aspect) => {
-        const planetA = aspect.planetA?.name || '';
-        const planetB = aspect.planetB?.name || '';
-        const aspectDescription =
-          aspect.energy || `${planetA} ${aspect.aspect} ${planetB}`;
-
-        if (
-          !keyAspects.find(
-            (a) =>
-              a.date === dateStr &&
-              a.aspect === aspect.aspect &&
-              a.planets.includes(planetA) &&
-              a.planets.includes(planetB),
-          )
-        ) {
-          const keyAspect = {
-            date: dateStr,
-            aspect: aspect.aspect || '',
-            planets: [planetA, planetB],
-            description: aspectDescription,
-          };
-          keyAspects.push(keyAspect);
-          monthlyData.get(month)!.keyAspects.push(keyAspect);
-
-          if (aspect.priority >= 7) {
-            const majorTransit = {
-              date: dateStr,
-              event: aspect.aspect || '',
-              description: aspectDescription,
-              significance: `Major ${aspect.aspect} between ${planetA} and ${planetB}`,
-            };
-            majorTransits.push(majorTransit);
-            monthlyData.get(month)!.majorTransits.push(majorTransit);
-          }
-        }
-      });
-
-    // Process conjunctions that are active (add to keyAspects if not already added)
-    aspects
-      .filter((a) => a.aspect === 'conjunction' && a.priority >= 6)
-      .forEach((aspect) => {
-        const planetA = aspect.planetA?.name || '';
-        const planetB = aspect.planetB?.name || '';
-        const key = conjunctionKey(planetA, planetB);
-        const startInfo = conjunctionStartMap.get(key);
-
+        // Add to keyAspects if not already added
+        const startInfo = aspectStartMap.get(key);
         if (startInfo) {
-          // Check if we already have this conjunction period
           const existingAspect = keyAspects.find(
             (a) =>
-              a.aspect === 'conjunction' &&
+              a.aspect === aspectType &&
               a.planets.includes(planetA) &&
               a.planets.includes(planetB) &&
               a.startDate === startInfo.startDate,
@@ -301,13 +556,14 @@ export async function generateYearlyForecast(
 
           if (!existingAspect) {
             const aspectDescription =
-              aspect.energy || `${planetA} conjunction ${planetB}`;
+              aspect.energy || `${planetA} ${aspectType} ${planetB}`;
             const keyAspect = {
               date: dateStr,
-              aspect: 'conjunction',
+              aspect: aspectType,
               planets: [planetA, planetB],
               description: aspectDescription,
               startDate: startInfo.startDate,
+              endDate: '',
             };
             keyAspects.push(keyAspect);
             monthlyData.get(month)!.keyAspects.push(keyAspect);
@@ -315,9 +571,11 @@ export async function generateYearlyForecast(
             if (aspect.priority >= 7) {
               const majorTransit = {
                 date: dateStr,
-                event: 'conjunction',
+                startDate: startInfo.startDate,
+                endDate: '',
+                event: aspectType,
                 description: aspectDescription,
-                significance: `Major conjunction between ${planetA} and ${planetB}`,
+                significance: `Major ${aspectType} between ${planetA} and ${planetB}`,
               };
               majorTransits.push(majorTransit);
               monthlyData.get(month)!.majorTransits.push(majorTransit);
@@ -325,6 +583,12 @@ export async function generateYearlyForecast(
           }
         }
       });
+
+    // Update previousAspects map for next iteration
+    previousAspects.clear();
+    currentAspectKeys.forEach((key) => {
+      previousAspects.set(key, true);
+    });
 
     currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
   }
@@ -345,21 +609,22 @@ export async function generateYearlyForecast(
     }
   }
 
-  // Handle conjunctions that start but don't end within the year
-  for (const [conjunctionKey, startInfo] of conjunctionStartMap.entries()) {
+  // Handle aspects that start but don't end within the year
+  for (const [aspectKey, startInfo] of aspectStartMap.entries()) {
     const existingAspect = keyAspects.find(
       (a) =>
-        a.aspect === 'conjunction' &&
+        a.aspect === startInfo.aspect &&
         a.planets.includes(startInfo.planetA) &&
         a.planets.includes(startInfo.planetB) &&
         a.startDate === startInfo.startDate,
     );
     if (!existingAspect) {
+      const aspectDescription = `${startInfo.planetA} ${startInfo.aspect} ${startInfo.planetB}`;
       keyAspects.push({
         date: startInfo.startDate,
-        aspect: 'conjunction',
+        aspect: startInfo.aspect,
         planets: [startInfo.planetA, startInfo.planetB],
-        description: `${startInfo.planetA} conjunction ${startInfo.planetB}`,
+        description: aspectDescription,
         startDate: startInfo.startDate,
         endDate: '',
       });
@@ -374,8 +639,6 @@ export async function generateYearlyForecast(
     const month = eclipseDate.getMonth();
     monthlyData.get(month)!.eclipses.push(eclipse);
   });
-
-  const summary = `Your ${year} cosmic forecast reveals ${majorTransits.length} major planetary transits, ${retrogrades.length} planetary retrogrades, ${eclipses.length} eclipses, and ${keyAspects.length} significant aspects. This year brings transformative energies and opportunities for growth.`;
 
   const deduplicatedMajorTransits = majorTransits.filter(
     (transit, index, self) =>
@@ -398,6 +661,12 @@ export async function generateYearlyForecast(
           a.planets.every((p) => aspect.planets.includes(p)),
       ),
   );
+
+  const limitedMajorTransits = deduplicatedMajorTransits.slice(0, 30);
+  const limitedRetrogrades = retrogrades.slice(0, 15);
+  const limitedKeyAspects = deduplicatedKeyAspects.slice(0, 30);
+
+  const summary = `Your ${year} cosmic forecast reveals ${limitedMajorTransits.length} major planetary transits, ${limitedRetrogrades.length} planetary retrogrades, ${eclipses.length} eclipses, and ${limitedKeyAspects.length} significant aspects. This year brings transformative energies and opportunities for growth.`;
 
   // Build monthly forecast array
   const monthNames = [
@@ -456,10 +725,10 @@ export async function generateYearlyForecast(
 
   return {
     year,
-    majorTransits: deduplicatedMajorTransits.slice(0, 30),
+    majorTransits: limitedMajorTransits,
     eclipses,
-    retrogrades: retrogrades.slice(0, 15),
-    keyAspects: deduplicatedKeyAspects.slice(0, 30),
+    retrogrades: limitedRetrogrades,
+    keyAspects: limitedKeyAspects,
     monthlyForecast,
     summary,
   };
