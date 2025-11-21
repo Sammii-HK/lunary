@@ -11,6 +11,8 @@ import {
   Globe,
   ChevronDown,
   Calendar,
+  BookOpen,
+  Tag,
 } from 'lucide-react';
 
 type ExploreItem = {
@@ -20,6 +22,16 @@ type ExploreItem = {
 };
 
 const exploreItems: ExploreItem[] = [
+  {
+    href: '/blog',
+    label: 'Blog',
+    icon: BookOpen,
+  },
+  {
+    href: '/pricing',
+    label: 'Pricing',
+    icon: Tag,
+  },
   {
     href: '/shop',
     label: 'Shop',
@@ -110,8 +122,12 @@ export const ExploreMenu = () => {
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
+                  href={`${item.href}?from=explore`}
+                  onClick={() => {
+                    setIsOpen(false);
+                    // Track that user is navigating from explore menu
+                    sessionStorage.setItem('lunary_nav_context', 'explore');
+                  }}
                   className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition ${
                     itemActive
                       ? 'bg-zinc-800 text-zinc-100'

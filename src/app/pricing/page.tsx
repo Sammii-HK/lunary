@@ -177,7 +177,7 @@ export default function PricingPage() {
   return (
     <>
       <FAQStructuredData faqs={faqs} />
-      <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col'>
+      <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
         {/* Header */}
         <section className='relative overflow-hidden border-b border-zinc-800/50'>
           <div className='absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-transparent'></div>

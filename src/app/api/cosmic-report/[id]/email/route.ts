@@ -59,7 +59,7 @@ export async function POST(request: NextRequest, context: any) {
       to: parsed.email.toLowerCase(),
       subject: `Your Lunary ${row.report_data.reportType} report`,
       html: `
-        <div style="font-family:Inter,Helvetica,sans-serif;background:#05020c;color:#f4f4ff;padding:32px;border-radius:20px">
+        <div style="font-family:Roboto,Helvetica,sans-serif;background:#05020c;color:#f4f4ff;padding:32px;border-radius:20px">
           <h1>${row.report_data.title}</h1>
           <p>${row.report_data.subtitle}</p>
           ${shareUrl ? `<p><strong>Share Link:</strong> ${shareUrl}</p>` : ''}

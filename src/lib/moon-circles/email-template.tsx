@@ -22,7 +22,7 @@ export function generateMoonCircleEmailHTML({
 }: MoonCircleEmailTemplateProps) {
   const shareLink = `${appUrl}/moon-circles/${moonCircleId}?share=true`;
   return `
-    <div style="background-color:#07070e;color:#f8f4ff;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px;border-radius:24px;border:1px solid rgba(139,92,246,0.2)">
+    <div style="background-color:#07070e;color:#f8f4ff;font-family:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px;border-radius:24px;border:1px solid rgba(139,92,246,0.2)">
       <p style="letter-spacing:0.4em;text-transform:uppercase;color:#c4b5fd;font-size:11px;margin:0 0 12px;">${moonPhase}</p>
       <h1 style="font-size:28px;margin:0 0 12px;">${title || 'Moon Circle Update'}</h1>
       <p style="color:#a78bfa;margin:0 0 24px;font-size:14px;">${dateLabel}</p>

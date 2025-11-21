@@ -32,31 +32,32 @@ export const Navbar = () => {
     '/cosmic-state',
     '/cosmic-report-generator',
     '/blog',
+    '/pricing',
+    '/shop',
+    '/moon-circles',
+    '/collections',
+    '/forecast',
   ];
 
-  // Define marketing pages
-  const isMarketingRoute =
-    pathname === '/' ||
-    pathname === '/welcome' ||
-    pathname === '/pricing' ||
-    pathname === '/help' ||
-    pathname === '/auth' ||
-    pathname.startsWith('/admin');
+  // Define marketing pages (excluding contextual pages like blog/pricing)
+  const coreMarketingRoutes = ['/', '/welcome', '/help', '/auth'];
+
+  const isCoreMarketingRoute =
+    coreMarketingRoutes.includes(pathname) || pathname.startsWith('/admin');
 
   // Show navbar on app pages for all users (including unauthenticated for SEO)
   const isAppPage = appPages.some(
     (page) => pathname === page || pathname.startsWith(`${page}/`),
   );
 
-  // CRITICAL: Never show on marketing routes - this is a safety check
-  // Marketing routes take precedence - if it's a marketing route, never show app nav
-  if (isMarketingRoute) {
+  // CRITICAL: Never show on core marketing routes
+  // But allow on contextual pages (blog/pricing) - AppChrome controls this
+  if (isCoreMarketingRoute) {
     return null;
   }
 
-  // Only show on app pages (and ensure it's not a marketing route)
-  // This ensures marketing and app routes are mutually exclusive
-  if (!isAppPage || isMarketingRoute) {
+  // Only show on app pages (contextual pages handled by AppChrome)
+  if (!isAppPage) {
     return null;
   }
 
