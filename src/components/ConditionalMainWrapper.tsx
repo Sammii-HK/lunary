@@ -61,7 +61,6 @@ export function ConditionalMainWrapper({
     const isActuallyAppPage = isAppPage && !isCoreMarketingRoute;
 
     // Check if we came from an app page or explore menu
-    const navContext = sessionStorage.getItem(NAV_CONTEXT_KEY);
     const referrer = document.referrer;
     const fromParam = searchParams?.get('from');
 
@@ -78,29 +77,45 @@ export function ConditionalMainWrapper({
       '/cosmic-report-generator',
     ];
 
+    // Check if referrer is an app page (must be same origin to be reliable)
     const referrerIsAppPage = referrer
-      ? appPagesForContext.some((page) => {
+      ? (() => {
           try {
             const referrerUrl = new URL(referrer);
-            return (
-              referrerUrl.pathname === page ||
-              referrerUrl.pathname.startsWith(`${page}/`)
+            // Only trust same-origin referrers
+            if (referrerUrl.origin !== window.location.origin) {
+              return false;
+            }
+            return appPagesForContext.some(
+              (page) =>
+                referrerUrl.pathname === page ||
+                referrerUrl.pathname.startsWith(`${page}/`),
             );
           } catch {
             return false;
           }
-        })
+        })()
       : false;
 
-    // Set cameFromApp if:
-    // - nav context is 'app' or 'explore'
-    // - URL has ?from=explore parameter
-    // - referrer is an app page
-    const cameFromApp =
-      navContext === 'app' ||
-      navContext === 'explore' ||
-      fromParam === 'explore' ||
-      referrerIsAppPage;
+    // Check if current page is a contextual page (blog/pricing)
+    const isContextualPageCheck = ['/blog', '/pricing'].some(
+      (page) => pathname === page || pathname.startsWith(`${page}/`),
+    );
+
+    let cameFromApp: boolean;
+    if (isContextualPageCheck) {
+      // For contextual pages, be strict: ONLY show app nav with explicit signal
+      // Do NOT rely on sessionStorage as it can be stale from previous sessions
+      cameFromApp = fromParam === 'explore' || referrerIsAppPage;
+    } else {
+      // For other pages, use normal logic
+      const navContext = sessionStorage.getItem(NAV_CONTEXT_KEY);
+      cameFromApp =
+        navContext === 'app' ||
+        navContext === 'explore' ||
+        fromParam === 'explore' ||
+        referrerIsAppPage;
+    }
 
     // Determine which nav is shown
     // Marketing nav shows on core marketing pages and contextual pages (unless coming from app/explore)
