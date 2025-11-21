@@ -2,6 +2,7 @@ interface MoonCircleEmailTemplateProps {
   moonCircleId: number;
   moonPhase: string;
   dateLabel: string;
+  dateSlug?: string;
   title?: string;
   summary?: string;
   appUrl?: string;
@@ -16,11 +17,13 @@ export function generateMoonCircleEmailHTML({
   moonCircleId,
   moonPhase,
   dateLabel,
+  dateSlug,
   title,
   summary,
   appUrl = getAppUrl(),
 }: MoonCircleEmailTemplateProps) {
-  const shareLink = `${appUrl}/moon-circles/${moonCircleId}?share=true`;
+  const slug = dateSlug || moonCircleId;
+  const shareLink = `${appUrl}/moon-circles/${slug}?share=true`;
   return `
     <div style="background-color:#07070e;color:#f8f4ff;font-family:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px;border-radius:24px;border:1px solid rgba(139,92,246,0.2)">
       <p style="letter-spacing:0.4em;text-transform:uppercase;color:#c4b5fd;font-size:11px;margin:0 0 12px;">${moonPhase}</p>
@@ -51,11 +54,13 @@ export function generateMoonCircleEmailText({
   moonCircleId,
   moonPhase,
   dateLabel,
+  dateSlug,
   title,
   summary,
   appUrl = getAppUrl(),
 }: MoonCircleEmailTemplateProps) {
-  const shareLink = `${appUrl}/moon-circles/${moonCircleId}?share=true`;
+  const slug = dateSlug || moonCircleId;
+  const shareLink = `${appUrl}/moon-circles/${slug}?share=true`;
   return `
 ${title || 'Moon Circle Update'} – ${moonPhase}
 ${dateLabel}

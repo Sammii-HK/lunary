@@ -62,6 +62,13 @@ const parseFocusPoints = (value: unknown): string[] => {
   return [];
 };
 
+const formatDateSlug = (value?: string | Date | null): string | null => {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString().split('T')[0];
+};
+
 const mapCircleRow = (row: MoonCircleRecord) => ({
   id: row.id,
   moon_phase: row.moon_phase,
@@ -71,6 +78,7 @@ const mapCircleRow = (row: MoonCircleRecord) => ({
       : row.event_date
         ? new Date(row.event_date).toISOString()
         : null,
+  date_slug: formatDateSlug(row.event_date),
   title: row.title,
   theme: row.theme,
   description: row.description,
@@ -220,13 +228,13 @@ export default async function MoonCirclesPage({
                   )}
                   <div className='flex flex-wrap gap-3'>
                     <Link
-                      href={`/moon-circles/${circle.id}`}
+                      href={`/moon-circles/${circle.date_slug || circle.id}`}
                       className='inline-flex items-center justify-center rounded-2xl bg-white/90 px-5 py-2.5 text-sm font-semibold text-purple-900 shadow-inner hover:bg-white'
                     >
                       View circle details
                     </Link>
                     <Link
-                      href={`/moon-circles/${circle.id}?share=true`}
+                      href={`/moon-circles/${circle.date_slug || circle.id}?share=true`}
                       className='inline-flex items-center justify-center rounded-2xl border border-purple-500/40 px-5 py-2.5 text-sm font-semibold text-purple-100 hover:border-purple-300 hover:text-white'
                     >
                       Share an insight

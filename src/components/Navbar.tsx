@@ -63,7 +63,7 @@ export const Navbar = () => {
 
   return (
     <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
-      <div className='flex w-full max-w-3xl items-center justify-between px-4 py-3 text-white md:justify-evenly md:px-6'>
+      <div className='flex w-full h-12 md:h-16 items-center justify-between px-4 py-2 text-white md:justify-evenly md:px-6'>
         <NavLink
           href='/app'
           icon={Eclipse}
@@ -126,7 +126,7 @@ const NavLink = ({ href, icon: Icon, label, activePath }: NavLinkProps) => {
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition md:flex-1 md:min-w-0 ${
+      className={`flex flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs transition md:flex-1 md:min-w-0 ${
         active
           ? isBookOfShadows
             ? 'text-purple-400'

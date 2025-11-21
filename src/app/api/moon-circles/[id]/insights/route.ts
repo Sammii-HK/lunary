@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
+import { validateInsightText } from '@/lib/moon-circles/moderation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic'; // Required because route uses searchParams
@@ -55,7 +56,8 @@ const normalizeSort = (value: string | null): SortOrder => {
 
 export async function GET(request: NextRequest, context: any) {
   try {
-    const moonCircleId = Number.parseInt(context?.params?.id, 10);
+    const params = await context.params;
+    const moonCircleId = Number.parseInt(params?.id, 10);
 
     if (!Number.isFinite(moonCircleId) || moonCircleId <= 0) {
       return NextResponse.json(
@@ -158,7 +160,8 @@ export async function GET(request: NextRequest, context: any) {
 
 export async function POST(request: NextRequest, context: any) {
   try {
-    const moonCircleId = Number.parseInt(context?.params?.id, 10);
+    const params = await context.params;
+    const moonCircleId = Number.parseInt(params?.id, 10);
 
     if (!Number.isFinite(moonCircleId) || moonCircleId <= 0) {
       return NextResponse.json(
@@ -197,6 +200,15 @@ export async function POST(request: NextRequest, context: any) {
     }
 
     const insightText = sanitizeInsightText(payload.insight_text ?? '');
+
+    const moderationCheck = validateInsightText(insightText);
+    if (!moderationCheck.isValid) {
+      return NextResponse.json(
+        { error: moderationCheck.error || 'Content validation failed' },
+        { status: 400 },
+      );
+    }
+
     if (!insightText || insightText.length < MIN_INSIGHT_LENGTH) {
       return NextResponse.json(
         {
@@ -268,6 +280,96 @@ export async function POST(request: NextRequest, context: any) {
     console.error('[moon-circles/:id/insights] POST failed', error);
     return NextResponse.json(
       { error: 'Failed to share insight' },
+      { status: 500 },
+    );
+  }
+}
+
+async function checkAdminAuth(request: NextRequest): Promise<boolean> {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+    const userEmail = session?.user?.email?.toLowerCase();
+    const adminEmails = (
+      process.env.ADMIN_EMAILS ||
+      process.env.ADMIN_EMAIL ||
+      ''
+    )
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    return Boolean(userEmail && adminEmails.includes(userEmail));
+  } catch (error) {
+    console.error('Admin auth check failed:', error);
+    return false;
+  }
+}
+
+export async function DELETE(request: NextRequest, context: any) {
+  try {
+    const isAdmin = await checkAdminAuth(request);
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 },
+      );
+    }
+
+    const params = await context.params;
+    const moonCircleId = Number.parseInt(params?.id, 10);
+    const { searchParams } = request.nextUrl;
+    const insightId = searchParams.get('insightId');
+
+    if (!Number.isFinite(moonCircleId) || moonCircleId <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid moon circle id' },
+        { status: 400 },
+      );
+    }
+
+    if (!insightId) {
+      return NextResponse.json(
+        { error: 'Insight ID is required' },
+        { status: 400 },
+      );
+    }
+
+    const insightIdNum = Number.parseInt(insightId, 10);
+    if (!Number.isFinite(insightIdNum) || insightIdNum <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid insight ID' },
+        { status: 400 },
+      );
+    }
+
+    const insightResult = await sql`
+      SELECT id, moon_circle_id
+      FROM moon_circle_insights
+      WHERE id = ${insightIdNum}
+        AND moon_circle_id = ${moonCircleId}
+      LIMIT 1
+    `;
+
+    if (insightResult.rows.length === 0) {
+      return NextResponse.json({ error: 'Insight not found' }, { status: 404 });
+    }
+
+    await sql`
+      DELETE FROM moon_circle_insights
+      WHERE id = ${insightIdNum}
+        AND moon_circle_id = ${moonCircleId}
+    `;
+
+    return NextResponse.json(
+      { success: true, message: 'Insight deleted successfully' },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error('[moon-circles/:id/insights] DELETE failed', error);
+    return NextResponse.json(
+      { error: 'Failed to delete insight' },
       { status: 500 },
     );
   }

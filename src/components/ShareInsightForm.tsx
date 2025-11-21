@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { validateInsightText } from '@/lib/moon-circles/moderation';
 
 const MIN_LENGTH = 10;
 const MAX_LENGTH = 1000;
@@ -61,6 +62,13 @@ export function ShareInsightForm({
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (isSubmitDisabled) return;
+
+      const moderationCheck = validateInsightText(insightText);
+      if (!moderationCheck.isValid) {
+        setStatus('error');
+        setMessage(moderationCheck.error || 'Content validation failed');
+        return;
+      }
 
       setStatus('loading');
       setMessage(null);
@@ -196,7 +204,8 @@ export function ShareInsightForm({
           checked={isAnonymous}
           onCheckedChange={setIsAnonymous}
           aria-label='Toggle anonymous sharing'
-          className='shrink-0'
+          className='shrink-0 data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-purple-500/30'
+          thumbClassName='bg-white'
         />
       </div>
 

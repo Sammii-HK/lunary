@@ -101,6 +101,13 @@ const formatReadableDate = (value?: string | Date | null) => {
   }).format(date);
 };
 
+const formatDateSlug = (value?: string | Date | null): string | null => {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString().split('T')[0];
+};
+
 const mapCircleDetail = (row: MoonCircleDetailRecord) => ({
   id: row.id,
   moon_phase: row.moon_phase,
@@ -122,7 +129,7 @@ const mapCircleDetail = (row: MoonCircleDetailRecord) => ({
 });
 
 interface MoonCircleDetailPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ date: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
@@ -133,8 +140,9 @@ export default async function MoonCircleDetailPage({
   const resolvedParams = await params;
   const resolvedSearch = searchParams ? await searchParams : undefined;
 
-  const moonCircleId = Number.parseInt(resolvedParams.id, 10);
-  if (!Number.isFinite(moonCircleId)) {
+  const dateParam = resolvedParams.date;
+
+  if (!dateParam || !/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
     notFound();
   }
 
@@ -153,7 +161,7 @@ export default async function MoonCircleDetailPage({
       resource_links,
       insight_count
     FROM moon_circles
-    WHERE id = ${moonCircleId}
+    WHERE event_date = ${dateParam}::date
     LIMIT 1
   `;
 
@@ -168,7 +176,7 @@ export default async function MoonCircleDetailPage({
   const relatedResult = await sql`
     SELECT id, moon_phase, event_date, theme, insight_count
     FROM moon_circles
-    WHERE id <> ${moonCircleId}
+    WHERE event_date <> ${dateParam}::date
     ORDER BY event_date DESC
     LIMIT 4
   `;
@@ -184,6 +192,7 @@ export default async function MoonCircleDetailPage({
           : record.event_date
             ? new Date(record.event_date).toISOString()
             : null,
+      date_slug: formatDateSlug(record.event_date),
       theme: record.theme,
       insight_count: Number(record.insight_count ?? 0),
     };
@@ -267,10 +276,6 @@ export default async function MoonCircleDetailPage({
           moonCircleId={circle.id}
           autoFocus={shouldAutoFocusShare}
           className='h-fit'
-          onSuccess={() => {
-            // Trigger a page refresh to show the new insight
-            window.location.reload();
-          }}
         />
       </section>
 
@@ -369,7 +374,7 @@ export default async function MoonCircleDetailPage({
             {related.map((item) => (
               <Link
                 key={item.id}
-                href={`/moon-circles/${item.id}`}
+                href={`/moon-circles/${item.date_slug || item.id}`}
                 className='rounded-2xl border border-purple-500/20 bg-purple-900/20 p-5 transition hover:border-purple-300 hover:bg-purple-900/40'
               >
                 <div className='flex items-center justify-between text-xs text-purple-200/80'>
