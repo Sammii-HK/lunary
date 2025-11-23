@@ -3,6 +3,11 @@ import webpush from 'web-push';
 
 import { trackNotificationEvent } from '@/lib/analytics/tracking';
 import { queueAnalyticsEvent } from '@/lib/discord';
+import {
+  getSentEvents,
+  markEventAsSent,
+  cleanupOldDates,
+} from '@/app/api/cron/shared-notification-tracker';
 
 // Lazy initialization of VAPID keys (only when actually needed)
 function ensureVapidConfigured() {
@@ -59,12 +64,38 @@ async function checkAstronomicalEvents(
   }
 }
 
+function createEventKeyFromPayload(payload: NotificationPayload): string {
+  const eventType = payload.data?.eventType || payload.type || 'unknown';
+  const eventName = payload.data?.eventName || payload.title || 'unknown';
+  const priority = payload.data?.priority ?? 0;
+  return `${eventType}-${eventName}-${priority}`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Configure VAPID keys when actually needed (not at module load time)
     ensureVapidConfigured();
 
     const { payload }: { payload: NotificationPayload } = await request.json();
+
+    const today = new Date().toISOString().split('T')[0];
+    const eventKey = createEventKeyFromPayload(payload);
+
+    await cleanupOldDates(1);
+
+    const sentEvents = await getSentEvents(today);
+    if (sentEvents.has(eventKey)) {
+      console.log(
+        `⏭️ Event ${eventKey} already sent today, skipping duplicate`,
+      );
+      return NextResponse.json({
+        success: true,
+        message: `Event already sent today (duplicate prevented)`,
+        recipientCount: 0,
+        skipped: true,
+        eventKey,
+      });
+    }
 
     // Get all subscriptions from database that want this type of notification
     // const subscriptions = await db.subscriptions.findMany({
@@ -73,7 +104,6 @@ export async function POST(request: NextRequest) {
     //   }
     // });
 
-    // For demo purposes, we'll just log the notification
     console.log('Sending cosmic notification:', payload);
 
     const notificationData = {
@@ -303,6 +333,21 @@ export async function POST(request: NextRequest) {
     console.log(
       `✅ Notification sent: ${successful} successful, ${failed} failed`,
     );
+
+    if (successful > 0) {
+      const eventType = payload.data?.eventType || payload.type || 'unknown';
+      const eventName = payload.data?.eventName || payload.title || 'unknown';
+      const priority = payload.data?.priority ?? 0;
+
+      await markEventAsSent(
+        today,
+        eventKey,
+        eventType,
+        eventName,
+        priority,
+        payload.data?.checkType === '4-hourly' ? '4-hourly' : 'daily',
+      );
+    }
 
     const truncate = (value: string | undefined, max: number) => {
       if (!value) return value;

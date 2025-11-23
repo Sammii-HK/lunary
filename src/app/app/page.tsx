@@ -15,6 +15,9 @@ import { recordCheckIn } from '@/lib/streak/check-in';
 import { DateWidget } from '@/components/DateWidget';
 import { AstronomyWidget } from '@/components/AstronomyWidget';
 import { ExploreThisWeek } from '@/components/ExploreThisWeek';
+import { QuickCheckIn } from '@/components/QuickCheckIn';
+import { QuickTarotCard } from '@/components/QuickTarotCard';
+import { QuickCosmicWeather } from '@/components/QuickCosmicWeather';
 
 // Post-trial messaging - lazy loaded since it's conditional (only shows for expired trial users)
 const PostTrialMessaging = dynamic(
@@ -171,6 +174,13 @@ export default function AppDashboard() {
           <DateWidget />
           <AstronomyWidget />
           <ExploreThisWeek />
+
+          {/* Quick Action Widgets */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <QuickCheckIn />
+            <QuickTarotCard />
+            <QuickCosmicWeather />
+          </div>
         </div>
 
         {/* Main Content Grid - Responsive 2-Column Layout */}

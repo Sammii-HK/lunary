@@ -1238,6 +1238,44 @@ async function setupDatabase() {
 
     console.log('✅ Onboarding completion table created');
 
+    // Create monthly_insights table
+    await sql`
+      CREATE TABLE IF NOT EXISTS monthly_insights (
+        user_id TEXT NOT NULL,
+        month INTEGER NOT NULL,
+        year INTEGER NOT NULL,
+        insights JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (user_id, month, year)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_user_id ON monthly_insights(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_date ON monthly_insights(year, month)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_updated_at ON monthly_insights(updated_at)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_monthly_insights_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        NEW.updated_at = NOW();
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql
+    `;
+
+    await sql`DROP TRIGGER IF EXISTS update_monthly_insights_timestamp ON monthly_insights`;
+
+    await sql`
+      CREATE TRIGGER update_monthly_insights_timestamp
+        BEFORE UPDATE ON monthly_insights
+        FOR EACH ROW
+        EXECUTE FUNCTION update_monthly_insights_updated_at()
+    `;
+
+    console.log('✅ Monthly insights table created');
+
     console.log('✅ Database setup complete!');
     console.log(
       '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, moon circle insights, user streaks, and onboarding completion',

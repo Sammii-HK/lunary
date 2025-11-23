@@ -52,8 +52,30 @@ export interface NotificationResult {
   error?: string;
 }
 
+function validateEvent(event: NotificationEvent): {
+  valid: boolean;
+  error?: string;
+} {
+  if (!event) {
+    return { valid: false, error: 'Event is required' };
+  }
+  if (!event.type || !event.type.trim()) {
+    return { valid: false, error: 'Event type is required' };
+  }
+  if (!event.name || !event.name.trim()) {
+    return { valid: false, error: 'Event name is required' };
+  }
+  if (event.priority === undefined || event.priority === null) {
+    return { valid: false, error: 'Event priority is required' };
+  }
+  return { valid: true };
+}
+
 function createEventKey(event: NotificationEvent): string {
-  return `${event.type}-${event.name || 'unknown'}-${event.priority}`;
+  const eventName = event.name && event.name.trim() ? event.name : 'unknown';
+  const eventType = event.type && event.type.trim() ? event.type : 'unknown';
+  const priority = event.priority ?? 0;
+  return `${eventType}-${eventName}-${priority}`;
 }
 
 function getPreferenceKey(eventType: string): string | null {
@@ -84,6 +106,16 @@ function createNotificationFromEvent(
   actions: Array<{ action: string; title: string; icon: string }>;
   vibrate: number[];
 } {
+  if (!event.name || !event.name.trim()) {
+    event.name = 'Cosmic Event';
+  }
+  if (!event.type || !event.type.trim()) {
+    event.type = 'cosmic';
+  }
+  if (event.priority === undefined || event.priority === null) {
+    event.priority = 0;
+  }
+
   const baseNotification = {
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
@@ -104,7 +136,7 @@ function createNotificationFromEvent(
   };
 
   const getIngressDescription = (planet?: string, sign?: string): string => {
-    if (!planet || !sign) {
+    if (!planet || !planet.trim() || !sign || !sign.trim()) {
       return 'Planetary energy shift creating new opportunities';
     }
 
@@ -228,16 +260,29 @@ function createNotificationFromEvent(
     if (influence) {
       return `This amplifies focus on ${influence} energies`;
     }
-    return `This amplifies focus on ${sign} themes and energies`;
+    if (sign && sign.trim()) {
+      return `This amplifies focus on ${sign} themes and energies`;
+    }
+    return 'Planetary energy shift creating new opportunities';
   };
 
   const getAspectDescription = (event: NotificationEvent): string => {
-    if (!event.aspect) {
+    if (!event.aspect || !event.aspect.trim()) {
       return 'Powerful cosmic alignment creating new opportunities';
     }
 
-    const planetA = event.planetA?.name || event.planetA || 'Planet';
-    const planetB = event.planetB?.name || event.planetB || 'Planet';
+    const planetA = event.planetA?.name || event.planetA;
+    const planetB = event.planetB?.name || event.planetB;
+
+    if (
+      !planetA ||
+      !planetB ||
+      typeof planetA !== 'string' ||
+      typeof planetB !== 'string'
+    ) {
+      return 'Powerful cosmic alignment creating new opportunities';
+    }
+
     const aspectDescriptions: Record<string, string> = {
       conjunction: 'unite their energies',
       trine: 'flow harmoniously together',
@@ -246,13 +291,14 @@ function createNotificationFromEvent(
       opposition: 'seek balance between',
     };
     const aspectAction = aspectDescriptions[event.aspect] || 'align';
-    if (planetA && planetB) {
-      return `${planetA} and ${planetB} ${aspectAction}, creating powerful cosmic influence`;
-    }
-    return 'Powerful cosmic alignment creating new opportunities';
+    return `${planetA} and ${planetB} ${aspectAction}, creating powerful cosmic influence`;
   };
 
   const getMoonDescription = (phaseName: string, moonSign?: string): string => {
+    if (!phaseName || !phaseName.trim()) {
+      phaseName = 'Moon Phase';
+    }
+
     const descriptions: Record<string, string> = {
       'New Moon':
         'A powerful reset point for manifestation and new beginnings. Set intentions aligned with your deeper purpose.',
@@ -276,7 +322,7 @@ function createNotificationFromEvent(
       description = 'Lunar energy shift creating new opportunities for growth';
     }
 
-    if (moonSign) {
+    if (moonSign && moonSign.trim()) {
       return `Moon in ${moonSign}: ${description}`;
     }
 
@@ -284,6 +330,10 @@ function createNotificationFromEvent(
   };
 
   const getRetrogradeDescription = (planet?: string, sign?: string): string => {
+    if (!planet || !planet.trim()) {
+      return 'Planetary retrograde invites reflection and review';
+    }
+
     const retrogradeMeanings: Record<string, string> = {
       Mercury:
         'invites reflection on communication, technology, and mental patterns',
@@ -302,14 +352,17 @@ function createNotificationFromEvent(
     };
 
     const meaning =
-      retrogradeMeanings[planet || ''] || 'invites reflection and review';
-    if (sign) {
+      retrogradeMeanings[planet] || 'invites reflection and review';
+    if (sign && sign.trim()) {
       return `This ${meaning} in ${sign}`;
     }
     return `This ${meaning}`;
   };
 
   const getSeasonalDescription = (eventName: string): string => {
+    if (!eventName || !eventName.trim()) {
+      return 'Seasonal energy shift brings new themes and opportunities for growth';
+    }
     if (eventName.includes('Equinox')) {
       return 'Equal day and night mark a powerful balance point, supporting new beginnings and equilibrium';
     }
@@ -320,19 +373,33 @@ function createNotificationFromEvent(
   };
 
   const createTitle = (event: NotificationEvent): string => {
-    const eventName = event.name || 'Cosmic Event';
+    const eventName =
+      event.name && event.name.trim() ? event.name : 'Cosmic Event';
 
     switch (event.type) {
       case 'moon':
         return eventName || 'Moon Phase';
 
       case 'aspect':
-        if (event.planetA && event.planetB && event.aspect) {
-          const planetAName = event.planetA.name || event.planetA || 'Planet';
-          const planetBName = event.planetB.name || event.planetB || 'Planet';
-          const aspectName =
-            event.aspect.charAt(0).toUpperCase() + event.aspect.slice(1);
-          return `${planetAName}-${planetBName} ${aspectName}`;
+        if (
+          event.planetA &&
+          event.planetB &&
+          event.aspect &&
+          event.aspect.trim()
+        ) {
+          const planetAName =
+            (typeof event.planetA === 'string'
+              ? event.planetA
+              : event.planetA?.name) || 'Planet';
+          const planetBName =
+            (typeof event.planetB === 'string'
+              ? event.planetB
+              : event.planetB?.name) || 'Planet';
+          if (planetAName !== 'Planet' && planetBName !== 'Planet') {
+            const aspectName =
+              event.aspect.charAt(0).toUpperCase() + event.aspect.slice(1);
+            return `${planetAName}-${planetBName} ${aspectName}`;
+          }
         }
         return eventName || 'Planetary Aspect';
 
@@ -340,7 +407,12 @@ function createNotificationFromEvent(
         return eventName || 'Seasonal Event';
 
       case 'ingress':
-        if (event.planet && event.sign) {
+        if (
+          event.planet &&
+          event.planet.trim() &&
+          event.sign &&
+          event.sign.trim()
+        ) {
           return `${event.planet} Enters ${event.sign}`;
         }
         if (eventName && eventName.includes('Enters')) {
@@ -349,7 +421,7 @@ function createNotificationFromEvent(
         return eventName || 'Planetary Ingress';
 
       case 'retrograde':
-        if (event.planet) {
+        if (event.planet && event.planet.trim()) {
           return `${event.planet} Retrograde Begins`;
         }
         if (eventName && eventName.includes('Retrograde')) {
@@ -366,30 +438,47 @@ function createNotificationFromEvent(
     switch (event.type) {
       case 'moon':
         const moonSign = cosmicData?.astronomicalData?.planets?.moon?.sign;
-        return getMoonDescription(event.name || 'Moon Phase', moonSign);
+        const moonPhaseName =
+          event.name && event.name.trim() ? event.name : 'Moon Phase';
+        return getMoonDescription(moonPhaseName, moonSign);
 
       case 'aspect':
         return getAspectDescription(event);
 
       case 'seasonal':
-        return getSeasonalDescription(event.name || 'Seasonal Event');
+        const seasonalName =
+          event.name && event.name.trim() ? event.name : 'Seasonal Event';
+        return getSeasonalDescription(seasonalName);
 
       case 'ingress':
-        return getIngressDescription(
-          event.planet || event.name?.split(' ')[0],
-          event.sign || event.name?.split(' ')[2],
-        );
+        let ingressPlanet = event.planet;
+        let ingressSign = event.sign;
+
+        if (!ingressPlanet && event.name) {
+          const nameParts = event.name.split(' ');
+          ingressPlanet = nameParts[0] || undefined;
+        }
+        if (!ingressSign && event.name) {
+          const nameParts = event.name.split(' ');
+          ingressSign = nameParts[2] || undefined;
+        }
+
+        return getIngressDescription(ingressPlanet, ingressSign);
 
       case 'retrograde':
-        return getRetrogradeDescription(
-          event.planet || event.name?.split(' ')[0],
-          event.sign,
-        );
+        let retrogradePlanet = event.planet;
+
+        if (!retrogradePlanet && event.name) {
+          const nameParts = event.name.split(' ');
+          retrogradePlanet = nameParts[0] || undefined;
+        }
+
+        return getRetrogradeDescription(retrogradePlanet, event.sign);
 
       default:
         return (
-          event.energy ||
-          event.description ||
+          (event.energy && event.energy.trim()) ||
+          (event.description && event.description.trim()) ||
           'Significant cosmic event occurring'
         );
     }
@@ -407,11 +496,11 @@ function createNotificationFromEvent(
     tag: `lunary-${event.type}`,
     data: {
       ...baseNotification.data,
-      eventName: event.name,
-      ...(event.type === 'moon' && { phase: event.name }),
-      ...(event.type === 'aspect' && { aspect: event.name }),
-      ...(event.type === 'seasonal' && { season: event.name }),
-      ...(event.type === 'ingress' && { ingress: event.name }),
+      eventName: event.name || 'Cosmic Event',
+      ...(event.type === 'moon' && event.name && { phase: event.name }),
+      ...(event.type === 'aspect' && event.name && { aspect: event.name }),
+      ...(event.type === 'seasonal' && event.name && { season: event.name }),
+      ...(event.type === 'ingress' && event.name && { ingress: event.name }),
     },
   };
 }
@@ -454,6 +543,18 @@ export async function sendUnifiedNotification(
 ): Promise<NotificationResult> {
   try {
     ensureVapidConfigured();
+
+    const validation = validateEvent(event);
+    if (!validation.valid) {
+      console.error(`Invalid event: ${validation.error}`, event);
+      return {
+        success: false,
+        recipientCount: 0,
+        successful: 0,
+        failed: 0,
+        error: validation.error,
+      };
+    }
 
     const today = new Date().toISOString().split('T')[0];
     const eventKey = createEventKey(event);

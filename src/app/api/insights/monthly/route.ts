@@ -41,6 +41,34 @@ export async function GET(request: NextRequest) {
     const month = now.getMonth() + 1;
     const year = now.getFullYear();
 
+    // Check for cached insights first
+    const cachedResult = await sql`
+      SELECT insights, updated_at
+      FROM monthly_insights
+      WHERE user_id = ${userId}
+      AND month = ${month}
+      AND year = ${year}
+      LIMIT 1
+    `;
+
+    // If cached and updated within last 24 hours, return cached data
+    if (cachedResult.rows.length > 0) {
+      const cached = cachedResult.rows[0];
+      const updatedAt = new Date(cached.updated_at);
+      const hoursSinceUpdate =
+        (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60);
+
+      if (hoursSinceUpdate < 24) {
+        return NextResponse.json({
+          insight: {
+            ...cached.insights,
+            month,
+            year,
+          },
+        });
+      }
+    }
+
     // Get frequent tarot cards from last 30 days
     // Cards is a JSONB array, so we need to unnest it first
     const tarotResult = await sql`
@@ -65,12 +93,52 @@ export async function GET(request: NextRequest) {
       }))
       .filter((card) => card.name); // Filter out any null/undefined names
 
-    // Get mood trends (if available in the future)
-    // For now, we'll derive a simple trend from card patterns
-    const moodTrend =
-      frequentCards.length > 0
-        ? null // Will be calculated from card meanings if needed
-        : null;
+    // Get mood trends from cosmic snapshots
+    const moodResult = await sql`
+      SELECT snapshot_data->'mood'->'last7d' as mood_data
+      FROM cosmic_snapshots
+      WHERE user_id = ${userId}
+      AND snapshot_date >= CURRENT_DATE - INTERVAL '30 days'
+      AND snapshot_data->'mood' IS NOT NULL
+      ORDER BY snapshot_date DESC
+      LIMIT 30
+    `;
+
+    const moodTags: Map<string, number> = new Map();
+    moodResult.rows.forEach((row) => {
+      if (row.mood_data && Array.isArray(row.mood_data)) {
+        row.mood_data.forEach((entry: any) => {
+          if (entry?.tag) {
+            moodTags.set(entry.tag, (moodTags.get(entry.tag) || 0) + 1);
+          }
+        });
+      }
+    });
+
+    const topMoodTags = Array.from(moodTags.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([tag]) => tag);
+
+    let moodTrend: string | null = null;
+    if (topMoodTags.length > 0) {
+      const moodDescriptions: Record<string, string> = {
+        balanced: 'Balanced and centered',
+        reflective: 'Reflective and introspective',
+        energetic: 'Energetic and active',
+        calm: 'Calm and peaceful',
+        creative: 'Creative and inspired',
+        focused: 'Focused and determined',
+        uncertain: 'Navigating uncertainty',
+        grateful: 'Grateful and appreciative',
+      };
+
+      const primaryMood = topMoodTags[0];
+      moodTrend = moodDescriptions[primaryMood] || `Mostly ${primaryMood}`;
+      if (topMoodTags.length > 1) {
+        moodTrend += ` with moments of ${topMoodTags.slice(1).join(' and ')}`;
+      }
+    }
 
     // Get themes from recent tarot readings
     const themesResult = await sql`
@@ -90,15 +158,131 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
-      insight: {
-        month,
-        year,
-        frequentCards,
-        moodTrend: moodTrend || null,
-        themes: [...new Set(themes)].slice(0, 5),
-      },
+    // Get journal entry themes from collections
+    const journalResult = await sql`
+      SELECT tags, title, description
+      FROM collections
+      WHERE user_id = ${userId}
+      AND category = 'journal'
+      AND created_at >= NOW() - INTERVAL '30 days'
+      ORDER BY created_at DESC
+      LIMIT 20
+    `;
+
+    const journalThemes: string[] = [];
+    const journalTitles: string[] = [];
+    journalResult.rows.forEach((row) => {
+      if (row.tags && Array.isArray(row.tags)) {
+        journalThemes.push(...row.tags);
+      }
+      if (row.title) {
+        journalTitles.push(row.title);
+      }
     });
+
+    // Get transit impacts from cosmic snapshots
+    const transitResult = await sql`
+      SELECT snapshot_data->'currentTransits' as transits
+      FROM cosmic_snapshots
+      WHERE user_id = ${userId}
+      AND snapshot_date >= CURRENT_DATE - INTERVAL '30 days'
+      AND snapshot_data->'currentTransits' IS NOT NULL
+      ORDER BY snapshot_date DESC
+      LIMIT 30
+    `;
+
+    const transitTypes: Map<string, number> = new Map();
+    transitResult.rows.forEach((row) => {
+      if (row.transits && Array.isArray(row.transits)) {
+        row.transits.forEach((transit: any) => {
+          const aspect = transit.aspect || 'unknown';
+          transitTypes.set(aspect, (transitTypes.get(aspect) || 0) + 1);
+        });
+      }
+    });
+
+    const transitImpacts = Array.from(transitTypes.entries())
+      .map(([aspect, count]) => ({ aspect, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // Generate personalized monthly summary
+    const totalReadings = frequentCards.reduce(
+      (sum, card) => sum + card.count,
+      0,
+    );
+    const uniqueThemes = [...new Set(themes)];
+    const uniqueJournalThemes = [...new Set(journalThemes)];
+
+    let summaryParts: string[] = [];
+
+    if (totalReadings > 0) {
+      summaryParts.push(
+        `You pulled ${totalReadings} tarot card${totalReadings !== 1 ? 's' : ''}`,
+      );
+      if (frequentCards.length > 0) {
+        summaryParts.push(
+          `with ${frequentCards[0].name} appearing most frequently`,
+        );
+      }
+    }
+
+    if (journalTitles.length > 0) {
+      summaryParts.push(
+        `You wrote ${journalTitles.length} journal entr${journalTitles.length !== 1 ? 'ies' : 'y'}`,
+      );
+      if (uniqueJournalThemes.length > 0) {
+        summaryParts.push(
+          `exploring themes like ${uniqueJournalThemes.slice(0, 2).join(' and ')}`,
+        );
+      }
+    }
+
+    if (transitImpacts.length > 0) {
+      summaryParts.push(
+        `The cosmos brought ${transitImpacts[0].aspect} aspects most often`,
+      );
+    }
+
+    if (moodTrend) {
+      summaryParts.push(
+        `Your overall mood trend was ${moodTrend.toLowerCase()}`,
+      );
+    }
+
+    const summary =
+      summaryParts.length > 0
+        ? `Your Cosmic Month in Review: ${summaryParts.join('. ')}.`
+        : `This month marks the beginning of your cosmic journey. Start pulling cards and journaling to see your patterns emerge.`;
+
+    const insight = {
+      month,
+      year,
+      frequentCards,
+      moodTrend: moodTrend || null,
+      themes: uniqueThemes.slice(0, 5),
+      journalThemes: uniqueJournalThemes.slice(0, 5),
+      journalCount: journalTitles.length,
+      transitImpacts,
+      summary,
+    };
+
+    // Cache the insights in database
+    try {
+      await sql`
+        INSERT INTO monthly_insights (user_id, month, year, insights, updated_at)
+        VALUES (${userId}, ${month}, ${year}, ${JSON.stringify(insight)}::jsonb, NOW())
+        ON CONFLICT (user_id, month, year)
+        DO UPDATE SET
+          insights = ${JSON.stringify(insight)}::jsonb,
+          updated_at = NOW()
+      `;
+    } catch (error) {
+      console.error('[Monthly Insights] Failed to cache insights:', error);
+      // Continue even if caching fails
+    }
+
+    return NextResponse.json({ insight });
   } catch (error) {
     console.error('[Monthly Insights] Error:', error);
     return NextResponse.json(
