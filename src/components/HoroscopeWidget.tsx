@@ -2,7 +2,7 @@
 
 import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from './SmartTrialButton';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   getBirthChartFromProfile,
   hasBirthChart,
@@ -12,7 +12,9 @@ import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
 import { bodiesSymbols } from '../../utils/zodiac/zodiac';
 import { useSubscription } from '../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
+import { useAstronomyContext } from '../context/AstronomyContext';
+import { Paywall } from './Paywall';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 
@@ -643,9 +645,19 @@ const getAspectInterpretation = (aspect: any): string => {
 export const HoroscopeWidget = () => {
   const { me } = useAccount();
   const subscription = useSubscription();
+  const { currentDateTime } = useAstronomyContext();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
   const [observer, setObserver] = useState<any>(null);
+
+  // Normalize date to date-only (no time) to ensure daily seed consistency
+  const normalizedDate = useMemo(() => {
+    const dateStr = dayjs(currentDateTime).format('YYYY-MM-DD');
+    return new Date(dateStr + 'T12:00:00'); // Use noon to avoid timezone issues
+  }, [currentDateTime]);
+
+  // Check date access for paywall
+  const canAccessDate = hasDateAccess(normalizedDate, subscription.status);
 
   // Lazy load astronomy-engine
   useEffect(() => {
@@ -688,9 +700,26 @@ export const HoroscopeWidget = () => {
     subscription.plan,
   );
 
+  // Check date access - show paywall if date is restricted
+  if (!canAccessDate) {
+    return (
+      <Paywall feature='personalized_horoscope'>
+        <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+          <div className='text-center'>
+            <h3 className='font-bold mb-2'>Personal Horoscope</h3>
+            <span className='text-xs text-purple-400'>Personalised</span>
+            <p className='text-zinc-400 text-xs mt-2'>
+              Access to historical and future dates requires a subscription.
+            </p>
+          </div>
+        </div>
+      </Paywall>
+    );
+  }
+
   // If user doesn't have birth chart access, show general horoscope
   if (!hasChartAccess) {
-    const generalHoroscope = getGeneralHoroscope();
+    const generalHoroscope = getGeneralHoroscope(normalizedDate);
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='space-y-2'>
@@ -708,15 +737,13 @@ export const HoroscopeWidget = () => {
           </div>
 
           <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20'>
-            {/* <p className='text-xs text-purple-200 mb-1'>
-              🌟 Start Your Free Trial
-            </p> */}
             <p className='text-xs text-purple-200 mb-1 font-medium'>
               ✨ Your personalized horoscope is ready
             </p>
             <p className='text-xs text-zinc-400 mb-2'>
-              Unlock it now to see how today's cosmic energy affects YOUR birth
-              chart. Experience the difference personalized astrology makes!
+              Unlock it now to see how the selected date&apos;s cosmic energy
+              affects YOUR birth chart. Experience the difference personalized
+              astrology makes!
             </p>
             <SmartTrialButton variant='link' />
           </div>
@@ -777,8 +804,7 @@ export const HoroscopeWidget = () => {
     );
   }
 
-  const today = new Date();
-  const currentTransits = getAstrologicalChart(today, observer);
+  const currentTransits = getAstrologicalChart(normalizedDate, observer);
 
   // Generate personalized horoscope
   const horoscope = generatePersonalizedHoroscope(

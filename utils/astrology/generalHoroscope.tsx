@@ -383,15 +383,15 @@ const getCosmicHighlight = (currentChart: any[]): string => {
   return highlights[index];
 };
 
-export const getGeneralHoroscope = (): GeneralHoroscopeReading => {
-  const today = dayjs();
+export const getGeneralHoroscope = (date?: Date): GeneralHoroscopeReading => {
+  const selectedDate = date ? dayjs(date) : dayjs();
   const observer = new Observer(51.4769, 0.0005, 0); // Default location
-  const currentChart = getAstrologicalChart(today.toDate(), observer);
-  const moonPhase = getMoonPhase(today.toDate());
-  const dayOfWeek = today.format('dddd');
+  const currentChart = getAstrologicalChart(selectedDate.toDate(), observer);
+  const moonPhase = getMoonPhase(selectedDate.toDate());
+  const dayOfWeek = selectedDate.format('dddd');
 
   return {
-    date: today.format('MMMM D, YYYY'),
+    date: selectedDate.format('MMMM D, YYYY'),
     moonPhase,
     reading: getComprehensiveReading(currentChart, moonPhase, dayOfWeek),
     generalAdvice:
