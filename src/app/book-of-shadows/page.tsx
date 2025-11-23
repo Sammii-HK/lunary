@@ -19,6 +19,8 @@ import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
+import { useAIPrompts } from '@/hooks/useAIPrompts';
+import { AIPromptCard } from '@/components/AIPromptCard';
 
 const MessageBubble = ({
   role,
@@ -156,6 +158,13 @@ function BookOfShadowsContent() {
     addMessage,
     threadId,
   } = useAssistantChat();
+
+  const {
+    prompts,
+    hasNewPrompts,
+    isLoading: promptsLoading,
+    markPromptAsRead,
+  } = useAIPrompts();
 
   const [cacheInitialized, setCacheInitialized] = useState(false);
 
@@ -439,6 +448,11 @@ function BookOfShadowsContent() {
                 Today: {dailyHighlight.primaryEvent}
               </span>
             ) : null}
+            {hasNewPrompts && (
+              <span className='rounded-full border border-purple-500/60 bg-purple-500/20 px-3 py-1 text-purple-300 font-semibold animate-pulse'>
+                ✨ New Prompt
+              </span>
+            )}
           </div>
         </header>
 
@@ -454,11 +468,32 @@ function BookOfShadowsContent() {
                     Loading your conversation...
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
-                    Begin by sharing how you're feeling, what you're exploring,
-                    or what guidance you're seeking. I'll answer with gentle,
-                    grounded insight.
-                  </div>
+                  <>
+                    <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                      Begin by sharing how you're feeling, what you're
+                      exploring, or what guidance you're seeking. I'll answer
+                      with gentle, grounded insight.
+                    </div>
+                    {!promptsLoading && prompts.length > 0 && (
+                      <div className='space-y-2'>
+                        <h3 className='text-sm font-medium text-zinc-300 px-1'>
+                          Suggested Prompts
+                        </h3>
+                        {prompts.slice(0, 3).map((prompt) => (
+                          <AIPromptCard
+                            key={prompt.id}
+                            prompt={prompt}
+                            onUsePrompt={sendMessage}
+                            onMarkAsRead={markPromptAsRead}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    <CopilotQuickActions
+                      onActionClick={(prompt) => sendMessage(prompt)}
+                      disabled={isStreaming}
+                    />
+                  </>
                 ) : (
                   <>
                     {messages.map((message, index) => (
