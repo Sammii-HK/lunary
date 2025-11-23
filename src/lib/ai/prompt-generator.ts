@@ -496,7 +496,7 @@ export async function getOrGenerateDailyPrompt(
       mainTransit:
         context.currentTransits && context.currentTransits.length > 0
           ? `${context.currentTransits[0].from} ${context.currentTransits[0].aspect} ${context.currentTransits[0].to}`
-          : null,
+          : undefined,
       tarotCard: context.tarot.daily?.name || context.tarot.personal?.name,
     };
 
@@ -604,13 +604,13 @@ export async function getOrGenerateWeeklyPrompt(
     });
 
     const cosmicContext = {
-      moonPhases: context.moon ? [context.moon.phase] : [],
-      weeklyCard: context.tarot.weekly?.name,
-      keyTransits: context.currentTransits?.slice(0, 3).map((t) => ({
-        from: t.from,
-        aspect: t.aspect,
-        to: t.to,
-      })),
+      moonPhase: context.moon?.phase,
+      moonSign: context.moon?.sign,
+      mainTransit:
+        context.currentTransits && context.currentTransits.length > 0
+          ? `${context.currentTransits[0].from} ${context.currentTransits[0].aspect} ${context.currentTransits[0].to}`
+          : undefined,
+      tarotCard: context.tarot.weekly?.name,
     };
 
     const promptId = await savePrompt(
