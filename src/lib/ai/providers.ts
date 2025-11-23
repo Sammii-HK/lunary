@@ -191,14 +191,31 @@ export const getCurrentTransits = async ({
 
   const transits: TransitRecord[] = globalData.generalTransits
     .slice(0, 10)
-    .map((transit) => ({
-      aspect: transit.aspect,
-      from: transit.planetA?.name || transit.planetA?.planet || 'Unknown',
-      to: transit.planetB?.name || transit.planetB?.planet || 'Unknown',
-      exactUtc: now.toISOString(),
-      applying: true,
-      strength: Math.min(transit.priority / 10, 1),
-    }));
+    .map((transit) => {
+      // Handle ingresses specially - they have planetB as null, sign is in planetA.constellation
+      if (transit.aspect === 'ingress') {
+        const planet =
+          transit.planetA?.name || transit.planetA?.planet || 'Unknown';
+        const sign = transit.planetA?.constellation || 'Unknown';
+        return {
+          aspect: transit.aspect,
+          from: planet,
+          to: sign !== 'Unknown' ? sign : 'Unknown',
+          exactUtc: now.toISOString(),
+          applying: true,
+          strength: Math.min(transit.priority / 10, 1),
+        };
+      }
+
+      return {
+        aspect: transit.aspect,
+        from: transit.planetA?.name || transit.planetA?.planet || 'Unknown',
+        to: transit.planetB?.name || transit.planetB?.planet || 'Unknown',
+        exactUtc: now.toISOString(),
+        applying: true,
+        strength: Math.min(transit.priority / 10, 1),
+      };
+    });
 
   if (personalizeForNotifications && isPayingUser) {
     const birthChart = await getBirthChart({ userId });

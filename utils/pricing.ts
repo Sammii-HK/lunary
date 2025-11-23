@@ -122,6 +122,7 @@ export const FEATURE_ACCESS = {
     'moon_circles',
     'ritual_generator',
     'collections',
+    'monthly_insights',
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -144,6 +145,7 @@ export const FEATURE_ACCESS = {
     'collections',
     'unlimited_collections',
     'advanced_patterns',
+    'monthly_insights',
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -169,6 +171,7 @@ export const FEATURE_ACCESS = {
     'advanced_patterns',
     'yearly_forecast',
     'data_export',
+    'monthly_insights',
   ],
 };
 

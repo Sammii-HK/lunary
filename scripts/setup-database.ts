@@ -1205,9 +1205,42 @@ async function setupDatabase() {
 
     console.log('✅ Admin activity log table created');
 
+    // Create user_streaks table
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_streaks (
+        user_id TEXT PRIMARY KEY,
+        current_streak INTEGER DEFAULT 0,
+        longest_streak INTEGER DEFAULT 0,
+        last_check_in DATE,
+        total_check_ins INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_streaks_last_check_in ON user_streaks(last_check_in)`;
+
+    console.log('✅ User streaks table created');
+
+    // Create onboarding_completion table
+    await sql`
+      CREATE TABLE IF NOT EXISTS onboarding_completion (
+        user_id TEXT PRIMARY KEY,
+        completed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        steps_completed TEXT[] DEFAULT ARRAY[]::TEXT[],
+        skipped BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_onboarding_completion_completed_at ON onboarding_completion(completed_at)`;
+
+    console.log('✅ Onboarding completion table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, and moon circle insights',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, moon circle insights, user streaks, and onboarding completion',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);

@@ -22,6 +22,7 @@ import {
   saveBirthChartToProfile,
 } from '../../utils/astrology/birthChart';
 import { conversionTracking } from '@/lib/analytics';
+import { OnboardingFeatureTour } from './OnboardingFeatureTour';
 
 export function OnboardingFlow() {
   const { me } = useAccount();
@@ -30,8 +31,14 @@ export function OnboardingFlow() {
   const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentStep, setCurrentStep] = useState<
-    'welcome' | 'birthday' | 'intention' | 'ai_preview' | 'complete'
+    | 'welcome'
+    | 'birthday'
+    | 'intention'
+    | 'feature_tour'
+    | 'ai_preview'
+    | 'complete'
   >('welcome');
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [birthday, setBirthday] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [birthLocation, setBirthLocation] = useState('');
@@ -113,18 +120,72 @@ export function OnboardingFlow() {
     }
   };
 
-  const handleSkip = () => {
+  const trackStepCompletion = async (
+    step: string,
+    skipped: boolean = false,
+  ) => {
+    try {
+      const newCompletedSteps = [...completedSteps, step];
+      setCompletedSteps(newCompletedSteps);
+
+      await fetch('/api/onboarding/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          stepsCompleted: newCompletedSteps,
+          skipped,
+        }),
+      });
+    } catch (error) {
+      console.error('[Onboarding] Failed to track completion:', error);
+    }
+  };
+
+  const handleSkip = async () => {
+    await trackStepCompletion(currentStep, true);
     localStorage.setItem('lunary_onboarding_seen', 'true');
     setShowOnboarding(false);
   };
 
-  const handleComplete = () => {
+  const handleStepSkip = async () => {
+    await trackStepCompletion(currentStep, true);
+    if (currentStep === 'welcome') {
+      setCurrentStep('birthday');
+    } else if (currentStep === 'birthday') {
+      setCurrentStep('intention');
+    } else if (currentStep === 'intention') {
+      setCurrentStep('feature_tour');
+    } else if (currentStep === 'feature_tour') {
+      setCurrentStep('ai_preview');
+    } else {
+      handleComplete();
+    }
+  };
+
+  const handleComplete = async () => {
+    await trackStepCompletion(currentStep, false);
     localStorage.setItem('lunary_onboarding_seen', 'true');
     setShowOnboarding(false);
     if (subscription.isSubscribed || subscription.isTrialActive) {
       router.push('/book-of-shadows');
     } else {
       router.push('/pricing');
+    }
+  };
+
+  const handleNext = async () => {
+    await trackStepCompletion(currentStep, false);
+    if (currentStep === 'welcome') {
+      setCurrentStep('birthday');
+    } else if (currentStep === 'birthday') {
+      setCurrentStep('intention');
+    } else if (currentStep === 'intention') {
+      setCurrentStep('feature_tour');
+    } else if (currentStep === 'feature_tour') {
+      setCurrentStep('ai_preview');
+    } else {
+      handleComplete();
     }
   };
 
@@ -289,12 +350,20 @@ export function OnboardingFlow() {
               >
                 {saving ? 'Saving...' : 'Continue'}
               </button>
-              <button
-                onClick={() => setCurrentStep('welcome')}
-                className='w-full text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
-              >
-                Back
-              </button>
+              <div className='flex items-center justify-between'>
+                <button
+                  onClick={() => setCurrentStep('welcome')}
+                  className='text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleStepSkip}
+                  className='text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+                >
+                  Skip
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -360,20 +429,35 @@ export function OnboardingFlow() {
                       selectedIntention,
                     );
                   }
-                  setCurrentStep('ai_preview');
+                  handleNext();
                 }}
                 className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
                 Continue
               </button>
-              <button
-                onClick={() => setCurrentStep('birthday')}
-                className='w-full text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
-              >
-                Back
-              </button>
+              <div className='flex items-center justify-between'>
+                <button
+                  onClick={() => setCurrentStep('birthday')}
+                  className='text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleStepSkip}
+                  className='text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+                >
+                  Skip
+                </button>
+              </div>
             </div>
           </div>
+        )}
+
+        {currentStep === 'feature_tour' && (
+          <OnboardingFeatureTour
+            onComplete={handleNext}
+            onSkip={handleStepSkip}
+          />
         )}
 
         {currentStep === 'ai_preview' && (

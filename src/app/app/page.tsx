@@ -9,10 +9,12 @@ import { useAccount } from 'jazz-tools/react';
 import { conversionTracking } from '@/lib/analytics';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { usePathname } from 'next/navigation';
+import { recordCheckIn } from '@/lib/streak/check-in';
 
 // Critical widgets loaded immediately
 import { DateWidget } from '@/components/DateWidget';
 import { AstronomyWidget } from '@/components/AstronomyWidget';
+import { ExploreThisWeek } from '@/components/ExploreThisWeek';
 
 // Post-trial messaging - lazy loaded since it's conditional (only shows for expired trial users)
 const PostTrialMessaging = dynamic(
@@ -143,10 +145,11 @@ export default function AppDashboard() {
   }, [authState.isAuthenticated, authState.loading, router]);
 
   useEffect(() => {
-    // Track app opened event
+    // Track app opened event and record check-in
     if (authState.isAuthenticated) {
       const userId = (me as any)?.id;
       conversionTracking.appOpened(userId, '/app');
+      recordCheckIn();
     } else if (!authState.loading) {
       conversionTracking.appOpened(undefined, '/app');
     }
@@ -167,6 +170,7 @@ export default function AppDashboard() {
         <div className='w-full space-y-4'>
           <DateWidget />
           <AstronomyWidget />
+          <ExploreThisWeek />
         </div>
 
         {/* Main Content Grid - Responsive 2-Column Layout */}

@@ -219,6 +219,7 @@ export function NotificationSettings() {
         }
       } else {
         // Enable
+        const userId = (me as any)?.id;
         const response = await fetch('/api/notifications/enable-tarot', {
           method: 'POST',
           headers: {
@@ -228,15 +229,21 @@ export function NotificationSettings() {
             endpoint,
             birthday,
             name: userName,
+            userId,
           }),
         });
 
         if (response.ok) {
           setTarotEnabled(true);
         } else {
-          const error = await response.json();
+          const errorData = await response.json().catch(() => ({}));
+          if (response.status === 404) {
+            throw new Error(
+              'Push subscription not found. Please refresh the page and try again.',
+            );
+          }
           throw new Error(
-            error.error || 'Failed to enable tarot notifications',
+            errorData.error || 'Failed to enable tarot notifications',
           );
         }
       }

@@ -1,6 +1,13 @@
 'use client';
 
-import React, { FormEvent, useEffect, useRef, useState, Suspense } from 'react';
+import React, {
+  FormEvent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  Suspense,
+} from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -11,6 +18,7 @@ import { AuthComponent } from '@/components/Auth';
 import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
+import { recordCheckIn } from '@/lib/streak/check-in';
 
 const MessageBubble = ({
   role,
@@ -169,6 +177,13 @@ function BookOfShadowsContent() {
         });
     }
   }, []);
+
+  // Record check-in when user accesses Book of Shadows
+  useEffect(() => {
+    if (authState.isAuthenticated && !authState.loading) {
+      recordCheckIn();
+    }
+  }, [authState.isAuthenticated, authState.loading]);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [promptHandled, setPromptHandled] = useState(false);
@@ -177,13 +192,79 @@ function BookOfShadowsContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const DEBOUNCE_MS = 500;
+  const lastContentLengthRef = useRef<number>(0);
+  const isScrollingRef = useRef<boolean>(false);
+
+  // Calculate total content length to detect content changes during streaming
+  const totalContentLength = messages.reduce(
+    (sum, msg) => sum + msg.content.length,
+    0,
+  );
 
   // Auto-scroll to bottom when messages change or streaming
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  // Use useLayoutEffect for immediate DOM updates
+  useLayoutEffect(() => {
+    // Skip if we're already scrolling to avoid scroll conflicts
+    if (isScrollingRef.current) return;
+
+    const shouldScroll =
+      messages.length > 0 &&
+      // New message added (array length changed)
+      (messages.length !== lastContentLengthRef.current ||
+        // Content updated during streaming (content length changed)
+        totalContentLength !== lastContentLengthRef.current ||
+        // Streaming started
+        isStreaming);
+
+    if (
+      shouldScroll &&
+      messagesEndRef.current &&
+      messagesContainerRef.current
+    ) {
+      isScrollingRef.current = true;
+
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        if (!messagesEndRef.current || !messagesContainerRef.current) {
+          isScrollingRef.current = false;
+          return;
+        }
+
+        const container = messagesContainerRef.current;
+        const endElement = messagesEndRef.current;
+
+        // During streaming, use instant scroll for responsiveness
+        // When streaming completes, use smooth scroll
+        if (isStreaming) {
+          // Instant scroll during streaming
+          container.scrollTop = container.scrollHeight;
+        } else {
+          // Smooth scroll when streaming completes
+          endElement.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Reset scrolling flag after a short delay
+        setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 100);
+      });
     }
-  }, [messages, isStreaming]);
+
+    // Update content length reference
+    lastContentLengthRef.current = totalContentLength;
+  }, [messages, isStreaming, totalContentLength]);
+
+  // Also scroll when streaming state changes (starts/stops)
+  useEffect(() => {
+    if (isStreaming && messagesEndRef.current && messagesContainerRef.current) {
+      requestAnimationFrame(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop =
+            messagesContainerRef.current.scrollHeight;
+        }
+      });
+    }
+  }, [isStreaming]);
 
   // Handle deep link prompt parameter
   useEffect(() => {
@@ -551,7 +632,7 @@ function BookOfShadowsContent() {
 
           <form
             onSubmit={handleSubmit}
-            className='sticky bottom-0 flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
+            className='sticky bottom-[72px] z-[90] flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
           >
             <div className='flex-1'>
               <label htmlFor='book-of-shadows-message' className='sr-only'>

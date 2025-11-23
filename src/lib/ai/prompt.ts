@@ -27,12 +27,13 @@ CRITICAL RULES:
 5. Connect ONLY the actual cosmic patterns provided to the user's question.
 6. Be direct and specific - avoid generic astrological language.
 7. CRITICAL: Do NOT include journal prompts or reflection prompts in your response. Never write phrases like "You could journal on..." or "inviting you to explore..." - these are handled separately by the system and should NEVER appear in your message content. Your response should end naturally without suggesting journaling or reflection activities.
-8. MESSAGE LENGTH VARIES BY CONTENT TYPE:
-   - Weekly Overview: 8-12 sentences (2-3 paragraphs) - comprehensive but concise
+8. TAROT CONTEXT: The context includes daily pulls (daily/weekly/personal cards), pattern analysis (dominant themes, frequent cards, pattern insights), and recent readings. Reference these patterns and daily pulls when discussing tarot, not just saved spreads. Use pattern insights to identify recurring themes and card frequencies to understand what energies are consistently present.
+9. MESSAGE LENGTH VARIES BY CONTENT TYPE:
+   - Weekly Overview: 8-12 sentences MINIMUM (2-3 paragraphs) - MUST be comprehensive and detailed, covering lunar journey, major transits, and practical guidance
    - Quick questions (cosmic weather, feelings, tarot interpretation): 4-6 sentences - concise but meaningful
    - Ritual suggestions: 5-7 sentences - practical and actionable
    - Journal entries: 6-8 sentences - reflective and personal
-   Adjust length based on the question type and complexity.
+   Adjust length based on the question type and complexity. Weekly Overviews are NOT quick summaries - they are comprehensive guides.
 9. Get to the point quickly - lead with the most relevant insight, then add supporting points.
 10. CRITICAL: Do NOT repeat information from previous messages. Each response should be fresh and new. If you've already mentioned something, don't mention it again unless the user specifically asks about it.
 11. Focus on NEW insights based on the current question, not rehashing what was said before.
@@ -71,6 +72,7 @@ Context data is provided below. You MUST:
 - Connect the actual cosmic patterns to the user's emotional state and questions
 - Vary your language and structure - don't use the same phrases or explanations repeatedly
 - Focus on what's MOST relevant to THIS specific question, not everything available
+- TAROT: Reference daily pulls (daily/weekly/personal cards) and pattern analysis (themes, frequent cards, insights) when discussing tarot, not just saved spreads. Pattern insights reveal recurring energies and themes over time.
 
 The context will show exactly what tarot cards and astrological patterns are available. Use ONLY what is provided.
 `.trim();
@@ -95,14 +97,23 @@ const describeContext = (
     }>;
     rituals?: Array<{ title: string; description: string }>;
   },
+  userMessage?: string,
 ): string => {
   const parts: string[] = [];
+
+  // Check if user explicitly asks about latest spread
+  const isAskingAboutSpread =
+    userMessage &&
+    (userMessage.toLowerCase().includes('latest spread') ||
+      userMessage.toLowerCase().includes('my last spread') ||
+      userMessage.toLowerCase().includes('last spread'));
 
   // Tarot cards - always include daily/weekly/personal cards (they're always generated)
   const tarotCards: string[] = [];
 
-  // Saved reading (if exists)
+  // Saved reading - ONLY include if user explicitly asks about latest spread
   if (
+    isAskingAboutSpread &&
     context.tarot.lastReading?.cards &&
     context.tarot.lastReading.cards.length > 0
   ) {
@@ -279,7 +290,7 @@ const getModeSpecificGuidance = (userMessage: string): string => {
     content.includes('interpret my tarot') ||
     content.includes('tarot reading')
   ) {
-    return "\n\nMODE: Tarot Interpretation\nCRITICAL: Check the TAROT section in the context data. The user's saved tarot reading cards are listed there. You MUST reference the specific cards from their reading. If cards are listed in the context, interpret them. If no cards are listed, acknowledge that no reading is saved yet.";
+    return "\n\nMODE: Tarot Interpretation\nCRITICAL: By default, reference daily pulls from last 7 days (daily/weekly/personal cards) and pattern analysis (dominant themes, frequent cards, pattern insights). Daily cards show ongoing energies - spreads are one-time snapshots. ONLY reference saved spreads if the user explicitly asks about 'latest spread' or 'my last spread'. Use pattern insights to identify recurring themes and what cards appear frequently in their readings. Focus on the daily cards and patterns that show what energies are consistently present.";
   }
 
   if (
@@ -293,7 +304,7 @@ const getModeSpecificGuidance = (userMessage: string): string => {
     content.includes('weekly overview') ||
     content.includes('summarise my week')
   ) {
-    return "\n\nMODE: Weekly Overview\nCRITICAL: Write 8-12 sentences (2-3 paragraphs). Do NOT write a single short sentence.\n\nYou MUST include:\n1. Overall lunar journey - describe how moon phases shift throughout the week, what each phase means, and when transitions occur\n2. Major planetary transits - detail the most important transits, what they mean, when they're exact, and how they affect the user personally based on their birth chart\n3. Practical guidance - connect cosmic patterns to actionable insights, highlight specific days that stand out, and provide day-by-day focus areas\n\nBe SPECIFIC and DETAILED. Name specific transits, mention specific days, explain what each transit means. This is NOT a quick summary - it's a comprehensive weekly guide.";
+    return "\n\nMODE: Weekly Overview\nCRITICAL: Write 8-12 sentences MINIMUM (2-3 paragraphs). This MUST be comprehensive and detailed. Do NOT write a single short sentence or brief summary.\n\nYou MUST include ALL of the following:\n1. Overall lunar journey (2-3 sentences) - describe how moon phases shift throughout the week, what each phase means, when transitions occur, and how the moon's sign changes affect energy\n2. Major planetary transits (3-4 sentences) - detail the most important transits from the context, what they mean astrologically, when they're exact, and how they affect the user personally based on their birth chart placements\n3. Practical guidance (3-4 sentences) - connect cosmic patterns to actionable insights, highlight specific days that stand out, provide day-by-day focus areas, and suggest how to work with the week's energies\n\nBe SPECIFIC and DETAILED. Name specific transits (e.g., 'Venus square Mars'), mention specific days (e.g., 'On Tuesday'), explain what each transit means. This is NOT a quick summary - it's a comprehensive weekly guide that helps the user navigate the entire week.";
   }
 
   if (
@@ -335,7 +346,7 @@ export const buildPromptSections = ({
   return {
     system: systemPrompt,
     memory,
-    context: `Context data:\n${describeContext(context, grimoireData)}`,
+    context: `Context data:\n${describeContext(context, grimoireData, userMessage)}`,
     userMessage,
   };
 };
