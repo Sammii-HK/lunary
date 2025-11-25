@@ -1,6 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from 'react';
 import { useAccount } from 'jazz-tools/react';
 import { betterAuthClient } from '@/lib/auth-client';
 
@@ -15,8 +21,6 @@ interface AuthState {
 function isTestMode(): boolean {
   if (typeof window === 'undefined') return false;
 
-  // Jest unit tests run in jsdom (Node.js), not real browser
-  // Only skip for Playwright e2e tests which run in real browser
   return (
     window.navigator.userAgent.includes('HeadlessChrome') ||
     (window as any).__PLAYWRIGHT_TEST__ === true ||
@@ -25,63 +29,98 @@ function isTestMode(): boolean {
   );
 }
 
-export function useAuthStatus(): AuthState {
+const defaultAuthState: AuthState = {
+  isAuthenticated: false,
+  user: null,
+  profile: null,
+  loading: true,
+};
+
+const AuthContext = createContext<AuthState>(defaultAuthState);
+
+// Cache for auth state to prevent duplicate requests
+let cachedAuthState: AuthState | null = null;
+let authPromise: Promise<AuthState> | null = null;
+
+export function AuthStatusProvider({ children }: { children: ReactNode }) {
   const { me } = useAccount();
 
-  // Always call hooks - don't return early
   const [authState, setAuthState] = useState<AuthState>(() => {
-    // Initialize state based on test mode
     if (isTestMode()) {
-      return {
-        isAuthenticated: false,
-        user: null,
-        profile: null,
-        loading: false,
-      };
+      return { ...defaultAuthState, loading: false };
     }
-    return {
-      isAuthenticated: false,
-      user: null,
-      profile: null,
-      loading: true,
-    };
+    // Return cached state if available
+    if (cachedAuthState) {
+      return cachedAuthState;
+    }
+    return defaultAuthState;
   });
 
   useEffect(() => {
-    // Skip API call in test mode
-    if (isTestMode()) {
-      return;
-    }
+    if (isTestMode()) return;
 
     let isMounted = true;
 
     const checkAuth = async () => {
-      try {
-        const session = await betterAuthClient.getSession();
-        const user =
-          session && typeof session === 'object'
-            ? 'user' in session
-              ? (session as any).user
-              : ((session as any)?.data?.user ?? null)
-            : null;
-
+      // If we already have a cached result with user data, use it
+      if (cachedAuthState && !cachedAuthState.loading) {
         if (isMounted) {
           setAuthState({
+            ...cachedAuthState,
+            profile: me?.profile || cachedAuthState.profile,
+          });
+        }
+        return;
+      }
+
+      // If there's already a request in flight, wait for it
+      if (authPromise) {
+        const result = await authPromise;
+        if (isMounted) {
+          setAuthState({
+            ...result,
+            profile: me?.profile || result.profile,
+          });
+        }
+        return;
+      }
+
+      // Make the actual request
+      authPromise = (async () => {
+        try {
+          const session = await betterAuthClient.getSession();
+          const user =
+            session && typeof session === 'object'
+              ? 'user' in session
+                ? (session as any).user
+                : ((session as any)?.data?.user ?? null)
+              : null;
+
+          const newState: AuthState = {
             isAuthenticated: !!user,
             user,
             profile: me?.profile || null,
             loading: false,
-          });
-        }
-      } catch (error) {
-        if (isMounted) {
-          setAuthState({
+          };
+          cachedAuthState = newState;
+          return newState;
+        } catch {
+          const newState: AuthState = {
             isAuthenticated: false,
             user: null,
             profile: me?.profile || null,
             loading: false,
-          });
+          };
+          cachedAuthState = newState;
+          return newState;
+        } finally {
+          authPromise = null;
         }
+      })();
+
+      const result = await authPromise;
+      if (isMounted) {
+        setAuthState(result);
       }
     };
 
@@ -92,5 +131,18 @@ export function useAuthStatus(): AuthState {
     };
   }, [me]);
 
-  return authState;
+  // Update profile when me changes
+  useEffect(() => {
+    if (me?.profile && authState.profile !== me.profile) {
+      setAuthState((prev) => ({ ...prev, profile: me.profile }));
+    }
+  }, [me?.profile, authState.profile]);
+
+  return (
+    <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>
+  );
+}
+
+export function useAuthStatus(): AuthState {
+  return useContext(AuthContext);
 }
