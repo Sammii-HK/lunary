@@ -44,7 +44,7 @@ The Apps Script fetches fresh data from the API endpoint each time it runs. Sinc
 
 1. Open your Google Sheet
 2. Go to **Extensions** → **Apps Script**
-3. Click **Run** on the `updateLunaryKPIs` function
+3. Click **Run** on the `updateLunaryMetrics` function
 4. Check the sheets - you should see:
    - Lower DAU/WAU/MAU (if test users were being counted)
    - Lower subscription counts (if test subscriptions existed)

@@ -55,7 +55,7 @@ function setSecret() {
   );
 }
 
-function updateLunaryKPIs() {
+function updateLunaryMetrics() {
   const response = UrlFetchApp.fetch(ANALYTICS_URL, {
     method: 'get',
     muteHttpExceptions: true,
@@ -505,7 +505,7 @@ function findRowByValue(sheet, columnIndex, value) {
 1. In Apps Script, go to **Triggers** (clock icon in left sidebar)
 2. Click **"Add Trigger"**
 3. Configure:
-   - **Function**: `updateLunaryKPIs`
+   - **Function**: `updateLunaryMetrics`
    - **Event source**: Time-driven
    - **Type**: Day timer
    - **Time**: Choose your preferred time (e.g., 10:00 AM)
