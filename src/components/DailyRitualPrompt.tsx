@@ -75,9 +75,26 @@ export function DailyRitualPrompt() {
     return null;
   }
 
+  const handleRitualClick = async () => {
+    try {
+      await fetch('/api/ritual/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ritualType: ritualPrompt.time,
+          metadata: { prompt: ritualPrompt.prompt },
+        }),
+      });
+    } catch (error) {
+      // Silently fail - don't interrupt user experience
+      console.error('[DailyRitualPrompt] Failed to track ritual:', error);
+    }
+  };
+
   return (
     <Link
       href={`/book-of-shadows?prompt=${encodeURIComponent(ritualPrompt.prompt)}`}
+      onClick={handleRitualClick}
       className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6 hover:border-purple-500/40 transition-colors'
     >
       <div className='flex items-center gap-3 mb-2'>

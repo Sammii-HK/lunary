@@ -33,6 +33,7 @@ import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
 import { Download } from 'lucide-react';
 import { StreakDisplay } from '@/components/StreakDisplay';
+import { RitualTracker } from '@/components/RitualTracker';
 import { MonthlyInsights } from '@/components/MonthlyInsights';
 import { Paywall } from '@/components/Paywall';
 
@@ -542,6 +543,7 @@ export default function ProfilePage() {
       {authState.isAuthenticated && !isEditing && (
         <div className='w-full max-w-3xl space-y-4'>
           <StreakDisplay />
+          <RitualTracker />
           <Paywall feature='monthly_insights'>
             <MonthlyInsights />
           </Paywall>

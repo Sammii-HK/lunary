@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Flame, Trophy } from 'lucide-react';
+import { Flame, Trophy, Share2 } from 'lucide-react';
+import { SharePersonalized } from './SharePersonalized';
 
 interface StreakData {
   current: number;
@@ -115,11 +116,20 @@ export function StreakDisplay() {
         )}
 
         <div className='pt-2 border-t border-zinc-800/60'>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-zinc-500 mb-3'>
             {streak.current === 0
               ? 'Start your streak today! Check in to begin tracking.'
               : 'Keep it going! Check in today to maintain your streak.'}
           </p>
+          {streak.current > 0 && (
+            <SharePersonalized
+              type='streak'
+              data={{
+                streak: streak.current,
+                longestStreak: streak.longest,
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

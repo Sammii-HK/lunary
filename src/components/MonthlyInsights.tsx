@@ -1,8 +1,36 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar, TrendingUp, Sparkles } from 'lucide-react';
+import { Calendar, TrendingUp, Sparkles, BarChart3 } from 'lucide-react';
 import { useAuthStatus } from './AuthStatus';
+import { SharePersonalized } from './SharePersonalized';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
+
+interface UsagePattern {
+  date: string;
+  tarotReadings: number;
+  journalEntries: number;
+  aiChats: number;
+  rituals: number;
+}
+
+interface TrendComparison {
+  thisMonth: number;
+  lastMonth: number;
+  change: number;
+  changePercent: number;
+}
 
 interface MonthlyInsight {
   month: number;
@@ -14,6 +42,14 @@ interface MonthlyInsight {
   journalCount?: number;
   transitImpacts?: Array<{ aspect: string; count: number }>;
   summary?: string;
+  usagePatterns?: UsagePattern[];
+  trends?: {
+    tarot: TrendComparison;
+    journal: TrendComparison;
+    ai: TrendComparison;
+    rituals: TrendComparison;
+  };
+  mostActiveDay?: string | null;
 }
 
 export function MonthlyInsights() {
@@ -179,6 +215,178 @@ export function MonthlyInsights() {
               <span className='text-zinc-300 font-medium'>Mood trend:</span>{' '}
               {insight.moodTrend}
             </p>
+          </div>
+        )}
+
+        {insight.trends && (
+          <div>
+            <div className='flex items-center gap-2 mb-3'>
+              <BarChart3 className='w-4 h-4 text-purple-400' />
+              <h3 className='text-sm font-medium text-zinc-300'>
+                This Month vs Last Month
+              </h3>
+            </div>
+            <div className='space-y-2'>
+              {insight.trends.tarot.thisMonth > 0 ||
+              insight.trends.tarot.lastMonth > 0 ? (
+                <div className='text-xs'>
+                  <div className='flex items-center justify-between mb-1'>
+                    <span className='text-zinc-300'>Tarot Readings</span>
+                    <span className='text-zinc-400'>
+                      {insight.trends.tarot.thisMonth} vs{' '}
+                      {insight.trends.tarot.lastMonth}
+                      {insight.trends.tarot.changePercent !== 0 && (
+                        <span
+                          className={
+                            insight.trends.tarot.changePercent > 0
+                              ? 'text-green-400 ml-1'
+                              : 'text-red-400 ml-1'
+                          }
+                        >
+                          ({insight.trends.tarot.changePercent > 0 ? '+' : ''}
+                          {insight.trends.tarot.changePercent}%)
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+              {insight.trends.journal.thisMonth > 0 ||
+              insight.trends.journal.lastMonth > 0 ? (
+                <div className='text-xs'>
+                  <div className='flex items-center justify-between mb-1'>
+                    <span className='text-zinc-300'>Journal Entries</span>
+                    <span className='text-zinc-400'>
+                      {insight.trends.journal.thisMonth} vs{' '}
+                      {insight.trends.journal.lastMonth}
+                      {insight.trends.journal.changePercent !== 0 && (
+                        <span
+                          className={
+                            insight.trends.journal.changePercent > 0
+                              ? 'text-green-400 ml-1'
+                              : 'text-red-400 ml-1'
+                          }
+                        >
+                          ({insight.trends.journal.changePercent > 0 ? '+' : ''}
+                          {insight.trends.journal.changePercent}%)
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+              {insight.trends.rituals.thisMonth > 0 ||
+              insight.trends.rituals.lastMonth > 0 ? (
+                <div className='text-xs'>
+                  <div className='flex items-center justify-between mb-1'>
+                    <span className='text-zinc-300'>Rituals</span>
+                    <span className='text-zinc-400'>
+                      {insight.trends.rituals.thisMonth} vs{' '}
+                      {insight.trends.rituals.lastMonth}
+                      {insight.trends.rituals.changePercent !== 0 && (
+                        <span
+                          className={
+                            insight.trends.rituals.changePercent > 0
+                              ? 'text-green-400 ml-1'
+                              : 'text-red-400 ml-1'
+                          }
+                        >
+                          ({insight.trends.rituals.changePercent > 0 ? '+' : ''}
+                          {insight.trends.rituals.changePercent}%)
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
+
+        {insight.usagePatterns && insight.usagePatterns.length > 0 && (
+          <div>
+            <div className='flex items-center gap-2 mb-3'>
+              <BarChart3 className='w-4 h-4 text-purple-400' />
+              <h3 className='text-sm font-medium text-zinc-300'>
+                Daily Activity
+              </h3>
+            </div>
+            <div className='h-48'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <LineChart data={insight.usagePatterns}>
+                  <CartesianGrid
+                    strokeDasharray='3 3'
+                    stroke='#3f3f46'
+                    opacity={0.3}
+                  />
+                  <XAxis
+                    dataKey='date'
+                    tick={{ fill: '#a1a1aa', fontSize: 10 }}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
+                  <YAxis tick={{ fill: '#a1a1aa', fontSize: 10 }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#18181b',
+                      border: '1px solid #3f3f46',
+                      borderRadius: '8px',
+                      color: '#e4e4e7',
+                    }}
+                    labelFormatter={(value) => {
+                      const date = new Date(value);
+                      return date.toLocaleDateString();
+                    }}
+                  />
+                  <Line
+                    type='monotone'
+                    dataKey='tarotReadings'
+                    stroke='#a855f7'
+                    strokeWidth={2}
+                    dot={false}
+                    name='Tarot'
+                  />
+                  <Line
+                    type='monotone'
+                    dataKey='journalEntries'
+                    stroke='#ec4899'
+                    strokeWidth={2}
+                    dot={false}
+                    name='Journal'
+                  />
+                  <Line
+                    type='monotone'
+                    dataKey='rituals'
+                    stroke='#f59e0b'
+                    strokeWidth={2}
+                    dot={false}
+                    name='Rituals'
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {insight.mostActiveDay && (
+          <div className='text-xs text-zinc-400'>
+            <span className='text-zinc-300 font-medium'>Most active day:</span>{' '}
+            {insight.mostActiveDay}
+          </div>
+        )}
+
+        {insight.frequentCards.length > 0 && (
+          <div className='pt-3 border-t border-zinc-800/60'>
+            <SharePersonalized
+              type='monthly-insights'
+              data={{
+                month: monthName,
+                frequentCards: insight.frequentCards,
+                journalCount: insight.journalCount,
+              }}
+            />
           </div>
         )}
       </div>

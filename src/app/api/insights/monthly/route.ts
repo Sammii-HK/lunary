@@ -5,6 +5,11 @@ import {
   hasFeatureAccess,
   normalizePlanType,
 } from '../../../../../utils/pricing';
+import {
+  getUsagePatterns,
+  getTrendComparison,
+  getMostActiveDay,
+} from '@/lib/insights/usage-patterns';
 
 export async function GET(request: NextRequest) {
   try {
@@ -255,6 +260,24 @@ export async function GET(request: NextRequest) {
         ? `Your Cosmic Month in Review: ${summaryParts.join('. ')}.`
         : `This month marks the beginning of your cosmic journey. Start pulling cards and journaling to see your patterns emerge.`;
 
+    // Get usage patterns and trends
+    const usagePatterns = await getUsagePatterns(userId, month, year);
+    const tarotTrend = await getTrendComparison(userId, month, year, 'tarot');
+    const journalTrend = await getTrendComparison(
+      userId,
+      month,
+      year,
+      'journal',
+    );
+    const aiTrend = await getTrendComparison(userId, month, year, 'ai');
+    const ritualTrend = await getTrendComparison(
+      userId,
+      month,
+      year,
+      'rituals',
+    );
+    const mostActiveDay = await getMostActiveDay(userId, month, year);
+
     const insight = {
       month,
       year,
@@ -265,6 +288,14 @@ export async function GET(request: NextRequest) {
       journalCount: journalTitles.length,
       transitImpacts,
       summary,
+      usagePatterns,
+      trends: {
+        tarot: tarotTrend,
+        journal: journalTrend,
+        ai: aiTrend,
+        rituals: ritualTrend,
+      },
+      mostActiveDay,
     };
 
     // Cache the insights in database
