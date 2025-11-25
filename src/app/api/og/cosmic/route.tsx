@@ -13,6 +13,7 @@ import {
 } from '../../../../../utils/astrology/cosmic-og';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Cache for 1 hour - base OG image updates hourly
 
 // Request deduplication
@@ -38,8 +39,23 @@ function getZodiacSign(longitude: number): string {
 }
 
 async function generateImage(req: NextRequest): Promise<Response> {
-  const fontData = await loadAstronomiconFont(req);
-  if (!fontData) throw new Error('Font load returned null');
+  let astronomiconFont: ArrayBuffer | null = null;
+  let robotoFont: ArrayBuffer | null = null;
+
+  try {
+    astronomiconFont = await loadAstronomiconFont(req);
+  } catch (error) {
+    console.error('Failed to load Astronomicon font:', error);
+  }
+
+  try {
+    robotoFont = await loadGoogleFont(req);
+  } catch (error) {
+    console.error('Failed to load Roboto Mono font:', error);
+  }
+
+  if (!astronomiconFont)
+    throw new Error('Astronomicon font load returned null');
 
   const today = new Date();
   const targetDate = new Date(
@@ -426,10 +442,19 @@ async function generateImage(req: NextRequest): Promise<Response> {
       fonts: [
         {
           name: 'Astronomicon',
-          data: fontData,
+          data: astronomiconFont,
           style: 'normal',
           weight: 400,
         },
+        ...(robotoFont
+          ? [
+              {
+                name: 'Roboto Mono',
+                data: robotoFont,
+                style: 'normal' as const,
+              },
+            ]
+          : []),
       ],
     },
   );

@@ -1,6 +1,9 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { getAccurateMoonPhase } from '../../../../../utils/astrology/cosmic-og';
+import {
+  getAccurateMoonPhase,
+  loadGoogleFont,
+} from '../../../../../utils/astrology/cosmic-og';
 
 export const runtime = 'nodejs'; // Node.js runtime required for astronomy-engine calculations
 export const dynamic = 'force-dynamic';
@@ -85,6 +88,9 @@ export async function GET(request: NextRequest) {
     'linear-gradient(135deg, #1e2a3a, #2563eb18)', // Bright blue
     'linear-gradient(135deg, #3b82f610, #1e3c72)', // Sky blue
   ];
+
+  // Load Roboto Mono font
+  const robotoFont = await loadGoogleFont(request);
 
   return new ImageResponse(
     (
@@ -193,6 +199,18 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
     ),
-    { width: 1200, height: 1200 },
+    {
+      width: 1200,
+      height: 1200,
+      fonts: robotoFont
+        ? [
+            {
+              name: 'Roboto Mono',
+              data: robotoFont,
+              style: 'normal',
+            },
+          ]
+        : [],
+    },
   );
 }

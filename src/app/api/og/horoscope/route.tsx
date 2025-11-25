@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { loadGoogleFont } from '../../../../../utils/astrology/cosmic-og';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 86400; // Cache for 24 hours (content updates daily)
@@ -83,6 +84,9 @@ export async function GET(request: NextRequest) {
     'linear-gradient(135deg, #1e2a3a, #2c3e50)',
     'linear-gradient(135deg, #1a2332, #1e3c72)',
   ];
+
+  // Load Roboto Mono font
+  const robotoFont = await loadGoogleFont(request);
 
   return new ImageResponse(
     (
@@ -186,6 +190,18 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
     ),
-    { width: 1200, height: 1200 },
+    {
+      width: 1200,
+      height: 1200,
+      fonts: robotoFont
+        ? [
+            {
+              name: 'Roboto Mono',
+              data: robotoFont,
+              style: 'normal',
+            },
+          ]
+        : [],
+    },
   );
 }

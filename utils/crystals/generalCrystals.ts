@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { getAstrologicalChart } from '../astrology/astrology';
 import { Observer } from 'astronomy-engine';
 import { getMoonPhase } from '../moon/moonPhases';
@@ -9,8 +8,6 @@ import {
   getCrystalsByMoonPhase,
   getCrystalByName,
 } from '../../src/constants/grimoire/crystals';
-
-dayjs.extend(dayOfYear);
 
 export type GeneralCrystalRecommendation = {
   name: string;
@@ -181,8 +178,11 @@ export const getGeneralCrystalRecommendation = (
   });
 
   // Select crystal based on current day to ensure consistency
-  const dayOfYear = today.dayOfYear();
-  const selectedCrystal = sortedCrystals[dayOfYear % sortedCrystals.length];
+  // Calculate day of year manually to avoid plugin issues
+  const startOfYear = dayjs(normalizedDate).startOf('year');
+  const currentDayOfYear = today.diff(startOfYear, 'day') + 1;
+  const selectedCrystal =
+    sortedCrystals[currentDayOfYear % sortedCrystals.length];
 
   // Generate reason
   let reason = `Based on today's cosmic energy`;
