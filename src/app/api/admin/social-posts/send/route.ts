@@ -132,6 +132,21 @@ export async function POST(request: NextRequest) {
         ]
       : [];
 
+    // Pinterest requires media - validate before proceeding
+    if (platformStr === 'pinterest' && mediaArray.length === 0) {
+      console.warn(
+        '⚠️ Pinterest requires media but none provided. Skipping Pinterest.',
+      );
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Pinterest requires an image or video. Please provide media for Pinterest posts.',
+        },
+        { status: 400 },
+      );
+    }
+
     // Format date for readable title (e.g., "Nov 23, 2025 at 2:00 PM")
     const formattedDate = scheduleDate.toLocaleDateString('en-US', {
       month: 'short',
