@@ -10,17 +10,13 @@ const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 const EXCLUDED_EMAIL = 'kellow.sammii@gmail.com';
 
 async function calculateRetention() {
-  const today = new Date();
-  const startDate = formatDate(
-    new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000),
-  );
-  const endDate = formatDate(today);
+  const startDate = formatDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
 
   const baseUsersResult = await sql`
     SELECT DISTINCT user_id
     FROM analytics_user_activity
     WHERE activity_type = 'session'
-      AND activity_date = ${startDate}
+      AND activity_date = ${startDate}::date
       AND user_id NOT IN (
         SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
         UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -32,23 +28,18 @@ async function calculateRetention() {
   );
 
   if (baseUsers.size === 0) {
-    return { day_1: 0, day_7: 0, day_30: 0 };
+    return { day_1: null, day_7: null, day_30: null };
   }
 
-  const day1Date = formatDate(
-    new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000),
-  );
-  const day7Date = formatDate(
-    new Date(today.getTime() - 23 * 24 * 60 * 60 * 1000),
-  );
-  const day30Date = formatDate(today);
+  const day1Date = formatDate(new Date(Date.now() - 29 * 24 * 60 * 60 * 1000));
+  const day7Date = formatDate(new Date(Date.now() - 23 * 24 * 60 * 60 * 1000));
 
   const [day1Result, day7Result, day30Result] = await Promise.all([
     sql`
       SELECT DISTINCT user_id
       FROM analytics_user_activity
       WHERE activity_type = 'session'
-        AND activity_date = ${day1Date}
+        AND activity_date = ${day1Date}::date
         AND user_id NOT IN (
           SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
           UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -58,7 +49,7 @@ async function calculateRetention() {
       SELECT DISTINCT user_id
       FROM analytics_user_activity
       WHERE activity_type = 'session'
-        AND activity_date = ${day7Date}
+        AND activity_date = ${day7Date}::date
         AND user_id NOT IN (
           SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
           UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -68,7 +59,7 @@ async function calculateRetention() {
       SELECT DISTINCT user_id
       FROM analytics_user_activity
       WHERE activity_type = 'session'
-        AND activity_date = ${day30Date}
+        AND activity_date = CURRENT_DATE
         AND user_id NOT IN (
           SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
           UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -90,15 +81,15 @@ async function calculateRetention() {
     day_1:
       baseUsers.size > 0
         ? Math.round((day1Returning / baseUsers.size) * 100)
-        : 0,
+        : null,
     day_7:
       baseUsers.size > 0
         ? Math.round((day7Returning / baseUsers.size) * 100)
-        : 0,
+        : null,
     day_30:
       baseUsers.size > 0
         ? Math.round((day30Returning / baseUsers.size) * 100)
-        : 0,
+        : null,
   };
 }
 
@@ -149,7 +140,7 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(DISTINCT user_id) AS value
         FROM analytics_user_activity
         WHERE activity_type = 'session'
-          AND activity_date = ${endDate}
+          AND activity_date = CURRENT_DATE
           AND user_id NOT IN (
             SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -159,7 +150,7 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(DISTINCT user_id) AS value
         FROM analytics_user_activity
         WHERE activity_type = 'session'
-          AND activity_date BETWEEN (${endDate}::date - INTERVAL '6 days') AND ${endDate}
+          AND activity_date BETWEEN (CURRENT_DATE - INTERVAL '6 days') AND CURRENT_DATE
           AND user_id NOT IN (
             SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -169,7 +160,7 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(DISTINCT user_id) AS value
         FROM analytics_user_activity
         WHERE activity_type = 'session'
-          AND activity_date BETWEEN (${endDate}::date - INTERVAL '29 days') AND ${endDate}
+          AND activity_date BETWEEN (CURRENT_DATE - INTERVAL '29 days') AND CURRENT_DATE
           AND user_id NOT IN (
             SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -378,7 +369,10 @@ export async function GET(request: NextRequest) {
       totalTrials30d > 0 ? (trialConversions30d / totalTrials30d) * 100 : 0;
 
     const retention = retentionResult;
-    const churnRate = Math.max(0, 100 - retention.day_30);
+    const churnRate =
+      retention.day_30 !== null && retention.day_30 !== undefined
+        ? Math.max(0, 100 - retention.day_30)
+        : null;
 
     // Correct pricing:
     // - lunary_plus (monthly): $4.99/month
@@ -536,12 +530,29 @@ export async function GET(request: NextRequest) {
     const stickinessDauWau = wau > 0 ? (dau / wau) * 100 : 0;
     const arr = mrr * 12;
 
+    // Validation: Catch impossible metric combinations
+    if (dau === 0 && (wau > 0 || mau > 0)) {
+      console.warn(
+        `[analytics/summary] Data inconsistency detected: DAU=0 but WAU=${wau}, MAU=${mau}. This may indicate a date/timezone issue.`,
+      );
+    }
+    if (wau > 0 && dau > wau) {
+      console.warn(
+        `[analytics/summary] Data inconsistency detected: DAU=${dau} > WAU=${wau}. This should not be possible.`,
+      );
+    }
+    if (mau > 0 && wau > mau) {
+      console.warn(
+        `[analytics/summary] Data inconsistency detected: WAU=${wau} > MAU=${mau}. This should not be possible.`,
+      );
+    }
+
     // Calculate returning users percentage
     const returningUsersResult = await sql`
       SELECT COUNT(DISTINCT a.user_id) AS value
       FROM analytics_user_activity a
       WHERE a.activity_type = 'session'
-        AND a.activity_date = ${endDate}
+        AND a.activity_date = CURRENT_DATE
         AND a.user_id NOT IN (
             SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -551,7 +562,7 @@ export async function GET(request: NextRequest) {
           FROM analytics_user_activity b
           WHERE b.user_id = a.user_id
             AND b.activity_type = 'session'
-            AND b.activity_date < ${endDate}
+            AND b.activity_date < CURRENT_DATE
             AND b.user_id NOT IN (
             SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
@@ -1190,7 +1201,7 @@ export async function GET(request: NextRequest) {
         mau,
         returningUsersPercent: Number(returningUsersPercent.toFixed(2)),
         conversionRate: Number(conversionRate.toFixed(2)),
-        churnPercent: Number(churnRate.toFixed(2)),
+        churnPercent: churnRate !== null ? Number(churnRate.toFixed(2)) : null,
         mrr: Number(mrr.toFixed(2)),
         arr: Number(arr.toFixed(2)),
         arpu: Number(arpu.toFixed(2)),
@@ -1217,7 +1228,7 @@ export async function GET(request: NextRequest) {
       churn: {
         monthlySubscriberChurn: Number(monthlySubscriberChurn.toFixed(2)),
         annualSubscriberChurn: Number(annualSubscriberChurn.toFixed(2)),
-        overallChurn: Number(churnRate.toFixed(2)),
+        overallChurn: churnRate !== null ? Number(churnRate.toFixed(2)) : null,
       },
 
       // Acquisition Metrics
@@ -1325,7 +1336,7 @@ export async function GET(request: NextRequest) {
       returningUsersPercent: Number(returningUsersPercent.toFixed(2)),
       activeTrials,
       activePayingUsers: activeSubscriptions,
-      churnRate: Number(churnRate.toFixed(2)),
+      churnRate: churnRate !== null ? Number(churnRate.toFixed(2)) : null,
       conversionRate: Number(conversionRate.toFixed(2)),
       arpu: Number(arpu.toFixed(2)),
       trialToPaidConversionRate30d: Number(

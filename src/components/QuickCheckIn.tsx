@@ -15,7 +15,7 @@ export function QuickCheckIn() {
 
   const handleCheckIn = async () => {
     await recordCheckIn();
-    router.push(
+    router.replace(
       '/book-of-shadows?prompt=' +
         encodeURIComponent('How am I feeling with these transits?'),
     );

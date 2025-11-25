@@ -1,10 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Bookmark, BookmarkCheck, FolderPlus, Loader2 } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Bookmark, BookmarkCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
+
+interface Folder {
+  id: number;
+  name: string;
+  color?: string;
+  icon?: string;
+}
 
 interface SaveToCollectionProps {
   item: {
@@ -20,57 +27,59 @@ interface SaveToCollectionProps {
     content: any;
     tags?: string[];
   };
+  isSaved?: boolean;
+  folders?: Folder[];
   onSaved?: () => void;
   className?: string;
 }
 
 export function SaveToCollection({
   item,
+  isSaved: isSavedProp,
+  folders: foldersProp,
   onSaved,
   className = '',
 }: SaveToCollectionProps) {
   const authState = useAuthStatus();
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSavedInternal, setIsSavedInternal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showFolderDialog, setShowFolderDialog] = useState(false);
-  const [folders, setFolders] = useState<any[]>([]);
+  const [foldersInternal, setFoldersInternal] = useState<Folder[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
-  const checkIfSaved = useCallback(async () => {
+  const isSaved = isSavedProp ?? isSavedInternal;
+  const folders = foldersProp ?? foldersInternal;
+
+  const fetchDataOnInteraction = useCallback(async () => {
+    if (hasFetched || isSavedProp !== undefined) return;
+
+    setHasFetched(true);
     try {
-      const response = await fetch(
-        `/api/collections?category=${item.category}&limit=100`,
-      );
-      const data = await response.json();
-      if (data.success) {
-        const exists = data.collections.some(
+      const [collectionsRes, foldersRes] = await Promise.all([
+        fetch(`/api/collections?category=${item.category}&limit=100`),
+        fetch('/api/collections/folders'),
+      ]);
+
+      const [collectionsData, foldersData] = await Promise.all([
+        collectionsRes.json(),
+        foldersRes.json(),
+      ]);
+
+      if (collectionsData.success) {
+        const exists = collectionsData.collections.some(
           (c: any) => c.title === item.title && c.category === item.category,
         );
-        setIsSaved(exists);
+        setIsSavedInternal(exists);
+      }
+
+      if (foldersData.success) {
+        setFoldersInternal(foldersData.folders);
       }
     } catch (error) {
-      console.error('Error checking if saved:', error);
+      console.error('Error fetching collection data:', error);
     }
-  }, [item]);
-
-  const fetchFolders = useCallback(async () => {
-    try {
-      const response = await fetch('/api/collections/folders');
-      const data = await response.json();
-      if (data.success) {
-        setFolders(data.folders);
-      }
-    } catch (error) {
-      console.error('Error fetching folders:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (authState.isAuthenticated) {
-      checkIfSaved();
-      fetchFolders();
-    }
-  }, [authState.isAuthenticated, checkIfSaved, fetchFolders]);
+  }, [hasFetched, isSavedProp, item]);
 
   const handleSave = async () => {
     if (!authState.isAuthenticated) {
@@ -90,7 +99,7 @@ export function SaveToCollection({
 
       const data = await response.json();
       if (data.success) {
-        setIsSaved(true);
+        setIsSavedInternal(true);
         conversionTracking.upgradeClicked('save_to_collection', item.category);
         onSaved?.();
         setShowFolderDialog(false);
@@ -120,7 +129,11 @@ export function SaveToCollection({
   return (
     <div className={className}>
       <Button
-        onClick={() => setShowFolderDialog(true)}
+        onClick={() => {
+          fetchDataOnInteraction();
+          setShowFolderDialog(true);
+        }}
+        onMouseEnter={fetchDataOnInteraction}
         variant='outline'
         size='sm'
         className='flex items-center gap-2'
