@@ -2,6 +2,7 @@
 
 import React, {
   FormEvent,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -19,14 +20,30 @@ import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
-import { useAIPrompts } from '@/hooks/useAIPrompts';
-import { AIPromptCard } from '@/components/AIPromptCard';
+// Temporarily disabled - was causing fetch errors
+// import { useAIPrompts } from '@/hooks/useAIPrompts';
+// import { AIPromptCard } from '@/components/AIPromptCard';
+
+interface CollectionFolder {
+  id: number;
+  name: string;
+  color?: string;
+  icon?: string;
+}
+
+interface SavedCollection {
+  title: string;
+  category: string;
+}
 
 const MessageBubble = ({
   role,
   content,
   messageId,
   onEntityClick,
+  savedCollections,
+  folders,
+  onSaved,
 }: {
   role: 'user' | 'assistant';
   content: string;
@@ -35,6 +52,9 @@ const MessageBubble = ({
     type: 'tarot' | 'ritual' | 'spell';
     name: string;
   }) => void;
+  savedCollections?: SavedCollection[];
+  folders?: CollectionFolder[];
+  onSaved?: () => void;
 }) => {
   const isUser = role === 'user';
   // Only parse assistant messages for entities (user messages don't need parsing)
@@ -131,6 +151,14 @@ const MessageBubble = ({
                 content: { messageId, content, role },
                 tags: ['ai-chat'],
               }}
+              isSaved={savedCollections?.some(
+                (c) =>
+                  c.title ===
+                    `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}` &&
+                  c.category === 'chat',
+              )}
+              folders={folders}
+              onSaved={onSaved}
             />
           </div>
         )}
@@ -159,14 +187,70 @@ function BookOfShadowsContent() {
     threadId,
   } = useAssistantChat();
 
-  const {
-    prompts,
-    hasNewPrompts,
-    isLoading: promptsLoading,
-    markPromptAsRead,
-  } = useAIPrompts();
+  // Temporarily disabled - was causing fetch errors
+  const prompts: any[] = [];
+  const hasNewPrompts = false;
+  const promptsLoading = false;
+  const markPromptAsRead = (_id: string) => {};
 
   const [cacheInitialized, setCacheInitialized] = useState(false);
+  const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(
+    [],
+  );
+  const [collectionFolders, setCollectionFolders] = useState<
+    CollectionFolder[]
+  >([]);
+
+  useEffect(() => {
+    if (!authState.isAuthenticated || authState.loading) return;
+
+    const fetchCollections = async () => {
+      try {
+        const [collectionsRes, foldersRes] = await Promise.all([
+          fetch('/api/collections?category=chat&limit=100'),
+          fetch('/api/collections/folders'),
+        ]);
+
+        const [collectionsData, foldersData] = await Promise.all([
+          collectionsRes.json(),
+          foldersRes.json(),
+        ]);
+
+        if (collectionsData.success) {
+          setSavedCollections(
+            collectionsData.collections.map((c: any) => ({
+              title: c.title,
+              category: c.category,
+            })),
+          );
+        }
+
+        if (foldersData.success) {
+          setCollectionFolders(foldersData.folders);
+        }
+      } catch (error) {
+        console.error('Error fetching collections:', error);
+      }
+    };
+
+    fetchCollections();
+  }, [authState.isAuthenticated, authState.loading]);
+
+  const handleCollectionSaved = useCallback(() => {
+    fetch('/api/collections?category=chat&limit=100')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setSavedCollections(
+            data.collections.map((c: any) => ({
+              title: c.title,
+              category: c.category,
+            })),
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Initialize tarot card parser on mount (client-side only)
   useEffect(() => {
@@ -195,7 +279,7 @@ function BookOfShadowsContent() {
   }, [authState.isAuthenticated, authState.loading]);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [promptHandled, setPromptHandled] = useState(false);
+  const [promptHandled, setPromptHandled] = useState<string | null>(null);
   const [isAssistExpanded, setIsAssistExpanded] = useState(true);
   const lastSendTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -203,6 +287,8 @@ function BookOfShadowsContent() {
   const DEBOUNCE_MS = 500;
   const lastContentLengthRef = useRef<number>(0);
   const isScrollingRef = useRef<boolean>(false);
+  const promptSentRef = useRef(false);
+  const prevLoadingRef = useRef(true);
 
   // Calculate total content length to detect content changes during streaming
   const totalContentLength = messages.reduce(
@@ -275,31 +361,16 @@ function BookOfShadowsContent() {
     }
   }, [isStreaming]);
 
-  // Handle deep link prompt parameter
+  // DISABLED: Prompt auto-send was causing loading issues
+  // Users can manually type or use quick actions instead
+  // TODO: Re-enable after fixing race conditions
   useEffect(() => {
-    if (
-      authState.isAuthenticated &&
-      !authState.loading &&
-      !promptHandled &&
-      messages.length === 0
-    ) {
-      const prompt = searchParams.get('prompt');
-      if (prompt && prompt.trim()) {
-        setPromptHandled(true);
-        const decodedPrompt = decodeURIComponent(prompt);
-        setTimeout(() => {
-          sendMessage(decodedPrompt);
-        }, 500);
-      }
+    // Just track the prompt for UI purposes, don't auto-send
+    const currentPrompt = searchParams.get('prompt');
+    if (currentPrompt) {
+      setPromptHandled(decodeURIComponent(currentPrompt.trim()));
     }
-  }, [
-    authState.isAuthenticated,
-    authState.loading,
-    promptHandled,
-    messages.length,
-    searchParams,
-    sendMessage,
-  ]);
+  }, [searchParams]);
 
   const attemptSend = () => {
     const now = Date.now();
@@ -443,9 +514,10 @@ function BookOfShadowsContent() {
                 Usage: {usage.used}/{usage.limit}
               </span>
             ) : null}
-            {dailyHighlight?.primaryEvent ? (
+            {(dailyHighlight as { primaryEvent?: string })?.primaryEvent ? (
               <span className='rounded-full border border-zinc-700/60 px-3 py-1'>
-                Today: {dailyHighlight.primaryEvent}
+                Today:{' '}
+                {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
               </span>
             ) : null}
             {hasNewPrompts && (
@@ -474,21 +546,7 @@ function BookOfShadowsContent() {
                       exploring, or what guidance you're seeking. I'll answer
                       with gentle, grounded insight.
                     </div>
-                    {!promptsLoading && prompts.length > 0 && (
-                      <div className='space-y-2'>
-                        <h3 className='text-sm font-medium text-zinc-300 px-1'>
-                          Suggested Prompts
-                        </h3>
-                        {prompts.slice(0, 3).map((prompt) => (
-                          <AIPromptCard
-                            key={prompt.id}
-                            prompt={prompt}
-                            onUsePrompt={sendMessage}
-                            onMarkAsRead={markPromptAsRead}
-                          />
-                        ))}
-                      </div>
-                    )}
+                    {/* AI Prompts temporarily disabled */}
                     <CopilotQuickActions
                       onActionClick={(prompt) => sendMessage(prompt)}
                       disabled={isStreaming}
@@ -502,6 +560,9 @@ function BookOfShadowsContent() {
                         role={message.role}
                         content={message.content}
                         messageId={message.id}
+                        savedCollections={savedCollections}
+                        folders={collectionFolders}
+                        onSaved={handleCollectionSaved}
                         onEntityClick={async (entity) => {
                           try {
                             let content = '';

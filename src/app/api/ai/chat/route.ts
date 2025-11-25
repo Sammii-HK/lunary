@@ -28,7 +28,8 @@ import {
 import { recordAiInteraction } from '@/lib/analytics/tracking';
 
 type ChatRequest = {
-  message: string;
+  message?: string;
+  messages?: Array<{ role: string; content: string }>;
   threadId?: string;
   mode?: string;
 };
@@ -45,17 +46,31 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as ChatRequest;
 
-    if (!body?.message || typeof body.message !== 'string') {
+    // Support both formats: direct message or AI SDK messages array
+    let userMessage: string;
+    if (body.message && typeof body.message === 'string') {
+      userMessage = body.message;
+    } else if (body.messages && Array.isArray(body.messages)) {
+      const lastUserMsg = [...body.messages]
+        .reverse()
+        .find((m) => m.role === 'user');
+      if (!lastUserMsg?.content) {
+        return jsonResponse({ error: 'No user message found.' }, 400);
+      }
+      userMessage = lastUserMsg.content;
+    } else {
       return jsonResponse({ error: 'Message is required.' }, 400);
     }
 
     const user = await requireUser(request);
     const planId = resolvePlanId(user);
-    const assistCommand = detectAssistCommand(body.message);
+    const assistCommand = detectAssistCommand(userMessage);
     const aiMode =
       typeof body.mode === 'string' && body.mode.trim().length > 0
         ? body.mode.trim()
         : (assistCommand.type ?? 'general');
+
+    // Use userMessage throughout instead of userMessage
     const memorySnippetLimit = MEMORY_SNIPPET_LIMITS[planId] ?? 0;
     const memorySnippets = getMemorySnippets(user.id, memorySnippetLimit);
 
@@ -112,7 +127,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (planId === 'free' && isRitualRequest(body.message)) {
+    if (planId === 'free' && isRitualRequest(userMessage)) {
       const weeklyUsage = await getWeeklyRitualUsage(user.id, now);
       if (weeklyUsage.used >= weeklyUsage.limit) {
         return jsonResponse(
@@ -161,7 +176,7 @@ export async function POST(request: NextRequest) {
         }
       | undefined;
 
-    const tarotCardMatch = body.message.match(
+    const tarotCardMatch = userMessage.match(
       /tarot card ["']([^"']+)["']|tarot card (\w+(?:\s+\w+)*)/i,
     );
     if (tarotCardMatch) {
@@ -183,19 +198,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (assistCommand.type) {
+    if (assistCommand.type && assistCommand.type !== 'none') {
       const assistSnippet = runAssistCommand(assistCommand, context);
-      const reflection = buildReflectionPrompt(context, body.message);
+      const reflection = buildReflectionPrompt(context, userMessage);
       const promptSections = buildPromptSections({
         context,
         memorySnippets,
-        userMessage: body.message,
+        userMessage: userMessage,
       });
 
       // Only save assistSnippet to thread - reflection is sent separately and should NOT be in message content
       const assistantContent = assistSnippet || '';
 
-      const tokensIn = estimateTokenCount(body.message);
+      const tokensIn = estimateTokenCount(userMessage);
       const tokensOut = estimateTokenCount(assistantContent);
 
       const usageResult = await updateUsage({
@@ -210,7 +225,7 @@ export async function POST(request: NextRequest) {
         return jsonResponse({ error: usageResult.message }, 429);
       }
 
-      if (planId === 'free' && isRitualRequest(body.message)) {
+      if (planId === 'free' && isRitualRequest(userMessage)) {
         await incrementWeeklyRitualUsage(user.id, now);
       }
 
@@ -220,7 +235,7 @@ export async function POST(request: NextRequest) {
         threadId: body.threadId,
         userMessage: {
           role: 'user',
-          content: body.message,
+          content: userMessage,
           ts: timestamp,
           tokens: tokensIn,
         },
@@ -230,7 +245,7 @@ export async function POST(request: NextRequest) {
           ts: timestamp,
           tokens: tokensOut,
         },
-        titleHint: body.message,
+        titleHint: userMessage,
       });
 
       await captureMemory({
@@ -333,7 +348,7 @@ export async function POST(request: NextRequest) {
     const promptSections = buildPromptSections({
       context,
       memorySnippets,
-      userMessage: body.message,
+      userMessage: userMessage,
       grimoireData,
     });
 
@@ -341,7 +356,7 @@ export async function POST(request: NextRequest) {
     try {
       composed = await composeAssistantReply({
         context,
-        userMessage: body.message,
+        userMessage: userMessage,
         memorySnippets,
         threadId: body.threadId,
         promptSectionsOverride: promptSections,
@@ -363,7 +378,7 @@ export async function POST(request: NextRequest) {
     }
 
     const assistantContent = composed.message;
-    const tokensIn = estimateTokenCount(body.message);
+    const tokensIn = estimateTokenCount(userMessage);
     const tokensOut = estimateTokenCount(assistantContent);
 
     const usageResult = await updateUsage({
@@ -378,7 +393,7 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: usageResult.message }, 429);
     }
 
-    if (planId === 'free' && isRitualRequest(body.message)) {
+    if (planId === 'free' && isRitualRequest(userMessage)) {
       await incrementWeeklyRitualUsage(user.id, now);
     }
 
@@ -388,7 +403,7 @@ export async function POST(request: NextRequest) {
       threadId: body.threadId,
       userMessage: {
         role: 'user',
-        content: body.message,
+        content: userMessage,
         ts: timestamp,
         tokens: tokensIn,
       },
@@ -398,7 +413,7 @@ export async function POST(request: NextRequest) {
         ts: timestamp,
         tokens: tokensOut,
       },
-      titleHint: body.message,
+      titleHint: userMessage,
     });
 
     await captureMemory({
