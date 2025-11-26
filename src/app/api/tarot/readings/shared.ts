@@ -323,6 +323,7 @@ export const mapRowToReading = (row: any) => {
     cards,
     metadata: row.metadata || {},
     planSnapshot: row.plan_snapshot,
+    aiInterpretation: row.ai_interpretation ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

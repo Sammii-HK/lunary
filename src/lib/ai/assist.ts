@@ -98,16 +98,8 @@ export const detectAssistCommand = (userMessage: string): AssistCommand => {
   return { type: 'none' };
 };
 
-const summariseWeek = (context: LunaryContext): string => {
-  const moods = context.mood?.last7d ?? [];
-  if (moods.length === 0) {
-    return 'The past week has been gentle yet shifting; notice how your energy has ebbed and flowed each day.';
-  }
-
-  const moodTags = moods.map((entry) => entry.tag);
-  const uniqueTags = Array.from(new Set(moodTags));
-
-  return `Your week traced ${uniqueTags.join(', ')} threads. Let those textures guide how you honour yourself this weekend.`;
+const summariseWeek = (_context: LunaryContext): string | null => {
+  return null;
 };
 
 const interpretTarot = (_context: LunaryContext): string | null => {
@@ -232,63 +224,12 @@ const ritualGeneration = (context: LunaryContext): string => {
   return `Tonight's ${moon.phase} in ${moon.sign} invites you to ${guidance}. Consider a ritual that honours this lunar moment.`;
 };
 
-const weeklyOverview = (context: LunaryContext): string => {
-  const moods = context.mood?.last7d ?? [];
-  const transits = context.currentTransits.slice(0, 5);
-  const moon = context.moon;
-
-  const parts: string[] = [];
-
-  if (moon) {
-    parts.push(
-      `This week's lunar journey moves through ${moon.phase} in ${moon.sign}`,
-    );
-  }
-
-  if (transits.length > 0) {
-    const keyTransits = transits
-      .slice(0, 3)
-      .map((t) => `${t.from} ${t.aspect} ${t.to}`)
-      .join(', ');
-    parts.push(`Key planetary influences: ${keyTransits}`);
-  }
-
-  if (moods.length > 0) {
-    const moodTags = Array.from(new Set(moods.map((m) => m.tag)));
-    parts.push(
-      `Your emotional landscape has touched on ${moodTags.join(', ')}`,
-    );
-  }
-
-  if (parts.length === 0) {
-    return 'This week offers gentle cosmic support for reflection and steady movement forward.';
-  }
-
-  return parts.join('. ') + '.';
+const weeklyOverview = (_context: LunaryContext): string | null => {
+  return null;
 };
 
-const journalEntry = (context: LunaryContext): string => {
-  const moon = context.moon
-    ? `${context.moon.phase.toLowerCase()} Moon in ${context.moon.sign}`
-    : null;
-  const tarot = context.tarot.daily?.name || context.tarot.weekly?.name;
-
-  const parts: string[] = [];
-  if (moon) {
-    parts.push(`Under the ${moon}`);
-  }
-  if (tarot) {
-    parts.push(`with ${tarot} as guide`);
-  }
-
-  const date = new Date().toLocaleDateString('en-GB', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
-  return `Journal entry for ${date}${parts.length > 0 ? ` — ${parts.join(', ')}` : ''}:`;
+const journalEntry = (_context: LunaryContext): string | null => {
+  return null;
 };
 
 export const runAssistCommand = (
