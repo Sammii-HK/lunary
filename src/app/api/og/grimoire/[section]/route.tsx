@@ -136,6 +136,12 @@ const sectionData: Record<
     subtitle: 'Divine Messages • Synchronicity',
     color: '#fbbf24',
   },
+  'lunar-nodes': {
+    title: 'Lunar Nodes',
+    emoji: '☊',
+    subtitle: 'North Node • South Node • Destiny',
+    color: '#6366f1',
+  },
 };
 
 const defaultSection = {

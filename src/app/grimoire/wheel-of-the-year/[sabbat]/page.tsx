@@ -46,7 +46,7 @@ export async function generateMetadata({
       siteName: 'Lunary',
       images: [
         {
-          url: '/api/og/cosmic',
+          url: '/api/og/grimoire/wheel-of-the-year',
           width: 1200,
           height: 630,
           alt: sabbatData.name,

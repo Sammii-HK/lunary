@@ -50,7 +50,7 @@ export async function generateMetadata({
       siteName: 'Lunary',
       images: [
         {
-          url: '/api/og/cosmic',
+          url: '/api/og/grimoire/houses',
           width: 1200,
           height: 630,
           alt: `${houseData.name}`,

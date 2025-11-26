@@ -46,7 +46,7 @@ export async function generateMetadata({
       siteName: 'Lunary',
       images: [
         {
-          url: '/api/og/cosmic',
+          url: '/api/og/grimoire/crystals',
           width: 1200,
           height: 630,
           alt: `${crystalData.name} Crystal`,

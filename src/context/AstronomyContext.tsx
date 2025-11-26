@@ -1,17 +1,8 @@
 'use client';
 
-import {
-  createContext,
-  use,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
   AstroChartInformation,
-  getAstrologicalChart,
-  getObserverLocation,
   ZodiacSign,
 } from '../../utils/astrology/astrology';
 import { constellations } from '../../utils/constellations';
@@ -20,26 +11,26 @@ import { getWrittenDate } from '../../utils/date/date';
 import { getTarotCard } from '../../utils/tarot/tarot';
 import { monthlyMoonPhases } from '../../utils/moon/monthlyPhases';
 import {
-  getMoonPhase,
   MoonPhaseLabels,
   stringToCamelCase,
 } from '../../utils/moon/moonPhases';
-// import { getHoroscope } from '../../utils/astrology/horoscope';
 import { useAccount } from 'jazz-tools/react';
 
-// Lazy load astronomy-engine to reduce initial bundle size
-let astronomyEngineModule: typeof import('astronomy-engine') | null = null;
-let astronomyEnginePromise: Promise<typeof import('astronomy-engine')> | null =
-  null;
-
-async function loadAstronomyEngine() {
-  if (astronomyEngineModule) return astronomyEngineModule;
-  if (!astronomyEnginePromise) {
-    astronomyEnginePromise = import('astronomy-engine');
-  }
-  astronomyEngineModule = await astronomyEnginePromise;
-  return astronomyEngineModule;
-}
+type GlobalCosmicData = {
+  moonPhase: {
+    name: string;
+    energy: string;
+    illumination: number;
+  };
+  planetaryPositions: Record<
+    string,
+    {
+      longitude: number;
+      sign: string;
+      retrograde: boolean;
+    }
+  >;
+} | null;
 
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
@@ -73,7 +64,6 @@ export const AstronomyContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  // Get account info if available
   const account = useAccount();
   const userName = account?.me?.profile?.name;
   const userBirthday = (account?.me?.profile as any)?.birthday;
@@ -82,40 +72,43 @@ export const AstronomyContextProvider = ({
   const [currentDate, setCurrentDate] = useState(
     dayjs(currentDateTime).format('YYYY-MM-DD'),
   );
+  const [cosmicData, setCosmicData] = useState<GlobalCosmicData>(null);
 
-  const [observer, setObserver] = useState<any>(null);
-  const [isLoadingEngine, setIsLoadingEngine] = useState(true);
-
-  // Lazy load astronomy-engine
   useEffect(() => {
     let isMounted = true;
 
-    loadAstronomyEngine().then((module) => {
-      if (!isMounted) return;
-      const { Observer } = module;
-      const defaultObserver = new Observer(51.4769, 0.0005, 0);
-      setObserver(defaultObserver);
-      setIsLoadingEngine(false);
-
-      // Get user location if available
-      getObserverLocation((obs) => {
-        if (isMounted) {
-          setObserver(obs);
+    fetch(`/api/cosmic/global?date=${currentDate}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data && !data.error) {
+          setCosmicData(data);
         }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch cosmic data:', err);
       });
-    });
 
     return () => {
       isMounted = false;
     };
-  }, []);
-
-  const natalObserver = observer;
+  }, [currentDate]);
 
   const currentAstrologicalChart = useMemo(() => {
-    if (!observer) return [];
-    return getAstrologicalChart(currentDateTime, observer);
-  }, [currentDateTime, observer]);
+    if (!cosmicData?.planetaryPositions) return [];
+    return Object.entries(cosmicData.planetaryPositions).map(
+      ([body, data]) => ({
+        body: body.charAt(0).toUpperCase() + body.slice(1),
+        sign: data.sign,
+        formattedDegree: {
+          degree: Math.floor(data.longitude % 30),
+          minute: Math.floor(((data.longitude % 30) % 1) * 60),
+        },
+        retrograde: data.retrograde,
+        eclipticLongitude: data.longitude,
+      }),
+    ) as AstroChartInformation[];
+  }, [cosmicData]);
+
   const currentMoonPosition = currentAstrologicalChart.find(
     ({ body }) => body === 'Moon',
   );
@@ -130,7 +123,12 @@ export const AstronomyContextProvider = ({
       ],
     [currentMoonConstellationPosition],
   );
-  const currentMoonPhase = getMoonPhase(currentDateTime);
+  const currentMoonPhase = useMemo(() => {
+    if (cosmicData?.moonPhase?.name) {
+      return cosmicData.moonPhase.name as MoonPhaseLabels;
+    }
+    return 'Waxing Crescent' as MoonPhaseLabels;
+  }, [cosmicData]);
   const writtenDate = useMemo(
     () => getWrittenDate(currentDateTime),
     [currentDateTime],
@@ -143,13 +141,6 @@ export const AstronomyContextProvider = ({
     monthlyMoonPhases[
       stringToCamelCase(currentMoonPhase) as keyof typeof monthlyMoonPhases
     ]?.symbol;
-
-  const natalChart = useMemo(() => {
-    if (!natalObserver) return [];
-    return getAstrologicalChart(dayjs('2000-01-01').toDate(), natalObserver);
-  }, [natalObserver]);
-  // const natalChart = useAstrologicalChart(dayjs("1994-01-20").toDate());
-  // const horoscope = useMemo(() => getHoroscope(currentAstrologicalChart, natalChart), [currentAstrologicalChart, natalChart]);
 
   useEffect(() => {
     setCurrentDate(dayjs(currentDateTime).format('YYYY-MM-DD'));

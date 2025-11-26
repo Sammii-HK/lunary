@@ -52,7 +52,7 @@ export async function generateMetadata({
       siteName: 'Lunary',
       images: [
         {
-          url: '/api/og/cosmic',
+          url: '/api/og/grimoire/zodiac',
           width: 1200,
           height: 630,
           alt: `${signData.name} Zodiac Sign`,
