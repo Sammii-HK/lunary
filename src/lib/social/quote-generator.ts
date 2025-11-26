@@ -1,9 +1,19 @@
 import OpenAI from 'openai';
 import { sql } from '@vercel/postgres';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY?.trim(),
-});
+// Lazy initialization to avoid build-time errors when API key is not available
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY is not configured');
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 export interface StoredQuote {
   id: number;
@@ -75,7 +85,7 @@ Lunary Brand Quotes (use sparingly - only 1-2 max):
 Return JSON with quotes in this format: {"quotes": ["Quote 1 - Author Name", "Quote 2 - Author Name", "Quote 3 - Author Name", "Quote 4 - Author Name", "Quote 5 - Author Name"]}
 Include attribution like "- Author Name" or "- Lunary" at the end of each quote.`;
 
-    const quoteCompletion = await openai.chat.completions.create({
+    const quoteCompletion = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
