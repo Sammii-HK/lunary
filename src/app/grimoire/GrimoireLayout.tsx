@@ -5,7 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
-import { useState, useEffect, useMemo, useTransition } from 'react';
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useTransition,
+  useCallback,
+} from 'react';
 import dynamic from 'next/dynamic';
 import {
   ChevronDownIcon,
@@ -15,21 +21,21 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
-import { runesList } from '@/constants/runes';
-import { tarotSuits, tarotSpreads } from '@/constants/tarot';
-import { spells } from '@/constants/spells';
-import { correspondencesData } from '@/constants/grimoire/correspondences';
-import { chakras } from '@/constants/chakras';
-// Crystal database imports - lazy loaded to reduce initial bundle size
-// Only loaded when user searches or navigates to crystals section
-import { annualFullMoons } from '@/constants/moon/annualFullMoons';
-import {
-  MonthlyMoonPhase,
-  monthlyMoonPhases,
-} from '../../../utils/moon/monthlyPhases';
-import { zodiacSigns, planetaryBodies } from '../../../utils/zodiac/zodiac';
-import { wheelOfTheYearSabbats } from '@/constants/sabbats';
-import { tarotCards } from '../../../utils/tarot/tarot-cards';
+
+type SearchDataType = {
+  runesList: any;
+  tarotSuits: any;
+  tarotSpreads: any;
+  spells: any;
+  correspondencesData: any;
+  chakras: any;
+  annualFullMoons: any;
+  monthlyMoonPhases: any;
+  zodiacSigns: any;
+  planetaryBodies: any;
+  wheelOfTheYearSabbats: any;
+  tarotCards: any;
+} | null;
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -180,6 +186,56 @@ export default function GrimoireLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchData, setSearchData] = useState<SearchDataType>(null);
+  const [searchDataLoading, setSearchDataLoading] = useState(false);
+
+  const loadSearchData = useCallback(async () => {
+    if (searchData || searchDataLoading) return;
+    setSearchDataLoading(true);
+    try {
+      const [
+        { runesList },
+        { tarotSuits, tarotSpreads },
+        { spells },
+        { correspondencesData },
+        { chakras },
+        { annualFullMoons },
+        { monthlyMoonPhases },
+        { zodiacSigns, planetaryBodies },
+        { wheelOfTheYearSabbats },
+        { tarotCards },
+      ] = await Promise.all([
+        import('@/constants/runes'),
+        import('@/constants/tarot'),
+        import('@/constants/spells'),
+        import('@/constants/grimoire/correspondences'),
+        import('@/constants/chakras'),
+        import('@/constants/moon/annualFullMoons'),
+        import('../../../utils/moon/monthlyPhases'),
+        import('../../../utils/zodiac/zodiac'),
+        import('@/constants/sabbats'),
+        import('../../../utils/tarot/tarot-cards'),
+      ]);
+      setSearchData({
+        runesList,
+        tarotSuits,
+        tarotSpreads,
+        spells,
+        correspondencesData,
+        chakras,
+        annualFullMoons,
+        monthlyMoonPhases,
+        zodiacSigns,
+        planetaryBodies,
+        wheelOfTheYearSabbats,
+        tarotCards,
+      });
+    } catch (error) {
+      console.error('Failed to load search data:', error);
+    } finally {
+      setSearchDataLoading(false);
+    }
+  }, [searchData, searchDataLoading]);
 
   const currentSection = currentSectionSlug
     ? slugToSection(currentSectionSlug)
@@ -245,11 +301,12 @@ export default function GrimoireLayout({
   // Comprehensive search across all content
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
+    if (!searchData) return [];
 
     const query = searchQuery.toLowerCase();
     const results: SearchResult[] = [];
 
-    // Search sections
+    // Search sections (from grimoire constant - always loaded)
     grimoireItems.forEach((itemKey) => {
       const item = grimoire[itemKey];
       if (item.title.toLowerCase().includes(query)) {
@@ -273,74 +330,68 @@ export default function GrimoireLayout({
     });
 
     // Search runes - link to individual pages
-    Object.entries(runesList).forEach(([key, rune]) => {
-      if (
-        rune.name.toLowerCase().includes(query) ||
-        rune.meaning.toLowerCase().includes(query) ||
-        rune.magicalProperties.toLowerCase().includes(query) ||
-        rune.notes.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'rune',
-          title: `${rune.symbol} ${rune.name}`,
-          section: 'runes',
-          href: `/grimoire/runes/${stringToKebabCase(key)}`,
-          match: `Meaning: ${rune.meaning}`,
-        });
-      }
-    });
+    Object.entries(searchData.runesList).forEach(
+      ([key, rune]: [string, any]) => {
+        if (
+          rune.name.toLowerCase().includes(query) ||
+          rune.meaning.toLowerCase().includes(query) ||
+          rune.magicalProperties.toLowerCase().includes(query) ||
+          rune.notes.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'rune',
+            title: `${rune.symbol} ${rune.name}`,
+            section: 'runes',
+            href: `/grimoire/runes/${stringToKebabCase(key)}`,
+            match: `Meaning: ${rune.meaning}`,
+          });
+        }
+      },
+    );
 
     // Search tarot suits - link to individual pages
-    Object.entries(tarotSuits).forEach(([key, suit]) => {
-      if (
-        suit.name.toLowerCase().includes(query) ||
-        suit.mysticalProperties.toLowerCase().includes(query) ||
-        suit.qualities.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'tarot',
-          title: `Tarot Suit - ${suit.name}`,
-          section: 'tarot',
-          href: `/grimoire/tarot-suits/${stringToKebabCase(key)}`,
-        });
-      }
-    });
+    Object.entries(searchData.tarotSuits).forEach(
+      ([key, suit]: [string, any]) => {
+        if (
+          suit.name.toLowerCase().includes(query) ||
+          suit.mysticalProperties.toLowerCase().includes(query) ||
+          suit.qualities.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'tarot',
+            title: `Tarot Suit - ${suit.name}`,
+            section: 'tarot',
+            href: `/grimoire/tarot-suits/${stringToKebabCase(key)}`,
+          });
+        }
+      },
+    );
 
     // Search tarot spreads - link to individual pages
-    Object.entries(tarotSpreads).forEach(([key, spread]) => {
-      if (
-        spread.name.toLowerCase().includes(query) ||
-        spread.description.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'tarot',
-          title: `Tarot Spread - ${spread.name}`,
-          section: 'tarot',
-          href: `/grimoire/tarot-spreads/${stringToKebabCase(key)}`,
-        });
-      }
-    });
+    Object.entries(searchData.tarotSpreads).forEach(
+      ([key, spread]: [string, any]) => {
+        if (
+          spread.name.toLowerCase().includes(query) ||
+          spread.description.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'tarot',
+            title: `Tarot Spread - ${spread.name}`,
+            section: 'tarot',
+            href: `/grimoire/tarot-spreads/${stringToKebabCase(key)}`,
+          });
+        }
+      },
+    );
 
     // Search tarot cards - link to individual pages
-    Object.entries(tarotCards.majorArcana).forEach(([key, card]) => {
-      if (
-        card.name.toLowerCase().includes(query) ||
-        card.keywords.some((kw) => kw.toLowerCase().includes(query)) ||
-        card.information?.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'tarot',
-          title: `Tarot Card - ${card.name}`,
-          section: 'tarot',
-          href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
-        });
-      }
-    });
-    Object.entries(tarotCards.minorArcana).forEach(([suitKey, suit]) => {
-      Object.entries(suit).forEach(([key, card]) => {
+    Object.entries(searchData.tarotCards.majorArcana).forEach(
+      ([key, card]: [string, any]) => {
         if (
           card.name.toLowerCase().includes(query) ||
-          card.keywords.some((kw) => kw.toLowerCase().includes(query)) ||
+          card.keywords.some((kw: string) =>
+            kw.toLowerCase().includes(query),
+          ) ||
           card.information?.toLowerCase().includes(query)
         ) {
           results.push({
@@ -350,26 +401,52 @@ export default function GrimoireLayout({
             href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
           });
         }
-      });
-    });
+      },
+    );
+    Object.entries(searchData.tarotCards.minorArcana).forEach(
+      ([suitKey, suit]: [string, any]) => {
+        Object.entries(suit).forEach(([key, card]: [string, any]) => {
+          if (
+            card.name.toLowerCase().includes(query) ||
+            card.keywords.some((kw: string) =>
+              kw.toLowerCase().includes(query),
+            ) ||
+            card.information?.toLowerCase().includes(query)
+          ) {
+            results.push({
+              type: 'tarot',
+              title: `Tarot Card - ${card.name}`,
+              section: 'tarot',
+              href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
+            });
+          }
+        });
+      },
+    );
 
     // Search correspondences - Colors - link to individual pages
-    Object.entries(correspondencesData.colors).forEach(([color, data]) => {
-      if (
-        color.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Color - ${color}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/colors/${stringToKebabCase(color)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
+    Object.entries(searchData.correspondencesData.colors).forEach(
+      ([color, data]: [string, any]) => {
+        if (
+          color.toLowerCase().includes(query) ||
+          data.uses.some((use: string) => use.toLowerCase().includes(query)) ||
+          data.planets.some((planet: string) =>
+            planet.toLowerCase().includes(query),
+          ) ||
+          data.correspondences.some((corr: string) =>
+            corr.toLowerCase().includes(query),
+          )
+        ) {
+          results.push({
+            type: 'correspondence',
+            title: `Color - ${color}`,
+            section: 'correspondences',
+            href: `/grimoire/correspondences/colors/${stringToKebabCase(color)}`,
+            match: `Uses: ${data.uses.join(', ')}`,
+          });
+        }
+      },
+    );
 
     // Search candle colors
     const candleColors = [
@@ -414,154 +491,202 @@ export default function GrimoireLayout({
     });
 
     // Search correspondences - Elements - link to individual pages
-    Object.entries(correspondencesData.elements).forEach(([element, data]) => {
-      if (
-        element.toLowerCase().includes(query) ||
-        data.colors.some((color) => color.toLowerCase().includes(query)) ||
-        data.crystals.some((crystal) =>
-          crystal.toLowerCase().includes(query),
-        ) ||
-        data.herbs.some((herb) => herb.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.zodiacSigns.some((sign) => sign.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Element - ${element}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/elements/${stringToKebabCase(element)}`,
-          match: `Direction: ${data.directions}`,
-        });
-      }
-    });
-
-    // Search correspondences - Days - link to individual pages
-    Object.entries(correspondencesData.days).forEach(([day, data]) => {
-      if (
-        day.toLowerCase().includes(query) ||
-        data.planet.toLowerCase().includes(query) ||
-        data.element.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Planetary Day - ${day}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/days/${stringToKebabCase(day)}`,
-          match: `Planet: ${data.planet}, Element: ${data.element}`,
-        });
-      }
-    });
-
-    // Search correspondences - Herbs - link to individual pages
-    Object.entries(correspondencesData.herbs).forEach(([herb, data]) => {
-      if (
-        herb.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Herb - ${herb}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/herbs/${stringToKebabCase(herb)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search correspondences - Numbers - link to individual pages
-    Object.entries(correspondencesData.numbers).forEach(([num, data]) => {
-      if (
-        num === query ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Number - ${num}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/numbers/${stringToKebabCase(num)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search correspondences - Deities - link to individual pages
-    Object.entries(correspondencesData.deities).forEach(([pantheon, gods]) => {
-      Object.entries(gods).forEach(([name, data]) => {
+    Object.entries(searchData.correspondencesData.elements).forEach(
+      ([element, data]: [string, any]) => {
         if (
-          name.toLowerCase().includes(query) ||
-          pantheon.toLowerCase().includes(query) ||
-          data.domain.some((domain) => domain.toLowerCase().includes(query))
+          element.toLowerCase().includes(query) ||
+          data.colors.some((color: string) =>
+            color.toLowerCase().includes(query),
+          ) ||
+          data.crystals.some((crystal: string) =>
+            crystal.toLowerCase().includes(query),
+          ) ||
+          data.herbs.some((herb: string) =>
+            herb.toLowerCase().includes(query),
+          ) ||
+          data.planets.some((planet: string) =>
+            planet.toLowerCase().includes(query),
+          ) ||
+          data.zodiacSigns.some((sign: string) =>
+            sign.toLowerCase().includes(query),
+          )
         ) {
           results.push({
             type: 'correspondence',
-            title: `${pantheon} Deity - ${name}`,
+            title: `Element - ${element}`,
             section: 'correspondences',
-            href: `/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(name)}`,
-            match: `Domain: ${data.domain.join(', ')}`,
+            href: `/grimoire/correspondences/elements/${stringToKebabCase(element)}`,
+            match: `Direction: ${data.directions}`,
           });
         }
-      });
-    });
+      },
+    );
+
+    // Search correspondences - Days - link to individual pages
+    Object.entries(searchData.correspondencesData.days).forEach(
+      ([day, data]: [string, any]) => {
+        if (
+          day.toLowerCase().includes(query) ||
+          data.planet.toLowerCase().includes(query) ||
+          data.element.toLowerCase().includes(query) ||
+          data.uses.some((use: string) => use.toLowerCase().includes(query)) ||
+          data.correspondences.some((corr: string) =>
+            corr.toLowerCase().includes(query),
+          )
+        ) {
+          results.push({
+            type: 'correspondence',
+            title: `Planetary Day - ${day}`,
+            section: 'correspondences',
+            href: `/grimoire/correspondences/days/${stringToKebabCase(day)}`,
+            match: `Planet: ${data.planet}, Element: ${data.element}`,
+          });
+        }
+      },
+    );
+
+    // Search correspondences - Herbs - link to individual pages
+    Object.entries(searchData.correspondencesData.herbs).forEach(
+      ([herb, data]: [string, any]) => {
+        if (
+          herb.toLowerCase().includes(query) ||
+          data.uses.some((use: string) => use.toLowerCase().includes(query)) ||
+          data.planets.some((planet: string) =>
+            planet.toLowerCase().includes(query),
+          ) ||
+          data.correspondences.some((corr: string) =>
+            corr.toLowerCase().includes(query),
+          )
+        ) {
+          results.push({
+            type: 'correspondence',
+            title: `Herb - ${herb}`,
+            section: 'correspondences',
+            href: `/grimoire/correspondences/herbs/${stringToKebabCase(herb)}`,
+            match: `Uses: ${data.uses.join(', ')}`,
+          });
+        }
+      },
+    );
+
+    // Search correspondences - Numbers - link to individual pages
+    Object.entries(searchData.correspondencesData.numbers).forEach(
+      ([num, data]: [string, any]) => {
+        if (
+          num === query ||
+          data.uses.some((use: string) => use.toLowerCase().includes(query)) ||
+          data.planets.some((planet: string) =>
+            planet.toLowerCase().includes(query),
+          ) ||
+          data.correspondences.some((corr: string) =>
+            corr.toLowerCase().includes(query),
+          )
+        ) {
+          results.push({
+            type: 'correspondence',
+            title: `Number - ${num}`,
+            section: 'correspondences',
+            href: `/grimoire/correspondences/numbers/${stringToKebabCase(num)}`,
+            match: `Uses: ${data.uses.join(', ')}`,
+          });
+        }
+      },
+    );
+
+    // Search correspondences - Deities - link to individual pages
+    Object.entries(searchData.correspondencesData.deities).forEach(
+      ([pantheon, gods]: [string, any]) => {
+        Object.entries(gods).forEach(([name, data]: [string, any]) => {
+          if (
+            name.toLowerCase().includes(query) ||
+            pantheon.toLowerCase().includes(query) ||
+            data.domain.some((domain: string) =>
+              domain.toLowerCase().includes(query),
+            )
+          ) {
+            results.push({
+              type: 'correspondence',
+              title: `${pantheon} Deity - ${name}`,
+              section: 'correspondences',
+              href: `/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(name)}`,
+              match: `Domain: ${data.domain.join(', ')}`,
+            });
+          }
+        });
+      },
+    );
 
     // Search correspondences - Flowers - link to individual pages
-    Object.entries(correspondencesData.flowers).forEach(([flower, data]) => {
-      if (
-        flower.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Flower - ${flower}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/flowers/${stringToKebabCase(flower)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
+    Object.entries(searchData.correspondencesData.flowers).forEach(
+      ([flower, data]: [string, any]) => {
+        if (
+          flower.toLowerCase().includes(query) ||
+          data.uses.some((use: string) => use.toLowerCase().includes(query)) ||
+          data.planets.some((planet: string) =>
+            planet.toLowerCase().includes(query),
+          ) ||
+          data.correspondences.some((corr: string) =>
+            corr.toLowerCase().includes(query),
+          )
+        ) {
+          results.push({
+            type: 'correspondence',
+            title: `Flower - ${flower}`,
+            section: 'correspondences',
+            href: `/grimoire/correspondences/flowers/${stringToKebabCase(flower)}`,
+            match: `Uses: ${data.uses.join(', ')}`,
+          });
+        }
+      },
+    );
 
     // Search correspondences - Wood - link to individual pages
-    Object.entries(correspondencesData.wood).forEach(([wood, data]) => {
-      if (
-        wood.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Wood - ${wood}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/wood/${stringToKebabCase(wood)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
+    Object.entries(searchData.correspondencesData.wood).forEach(
+      ([wood, data]: [string, any]) => {
+        if (
+          wood.toLowerCase().includes(query) ||
+          data.uses.some((use: string) => use.toLowerCase().includes(query)) ||
+          data.planets.some((planet: string) =>
+            planet.toLowerCase().includes(query),
+          ) ||
+          data.correspondences.some((corr: string) =>
+            corr.toLowerCase().includes(query),
+          )
+        ) {
+          results.push({
+            type: 'correspondence',
+            title: `Wood - ${wood}`,
+            section: 'correspondences',
+            href: `/grimoire/correspondences/wood/${stringToKebabCase(wood)}`,
+            match: `Uses: ${data.uses.join(', ')}`,
+          });
+        }
+      },
+    );
 
     // Search correspondences - Animals - link to individual pages
-    Object.entries(correspondencesData.animals).forEach(([animal, data]) => {
-      if (
-        animal.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Animal - ${animal}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/animals/${stringToKebabCase(animal)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
+    Object.entries(searchData.correspondencesData.animals).forEach(
+      ([animal, data]: [string, any]) => {
+        if (
+          animal.toLowerCase().includes(query) ||
+          data.uses.some((use: string) => use.toLowerCase().includes(query)) ||
+          data.planets.some((planet: string) =>
+            planet.toLowerCase().includes(query),
+          ) ||
+          data.correspondences.some((corr: string) =>
+            corr.toLowerCase().includes(query),
+          )
+        ) {
+          results.push({
+            type: 'correspondence',
+            title: `Animal - ${animal}`,
+            section: 'correspondences',
+            href: `/grimoire/correspondences/animals/${stringToKebabCase(animal)}`,
+            match: `Uses: ${data.uses.join(', ')}`,
+          });
+        }
+      },
+    );
 
     // Search candle magic
     if (
@@ -581,98 +706,103 @@ export default function GrimoireLayout({
     }
 
     // Search chakras - link to individual pages
-    Object.entries(chakras).forEach(([key, chakra]) => {
-      if (
-        chakra.name.toLowerCase().includes(query) ||
-        chakra.color.toLowerCase().includes(query) ||
-        chakra.properties.toLowerCase().includes(query) ||
-        chakra.mysticalProperties.toLowerCase().includes(query) ||
-        chakra.location.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'chakra',
-          title: `${chakra.symbol} ${chakra.name} Chakra`,
-          section: 'chakras',
-          href: `/grimoire/chakras/${stringToKebabCase(key)}`,
-          match: `Color: ${chakra.color}, Properties: ${chakra.properties}`,
-        });
-      }
-    });
+    Object.entries(searchData.chakras).forEach(
+      ([key, chakra]: [string, any]) => {
+        if (
+          chakra.name.toLowerCase().includes(query) ||
+          chakra.color.toLowerCase().includes(query) ||
+          chakra.properties.toLowerCase().includes(query) ||
+          chakra.mysticalProperties.toLowerCase().includes(query) ||
+          chakra.location.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'chakra',
+            title: `${chakra.symbol} ${chakra.name} Chakra`,
+            section: 'chakras',
+            href: `/grimoire/chakras/${stringToKebabCase(key)}`,
+            match: `Color: ${chakra.color}, Properties: ${chakra.properties}`,
+          });
+        }
+      },
+    );
 
     // Search moon phases - link to individual pages
-    Object.entries(monthlyMoonPhases).forEach(([phase, data]) => {
-      if (
-        phase.toLowerCase().includes(query) ||
-        (data as any).information?.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'moon',
-          title: `Moon Phase - ${phase}`,
-          section: 'moon',
-          href: `/grimoire/moon-phases/${stringToKebabCase(phase)}`,
-        });
-      }
-    });
+    Object.entries(searchData.monthlyMoonPhases).forEach(
+      ([phase, data]: [string, any]) => {
+        if (
+          phase.toLowerCase().includes(query) ||
+          (data as any).information?.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'moon',
+            title: `Moon Phase - ${phase}`,
+            section: 'moon',
+            href: `/grimoire/moon-phases/${stringToKebabCase(phase)}`,
+          });
+        }
+      },
+    );
 
     // Search full moon names - link to individual pages
-    Object.entries(annualFullMoons).forEach(([month, moon]) => {
-      if (
-        moon.name.toLowerCase().includes(query) ||
-        month.toLowerCase().includes(query) ||
-        moon.description.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'moon',
-          title: `Full Moon - ${moon.name}`,
-          section: 'moon',
-          href: `/grimoire/full-moons/${stringToKebabCase(month)}`,
-          match: `${month} - ${moon.description.slice(0, 60)}...`,
-        });
-      }
-    });
+    Object.entries(searchData.annualFullMoons).forEach(
+      ([month, moon]: [string, any]) => {
+        if (
+          moon.name.toLowerCase().includes(query) ||
+          month.toLowerCase().includes(query) ||
+          moon.description.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'moon',
+            title: `Full Moon - ${moon.name}`,
+            section: 'moon',
+            href: `/grimoire/full-moons/${stringToKebabCase(month)}`,
+            match: `${month} - ${moon.description.slice(0, 60)}...`,
+          });
+        }
+      },
+    );
 
     // Search zodiac signs - link to individual pages
-    Object.entries(zodiacSigns).forEach(([key, sign]) => {
-      const signData = sign as { name: string; mysticalProperties?: string };
-      if (
-        signData.name.toLowerCase().includes(query) ||
-        signData.mysticalProperties?.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'zodiac',
-          title: `Zodiac Sign - ${signData.name}`,
-          section: 'astronomy',
-          href: `/grimoire/zodiac/${stringToKebabCase(key)}`,
-        });
-      }
-    });
+    Object.entries(searchData.zodiacSigns).forEach(
+      ([key, sign]: [string, any]) => {
+        const signData = sign as { name: string; mysticalProperties?: string };
+        if (
+          signData.name.toLowerCase().includes(query) ||
+          signData.mysticalProperties?.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'zodiac',
+            title: `Zodiac Sign - ${signData.name}`,
+            section: 'astronomy',
+            href: `/grimoire/zodiac/${stringToKebabCase(key)}`,
+          });
+        }
+      },
+    );
 
     // Search planets - link to individual pages
-    Object.entries(planetaryBodies).forEach(([key, planet]) => {
-      const planetData = planet as {
-        name: string;
-        mysticalProperties?: string;
-      };
-      if (
-        planetData.name.toLowerCase().includes(query) ||
-        planetData.mysticalProperties?.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'planet',
-          title: `Planet - ${planetData.name}`,
-          section: 'astronomy',
-          href: `/grimoire/planets/${stringToKebabCase(key)}`,
-        });
-      }
-    });
-
-    // Search crystals - removed to reduce bundle size
-    // Crystal search is handled by the Crystals component when loaded
-    // This prevents importing the large crystal database (~200KB) into GrimoireLayout
-    // Users can navigate to /grimoire/crystals to search crystals
+    Object.entries(searchData.planetaryBodies).forEach(
+      ([key, planet]: [string, any]) => {
+        const planetData = planet as {
+          name: string;
+          mysticalProperties?: string;
+        };
+        if (
+          planetData.name.toLowerCase().includes(query) ||
+          planetData.mysticalProperties?.toLowerCase().includes(query)
+        ) {
+          results.push({
+            type: 'planet',
+            title: `Planet - ${planetData.name}`,
+            section: 'astronomy',
+            href: `/grimoire/planets/${stringToKebabCase(key)}`,
+          });
+        }
+      },
+    );
 
     // Search sabbats - link to individual pages
-    wheelOfTheYearSabbats.forEach((sabbat) => {
+    searchData.wheelOfTheYearSabbats.forEach((sabbat: any) => {
       if (
         sabbat.name.toLowerCase().includes(query) ||
         sabbat.description.toLowerCase().includes(query) ||
@@ -1021,7 +1151,7 @@ export default function GrimoireLayout({
     }
 
     return results.slice(0, 20); // Increased limit to 20 results
-  }, [searchQuery]);
+  }, [searchQuery, searchData]);
 
   // Filter sections based on search
   const filteredItems = useMemo(() => {
@@ -1083,13 +1213,16 @@ export default function GrimoireLayout({
             <Search className='absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-zinc-400' />
             <input
               type='text'
-              placeholder='Search grimoire...'
+              placeholder={
+                searchDataLoading ? 'Loading search...' : 'Search grimoire...'
+              }
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setShowSearchResults(e.target.value.length > 0);
               }}
               onFocus={() => {
+                loadSearchData();
                 if (searchQuery.length > 0) setShowSearchResults(true);
               }}
               className='w-full pl-10 md:pl-12 pr-4 py-2 md:py-2.5 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base'
@@ -1097,45 +1230,55 @@ export default function GrimoireLayout({
           </div>
 
           {/* Search Results Dropdown */}
-          {showSearchResults && searchResults.length > 0 && (
-            <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg max-h-96 overflow-y-auto z-50'>
-              <div className='p-2 md:p-3 space-y-1'>
-                {searchResults.map((result, index) => (
-                  <Link
-                    key={index}
-                    href={result.href}
-                    onClick={() => {
-                      setShowSearchResults(false);
-                      setSearchQuery('');
-                      setSidebarOpen(false);
-                      startTransition(() => {
-                        if (result.section) {
-                          setExpandedSections(new Set([result.section]));
-                        }
-                      });
-                    }}
-                    className='block p-2 md:p-3 rounded hover:bg-zinc-800 transition-colors'
-                  >
-                    <div className='flex items-start gap-2'>
-                      <div className='flex-1 min-w-0'>
-                        <div className='text-sm md:text-base font-medium text-zinc-100 truncate'>
-                          {result.title}
-                        </div>
-                        {result.match && (
-                          <div className='text-xs md:text-sm text-zinc-400 mt-1 truncate'>
-                            {result.match}
-                          </div>
-                        )}
-                        <div className='text-xs text-zinc-500 mt-1 capitalize'>
-                          {result.type}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+          {showSearchResults && searchDataLoading && searchQuery.trim() && (
+            <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg p-4 z-50'>
+              <div className='flex items-center gap-2 text-zinc-400'>
+                <div className='w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin' />
+                <span className='text-sm'>Loading search data...</span>
               </div>
             </div>
           )}
+          {showSearchResults &&
+            !searchDataLoading &&
+            searchResults.length > 0 && (
+              <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg max-h-96 overflow-y-auto z-50'>
+                <div className='p-2 md:p-3 space-y-1'>
+                  {searchResults.map((result, index) => (
+                    <Link
+                      key={index}
+                      href={result.href}
+                      onClick={() => {
+                        setShowSearchResults(false);
+                        setSearchQuery('');
+                        setSidebarOpen(false);
+                        startTransition(() => {
+                          if (result.section) {
+                            setExpandedSections(new Set([result.section]));
+                          }
+                        });
+                      }}
+                      className='block p-2 md:p-3 rounded hover:bg-zinc-800 transition-colors'
+                    >
+                      <div className='flex items-start gap-2'>
+                        <div className='flex-1 min-w-0'>
+                          <div className='text-sm md:text-base font-medium text-zinc-100 truncate'>
+                            {result.title}
+                          </div>
+                          {result.match && (
+                            <div className='text-xs md:text-sm text-zinc-400 mt-1 truncate'>
+                              {result.match}
+                            </div>
+                          )}
+                          <div className='text-xs text-zinc-500 mt-1 capitalize'>
+                            {result.type}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
 
         {/* Navigation */}

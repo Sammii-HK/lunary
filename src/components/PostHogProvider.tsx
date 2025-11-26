@@ -40,38 +40,49 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const initializedRef = useRef(false);
   const posthogRef = useRef<any>(null);
   const [posthogAvailable, setPosthogAvailable] = useState(false);
-  const [PostHogModule, setPostHogModule] = useState<any>(null);
 
-  // Load and initialize PostHog
+  // Defer PostHog loading until after first paint to improve LCP
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
     if (!posthogKey || initializedRef.current) return;
 
-    loadPostHog().then((posthog) => {
-      if (!posthog) return;
-
-      try {
-        if (typeof posthog.init !== 'function') {
-          console.error('[PostHog] PostHog.init is not available');
-          return;
-        }
-
-        posthog.init(posthogKey, {
-          api_host:
-            process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
-          loaded: () => {
-            posthogRef.current = posthog;
-            initializedRef.current = true;
-            setPosthogAvailable(true);
-          },
-          capture_pageview: false,
-          capture_pageleave: true,
-        });
-      } catch (error) {
-        console.error('[PostHog] Failed to initialize:', error);
+    // Use requestIdleCallback if available, otherwise setTimeout
+    const scheduleLoad = (callback: () => void) => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(callback, { timeout: 3000 });
+      } else {
+        setTimeout(callback, 1500);
       }
+    };
+
+    scheduleLoad(() => {
+      loadPostHog().then((posthog) => {
+        if (!posthog) return;
+
+        try {
+          if (typeof posthog.init !== 'function') {
+            console.error('[PostHog] PostHog.init is not available');
+            return;
+          }
+
+          posthog.init(posthogKey, {
+            api_host:
+              process.env.NEXT_PUBLIC_POSTHOG_HOST ||
+              'https://us.i.posthog.com',
+            loaded: () => {
+              posthogRef.current = posthog;
+              initializedRef.current = true;
+              setPosthogAvailable(true);
+            },
+            capture_pageview: false,
+            capture_pageleave: true,
+          });
+        } catch (error) {
+          console.error('[PostHog] Failed to initialize:', error);
+        }
+      });
     });
   }, []);
 

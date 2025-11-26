@@ -704,7 +704,7 @@ export const HoroscopeWidget = () => {
   if (!canAccessDate) {
     return (
       <Paywall feature='personalized_horoscope'>
-        <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+        <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
           <div className='text-center'>
             <h3 className='font-bold mb-2'>Personal Horoscope</h3>
             <span className='text-xs text-purple-400'>Personalised</span>
@@ -721,7 +721,7 @@ export const HoroscopeWidget = () => {
   if (!hasChartAccess) {
     const generalHoroscope = getGeneralHoroscope(normalizedDate);
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='space-y-2'>
           <div className='flex items-center justify-between'>
             {/* <h3 className='font-bold'>Daily Cosmic Energy</h3> */}
@@ -755,7 +755,7 @@ export const HoroscopeWidget = () => {
   // For premium users, we need both profile data AND subscription access
   if (!me || !userBirthday) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
           <span className='text-xs text-purple-400'>Personalised</span>
@@ -777,7 +777,7 @@ export const HoroscopeWidget = () => {
 
   if (!birthChart) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
           <span className='text-xs text-purple-400'>Personalised</span>
@@ -792,7 +792,7 @@ export const HoroscopeWidget = () => {
   // Get current planetary positions (only if observer is loaded)
   if (!observer) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
           <span className='text-xs text-purple-400'>Personalised</span>
@@ -815,7 +815,7 @@ export const HoroscopeWidget = () => {
   );
 
   return (
-    <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-0'>
+    <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
       <div className='flex items-center justify-between mb-2 flex-shrink-0'>
         <h3 className='font-bold'>Personal Horoscope</h3>
         <span className='text-xs text-purple-400'>Personalised</span>

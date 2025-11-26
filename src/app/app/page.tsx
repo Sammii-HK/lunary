@@ -20,13 +20,15 @@ import { QuickTarotCard } from '@/components/QuickTarotCard';
 import { QuickCosmicWeather } from '@/components/QuickCosmicWeather';
 
 // Post-trial messaging - lazy loaded since it's conditional (only shows for expired trial users)
+// Uses empty div placeholder to prevent CLS when component decides not to render
 const PostTrialMessaging = dynamic(
   () =>
     import('@/components/PostTrialMessaging').then((mod) => ({
       default: mod.PostTrialMessaging,
     })),
   {
-    ssr: false, // Client-side only since it depends on user state
+    ssr: false,
+    loading: () => <div className='min-h-0' />,
   },
 );
 
@@ -105,7 +107,7 @@ const EphemerisWidget = dynamic(() => import('@/components/EphemerisWidget'), {
 const ConditionalWheel = dynamic(
   () => import('@/components/ConditionalWheel'),
   {
-    loading: () => null, // ConditionalWheel handles its own loading state
+    loading: () => <div className='min-h-0' />,
     ssr: false,
   },
 );

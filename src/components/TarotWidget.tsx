@@ -22,14 +22,8 @@ export const TarotWidget = () => {
   if (!hasChartAccess) {
     const generalTarot = getGeneralTarotReading();
     return (
-      <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden'>
+      <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden min-h-64'>
         <div className='space-y-3 flex-1 min-w-0 overflow-y-auto overflow-x-hidden'>
-          {/* <div className='flex items-center justify-between'>
-            <h3 className='font-bold'>Daily Tarot Guidance</h3>
-            <span className='text-lg'>🔮</span>
-          </div> */}
-
-          {/* Daily Card Display */}
           <div className='text-center'>
             <h4 className='font-semibold text-purple-300 mb-2'>
               {generalTarot.daily.name}
@@ -39,15 +33,13 @@ export const TarotWidget = () => {
             </p>
           </div>
 
-          {/* Daily Message */}
           <p className='text-sm text-zinc-300 leading-relaxed break-words'>
             {generalTarot.guidance.dailyMessage}
           </p>
 
-          {/* Upsell Section - Sophisticated Teaser */}
           <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-3 border border-purple-500/20'>
             <p className='text-xs text-purple-200 mb-1 font-medium'>
-              ✨ Your personalized tarot pattern has been calculated
+              Your personalized tarot pattern has been calculated
             </p>
             <p className='text-xs text-zinc-400 mb-2'>
               Unlock it now to see what's influencing you today based on your
@@ -62,7 +54,7 @@ export const TarotWidget = () => {
 
   // For premium users, show personalized tarot
   return (
-    <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden'>
+    <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden min-h-64'>
       <div className='space-y-3 flex-1 min-w-0 overflow-y-auto overflow-x-hidden'>
         <div className='flex items-center justify-between'>
           <h3 className='font-bold'>Personal Tarot Card</h3>
