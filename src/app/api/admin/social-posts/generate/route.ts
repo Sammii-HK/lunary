@@ -208,6 +208,23 @@ export async function POST(request: NextRequest) {
         EXECUTE FUNCTION update_social_posts_updated_at()
       `;
 
+      // Create social_quotes table for quote pool
+      await sql`
+        CREATE TABLE IF NOT EXISTS social_quotes (
+          id SERIAL PRIMARY KEY,
+          quote_text TEXT NOT NULL UNIQUE,
+          author TEXT,
+          status TEXT NOT NULL DEFAULT 'available',
+          used_at TIMESTAMP WITH TIME ZONE,
+          use_count INTEGER DEFAULT 0,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+      await sql`CREATE INDEX IF NOT EXISTS idx_social_quotes_status ON social_quotes(status)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_social_quotes_use_count ON social_quotes(use_count)`;
+
       // Add image_url column if it doesn't exist (for existing tables)
       try {
         const columnExists = await sql`
@@ -409,7 +426,7 @@ Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
         ? 'https://lunary.app'
         : 'http://localhost:3000';
 
-    // Use shared quote generator
+    // Use quote pool for Instagram posts (quotes are stored and reused)
     const { generateCatchyQuote, getQuoteImageUrl } = await import(
       '@/lib/social/quote-generator'
     );
@@ -419,12 +436,13 @@ Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
     const scheduledDate = new Date(now);
     scheduledDate.setDate(now.getDate() + weekOffset * 7);
 
+    const platformsNeedingImages = ['instagram', 'pinterest', 'reddit'];
+
     for (const postContent of postsArray) {
-      // Generate catchy quote for Instagram posts
-      const quote =
-        platform === 'instagram'
-          ? await generateCatchyQuote(postContent, postType || 'benefit')
-          : '';
+      // Generate catchy quote for platforms that need images
+      const quote = platformsNeedingImages.includes(platform)
+        ? await generateCatchyQuote(postContent, postType || 'benefit')
+        : '';
       const imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
       try {
         const insertResult = await sql`

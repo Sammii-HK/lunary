@@ -1,18 +1,43 @@
 import OpenAI from 'openai';
+import { sql } from '@vercel/postgres';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY?.trim(),
 });
 
-export async function generateCatchyQuote(
-  postContent: string,
-  postType: string,
-): Promise<string> {
-  try {
-    const quotePrompt = `Generate 5 catchy, standalone quote options for an Instagram image card. IMPORTANT: Prioritize famous quotes and cosmic wisdom over brand quotes.
+export interface StoredQuote {
+  id: number;
+  quoteText: string;
+  author: string | null;
+  status: 'available' | 'used' | 'archived';
+  usedAt: Date | null;
+  useCount: number;
+  createdAt: Date;
+}
 
-Post content: "${postContent}"
-Post type: ${postType}
+function parseQuoteAndAuthor(fullQuote: string): {
+  quoteText: string;
+  author: string | null;
+} {
+  const lastDashIndex = Math.max(
+    fullQuote.lastIndexOf(' - '),
+    fullQuote.lastIndexOf(' — '),
+  );
+  if (lastDashIndex > 0) {
+    const potentialAuthor = fullQuote.substring(lastDashIndex + 3).trim();
+    if (potentialAuthor && /^[A-Z]/.test(potentialAuthor)) {
+      return {
+        quoteText: fullQuote.substring(0, lastDashIndex).trim(),
+        author: potentialAuthor,
+      };
+    }
+  }
+  return { quoteText: fullQuote.trim(), author: null };
+}
+
+export async function generateQuoteBatch(): Promise<StoredQuote[]> {
+  try {
+    const quotePrompt = `Generate 5 unique, catchy, standalone quote options for social media image cards. IMPORTANT: Prioritize famous quotes and cosmic wisdom over brand quotes.
 
 Requirements for quotes:
 - Each quote should be standalone and shareable (works without context)
@@ -47,7 +72,7 @@ Lunary Brand Quotes (use sparingly - only 1-2 max):
 - "Your birth chart is your cosmic blueprint" - Lunary
 - "The stars remember when you were born" - Lunary
 
-Return JSON with quotes in this format: {"quotes": ["Quote 1 with attribution", "Quote 2 with attribution", "Quote 3 with attribution", "Quote 4 with attribution", "Quote 5 with attribution"]}
+Return JSON with quotes in this format: {"quotes": ["Quote 1 - Author Name", "Quote 2 - Author Name", "Quote 3 - Author Name", "Quote 4 - Author Name", "Quote 5 - Author Name"]}
 Include attribution like "- Author Name" or "- Lunary" at the end of each quote.`;
 
     const quoteCompletion = await openai.chat.completions.create({
@@ -56,7 +81,7 @@ Include attribution like "- Author Name" or "- Lunary" at the end of each quote.
         {
           role: 'system',
           content:
-            'You are a quote curator for Instagram. Your job is to find and adapt profound, cosmic quotes from famous scientists, astronomers, astrologers, and philosophers. Prioritize famous quotes (Carl Sagan, Stephen Hawking, Plato, etc.) over brand quotes. Create quotes that are shareable, inspiring, and cosmic. Mix famous quotes with occasional brand quotes. Return only valid JSON.',
+            'You are a quote curator for social media. Your job is to find and adapt profound, cosmic quotes from famous scientists, astronomers, astrologers, and philosophers. Prioritize famous quotes (Carl Sagan, Stephen Hawking, Plato, etc.) over brand quotes. Create quotes that are shareable, inspiring, and cosmic. Mix famous quotes with occasional brand quotes. Return only valid JSON.',
         },
         { role: 'user', content: quotePrompt },
       ],
@@ -70,30 +95,162 @@ Include attribution like "- Author Name" or "- Lunary" at the end of each quote.
     );
     const quotes = quoteResult.quotes || [];
 
-    // Prefer quotes that are NOT Lunary quotes (more variety)
-    const nonLunaryQuotes = quotes.filter(
-      (q: string) =>
-        !q.toLowerCase().includes('lunary') &&
-        !q.toLowerCase().includes('birth chart') &&
-        !q.toLowerCase().includes('cosmic blueprint'),
-    );
+    const savedQuotes: StoredQuote[] = [];
 
-    // Return a non-Lunary quote if available, otherwise random from all quotes
-    if (nonLunaryQuotes.length > 0) {
-      return nonLunaryQuotes[
-        Math.floor(Math.random() * nonLunaryQuotes.length)
-      ];
+    for (const fullQuote of quotes) {
+      const { quoteText, author } = parseQuoteAndAuthor(fullQuote);
+
+      try {
+        const result = await sql`
+          INSERT INTO social_quotes (quote_text, author, status)
+          VALUES (${quoteText}, ${author}, 'available')
+          ON CONFLICT (quote_text) DO NOTHING
+          RETURNING id, quote_text, author, status, used_at, use_count, created_at
+        `;
+
+        if (result.rows.length > 0) {
+          const row = result.rows[0];
+          savedQuotes.push({
+            id: row.id,
+            quoteText: row.quote_text,
+            author: row.author,
+            status: row.status,
+            usedAt: row.used_at,
+            useCount: row.use_count,
+            createdAt: row.created_at,
+          });
+        }
+      } catch (dbError) {
+        console.warn('Failed to save quote to database:', dbError);
+      }
     }
 
-    // Fallback: return random quote from all quotes
-    if (quotes.length > 0) {
-      return quotes[Math.floor(Math.random() * quotes.length)];
-    }
+    console.log(`📝 Generated and saved ${savedQuotes.length} new quotes`);
+    return savedQuotes;
   } catch (error) {
-    console.warn('Failed to generate catchy quote, using fallback:', error);
+    console.error('Failed to generate quote batch:', error);
+    return [];
+  }
+}
+
+export async function getAvailableQuoteCount(): Promise<number> {
+  try {
+    const result = await sql`
+      SELECT COUNT(*) as count FROM social_quotes WHERE status = 'available'
+    `;
+    return parseInt(result.rows[0]?.count || '0', 10);
+  } catch (error) {
+    console.error('Failed to get available quote count:', error);
+    return 0;
+  }
+}
+
+export async function getAvailableQuote(): Promise<StoredQuote | null> {
+  try {
+    const result = await sql`
+      SELECT id, quote_text, author, status, used_at, use_count, created_at
+      FROM social_quotes
+      WHERE status = 'available'
+      ORDER BY use_count ASC, created_at ASC
+      LIMIT 1
+    `;
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      quoteText: row.quote_text,
+      author: row.author,
+      status: row.status,
+      usedAt: row.used_at,
+      useCount: row.use_count,
+      createdAt: row.created_at,
+    };
+  } catch (error) {
+    console.error('Failed to get available quote:', error);
+    return null;
+  }
+}
+
+export async function markQuoteUsed(quoteId: number): Promise<void> {
+  try {
+    await sql`
+      UPDATE social_quotes
+      SET status = 'used', used_at = NOW(), use_count = use_count + 1
+      WHERE id = ${quoteId}
+    `;
+  } catch (error) {
+    console.error('Failed to mark quote as used:', error);
+  }
+}
+
+export async function resetQuoteForReuse(quoteId: number): Promise<void> {
+  try {
+    await sql`
+      UPDATE social_quotes
+      SET status = 'available'
+      WHERE id = ${quoteId}
+    `;
+  } catch (error) {
+    console.error('Failed to reset quote for reuse:', error);
+  }
+}
+
+export async function resetAllQuotesForReuse(): Promise<number> {
+  try {
+    const result = await sql`
+      UPDATE social_quotes
+      SET status = 'available'
+      WHERE status = 'used'
+      RETURNING id
+    `;
+    console.log(`🔄 Reset ${result.rows.length} quotes for reuse`);
+    return result.rows.length;
+  } catch (error) {
+    console.error('Failed to reset quotes for reuse:', error);
+    return 0;
+  }
+}
+
+const MIN_QUOTE_POOL_SIZE = 10;
+
+export async function generateCatchyQuote(
+  postContent: string,
+  postType: string,
+): Promise<string> {
+  try {
+    let availableCount = await getAvailableQuoteCount();
+
+    if (availableCount < MIN_QUOTE_POOL_SIZE) {
+      console.log(
+        `📝 Quote pool low (${availableCount}), generating new batch...`,
+      );
+      await generateQuoteBatch();
+
+      if (availableCount === 0) {
+        console.log('🔄 No available quotes, resetting used quotes...');
+        await resetAllQuotesForReuse();
+      }
+    }
+
+    const quote = await getAvailableQuote();
+
+    if (quote) {
+      await markQuoteUsed(quote.id);
+      const fullQuote = quote.author
+        ? `${quote.quoteText} - ${quote.author}`
+        : quote.quoteText;
+      return fullQuote;
+    }
+
+    console.warn('No quotes available, generating fallback...');
+  } catch (error) {
+    console.warn('Failed to get quote from pool, using fallback:', error);
   }
 
-  // Fallback: extract meaningful snippet from post
   const firstSentence = postContent.match(/^[^.!?]+[.!?]/)?.[0];
   if (firstSentence && firstSentence.length <= 100) {
     return firstSentence.trim();
@@ -106,5 +263,30 @@ Include attribution like "- Author Name" or "- Lunary" at the end of each quote.
 }
 
 export function getQuoteImageUrl(quote: string, baseUrl: string): string {
-  return `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}&author=Lunary`;
+  return `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}`;
+}
+
+export async function getQuotePoolStats(): Promise<{
+  available: number;
+  used: number;
+  total: number;
+}> {
+  try {
+    const result = await sql`
+      SELECT 
+        COUNT(*) FILTER (WHERE status = 'available') as available,
+        COUNT(*) FILTER (WHERE status = 'used') as used,
+        COUNT(*) as total
+      FROM social_quotes
+    `;
+    const row = result.rows[0];
+    return {
+      available: parseInt(row?.available || '0', 10),
+      used: parseInt(row?.used || '0', 10),
+      total: parseInt(row?.total || '0', 10),
+    };
+  } catch (error) {
+    console.error('Failed to get quote pool stats:', error);
+    return { available: 0, used: 0, total: 0 };
+  }
 }

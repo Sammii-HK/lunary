@@ -581,11 +581,12 @@ Return JSON: {"posts": ["Post content"]}`;
         : 'http://localhost:3000';
 
     // Save all posts to database with image URLs
-    // Generate catchy quotes for Instagram posts
-    // Use shared quote generator
-    const { generateCatchyQuote, getQuoteImageUrl } = await import(
-      '@/lib/social/quote-generator'
-    );
+    // Use quote pool for Instagram posts (quotes are stored and reused, not regenerated each time)
+    const { generateCatchyQuote, getQuoteImageUrl, getQuotePoolStats } =
+      await import('@/lib/social/quote-generator');
+
+    const quoteStatsBefore = await getQuotePoolStats();
+    console.log('📊 Quote pool before generation:', quoteStatsBefore);
 
     const savedPostIds: string[] = [];
     for (let i = 0; i < allGeneratedPosts.length; i++) {
@@ -597,11 +598,11 @@ Return JSON: {"posts": ["Post content"]}`;
       postDate.setDate(weekStartDate.getDate() + post.dayOffset);
       postDate.setHours(post.hour, 0, 0, 0); // Use the optimal hour for this platform
 
-      // Only generate quotes for Instagram posts
-      const quote =
-        post.platform === 'instagram'
-          ? await generateCatchyQuote(post.content, post.postType)
-          : '';
+      // Generate quotes for platforms that need images
+      const platformsNeedingImages = ['instagram', 'pinterest', 'reddit'];
+      const quote = platformsNeedingImages.includes(post.platform)
+        ? await generateCatchyQuote(post.content, post.postType)
+        : '';
       const imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
 
       try {
@@ -619,12 +620,16 @@ Return JSON: {"posts": ["Post content"]}`;
     // Skip Pushover notification for weekly post generation - too noisy
     // Users can check the approval queue directly
 
+    const quoteStatsAfter = await getQuotePoolStats();
+    console.log('📊 Quote pool after generation:', quoteStatsAfter);
+
     return NextResponse.json({
       success: true,
       message: `Generated ${savedPostIds.length} posts for the week`,
       weekRange: `${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}`,
       posts: allGeneratedPosts,
       savedIds: savedPostIds,
+      quotePool: quoteStatsAfter,
     });
   } catch (error) {
     console.error('Error generating weekly posts:', error);

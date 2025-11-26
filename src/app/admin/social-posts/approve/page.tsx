@@ -70,6 +70,9 @@ export default function PostApprovalPage() {
     success: number;
     failed: number;
   } | null>(null);
+  const [bulkActionLoading, setBulkActionLoading] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     loadPendingPosts();
@@ -84,6 +87,36 @@ export default function PostApprovalPage() {
       }
     } catch (error) {
       console.error('Failed to load pending posts:', error);
+    }
+  };
+
+  const handleBulkAction = async (action: 'approve_all' | 'clear_all') => {
+    const confirmMessage =
+      action === 'approve_all'
+        ? `Approve all ${pendingPosts.filter((p) => p.status === 'pending').length} pending posts?`
+        : `Delete all ${pendingPosts.filter((p) => p.status === 'pending').length} pending posts? This cannot be undone.`;
+
+    if (!confirm(confirmMessage)) return;
+
+    setBulkActionLoading(action);
+    try {
+      const response = await fetch('/api/admin/social-posts/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        loadPendingPosts();
+      } else {
+        alert(`Failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Bulk action failed:', error);
+      alert('Bulk action failed');
+    } finally {
+      setBulkActionLoading(null);
     }
   };
 
@@ -308,9 +341,10 @@ export default function PostApprovalPage() {
       });
 
       const data = await response.json();
+      const platformsWithImages = ['instagram', 'pinterest', 'reddit'];
       if (data.success && data.url) {
-        // For Instagram with image: copy both text and image URL
-        if (post.platform === 'instagram' && post.imageUrl) {
+        // For platforms with images: copy both text and image URL
+        if (platformsWithImages.includes(post.platform) && post.imageUrl) {
           const clipboardContent = `${post.content}\n\nImage: ${post.imageUrl}`;
           await navigator.clipboard.writeText(clipboardContent);
 
@@ -319,7 +353,7 @@ export default function PostApprovalPage() {
 
           window.open(data.url, '_blank');
           alert(
-            `✅ Instagram opened!\n\n📋 Text and image URL copied to clipboard.\n\n📸 To add the image:\n1. Right-click the image preview below and "Save image as..."\n2. Or open the image URL in a new tab and save it\n3. Upload it to Instagram along with your text`,
+            `✅ ${post.platform.charAt(0).toUpperCase() + post.platform.slice(1)} opened!\n\n📋 Text and image URL copied to clipboard.\n\n📸 To add the image:\n1. Right-click the image preview below and "Save image as..."\n2. Or open the image URL in a new tab and save it\n3. Upload it to ${post.platform} along with your text`,
           );
         } else {
           // Copy content to clipboard for easy pasting
@@ -346,7 +380,8 @@ export default function PostApprovalPage() {
       console.error('Error opening app:', error);
       // Fallback: just copy to clipboard
       try {
-        if (post.platform === 'instagram' && post.imageUrl) {
+        const platformsWithImages = ['instagram', 'pinterest', 'reddit'];
+        if (platformsWithImages.includes(post.platform) && post.imageUrl) {
           await navigator.clipboard.writeText(
             `${post.content}\n\nImage: ${post.imageUrl}`,
           );
@@ -490,6 +525,36 @@ export default function PostApprovalPage() {
               </div>
               <div className='text-xs text-zinc-400'>Approved</div>
             </div>
+            {pendingCount > 0 && (
+              <>
+                <Button
+                  onClick={() => handleBulkAction('approve_all')}
+                  disabled={bulkActionLoading !== null}
+                  variant='outline'
+                  className='border-green-600 text-green-400 hover:bg-green-600/20'
+                >
+                  {bulkActionLoading === 'approve_all' ? (
+                    <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                  ) : (
+                    <Check className='h-4 w-4 mr-2' />
+                  )}
+                  Approve All
+                </Button>
+                <Button
+                  onClick={() => handleBulkAction('clear_all')}
+                  disabled={bulkActionLoading !== null}
+                  variant='outline'
+                  className='border-red-600 text-red-400 hover:bg-red-600/20'
+                >
+                  {bulkActionLoading === 'clear_all' ? (
+                    <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                  ) : (
+                    <X className='h-4 w-4 mr-2' />
+                  )}
+                  Clear All
+                </Button>
+              </>
+            )}
             {approvedCount > 0 && (
               <Button
                 onClick={handleSendAllApproved}
@@ -642,55 +707,60 @@ export default function PostApprovalPage() {
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-4'>
-                    {/* Display image for Instagram posts */}
-                    {post.imageUrl && post.platform === 'instagram' && (
-                      <div className='relative w-full max-w-md mx-auto group'>
-                        <Image
-                          src={post.imageUrl}
-                          alt='Post image'
-                          width={800}
-                          height={800}
-                          className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90 transition-opacity'
-                          onClick={() => window.open(post.imageUrl, '_blank')}
-                          unoptimized
-                        />
-                        <div className='absolute top-2 right-2 flex gap-2'>
-                          <a
-                            href={post.imageUrl}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
-                            title='Open in new tab'
-                          >
-                            <ExternalLink className='h-3 w-3' />
-                            Open
-                          </a>
-                          <button
-                            onClick={() => handleDownloadImage(post.imageUrl!)}
-                            className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
-                            title='Download image'
-                          >
-                            <svg
-                              className='h-3 w-3'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
+                    {/* Display image for platforms that need images */}
+                    {post.imageUrl &&
+                      ['instagram', 'pinterest', 'reddit'].includes(
+                        post.platform,
+                      ) && (
+                        <div className='relative w-full max-w-md mx-auto group'>
+                          <Image
+                            src={post.imageUrl}
+                            alt='Post image'
+                            width={800}
+                            height={800}
+                            className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90 transition-opacity'
+                            onClick={() => window.open(post.imageUrl, '_blank')}
+                            unoptimized
+                          />
+                          <div className='absolute top-2 right-2 flex gap-2'>
+                            <a
+                              href={post.imageUrl}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                              title='Open in new tab'
                             >
-                              <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                strokeWidth={2}
-                                d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'
-                              />
-                            </svg>
-                            Save
-                          </button>
+                              <ExternalLink className='h-3 w-3' />
+                              Open
+                            </a>
+                            <button
+                              onClick={() =>
+                                handleDownloadImage(post.imageUrl!)
+                              }
+                              className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                              title='Download image'
+                            >
+                              <svg
+                                className='h-3 w-3'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                              >
+                                <path
+                                  strokeLinecap='round'
+                                  strokeLinejoin='round'
+                                  strokeWidth={2}
+                                  d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'
+                                />
+                              </svg>
+                              Save
+                            </button>
+                          </div>
+                          <div className='mt-2 text-xs text-zinc-400 text-center'>
+                            Click image to view full size • Right-click to save
+                          </div>
                         </div>
-                        <div className='mt-2 text-xs text-zinc-400 text-center'>
-                          Click image to view full size • Right-click to save
-                        </div>
-                      </div>
-                    )}
+                      )}
 
                     <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
                       {editingPost === post.id ? (
@@ -881,29 +951,38 @@ export default function PostApprovalPage() {
                             variant='outline'
                             className='border-blue-500/50 text-blue-400 hover:bg-blue-500/10'
                             title={
-                              post.imageUrl && post.platform === 'instagram'
-                                ? 'Opens Instagram and copies text + image URL to clipboard'
+                              post.imageUrl &&
+                              ['instagram', 'pinterest', 'reddit'].includes(
+                                post.platform,
+                              )
+                                ? `Opens ${post.platform} and copies text + image URL to clipboard`
                                 : 'Opens app with content pre-filled'
                             }
                           >
                             <ExternalLink className='h-4 w-4 mr-2' />
-                            {post.imageUrl && post.platform === 'instagram'
+                            {post.imageUrl &&
+                            ['instagram', 'pinterest', 'reddit'].includes(
+                              post.platform,
+                            )
                               ? 'Copy & Open'
                               : 'Preview'}
                           </Button>
-                          {post.imageUrl && post.platform === 'instagram' && (
-                            <Button
-                              onClick={() =>
-                                handleDownloadImage(post.imageUrl!)
-                              }
-                              variant='outline'
-                              className='border-purple-500/50 text-purple-400 hover:bg-purple-500/10'
-                              title='Download image for Instagram'
-                            >
-                              <Download className='h-4 w-4 mr-2' />
-                              Image
-                            </Button>
-                          )}
+                          {post.imageUrl &&
+                            ['instagram', 'pinterest', 'reddit'].includes(
+                              post.platform,
+                            ) && (
+                              <Button
+                                onClick={() =>
+                                  handleDownloadImage(post.imageUrl!)
+                                }
+                                variant='outline'
+                                className='border-purple-500/50 text-purple-400 hover:bg-purple-500/10'
+                                title='Download image'
+                              >
+                                <Download className='h-4 w-4 mr-2' />
+                                Image
+                              </Button>
+                            )}
                           <Button
                             onClick={() => handleReject(post.id)}
                             disabled={rejectingPostId === post.id}
