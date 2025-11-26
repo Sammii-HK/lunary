@@ -522,12 +522,10 @@ async function runDailyPosts(dateStr: string) {
           ],
         },
         pinterest: {
-          // Use quote post image for Pinterest
-          media: [quoteImageUrl],
+          media: [`${productionUrl}/api/og/cosmic/${dateStr}`],
         },
         tiktok: {
-          // Use quote post image for TikTok
-          media: [quoteImageUrl],
+          media: [`${productionUrl}/api/og/cosmic/${dateStr}`],
         },
         x: {
           content: generateCosmicPost(cosmicContent).snippetShort.replace(
