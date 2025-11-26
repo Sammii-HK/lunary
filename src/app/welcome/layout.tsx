@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
+  title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
   description:
-    "Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today. Understand today's energy based on your birth chart. Daily tarot, lunar cycles and planetary transits personalized to you.",
+    'Get daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data, not generic zodiac signs. Join 10,000+ cosmic explorers. Try free for 7 days.',
   keywords: [
     'AI astrology',
     'personalized astrology',
@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     canonical: 'https://lunary.app/welcome',
   },
   openGraph: {
-    title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
+    title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
     description:
-      'Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today.',
+      'Daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data, not generic zodiac signs. Try free for 7 days.',
     url: 'https://lunary.app/welcome',
     siteName: 'Lunary',
     images: [
@@ -44,9 +44,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Your AI-Powered Astral Guide | Lunary - Personalized Astrology',
+    title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
     description:
-      'Your AI-powered astral guide for personalized astrology, tarot, and cosmic insight. Built around your birth chart, your energy, and the sky today.',
+      'Daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data. Try free for 7 days.',
     images: ['/api/og/cosmic'],
   },
   robots: {

@@ -128,6 +128,10 @@ export default async function CrystalPage({
           `${crystalData.name} uses`,
         ]}
         canonicalUrl={`https://lunary.app/grimoire/crystals/${crystal}`}
+        whatIs={{
+          question: `What is ${crystalData.name}?`,
+          answer: `${crystalData.name} is ${crystalData.description.toLowerCase()}. This ${crystalData.rarity} crystal is associated with ${crystalData.properties.slice(0, 3).join(', ').toLowerCase()} and works with the ${crystalData.chakras.join(' and ')} chakra${crystalData.chakras.length > 1 ? 's' : ''}. ${crystalData.metaphysicalProperties.split('.')[0]}.`,
+        }}
         intro={`${crystalData.name} is ${crystalData.description.toLowerCase()}. ${crystalData.metaphysicalProperties}`}
         tldr={`${crystalData.name} is associated with ${crystalData.properties.slice(0, 3).join(', ').toLowerCase()} and works with the ${crystalData.chakras.join(' and ')} chakras.`}
         meaning={`Crystals are powerful tools for healing, manifestation, and spiritual growth. Each crystal carries unique energetic properties that can support your journey. ${crystalData.name} is one of the most ${crystalData.rarity === 'common' ? 'accessible' : crystalData.rarity === 'rare' ? 'powerful' : 'unique'} crystals, known for its ${crystalData.properties.slice(0, 2).join(' and ')} properties.

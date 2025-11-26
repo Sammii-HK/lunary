@@ -18,6 +18,12 @@ export interface SEOContentTemplateProps {
   keywords: string[];
   canonicalUrl: string;
 
+  // Featured snippet optimization
+  whatIs?: {
+    question: string;
+    answer: string;
+  };
+
   // Content sections
   intro?: string;
   tldr?: string;
@@ -61,6 +67,7 @@ export function SEOContentTemplate({
   description,
   keywords,
   canonicalUrl,
+  whatIs,
   intro,
   tldr,
   meaning,
@@ -138,6 +145,16 @@ export function SEOContentTemplate({
           <p className='text-lg text-zinc-400 leading-relaxed'>{description}</p>
         )}
       </header>
+
+      {/* What is X? - Featured Snippet Optimization */}
+      {whatIs && (
+        <section className='mb-8'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-3'>
+            {whatIs.question}
+          </h2>
+          <p className='text-zinc-300 leading-relaxed'>{whatIs.answer}</p>
+        </section>
+      )}
 
       {/* TL;DR Quick Meaning Block */}
       {tldr && (

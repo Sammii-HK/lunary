@@ -358,6 +358,41 @@ const nextConfig = {
       },
     ];
   },
+
+  async redirects() {
+    return [
+      {
+        source: '/grimoire/sabbats/:sabbat',
+        destination: '/grimoire/wheel-of-the-year/:sabbat',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/moon-phases/:phase',
+        destination: '/grimoire/moon/phases/:phase',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/full-moons/:month',
+        destination: '/grimoire/moon/full-moons/:month',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/tarot-spreads/:spread',
+        destination: '/grimoire/tarot/spreads/:spread',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/planets/:planet',
+        destination: '/grimoire/astronomy/planets/:planet',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/witches/:witch',
+        destination: '/grimoire/modern-witchcraft/witch-types/:witch',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withBundleAnalyzer(nextConfig);

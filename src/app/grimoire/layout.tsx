@@ -1,13 +1,28 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Grimoire - Lunary',
+  title: 'Free Grimoire [500+ Spells, Crystals, Tarot & More] | Lunary',
   description:
-    'Explore mystical knowledge, cosmic wisdom, tarot, crystals, runes, chakras, moon phases, and astrological correspondences in the Lunary Grimoire. Complete guides for magical practice.',
+    'Complete digital grimoire with 78 tarot cards, 50+ crystals, 24 runes, 12 zodiac signs, moon phases, candle magic & correspondences. Free access to centuries of mystical knowledge.',
+  keywords: [
+    'grimoire',
+    'digital grimoire',
+    'book of shadows',
+    'tarot meanings',
+    'crystal guide',
+    'rune meanings',
+    'moon phases',
+    'candle magic',
+    'magical correspondences',
+    'witchcraft guide',
+  ],
+  authors: [{ name: 'Lunary' }],
+  creator: 'Lunary',
+  publisher: 'Lunary',
   openGraph: {
-    title: 'Grimoire - Lunary',
+    title: 'Free Grimoire [500+ Spells, Crystals, Tarot & More] | Lunary',
     description:
-      'Explore mystical knowledge, cosmic wisdom, tarot, crystals, runes, chakras, moon phases, and astrological correspondences.',
+      'Complete digital grimoire with 78 tarot cards, 50+ crystals, 24 runes, moon phases, candle magic & correspondences. Free access.',
     url: 'https://lunary.app/grimoire',
     siteName: 'Lunary',
     images: [
@@ -23,9 +38,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Grimoire - Lunary',
+    title: 'Free Grimoire [500+ Spells, Crystals, Tarot & More] | Lunary',
     description:
-      'Explore mystical knowledge, cosmic wisdom, tarot, crystals, runes, chakras, moon phases, and astrological correspondences.',
+      '78 tarot cards, 50+ crystals, 24 runes, moon phases, candle magic & correspondences. Complete digital grimoire.',
     images: ['/api/og/cosmic'],
   },
   alternates: {

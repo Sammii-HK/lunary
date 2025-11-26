@@ -1316,11 +1316,6 @@ export default function CompatibilityChart() {
                 price: '0',
                 priceCurrency: 'USD',
               },
-              aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: '4.8',
-                ratingCount: '150',
-              },
               featureList: [
                 'Zodiac sign compatibility analysis',
                 'Element compatibility (Fire, Earth, Air, Water)',

@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Personalized Daily Horoscope - Lunary',
+  title: 'Daily Horoscope [Personalized to Your Birth Chart] | Lunary',
   description:
-    'Get your personalized daily horoscope based on your exact birth chart. Real astronomical data, precise planetary positions, and insights tailored to your unique cosmic signature. Free 7-day trial.',
+    'Not generic zodiac predictions. Get YOUR daily horoscope calculated from your exact birth time, date & location. Real planetary transits affecting YOU today. Try free for 7 days.',
   keywords: [
     'personalized horoscope',
     'daily horoscope',
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
     canonical: 'https://lunary.app/horoscope',
   },
   openGraph: {
-    title: 'Personalized Daily Horoscope - Lunary',
+    title: 'Daily Horoscope [Personalized to Your Birth Chart] | Lunary',
     description:
-      'Get your personalized daily horoscope based on your exact birth chart. Real astronomical data and insights tailored to your unique cosmic signature.',
+      'Not generic zodiac predictions. Get YOUR daily horoscope calculated from your exact birth time. Real planetary transits affecting YOU today.',
     url: 'https://lunary.app/horoscope',
     siteName: 'Lunary',
     images: [
@@ -41,9 +41,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Personalized Daily Horoscope - Lunary',
+    title: 'Daily Horoscope [Personalized to Your Birth Chart] | Lunary',
     description:
-      'Get your personalized daily horoscope based on your exact birth chart. Real astronomical data and insights tailored to your unique cosmic signature.',
+      'Not generic zodiac predictions. YOUR daily horoscope calculated from your exact birth time. Try free for 7 days.',
     images: ['/api/og/cosmic'],
   },
   robots: {

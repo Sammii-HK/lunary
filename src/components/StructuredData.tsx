@@ -41,6 +41,23 @@ export function StructuredData() {
     browserRequirements: 'Requires JavaScript. Requires HTML5.',
   };
 
+  const webSiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    url: 'https://lunary.app',
+    name: 'Lunary',
+    description:
+      'Personalized astrology app based on real astronomical data. Birth chart analysis, daily horoscopes, tarot readings, and cosmic guidance.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: 'https://lunary.app/grimoire?search={search_term_string}',
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <>
       <script
@@ -53,6 +70,12 @@ export function StructuredData() {
         type='application/ld+json'
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(webApplicationSchema),
+        }}
+      />
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webSiteSchema),
         }}
       />
     </>

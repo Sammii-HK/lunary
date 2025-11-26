@@ -246,7 +246,7 @@ export async function generateMetadata({
       siteName: 'Lunary',
       images: [
         {
-          url: '/api/og/cosmic',
+          url: `/api/og/grimoire/${sectionSlug}`,
           width: 1200,
           height: 630,
           alt: `${sectionData.title} - Lunary Grimoire`,
@@ -259,7 +259,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: [`/api/og/grimoire/${sectionSlug}`],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/${sectionSlug}`,
