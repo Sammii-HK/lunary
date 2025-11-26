@@ -80,20 +80,13 @@ describe('Unified Notification Service', () => {
         priority: 10,
       };
 
-      mockSql.mockResolvedValueOnce({
-        rows: [],
-      });
+      // Empty event names are now rejected as invalid
+      const result = await sendUnifiedNotification(event);
 
-      await sendUnifiedNotification(event);
-
-      expect(markEventAsSent).toHaveBeenCalledWith(
-        expect.any(String),
-        'moon-unknown-10',
-        'moon',
-        '',
-        10,
-        'daily',
-      );
+      expect(result.success).toBe(false);
+      expect(result.recipientCount).toBe(0);
+      // markEventAsSent should NOT be called for invalid events
+      expect(markEventAsSent).not.toHaveBeenCalled();
     });
   });
 
