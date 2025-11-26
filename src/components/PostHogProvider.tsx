@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, Suspense } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 let posthogModule: any = null;
@@ -40,7 +40,9 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const initializedRef = useRef(false);
   const posthogRef = useRef<any>(null);
   const [posthogAvailable, setPosthogAvailable] = useState(false);
+  const [PostHogModule, setPostHogModule] = useState<any>(null);
 
+  // Load and initialize PostHog
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -95,9 +97,5 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense fallback={<>{children}</>}>
-      <PostHogProviderContent>{children}</PostHogProviderContent>
-    </Suspense>
-  );
+  return <PostHogProviderContent>{children}</PostHogProviderContent>;
 }

@@ -11,11 +11,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { ExploreMenu } from './ExploreMenu';
-import { useAuthStatus } from './AuthStatus';
 
 export const Navbar = () => {
   const pathname = usePathname();
-  const authState = useAuthStatus();
+
+  // Early return if pathname is not available yet
+  if (!pathname) {
+    return null;
+  }
 
   // Define app pages where navbar should show
   const appPages = [
@@ -28,30 +31,39 @@ export const Navbar = () => {
     '/profile',
     '/cosmic-state',
     '/cosmic-report-generator',
+    '/blog',
+    '/pricing',
+    '/shop',
+    '/moon-circles',
+    '/collections',
+    '/forecast',
   ];
 
-  // Define marketing pages
-  const isMarketingRoute =
-    pathname === '/' ||
-    pathname === '/welcome' ||
-    pathname === '/pricing' ||
-    pathname === '/help' ||
-    pathname === '/auth' ||
-    pathname?.startsWith('/blog') ||
-    pathname?.startsWith('/admin');
+  // Define marketing pages (excluding contextual pages like blog/pricing)
+  const coreMarketingRoutes = ['/', '/welcome', '/help', '/auth'];
 
-  // Only show navbar for authenticated users on app pages
+  const isCoreMarketingRoute =
+    coreMarketingRoutes.includes(pathname) || pathname.startsWith('/admin');
+
+  // Show navbar on app pages for all users (including unauthenticated for SEO)
   const isAppPage = appPages.some(
-    (page) => pathname === page || pathname?.startsWith(`${page}/`),
+    (page) => pathname === page || pathname.startsWith(`${page}/`),
   );
 
-  if (isMarketingRoute || !authState.isAuthenticated || !isAppPage) {
+  // CRITICAL: Never show on core marketing routes
+  // But allow on contextual pages (blog/pricing) - AppChrome controls this
+  if (isCoreMarketingRoute) {
+    return null;
+  }
+
+  // Only show on app pages (contextual pages handled by AppChrome)
+  if (!isAppPage) {
     return null;
   }
 
   return (
-    <nav className='sticky bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
-      <div className='flex w-full max-w-3xl items-center justify-between px-4 py-3 text-white md:justify-evenly md:px-6'>
+    <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
+      <div className='flex w-full h-12 md:h-16 items-center justify-between px-4 py-2 text-white md:justify-evenly md:px-6'>
         <NavLink
           href='/app'
           icon={Eclipse}
@@ -114,7 +126,7 @@ const NavLink = ({ href, icon: Icon, label, activePath }: NavLinkProps) => {
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition md:flex-1 md:min-w-0 ${
+      className={`flex flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs transition md:flex-1 md:min-w-0 ${
         active
           ? isBookOfShadows
             ? 'text-purple-400'

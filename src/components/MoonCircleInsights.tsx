@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
   ChevronDown,
@@ -78,18 +78,39 @@ export function MoonCircleInsights({
   const [error, setError] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(collapsedByDefault);
   const [hasFetched, setHasFetched] = useState(false);
+  const prevInitialInsightsRef = useRef<string>('');
+  const sortRef = useRef<SortOrder>(defaultSort);
+
+  const initialInsightsKey = useMemo(
+    () => JSON.stringify(initialInsights.map((i) => i.id)),
+    [initialInsights],
+  );
 
   useEffect(() => {
-    setInsights(initialInsights);
-    setTotal(initialTotal ?? insightCount ?? initialInsights.length ?? 0);
-    setPage(0);
-    setSort(defaultSort);
-    setHasFetched(initialInsights.length > 0);
-  }, [initialInsights, initialTotal, insightCount, defaultSort]);
+    if (prevInitialInsightsRef.current !== initialInsightsKey) {
+      prevInitialInsightsRef.current = initialInsightsKey;
+      setInsights(initialInsights);
+      setTotal(initialTotal ?? insightCount ?? initialInsights.length ?? 0);
+      setPage(0);
+      setSort(defaultSort);
+      sortRef.current = defaultSort;
+      setHasFetched(initialInsights.length > 0);
+    }
+  }, [
+    initialInsightsKey,
+    initialTotal,
+    insightCount,
+    defaultSort,
+    initialInsights,
+  ]);
+
+  useEffect(() => {
+    sortRef.current = sort;
+  }, [sort]);
 
   const fetchInsights = useCallback(
     async (overridePage = 0, overrideSort?: SortOrder) => {
-      const sortOrder = overrideSort ?? sort;
+      const sortOrder = overrideSort ?? sortRef.current;
       try {
         setIsLoading(true);
         setError(null);
@@ -133,7 +154,7 @@ export function MoonCircleInsights({
         setIsLoading(false);
       }
     },
-    [moonCircleId, pageSize, sort],
+    [moonCircleId, pageSize],
   );
 
   useEffect(() => {
@@ -141,7 +162,7 @@ export function MoonCircleInsights({
       // Always fetch if collapsed state changes or on mount
       fetchInsights(0, sort);
     }
-  }, [autoFetch, fetchInsights, isCollapsed, sort]);
+  }, [autoFetch, fetchInsights, isCollapsed]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -156,17 +177,31 @@ export function MoonCircleInsights({
         }, 500);
       }
     };
+    const deleteHandler = () => {
+      // Refresh insights when one is deleted
+      setTimeout(() => {
+        fetchInsights(page, sort);
+      }, 300);
+    };
     window.addEventListener(
       'moon-circle-insight:submitted',
       handler as EventListener,
+    );
+    window.addEventListener(
+      'moon-circle-insight:deleted',
+      deleteHandler as EventListener,
     );
     return () => {
       window.removeEventListener(
         'moon-circle-insight:submitted',
         handler as EventListener,
       );
+      window.removeEventListener(
+        'moon-circle-insight:deleted',
+        deleteHandler as EventListener,
+      );
     };
-  }, [fetchInsights, moonCircleId]);
+  }, [fetchInsights, moonCircleId, page, sort]);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(Math.max(total, 1) / pageSize));
@@ -341,6 +376,10 @@ export function MoonCircleInsights({
                   key={insight.id}
                   insight={insight}
                   moonCircle={{ moon_phase: moonPhase, date }}
+                  moonCircleId={moonCircleId}
+                  onDelete={() => {
+                    fetchInsights(page, sort);
+                  }}
                 />
               ))}
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, Suspense, useRef } from 'react';
+import { useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
@@ -124,31 +124,17 @@ export default function AppDashboard() {
   const { me } = useAccount();
   const authState = useAuthStatus();
   const router = useRouter();
-  const redirectExecuted = useRef(false);
 
-  useEffect(() => {
-    // Skip redirect logic in Playwright e2e test mode
-    if (isTestMode()) return;
-
-    if (typeof window === 'undefined') return;
-    if (redirectExecuted.current) return;
-
-    // Check if running in PWA mode
-    const isPWA =
-      window.matchMedia('(display-mode: standalone)').matches ||
+  // Check PWA mode (client-side only)
+  const isPWA =
+    typeof window !== 'undefined' &&
+    !isTestMode() &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
       window.matchMedia('(display-mode: minimal-ui)').matches ||
-      (window.navigator as any).standalone === true;
+      (window.navigator as any).standalone === true);
 
-    // Only redirect PWA users who are not authenticated
-    if (isPWA && !authState.loading && !authState.isAuthenticated) {
-      redirectExecuted.current = true;
-      router.replace('/auth');
-      return;
-    }
-  }, [authState.isAuthenticated, authState.loading, router]);
-
+  // Track app opened event and record check-in
   useEffect(() => {
-    // Track app opened event and record check-in
     if (authState.isAuthenticated) {
       const userId = (me as any)?.id;
       conversionTracking.appOpened(userId, '/app');

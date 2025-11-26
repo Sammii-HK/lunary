@@ -18,7 +18,7 @@ function verifySignature(
   timestamp: string,
 ): boolean {
   if (!DISCORD_PUBLIC_KEY) {
-    console.error('DISCORD_PUBLIC_KEY not configured');
+    console.error('[discord-interactions] DISCORD_PUBLIC_KEY not configured');
     return false;
   }
 
@@ -27,9 +27,30 @@ function verifySignature(
     const publicKeyBytes = Buffer.from(DISCORD_PUBLIC_KEY, 'hex');
     const signatureBytes = Buffer.from(signature, 'hex');
 
+    if (publicKeyBytes.length !== 32) {
+      console.error(
+        '[discord-interactions] Invalid public key length (expected 32 bytes, got',
+        publicKeyBytes.length,
+        ')',
+      );
+      return false;
+    }
+
+    if (signatureBytes.length !== 64) {
+      console.error(
+        '[discord-interactions] Invalid signature length (expected 64 bytes, got',
+        signatureBytes.length,
+        ')',
+      );
+      return false;
+    }
+
     return nacl.sign.detached.verify(message, signatureBytes, publicKeyBytes);
   } catch (error) {
-    console.error('Signature verification error:', error);
+    console.error(
+      '[discord-interactions] Signature verification error:',
+      error,
+    );
     return false;
   }
 }
@@ -51,16 +72,23 @@ export async function POST(request: NextRequest) {
 
     // Handle PING immediately (Discord's verification)
     if (interaction.type === InteractionType.PING) {
-      // For PING, verify signature if present, but respond with PONG regardless
-      // This handles both verification (with signature) and regular PINGs
+      // Discord requires signature verification for URL verification
+      // If signature is present, it must be valid (Discord sends signature during verification)
       if (signature && timestamp) {
         if (!verifySignature(body, signature, timestamp)) {
-          console.error('Invalid signature for PING');
+          console.error(
+            '[discord-interactions] Invalid signature for PING verification',
+          );
           return NextResponse.json(
             { error: 'Invalid signature' },
             { status: 401 },
           );
         }
+      } else if (!DISCORD_PUBLIC_KEY) {
+        // If no signature but public key is missing, log warning
+        console.warn(
+          '[discord-interactions] PING received but DISCORD_PUBLIC_KEY not configured',
+        );
       }
 
       return NextResponse.json({

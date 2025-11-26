@@ -1,12 +1,149 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { cn } from '@/lib/utils';
+
+const NAV_CONTEXT_KEY = 'lunary_nav_context';
+
 export function ConditionalMainWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [showMarketingNav, setShowMarketingNav] = useState(false);
+  const [showAppNav, setShowAppNav] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !pathname) return;
+
+    // Define core marketing pages (always show marketing nav)
+    const coreMarketingRoutes = ['/', '/welcome', '/help', '/auth'];
+    const isCoreMarketingRoute =
+      coreMarketingRoutes.includes(pathname) || pathname.startsWith('/admin');
+
+    // Define app pages
+    const appPages = [
+      '/app',
+      '/tarot',
+      '/horoscope',
+      '/birth-chart',
+      '/book-of-shadows',
+      '/grimoire',
+      '/profile',
+      '/cosmic-state',
+      '/cosmic-report-generator',
+      '/blog',
+    ];
+
+    // Define explore pages
+    const explorePages = [
+      '/shop',
+      '/moon-circles',
+      '/collections',
+      '/forecast',
+      '/cosmic-report-generator',
+      '/cosmic-state',
+    ];
+
+    // Pages that can show app nav if coming from app
+    const contextualPages = ['/blog', '/pricing', ...explorePages];
+    const isContextualPage = contextualPages.some(
+      (page) => pathname === page || pathname.startsWith(`${page}/`),
+    );
+
+    const isAppPage = appPages.some(
+      (page) => pathname === page || pathname.startsWith(`${page}/`),
+    );
+
+    const isActuallyAppPage = isAppPage && !isCoreMarketingRoute;
+
+    // Check if we came from an app page or explore menu
+    const referrer = document.referrer;
+    const fromParam = searchParams?.get('from');
+
+    // Define app pages for context tracking
+    const appPagesForContext = [
+      '/app',
+      '/tarot',
+      '/horoscope',
+      '/birth-chart',
+      '/book-of-shadows',
+      '/grimoire',
+      '/profile',
+      '/cosmic-state',
+      '/cosmic-report-generator',
+    ];
+
+    // Check if referrer is an app page (must be same origin to be reliable)
+    const referrerIsAppPage = referrer
+      ? (() => {
+          try {
+            const referrerUrl = new URL(referrer);
+            // Only trust same-origin referrers
+            if (referrerUrl.origin !== window.location.origin) {
+              return false;
+            }
+            return appPagesForContext.some(
+              (page) =>
+                referrerUrl.pathname === page ||
+                referrerUrl.pathname.startsWith(`${page}/`),
+            );
+          } catch {
+            return false;
+          }
+        })()
+      : false;
+
+    // Check if current page is a contextual page (blog/pricing)
+    const isContextualPageCheck = ['/blog', '/pricing'].some(
+      (page) => pathname === page || pathname.startsWith(`${page}/`),
+    );
+
+    let cameFromApp: boolean;
+    if (isContextualPageCheck) {
+      // For contextual pages, be strict: ONLY show app nav with explicit signal
+      // Do NOT rely on sessionStorage as it can be stale from previous sessions
+      cameFromApp = fromParam === 'explore' || referrerIsAppPage;
+    } else {
+      // For other pages, use normal logic
+      const navContext = sessionStorage.getItem(NAV_CONTEXT_KEY);
+      cameFromApp =
+        navContext === 'app' ||
+        navContext === 'explore' ||
+        fromParam === 'explore' ||
+        referrerIsAppPage;
+    }
+
+    // Determine which nav is shown
+    // Marketing nav shows on core marketing pages and contextual pages (unless coming from app/explore)
+    const marketingNav =
+      (isCoreMarketingRoute || (isContextualPage && !cameFromApp)) &&
+      !pathname.startsWith('/admin');
+    // App nav shows on actual app pages OR contextual pages if coming from app/explore
+    const appNav =
+      (isActuallyAppPage || (isContextualPage && cameFromApp)) &&
+      !pathname.startsWith('/admin');
+
+    setShowMarketingNav(marketingNav);
+    setShowAppNav(appNav);
+  }, [pathname, searchParams]);
+
   return (
-    <main className='flex flex-col min-h-full w-full font-mono text-sm gap-4 overflow-auto px-4'>
+    <main
+      className={cn(
+        'flex flex-col w-full font-mono text-sm gap-4 overflow-y-auto px-4',
+        showMarketingNav && 'mt-8',
+        showAppNav && 'pb-20',
+        // Calculate height accounting for fixed navs
+        showMarketingNav && showAppNav && 'h-[calc(100vh-2rem-5rem)]',
+        showMarketingNav && !showAppNav && 'h-[calc(100vh-2rem)]',
+        !showMarketingNav && showAppNav && 'h-[calc(100vh-5rem)]',
+        !showMarketingNav && !showAppNav && 'h-screen',
+      )}
+    >
       {children}
     </main>
   );

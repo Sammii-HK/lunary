@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import dayjs from 'dayjs';
 import {
@@ -14,6 +15,9 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
+import { cn } from '@/lib/utils';
+
+const NAV_CONTEXT_KEY = 'lunary_nav_context';
 
 interface BlogPost {
   id: string;
@@ -35,9 +39,52 @@ interface BlogPost {
 }
 
 export default function BlogPage() {
+  const pathname = usePathname();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentWeekData, setCurrentWeekData] = useState<any>(null);
+  const [showMarketingNav, setShowMarketingNav] = useState(false);
+
+  // Detect if marketing nav is shown
+  useEffect(() => {
+    if (typeof window === 'undefined' || !pathname) return;
+
+    // Check if we came from an app page
+    const navContext = sessionStorage.getItem(NAV_CONTEXT_KEY);
+    const referrer = document.referrer;
+
+    // Define app pages for context tracking
+    const appPagesForContext = [
+      '/app',
+      '/tarot',
+      '/horoscope',
+      '/birth-chart',
+      '/book-of-shadows',
+      '/grimoire',
+      '/profile',
+      '/cosmic-state',
+      '/cosmic-report-generator',
+    ];
+
+    const referrerIsAppPage = referrer
+      ? appPagesForContext.some((page) => {
+          try {
+            const referrerUrl = new URL(referrer);
+            return (
+              referrerUrl.pathname === page ||
+              referrerUrl.pathname.startsWith(`${page}/`)
+            );
+          } catch {
+            return false;
+          }
+        })
+      : false;
+
+    const cameFromApp = navContext === 'app' || referrerIsAppPage;
+
+    // Blog shows marketing nav if NOT coming from app
+    setShowMarketingNav(!cameFromApp);
+  }, [pathname]);
 
   // Generate all previous weeks from start of 2025 to current week
   const generateAllWeeks = useMemo(() => {
@@ -149,7 +196,12 @@ export default function BlogPage() {
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      <div className='max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8'>
+      <div
+        className={cn(
+          'max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8',
+          showMarketingNav && 'mt-8',
+        )}
+      >
         {/* Header */}
         <div className='mb-8 md:mb-12'>
           <h1 className='text-3xl md:text-4xl font-light text-zinc-100 mb-2 flex items-center gap-3'>
