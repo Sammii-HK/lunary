@@ -503,7 +503,7 @@ async function runDailyPosts(dateStr: string) {
     {
       name: dateStr,
       content: postContent,
-      platforms: ['reddit', 'pinterest'],
+      platforms: ['reddit', 'pinterest', 'tiktok', 'facebook', 'linkedin'],
       imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
@@ -520,12 +520,6 @@ async function runDailyPosts(dateStr: string) {
             `${productionUrl}/api/og/moon?date=${dateStr}`,
             `${productionUrl}/api/og/horoscope?date=${dateStr}`,
           ],
-        },
-        pinterest: {
-          media: [`${productionUrl}/api/og/cosmic/${dateStr}`],
-        },
-        tiktok: {
-          media: [`${productionUrl}/api/og/cosmic/${dateStr}`],
         },
         x: {
           content: generateCosmicPost(cosmicContent).snippetShort.replace(
