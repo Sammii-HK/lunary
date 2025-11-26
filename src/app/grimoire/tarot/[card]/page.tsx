@@ -91,7 +91,7 @@ export async function generateMetadata({
       siteName: 'Lunary',
       images: [
         {
-          url: '/api/og/cosmic',
+          url: '/api/og/grimoire/tarot',
           width: 1200,
           height: 630,
           alt: `${cardData.card.name} Tarot Card`,
@@ -244,6 +244,10 @@ export default async function TarotCardPage({
           `${cardData.card.name} reversed`,
         ]}
         canonicalUrl={`https://lunary.app/grimoire/tarot/${card}`}
+        whatIs={{
+          question: `What is ${cardData.card.name}?`,
+          answer: `${cardData.card.name} is ${cardData.type === 'major' ? 'a Major Arcana tarot card' : `a ${suitInfo?.name || 'Minor Arcana'} tarot card`} representing ${cardData.card.keywords.join(', ').toLowerCase()}. ${cardData.type === 'major' ? 'As one of the 22 Major Arcana cards, it represents significant life themes and spiritual lessons.' : suitInfo ? `Associated with the ${suitInfo.element} element, it relates to ${suitInfo.qualities.toLowerCase()}.` : ''} When this card appears in a reading, it brings attention to themes of ${cardData.card.keywords.slice(0, 3).join(', ').toLowerCase()}.`,
+        }}
         intro={`${cardData.card.name} is ${cardData.type === 'major' ? 'a Major Arcana card' : `a ${suitInfo?.name || 'Minor Arcana'} card`} representing ${cardData.card.keywords.join(', ').toLowerCase()}. ${cardData.card.information}`}
         tldr={`${cardData.card.name} represents ${cardData.card.keywords.join(', ').toLowerCase()}.`}
         meaning={`${cardData.card.name} is ${cardData.type === 'major' ? 'one of the 22 Major Arcana cards' : `a ${suitInfo?.name || 'Minor Arcana'} card`} in the tarot deck. ${cardData.type === 'major' ? 'Major Arcana cards represent significant life themes and spiritual lessons.' : suitInfo ? `${suitInfo.name} cards are associated with ${suitInfo.element} element and represent ${suitInfo.qualities.toLowerCase()}.` : ''}

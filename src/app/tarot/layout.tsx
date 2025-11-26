@@ -1,13 +1,26 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Tarot Readings - Lunary',
+  title: 'Tarot Readings [78 Cards + Birth Chart Integration] | Lunary',
   description:
-    'Personalized tarot readings based on your birth chart and cosmic signature. Daily and weekly cards, pattern analysis, and spiritual guidance.',
+    'Daily tarot draws personalized to YOUR birth chart. Full 78-card deck with reversals, pattern tracking & cosmic timing. See which cards appear most in your readings. Try free.',
+  keywords: [
+    'personalized tarot',
+    'tarot readings',
+    'birth chart tarot',
+    'daily tarot card',
+    'tarot app',
+    'tarot interpretation',
+    'tarot patterns',
+    'cosmic tarot',
+  ],
+  authors: [{ name: 'Lunary' }],
+  creator: 'Lunary',
+  publisher: 'Lunary',
   openGraph: {
-    title: 'Tarot Readings - Lunary',
+    title: 'Tarot Readings [78 Cards + Birth Chart Integration] | Lunary',
     description:
-      'Personalized tarot readings based on your birth chart and cosmic signature. Daily and weekly cards, pattern analysis, and spiritual guidance.',
+      'Daily tarot draws personalized to YOUR birth chart. Full 78-card deck with reversals, pattern tracking & cosmic timing.',
     url: 'https://lunary.app/tarot',
     siteName: 'Lunary',
     images: [
@@ -23,9 +36,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tarot Readings - Lunary',
+    title: 'Tarot Readings [78 Cards + Birth Chart Integration] | Lunary',
     description:
-      'Personalized tarot readings based on your birth chart and cosmic signature.',
+      'Daily tarot draws personalized to YOUR birth chart. Full 78-card deck with reversals & pattern tracking.',
     images: ['/api/og/cosmic'],
   },
   alternates: {

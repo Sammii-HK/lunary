@@ -223,14 +223,14 @@ export type TarotProviderParams = { userId: string; now?: Date };
 export const getTarotLastReading = async ({
   userId,
   now = new Date(),
-}: TarotProviderParams): Promise<TarotReading | null> => {
+}: TarotProviderParams): Promise<
+  (TarotReading & { id?: string; aiInterpretation?: string }) | null
+> => {
   try {
     const { sql } = await import('@vercel/postgres');
 
-    // Fetch the most recent SPREAD (not daily pulls) from database
-    // Daily pulls have spread_name = 'Daily', 'Weekly', or 'Personal' - exclude these
     const result = await sql`
-      SELECT cards, spread_name, spread_slug, created_at
+      SELECT id, cards, spread_name, spread_slug, ai_interpretation, created_at
       FROM tarot_readings
       WHERE user_id = ${userId}
         AND archived_at IS NULL
@@ -246,10 +246,10 @@ export const getTarotLastReading = async ({
         : JSON.parse(row.cards || '[]');
 
       const reading = {
+        id: row.id,
         spread: row.spread_name || 'Three Card Insight',
         cards: cards
           .map((card: any) => {
-            // Handle nested card structure (card.card.name) or direct structure (card.name)
             const cardName = card.card?.name || card.name;
             const cardPosition =
               card.positionId || card.positionLabel || card.position;
@@ -277,10 +277,11 @@ export const getTarotLastReading = async ({
               card !== null,
           ),
         timestamp: row.created_at || dayjs(now).toISOString(),
+        aiInterpretation: row.ai_interpretation || undefined,
       };
 
       console.log(
-        `[Tarot Provider] Found reading for user ${userId}: spread=${reading.spread}, cards=${reading.cards.length}`,
+        `[Tarot Provider] Found reading for user ${userId}: spread=${reading.spread}, cards=${reading.cards.length}, hasInterpretation=${!!reading.aiInterpretation}`,
       );
       return reading;
     }
@@ -290,7 +291,6 @@ export const getTarotLastReading = async ({
     console.error('[Tarot Provider] Failed to fetch from database:', error);
   }
 
-  // Fallback: return null if no reading found (don't generate mock data)
   return null;
 };
 

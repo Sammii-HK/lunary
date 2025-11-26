@@ -99,18 +99,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/comparison`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/comparison/best-personalized-astrology-apps`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.9,
-    },
-    {
       url: `${baseUrl}/help`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
@@ -151,6 +139,72 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/comparison/lunary-vs-costar`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/comparison/lunary-vs-pattern`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/comparison/lunary-vs-moonly`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/comparison/lunary-vs-lunar-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/comparison/lunary-vs-arcarae`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/comparison/personalized-vs-generic-astrology`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire/card-combinations`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/moon-rituals`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/moon-signs`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/reversed-cards-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/spellcraft-fundamentals`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
     },
   ];
 
@@ -221,30 +275,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  // Add all tarot card pages (major arcana)
-  const majorArcanaRoutes = Object.keys(tarotCards.majorArcana).map(
-    (cardId) => ({
-      url: `${baseUrl}/grimoire/tarot/${cardId}`,
+  // Add all tarot card pages (major arcana) - using slugified card names
+  const majorArcanaRoutes = Object.values(tarotCards.majorArcana).map(
+    (card) => ({
+      url: `${baseUrl}/grimoire/tarot/${stringToKebabCase(card.name)}`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }),
   );
 
-  // Add all tarot card pages (minor arcana)
-  const minorArcanaRoutes = Object.entries(tarotCards.minorArcana).flatMap(
-    ([suitKey, suitCards]) =>
-      Object.keys(suitCards as Record<string, unknown>).map((cardId) => ({
-        url: `${baseUrl}/grimoire/tarot/${suitKey}/${cardId}`,
-        lastModified: now,
-        changeFrequency: 'monthly' as const,
-        priority: 0.6,
-      })),
+  // Add all tarot card pages (minor arcana) - using slugified card names
+  const minorArcanaRoutes = Object.values(tarotCards.minorArcana).flatMap(
+    (suitCards) =>
+      Object.values(suitCards as Record<string, { name: string }>).map(
+        (card) => ({
+          url: `${baseUrl}/grimoire/tarot/${stringToKebabCase(card.name)}`,
+          lastModified: now,
+          changeFrequency: 'monthly' as const,
+          priority: 0.6,
+        }),
+      ),
   );
 
-  // Add all moon phase pages
+  // Add all moon phase pages - using slugified phase names
   const moonPhaseRoutes = Object.keys(monthlyMoonPhases).map((phaseId) => ({
-    url: `${baseUrl}/grimoire/moon/phases/${phaseId}`,
+    url: `${baseUrl}/grimoire/moon/phases/${stringToKebabCase(phaseId)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
@@ -266,9 +322,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  // Add all sabbat pages
+  // Add all sabbat pages - using slugified names
   const sabbatRoutes = wheelOfTheYearSabbats.map((sabbat) => ({
-    url: `${baseUrl}/grimoire/wheel-of-the-year/${sabbat.name.toLowerCase()}`,
+    url: `${baseUrl}/grimoire/wheel-of-the-year/${stringToKebabCase(sabbat.name)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.6,

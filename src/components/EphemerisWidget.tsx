@@ -1065,7 +1065,7 @@ export default function EphemerisWidget() {
 
   if (!location || locationLoading) {
     return (
-      <div className='flex h-full w-full flex-col rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
+      <div className='flex h-full w-full flex-col rounded-lg border border-zinc-700 bg-zinc-800 p-4 min-h-64'>
         <div className='mb-3 flex items-center justify-center gap-2'>
           <MapPin size={16} className='text-purple-400' />
           <h3 className='text-lg font-semibold text-white'>Sky Tonight</h3>
@@ -1082,7 +1082,7 @@ export default function EphemerisWidget() {
   }
 
   return (
-    <div className='flex h-full w-full flex-col gap-4 rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
+    <div className='flex h-full w-full flex-col gap-4 rounded-lg border border-zinc-700 bg-zinc-800 p-4 min-h-64'>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <MapPin size={16} className='text-purple-400' />

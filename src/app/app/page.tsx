@@ -11,22 +11,59 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { usePathname } from 'next/navigation';
 import { recordCheckIn } from '@/lib/streak/check-in';
 
-// Critical widgets loaded immediately
+// Critical above-fold widgets loaded immediately
 import { DateWidget } from '@/components/DateWidget';
 import { AstronomyWidget } from '@/components/AstronomyWidget';
 import { ExploreThisWeek } from '@/components/ExploreThisWeek';
-import { QuickCheckIn } from '@/components/QuickCheckIn';
-import { QuickTarotCard } from '@/components/QuickTarotCard';
-import { QuickCosmicWeather } from '@/components/QuickCosmicWeather';
+
+// Quick action widgets - dynamic import with skeletons
+const QuickCheckIn = dynamic(
+  () =>
+    import('@/components/QuickCheckIn').then((mod) => ({
+      default: mod.QuickCheckIn,
+    })),
+  {
+    loading: () => (
+      <div className='h-24 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+    ssr: false,
+  },
+);
+const QuickTarotCard = dynamic(
+  () =>
+    import('@/components/QuickTarotCard').then((mod) => ({
+      default: mod.QuickTarotCard,
+    })),
+  {
+    loading: () => (
+      <div className='h-24 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+    ssr: false,
+  },
+);
+const QuickCosmicWeather = dynamic(
+  () =>
+    import('@/components/QuickCosmicWeather').then((mod) => ({
+      default: mod.QuickCosmicWeather,
+    })),
+  {
+    loading: () => (
+      <div className='h-24 bg-zinc-900/50 rounded-lg animate-pulse' />
+    ),
+    ssr: false,
+  },
+);
 
 // Post-trial messaging - lazy loaded since it's conditional (only shows for expired trial users)
+// Uses empty div placeholder to prevent CLS when component decides not to render
 const PostTrialMessaging = dynamic(
   () =>
     import('@/components/PostTrialMessaging').then((mod) => ({
       default: mod.PostTrialMessaging,
     })),
   {
-    ssr: false, // Client-side only since it depends on user state
+    ssr: false,
+    loading: () => <div className='min-h-0' />,
   },
 );
 
@@ -105,7 +142,7 @@ const EphemerisWidget = dynamic(() => import('@/components/EphemerisWidget'), {
 const ConditionalWheel = dynamic(
   () => import('@/components/ConditionalWheel'),
   {
-    loading: () => null, // ConditionalWheel handles its own loading state
+    loading: () => <div className='min-h-0' />,
     ssr: false,
   },
 );

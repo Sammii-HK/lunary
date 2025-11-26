@@ -21,9 +21,7 @@ import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
-// Temporarily disabled - causing fetch failures
-// import { useAIPrompts } from '@/hooks/useAIPrompts';
-// import { AIPromptCard } from '@/components/AIPromptCard';
+import { RitualTracker } from '@/components/RitualTracker';
 
 interface CollectionFolder {
   id: number;
@@ -190,13 +188,6 @@ function BookOfShadowsContent() {
     addMessage,
     threadId,
   } = useAssistantChat({ birthday: userBirthday });
-
-  // Temporarily disabled - causing fetch failures
-  const prompts: any[] = [];
-  const hasNewPrompts = false;
-  const promptsLoading = false;
-  const promptsError = null;
-  const markPromptAsRead = (_id: number) => {};
 
   const [cacheInitialized, setCacheInitialized] = useState(false);
   const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(
@@ -497,9 +488,9 @@ function BookOfShadowsContent() {
   }
 
   return (
-    <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-      <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
-        <header className='mb-6 space-y-2'>
+    <div className='h-screen w-full overflow-hidden bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+      <div className='mx-auto flex h-full w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
+        <header className='mb-6 shrink-0 space-y-2'>
           <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
             Book of Shadows
           </h1>
@@ -525,19 +516,15 @@ function BookOfShadowsContent() {
                 {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
               </span>
             ) : null}
-            {hasNewPrompts && (
-              <span className='rounded-full border border-purple-500/60 bg-purple-500/20 px-3 py-1 text-purple-300 font-semibold animate-pulse'>
-                ✨ New Prompt
-              </span>
-            )}
           </div>
+          <RitualTracker />
         </header>
 
-        <div className='flex flex-1 flex-col gap-4'>
-          <section className='flex flex-1 flex-col gap-4 overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur'>
+        <div className='flex min-h-0 flex-1 flex-col gap-4'>
+          <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur'>
             <div
               ref={messagesContainerRef}
-              className='flex-1 overflow-y-auto px-4 py-6 md:px-6'
+              className='min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-6'
             >
               <div className='mx-auto flex max-w-2xl flex-col gap-4 md:gap-6'>
                 {isLoadingHistory ? (
@@ -708,7 +695,7 @@ function BookOfShadowsContent() {
               </div>
             </div>
 
-            <div className='border-t border-zinc-800/70 bg-zinc-900/40'>
+            <div className='shrink-0 border-t border-zinc-800/70 bg-zinc-900/40'>
               <button
                 onClick={() => setIsAssistExpanded(!isAssistExpanded)}
                 className='flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-purple-300/90 transition hover:bg-zinc-800/40 md:px-6'
@@ -733,7 +720,7 @@ function BookOfShadowsContent() {
 
           <form
             onSubmit={handleSubmit}
-            className='sticky bottom-0 z-[90] flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
+            className='shrink-0 flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
           >
             <div className='flex-1'>
               <label htmlFor='book-of-shadows-message' className='sr-only'>

@@ -6,7 +6,7 @@ export const MoonWidget = () => {
   // const lunarAgeToNextPhase = getLunarAgeToNextPhase(lunarAge);
 
   return (
-    <div className='border-stone-800 border p-3 flex flex-col w-full h-full rounded-md'>
+    <div className='border-stone-800 border p-3 flex flex-col w-full h-full rounded-md min-h-64'>
       <div className='flex w-full justify-between'>
         <div className='flex align-middle flex-col md:flex-row mb-3'>
           <MoonConstellation />

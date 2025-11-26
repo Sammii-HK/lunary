@@ -120,15 +120,22 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <head>
-        {/* Prefetch API endpoint for potential future use */}
+        {/* Preconnect to critical external services */}
+        <link rel='preconnect' href='https://cloud.jazz.tools' />
+        <link rel='preconnect' href='https://us.i.posthog.com' />
+        <link
+          rel='preconnect'
+          href='https://fonts.gstatic.com'
+          crossOrigin='anonymous'
+        />
+        <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
+        {/* Prefetch API endpoint for app dashboard */}
         <link
           rel='prefetch'
           href='/api/cosmic/global'
           as='fetch'
           crossOrigin='anonymous'
         />
-        {/* DNS prefetch for external resources */}
-        <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
       </head>
       <body
         className={`${roboto.className} w-full min-h-screen bg-zinc-950 text-white`}

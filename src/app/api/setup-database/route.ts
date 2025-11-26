@@ -295,6 +295,11 @@ export async function POST(request: NextRequest) {
 
     await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_user ON tarot_readings(user_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_created ON tarot_readings(created_at DESC)`;
+
+    await sql`
+      ALTER TABLE tarot_readings
+      ADD COLUMN IF NOT EXISTS ai_interpretation TEXT
+    `;
     await sql`
         CREATE INDEX IF NOT EXISTS idx_tarot_readings_active
         ON tarot_readings(user_id, created_at)

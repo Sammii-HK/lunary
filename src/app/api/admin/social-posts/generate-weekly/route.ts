@@ -86,7 +86,7 @@ const COMPETITOR_CONTEXT = getCompetitorContext();
 
 export async function POST(request: NextRequest) {
   try {
-    const { weekStart } = await request.json();
+    const { weekStart, currentWeek } = await request.json();
 
     // Trim whitespace from API key (common issue with .env files)
     const apiKey = process.env.OPENAI_API_KEY?.trim();
@@ -163,9 +163,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate week dates - always generate for the week that starts 7 days from now
+    // Calculate week dates
     let startDate: Date;
-    if (weekStart) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (currentWeek) {
+      // Current week - start from today
+      startDate = new Date(today);
+    } else if (weekStart) {
       startDate = new Date(weekStart);
     } else {
       // Default to week ahead (7 days from now)
@@ -180,8 +186,13 @@ export async function POST(request: NextRequest) {
     weekStartDate.setDate(startDate.getDate() - daysToMonday);
     weekStartDate.setHours(0, 0, 0, 0);
 
+    // For currentWeek, calculate the minimum day offset (today's offset from Monday)
+    const todayDayOfWeek = today.getDay();
+    const todayOffset = todayDayOfWeek === 0 ? 6 : todayDayOfWeek - 1; // Monday = 0, Sunday = 6
+    const minDayOffset = currentWeek ? todayOffset : 0;
+
     console.log(
-      `📅 Generating posts for week: ${weekStartDate.toLocaleDateString()} (7 days ahead)`,
+      `📅 Generating posts for week: ${weekStartDate.toLocaleDateString()}${currentWeek ? ` (current week, from ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][todayOffset]})` : ' (next week)'}`,
     );
 
     const weekEndDate = new Date(weekStartDate);
@@ -449,6 +460,15 @@ export async function POST(request: NextRequest) {
       return a.hour - b.hour;
     });
 
+    // Filter out past days when generating for current week
+    const filteredPosts = currentWeek
+      ? weeklyPosts.filter((post) => post.dayOffset >= minDayOffset)
+      : weeklyPosts;
+
+    console.log(
+      `📝 Generating ${filteredPosts.length} posts (filtered from ${weeklyPosts.length} total)`,
+    );
+
     const allGeneratedPosts: Array<{
       content: string;
       platform: string;
@@ -460,7 +480,7 @@ export async function POST(request: NextRequest) {
       subreddit?: string;
     }> = [];
 
-    for (const postPlan of weeklyPosts) {
+    for (const postPlan of filteredPosts) {
       const platformGuidelines: Record<string, string> = {
         instagram:
           '125-150 chars optimal. Engaging, visual-focused. Use line breaks for readability. Hashtags: 5-10 relevant ones.',
@@ -599,7 +619,12 @@ Return JSON: {"posts": ["Post content"]}`;
       postDate.setHours(post.hour, 0, 0, 0); // Use the optimal hour for this platform
 
       // Generate quotes for platforms that need images
-      const platformsNeedingImages = ['instagram', 'pinterest', 'reddit'];
+      const platformsNeedingImages = [
+        'instagram',
+        'pinterest',
+        'reddit',
+        'tiktok',
+      ];
       const quote = platformsNeedingImages.includes(post.platform)
         ? await generateCatchyQuote(post.content, post.postType)
         : '';

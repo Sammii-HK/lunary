@@ -942,7 +942,7 @@ export const CrystalWidget = () => {
   if (!canAccessDate) {
     return (
       <Paywall feature='personalized_crystal_recommendations'>
-        <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
+        <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
           <div className='text-center'>
             <h3 className='font-bold mb-2'>Personal Crystal</h3>
             <span className='text-xs text-purple-400'>Personalised</span>
@@ -957,10 +957,18 @@ export const CrystalWidget = () => {
 
   // If user doesn't have birth chart access, show general crystal recommendation
   if (!hasChartAccess) {
-    if (!generalCrystal) return null;
+    if (!generalCrystal) {
+      return (
+        <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
+          <div className='flex-1 flex items-center justify-center'>
+            <div className='h-4 w-32 bg-zinc-800 rounded animate-pulse' />
+          </div>
+        </div>
+      );
+    }
 
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='space-y-2'>
           <div className='space-y-2'>
             <div className='text-center'>
@@ -990,7 +998,7 @@ export const CrystalWidget = () => {
   // For premium users, we need both profile data AND subscription access
   if (!me || !userBirthday) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-purple-400'>Personalised</span>
@@ -1008,7 +1016,7 @@ export const CrystalWidget = () => {
 
   if (!birthChart) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-purple-400'>Personalised</span>
@@ -1023,7 +1031,7 @@ export const CrystalWidget = () => {
 
   if (!crystalData) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
+      <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-purple-400'>Personalised</span>
@@ -1040,7 +1048,7 @@ export const CrystalWidget = () => {
   const guidance = crystalData.guidance;
 
   return (
-    <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative'>
+    <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative min-h-64'>
       {/* Info Icon with Popover */}
       <Popover.Root>
         <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'>

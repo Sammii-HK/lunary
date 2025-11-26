@@ -5,31 +5,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
-import { useState, useEffect, useMemo, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import {
   ChevronDownIcon,
   ChevronRightIcon,
   Menu,
   X,
-  Search,
   Sparkles,
+  Search,
 } from 'lucide-react';
-import { runesList } from '@/constants/runes';
-import { tarotSuits, tarotSpreads } from '@/constants/tarot';
-import { spells } from '@/constants/spells';
-import { correspondencesData } from '@/constants/grimoire/correspondences';
-import { chakras } from '@/constants/chakras';
-// Crystal database imports - lazy loaded to reduce initial bundle size
-// Only loaded when user searches or navigates to crystals section
-import { annualFullMoons } from '@/constants/moon/annualFullMoons';
-import {
-  MonthlyMoonPhase,
-  monthlyMoonPhases,
-} from '../../../utils/moon/monthlyPhases';
-import { zodiacSigns, planetaryBodies } from '../../../utils/zodiac/zodiac';
-import { wheelOfTheYearSabbats } from '@/constants/sabbats';
-import { tarotCards } from '../../../utils/tarot/tarot-cards';
+import { GrimoireSearch } from './GrimoireSearch';
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -144,29 +130,6 @@ const GrimoireContent = {
   compatibilityChart: <CompatibilityChart />,
 };
 
-interface SearchResult {
-  type:
-    | 'section'
-    | 'rune'
-    | 'tarot'
-    | 'spell'
-    | 'correspondence'
-    | 'crystal'
-    | 'chakra'
-    | 'moon'
-    | 'zodiac'
-    | 'planet'
-    | 'candle'
-    | 'practice'
-    | 'sabbat'
-    | 'meditation'
-    | 'witch';
-  title: string;
-  section?: string;
-  href: string;
-  match?: string;
-}
-
 export default function GrimoireLayout({
   currentSectionSlug,
 }: {
@@ -178,8 +141,6 @@ export default function GrimoireLayout({
     new Set(),
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSearchResults, setShowSearchResults] = useState(false);
 
   const currentSection = currentSectionSlug
     ? slugToSection(currentSectionSlug)
@@ -217,21 +178,6 @@ export default function GrimoireLayout({
     setSidebarOpen(false);
   }, [pathname]);
 
-  // Close search results when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.search-container')) {
-        setShowSearchResults(false);
-      }
-    };
-
-    if (showSearchResults) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
-  }, [showSearchResults]);
-
   const toggleSection = (sectionKey: string) => {
     const newExpanded = new Set(expandedSections);
     if (newExpanded.has(sectionKey)) {
@@ -242,801 +188,11 @@ export default function GrimoireLayout({
     setExpandedSections(newExpanded);
   };
 
-  // Comprehensive search across all content
-  const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-
-    const query = searchQuery.toLowerCase();
-    const results: SearchResult[] = [];
-
-    // Search sections
-    grimoireItems.forEach((itemKey) => {
-      const item = grimoire[itemKey];
-      if (item.title.toLowerCase().includes(query)) {
-        results.push({
-          type: 'section',
-          title: item.title,
-          section: itemKey,
-          href: `/grimoire/${sectionToSlug(itemKey)}`,
-        });
-      }
-      item.contents?.forEach((content) => {
-        if (content.toLowerCase().includes(query)) {
-          results.push({
-            type: 'section',
-            title: `${item.title} - ${content}`,
-            section: itemKey,
-            href: `/grimoire/${sectionToSlug(itemKey)}#${stringToKebabCase(content)}`,
-          });
-        }
-      });
-    });
-
-    // Search runes - link to individual pages
-    Object.entries(runesList).forEach(([key, rune]) => {
-      if (
-        rune.name.toLowerCase().includes(query) ||
-        rune.meaning.toLowerCase().includes(query) ||
-        rune.magicalProperties.toLowerCase().includes(query) ||
-        rune.notes.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'rune',
-          title: `${rune.symbol} ${rune.name}`,
-          section: 'runes',
-          href: `/grimoire/runes/${stringToKebabCase(key)}`,
-          match: `Meaning: ${rune.meaning}`,
-        });
-      }
-    });
-
-    // Search tarot suits - link to individual pages
-    Object.entries(tarotSuits).forEach(([key, suit]) => {
-      if (
-        suit.name.toLowerCase().includes(query) ||
-        suit.mysticalProperties.toLowerCase().includes(query) ||
-        suit.qualities.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'tarot',
-          title: `Tarot Suit - ${suit.name}`,
-          section: 'tarot',
-          href: `/grimoire/tarot-suits/${stringToKebabCase(key)}`,
-        });
-      }
-    });
-
-    // Search tarot spreads - link to individual pages
-    Object.entries(tarotSpreads).forEach(([key, spread]) => {
-      if (
-        spread.name.toLowerCase().includes(query) ||
-        spread.description.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'tarot',
-          title: `Tarot Spread - ${spread.name}`,
-          section: 'tarot',
-          href: `/grimoire/tarot-spreads/${stringToKebabCase(key)}`,
-        });
-      }
-    });
-
-    // Search tarot cards - link to individual pages
-    Object.entries(tarotCards.majorArcana).forEach(([key, card]) => {
-      if (
-        card.name.toLowerCase().includes(query) ||
-        card.keywords.some((kw) => kw.toLowerCase().includes(query)) ||
-        card.information?.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'tarot',
-          title: `Tarot Card - ${card.name}`,
-          section: 'tarot',
-          href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
-        });
-      }
-    });
-    Object.entries(tarotCards.minorArcana).forEach(([suitKey, suit]) => {
-      Object.entries(suit).forEach(([key, card]) => {
-        if (
-          card.name.toLowerCase().includes(query) ||
-          card.keywords.some((kw) => kw.toLowerCase().includes(query)) ||
-          card.information?.toLowerCase().includes(query)
-        ) {
-          results.push({
-            type: 'tarot',
-            title: `Tarot Card - ${card.name}`,
-            section: 'tarot',
-            href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
-          });
-        }
-      });
-    });
-
-    // Search correspondences - Colors - link to individual pages
-    Object.entries(correspondencesData.colors).forEach(([color, data]) => {
-      if (
-        color.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Color - ${color}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/colors/${stringToKebabCase(color)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search candle colors
-    const candleColors = [
-      { name: 'Red', uses: ['Love spells', 'Courage', 'Energy', 'Protection'] },
-      {
-        name: 'Pink',
-        uses: ['Romantic love', 'Friendship', 'Emotional healing'],
-      },
-      { name: 'Orange', uses: ['Career success', 'Creativity', 'Attraction'] },
-      { name: 'Yellow', uses: ['Communication', 'Learning', 'Mental clarity'] },
-      { name: 'Green', uses: ['Money', 'Growth', 'Fertility', 'Healing'] },
-      { name: 'Blue', uses: ['Peace', 'Healing', 'Protection', 'Wisdom'] },
-      {
-        name: 'Purple',
-        uses: ['Spirituality', 'Divination', 'Psychic development'],
-      },
-      {
-        name: 'Indigo',
-        uses: ['Meditation', 'Intuition', 'Psychic protection'],
-      },
-      { name: 'White', uses: ['All-purpose', 'Protection', 'Purification'] },
-      {
-        name: 'Black',
-        uses: ['Banishing', 'Protection', 'Removing negativity'],
-      },
-      { name: 'Brown', uses: ['Grounding', 'Stability', 'Home protection'] },
-      { name: 'Silver', uses: ['Intuition', 'Dream work', 'Moon magic'] },
-    ];
-    candleColors.forEach((candle) => {
-      if (
-        candle.name.toLowerCase().includes(query) ||
-        candle.uses.some((use) => use.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'candle',
-          title: `Candle Color - ${candle.name}`,
-          section: 'candle-magic',
-          href: `/grimoire/candle-magic#color-meanings`,
-          match: `Uses: ${candle.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search correspondences - Elements - link to individual pages
-    Object.entries(correspondencesData.elements).forEach(([element, data]) => {
-      if (
-        element.toLowerCase().includes(query) ||
-        data.colors.some((color) => color.toLowerCase().includes(query)) ||
-        data.crystals.some((crystal) =>
-          crystal.toLowerCase().includes(query),
-        ) ||
-        data.herbs.some((herb) => herb.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.zodiacSigns.some((sign) => sign.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Element - ${element}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/elements/${stringToKebabCase(element)}`,
-          match: `Direction: ${data.directions}`,
-        });
-      }
-    });
-
-    // Search correspondences - Days - link to individual pages
-    Object.entries(correspondencesData.days).forEach(([day, data]) => {
-      if (
-        day.toLowerCase().includes(query) ||
-        data.planet.toLowerCase().includes(query) ||
-        data.element.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Planetary Day - ${day}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/days/${stringToKebabCase(day)}`,
-          match: `Planet: ${data.planet}, Element: ${data.element}`,
-        });
-      }
-    });
-
-    // Search correspondences - Herbs - link to individual pages
-    Object.entries(correspondencesData.herbs).forEach(([herb, data]) => {
-      if (
-        herb.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Herb - ${herb}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/herbs/${stringToKebabCase(herb)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search correspondences - Numbers - link to individual pages
-    Object.entries(correspondencesData.numbers).forEach(([num, data]) => {
-      if (
-        num === query ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Number - ${num}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/numbers/${stringToKebabCase(num)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search correspondences - Deities - link to individual pages
-    Object.entries(correspondencesData.deities).forEach(([pantheon, gods]) => {
-      Object.entries(gods).forEach(([name, data]) => {
-        if (
-          name.toLowerCase().includes(query) ||
-          pantheon.toLowerCase().includes(query) ||
-          data.domain.some((domain) => domain.toLowerCase().includes(query))
-        ) {
-          results.push({
-            type: 'correspondence',
-            title: `${pantheon} Deity - ${name}`,
-            section: 'correspondences',
-            href: `/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(name)}`,
-            match: `Domain: ${data.domain.join(', ')}`,
-          });
-        }
-      });
-    });
-
-    // Search correspondences - Flowers - link to individual pages
-    Object.entries(correspondencesData.flowers).forEach(([flower, data]) => {
-      if (
-        flower.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Flower - ${flower}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/flowers/${stringToKebabCase(flower)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search correspondences - Wood - link to individual pages
-    Object.entries(correspondencesData.wood).forEach(([wood, data]) => {
-      if (
-        wood.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Wood - ${wood}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/wood/${stringToKebabCase(wood)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search correspondences - Animals - link to individual pages
-    Object.entries(correspondencesData.animals).forEach(([animal, data]) => {
-      if (
-        animal.toLowerCase().includes(query) ||
-        data.uses.some((use) => use.toLowerCase().includes(query)) ||
-        data.planets.some((planet) => planet.toLowerCase().includes(query)) ||
-        data.correspondences.some((corr) => corr.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'correspondence',
-          title: `Animal - ${animal}`,
-          section: 'correspondences',
-          href: `/grimoire/correspondences/animals/${stringToKebabCase(animal)}`,
-          match: `Uses: ${data.uses.join(', ')}`,
-        });
-      }
-    });
-
-    // Search candle magic
-    if (
-      query.includes('candle') ||
-      query.includes('candle magic') ||
-      query.includes('carving') ||
-      query.includes('anointing')
-    ) {
-      results.push({
-        type: 'practice',
-        title: 'Candle Magic',
-        section: 'candle-magic',
-        href: '/grimoire/candle-magic',
-        match:
-          'Complete guide to candle magic, color meanings, carving, and rituals',
-      });
+  const handleSearchResultClick = (section?: string) => {
+    if (section) {
+      setExpandedSections(new Set([section]));
     }
-
-    // Search chakras - link to individual pages
-    Object.entries(chakras).forEach(([key, chakra]) => {
-      if (
-        chakra.name.toLowerCase().includes(query) ||
-        chakra.color.toLowerCase().includes(query) ||
-        chakra.properties.toLowerCase().includes(query) ||
-        chakra.mysticalProperties.toLowerCase().includes(query) ||
-        chakra.location.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'chakra',
-          title: `${chakra.symbol} ${chakra.name} Chakra`,
-          section: 'chakras',
-          href: `/grimoire/chakras/${stringToKebabCase(key)}`,
-          match: `Color: ${chakra.color}, Properties: ${chakra.properties}`,
-        });
-      }
-    });
-
-    // Search moon phases - link to individual pages
-    Object.entries(monthlyMoonPhases).forEach(([phase, data]) => {
-      if (
-        phase.toLowerCase().includes(query) ||
-        (data as any).information?.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'moon',
-          title: `Moon Phase - ${phase}`,
-          section: 'moon',
-          href: `/grimoire/moon-phases/${stringToKebabCase(phase)}`,
-        });
-      }
-    });
-
-    // Search full moon names - link to individual pages
-    Object.entries(annualFullMoons).forEach(([month, moon]) => {
-      if (
-        moon.name.toLowerCase().includes(query) ||
-        month.toLowerCase().includes(query) ||
-        moon.description.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'moon',
-          title: `Full Moon - ${moon.name}`,
-          section: 'moon',
-          href: `/grimoire/full-moons/${stringToKebabCase(month)}`,
-          match: `${month} - ${moon.description.slice(0, 60)}...`,
-        });
-      }
-    });
-
-    // Search zodiac signs - link to individual pages
-    Object.entries(zodiacSigns).forEach(([key, sign]) => {
-      const signData = sign as { name: string; mysticalProperties?: string };
-      if (
-        signData.name.toLowerCase().includes(query) ||
-        signData.mysticalProperties?.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'zodiac',
-          title: `Zodiac Sign - ${signData.name}`,
-          section: 'astronomy',
-          href: `/grimoire/zodiac/${stringToKebabCase(key)}`,
-        });
-      }
-    });
-
-    // Search planets - link to individual pages
-    Object.entries(planetaryBodies).forEach(([key, planet]) => {
-      const planetData = planet as {
-        name: string;
-        mysticalProperties?: string;
-      };
-      if (
-        planetData.name.toLowerCase().includes(query) ||
-        planetData.mysticalProperties?.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'planet',
-          title: `Planet - ${planetData.name}`,
-          section: 'astronomy',
-          href: `/grimoire/planets/${stringToKebabCase(key)}`,
-        });
-      }
-    });
-
-    // Search crystals - removed to reduce bundle size
-    // Crystal search is handled by the Crystals component when loaded
-    // This prevents importing the large crystal database (~200KB) into GrimoireLayout
-    // Users can navigate to /grimoire/crystals to search crystals
-
-    // Search sabbats - link to individual pages
-    wheelOfTheYearSabbats.forEach((sabbat) => {
-      if (
-        sabbat.name.toLowerCase().includes(query) ||
-        sabbat.description.toLowerCase().includes(query) ||
-        sabbat.date.toLowerCase().includes(query)
-      ) {
-        results.push({
-          type: 'sabbat',
-          title: `Sabbat - ${sabbat.name}`,
-          section: 'wheel-of-the-year',
-          href: `/grimoire/sabbats/${stringToKebabCase(sabbat.name)}`,
-          match: `${sabbat.date} - ${sabbat.description.slice(0, 60)}...`,
-        });
-      }
-    });
-
-    // Search meditation techniques - link to individual pages
-    const meditationTechniques = {
-      'guided-meditation': { name: 'Guided Meditation' },
-      'mindfulness-meditation': { name: 'Mindfulness Meditation' },
-      'visualization-meditation': { name: 'Visualization Meditation' },
-      'walking-meditation': { name: 'Walking Meditation' },
-      'mantra-meditation': { name: 'Mantra Meditation' },
-      'loving-kindness-meditation': { name: 'Loving-Kindness Meditation' },
-      'body-scan-meditation': { name: 'Body Scan Meditation' },
-      'transcendental-meditation': { name: 'Transcendental Meditation' },
-    };
-    Object.entries(meditationTechniques).forEach(([key, technique]) => {
-      if (technique.name.toLowerCase().includes(query)) {
-        results.push({
-          type: 'meditation',
-          title: `Meditation - ${technique.name}`,
-          section: 'meditation',
-          href: `/grimoire/meditation/${key}`,
-        });
-      }
-    });
-
-    // Search witch types - link to individual pages
-    const witchTypes = [
-      'green-witch',
-      'kitchen-witch',
-      'hedge-witch',
-      'sea-witch',
-      'cosmic-witch',
-      'eclectic-witch',
-    ];
-    witchTypes.forEach((witch) => {
-      const witchName = witch
-        .split('-')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-      if (witchName.toLowerCase().includes(query) || witch.includes(query)) {
-        results.push({
-          type: 'witch',
-          title: `Witch Path - ${witchName}`,
-          section: 'modern-witchcraft',
-          href: `/grimoire/witches/${witch}`,
-        });
-      }
-    });
-
-    // Search divination methods - link to individual pages
-    const divinationMethods = [
-      {
-        name: 'Pendulum Divination',
-        slug: 'pendulum-divination',
-        keywords: ['pendulum', 'dowsing', 'yes no'],
-      },
-      {
-        name: 'Scrying',
-        slug: 'scrying',
-        keywords: ['scrying', 'crystal ball', 'black mirror', 'water scrying'],
-      },
-      {
-        name: 'Dream Interpretation',
-        slug: 'dream-interpretation',
-        keywords: ['dream', 'dreams', 'dream journal', 'lucid'],
-      },
-      {
-        name: 'Reading Omens',
-        slug: 'reading-omens',
-        keywords: ['omen', 'omens', 'signs', 'animal omen', 'natural signs'],
-      },
-    ];
-    divinationMethods.forEach((method) => {
-      if (
-        method.name.toLowerCase().includes(query) ||
-        method.slug.toLowerCase().includes(query) ||
-        method.keywords.some((kw) => kw.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'section',
-          title: `Divination - ${method.name}`,
-          section: 'divination',
-          href: `/grimoire/${method.slug}`,
-        });
-      }
-    });
-
-    // Search modern witchcraft subsections - link to individual pages
-    const witchcraftSubsections = [
-      {
-        name: 'Book of Shadows',
-        slug: 'book-of-shadows',
-        keywords: ['book of shadows', 'bos', 'grimoire', 'journal'],
-      },
-      {
-        name: 'Witchcraft Tools',
-        slug: 'witchcraft-tools',
-        keywords: [
-          'tools',
-          'athame',
-          'wand',
-          'chalice',
-          'pentacle',
-          'cauldron',
-        ],
-      },
-      {
-        name: 'Witchcraft Ethics',
-        slug: 'witchcraft-ethics',
-        keywords: ['ethics', 'wiccan rede', 'threefold law', 'harm none'],
-      },
-    ];
-    witchcraftSubsections.forEach((subsection) => {
-      if (
-        subsection.name.toLowerCase().includes(query) ||
-        subsection.slug.toLowerCase().includes(query) ||
-        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'section',
-          title: `Modern Witchcraft - ${subsection.name}`,
-          section: 'modern-witchcraft',
-          href: `/grimoire/${subsection.slug}`,
-        });
-      }
-    });
-
-    // Search breathwork
-    if (
-      query.includes('breathwork') ||
-      query.includes('breathing') ||
-      query.includes('pranayama') ||
-      query.includes('breath')
-    ) {
-      results.push({
-        type: 'meditation',
-        title: 'Breathwork Techniques',
-        section: 'meditation',
-        href: '/grimoire/breathwork',
-        match:
-          'Conscious breathing techniques for grounding, centering, and energy regulation',
-      });
-    }
-
-    // Search birth chart subsections
-    const birthChartSubsections = [
-      {
-        name: 'Transits',
-        slug: 'transits',
-        keywords: [
-          'transits',
-          'planetary transits',
-          'current transits',
-          'saturn return',
-        ],
-      },
-      {
-        name: 'Rising Sign',
-        slug: 'rising-sign',
-        keywords: [
-          'rising sign',
-          'ascendant',
-          'ascendant sign',
-          'outer personality',
-        ],
-      },
-      {
-        name: 'Synastry',
-        slug: 'synastry',
-        keywords: [
-          'synastry',
-          'relationship compatibility',
-          'compatibility',
-          'relationship astrology',
-        ],
-      },
-    ];
-    birthChartSubsections.forEach((subsection) => {
-      if (
-        subsection.name.toLowerCase().includes(query) ||
-        subsection.slug.toLowerCase().includes(query) ||
-        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'section',
-          title: `Birth Chart - ${subsection.name}`,
-          section: 'birth-chart',
-          href: `/grimoire/${subsection.slug}`,
-        });
-      }
-    });
-
-    // Search candle magic subsections
-    const candleMagicSubsections = [
-      {
-        name: 'Incantations by Candle Color',
-        slug: 'incantations-by-candle-color',
-        keywords: [
-          'incantations',
-          'candle incantations',
-          'candle chants',
-          'spell chants',
-        ],
-      },
-      {
-        name: 'Lighting Candles on Your Altar',
-        slug: 'lighting-candles-on-altar',
-        keywords: [
-          'lighting candles',
-          'altar',
-          'candle lighting ritual',
-          'altar setup',
-        ],
-      },
-      {
-        name: 'Anointing Candles with Oils',
-        slug: 'anointing-candles',
-        keywords: [
-          'anointing',
-          'anointing candles',
-          'candle oils',
-          'essential oils',
-        ],
-      },
-    ];
-    candleMagicSubsections.forEach((subsection) => {
-      if (
-        subsection.name.toLowerCase().includes(query) ||
-        subsection.slug.toLowerCase().includes(query) ||
-        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'practice',
-          title: `Candle Magic - ${subsection.name}`,
-          section: 'candle-magic',
-          href: `/grimoire/${subsection.slug}`,
-        });
-      }
-    });
-
-    // Search moon subsections
-    const moonSubsections = [
-      {
-        name: 'Moon Rituals by Phase',
-        slug: 'moon-rituals',
-        keywords: [
-          'moon rituals',
-          'lunar rituals',
-          'moon phase rituals',
-          'new moon ritual',
-          'full moon ritual',
-        ],
-      },
-      {
-        name: 'Moon Signs & Daily Influence',
-        slug: 'moon-signs',
-        keywords: [
-          'moon signs',
-          'moon in signs',
-          'daily moon sign',
-          'moon sign meaning',
-        ],
-      },
-    ];
-    moonSubsections.forEach((subsection) => {
-      if (
-        subsection.name.toLowerCase().includes(query) ||
-        subsection.slug.toLowerCase().includes(query) ||
-        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'moon',
-          title: `Moon - ${subsection.name}`,
-          section: 'moon',
-          href: `/grimoire/${subsection.slug}`,
-        });
-      }
-    });
-
-    // Search tarot subsections
-    const tarotSubsections = [
-      {
-        name: 'Reading Card Combinations',
-        slug: 'card-combinations',
-        keywords: [
-          'card combinations',
-          'reading combinations',
-          'tarot pairs',
-          'multiple cards',
-        ],
-      },
-      {
-        name: 'Reversed Cards Guide',
-        slug: 'reversed-cards-guide',
-        keywords: [
-          'reversed cards',
-          'reversed tarot',
-          'upside down cards',
-          'reversed meaning',
-        ],
-      },
-    ];
-    tarotSubsections.forEach((subsection) => {
-      if (
-        subsection.name.toLowerCase().includes(query) ||
-        subsection.slug.toLowerCase().includes(query) ||
-        subsection.keywords.some((kw) => kw.toLowerCase().includes(query))
-      ) {
-        results.push({
-          type: 'tarot',
-          title: `Tarot - ${subsection.name}`,
-          section: 'tarot',
-          href: `/grimoire/${subsection.slug}`,
-        });
-      }
-    });
-
-    // Search spellcraft fundamentals
-    if (
-      query.includes('spellcraft') ||
-      query.includes('spell fundamentals') ||
-      query.includes('magic basics') ||
-      query.includes('how to cast') ||
-      query.includes('spell basics')
-    ) {
-      results.push({
-        type: 'practice',
-        title: 'Spellcraft Fundamentals',
-        section: 'practices',
-        href: '/grimoire/spellcraft-fundamentals',
-        match:
-          'Essential foundations of spellcraft, timing, intention, and magical practice',
-      });
-    }
-
-    return results.slice(0, 20); // Increased limit to 20 results
-  }, [searchQuery]);
-
-  // Filter sections based on search
-  const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) return grimoireItems;
-
-    const query = searchQuery.toLowerCase();
-    return grimoireItems.filter((itemKey) => {
-      const item = grimoire[itemKey];
-      const titleMatch = item.title.toLowerCase().includes(query);
-      const contentMatch = item.contents?.some((content) =>
-        content.toLowerCase().includes(query),
-      );
-      return titleMatch || contentMatch;
-    });
-  }, [searchQuery]);
+  };
 
   return (
     <div className='flex flex-row h-[93dvh] overflow-hidden relative'>
@@ -1072,178 +228,124 @@ export default function GrimoireLayout({
           <button
             onClick={() => setSidebarOpen(false)}
             className='md:hidden p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-white'
+            aria-label='Close sidebar menu'
           >
-            <X size={20} />
+            <X size={20} aria-hidden='true' />
           </button>
         </div>
 
         {/* Search */}
-        <div className='p-4 md:p-5 lg:p-6 border-b border-zinc-700 relative search-container'>
-          <div className='relative'>
-            <Search className='absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-zinc-400' />
-            <input
-              type='text'
-              placeholder='Search grimoire...'
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowSearchResults(e.target.value.length > 0);
-              }}
-              onFocus={() => {
-                if (searchQuery.length > 0) setShowSearchResults(true);
-              }}
-              className='w-full pl-10 md:pl-12 pr-4 py-2 md:py-2.5 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base'
-            />
-          </div>
-
-          {/* Search Results Dropdown */}
-          {showSearchResults && searchResults.length > 0 && (
-            <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg max-h-96 overflow-y-auto z-50'>
-              <div className='p-2 md:p-3 space-y-1'>
-                {searchResults.map((result, index) => (
-                  <Link
-                    key={index}
-                    href={result.href}
-                    onClick={() => {
-                      setShowSearchResults(false);
-                      setSearchQuery('');
-                      setSidebarOpen(false);
-                      startTransition(() => {
-                        if (result.section) {
-                          setExpandedSections(new Set([result.section]));
-                        }
-                      });
-                    }}
-                    className='block p-2 md:p-3 rounded hover:bg-zinc-800 transition-colors'
-                  >
-                    <div className='flex items-start gap-2'>
-                      <div className='flex-1 min-w-0'>
-                        <div className='text-sm md:text-base font-medium text-zinc-100 truncate'>
-                          {result.title}
-                        </div>
-                        {result.match && (
-                          <div className='text-xs md:text-sm text-zinc-400 mt-1 truncate'>
-                            {result.match}
-                          </div>
-                        )}
-                        <div className='text-xs text-zinc-500 mt-1 capitalize'>
-                          {result.type}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <GrimoireSearch
+          onResultClick={handleSearchResultClick}
+          onSidebarClose={() => setSidebarOpen(false)}
+        />
 
         {/* Navigation */}
         <div className='flex-1 overflow-y-auto p-4 md:p-5 lg:p-6'>
-          {filteredItems.length === 0 ? (
-            <div className='text-center text-zinc-400 py-8'>
-              <p>No results found</p>
-            </div>
-          ) : (
-            <div className='space-y-2'>
-              {filteredItems.map((itemKey: string) => {
-                const isExpanded = expandedSections.has(itemKey);
-                const hasContents =
-                  grimoire[itemKey].contents &&
-                  grimoire[itemKey].contents!.length > 0;
-                const isActive = currentSection === itemKey;
+          <div className='space-y-2'>
+            {grimoireItems.map((itemKey: string) => {
+              const isExpanded = expandedSections.has(itemKey);
+              const hasContents =
+                grimoire[itemKey].contents &&
+                grimoire[itemKey].contents!.length > 0;
+              const isActive = currentSection === itemKey;
 
-                const slug = sectionToSlug(itemKey);
-                const href = `/grimoire/${slug}`;
+              const slug = sectionToSlug(itemKey);
+              const href = `/grimoire/${slug}`;
 
-                return (
-                  <div key={itemKey} className='w-full'>
-                    {/* Main header */}
-                    <div
-                      className={`flex items-center rounded transition-colors ${
-                        isActive
-                          ? 'bg-zinc-800/50 border-l-2 border-purple-400'
-                          : ''
+              return (
+                <div key={itemKey} className='w-full'>
+                  {/* Main header */}
+                  <div
+                    className={`flex items-center rounded transition-colors ${
+                      isActive
+                        ? 'bg-zinc-800/50 border-l-2 border-purple-400'
+                        : ''
+                    }`}
+                  >
+                    {hasContents ? (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleSection(itemKey);
+                        }}
+                        className='p-1 mr-1 hover:bg-zinc-700 rounded'
+                        aria-label={
+                          isExpanded
+                            ? `Collapse ${grimoire[itemKey].title}`
+                            : `Expand ${grimoire[itemKey].title}`
+                        }
+                        aria-expanded={isExpanded}
+                      >
+                        {isExpanded ? (
+                          <ChevronDownIcon
+                            size={16}
+                            className='text-zinc-400'
+                            aria-hidden='true'
+                          />
+                        ) : (
+                          <ChevronRightIcon
+                            size={16}
+                            className='text-zinc-400'
+                            aria-hidden='true'
+                          />
+                        )}
+                      </button>
+                    ) : (
+                      <div className='w-6' />
+                    )}
+
+                    <Link
+                      href={href}
+                      prefetch={true}
+                      onClick={() => {
+                        startTransition(() => {
+                          setSidebarOpen(false);
+                        });
+                      }}
+                      className={`flex-1 py-2 md:py-2.5 px-2 md:px-3 text-sm md:text-base lg:text-lg font-medium hover:text-purple-400 transition-colors block ${
+                        isActive ? 'text-purple-400' : 'text-white'
                       }`}
                     >
-                      {hasContents ? (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleSection(itemKey);
-                          }}
-                          className='p-1 mr-1 hover:bg-zinc-700 rounded'
-                        >
-                          {isExpanded ? (
-                            <ChevronDownIcon
-                              size={16}
-                              className='text-zinc-400'
-                            />
-                          ) : (
-                            <ChevronRightIcon
-                              size={16}
-                              className='text-zinc-400'
-                            />
-                          )}
-                        </button>
-                      ) : (
-                        <div className='w-6' />
-                      )}
+                      {grimoire[itemKey].title}
+                    </Link>
+                  </div>
 
-                      <Link
-                        href={href}
-                        prefetch={true}
-                        onClick={() => {
-                          startTransition(() => {
-                            setSidebarOpen(false);
-                          });
-                        }}
-                        className={`flex-1 py-2 md:py-2.5 px-2 md:px-3 text-sm md:text-base lg:text-lg font-medium hover:text-purple-400 transition-colors block ${
-                          isActive ? 'text-purple-400' : 'text-white'
-                        }`}
-                      >
-                        {grimoire[itemKey].title}
-                      </Link>
-                    </div>
-
-                    {/* Collapsible content */}
-                    {hasContents && (
-                      <div
-                        className={`
+                  {/* Collapsible content */}
+                  {hasContents && (
+                    <div
+                      className={`
                           overflow-hidden transition-all duration-300 ease-in-out
                           ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
                         `}
-                      >
-                        <div className='ml-6 md:ml-8 mt-1 space-y-1'>
-                          {grimoire[itemKey].contents!.map(
-                            (content: string) => {
-                              const slug = sectionToSlug(itemKey);
-                              return (
-                                <Link
-                                  key={content}
-                                  href={`/grimoire/${slug}#${stringToKebabCase(content)}`}
-                                  prefetch={true}
-                                  onClick={() => {
-                                    startTransition(() => {
-                                      setSidebarOpen(false);
-                                    });
-                                  }}
-                                  className='block py-1.5 md:py-2 px-2 md:px-3 text-xs md:text-sm text-zinc-300 hover:text-purple-300 hover:bg-zinc-800 rounded transition-colors'
-                                >
-                                  {content}
-                                </Link>
-                              );
-                            },
-                          )}
-                        </div>
+                    >
+                      <div className='ml-6 md:ml-8 mt-1 space-y-1'>
+                        {grimoire[itemKey].contents!.map((content: string) => {
+                          const slug = sectionToSlug(itemKey);
+                          return (
+                            <Link
+                              key={content}
+                              href={`/grimoire/${slug}#${stringToKebabCase(content)}`}
+                              prefetch={true}
+                              onClick={() => {
+                                startTransition(() => {
+                                  setSidebarOpen(false);
+                                });
+                              }}
+                              className='block py-1.5 md:py-2 px-2 md:px-3 text-xs md:text-sm text-zinc-300 hover:text-purple-300 hover:bg-zinc-800 rounded transition-colors'
+                            >
+                              {content}
+                            </Link>
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -1253,8 +355,9 @@ export default function GrimoireLayout({
         <button
           onClick={() => setSidebarOpen(true)}
           className='md:hidden fixed top-4 left-4 z-30 p-2 bg-zinc-900 border border-zinc-700 rounded-md text-white hover:bg-zinc-800 transition-colors'
+          aria-label='Open grimoire menu'
         >
-          <Menu size={20} />
+          <Menu size={20} aria-hidden='true' />
         </button>
 
         {/* Loading indicator */}

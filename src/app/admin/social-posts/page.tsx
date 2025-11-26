@@ -255,13 +255,46 @@ export default function SocialPostsPage() {
                       {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentWeek: true }),
+                      },
+                    );
+                    const data = await response.json();
+                    if (data.success) {
+                      alert(
+                        `✅ Generated ${data.savedIds.length} posts for the current week!\n\nWeek: ${data.weekRange}\n\nPosts from today to Sunday.`,
+                      );
+                    } else {
+                      alert(`Failed: ${data.error}`);
+                    }
+                  } catch (error) {
+                    alert('Failed to generate weekly posts');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                variant='outline'
+                className='w-full border-green-500/50 text-green-400 hover:bg-green-500/10'
+              >
+                <Calendar className='h-4 w-4 mr-2' />
+                Generate Current Week
+              </Button>
+              <Button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const response = await fetch(
+                      '/api/admin/social-posts/generate-weekly',
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({}),
                       },
                     );
                     const data = await response.json();
                     if (data.success) {
                       alert(
-                        `✅ Generated ${data.savedIds.length} posts for the week!\n\nWeek: ${data.weekRange}\n\nYou'll receive a Discord notification.`,
+                        `✅ Generated ${data.savedIds.length} posts for next week!\n\nWeek: ${data.weekRange}`,
                       );
                     } else {
                       alert(`Failed: ${data.error}`);
@@ -277,7 +310,7 @@ export default function SocialPostsPage() {
                 className='w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/10'
               >
                 <Calendar className='h-4 w-4 mr-2' />
-                Generate Weekly Posts
+                Generate Next Week
               </Button>
             </div>
           </CardContent>

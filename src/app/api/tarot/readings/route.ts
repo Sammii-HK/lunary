@@ -78,6 +78,7 @@ export async function GET(request: NextRequest) {
                notes,
                tags,
                metadata,
+               ai_interpretation,
                created_at,
                updated_at
         FROM tarot_readings
@@ -283,6 +284,7 @@ export async function POST(request: NextRequest) {
                 notes,
                 tags,
                 metadata,
+                ai_interpretation,
                 created_at,
                 updated_at
     `;
@@ -302,6 +304,80 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to generate tarot spread',
+      },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await auth.api.getSession({ headers: request.headers });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 },
+      );
+    }
+
+    const userId = session.user.id;
+    const data = await request.json();
+    const { readingId, aiInterpretation } = data;
+
+    if (!readingId) {
+      return NextResponse.json(
+        { error: 'readingId is required' },
+        { status: 400 },
+      );
+    }
+
+    if (typeof aiInterpretation !== 'string') {
+      return NextResponse.json(
+        { error: 'aiInterpretation must be a string' },
+        { status: 400 },
+      );
+    }
+
+    const result = await sql`
+      UPDATE tarot_readings
+      SET ai_interpretation = ${aiInterpretation},
+          updated_at = NOW()
+      WHERE id = ${readingId}::uuid
+        AND user_id = ${userId}
+      RETURNING id,
+                spread_slug,
+                spread_name,
+                plan_snapshot,
+                cards,
+                summary,
+                highlights,
+                journaling_prompts,
+                notes,
+                tags,
+                metadata,
+                ai_interpretation,
+                created_at,
+                updated_at
+    `;
+
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Reading not found or unauthorized' },
+        { status: 404 },
+      );
+    }
+
+    const updatedReading = mapRowToReading(result.rows[0]);
+
+    return NextResponse.json({
+      reading: updatedReading,
+    });
+  } catch (error) {
+    console.error('[tarot/readings] PATCH failed', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to update tarot reading',
       },
       { status: 500 },
     );
