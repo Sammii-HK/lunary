@@ -32,6 +32,7 @@ type ChatRequest = {
   messages?: Array<{ role: string; content: string }>;
   threadId?: string;
   mode?: string;
+  birthday?: string;
 };
 
 const jsonResponse = (payload: unknown, status = 200, init?: ResponseInit) =>
@@ -63,8 +64,15 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await requireUser(request);
+    // Allow client to pass birthday if server couldn't resolve it
+    const userBirthday = user.birthday ?? body.birthday ?? undefined;
+    const userWithBirthday = { ...user, birthday: userBirthday };
     const planId = resolvePlanId(user);
     const assistCommand = detectAssistCommand(userMessage);
+    console.log('[AI Chat] Processing message:', {
+      userMessage: userMessage.substring(0, 50),
+      assistCommand,
+    });
     const aiMode =
       typeof body.mode === 'string' && body.mode.trim().length > 0
         ? body.mode.trim()
@@ -156,7 +164,7 @@ export async function POST(request: NextRequest) {
       tz: user.timezone ?? 'Europe/London',
       locale: user.locale ?? 'en-GB',
       displayName: user.displayName,
-      userBirthday: user.birthday,
+      userBirthday: userWithBirthday.birthday,
       historyLimit,
       includeMood,
       planId,
@@ -200,135 +208,85 @@ export async function POST(request: NextRequest) {
 
     if (assistCommand.type && assistCommand.type !== 'none') {
       const assistSnippet = runAssistCommand(assistCommand, context);
-      const reflection = buildReflectionPrompt(context, userMessage);
-      const promptSections = buildPromptSections({
-        context,
-        memorySnippets,
-        userMessage: userMessage,
+      console.log('[AI Chat] Assist command result:', {
+        type: assistCommand.type,
+        hasSnippet: assistSnippet !== null,
+        snippetLength: assistSnippet?.length,
       });
 
-      // Only save assistSnippet to thread - reflection is sent separately and should NOT be in message content
-      const assistantContent = assistSnippet || '';
-
-      const tokensIn = estimateTokenCount(userMessage);
-      const tokensOut = estimateTokenCount(assistantContent);
-
-      const usageResult = await updateUsage({
-        userId: user.id,
-        planId,
-        tokensIn,
-        tokensOut,
-        now,
-      });
-
-      if (usageResult.limitExceeded) {
-        return jsonResponse({ error: usageResult.message }, 429);
-      }
-
-      if (planId === 'free' && isRitualRequest(userMessage)) {
-        await incrementWeeklyRitualUsage(user.id, now);
-      }
-
-      const timestamp = now.toISOString();
-      const { thread } = await appendToThread({
-        userId: user.id,
-        threadId: body.threadId,
-        userMessage: {
-          role: 'user',
-          content: userMessage,
-          ts: timestamp,
-          tokens: tokensIn,
-        },
-        assistantMessage: {
-          role: 'assistant',
-          content: assistantContent,
-          ts: timestamp,
-          tokens: tokensOut,
-        },
-        titleHint: userMessage,
-      });
-
-      await captureMemory({
-        userId: user.id,
-        planId,
-        messages: thread.messages,
-        usageCount: usageResult.usage.usedMessages,
-        saveSnippet: async ({ userId: id, snippet }) => {
-          await saveConversationSnippet(id, snippet);
-          return { ok: true };
-        },
-        snippetLimit: memorySnippetLimit,
-      });
-
-      const updatedMemorySnippets =
-        memorySnippetLimit > 0
-          ? getMemorySnippets(user.id, memorySnippetLimit)
-          : memorySnippets;
-
-      const metaPayload = {
-        threadId: thread.id,
-        response: {
-          role: 'assistant',
-          tokens: tokensOut,
-        },
-        planId,
-        usage: {
-          used: usageResult.usage.usedMessages,
-          limit: usageResult.dailyLimit,
-          tokensIn: usageResult.usage.tokensIn,
-          tokensOut: usageResult.usage.tokensOut,
-        },
-        dailyHighlight,
-        memories: updatedMemorySnippets,
-      };
-
-      await recordAiInteraction({
-        userId: user.id,
-        mode: aiMode,
-        tokensIn,
-        tokensOut,
-        metadata: {
-          thread_id: thread.id,
-          assist: assistCommand.type ?? undefined,
-        },
-      });
-
-      const wantsStream =
-        request.headers.get('accept')?.includes('text/event-stream') ||
-        request.nextUrl.searchParams.get('stream') === '1';
-
-      if (wantsStream) {
-        const stream = createAssistantStream({
-          composed: {
-            message: assistantContent,
-            assistSnippet: assistSnippet ?? null,
-            reflection,
-            promptSections,
-          },
-          meta: {
-            ...metaPayload,
-            memories: updatedMemorySnippets,
-          },
+      // If runAssistCommand returns non-null, use the assist path
+      // Otherwise fall through to full AI generation below
+      if (assistSnippet !== null) {
+        const reflection = buildReflectionPrompt(context, userMessage);
+        const promptSections = buildPromptSections({
+          context,
+          memorySnippets,
+          userMessage: userMessage,
         });
 
-        return new Response(stream, {
-          status: 200,
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache, no-transform',
-            Connection: 'keep-alive',
-          },
-        });
-      }
+        const assistantContent = assistSnippet;
 
-      return jsonResponse({
-        threadId: thread.id,
-        response: {
-          role: 'assistant',
-          content: assistantContent,
-          tokens: tokensOut,
-        },
-        meta: {
+        const tokensIn = estimateTokenCount(userMessage);
+        const tokensOut = estimateTokenCount(assistantContent);
+
+        const usageResult = await updateUsage({
+          userId: user.id,
+          planId,
+          tokensIn,
+          tokensOut,
+          now,
+        });
+
+        if (usageResult.limitExceeded) {
+          return jsonResponse({ error: usageResult.message }, 429);
+        }
+
+        if (planId === 'free' && isRitualRequest(userMessage)) {
+          await incrementWeeklyRitualUsage(user.id, now);
+        }
+
+        const timestamp = now.toISOString();
+        const { thread } = await appendToThread({
+          userId: user.id,
+          threadId: body.threadId,
+          userMessage: {
+            role: 'user',
+            content: userMessage,
+            ts: timestamp,
+            tokens: tokensIn,
+          },
+          assistantMessage: {
+            role: 'assistant',
+            content: assistantContent,
+            ts: timestamp,
+            tokens: tokensOut,
+          },
+          titleHint: userMessage,
+        });
+
+        await captureMemory({
+          userId: user.id,
+          planId,
+          messages: thread.messages,
+          usageCount: usageResult.usage.usedMessages,
+          saveSnippet: async ({ userId: id, snippet }) => {
+            await saveConversationSnippet(id, snippet);
+            return { ok: true };
+          },
+          snippetLimit: memorySnippetLimit,
+        });
+
+        const updatedMemorySnippets =
+          memorySnippetLimit > 0
+            ? getMemorySnippets(user.id, memorySnippetLimit)
+            : memorySnippets;
+
+        const metaPayload = {
+          threadId: thread.id,
+          response: {
+            role: 'assistant',
+            tokens: tokensOut,
+          },
           planId,
           usage: {
             used: usageResult.usage.usedMessages,
@@ -337,11 +295,70 @@ export async function POST(request: NextRequest) {
             tokensOut: usageResult.usage.tokensOut,
           },
           dailyHighlight,
-          assist: assistSnippet,
-          reflection,
           memories: updatedMemorySnippets,
-        },
-      });
+        };
+
+        await recordAiInteraction({
+          userId: user.id,
+          mode: aiMode,
+          tokensIn,
+          tokensOut,
+          metadata: {
+            thread_id: thread.id,
+            assist: assistCommand.type ?? undefined,
+          },
+        });
+
+        const wantsStream =
+          request.headers.get('accept')?.includes('text/event-stream') ||
+          request.nextUrl.searchParams.get('stream') === '1';
+
+        if (wantsStream) {
+          const stream = createAssistantStream({
+            composed: {
+              message: assistantContent,
+              assistSnippet: assistSnippet,
+              reflection,
+              promptSections,
+            },
+            meta: {
+              ...metaPayload,
+              memories: updatedMemorySnippets,
+            },
+          });
+
+          return new Response(stream, {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/event-stream',
+              'Cache-Control': 'no-cache, no-transform',
+              Connection: 'keep-alive',
+            },
+          });
+        }
+
+        return jsonResponse({
+          threadId: thread.id,
+          response: {
+            role: 'assistant',
+            content: assistantContent,
+            tokens: tokensOut,
+          },
+          meta: {
+            planId,
+            usage: {
+              used: usageResult.usage.usedMessages,
+              limit: usageResult.dailyLimit,
+              tokensIn: usageResult.usage.tokensIn,
+              tokensOut: usageResult.usage.tokensOut,
+            },
+            dailyHighlight,
+            assist: assistSnippet,
+            reflection,
+            memories: updatedMemorySnippets,
+          },
+        });
+      }
     }
 
     // Build prompt sections with grimoire data if available

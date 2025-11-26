@@ -61,8 +61,9 @@ const getThreadStorageKey = (userId: string | null): string | null => {
   return `lunary-ai-thread-id-${userId}`;
 };
 
-export const useAssistantChat = () => {
+export const useAssistantChat = (options?: { birthday?: string }) => {
   const { user, loading: authLoading } = useAuthStatus();
+  const birthday = options?.birthday;
   const userId = user?.id || null;
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -249,6 +250,7 @@ export const useAssistantChat = () => {
             body: JSON.stringify({
               message: content,
               threadId,
+              birthday,
             }),
           },
         );

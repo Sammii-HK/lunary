@@ -62,8 +62,13 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     const checkAuth = async () => {
-      // If we already have a cached result with user data, use it
-      if (cachedAuthState && !cachedAuthState.loading) {
+      // Only use cache if user is already authenticated
+      // This ensures we re-check after sign-in
+      if (
+        cachedAuthState &&
+        !cachedAuthState.loading &&
+        cachedAuthState.isAuthenticated
+      ) {
         if (isMounted) {
           setAuthState({
             ...cachedAuthState,
@@ -85,10 +90,18 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Make the actual request
+      // Make the actual request with timeout
       authPromise = (async () => {
         try {
-          const session = await betterAuthClient.getSession();
+          const timeoutPromise = new Promise<null>((_, reject) =>
+            setTimeout(() => reject(new Error('Auth timeout')), 5000),
+          );
+
+          const session = await Promise.race([
+            betterAuthClient.getSession(),
+            timeoutPromise,
+          ]);
+
           const user =
             session && typeof session === 'object'
               ? 'user' in session

@@ -11,35 +11,6 @@ export function useAIPrompts() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPrompts = useCallback(async () => {
-    if (!user?.id) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/ai/prompts?autoGenerate=true', {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch prompts');
-      }
-
-      const data = await response.json();
-      setPrompts(data.prompts || []);
-      setHasNewPrompts(data.hasNewPrompts || false);
-    } catch (err) {
-      console.error('[useAIPrompts] Error fetching prompts:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load prompts');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id]);
-
   const markPromptAsRead = useCallback(
     async (promptId: number) => {
       try {
@@ -78,15 +49,56 @@ export function useAIPrompts() {
   );
 
   useEffect(() => {
-    fetchPrompts();
-  }, [fetchPrompts]);
+    let cancelled = false;
+
+    const doFetch = async () => {
+      if (!user?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch('/api/ai/prompts?autoGenerate=true', {
+          credentials: 'include',
+        });
+
+        if (cancelled) return;
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch prompts');
+        }
+
+        const data = await response.json();
+        if (cancelled) return;
+
+        setPrompts(data.prompts || []);
+        setHasNewPrompts(data.hasNewPrompts || false);
+      } catch (err) {
+        if (cancelled) return;
+        console.error('[useAIPrompts] Error fetching prompts:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load prompts');
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    doFetch();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   return {
     prompts,
     hasNewPrompts,
     isLoading,
     error,
-    refetch: fetchPrompts,
     markPromptAsRead,
   };
 }

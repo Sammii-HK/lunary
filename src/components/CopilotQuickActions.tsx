@@ -7,6 +7,7 @@ import {
   Calendar,
   PenTool,
   Cloud,
+  Layers,
 } from 'lucide-react';
 
 interface QuickAction {
@@ -30,9 +31,15 @@ const quickActions: QuickAction[] = [
     icon: <Sparkles className='w-4 h-4' />,
   },
   {
-    id: 'tarot-interpret',
-    label: 'Interpret My Tarot',
-    prompt: 'Interpret my last tarot reading',
+    id: 'tarot-patterns',
+    label: 'Tarot Patterns',
+    prompt: 'What patterns do you see in my recent daily tarot pulls?',
+    icon: <Layers className='w-4 h-4' />,
+  },
+  {
+    id: 'tarot-spread',
+    label: 'Interpret Spread',
+    prompt: 'Give me a detailed interpretation of my latest tarot spread',
     icon: <BookOpen className='w-4 h-4' />,
   },
   {

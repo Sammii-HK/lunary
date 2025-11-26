@@ -56,7 +56,7 @@ export async function generateDailyPrompt(
         : null;
 
     // Get today's tarot card
-    const tarotCard = context.tarot.daily?.name || context.tarot.personal?.name;
+    const tarotCard = context.tarot.daily?.name;
 
     // Check for lunar events (new moon, full moon, etc.)
     const lunarEvent = getLunarEvent(context.moon);
@@ -497,7 +497,7 @@ export async function getOrGenerateDailyPrompt(
         context.currentTransits && context.currentTransits.length > 0
           ? `${context.currentTransits[0].from} ${context.currentTransits[0].aspect} ${context.currentTransits[0].to}`
           : undefined,
-      tarotCard: context.tarot.daily?.name || context.tarot.personal?.name,
+      tarotCard: context.tarot.daily?.name,
     };
 
     const promptId = await savePrompt(

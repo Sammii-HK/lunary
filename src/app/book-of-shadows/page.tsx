@@ -12,6 +12,7 @@ import React, {
 import { useSearchParams } from 'next/navigation';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
+import { useAccount } from 'jazz-tools/react';
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -20,7 +21,7 @@ import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
-// Temporarily disabled - was causing fetch errors
+// Temporarily disabled - causing fetch failures
 // import { useAIPrompts } from '@/hooks/useAIPrompts';
 // import { AIPromptCard } from '@/components/AIPromptCard';
 
@@ -170,6 +171,9 @@ const MessageBubble = ({
 function BookOfShadowsContent() {
   const authState = useAuthStatus();
   const searchParams = useSearchParams();
+  const { me } = useAccount();
+  const userBirthday = (me?.profile as any)?.birthday;
+
   const {
     messages,
     sendMessage,
@@ -185,13 +189,14 @@ function BookOfShadowsContent() {
     clearError,
     addMessage,
     threadId,
-  } = useAssistantChat();
+  } = useAssistantChat({ birthday: userBirthday });
 
-  // Temporarily disabled - was causing fetch errors
+  // Temporarily disabled - causing fetch failures
   const prompts: any[] = [];
   const hasNewPrompts = false;
   const promptsLoading = false;
-  const markPromptAsRead = (_id: string) => {};
+  const promptsError = null;
+  const markPromptAsRead = (_id: number) => {};
 
   const [cacheInitialized, setCacheInitialized] = useState(false);
   const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(
@@ -528,7 +533,7 @@ function BookOfShadowsContent() {
           </div>
         </header>
 
-        <main className='flex flex-1 flex-col gap-4'>
+        <div className='flex flex-1 flex-col gap-4'>
           <section className='flex flex-1 flex-col gap-4 overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur'>
             <div
               ref={messagesContainerRef}
@@ -728,7 +733,7 @@ function BookOfShadowsContent() {
 
           <form
             onSubmit={handleSubmit}
-            className='sticky bottom-[72px] z-[90] flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
+            className='sticky bottom-0 z-[90] flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
           >
             <div className='flex-1'>
               <label htmlFor='book-of-shadows-message' className='sr-only'>
@@ -762,7 +767,7 @@ function BookOfShadowsContent() {
               </Button>
             )}
           </form>
-        </main>
+        </div>
       </div>
     </div>
   );

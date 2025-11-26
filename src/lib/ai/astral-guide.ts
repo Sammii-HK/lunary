@@ -167,7 +167,6 @@ function buildTarotSummary(contextTarot: {
   lastReading?: { spread: string; cards: TarotCard[] };
   daily?: TarotCard;
   weekly?: TarotCard;
-  personal?: TarotCard;
   patternAnalysis?: {
     dominantThemes: string[];
     frequentCards: Array<{ name: string; count: number }>;
@@ -181,9 +180,6 @@ function buildTarotSummary(contextTarot: {
   }
   if (contextTarot.weekly) {
     parts.push(`Weekly card: ${contextTarot.weekly.name}`);
-  }
-  if (contextTarot.personal) {
-    parts.push(`Personal card: ${contextTarot.personal.name}`);
   }
 
   if (contextTarot.lastReading && contextTarot.lastReading.cards.length > 0) {

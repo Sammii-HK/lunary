@@ -256,10 +256,7 @@ export async function GET(request: NextRequest) {
             hasBirthChart: !!snapshot?.birthChart,
             hasTransits: snapshot?.currentTransits.length || 0,
             hasMoon: !!snapshot?.moon,
-            hasTarot:
-              !!snapshot?.tarot?.daily ||
-              !!snapshot?.tarot?.weekly ||
-              !!snapshot?.tarot?.personal,
+            hasTarot: !!snapshot?.tarot?.daily || !!snapshot?.tarot?.weekly,
           });
           // Still return it - let the UI handle empty state
         }
@@ -275,10 +272,7 @@ export async function GET(request: NextRequest) {
               hasBirthChart: !!snapshot.birthChart,
               hasTransits: snapshot.currentTransits.length > 0,
               hasMoon: !!snapshot.moon,
-              hasTarot:
-                !!snapshot.tarot.daily ||
-                !!snapshot.tarot.weekly ||
-                !!snapshot.tarot.personal,
+              hasTarot: !!snapshot.tarot.daily || !!snapshot.tarot.weekly,
             },
           );
         }

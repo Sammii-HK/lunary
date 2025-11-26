@@ -28,17 +28,13 @@ const describeMoon = (context: LunaryContext): string | null => {
 };
 
 const describeTarot = (context: LunaryContext): string | null => {
-  // Prefer daily/weekly/personal cards over saved reading
+  // Use actual pulled cards (daily/weekly)
   const dailyCard = context.tarot.daily?.name;
   const weeklyCard = context.tarot.weekly?.name;
-  const personalCard = context.tarot.personal?.name;
 
   const cardNames: string[] = [];
   if (dailyCard && dailyCard.trim()) cardNames.push(dailyCard);
   if (weeklyCard && weeklyCard.trim()) cardNames.push(weeklyCard);
-  if (personalCard && personalCard.trim() && cardNames.length < 2) {
-    cardNames.push(personalCard);
-  }
 
   // Fallback to saved reading if no daily/weekly/personal cards
   if (cardNames.length === 0) {
