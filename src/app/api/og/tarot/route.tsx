@@ -5,6 +5,7 @@ import dayOfYear from 'dayjs/plugin/dayOfYear';
 import utc from 'dayjs/plugin/utc';
 import { getTarotCard } from '../../../../../utils/tarot/tarot';
 import { getTarotCardByName } from '../../../../../src/utils/tarot/getCardByName';
+import { loadGoogleFont } from '../../../../../utils/astrology/cosmic-og';
 
 dayjs.extend(dayOfYear);
 dayjs.extend(utc);
@@ -126,6 +127,9 @@ export async function GET(request: NextRequest) {
   // Same theme system as cosmic - use card color for theme
   const theme = getTarotTheme(card, dateObj);
 
+  // Load Roboto Mono font
+  const robotoFont = await loadGoogleFont(request);
+
   return new ImageResponse(
     (
       <div
@@ -230,6 +234,18 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
     ),
-    { width: 1200, height: 1200 },
+    {
+      width: 1200,
+      height: 1200,
+      fonts: robotoFont
+        ? [
+            {
+              name: 'Roboto Mono',
+              data: robotoFont,
+              style: 'normal',
+            },
+          ]
+        : [],
+    },
   );
 }

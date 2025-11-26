@@ -3,6 +3,37 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
+let posthogModule: any = null;
+let posthogLoaded = false;
+
+async function loadPostHog() {
+  if (posthogLoaded) return posthogModule;
+  if (typeof window === 'undefined') {
+    posthogLoaded = true;
+    return null;
+  }
+
+  const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  if (!posthogKey) {
+    posthogLoaded = true;
+    return null;
+  }
+
+  try {
+    const posthogImport = await import('posthog-js');
+    posthogModule = posthogImport.default || posthogImport;
+    posthogLoaded = true;
+    return posthogModule;
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[PostHog] Failed to load:', error);
+    }
+    posthogLoaded = true;
+    posthogModule = null;
+    return null;
+  }
+}
+
 function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -11,83 +42,51 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const [posthogAvailable, setPosthogAvailable] = useState(false);
   const [PostHogModule, setPostHogModule] = useState<any>(null);
 
-  // Load PostHog module lazily on client side using eval to prevent webpack analysis
+  // Load and initialize PostHog
   useEffect(() => {
-    if (typeof window === 'undefined' || PostHogModule !== null) return;
-
-    // Use eval to prevent webpack from statically analyzing the import
-    const loadPostHog = async () => {
-      try {
-        // eslint-disable-next-line no-eval
-        const posthogModule = await eval('import("posthog-js")');
-        setPostHogModule(posthogModule.default || posthogModule);
-      } catch (error) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('[PostHog] Failed to load posthog-js:', error);
-        }
-        setPostHogModule(false); // Mark as failed
-      }
-    };
-
-    loadPostHog();
-  }, [PostHogModule]);
-
-  // Initialize PostHog once module is loaded
-  useEffect(() => {
-    if (!PostHogModule || PostHogModule === false || initializedRef.current)
-      return;
+    if (typeof window === 'undefined') return;
 
     const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    const posthogHost =
-      process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
+    if (!posthogKey || initializedRef.current) return;
 
-    if (!posthogKey || typeof window === 'undefined') {
-      return;
-    }
+    loadPostHog().then((posthog) => {
+      if (!posthog) return;
 
-    try {
-      if (typeof PostHogModule.init !== 'function') {
-        console.error('[PostHog] PostHog.init is not available');
-        return;
+      try {
+        if (typeof posthog.init !== 'function') {
+          console.error('[PostHog] PostHog.init is not available');
+          return;
+        }
+
+        posthog.init(posthogKey, {
+          api_host:
+            process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
+          loaded: () => {
+            posthogRef.current = posthog;
+            initializedRef.current = true;
+            setPosthogAvailable(true);
+          },
+          capture_pageview: false,
+          capture_pageleave: true,
+        });
+      } catch (error) {
+        console.error('[PostHog] Failed to initialize:', error);
       }
-
-      PostHogModule.init(posthogKey, {
-        api_host: posthogHost,
-        loaded: () => {
-          posthogRef.current = PostHogModule;
-          initializedRef.current = true;
-          setPosthogAvailable(true);
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[PostHog] Initialized');
-          }
-        },
-        capture_pageview: false,
-        capture_pageleave: true,
-      });
-    } catch (error) {
-      console.error('[PostHog] Failed to initialize:', error);
-    }
-  }, [PostHogModule]);
+    });
+  }, []);
 
   useEffect(() => {
-    // Skip if posthog-js is not available or not initialized
     if (!posthogAvailable || !posthogRef.current || !initializedRef.current) {
       return;
     }
 
-    // Capture pageviews
     if (pathname) {
       try {
         let url = window.origin + pathname;
-        if (searchParams && searchParams.toString()) {
-          url = url + `?${searchParams.toString()}`;
+        if (searchParams?.toString()) {
+          url += `?${searchParams.toString()}`;
         }
-        const posthog = posthogRef.current;
-        if (posthog && typeof posthog.capture === 'function') {
-          posthog.capture('$pageview', {
-            $current_url: url,
-          });
-        }
+        posthogRef.current?.capture?.('$pageview', { $current_url: url });
       } catch (error) {
         console.error('[PostHog] Failed to capture pageview:', error);
       }

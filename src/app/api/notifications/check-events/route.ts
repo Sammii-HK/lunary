@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import webpush from 'web-push';
+import {
+  sendUnifiedNotification,
+  NotificationEvent,
+} from '@/lib/notifications/unified-service';
 
 // Lazy initialization of VAPID keys (only when actually needed)
 function ensureVapidConfigured() {
@@ -44,16 +48,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const notifications = [];
+    const eventsToNotify: any[] = [];
 
     // Check if primary event is notification-worthy
     const primaryEvent = cosmicData.primaryEvent;
     if (primaryEvent && isNotificationWorthy(primaryEvent)) {
-      const notification = createNotificationFromEvent(
-        primaryEvent,
-        cosmicData,
-      );
-      notifications.push(notification);
+      eventsToNotify.push(primaryEvent);
     }
 
     // Check secondary events for high-priority items
@@ -64,24 +64,48 @@ export async function GET(request: NextRequest) {
 
       for (const event of significantEvents) {
         if (isNotificationWorthy(event)) {
-          const notification = createNotificationFromEvent(event, cosmicData);
-          notifications.push(notification);
+          eventsToNotify.push(event);
         }
       }
     }
 
-    // Send notifications
+    // Send notifications using unified service
     const results = [];
-    for (const notification of notifications) {
+    for (const event of eventsToNotify) {
       try {
-        const sendResult = await sendNotificationToSubscribers(notification);
-        results.push(sendResult);
+        const notificationEvent: NotificationEvent = {
+          name: event.name || 'Cosmic Event',
+          type: event.type || 'unknown',
+          priority: event.priority || 0,
+          planet: event.planet,
+          sign: event.sign,
+          planetA: event.planetA,
+          planetB: event.planetB,
+          aspect: event.aspect,
+          emoji: event.emoji,
+          energy: event.energy,
+          description: event.description,
+        };
+
+        const sendResult = await sendUnifiedNotification(
+          notificationEvent,
+          cosmicData,
+          'daily',
+        );
+        results.push({
+          success: sendResult.success,
+          notification: event.name,
+          recipientCount: sendResult.recipientCount,
+          successful: sendResult.successful,
+          failed: sendResult.failed,
+          eventKey: sendResult.eventKey,
+        });
       } catch (error) {
         console.error('Failed to send notification:', error);
         results.push({
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-          notification: notification.title,
+          notification: event.name,
         });
       }
     }
@@ -90,7 +114,7 @@ export async function GET(request: NextRequest) {
       success: true,
       date: today,
       primaryEvent: primaryEvent?.name,
-      notificationsSent: notifications.length,
+      notificationsSent: eventsToNotify.length,
       results,
     });
   } catch (error) {

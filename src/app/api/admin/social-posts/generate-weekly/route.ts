@@ -315,6 +315,9 @@ export async function POST(request: NextRequest) {
       'Personalized Horoscopes',
       'Daily Horoscopes',
       'Tarot Readings',
+      'Tarot Pattern Analysis',
+      'Personal Transits',
+      'AI Chat Companion',
       'Digital Grimoire',
       'Astronomical Calculations',
       'Moon Phases',
@@ -325,6 +328,21 @@ export async function POST(request: NextRequest) {
       'Spiritual Guidance',
       'Crystal Correspondences',
       'Magical Practices',
+      'Collections',
+      'Moon Circles',
+      'Ritual Generator',
+      'Assist Commands',
+      'Memory System',
+      'Grimoire Knowledge',
+      'Transit Calendar',
+      'Solar Return',
+      'Cosmic Profile',
+      'Birthday Collection',
+      'Yearly Forecast',
+      'Data Export',
+      'Weekly Reports',
+      'Deeper Readings',
+      'Advanced Pattern Analysis',
     ];
 
     // Available post types
@@ -563,109 +581,12 @@ Return JSON: {"posts": ["Post content"]}`;
         : 'http://localhost:3000';
 
     // Save all posts to database with image URLs
-    // Generate catchy quotes for Instagram posts
-    const generateCatchyQuote = async (
-      postContent: string,
-      postType: string,
-      platform: string,
-    ): Promise<string> => {
-      if (platform !== 'instagram') return '';
+    // Use quote pool for Instagram posts (quotes are stored and reused, not regenerated each time)
+    const { generateCatchyQuote, getQuoteImageUrl, getQuotePoolStats } =
+      await import('@/lib/social/quote-generator');
 
-      try {
-        const quotePrompt = `Generate 5 catchy, standalone quote options for an Instagram image card. IMPORTANT: Prioritize famous quotes and cosmic wisdom over brand quotes.
-
-Post content: "${postContent}"
-Post type: ${postType}
-
-Requirements for quotes:
-- Each quote should be standalone and shareable (works without context)
-- 60-100 characters max (short and punchy)
-- Catchy, memorable, and inspiring
-- Can be a question, statement, or insight
-- Natural and authentic, not salesy
-- Use sentence case
-
-QUOTE DISTRIBUTION (IMPORTANT):
-- At least 3 out of 5 quotes should be inspired by or adapted from famous scientists, astronomers, astrologers, and philosophers
-- Only 1-2 quotes should be Lunary brand quotes
-- Mix the order - don't put all Lunary quotes first
-
-Famous Quotes to Inspire From (adapt these themes or create similar style):
-- "We are made of star-stuff" - Carl Sagan
-- "The cosmos is within us" - Carl Sagan
-- "Look up at the stars and not down at your feet" - Stephen Hawking
-- "The stars are the land-marks of the universe" - Sir John Herschel
-- "Astronomy compels the soul to look upward" - Plato
-- "The universe is not only stranger than we imagine, it is stranger than we can imagine" - J.B.S. Haldane
-- "In the cosmos, there are no absolute up or down" - Stephen Hawking
-- "The cosmos is all that is or ever was or ever will be" - Carl Sagan
-- "The universe is a pretty big place. If it's just us, seems like an awful waste of space." - Carl Sagan
-- "Somewhere, something incredible is waiting to be known." - Carl Sagan
-- "The cosmos is within us. We are made of star-stuff. We are a way for the universe to know itself." - Carl Sagan
-- "The stars are the land-marks of the universe." - Sir John Herschel
-- "Astronomy compels the soul to look upward and leads us from this world to another." - Plato
-
-Lunary Brand Quotes (use sparingly - only 1-2 max):
-- "Discover the universe within you, one star at a time" - Lunary
-- "Your birth chart is your cosmic blueprint" - Lunary
-- "The stars remember when you were born" - Lunary
-
-Return JSON with quotes in this format: {"quotes": ["Quote 1 with attribution", "Quote 2 with attribution", "Quote 3 with attribution", "Quote 4 with attribution", "Quote 5 with attribution"]}
-Include attribution like "- Author Name" or "- Lunary" at the end of each quote.`;
-
-        const quoteCompletion = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: `You are a quote curator for Instagram. Your job is to find and adapt profound, cosmic quotes from famous scientists, astronomers, astrologers, and philosophers. Prioritize famous quotes (Carl Sagan, Stephen Hawking, Plato, etc.) over brand quotes. Create quotes that are shareable, inspiring, and cosmic. Mix famous quotes with occasional brand quotes. Return only valid JSON.`,
-            },
-            { role: 'user', content: quotePrompt },
-          ],
-          response_format: { type: 'json_object' },
-          max_tokens: 500,
-          temperature: 0.9,
-        });
-
-        const quoteResult = JSON.parse(
-          quoteCompletion.choices[0]?.message?.content || '{}',
-        );
-        const quotes = quoteResult.quotes || [];
-
-        // Prefer quotes that are NOT Lunary quotes (more variety)
-        const nonLunaryQuotes = quotes.filter(
-          (q: string) =>
-            !q.toLowerCase().includes('lunary') &&
-            !q.toLowerCase().includes('birth chart') &&
-            !q.toLowerCase().includes('cosmic blueprint'),
-        );
-
-        // Return a non-Lunary quote if available, otherwise random from all quotes
-        if (nonLunaryQuotes.length > 0) {
-          return nonLunaryQuotes[
-            Math.floor(Math.random() * nonLunaryQuotes.length)
-          ];
-        }
-
-        // Fallback: return random quote from all quotes
-        if (quotes.length > 0) {
-          return quotes[Math.floor(Math.random() * quotes.length)];
-        }
-      } catch (error) {
-        console.warn('Failed to generate catchy quote, using fallback:', error);
-      }
-
-      // Fallback: extract meaningful snippet from post
-      const firstSentence = postContent.match(/^[^.!?]+[.!?]/)?.[0];
-      if (firstSentence && firstSentence.length <= 100) {
-        return firstSentence.trim();
-      }
-      const snippet = postContent.substring(0, 100);
-      const lastSpace = snippet.lastIndexOf(' ');
-      return lastSpace > 60
-        ? snippet.substring(0, lastSpace) + '...'
-        : snippet + '...';
-    };
+    const quoteStatsBefore = await getQuotePoolStats();
+    console.log('📊 Quote pool before generation:', quoteStatsBefore);
 
     const savedPostIds: string[] = [];
     for (let i = 0; i < allGeneratedPosts.length; i++) {
@@ -677,14 +598,12 @@ Include attribution like "- Author Name" or "- Lunary" at the end of each quote.
       postDate.setDate(weekStartDate.getDate() + post.dayOffset);
       postDate.setHours(post.hour, 0, 0, 0); // Use the optimal hour for this platform
 
-      const quote = await generateCatchyQuote(
-        post.content,
-        post.postType,
-        post.platform,
-      );
-      const imageUrl = quote
-        ? `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}&author=Lunary`
-        : null;
+      // Generate quotes for platforms that need images
+      const platformsNeedingImages = ['instagram', 'pinterest', 'reddit'];
+      const quote = platformsNeedingImages.includes(post.platform)
+        ? await generateCatchyQuote(post.content, post.postType)
+        : '';
+      const imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
 
       try {
         const result = await sql`
@@ -701,12 +620,16 @@ Include attribution like "- Author Name" or "- Lunary" at the end of each quote.
     // Skip Pushover notification for weekly post generation - too noisy
     // Users can check the approval queue directly
 
+    const quoteStatsAfter = await getQuotePoolStats();
+    console.log('📊 Quote pool after generation:', quoteStatsAfter);
+
     return NextResponse.json({
       success: true,
       message: `Generated ${savedPostIds.length} posts for the week`,
       weekRange: `${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}`,
       posts: allGeneratedPosts,
       savedIds: savedPostIds,
+      quotePool: quoteStatsAfter,
     });
   } catch (error) {
     console.error('Error generating weekly posts:', error);

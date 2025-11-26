@@ -8,10 +8,16 @@ import { WeeklyUsageCounter } from '@/components/WeeklyUsageCounter';
 import { useAccount } from 'jazz-tools/react';
 import { conversionTracking } from '@/lib/analytics';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { usePathname } from 'next/navigation';
+import { recordCheckIn } from '@/lib/streak/check-in';
 
 // Critical widgets loaded immediately
 import { DateWidget } from '@/components/DateWidget';
 import { AstronomyWidget } from '@/components/AstronomyWidget';
+import { ExploreThisWeek } from '@/components/ExploreThisWeek';
+import { QuickCheckIn } from '@/components/QuickCheckIn';
+import { QuickTarotCard } from '@/components/QuickTarotCard';
+import { QuickCosmicWeather } from '@/components/QuickCosmicWeather';
 
 // Post-trial messaging - lazy loaded since it's conditional (only shows for expired trial users)
 const PostTrialMessaging = dynamic(
@@ -127,11 +133,12 @@ export default function AppDashboard() {
       window.matchMedia('(display-mode: minimal-ui)').matches ||
       (window.navigator as any).standalone === true);
 
-  // Track app opened event
+  // Track app opened event and record check-in
   useEffect(() => {
     if (authState.isAuthenticated) {
       const userId = (me as any)?.id;
       conversionTracking.appOpened(userId, '/app');
+      recordCheckIn();
     } else if (!authState.loading) {
       conversionTracking.appOpened(undefined, '/app');
     }
@@ -152,6 +159,14 @@ export default function AppDashboard() {
         <div className='w-full space-y-4'>
           <DateWidget />
           <AstronomyWidget />
+          <ExploreThisWeek />
+
+          {/* Quick Action Widgets */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <QuickCheckIn />
+            <QuickTarotCard />
+            <QuickCosmicWeather />
+          </div>
         </div>
 
         {/* Main Content Grid - Responsive 2-Column Layout */}

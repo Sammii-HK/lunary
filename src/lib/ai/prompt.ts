@@ -27,12 +27,13 @@ CRITICAL RULES:
 5. Connect ONLY the actual cosmic patterns provided to the user's question.
 6. Be direct and specific - avoid generic astrological language.
 7. CRITICAL: Do NOT include journal prompts or reflection prompts in your response. Never write phrases like "You could journal on..." or "inviting you to explore..." - these are handled separately by the system and should NEVER appear in your message content. Your response should end naturally without suggesting journaling or reflection activities.
-8. MESSAGE LENGTH VARIES BY CONTENT TYPE:
-   - Weekly Overview: 8-12 sentences (2-3 paragraphs) - comprehensive but concise
+8. TAROT CONTEXT: The context includes recent readings (actual cards the user pulled), pattern analysis (dominant themes, frequent cards, pattern insights), and fallback cards (daily/weekly/personal). ALWAYS prioritize recentReadings over fallback cards - these are the ACTUAL cards the user pulled. The fallback daily/weekly/personal cards are only for users who haven't pulled cards yet.
+9. MESSAGE LENGTH VARIES BY CONTENT TYPE:
+   - Weekly Overview: 8-12 sentences MINIMUM (2-3 paragraphs) - MUST be comprehensive and detailed, covering lunar journey, major transits, and practical guidance
    - Quick questions (cosmic weather, feelings, tarot interpretation): 4-6 sentences - concise but meaningful
    - Ritual suggestions: 5-7 sentences - practical and actionable
    - Journal entries: 6-8 sentences - reflective and personal
-   Adjust length based on the question type and complexity.
+   Adjust length based on the question type and complexity. Weekly Overviews are NOT quick summaries - they are comprehensive guides.
 9. Get to the point quickly - lead with the most relevant insight, then add supporting points.
 10. CRITICAL: Do NOT repeat information from previous messages. Each response should be fresh and new. If you've already mentioned something, don't mention it again unless the user specifically asks about it.
 11. Focus on NEW insights based on the current question, not rehashing what was said before.
@@ -71,6 +72,7 @@ Context data is provided below. You MUST:
 - Connect the actual cosmic patterns to the user's emotional state and questions
 - Vary your language and structure - don't use the same phrases or explanations repeatedly
 - Focus on what's MOST relevant to THIS specific question, not everything available
+- TAROT: Reference daily pulls (daily/weekly/personal cards) and pattern analysis (themes, frequent cards, insights) when discussing tarot, not just saved spreads. Pattern insights reveal recurring energies and themes over time.
 
 The context will show exactly what tarot cards and astrological patterns are available. Use ONLY what is provided.
 `.trim();
@@ -95,13 +97,11 @@ const describeContext = (
     }>;
     rituals?: Array<{ title: string; description: string }>;
   },
+  userMessage?: string,
 ): string => {
   const parts: string[] = [];
 
-  // Tarot cards - always include daily/weekly/personal cards (they're always generated)
-  const tarotCards: string[] = [];
-
-  // Saved reading (if exists)
+  // SAVED SPREAD - always include if user has one (for spread interpretation)
   if (
     context.tarot.lastReading?.cards &&
     context.tarot.lastReading.cards.length > 0
@@ -114,49 +114,30 @@ const describeContext = (
       })
       .join(', ');
     const spreadName = context.tarot.lastReading.spread || 'Unknown Spread';
-    tarotCards.push(`SAVED READING: ${cardDetails} | Spread: ${spreadName}`);
+    parts.push(`SAVED SPREAD: ${spreadName} | Cards: ${cardDetails}`);
   }
 
-  // Daily, weekly, personal cards - these are always available
+  // Today's personalized daily card
   if (context.tarot.daily) {
-    tarotCards.push(`Daily: ${context.tarot.daily.name}`);
+    parts.push(
+      `TODAY'S DAILY CARD: ${context.tarot.daily.name}${context.tarot.daily.reversed ? ' [reversed]' : ''}`,
+    );
   }
   if (context.tarot.weekly) {
-    tarotCards.push(`Weekly: ${context.tarot.weekly.name}`);
-  }
-  if (context.tarot.personal) {
-    tarotCards.push(`Personal: ${context.tarot.personal.name}`);
-  }
-
-  // Always include tarot section - cards are always generated
-  if (tarotCards.length > 0) {
-    parts.push(`TAROT CARDS: ${tarotCards.join(' | ')}`);
-  } else {
-    // Fallback if somehow no cards are available
     parts.push(
-      `TAROT CARDS: Available (daily/weekly/personal cards generated)`,
+      `THIS WEEK'S CARD: ${context.tarot.weekly.name}${context.tarot.weekly.reversed ? ' [reversed]' : ''}`,
     );
   }
 
-  // Recent readings with insights (for AI Plus users)
-  if (context.tarot.recentReadings && context.tarot.recentReadings.length > 0) {
-    const recentReadingsInfo: string[] = [];
-    context.tarot.recentReadings.slice(0, 10).forEach((reading, index) => {
-      const cardNames = reading.cards.map((c) => c.name).join(', ');
-      let readingInfo = `${index + 1}. ${reading.spread}: ${cardNames}`;
-      if (reading.summary) {
-        readingInfo += ` | Summary: ${reading.summary.substring(0, 150)}`;
-      }
-      if (reading.highlights && reading.highlights.length > 0) {
-        readingInfo += ` | Highlights: ${reading.highlights.slice(0, 3).join(', ')}`;
-      }
-      recentReadingsInfo.push(readingInfo);
-    });
-    if (recentReadingsInfo.length > 0) {
-      parts.push(
-        `RECENT TAROT READINGS (${recentReadingsInfo.length}): ${recentReadingsInfo.join(' || ')}`,
-      );
-    }
+  // Last 7 days of personalized daily cards - this is the PRIMARY source for pattern analysis
+  if (
+    context.tarot.recentDailyCards &&
+    context.tarot.recentDailyCards.length > 0
+  ) {
+    const dailyCardsList = context.tarot.recentDailyCards
+      .map((r) => `${r.day}: ${r.card.name}`)
+      .join(', ');
+    parts.push(`DAILY CARDS (last 7 days): ${dailyCardsList}`);
   }
 
   // Pattern analysis - include insights since they're already computed
@@ -275,11 +256,45 @@ const getModeSpecificGuidance = (userMessage: string): string => {
   }
 
   if (
+    content.includes('tarot patterns') ||
+    content.includes('patterns in my') ||
+    content.includes('daily tarot pulls')
+  ) {
+    return `\n\nMODE: Tarot Pattern Analysis (Last 7 Days)
+CRITICAL: Use "TAROT READINGS (last 7 days)" data. Keep response to 4-6 sentences MAX.
+
+Focus on:
+1. Which cards appeared multiple times and what that means
+2. Which suit dominates and its significance  
+3. One key insight or guidance
+
+Example: "Six of Swords appeared 3x this week, suggesting a theme of transition. Swords dominate your pulls, indicating mental focus. The recurring message: embrace change through clear thinking."
+
+DO NOT list cards chronologically. Give a brief interpretation.
+If no data found, say "I don't see recent daily pulls to analyze."`;
+  }
+
+  if (
     content.includes('interpret my last tarot') ||
     content.includes('interpret my tarot') ||
-    content.includes('tarot reading')
+    content.includes('tarot reading') ||
+    content.includes('interpret my spread') ||
+    content.includes('latest spread') ||
+    content.includes('spread interpretation')
   ) {
-    return "\n\nMODE: Tarot Interpretation\nCRITICAL: Check the TAROT section in the context data. The user's saved tarot reading cards are listed there. You MUST reference the specific cards from their reading. If cards are listed in the context, interpret them. If no cards are listed, acknowledge that no reading is saved yet.";
+    return `\n\nMODE: Tarot Spread Interpretation
+ABSOLUTE LIMIT: 150 words maximum. NO EXCEPTIONS.
+
+Format EXACTLY like this:
+"Your [Spread Name] reveals: [Position 1] - [Card]: [one short phrase]. [Position 2] - [Card]: [one short phrase]. [Continue for each card]. Overall: [one sentence guidance]."
+
+RULES:
+- ONE short phrase per card (max 10 words each)
+- NO paragraphs, NO lengthy explanations
+- Each card ties to its POSITION meaning, not generic card meaning
+- Focus on how positions work TOGETHER as a story
+
+If no SAVED SPREAD found, say "I don't see a saved spread to interpret."`;
   }
 
   if (
@@ -293,7 +308,24 @@ const getModeSpecificGuidance = (userMessage: string): string => {
     content.includes('weekly overview') ||
     content.includes('summarise my week')
   ) {
-    return "\n\nMODE: Weekly Overview\nCRITICAL: Write 8-12 sentences (2-3 paragraphs). Do NOT write a single short sentence.\n\nYou MUST include:\n1. Overall lunar journey - describe how moon phases shift throughout the week, what each phase means, and when transitions occur\n2. Major planetary transits - detail the most important transits, what they mean, when they're exact, and how they affect the user personally based on their birth chart\n3. Practical guidance - connect cosmic patterns to actionable insights, highlight specific days that stand out, and provide day-by-day focus areas\n\nBe SPECIFIC and DETAILED. Name specific transits, mention specific days, explain what each transit means. This is NOT a quick summary - it's a comprehensive weekly guide.";
+    return `\n\nMODE: Weekly Overview
+CRITICAL: This is a COMPREHENSIVE weekly guide, NOT a vague summary. Write 10-15 sentences (3-4 paragraphs).
+
+DO NOT:
+- List vague adjectives like "sensitive, grounded, expansive" 
+- Repeat the tarot pattern analysis (user can ask separately)
+- Write generic horoscope-style fluff
+
+DO:
+1. COSMIC HIGHLIGHTS (3-4 sentences): Name the TOP 2-3 planetary transits this week. Be specific - "Venus conjunct Mars on Thursday brings passion" not "the week has creative energy". Mention the exact days when key transits peak.
+
+2. LUNAR JOURNEY (2-3 sentences): What moon phase are we in? When does it change? What sign is the moon in and when does it shift? How does this affect emotional energy?
+
+3. YOUR WEEK AHEAD (4-5 sentences): Based on their birth chart placements and the transits, give specific day-by-day guidance. Example: "Monday-Tuesday favor introspection as the moon moves through your 12th house. By Wednesday, Mercury's trine to your natal Jupiter makes it ideal for important conversations."
+
+4. KEY DAYS (2-3 sentences): Highlight 2-3 specific days and what makes them significant. "Friday stands out with the Sun sextile Neptune - perfect for creative projects or spiritual practice."
+
+Be SPECIFIC with transit names, days, and practical actions. No vague "honor yourself" language.`;
   }
 
   if (
@@ -335,7 +367,7 @@ export const buildPromptSections = ({
   return {
     system: systemPrompt,
     memory,
-    context: `Context data:\n${describeContext(context, grimoireData)}`,
+    context: `Context data:\n${describeContext(context, grimoireData, userMessage)}`,
     userMessage,
   };
 };

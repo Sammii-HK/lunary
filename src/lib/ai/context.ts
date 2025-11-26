@@ -41,6 +41,7 @@ export type LunaryContextDependencies = {
     userId: string;
     limit?: number;
     now?: Date;
+    dailyPullsOnly?: boolean;
   }) => Promise<TarotReadingWithInsights[]>;
   getTarotPatternAnalysis: (params: {
     userId: string;
@@ -48,9 +49,9 @@ export type LunaryContextDependencies = {
     userBirthday?: string;
     now?: Date;
   }) => Promise<{
-    daily: TarotCard;
-    weekly: TarotCard;
-    personal: TarotCard;
+    daily: TarotCard | null;
+    weekly: TarotCard | null;
+    recentDailyCards: Array<{ date: string; day: string; card: TarotCard }>;
     trends: {
       dominantThemes: string[];
       frequentCards: Array<{ name: string; count: number }>;
@@ -131,13 +132,7 @@ export const buildLunaryContext = async ({
 }: BuildLunaryContextParams & {
   useCache?: boolean;
 }): Promise<BuildLunaryContextResult> => {
-  // Try to get cached snapshot first - reuse tarot data if available
-  let cachedTarotData: {
-    daily?: any;
-    weekly?: any;
-    personal?: any;
-    patternAnalysis?: any;
-  } | null = null;
+  // NOTE: We do NOT cache tarot data - always fetch fresh from database
 
   if (useCache) {
     try {
@@ -163,29 +158,18 @@ export const buildLunaryContext = async ({
   }
 
   // Even if useCache is false, try to get cached tarot data to reuse
-  // This avoids regenerating the same cards when building fresh context
-  if (!useCache) {
-    try {
-      const cachedSnapshot = await getCachedSnapshot(userId, now);
-      if (cachedSnapshot?.tarot) {
-        cachedTarotData = {
-          daily: cachedSnapshot.tarot.daily,
-          weekly: cachedSnapshot.tarot.weekly,
-          personal: cachedSnapshot.tarot.personal,
-          patternAnalysis: cachedSnapshot.tarot.patternAnalysis,
-        };
-      }
-    } catch (error) {
-      // Ignore cache errors when building fresh - we'll generate new data
-    }
-  }
+  // NEVER use cached tarot data - always fetch fresh from database
+  // The cache had old generated/fake data that was causing wrong results
 
   const deps = mergeDeps(dependencyOverrides);
 
-  // For AI Plus users, fetch recent readings with insights
-  const isAiPlusUser =
-    planId === 'lunary_plus_ai' || planId === 'lunary_plus_ai_annual';
-  const recentReadingsLimit = isAiPlusUser ? 10 : 0;
+  // Fetch recent readings for pattern analysis (all paying users including trials)
+  // Trial is a status, not a plan - trials are on specific plans (lunary_plus, lunary_plus_ai, lunary_plus_ai_annual)
+  const hasPaidAccess =
+    planId === 'lunary_plus' ||
+    planId === 'lunary_plus_ai' ||
+    planId === 'lunary_plus_ai_annual';
+  const recentReadingsLimit = hasPaidAccess ? 10 : 0;
 
   const [
     birthChart,
@@ -214,7 +198,12 @@ export const buildLunaryContext = async ({
     }),
     recentReadingsLimit > 0
       ? deps
-          .getTarotRecentReadings({ userId, limit: recentReadingsLimit, now })
+          .getTarotRecentReadings({
+            userId,
+            limit: recentReadingsLimit,
+            now,
+            dailyPullsOnly: true,
+          })
           .catch((error) => {
             console.error(
               '[LunaryContext] Failed to fetch recent tarot readings',
@@ -223,33 +212,21 @@ export const buildLunaryContext = async ({
             return [];
           })
       : Promise.resolve([]),
-    // Use cached tarot data if available, otherwise fetch fresh
-    cachedTarotData
-      ? Promise.resolve({
-          daily: cachedTarotData.daily,
-          weekly: cachedTarotData.weekly,
-          personal: cachedTarotData.personal,
-          trends: cachedTarotData.patternAnalysis || {
-            dominantThemes: [],
-            frequentCards: [],
-            patternInsights: [],
-          },
-        })
-      : deps
-          .getTarotPatternAnalysis({
-            userId,
-            userName: displayName,
-            userBirthday,
-            now,
-          })
-          .catch((error) => {
-            console.error(
-              '[LunaryContext] Failed to fetch tarot pattern analysis:',
-              error,
-            );
-            // Return null - we'll handle fallback after Promise.all
-            return null;
-          }),
+    // ALWAYS fetch fresh tarot data from database - never use cache
+    deps
+      .getTarotPatternAnalysis({
+        userId,
+        userName: displayName,
+        userBirthday,
+        now,
+      })
+      .catch((error) => {
+        console.error(
+          '[LunaryContext] Failed to fetch tarot pattern analysis:',
+          error,
+        );
+        return null;
+      }),
     deps.getDailyHighlight({ userId, now }).catch((error) => {
       console.error('[LunaryContext] Failed to fetch daily highlight', error);
       return null;
@@ -273,50 +250,8 @@ export const buildLunaryContext = async ({
       : Promise.resolve({ lastMessages: emptyHistory }),
   ]);
 
-  // Generate fallback tarot cards if pattern analysis failed and we don't have cached data
-  let finalTarotPatternAnalysis = tarotPatternAnalysis;
-  if (!finalTarotPatternAnalysis && !cachedTarotData) {
-    try {
-      const { getTarotCard } = await import('../../../utils/tarot/tarot');
-      const today = new Date();
-      const todayString = today.toDateString();
-
-      // Calculate weekly seed
-      const weekStart = new Date(today);
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-      const weekStartYear = weekStart.getFullYear();
-      const weekStartMonth = weekStart.getMonth() + 1;
-      const weekStartDate = weekStart.getDate();
-      const dayOfYear = Math.floor(
-        (weekStart.getTime() - new Date(weekStartYear, 0, 0).getTime()) /
-          86400000,
-      );
-      const weekNumber = Math.floor(dayOfYear / 7);
-      const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
-
-      // Get personal card seed
-      const currentMonth = new Date().getMonth().toString();
-      const personalSeed = userBirthday
-        ? userBirthday + currentMonth
-        : currentMonth;
-
-      finalTarotPatternAnalysis = {
-        daily: getTarotCard(`daily-${todayString}`, displayName, userBirthday),
-        weekly: getTarotCard(weeklySeed, displayName, userBirthday),
-        personal: getTarotCard(personalSeed, displayName, userBirthday),
-        trends: {
-          dominantThemes: [],
-          frequentCards: [],
-          patternInsights: [],
-        },
-      };
-    } catch (fallbackError) {
-      console.error(
-        '[LunaryContext] Fallback tarot generation failed:',
-        fallbackError,
-      );
-    }
-  }
+  // Use pattern analysis from database - no generated fallback cards
+  const finalTarotPatternAnalysis = tarotPatternAnalysis;
 
   const context: LunaryContext = {
     user: {
@@ -332,10 +267,10 @@ export const buildLunaryContext = async ({
       lastReading: tarotReading ?? undefined,
       recentReadings:
         tarotRecentReadings.length > 0 ? tarotRecentReadings : undefined,
-      // Ensure tarot cards are always included - use cached, fetched, or fallback
       daily: finalTarotPatternAnalysis?.daily ?? undefined,
       weekly: finalTarotPatternAnalysis?.weekly ?? undefined,
-      personal: finalTarotPatternAnalysis?.personal ?? undefined,
+      recentDailyCards:
+        finalTarotPatternAnalysis?.recentDailyCards ?? undefined,
       patternAnalysis: finalTarotPatternAnalysis?.trends ?? undefined,
     },
     history: {

@@ -4,6 +4,7 @@ import { getRecommendedSpells } from '@/constants/spells';
 export type AssistCommand =
   | { type: 'summarise_week' }
   | { type: 'interpret_tarot' }
+  | { type: 'tarot_patterns' }
   | { type: 'explain_energy' }
   | { type: 'cosmic_weather' }
   | { type: 'transit_feelings' }
@@ -18,11 +19,18 @@ const weekPhrases = [
   'recap my week',
   'weekly overview',
 ];
-const tarotPhrases = [
-  'interpret my tarot',
-  'tarot pull',
-  'what do my cards mean',
-  'interpret my last tarot reading',
+const tarotSpreadPhrases = [
+  'interpret my spread',
+  'latest spread',
+  'spread interpretation',
+  'detailed interpretation of my latest tarot spread',
+  'my last spread',
+];
+const tarotPatternsPhrases = [
+  'tarot patterns',
+  'patterns in my recent daily tarot',
+  'daily tarot pulls',
+  'recent daily tarot',
 ];
 const energyPhrases = ['explain today', "today's energy"];
 const cosmicWeatherPhrases = [
@@ -75,7 +83,11 @@ export const detectAssistCommand = (userMessage: string): AssistCommand => {
     return { type: 'journal_entry' };
   }
 
-  if (tarotPhrases.some((phrase) => content.includes(phrase))) {
+  if (tarotPatternsPhrases.some((phrase) => content.includes(phrase))) {
+    return { type: 'tarot_patterns' };
+  }
+
+  if (tarotSpreadPhrases.some((phrase) => content.includes(phrase))) {
     return { type: 'interpret_tarot' };
   }
 
@@ -98,23 +110,12 @@ const summariseWeek = (context: LunaryContext): string => {
   return `Your week traced ${uniqueTags.join(', ')} threads. Let those textures guide how you honour yourself this weekend.`;
 };
 
-const interpretTarot = (context: LunaryContext): string => {
-  const cards = context.tarot.lastReading?.cards;
-  if (!cards || cards.length === 0) {
-    return 'No tarot spread is on record, yet the deck invites you to pull with intention and ask what wants to be revealed.';
-  }
+const interpretTarot = (_context: LunaryContext): string | null => {
+  return null;
+};
 
-  // Filter out any cards without names and map to card names
-  const cardNames = cards
-    .filter((card) => card && card.name && card.name.trim())
-    .map((card) => `${card.name}${card.reversed ? ' (reversed)' : ''}`);
-
-  if (cardNames.length === 0) {
-    return 'No tarot spread is on record, yet the deck invites you to pull with intention and ask what wants to be revealed.';
-  }
-
-  const description = cardNames.join(', ');
-  return `Your recent spread whispers through ${description}. Notice which archetype feels closest to your present heart.`;
+const tarotPatterns = (_context: LunaryContext): string | null => {
+  return null;
 };
 
 const describeTransit = (transit: TransitRecord): string => {
@@ -299,6 +300,8 @@ export const runAssistCommand = (
       return summariseWeek(context);
     case 'interpret_tarot':
       return interpretTarot(context);
+    case 'tarot_patterns':
+      return tarotPatterns(context);
     case 'explain_energy':
       return explainEnergy(context);
     case 'cosmic_weather':

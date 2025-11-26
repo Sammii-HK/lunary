@@ -5,6 +5,8 @@ import {
   Zap,
   Orbit,
   BookOpenCheck,
+  Calendar,
+  TrendingUp,
 } from 'lucide-react';
 import clsx from 'clsx';
 import type { ComponentType } from 'react';
@@ -61,6 +63,19 @@ const defaultFeatures: Feature[] = [
     description:
       'Curated spells, tarot spreads, and astro-lesson packs updated weekly.',
     icon: BookOpenCheck,
+  },
+  {
+    title: '2026 Forecast',
+    description:
+      'Comprehensive yearly cosmic forecast with major transits, eclipses, retrograde periods, and seasonal transitions.',
+    icon: TrendingUp,
+    tag: 'Annual',
+  },
+  {
+    title: 'Calendar Download',
+    description:
+      'Download your personalized cosmic calendar (ICS format) with all major astrological events for seamless integration.',
+    icon: Calendar,
   },
 ];
 

@@ -61,8 +61,9 @@ const getThreadStorageKey = (userId: string | null): string | null => {
   return `lunary-ai-thread-id-${userId}`;
 };
 
-export const useAssistantChat = () => {
-  const { user } = useAuthStatus();
+export const useAssistantChat = (options?: { birthday?: string }) => {
+  const { user, loading: authLoading } = useAuthStatus();
+  const birthday = options?.birthday;
   const userId = user?.id || null;
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -76,19 +77,21 @@ export const useAssistantChat = () => {
   const [error, setError] = useState<string | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const lastUpdateRef = useRef<number>(0);
-  const pendingUpdatesRef = useRef<Array<{ text: string; timestamp: number }>>(
-    [],
-  );
-  const THROTTLE_MS = 100; // Throttle updates to reduce costs
 
   const loadThreadHistory = useCallback(
     async (id: string) => {
       try {
-        setIsLoadingHistory(true);
+        // Don't set loading to true here - it's already set by initial state
+        // and re-setting it during HMR can cause issues
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         const response = await fetch(`/api/ai/thread?threadId=${id}`, {
           credentials: 'include',
+          signal: controller.signal,
         });
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const thread = await response.json();
@@ -120,6 +123,15 @@ export const useAssistantChat = () => {
             }
             setMessages([]);
           }
+        } else if (response.status === 401) {
+          // Auth not ready yet or session expired - don't clear localStorage
+          // Just show empty state, user can still send messages which will create new thread
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              '[AssistantChat] Thread load unauthorized - auth may not be ready yet',
+            );
+          }
+          setMessages([]);
         } else if (response.status === 404) {
           if (process.env.NODE_ENV === 'development') {
             console.log('[AssistantChat] Thread not found in database:', id);
@@ -144,7 +156,11 @@ export const useAssistantChat = () => {
           setMessages([]);
         }
       } catch (error) {
-        console.error('[AssistantChat] Failed to load thread history', error);
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.warn('[AssistantChat] Thread load timed out after 10s');
+        } else {
+          console.error('[AssistantChat] Failed to load thread history', error);
+        }
         setMessages([]);
       } finally {
         setIsLoadingHistory(false);
@@ -154,6 +170,11 @@ export const useAssistantChat = () => {
   );
 
   useEffect(() => {
+    // Wait for auth to finish loading before attempting to load thread
+    if (authLoading) {
+      return;
+    }
+
     if (!userId) {
       setIsLoadingHistory(false);
       setMessages([]);
@@ -171,71 +192,24 @@ export const useAssistantChat = () => {
     const storedThreadId =
       typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[AssistantChat] Loading thread:', {
-        userId,
-        storageKey,
-        storedThreadId,
-      });
-    }
+    console.log('[AssistantChat] Init thread:', { storedThreadId });
 
     if (storedThreadId) {
       setThreadId(storedThreadId);
-      loadThreadHistory(storedThreadId).catch((error) => {
-        console.error('[AssistantChat] Error loading thread:', error);
-        setIsLoadingHistory(false);
-        setMessages([]);
-      });
+      loadThreadHistory(storedThreadId);
     } else {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(
-          '[AssistantChat] No stored thread ID found - checking for recent thread',
-        );
-      }
-      // Try to find most recent thread as fallback
-      (async () => {
-        try {
-          const { getMostRecentThread } = await import('@/lib/ai/threads');
-          const recentThread = await getMostRecentThread(userId);
-          if (recentThread) {
-            if (process.env.NODE_ENV === 'development') {
-              console.log(
-                '[AssistantChat] Found recent thread:',
-                recentThread.id,
-                'with',
-                recentThread.messages.length,
-                'messages',
-              );
-            }
-            setThreadId(recentThread.id);
-            const storageKey = getThreadStorageKey(userId);
-            if (storageKey && typeof window !== 'undefined') {
-              localStorage.setItem(storageKey, recentThread.id);
-            }
-            const loadedMessages: AssistantMessage[] =
-              recentThread.messages.map((msg: any, index: number) => ({
-                id: `${recentThread.id}-${index}`,
-                role: msg.role,
-                content: msg.content,
-              }));
-            setMessages(loadedMessages);
-          }
-        } catch (error) {
-          console.error('[AssistantChat] Failed to find recent thread:', error);
-        } finally {
-          setIsLoadingHistory(false);
-        }
-      })();
+      setIsLoadingHistory(false);
     }
-  }, [userId, loadThreadHistory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, authLoading]);
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-      setIsStreaming(false);
-      streamingMessageIdRef.current = null;
     }
+    setIsStreaming(false);
+    streamingMessageIdRef.current = null;
   }, []);
 
   const sendMessage = useCallback(
@@ -276,6 +250,7 @@ export const useAssistantChat = () => {
             body: JSON.stringify({
               message: content,
               threadId,
+              birthday,
             }),
           },
         );
@@ -387,109 +362,29 @@ export const useAssistantChat = () => {
               case 'message': {
                 const text = safeJsonParse<string>(data);
                 if (typeof text === 'string' && text.trim().length > 0) {
-                  const now = Date.now();
-                  const isFirstChunk = !streamingMessageIdRef.current;
-                  // Always show first chunk immediately, throttle subsequent chunks
-                  const shouldUpdate =
-                    isFirstChunk || now - lastUpdateRef.current >= THROTTLE_MS;
-
-                  if (shouldUpdate) {
-                    // Update immediately - ensure new array reference
-                    setMessages((prev) => {
-                      if (!streamingMessageIdRef.current) {
-                        const id = makeId();
-                        streamingMessageIdRef.current = id;
-                        const newMessages = [
-                          ...prev,
-                          { id, role: 'assistant' as const, content: text },
-                        ];
-                        return newMessages;
-                      } else {
-                        const targetId = streamingMessageIdRef.current;
-                        // Always return a new array to ensure React detects the change
-                        return prev.map((msg) =>
-                          msg.id === targetId
-                            ? {
-                                ...msg,
-                                content:
-                                  msg.content.length > 0
-                                    ? `${msg.content}\n\n${text}`
-                                    : text,
-                              }
-                            : msg,
-                        );
-                      }
-                    });
-                    lastUpdateRef.current = now;
-                    // Clear any pending updates since we just updated
-                    pendingUpdatesRef.current = [];
+                  if (!streamingMessageIdRef.current) {
+                    const id = makeId();
+                    streamingMessageIdRef.current = id;
+                    setMessages((prev) => [
+                      ...prev,
+                      { id, role: 'assistant' as const, content: text },
+                    ]);
                   } else {
-                    // Queue throttled update
-                    pendingUpdatesRef.current.push({ text, timestamp: now });
                     const targetId = streamingMessageIdRef.current;
-                    const delay = Math.max(
-                      10,
-                      THROTTLE_MS - (now - lastUpdateRef.current),
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === targetId
+                          ? { ...msg, content: msg.content + '\n\n' + text }
+                          : msg,
+                      ),
                     );
-                    setTimeout(() => {
-                      if (
-                        !abortController.signal.aborted &&
-                        streamingMessageIdRef.current === targetId &&
-                        pendingUpdatesRef.current.length > 0
-                      ) {
-                        // Apply all pending updates
-                        const updates = pendingUpdatesRef.current;
-                        pendingUpdatesRef.current = [];
-                        setMessages((prev) => {
-                          const updated = prev.map((msg) =>
-                            msg.id === targetId
-                              ? {
-                                  ...msg,
-                                  content:
-                                    msg.content +
-                                    '\n\n' +
-                                    updates.map((u) => u.text).join('\n\n'),
-                                }
-                              : msg,
-                          );
-                          // Ensure new array reference
-                          return [...updated];
-                        });
-                        lastUpdateRef.current = Date.now();
-                      }
-                    }, delay);
                   }
                 }
                 break;
               }
               case 'done': {
-                // Flush all pending updates immediately when stream ends
-                const targetId = streamingMessageIdRef.current;
-                if (targetId && pendingUpdatesRef.current.length > 0) {
-                  const updates = pendingUpdatesRef.current;
-                  pendingUpdatesRef.current = [];
-                  setMessages((prev) => {
-                    const updated = prev.map((msg) =>
-                      msg.id === targetId
-                        ? {
-                            ...msg,
-                            content:
-                              msg.content +
-                              '\n\n' +
-                              updates.map((u) => u.text).join('\n\n'),
-                          }
-                        : msg,
-                    );
-                    // Ensure new array reference to trigger re-render
-                    return [...updated];
-                  });
-                }
-                // Clear streaming state
                 streamingMessageIdRef.current = null;
-                lastUpdateRef.current = 0;
-                pendingUpdatesRef.current = [];
                 setIsStreaming(false);
-                // Don't reload - we already have all messages in state from streaming
                 break;
               }
             }
@@ -511,7 +406,7 @@ export const useAssistantChat = () => {
         abortControllerRef.current = null;
       }
     },
-    [isStreaming, threadId, userId, loadThreadHistory],
+    [isStreaming, threadId, userId],
   );
 
   const addMessage = useCallback((message: AssistantMessage) => {

@@ -3,7 +3,6 @@ import {
   getSentEvents,
   cleanupOldDates,
   getSentEventsCount,
-  markEventAsSent,
 } from '@/app/api/cron/shared-notification-tracker';
 import {
   sendUnifiedNotification,
@@ -61,8 +60,20 @@ export async function GET(request: NextRequest) {
     const sentToday = await getSentEvents(today);
     const alreadySentCount = await getSentEventsCount(today);
 
+    // Get event types that have been sent today (for variety tracking)
+    const sentEventTypes = new Set<string>();
+    for (const eventKey of sentToday) {
+      const parts = eventKey.split('-');
+      if (parts.length > 0) {
+        sentEventTypes.add(parts[0]); // event type is first part
+      }
+    }
+
     // Check if there are notification-worthy events happening today
-    const currentEvents = getNotificationWorthyEvents(cosmicData);
+    const currentEvents = getNotificationWorthyEvents(
+      cosmicData,
+      sentEventTypes,
+    );
 
     // Filter out events that have already been notified about today
     // This includes events sent by daily cron AND events sent in previous 4-hourly checks
@@ -90,14 +101,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Send notifications for significant events
+    // Send notifications for significant events using unified service
     const results = [];
     let totalSent = 0;
 
     for (const event of newEvents) {
       try {
-        const eventKey = `${event.type || 'unknown'}-${event.name || 'unknown'}-${event.priority || 0}`;
-
         const notificationEvent: NotificationEvent = {
           name: event.name || 'Cosmic Event',
           type: event.type || 'unknown',
@@ -112,37 +121,12 @@ export async function GET(request: NextRequest) {
           description: event.description,
         };
 
-        const notification = createNotificationFromEvent(
+        const result = await sendUnifiedNotification(
           notificationEvent,
           cosmicData,
+          '4-hourly',
         );
 
-        const response = await fetch(`${baseUrl}/api/notifications/send`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.CRON_SECRET}`,
-          },
-          body: JSON.stringify({
-            payload: {
-              type: getNotificationType(event.type),
-              title: notification.title,
-              body: notification.body,
-              icon: '/icons/icon-192x192.png',
-              badge: '/icons/icon-72x72.png',
-              data: {
-                date: today,
-                eventName: event.name,
-                priority: event.priority,
-                eventType: event.type,
-                checkType: '4-hourly',
-                isTimeSpecific: true,
-              },
-            },
-          }),
-        });
-
-        const result = await response.json();
         totalSent += result.recipientCount || 0;
         results.push({
           success: result.success,
@@ -152,16 +136,6 @@ export async function GET(request: NextRequest) {
           eventName: event.name,
           eventKey: result.eventKey,
         });
-
-        // Mark this event as sent in database tracker (so it won't be sent again)
-        await markEventAsSent(
-          today,
-          eventKey,
-          event.type,
-          event.name,
-          event.priority,
-          '4-hourly',
-        );
       } catch (eventError) {
         console.error(
           `Failed to send notification for event ${event.name}:`,
@@ -215,7 +189,11 @@ function getNotificationType(type: string): string {
 }
 
 // Same logic as daily-posts but for 4-hourly checks
-function getNotificationWorthyEvents(cosmicData: any): any[] {
+// sentEventTypes: Set of event types already sent today (for variety)
+function getNotificationWorthyEvents(
+  cosmicData: any,
+  sentEventTypes?: Set<string>,
+): any[] {
   // Build allEvents array from available data (same as daily-posts)
   const allEvents: any[] = [];
 
@@ -303,8 +281,19 @@ function getNotificationWorthyEvents(cosmicData: any): any[] {
     return isEventNotificationWorthy(event);
   });
 
-  // Return raw events (not notification objects) - unified service will create notifications
-  return notificationWorthyEvents.slice(0, 1);
+  // Ensure variety: select 1 event but prioritize different event types
+  // This prevents always sending the same type (e.g., always moon phases)
+  // First, try to find an event of a type NOT yet sent today
+  for (const event of notificationWorthyEvents) {
+    const isNewType = !sentEventTypes?.has(event.type);
+    if (isNewType) {
+      return [event]; // Return first event of a new type
+    }
+  }
+
+  // If all types have been sent today, return empty array (no notification)
+  // This ensures variety - we don't repeat the same event types in one day
+  return [];
 }
 
 function isEventNotificationWorthy(event: any): boolean {

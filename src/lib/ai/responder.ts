@@ -169,20 +169,33 @@ export const composeAssistantReply = async ({
     }
 
     // Determine max_tokens based on content type
+    const lowerMessage = userMessage.toLowerCase();
     const isWeeklyOverview =
-      userMessage.toLowerCase().includes('weekly overview') ||
-      userMessage.toLowerCase().includes('summarise my week');
+      lowerMessage.includes('weekly overview') ||
+      lowerMessage.includes('summarise my week');
     const isRitualRequest =
-      userMessage.toLowerCase().includes('ritual') &&
-      (userMessage.toLowerCase().includes('moon') ||
-        userMessage.toLowerCase().includes('tonight'));
+      lowerMessage.includes('ritual') &&
+      (lowerMessage.includes('moon') || lowerMessage.includes('tonight'));
     const isJournalEntry =
-      userMessage.toLowerCase().includes('journal entry') ||
-      userMessage.toLowerCase().includes('format as journal');
+      lowerMessage.includes('journal entry') ||
+      lowerMessage.includes('format as journal');
+    const isSpreadInterpretation =
+      lowerMessage.includes('interpret my spread') ||
+      lowerMessage.includes('latest spread') ||
+      lowerMessage.includes('spread interpretation') ||
+      lowerMessage.includes('interpretation of my latest tarot');
+    const isTarotPatterns =
+      lowerMessage.includes('tarot patterns') ||
+      lowerMessage.includes('daily tarot pulls') ||
+      lowerMessage.includes('patterns in my');
 
     let maxTokens = 400; // Default for quick questions
     if (isWeeklyOverview) {
-      maxTokens = 1200; // Much longer for comprehensive weekly overviews (15-20 sentences)
+      maxTokens = 1200; // Longer for comprehensive weekly overviews
+    } else if (isSpreadInterpretation) {
+      maxTokens = 250; // Short and focused for spread interpretations
+    } else if (isTarotPatterns) {
+      maxTokens = 200; // Brief pattern analysis
     } else if (isRitualRequest || isJournalEntry) {
       maxTokens = 500; // Medium length for rituals and journal entries
     }

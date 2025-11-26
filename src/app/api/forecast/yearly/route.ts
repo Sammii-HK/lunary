@@ -8,6 +8,8 @@ import {
 } from '../../../../../utils/pricing';
 import { YearlyForecast, generateYearlyForecast } from '@/lib/forecast/yearly';
 
+export const dynamic = 'force-dynamic';
+
 type YearlyForecastRow = {
   forecast: YearlyForecast;
   expires_at: Date | null;

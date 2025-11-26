@@ -443,6 +443,52 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ AI usage table created');
 
+    // Create the ai_prompts table for daily/weekly personalized prompts
+    await sql`
+      CREATE TABLE IF NOT EXISTS ai_prompts (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        prompt_type VARCHAR(50) NOT NULL,
+        prompt_text TEXT NOT NULL,
+        cosmic_context JSONB,
+        generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        expires_at TIMESTAMPTZ NOT NULL,
+        read_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        CONSTRAINT unique_user_prompt_type_date UNIQUE (user_id, prompt_type, generated_at)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_user_id ON ai_prompts(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_type ON ai_prompts(prompt_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_generated_at ON ai_prompts(generated_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_expires_at ON ai_prompts(expires_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_unread ON ai_prompts(user_id, read_at) WHERE read_at IS NULL`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_ai_prompts_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_ai_prompts_timestamp ON ai_prompts
+    `;
+
+    await sql`
+      CREATE TRIGGER update_ai_prompts_timestamp
+      BEFORE UPDATE ON ai_prompts
+      FOR EACH ROW
+      EXECUTE FUNCTION update_ai_prompts_updated_at()
+    `;
+
+    console.log('✅ AI prompts table created');
+
     // Create the discord_notification_log table for deduplication and rate limiting
     await sql`
       CREATE TABLE IF NOT EXISTS discord_notification_log (
@@ -555,12 +601,128 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Discord interactions analytics table created');
 
+    // Create user_streaks table
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_streaks (
+        user_id TEXT PRIMARY KEY,
+        current_streak INTEGER DEFAULT 0,
+        longest_streak INTEGER DEFAULT 0,
+        last_check_in DATE,
+        total_check_ins INTEGER DEFAULT 0,
+        ritual_streak INTEGER DEFAULT 0,
+        longest_ritual_streak INTEGER DEFAULT 0,
+        last_ritual_date DATE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_streaks_last_check_in ON user_streaks(last_check_in)`;
+
+    console.log('✅ User streaks table created');
+
+    // Create ritual_habits table
+    await sql`
+      CREATE TABLE IF NOT EXISTS ritual_habits (
+        user_id TEXT NOT NULL,
+        habit_date DATE NOT NULL,
+        ritual_type TEXT NOT NULL,
+        completed BOOLEAN DEFAULT FALSE,
+        completion_time TIMESTAMP WITH TIME ZONE,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (user_id, habit_date, ritual_type)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_habits_user_id ON ritual_habits(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_habits_date ON ritual_habits(habit_date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_habits_user_date ON ritual_habits(user_id, habit_date)`;
+
+    console.log('✅ Ritual habits table created');
+
+    // Create onboarding_completion table
+    await sql`
+      CREATE TABLE IF NOT EXISTS onboarding_completion (
+        user_id TEXT PRIMARY KEY,
+        completed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        steps_completed TEXT[] DEFAULT ARRAY[]::TEXT[],
+        skipped BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_onboarding_completion_completed_at ON onboarding_completion(completed_at)`;
+
+    console.log('✅ Onboarding completion table created');
+
+    // Create monthly_insights table
+    await sql`
+      CREATE TABLE IF NOT EXISTS monthly_insights (
+        user_id TEXT NOT NULL,
+        month INTEGER NOT NULL,
+        year INTEGER NOT NULL,
+        insights JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (user_id, month, year)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_user_id ON monthly_insights(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_date ON monthly_insights(year, month)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_updated_at ON monthly_insights(updated_at)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_monthly_insights_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        NEW.updated_at = NOW();
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql
+    `;
+
+    await sql`DROP TRIGGER IF EXISTS update_monthly_insights_timestamp ON monthly_insights`;
+
+    await sql`
+      CREATE TRIGGER update_monthly_insights_timestamp
+        BEFORE UPDATE ON monthly_insights
+        FOR EACH ROW
+        EXECUTE FUNCTION update_monthly_insights_updated_at()
+    `;
+
+    console.log('✅ Monthly insights table created');
+
+    // Create re_engagement_campaigns table
+    await sql`
+      CREATE TABLE IF NOT EXISTS re_engagement_campaigns (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        campaign_type TEXT NOT NULL,
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        opened_at TIMESTAMP WITH TIME ZONE,
+        clicked_at TIMESTAMP WITH TIME ZONE,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_user_id ON re_engagement_campaigns(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_type ON re_engagement_campaigns(campaign_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_sent_at ON re_engagement_campaigns(sent_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_user_type_sent ON re_engagement_campaigns(user_id, campaign_type, sent_at)`;
+
+    console.log('✅ Re-engagement campaigns table created');
+
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, discord_notification_log, discord_notification_analytics, admin_activity_log, analytics_discord_interactions)',
+        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, discord_notification_log, discord_notification_analytics, admin_activity_log, analytics_discord_interactions, user_streaks, onboarding_completion)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

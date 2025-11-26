@@ -28,10 +28,19 @@ export async function GET(request: NextRequest) {
     let quoteText = text;
 
     // Check if quote contains attribution (format: "quote" - Author or "quote" — Author)
-    const attributionMatch = text.match(/^(.+?)\s*[-—]\s*(.+)$/);
-    if (attributionMatch) {
-      quoteText = attributionMatch[1].trim();
-      author = attributionMatch[2].trim();
+    // Match the LAST dash/emdash to handle quotes with dashes in the text (e.g., "star-stuff")
+    // Split on the last occurrence of " - " or " — " pattern
+    const lastDashIndex = Math.max(
+      text.lastIndexOf(' - '),
+      text.lastIndexOf(' — '),
+    );
+    if (lastDashIndex > 0) {
+      // Check if what follows looks like an author name (starts with capital letter)
+      const potentialAuthor = text.substring(lastDashIndex + 3).trim();
+      if (potentialAuthor && /^[A-Z]/.test(potentialAuthor)) {
+        quoteText = text.substring(0, lastDashIndex).trim();
+        author = potentialAuthor;
+      }
     }
 
     // Load font (fallback to system font if fails)

@@ -67,10 +67,13 @@ export const requireUser = async (
     ].filter(Boolean) as string[];
     const normalizedSessionPlan = normalizePlanType(sessionPlanCandidates[0]);
 
-    // Fetch subscription from database to get accurate plan
+    // Fetch subscription and profile from database
     let subscriptionPlan: string | undefined;
+    let dbBirthday: string | undefined;
     try {
       const { sql } = await import('@vercel/postgres');
+
+      // Fetch subscription
       const subscriptionResult = await sql`
         SELECT plan_type, status
         FROM subscriptions
@@ -89,9 +92,44 @@ export const requireUser = async (
           subscriptionPlan = sub.plan_type || undefined;
         }
       }
+
+      // Fetch birthday from accounts table if not in session
+      if (!user.birthday && !user.birthDate) {
+        try {
+          const accountResult = await sql`
+            SELECT birthday FROM accounts WHERE id = ${user.id} LIMIT 1
+          `;
+          if (accountResult.rows.length > 0 && accountResult.rows[0].birthday) {
+            dbBirthday = accountResult.rows[0].birthday;
+          }
+        } catch (accError: any) {
+          // Silently ignore if accounts table doesn't exist (42P01)
+          if (accError?.code !== '42P01') {
+            console.error(
+              '[AI Auth] Failed to fetch birthday from accounts',
+              accError,
+            );
+          }
+        }
+      }
     } catch (error) {
       console.error('[AI Auth] Failed to fetch subscription', error);
     }
+
+    // Try to get birthday from Jazz if still missing
+    let jazzBirthday: string | undefined;
+    const sessionBirthday = user.birthday ?? user.birthDate ?? dbBirthday;
+    if (!sessionBirthday) {
+      try {
+        const { loadJazzProfile } = await import('../jazz/server');
+        const jazzProfile = await loadJazzProfile(user.id);
+        jazzBirthday = (jazzProfile as any)?.birthday;
+      } catch (error) {
+        // Jazz profile fetch is optional, don't fail auth
+      }
+    }
+
+    const finalBirthday = sessionBirthday ?? jazzBirthday ?? undefined;
 
     return {
       id: user.id,
@@ -105,7 +143,7 @@ export const requireUser = async (
           : undefined) ||
         normalizePlanType(subscriptionPlan) ||
         undefined,
-      birthday: user.birthday ?? user.birthDate ?? undefined,
+      birthday: finalBirthday,
     };
   } catch (error) {
     if (error instanceof UnauthorizedError) {

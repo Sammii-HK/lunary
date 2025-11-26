@@ -62,7 +62,6 @@ export type TarotReadingWithInsights = TarotReading & {
 export type TarotPatternAnalysis = {
   daily?: TarotCard;
   weekly?: TarotCard;
-  personal?: TarotCard;
   trends?: {
     dominantThemes: string[];
     frequentCards: Array<{ name: string; count: number }>;
@@ -100,7 +99,7 @@ export type LunaryContext = {
     recentReadings?: TarotReadingWithInsights[];
     daily?: TarotCard;
     weekly?: TarotCard;
-    personal?: TarotCard;
+    recentDailyCards?: Array<{ date: string; day: string; card: TarotCard }>;
     patternAnalysis?: {
       dominantThemes: string[];
       frequentCards: Array<{ name: string; count: number }>;

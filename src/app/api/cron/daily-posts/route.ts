@@ -18,6 +18,10 @@ import {
   generateTrialExpiredEmailText,
 } from '@/lib/email-templates/trial-expired';
 import { getNextSubreddit } from '@/config/reddit-subreddits';
+import {
+  generateCatchyQuote,
+  getQuoteImageUrl,
+} from '@/lib/social/quote-generator';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -487,11 +491,18 @@ async function runDailyPosts(dateStr: string) {
   // Generate Reddit title from cosmic content
   const redditTitle = `Daily Cosmic Guidance - ${dateStr}: ${cosmicContent.primaryEvent.name}`;
 
-  // Generate posts with dynamic content - ONE Twitter post only
+  // Generate post content
+  const postContent = generateCosmicPost(cosmicContent).snippet;
+
+  // Generate AI quote for Pinterest/TikTok using shared utility
+  const quote = await generateCatchyQuote(postContent, 'cosmic');
+  const quoteImageUrl = getQuoteImageUrl(quote, productionUrl);
+
+  // Generate posts with dynamic content
   const posts = [
     {
       name: dateStr,
-      content: generateCosmicPost(cosmicContent).snippet,
+      content: postContent,
       platforms: ['reddit', 'pinterest'],
       imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
@@ -509,6 +520,14 @@ async function runDailyPosts(dateStr: string) {
             `${productionUrl}/api/og/moon?date=${dateStr}`,
             `${productionUrl}/api/og/horoscope?date=${dateStr}`,
           ],
+        },
+        pinterest: {
+          // Use quote post image for Pinterest
+          media: [quoteImageUrl],
+        },
+        tiktok: {
+          // Use quote post image for TikTok
+          media: [quoteImageUrl],
         },
         x: {
           content: generateCosmicPost(cosmicContent).snippetShort.replace(

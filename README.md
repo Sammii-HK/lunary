@@ -28,7 +28,7 @@ Next.js 15 full-stack application delivering personalized astrological insights,
 
 ### User Features
 
-**Astronomical Data**: Real-time moon phases with constellation positions, planetary ephemeris, retrograde tracking, birth chart analysis with house calculations, transit-based horoscopes, personalized tarot readings
+**Astronomical Data**: Real-time moon phases with constellation positions, planetary ephemeris, retrograde tracking, birth chart analysis with house calculations, transit-based horoscopes, personalized tarot readings, 2026 yearly forecast, downloadable cosmic calendar (ICS format)
 
 **Content**: Comprehensive grimoire library (crystals, spells, numerology, chakras, runes), weekly blog with planetary highlights, newsletter subscriptions
 

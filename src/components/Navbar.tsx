@@ -132,7 +132,7 @@ const NavLink = ({ href, icon: Icon, label, activePath }: NavLinkProps) => {
             ? 'text-purple-400'
             : 'text-zinc-200'
           : isBookOfShadows
-            ? 'text-purple-400/50 hover:text-purple-400/75'
+            ? 'text-purple-200 hover:text-purple-400'
             : 'text-zinc-400 hover:text-zinc-200'
       }`}
     >
@@ -140,8 +140,8 @@ const NavLink = ({ href, icon: Icon, label, activePath }: NavLinkProps) => {
         className={`h-5 w-5 ${
           isBookOfShadows
             ? active
-              ? 'text-purple-400'
-              : 'text-purple-400/50'
+              ? 'text-purple-200'
+              : 'text-purple-400'
             : ''
         }`}
       />

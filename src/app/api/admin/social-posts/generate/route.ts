@@ -208,6 +208,23 @@ export async function POST(request: NextRequest) {
         EXECUTE FUNCTION update_social_posts_updated_at()
       `;
 
+      // Create social_quotes table for quote pool
+      await sql`
+        CREATE TABLE IF NOT EXISTS social_quotes (
+          id SERIAL PRIMARY KEY,
+          quote_text TEXT NOT NULL UNIQUE,
+          author TEXT,
+          status TEXT NOT NULL DEFAULT 'available',
+          used_at TIMESTAMP WITH TIME ZONE,
+          use_count INTEGER DEFAULT 0,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+
+      await sql`CREATE INDEX IF NOT EXISTS idx_social_quotes_status ON social_quotes(status)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_social_quotes_use_count ON social_quotes(use_count)`;
+
       // Add image_url column if it doesn't exist (for existing tables)
       try {
         const columnExists = await sql`
@@ -409,107 +426,24 @@ Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
         ? 'https://lunary.app'
         : 'http://localhost:3000';
 
-    // Generate catchy quotes for Instagram posts
-    const generateCatchyQuote = async (
-      postContent: string,
-      postType: string,
-      topic?: string,
-    ): Promise<string> => {
-      if (platform !== 'instagram') return '';
-
-      try {
-        const quotePrompt = `Generate 5 catchy, standalone quote options for an Instagram image card based on this social media post:
-
-Post content: "${postContent}"
-Post type: ${postType}
-${topic ? `Topic: ${topic}` : ''}
-
-Requirements for quotes:
-- Each quote should be standalone and shareable (works without context)
-- 60-100 characters max (short and punchy)
-- Catchy, memorable, and inspiring
-- Should highlight Lunary's value: personalized birth charts, real astronomy, cosmic insights
-- Can be a question, statement, or insight
-- Natural and authentic, not salesy
-- Use sentence case
-
-INSPIRATION: Mix Lunary's own brand quotes with quotes inspired by famous scientists, astronomers, astrologers, and philosophers who spoke about the cosmos, stars, and celestial wisdom.
-
-Lunary Brand Quotes (use these or create similar):
-- "Discover the universe within you, one star at a time"
-- "Your birth chart is your cosmic blueprint"
-- "The stars remember when you were born"
-- "Personalized insights from the cosmos, just for you"
-- "Your cosmic story begins with your exact moment of birth"
-- "Real astronomy meets personal insight"
-- "The universe wrote your story in the stars"
-
-Famous Quotes (adapt these themes or use similar style):
-- "We are made of star-stuff" (Carl Sagan)
-- "The cosmos is within us" (Carl Sagan)
-- "Look up at the stars and not down at your feet" (Stephen Hawking)
-- "The stars are the land-marks of the universe" (Sir John Herschel)
-- "Astronomy compels the soul to look upward" (Plato)
-- "The universe is not only stranger than we imagine, it is stranger than we can imagine" (J.B.S. Haldane)
-- "In the cosmos, there are no absolute up or down" (Stephen Hawking)
-- "The cosmos is all that is or ever was or ever will be" (Carl Sagan)
-
-Mix Lunary's own quotes with famous quotes. Create quotes that feel profound, cosmic, and connected to astrology/astronomy. When using Lunary quotes, attribute to "Lunary". When adapting famous quotes, you can attribute to the original author or create new quotes in their style.
-
-Return JSON: {"quotes": ["Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5"]}`;
-
-        const quoteCompletion = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\nYou are a quote writer for Lunary. Create catchy, shareable quotes inspired by famous scientists, astronomers, astrologers, and philosophers. The quotes should be cosmic, celestial, and profound - similar to quotes from Carl Sagan, Stephen Hawking, Plato, and other great minds who spoke about the cosmos. Return only valid JSON.`,
-            },
-            { role: 'user', content: quotePrompt },
-          ],
-          response_format: { type: 'json_object' },
-          max_tokens: 400,
-          temperature: 0.9,
-        });
-
-        const quoteResult = JSON.parse(
-          quoteCompletion.choices[0]?.message?.content || '{}',
-        );
-        const quotes = quoteResult.quotes || [];
-        // Return the first (best) quote, or fallback to extracting from post
-        if (quotes.length > 0 && quotes[0]) {
-          return quotes[0];
-        }
-      } catch (error) {
-        console.warn('Failed to generate catchy quote, using fallback:', error);
-      }
-
-      // Fallback: extract meaningful snippet from post
-      const firstSentence = postContent.match(/^[^.!?]+[.!?]/)?.[0];
-      if (firstSentence && firstSentence.length <= 100) {
-        return firstSentence.trim();
-      }
-      const snippet = postContent.substring(0, 100);
-      const lastSpace = snippet.lastIndexOf(' ');
-      return lastSpace > 60
-        ? snippet.substring(0, lastSpace) + '...'
-        : snippet + '...';
-    };
+    // Use quote pool for Instagram posts (quotes are stored and reused)
+    const { generateCatchyQuote, getQuoteImageUrl } = await import(
+      '@/lib/social/quote-generator'
+    );
 
     // Calculate scheduled_date based on weekOffset
     const now = new Date();
     const scheduledDate = new Date(now);
     scheduledDate.setDate(now.getDate() + weekOffset * 7);
 
+    const platformsNeedingImages = ['instagram', 'pinterest', 'reddit'];
+
     for (const postContent of postsArray) {
-      // Generate catchy quote for Instagram posts
-      const quote =
-        platform === 'instagram'
-          ? await generateCatchyQuote(postContent, postType || 'benefit', topic)
-          : '';
-      const imageUrl = quote
-        ? `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}&author=Lunary`
-        : null;
+      // Generate catchy quote for platforms that need images
+      const quote = platformsNeedingImages.includes(platform)
+        ? await generateCatchyQuote(postContent, postType || 'benefit')
+        : '';
+      const imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
       try {
         const insertResult = await sql`
           INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, created_at)

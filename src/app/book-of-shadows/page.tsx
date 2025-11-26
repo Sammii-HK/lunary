@@ -1,9 +1,18 @@
 'use client';
 
-import React, { FormEvent, useEffect, useRef, useState, Suspense } from 'react';
+import React, {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  Suspense,
+} from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
+import { useAccount } from 'jazz-tools/react';
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -11,12 +20,31 @@ import { AuthComponent } from '@/components/Auth';
 import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
+import { recordCheckIn } from '@/lib/streak/check-in';
+// Temporarily disabled - causing fetch failures
+// import { useAIPrompts } from '@/hooks/useAIPrompts';
+// import { AIPromptCard } from '@/components/AIPromptCard';
+
+interface CollectionFolder {
+  id: number;
+  name: string;
+  color?: string;
+  icon?: string;
+}
+
+interface SavedCollection {
+  title: string;
+  category: string;
+}
 
 const MessageBubble = ({
   role,
   content,
   messageId,
   onEntityClick,
+  savedCollections,
+  folders,
+  onSaved,
 }: {
   role: 'user' | 'assistant';
   content: string;
@@ -25,6 +53,9 @@ const MessageBubble = ({
     type: 'tarot' | 'ritual' | 'spell';
     name: string;
   }) => void;
+  savedCollections?: SavedCollection[];
+  folders?: CollectionFolder[];
+  onSaved?: () => void;
 }) => {
   const isUser = role === 'user';
   // Only parse assistant messages for entities (user messages don't need parsing)
@@ -121,6 +152,14 @@ const MessageBubble = ({
                 content: { messageId, content, role },
                 tags: ['ai-chat'],
               }}
+              isSaved={savedCollections?.some(
+                (c) =>
+                  c.title ===
+                    `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}` &&
+                  c.category === 'chat',
+              )}
+              folders={folders}
+              onSaved={onSaved}
             />
           </div>
         )}
@@ -132,6 +171,9 @@ const MessageBubble = ({
 function BookOfShadowsContent() {
   const authState = useAuthStatus();
   const searchParams = useSearchParams();
+  const { me } = useAccount();
+  const userBirthday = (me?.profile as any)?.birthday;
+
   const {
     messages,
     sendMessage,
@@ -147,9 +189,73 @@ function BookOfShadowsContent() {
     clearError,
     addMessage,
     threadId,
-  } = useAssistantChat();
+  } = useAssistantChat({ birthday: userBirthday });
+
+  // Temporarily disabled - causing fetch failures
+  const prompts: any[] = [];
+  const hasNewPrompts = false;
+  const promptsLoading = false;
+  const promptsError = null;
+  const markPromptAsRead = (_id: number) => {};
 
   const [cacheInitialized, setCacheInitialized] = useState(false);
+  const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(
+    [],
+  );
+  const [collectionFolders, setCollectionFolders] = useState<
+    CollectionFolder[]
+  >([]);
+
+  useEffect(() => {
+    if (!authState.isAuthenticated || authState.loading) return;
+
+    const fetchCollections = async () => {
+      try {
+        const [collectionsRes, foldersRes] = await Promise.all([
+          fetch('/api/collections?category=chat&limit=100'),
+          fetch('/api/collections/folders'),
+        ]);
+
+        const [collectionsData, foldersData] = await Promise.all([
+          collectionsRes.json(),
+          foldersRes.json(),
+        ]);
+
+        if (collectionsData.success) {
+          setSavedCollections(
+            collectionsData.collections.map((c: any) => ({
+              title: c.title,
+              category: c.category,
+            })),
+          );
+        }
+
+        if (foldersData.success) {
+          setCollectionFolders(foldersData.folders);
+        }
+      } catch (error) {
+        console.error('Error fetching collections:', error);
+      }
+    };
+
+    fetchCollections();
+  }, [authState.isAuthenticated, authState.loading]);
+
+  const handleCollectionSaved = useCallback(() => {
+    fetch('/api/collections?category=chat&limit=100')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setSavedCollections(
+            data.collections.map((c: any) => ({
+              title: c.title,
+              category: c.category,
+            })),
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Initialize tarot card parser on mount (client-side only)
   useEffect(() => {
@@ -169,47 +275,107 @@ function BookOfShadowsContent() {
         });
     }
   }, []);
+
+  // Record check-in when user accesses Book of Shadows
+  useEffect(() => {
+    if (authState.isAuthenticated && !authState.loading) {
+      recordCheckIn();
+    }
+  }, [authState.isAuthenticated, authState.loading]);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [promptHandled, setPromptHandled] = useState(false);
+  const [promptHandled, setPromptHandled] = useState<string | null>(null);
   const [isAssistExpanded, setIsAssistExpanded] = useState(true);
   const lastSendTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const DEBOUNCE_MS = 500;
+  const lastContentLengthRef = useRef<number>(0);
+  const isScrollingRef = useRef<boolean>(false);
+  const promptSentRef = useRef(false);
+  const prevLoadingRef = useRef(true);
+
+  // Calculate total content length to detect content changes during streaming
+  const totalContentLength = messages.reduce(
+    (sum, msg) => sum + msg.content.length,
+    0,
+  );
 
   // Auto-scroll to bottom when messages change or streaming
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, isStreaming]);
+  // Use useLayoutEffect for immediate DOM updates
+  useLayoutEffect(() => {
+    // Skip if we're already scrolling to avoid scroll conflicts
+    if (isScrollingRef.current) return;
 
-  // Handle deep link prompt parameter
-  useEffect(() => {
+    const shouldScroll =
+      messages.length > 0 &&
+      // New message added (array length changed)
+      (messages.length !== lastContentLengthRef.current ||
+        // Content updated during streaming (content length changed)
+        totalContentLength !== lastContentLengthRef.current ||
+        // Streaming started
+        isStreaming);
+
     if (
-      authState.isAuthenticated &&
-      !authState.loading &&
-      !promptHandled &&
-      messages.length === 0
+      shouldScroll &&
+      messagesEndRef.current &&
+      messagesContainerRef.current
     ) {
-      const prompt = searchParams.get('prompt');
-      if (prompt && prompt.trim()) {
-        setPromptHandled(true);
-        const decodedPrompt = decodeURIComponent(prompt);
+      isScrollingRef.current = true;
+
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        if (!messagesEndRef.current || !messagesContainerRef.current) {
+          isScrollingRef.current = false;
+          return;
+        }
+
+        const container = messagesContainerRef.current;
+        const endElement = messagesEndRef.current;
+
+        // During streaming, use instant scroll for responsiveness
+        // When streaming completes, use smooth scroll
+        if (isStreaming) {
+          // Instant scroll during streaming
+          container.scrollTop = container.scrollHeight;
+        } else {
+          // Smooth scroll when streaming completes
+          endElement.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Reset scrolling flag after a short delay
         setTimeout(() => {
-          sendMessage(decodedPrompt);
-        }, 500);
-      }
+          isScrollingRef.current = false;
+        }, 100);
+      });
     }
-  }, [
-    authState.isAuthenticated,
-    authState.loading,
-    promptHandled,
-    messages.length,
-    searchParams,
-    sendMessage,
-  ]);
+
+    // Update content length reference
+    lastContentLengthRef.current = totalContentLength;
+  }, [messages, isStreaming, totalContentLength]);
+
+  // Also scroll when streaming state changes (starts/stops)
+  useEffect(() => {
+    if (isStreaming && messagesEndRef.current && messagesContainerRef.current) {
+      requestAnimationFrame(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop =
+            messagesContainerRef.current.scrollHeight;
+        }
+      });
+    }
+  }, [isStreaming]);
+
+  // DISABLED: Prompt auto-send was causing loading issues
+  // Users can manually type or use quick actions instead
+  // TODO: Re-enable after fixing race conditions
+  useEffect(() => {
+    // Just track the prompt for UI purposes, don't auto-send
+    const currentPrompt = searchParams.get('prompt');
+    if (currentPrompt) {
+      setPromptHandled(decodeURIComponent(currentPrompt.trim()));
+    }
+  }, [searchParams]);
 
   const attemptSend = () => {
     const now = Date.now();
@@ -353,15 +519,21 @@ function BookOfShadowsContent() {
                 Usage: {usage.used}/{usage.limit}
               </span>
             ) : null}
-            {dailyHighlight?.primaryEvent ? (
+            {(dailyHighlight as { primaryEvent?: string })?.primaryEvent ? (
               <span className='rounded-full border border-zinc-700/60 px-3 py-1'>
-                Today: {dailyHighlight.primaryEvent}
+                Today:{' '}
+                {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
               </span>
             ) : null}
+            {hasNewPrompts && (
+              <span className='rounded-full border border-purple-500/60 bg-purple-500/20 px-3 py-1 text-purple-300 font-semibold animate-pulse'>
+                ✨ New Prompt
+              </span>
+            )}
           </div>
         </header>
 
-        <main className='flex flex-1 flex-col gap-4'>
+        <div className='flex flex-1 flex-col gap-4'>
           <section className='flex flex-1 flex-col gap-4 overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur'>
             <div
               ref={messagesContainerRef}
@@ -373,11 +545,18 @@ function BookOfShadowsContent() {
                     Loading your conversation...
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
-                    Begin by sharing how you're feeling, what you're exploring,
-                    or what guidance you're seeking. I'll answer with gentle,
-                    grounded insight.
-                  </div>
+                  <>
+                    <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                      Begin by sharing how you're feeling, what you're
+                      exploring, or what guidance you're seeking. I'll answer
+                      with gentle, grounded insight.
+                    </div>
+                    {/* AI Prompts temporarily disabled */}
+                    <CopilotQuickActions
+                      onActionClick={(prompt) => sendMessage(prompt)}
+                      disabled={isStreaming}
+                    />
+                  </>
                 ) : (
                   <>
                     {messages.map((message, index) => (
@@ -386,6 +565,9 @@ function BookOfShadowsContent() {
                         role={message.role}
                         content={message.content}
                         messageId={message.id}
+                        savedCollections={savedCollections}
+                        folders={collectionFolders}
+                        onSaved={handleCollectionSaved}
                         onEntityClick={async (entity) => {
                           try {
                             let content = '';
@@ -551,7 +733,7 @@ function BookOfShadowsContent() {
 
           <form
             onSubmit={handleSubmit}
-            className='sticky bottom-0 flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
+            className='sticky bottom-0 z-[90] flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
           >
             <div className='flex-1'>
               <label htmlFor='book-of-shadows-message' className='sr-only'>
@@ -585,7 +767,7 @@ function BookOfShadowsContent() {
               </Button>
             )}
           </form>
-        </main>
+        </div>
       </div>
     </div>
   );

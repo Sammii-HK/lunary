@@ -12,11 +12,13 @@ import {
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCrystals';
 import { useSubscription } from '../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
+import { useAstronomyContext } from '../context/AstronomyContext';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { Info } from 'lucide-react';
 import { Popover } from '@base-ui-components/react/popover';
+import { Paywall } from './Paywall';
 
 // Crystal database with astrological properties - Expanded comprehensive database
 type Crystal = {
@@ -861,6 +863,7 @@ const getCrystalGuidance = (
 export const CrystalWidget = () => {
   const { me } = useAccount();
   const subscription = useSubscription();
+  const { currentDateTime } = useAstronomyContext();
   const userName = (me?.profile as any)?.name;
   const userBirthday = (me?.profile as any)?.birthday;
   const [observer, setObserver] = useState<any>(null);
@@ -878,6 +881,15 @@ export const CrystalWidget = () => {
     subscription.plan,
   );
 
+  // Normalize date to date-only (no time) to ensure daily seed consistency
+  const normalizedDate = useMemo(() => {
+    const dateStr = dayjs(currentDateTime).format('YYYY-MM-DD');
+    return new Date(dateStr + 'T12:00:00'); // Use noon to avoid timezone issues
+  }, [currentDateTime]);
+
+  // Check date access for paywall
+  const canAccessDate = hasDateAccess(normalizedDate, subscription.status);
+
   // Get birth chart data (needed for hooks)
   const hasBirthChartData = hasBirthChart(me?.profile);
   const birthChart = hasBirthChartData
@@ -887,34 +899,27 @@ export const CrystalWidget = () => {
   // Memoize general crystal for non-premium users
   const generalCrystal = useMemo(() => {
     if (hasChartAccess) return null;
-    return getGeneralCrystalRecommendation();
-  }, [hasChartAccess]);
-
-  // Memoize crystal calculation to ensure it's seeded and deterministic
-  // Calculate stable date string once - will be same for entire day
-  const todayDateString = useMemo(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0]; // YYYY-MM-DD
-  }, []);
+    if (!canAccessDate) return null; // Don't show general crystal if date is paywalled
+    return getGeneralCrystalRecommendation(normalizedDate);
+  }, [hasChartAccess, canAccessDate, normalizedDate]);
 
   const crystalData = useMemo(() => {
     if (!birthChart || !userBirthday || !observer) return null;
+    if (!canAccessDate) return null; // Don't calculate if date is paywalled
 
-    // Use the date string to create a stable Date object for the day
-    const today = new Date(todayDateString + 'T12:00:00'); // Use noon to avoid timezone issues
-    const currentTransits = getAstrologicalChart(today, observer);
+    const currentTransits = getAstrologicalChart(normalizedDate, observer);
 
     const recommendedCrystal = calculateCrystalRecommendation(
       birthChart,
       currentTransits,
-      today,
+      normalizedDate,
       userBirthday,
     );
     const sunSign = birthChart.find((p) => p.body === 'Sun')?.sign || 'Aries';
     const guidance = getCrystalGuidance(
       recommendedCrystal,
       sunSign,
-      today,
+      normalizedDate,
       userBirthday,
     );
 
@@ -922,8 +927,7 @@ export const CrystalWidget = () => {
       crystal: recommendedCrystal,
       guidance,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todayDateString, userBirthday, observer, JSON.stringify(birthChart)]);
+  }, [normalizedDate, userBirthday, observer, birthChart, canAccessDate]);
 
   useEffect(() => {
     if (crystalData && hasChartAccess) {
@@ -934,6 +938,23 @@ export const CrystalWidget = () => {
     }
   }, [crystalData, hasChartAccess, me]);
 
+  // Check date access - show paywall if date is restricted
+  if (!canAccessDate) {
+    return (
+      <Paywall feature='personalized_crystal_recommendations'>
+        <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
+          <div className='text-center'>
+            <h3 className='font-bold mb-2'>Personal Crystal</h3>
+            <span className='text-xs text-purple-400'>Personalised</span>
+            <p className='text-zinc-400 text-xs mt-2'>
+              Access to historical and future dates requires a subscription.
+            </p>
+          </div>
+        </div>
+      </Paywall>
+    );
+  }
+
   // If user doesn't have birth chart access, show general crystal recommendation
   if (!hasChartAccess) {
     if (!generalCrystal) return null;
@@ -941,11 +962,6 @@ export const CrystalWidget = () => {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col'>
         <div className='space-y-2'>
-          {/* <div className='flex items-center justify-between'>
-            <h3 className='font-bold'>Crystal Energy</h3>
-            <div className='text-lg'>💎</div>
-          </div> */}
-
           <div className='space-y-2'>
             <div className='text-center'>
               <h4 className='font-semibold text-purple-300'>
@@ -960,9 +976,6 @@ export const CrystalWidget = () => {
           </div>
 
           <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20'>
-            {/* <p className='text-xs text-purple-200 mb-1'>
-              💎 Start Your Free Trial
-            </p> */}
             <p className='text-xs text-zinc-400 mb-2'>
               Get crystals chosen specifically for YOUR birth chart. See what
               the universe has selected for you!
@@ -1027,7 +1040,44 @@ export const CrystalWidget = () => {
   const guidance = crystalData.guidance;
 
   return (
-    <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
+    <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative'>
+      {/* Info Icon with Popover */}
+      <Popover.Root>
+        <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'>
+          <Info size={14} />
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner sideOffset={8}>
+            <Popover.Popup className='bg-zinc-800 border border-zinc-700 rounded-lg p-4 max-w-sm text-xs text-zinc-300 shadow-lg z-50'>
+              <div className='space-y-3'>
+                <div>
+                  <h4 className='font-semibold text-white mb-2'>
+                    Crystal Selection Process
+                  </h4>
+                  <p className='mb-2'>
+                    Your daily crystal is calculated using:
+                  </p>
+                  <ul className='list-disc list-inside space-y-1 text-zinc-400'>
+                    <li>Your birth chart placements (Sun, Moon, planets)</li>
+                    <li>Current planetary positions and transits</li>
+                    <li>Selected date&apos;s numerological vibration</li>
+                    <li>Day-of-week planetary ruler energies</li>
+                    <li>Astrological aspects and alignments</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className='text-zinc-400'>
+                    Each crystal&apos;s properties are matched against these
+                    cosmic factors to find your most beneficial stone for the
+                    selected date.
+                  </p>
+                </div>
+              </div>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
+
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
           <h3 className='font-bold'>Personal Crystal</h3>
@@ -1056,59 +1106,4 @@ export const CrystalWidget = () => {
       </div>
     </div>
   );
-  <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative'>
-    {/* Info Icon with Popover */}
-    <Popover.Root>
-      <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'>
-        <Info size={14} />
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner sideOffset={8}>
-          <Popover.Popup className='bg-zinc-800 border border-zinc-700 rounded-lg p-4 max-w-sm text-xs text-zinc-300 shadow-lg z-50'>
-            <div className='space-y-3'>
-              <div>
-                <h4 className='font-semibold text-white mb-2'>
-                  Crystal Selection Process
-                </h4>
-                <p className='mb-2'>Your daily crystal is calculated using:</p>
-                <ul className='list-disc list-inside space-y-1 text-zinc-400'>
-                  <li>Your birth chart placements (Sun, Moon, planets)</li>
-                  <li>Current planetary positions and transits</li>
-                  <li>Today&apos;s numerological vibration</li>
-                  <li>Day-of-week planetary ruler energies</li>
-                  <li>Astrological aspects and alignments</li>
-                </ul>
-              </div>
-              <div>
-                <p className='text-zinc-400'>
-                  Each crystal&apos;s properties are matched against these
-                  cosmic factors to find your most beneficial stone for the day.
-                </p>
-              </div>
-            </div>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
-
-    <div className='text-center mb-3'>
-      <div className='text-md font-semibold text-white'>
-        {recommendedCrystal.name}
-      </div>
-      <div className='text-xs text-zinc-400 mb-2'>
-        {recommendedCrystal.chakra} Chakra
-      </div>
-    </div>
-
-    <div className='text-center text-sm text-zinc-300 leading-relaxed mb-3'>
-      <p className='mb-2'>{recommendedCrystal.description}</p>
-      <p className='text-xs text-zinc-400'>{guidance}</p>
-    </div>
-
-    <div className='text-center mb-3'>
-      <div className='text-xs text-zinc-500 italic'>
-        &quot;{recommendedCrystal.intention}&quot;
-      </div>
-    </div>
-  </div>;
 };

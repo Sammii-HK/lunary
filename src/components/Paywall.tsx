@@ -38,7 +38,8 @@ type FeatureName =
   | 'advanced_patterns'
   | 'unlimited_tarot_spreads'
   | 'yearly_forecast'
-  | 'data_export';
+  | 'data_export'
+  | 'monthly_insights';
 
 interface PaywallProps {
   feature: FeatureName;
@@ -150,6 +151,12 @@ function getFeatureDescription(feature: string): string {
       return 'Get a comprehensive yearly cosmic forecast with major transits, eclipses, retrograde periods, and seasonal transitions. Plan your year with cosmic awareness.';
     case 'data_export':
       return 'Export all your cosmic data including birth chart, tarot readings, collections, and insights. Download your complete Lunary journey as JSON.';
+    case 'monthly_insights':
+      return 'Track your monthly cosmic patterns with frequent tarot cards, dominant themes, and personalized insights from your readings. See how your cosmic journey unfolds over time.';
+    case 'personalized_horoscope':
+      return 'Get daily personalized horoscopes that dynamically change based on your selected date, incorporating your entire birth chart for truly customized guidance.';
+    case 'personalized_crystal_recommendations':
+      return 'Receive crystal recommendations that dynamically change based on your selected date, perfectly aligned with your birth chart and cosmic energies.';
     default:
       return 'This Personalised Feature provides deeper insights into your cosmic profile and personalized guidance.';
   }

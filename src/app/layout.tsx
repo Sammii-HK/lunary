@@ -19,6 +19,7 @@ import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
 import { StructuredData } from '@/components/StructuredData';
 import { AppChrome } from '@/components/AppChrome';
 import { PostHogProvider } from '@/components/PostHogProvider';
+import { AuthStatusProvider } from '@/components/AuthStatus';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -119,9 +120,9 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <head>
-        {/* Preload critical API endpoint */}
+        {/* Prefetch API endpoint for potential future use */}
         <link
-          rel='preload'
+          rel='prefetch'
           href='/api/cosmic/global'
           as='fetch'
           crossOrigin='anonymous'
@@ -138,22 +139,24 @@ export default function RootLayout({
           <PostHogProvider>
             <ErrorBoundaryWrapper>
               <LunaryJazzProvider>
-                <Suspense
-                  fallback={
-                    <main className='flex flex-col w-full font-mono text-sm gap-4 overflow-y-auto px-4 h-screen'>
-                      {children}
-                    </main>
-                  }
-                >
-                  <ConditionalMainWrapper>
-                    <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                    <Analytics />
-                    <SpeedInsights />
-                  </ConditionalMainWrapper>
-                </Suspense>
-                <Suspense fallback={null}>
-                  <AppChrome />
-                </Suspense>
+                <AuthStatusProvider>
+                  <Suspense
+                    fallback={
+                      <main className='flex flex-col w-full font-mono text-sm gap-4 overflow-y-auto px-4 h-screen'>
+                        {children}
+                      </main>
+                    }
+                  >
+                    <ConditionalMainWrapper>
+                      <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                      <Analytics />
+                      <SpeedInsights />
+                    </ConditionalMainWrapper>
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <AppChrome />
+                  </Suspense>
+                </AuthStatusProvider>
               </LunaryJazzProvider>
             </ErrorBoundaryWrapper>
           </PostHogProvider>

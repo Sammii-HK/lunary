@@ -85,7 +85,8 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Everything in Lunary+ AI',
       'Unlimited tarot spreads',
       'Extended timeline analysis (6 & 12-month trends)',
-      'Yearly cosmic forecast',
+      '2026 yearly cosmic forecast',
+      'Calendar download (ICS format)',
       'Export your cosmic data',
       'Unlimited collections & folders',
       'Customer support',
@@ -122,6 +123,7 @@ export const FEATURE_ACCESS = {
     'moon_circles',
     'ritual_generator',
     'collections',
+    'monthly_insights',
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -144,6 +146,7 @@ export const FEATURE_ACCESS = {
     'collections',
     'unlimited_collections',
     'advanced_patterns',
+    'monthly_insights',
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -169,6 +172,7 @@ export const FEATURE_ACCESS = {
     'advanced_patterns',
     'yearly_forecast',
     'data_export',
+    'monthly_insights',
   ],
 };
 
@@ -278,6 +282,49 @@ export function hasBirthChartAccess(
   planType?: string | undefined,
 ): boolean {
   return hasFeatureAccess(subscriptionStatus, planType, 'birth_chart');
+}
+
+/**
+ * Check if user has access to a specific date for calendar features.
+ * Free users: Can only access dates within 7 days back from today
+ * Paying users (trial/active): Full calendar access (no date restrictions)
+ * Dates are normalized to date-only (YYYY-MM-DD) for accurate comparison
+ */
+export function hasDateAccess(
+  date: Date,
+  subscriptionStatus: string | undefined,
+): boolean {
+  // Normalize dates to date-only (no time) for comparison
+  const normalizeDate = (d: Date): string => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const targetDateStr = normalizeDate(date);
+  const todayStr = normalizeDate(new Date());
+
+  // Parse dates for comparison
+  const targetDate = new Date(targetDateStr + 'T12:00:00');
+  const today = new Date(todayStr + 'T12:00:00');
+
+  // Calculate days difference
+  const diffTime = today.getTime() - targetDate.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  // If user is paying (trial or active), grant full access
+  if (
+    subscriptionStatus === 'trial' ||
+    subscriptionStatus === 'active' ||
+    subscriptionStatus === 'trialing'
+  ) {
+    return true;
+  }
+
+  // Free users: Can only access dates within 7 days back from today
+  // Allow today and up to 7 days in the past
+  return diffDays >= 0 && diffDays <= 7;
 }
 
 // Helper function to check if user can collect birthday
