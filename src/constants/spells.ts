@@ -751,6 +751,889 @@ export const spells: Spell[] = [
     history:
       'Beltane is an ancient Celtic fire festival celebrating the peak of spring and fertility. Traditions include flower crowns, Maypole dancing, and blessing livestock and crops.',
   },
+
+  // BANISHING SPELLS
+  {
+    id: 'cord-cutting-ritual',
+    title: 'Cord Cutting Ritual',
+    category: 'banishing',
+    type: 'ritual',
+    difficulty: 'intermediate',
+    timing: {
+      moonPhase: ['Waning Gibbous', 'Last Quarter', 'Waning Crescent'],
+      timeOfDay: 'midnight',
+      season: 'any',
+    },
+    duration: '30 minutes',
+    ingredients: [
+      {
+        name: 'Black candle',
+        amount: '2',
+        purpose: 'Representing yourself and the person/situation',
+      },
+      {
+        name: 'Black cord or string',
+        amount: '12 inches',
+        purpose: 'Representing the energetic connection to cut',
+        substitutes: ['Black ribbon', 'Black yarn'],
+      },
+      {
+        name: 'Scissors or athame',
+        amount: '1',
+        purpose: 'Cutting the cord',
+      },
+    ],
+    tools: ['Fireproof dish', 'Salt for circle'],
+    preparation: [
+      'Cast a protective circle with salt',
+      'Ground yourself and set clear intention',
+      'Identify exactly what connection you wish to sever',
+    ],
+    steps: [
+      'Place candles about 6 inches apart',
+      'Tie one end of cord around each candle',
+      'Light both candles',
+      'Focus on the connection you wish to release',
+      'Say: "I release all cords that bind me to [name/situation]. I reclaim my energy and set us both free."',
+      'Cut the cord in the center with scissors',
+      'Let candles burn down completely',
+      'Bury or dispose of cord remnants away from your home',
+    ],
+    purpose: 'Severs unhealthy energetic attachments to people or situations',
+    description:
+      'A powerful ritual for releasing toxic relationships, past trauma bonds, or unhealthy attachments that drain your energy.',
+    correspondences: {
+      elements: ['Fire', 'Spirit'],
+      colors: ['Black', 'White'],
+      crystals: ['Obsidian', 'Black Tourmaline', 'Smoky Quartz'],
+      planets: ['Saturn', 'Pluto'],
+      zodiac: ['Scorpio', 'Capricorn'],
+    },
+    safety: [
+      'Only cut cords with those you truly wish to release',
+      'This severs the unhealthy connection, not love or good memories',
+      'Ground thoroughly after this intense work',
+    ],
+  },
+
+  {
+    id: 'freezer-spell',
+    title: 'Freezer Binding Spell',
+    category: 'banishing',
+    type: 'spell',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['Waning Crescent', 'New Moon'],
+      timeOfDay: 'any',
+      season: 'any',
+    },
+    duration: '10 minutes',
+    ingredients: [
+      {
+        name: 'Small piece of paper',
+        amount: '1',
+        purpose: 'Writing the name or situation',
+      },
+      {
+        name: 'Small container with lid',
+        amount: '1',
+        purpose: 'Containing the spell',
+        substitutes: ['Plastic bag', 'Ice cube tray'],
+      },
+      {
+        name: 'Water',
+        amount: 'Enough to fill container',
+        purpose: 'Freezing and binding the energy',
+      },
+    ],
+    tools: ['Pen', 'Freezer'],
+    preparation: [
+      'Cleanse your space',
+      'Focus clearly on what you wish to stop or freeze',
+    ],
+    steps: [
+      'Write the name or situation on the paper',
+      'Fold paper away from you three times',
+      'Place in container and fill with water',
+      'Say: "I freeze you out, I freeze you still. You cannot harm me against my will."',
+      'Place container in the back of your freezer',
+      'Leave indefinitely or until situation resolves',
+    ],
+    purpose: 'Stops someone from causing harm or freezes a difficult situation',
+    description:
+      "A simple folk magic spell that freezes someone's harmful actions or stops a situation from escalating.",
+    correspondences: {
+      elements: ['Water'],
+      colors: ['Black', 'Blue'],
+      planets: ['Saturn'],
+    },
+    safety: [
+      'Use only for protection, not revenge',
+      "Do not use to control others' free will",
+      'Dispose of properly when no longer needed',
+    ],
+  },
+
+  {
+    id: 'mirror-return-to-sender',
+    title: 'Mirror Return to Sender Spell',
+    category: 'banishing',
+    type: 'spell',
+    difficulty: 'intermediate',
+    timing: {
+      moonPhase: ['Full Moon', 'Waning Gibbous'],
+      timeOfDay: 'midnight',
+      season: 'any',
+    },
+    duration: '20 minutes',
+    ingredients: [
+      {
+        name: 'Small mirror',
+        amount: '1',
+        purpose: 'Reflecting negative energy back',
+      },
+      {
+        name: 'Black candle',
+        amount: '1',
+        purpose: 'Protection and banishing',
+      },
+      {
+        name: 'Salt',
+        amount: '1 tablespoon',
+        purpose: 'Purification and barrier',
+      },
+    ],
+    tools: ['Black cloth to wrap mirror'],
+    preparation: [
+      'Cleanse the mirror with salt water',
+      'Set protective boundaries around yourself',
+    ],
+    steps: [
+      'Light the black candle',
+      'Hold the mirror facing outward',
+      'Sprinkle salt around the mirror',
+      'Say: "Mirror bright, mirror true, send back all that\'s sent to me by you. No harm to me shall come to stay, all negativity is sent away."',
+      'Wrap mirror in black cloth',
+      'Place near front door or window facing outward',
+    ],
+    purpose:
+      'Returns negative energy, curses, or ill wishes back to their sender',
+    description:
+      'A defensive spell that creates an energetic mirror, bouncing any negative intentions back to their source.',
+    correspondences: {
+      elements: ['Spirit', 'Water'],
+      colors: ['Black', 'Silver'],
+      crystals: ['Mirror', 'Obsidian', 'Hematite'],
+      planets: ['Saturn', 'Moon'],
+    },
+    safety: [
+      'This is defensive magic, not offensive',
+      'Only use when you genuinely feel attacked',
+      'The energy returned is what was sent - nothing more',
+    ],
+  },
+
+  // MORE LOVE SPELLS
+  {
+    id: 'honey-jar-sweetening',
+    title: 'Honey Jar Sweetening Spell',
+    category: 'love',
+    type: 'spell',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['Waxing Crescent', 'Waxing Gibbous', 'Full Moon'],
+      planetaryDay: ['Friday'],
+      timeOfDay: 'any',
+      season: 'any',
+    },
+    duration: '15 minutes',
+    ingredients: [
+      {
+        name: 'Small jar of honey',
+        amount: '1',
+        purpose: 'Sweetening the relationship or situation',
+      },
+      {
+        name: 'Paper with name/petition',
+        amount: '1',
+        purpose: 'Focusing the intention',
+      },
+      {
+        name: 'Pink candle',
+        amount: '1',
+        purpose: 'Love and affection',
+      },
+    ],
+    tools: ['Pen'],
+    preparation: [
+      'Write your petition clearly',
+      'Focus on sweetening, not controlling',
+    ],
+    steps: [
+      "Write your name and the other person's name on paper",
+      'Fold paper toward you three times',
+      'Open honey jar and push paper into honey',
+      'Taste some honey and say: "As this honey is sweet to me, so shall [name] be sweet to me."',
+      'Close jar and place pink candle on top',
+      'Light candle and let it burn down',
+      'Repeat weekly until relationship sweetens',
+    ],
+    purpose:
+      'Sweetens a relationship or makes someone more favorable toward you',
+    description:
+      'A traditional Hoodoo spell for improving relationships, reconciliation, or making someone think kindly of you.',
+    correspondences: {
+      elements: ['Water', 'Earth'],
+      colors: ['Pink', 'Gold'],
+      planets: ['Venus'],
+      zodiac: ['Taurus', 'Libra'],
+    },
+    safety: [
+      'Never use to force love or control someone',
+      'Focus on existing relationships, not obsession',
+      'Respect free will always',
+    ],
+  },
+
+  {
+    id: 'pink-candle-attraction',
+    title: 'Pink Candle Love Attraction',
+    category: 'love',
+    type: 'candle_magic',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['New Moon', 'Waxing Crescent', 'Full Moon'],
+      planetaryDay: ['Friday'],
+      timeOfDay: 'dusk',
+      season: 'any',
+    },
+    duration: '20 minutes',
+    ingredients: [
+      {
+        name: 'Pink candle',
+        amount: '1',
+        purpose: 'Love and attraction energy',
+      },
+      {
+        name: 'Rose oil',
+        amount: 'Few drops',
+        purpose: 'Enhancing love vibration',
+        substitutes: ['Jasmine oil', 'Ylang ylang'],
+      },
+      {
+        name: 'Rose petals',
+        amount: 'Handful',
+        purpose: 'Love correspondences',
+      },
+    ],
+    tools: ['Candle holder', 'Matches'],
+    preparation: [
+      'Anoint candle with rose oil from middle outward',
+      'Focus on the love you wish to attract',
+    ],
+    steps: [
+      'Create circle of rose petals around candle',
+      'Light candle',
+      'Visualize yourself surrounded by loving energy',
+      'Say: "Love flows to me easily and freely. I am worthy of deep, true love."',
+      'Meditate on receiving love for 10 minutes',
+      "Let candle burn safely or snuff (don't blow out)",
+    ],
+    purpose: 'Attracts new love or strengthens romantic feelings',
+    description:
+      'A gentle spell to open yourself to love and attract romantic opportunities.',
+    correspondences: {
+      elements: ['Fire', 'Water'],
+      colors: ['Pink', 'Red'],
+      crystals: ['Rose Quartz', 'Rhodonite'],
+      herbs: ['Rose', 'Jasmine', 'Lavender'],
+      planets: ['Venus'],
+    },
+    safety: [
+      'Focus on attracting love in general, not a specific person',
+      'Be open to love appearing unexpectedly',
+    ],
+  },
+
+  // MORE PROSPERITY SPELLS
+  {
+    id: 'money-bowl',
+    title: 'Money Bowl Abundance Spell',
+    category: 'prosperity',
+    type: 'spell',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['New Moon', 'Waxing Crescent', 'Full Moon'],
+      planetaryDay: ['Thursday', 'Sunday'],
+      timeOfDay: 'noon',
+      season: 'any',
+    },
+    duration: '20 minutes',
+    ingredients: [
+      {
+        name: 'Green or gold bowl',
+        amount: '1',
+        purpose: 'Container for abundance energy',
+      },
+      {
+        name: 'Coins',
+        amount: 'Various denominations',
+        purpose: 'Attracting more money',
+      },
+      {
+        name: 'Cinnamon sticks',
+        amount: '3',
+        purpose: 'Fast manifestation',
+      },
+      {
+        name: 'Bay leaves',
+        amount: '3',
+        purpose: 'Success and wishes',
+      },
+      {
+        name: 'Citrine crystal',
+        amount: '1',
+        purpose: 'Abundance and manifestation',
+        substitutes: ['Pyrite', 'Green Aventurine'],
+      },
+    ],
+    tools: ['Green candle (optional)'],
+    preparation: [
+      'Cleanse bowl with salt water',
+      'Gather coins from your wallet or around your home',
+    ],
+    steps: [
+      'Place citrine in center of bowl',
+      'Arrange coins around the crystal',
+      'Add cinnamon sticks and bay leaves',
+      'Hold hands over bowl and say: "Money flows to me from expected and unexpected sources. I am a magnet for abundance."',
+      'Place bowl in wealth corner of home (far left from entrance)',
+      'Add coins to bowl whenever you receive money',
+    ],
+    purpose: 'Creates a continuous flow of money and abundance',
+    description:
+      'A living spell that grows stronger as you add to it, creating a magnetic pull for financial abundance.',
+    correspondences: {
+      elements: ['Earth'],
+      colors: ['Green', 'Gold'],
+      crystals: ['Citrine', 'Pyrite', 'Green Aventurine'],
+      herbs: ['Cinnamon', 'Bay', 'Basil'],
+      planets: ['Jupiter', 'Sun'],
+    },
+    safety: [
+      'Focus on abundance, not greed',
+      'Take practical action alongside magic',
+      'Refresh herbs monthly',
+    ],
+  },
+
+  {
+    id: 'bay-leaf-wish',
+    title: 'Bay Leaf Wish Burning',
+    category: 'manifestation',
+    type: 'spell',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['New Moon', 'Full Moon'],
+      timeOfDay: 'any',
+      season: 'any',
+    },
+    duration: '5 minutes',
+    ingredients: [
+      {
+        name: 'Dried bay leaf',
+        amount: '1',
+        purpose: 'Carrying wishes to the universe',
+      },
+      {
+        name: 'Pen or marker',
+        amount: '1',
+        purpose: 'Writing your wish',
+      },
+    ],
+    tools: ['Fireproof dish', 'Lighter'],
+    preparation: [
+      'Get clear on your specific wish',
+      'Use a fully dried bay leaf',
+    ],
+    steps: [
+      'Write your wish on the bay leaf',
+      'Hold it and visualize your wish coming true',
+      'Say: "As this leaf burns, my wish takes flight. Bring my desire into the light."',
+      'Burn the leaf in the fireproof dish',
+      'Release attachment to the outcome',
+    ],
+    purpose: 'Sends wishes and intentions to the universe for manifestation',
+    description:
+      'A simple, powerful spell for manifesting wishes. The smoke carries your intentions upward.',
+    correspondences: {
+      elements: ['Fire', 'Air'],
+      colors: ['Green', 'Gold'],
+      planets: ['Sun', 'Jupiter'],
+    },
+    safety: [
+      'Always use fireproof container',
+      'Keep water nearby',
+      'Ensure leaf is fully extinguished',
+    ],
+  },
+
+  // MORE CLEANSING
+  {
+    id: 'salt-water-aura-cleanse',
+    title: 'Salt Water Aura Cleansing',
+    category: 'cleansing',
+    type: 'ritual',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['Waning Crescent', 'New Moon'],
+      timeOfDay: 'any',
+      season: 'any',
+    },
+    duration: '15 minutes',
+    ingredients: [
+      {
+        name: 'Sea salt',
+        amount: '2 tablespoons',
+        purpose: 'Purification',
+      },
+      {
+        name: 'Water',
+        amount: '1 bowl',
+        purpose: 'Cleansing element',
+      },
+      {
+        name: 'White candle',
+        amount: '1',
+        purpose: 'Divine light',
+      },
+    ],
+    tools: ['Bowl', 'Towel'],
+    preparation: [
+      'Dissolve salt in water',
+      'Light white candle for purification',
+    ],
+    steps: [
+      'Dip fingers in salt water',
+      'Starting at crown, lightly flick water around your aura',
+      'Work down to feet, focusing on releasing negativity',
+      'Say: "Salt and water, cleanse me clear. Remove all that does not serve me here."',
+      'Pat dry with towel',
+      'Dispose of water down the drain',
+    ],
+    purpose: 'Cleanses the aura of negative energy and attachments',
+    description:
+      'A quick, effective way to clear your energetic field of accumulated negativity.',
+    correspondences: {
+      elements: ['Water', 'Earth'],
+      colors: ['White', 'Blue'],
+      crystals: ['Selenite', 'Clear Quartz'],
+      planets: ['Moon'],
+    },
+    safety: ['Avoid eyes and open wounds', 'Use on skin only, not internally'],
+  },
+
+  {
+    id: 'egg-cleanse',
+    title: 'Egg Cleansing (Limpia)',
+    category: 'cleansing',
+    type: 'ritual',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['Waning Crescent', 'New Moon'],
+      timeOfDay: 'any',
+      season: 'any',
+    },
+    duration: '20 minutes',
+    ingredients: [
+      {
+        name: 'Raw egg',
+        amount: '1',
+        purpose: 'Absorbing negative energy',
+      },
+      {
+        name: 'Glass of water',
+        amount: '1',
+        purpose: 'Reading the cleansing results',
+      },
+      {
+        name: 'Salt',
+        amount: '1 pinch',
+        purpose: 'Added purification',
+      },
+    ],
+    tools: ['White cloth or towel'],
+    preparation: [
+      'Bring egg to room temperature',
+      'Set intention for cleansing',
+    ],
+    steps: [
+      'Hold egg and say a prayer or intention for cleansing',
+      'Starting at head, roll egg over entire body',
+      'Focus on areas that feel heavy or blocked',
+      'Crack egg into glass of water',
+      'Add pinch of salt',
+      'Read the patterns (bubbles = negative energy released)',
+      'Dispose of egg water in toilet - flush immediately',
+    ],
+    purpose: 'Removes negative energy, evil eye, and spiritual blockages',
+    description:
+      'A traditional Mexican/Latin American cleansing ritual that uses an egg to absorb negativity.',
+    correspondences: {
+      elements: ['Earth', 'Water'],
+      colors: ['White'],
+      planets: ['Moon'],
+    },
+    safety: [
+      'Never eat the egg after cleansing',
+      'Dispose of immediately after reading',
+      'Wash hands thoroughly after',
+    ],
+  },
+
+  // MORE DIVINATION
+  {
+    id: 'moon-water-scrying',
+    title: 'Moon Water Scrying',
+    category: 'divination',
+    type: 'ritual',
+    difficulty: 'intermediate',
+    timing: {
+      moonPhase: ['Full Moon'],
+      timeOfDay: 'midnight',
+      season: 'any',
+    },
+    duration: '30 minutes',
+    ingredients: [
+      {
+        name: 'Moon water',
+        amount: '1 bowl',
+        purpose: 'Charged water for visions',
+      },
+      {
+        name: 'Black bowl or dark surface',
+        amount: '1',
+        purpose: 'Scrying surface',
+      },
+      {
+        name: 'White or silver candle',
+        amount: '1',
+        purpose: 'Illumination',
+      },
+    ],
+    tools: ['Quiet, dark space'],
+    preparation: [
+      'Charge water under the full moon overnight',
+      'Create dark, quiet space for scrying',
+    ],
+    steps: [
+      'Pour moon water into black bowl',
+      'Light candle behind you (not in view)',
+      'Gaze softly at water surface',
+      'Let your eyes relax and go slightly out of focus',
+      'Ask your question silently',
+      'Observe any images, symbols, or impressions',
+      'Record what you see in a journal',
+    ],
+    purpose: 'Receives visions and answers through water scrying',
+    description:
+      'An ancient divination technique using the reflective surface of moon-charged water.',
+    correspondences: {
+      elements: ['Water'],
+      colors: ['Silver', 'Black', 'White'],
+      crystals: ['Moonstone', 'Labradorite'],
+      planets: ['Moon'],
+    },
+    safety: [
+      'Ground before and after scrying',
+      'Set time limits (15-20 min max)',
+      "Don't force visions",
+    ],
+  },
+
+  {
+    id: 'pendulum-divination',
+    title: 'Pendulum Yes/No Divination',
+    category: 'divination',
+    type: 'ritual',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['Full Moon', 'Waxing Gibbous'],
+      timeOfDay: 'any',
+      season: 'any',
+    },
+    duration: '10-15 minutes',
+    ingredients: [
+      {
+        name: 'Pendulum',
+        amount: '1',
+        purpose: 'Divination tool',
+        substitutes: ['Necklace with pendant', 'Ring on string'],
+      },
+    ],
+    tools: ['Flat surface', 'Pendulum board (optional)'],
+    preparation: [
+      'Cleanse pendulum with sage or moonlight',
+      'Calibrate by asking "Show me yes" and "Show me no"',
+    ],
+    steps: [
+      'Hold pendulum chain between thumb and forefinger',
+      'Rest elbow on table for stability',
+      'Let pendulum hang still',
+      'Ask a yes/no question clearly',
+      "Observe the pendulum's movement",
+      'Thank the pendulum after each session',
+    ],
+    purpose: 'Receives clear yes/no answers from higher guidance',
+    description:
+      'A simple divination method for receiving guidance on specific questions.',
+    correspondences: {
+      elements: ['Spirit', 'Air'],
+      colors: ['Clear', 'Purple'],
+      crystals: ['Clear Quartz', 'Amethyst'],
+      planets: ['Moon', 'Mercury'],
+    },
+    safety: [
+      "Don't ask about health or legal matters",
+      "Don't make major decisions solely on pendulum",
+      'Check your own bias before asking',
+    ],
+  },
+
+  // MORE MANIFESTATION
+  {
+    id: 'new-moon-intention-setting',
+    title: 'New Moon Intention Setting Ritual',
+    category: 'manifestation',
+    type: 'ritual',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['New Moon'],
+      timeOfDay: 'dusk',
+      season: 'any',
+    },
+    duration: '30 minutes',
+    ingredients: [
+      {
+        name: 'White candle',
+        amount: '1',
+        purpose: 'New beginnings',
+      },
+      {
+        name: 'Journal or paper',
+        amount: '1',
+        purpose: 'Writing intentions',
+      },
+      {
+        name: 'Clear quartz',
+        amount: '1',
+        purpose: 'Amplifying intentions',
+      },
+    ],
+    tools: ['Pen'],
+    preparation: [
+      'Review what you want to manifest this lunar cycle',
+      'Cleanse your space',
+    ],
+    steps: [
+      'Light white candle',
+      'Hold clear quartz and breathe deeply',
+      'Write 3-5 specific intentions for the lunar cycle',
+      'Read each intention aloud',
+      'Say: "As the moon grows, so do these intentions. I plant these seeds under the dark moon."',
+      'Place paper under candle until it burns down',
+      'Keep intentions visible throughout the month',
+    ],
+    purpose:
+      'Plants seeds of intention at the most potent time for new beginnings',
+    description:
+      'The new moon is the perfect time to set intentions for what you want to grow and manifest.',
+    correspondences: {
+      elements: ['Spirit'],
+      colors: ['White', 'Silver', 'Black'],
+      crystals: ['Clear Quartz', 'Moonstone'],
+      planets: ['Moon'],
+    },
+    safety: [
+      'Be specific but not attached',
+      "Focus on what you want, not what you don't want",
+      'Review intentions at full moon',
+    ],
+  },
+
+  {
+    id: 'candle-manifestation',
+    title: 'Seven Day Candle Manifestation',
+    category: 'manifestation',
+    type: 'candle_magic',
+    difficulty: 'intermediate',
+    timing: {
+      moonPhase: ['New Moon', 'Waxing Crescent'],
+      timeOfDay: 'same time daily',
+      season: 'any',
+    },
+    duration: '7 days (15 min/day)',
+    ingredients: [
+      {
+        name: 'Seven day candle (glass-enclosed)',
+        amount: '1',
+        purpose: 'Sustained manifestation energy',
+      },
+      {
+        name: 'Appropriate oil for intention',
+        amount: 'Few drops',
+        purpose: 'Charging the candle',
+      },
+      {
+        name: 'Herbs matching intention',
+        amount: '1 tablespoon',
+        purpose: 'Adding power to spell',
+      },
+    ],
+    tools: ['Pin or nail for carving'],
+    preparation: [
+      'Choose candle color for your intention',
+      'Carve symbols or words into wax',
+      'Anoint with oil',
+    ],
+    steps: [
+      'Dress candle with oil and roll in herbs',
+      'Light at the same time each day',
+      'Spend 10-15 minutes visualizing your goal',
+      'Speak your intention aloud each day',
+      'Let candle burn continuously if safe, or burn for 1 hour daily',
+      'When candle finishes, bury remains or dispose in running water',
+    ],
+    purpose:
+      'Creates sustained magical energy over seven days for major manifestations',
+    description:
+      'A prolonged spell that builds power over a week, ideal for significant goals.',
+    correspondences: {
+      elements: ['Fire'],
+      colors: ['Varies by intention'],
+      planets: ['Sun', 'Jupiter'],
+    },
+    safety: [
+      'Never leave burning candle unattended',
+      'Use glass-enclosed candles for safety',
+      'Keep away from flammable materials',
+    ],
+  },
+
+  // MORE HEALING
+  {
+    id: 'chakra-balancing-meditation',
+    title: 'Seven Chakra Balancing Ritual',
+    category: 'healing',
+    type: 'ritual',
+    difficulty: 'intermediate',
+    timing: {
+      moonPhase: ['Full Moon', 'New Moon'],
+      timeOfDay: 'dawn',
+      season: 'any',
+    },
+    duration: '45 minutes',
+    ingredients: [
+      {
+        name: 'Seven colored candles',
+        amount: '1 of each color',
+        purpose: 'Representing each chakra',
+      },
+      {
+        name: 'Corresponding crystals',
+        amount: '7',
+        purpose: 'Chakra healing',
+      },
+    ],
+    tools: ['Yoga mat or comfortable space', 'Relaxing music (optional)'],
+    preparation: [
+      'Arrange candles in a line or circle',
+      'Gather crystals for each chakra',
+    ],
+    steps: [
+      'Light candles from root (red) to crown (violet)',
+      'Lie down comfortably',
+      'Place each crystal on its corresponding chakra',
+      'Breathe deeply and visualize each chakra spinning brightly',
+      'Spend 3-5 minutes on each chakra, moving from root to crown',
+      'Visualize all chakras aligned and balanced',
+      'Remove crystals and rest for 5 minutes',
+    ],
+    purpose: 'Balances and aligns all seven chakras for holistic wellbeing',
+    description:
+      'A comprehensive energy healing ritual that addresses all major energy centers.',
+    correspondences: {
+      elements: ['All elements'],
+      colors: ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo', 'Violet'],
+      crystals: ['Various - one per chakra'],
+      planets: ['All planets'],
+    },
+    safety: [
+      'Move slowly and gently',
+      'Stay hydrated',
+      'Ground after the ritual',
+    ],
+  },
+
+  {
+    id: 'anxiety-relief-spell',
+    title: 'Anxiety Relief Calming Spell',
+    category: 'healing',
+    type: 'spell',
+    difficulty: 'beginner',
+    timing: {
+      moonPhase: ['Waning Gibbous', 'Last Quarter'],
+      timeOfDay: 'any',
+      season: 'any',
+    },
+    duration: '15 minutes',
+    ingredients: [
+      {
+        name: 'Lavender',
+        amount: '1 tablespoon dried',
+        purpose: 'Calming and peace',
+      },
+      {
+        name: 'Chamomile',
+        amount: '1 tablespoon dried',
+        purpose: 'Soothing anxiety',
+      },
+      {
+        name: 'Blue candle',
+        amount: '1',
+        purpose: 'Peace and tranquility',
+      },
+      {
+        name: 'Amethyst',
+        amount: '1',
+        purpose: 'Calming energy',
+      },
+    ],
+    tools: ['Small pouch or sachet'],
+    preparation: ['Find a quiet, comfortable space', 'Take three deep breaths'],
+    steps: [
+      'Light blue candle',
+      'Hold amethyst and breathe deeply',
+      'Mix lavender and chamomile in pouch',
+      'Hold pouch to heart and say: "Calm surrounds me, peace within. Anxiety fades, serenity begins."',
+      "Inhale the herbs' scent",
+      'Carry pouch with you or place under pillow',
+    ],
+    purpose: 'Reduces anxiety and promotes inner calm',
+    description:
+      'A soothing spell to ease anxiety and bring peace to an overwhelmed mind.',
+    correspondences: {
+      elements: ['Water', 'Air'],
+      colors: ['Blue', 'Lavender'],
+      crystals: ['Amethyst', 'Blue Lace Agate', 'Lepidolite'],
+      herbs: ['Lavender', 'Chamomile', 'Valerian'],
+      planets: ['Moon', 'Neptune'],
+    },
+    safety: [
+      'Not a replacement for professional mental health care',
+      'Use alongside other coping strategies',
+    ],
+  },
 ];
 
 // Moon Phase specific spell recommendations
@@ -760,26 +1643,56 @@ export const moonSpells = {
     'rose-quartz-self-love',
     'basil-prosperity-jar',
     'sage-space-cleansing',
+    'new-moon-intention-setting',
+    'bay-leaf-wish',
+    'pink-candle-attraction',
   ],
   'Waxing Crescent': [
     'basil-prosperity-jar',
     'rose-quartz-self-love',
     'salt-circle-protection',
+    'honey-jar-sweetening',
+    'money-bowl',
+    'candle-manifestation',
   ],
-  'First Quarter': ['basil-prosperity-jar'],
-  'Waxing Gibbous': ['basil-prosperity-jar', 'beltane-fertility-blessing'],
+  'First Quarter': [
+    'basil-prosperity-jar',
+    'money-bowl',
+    'candle-manifestation',
+  ],
+  'Waxing Gibbous': [
+    'basil-prosperity-jar',
+    'beltane-fertility-blessing',
+    'honey-jar-sweetening',
+    'pendulum-divination',
+  ],
   'Full Moon': [
     'lavender-healing-bath',
     'rose-quartz-self-love',
     'salt-circle-protection',
     'beltane-fertility-blessing',
+    'moon-water-scrying',
+    'mirror-return-to-sender',
+    'chakra-balancing-meditation',
   ],
-  'Waning Gibbous': ['lavender-healing-bath'],
-  'Last Quarter': ['black-tourmaline-shield', 'sage-space-cleansing'],
+  'Waning Gibbous': [
+    'lavender-healing-bath',
+    'cord-cutting-ritual',
+    'anxiety-relief-spell',
+  ],
+  'Last Quarter': [
+    'black-tourmaline-shield',
+    'sage-space-cleansing',
+    'cord-cutting-ritual',
+    'freezer-spell',
+  ],
   'Waning Crescent': [
     'black-tourmaline-shield',
     'sage-space-cleansing',
     'samhain-ancestor-connection',
+    'egg-cleanse',
+    'salt-water-aura-cleanse',
+    'freezer-spell',
   ],
 };
 

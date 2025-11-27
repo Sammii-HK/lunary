@@ -44,6 +44,7 @@ export type TarotCard = {
   keywords?: string[];
   information?: string;
   position?: string;
+  positionMeaning?: string;
   reversed?: boolean;
 };
 

@@ -50,6 +50,7 @@ const MessageBubble = ({
   onEntityClick?: (entity: {
     type: 'tarot' | 'ritual' | 'spell';
     name: string;
+    slug?: string;
   }) => void;
   savedCollections?: SavedCollection[];
   folders?: CollectionFolder[];
@@ -563,26 +564,20 @@ function BookOfShadowsContent() {
                         onSaved={handleCollectionSaved}
                         onEntityClick={async (entity) => {
                           try {
-                            let content = '';
-
-                            if (entity.type === 'tarot') {
-                              // Fetch tarot card data directly from grimoire
-                              const { getTarotCardByName } = await import(
-                                '@/utils/tarot/getCardByName'
-                              );
-                              const cardData = getTarotCardByName(entity.name);
-
-                              if (cardData) {
-                                // Just show the description, no heading or keywords
-                                content = cardData.information;
-                              } else {
-                                content = `I couldn't find information about "${entity.name}" in the grimoire.`;
-                              }
-                            } else if (
+                            // For spells/rituals, navigate to grimoire page
+                            if (
                               entity.type === 'ritual' ||
                               entity.type === 'spell'
                             ) {
-                              // Fetch spell/ritual data directly from grimoire
+                              const slug = (entity as any).slug;
+                              if (slug) {
+                                window.open(
+                                  `/grimoire/spells/${slug}`,
+                                  '_blank',
+                                );
+                                return;
+                              }
+                              // Fallback: try to find the spell and get its ID
                               const { spellDatabase } = await import(
                                 '@/constants/grimoire/spells'
                               );
@@ -596,27 +591,27 @@ function BookOfShadowsContent() {
                                       entity.name.toLowerCase(),
                                   ),
                               );
-
                               if (spell) {
-                                const typeLabel =
-                                  spell.type === 'ritual' ? 'Ritual' : 'Spell';
-                                const difficulty = spell.difficulty
-                                  ? `**Difficulty:** ${spell.difficulty.charAt(0).toUpperCase() + spell.difficulty.slice(1)}\n\n`
-                                  : '';
-                                const purpose = spell.purpose
-                                  ? `**Purpose:** ${spell.purpose}\n\n`
-                                  : '';
-                                const description =
-                                  spell.fullDescription || spell.description;
-                                const timing = spell.timing?.bestTiming
-                                  ? `**Best Timing:** ${spell.timing.bestTiming}\n\n`
-                                  : '';
+                                window.open(
+                                  `/grimoire/spells/${spell.id}`,
+                                  '_blank',
+                                );
+                                return;
+                              }
+                            }
 
-                                content = `## ${spell.title} (${typeLabel})\n\n${difficulty}${purpose}${timing}${description}`;
+                            let content = '';
 
-                                if (spell.steps && spell.steps.length > 0) {
-                                  content += `\n\n**Steps:**\n${spell.steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}`;
-                                }
+                            if (entity.type === 'tarot') {
+                              // Fetch tarot card data directly from grimoire
+                              const { getTarotCardByName } = await import(
+                                '@/utils/tarot/getCardByName'
+                              );
+                              const cardData = getTarotCardByName(entity.name);
+
+                              if (cardData) {
+                                // Just show the description, no heading or keywords
+                                content = cardData.information;
                               } else {
                                 content = `I couldn't find information about "${entity.name}" in the grimoire.`;
                               }

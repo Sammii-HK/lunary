@@ -210,27 +210,27 @@ export function PWAHandler({
   }
 
   return (
-    <div className='fixed bottom-24 left-4 right-4 z-50'>
-      <div className='bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-lg p-4 shadow-lg backdrop-blur-sm'>
-        <div className='flex items-center justify-between'>
+    <div className='fixed top-0 left-0 right-0 z-50 safe-area-inset-top'>
+      <div className='bg-gradient-to-r from-purple-600/90 to-pink-600/90 border-b border-purple-500/30 px-4 py-3 shadow-lg backdrop-blur-sm'>
+        <div className='max-w-4xl mx-auto flex items-center justify-between'>
           <div className='flex-1'>
-            <h3 className='text-base font-semibold text-white'>
+            <h3 className='text-sm font-semibold text-white'>
               Install Lunary App
             </h3>
-            <p className='text-sm text-purple-200 mt-1'>
+            <p className='text-xs text-purple-100 mt-0.5'>
               Get faster access and offline support
             </p>
           </div>
           <div className='flex gap-2 ml-4'>
             <button
               onClick={handleDismiss}
-              className='px-4 py-2 text-sm text-zinc-300 hover:text-white transition-colors'
+              className='px-3 py-1.5 text-xs text-white/80 hover:text-white transition-colors'
             >
               Later
             </button>
             <button
               onClick={handleInstallClick}
-              className='px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg font-medium transition-colors shadow-lg'
+              className='px-4 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs rounded-lg font-medium transition-colors'
             >
               Install
             </button>
