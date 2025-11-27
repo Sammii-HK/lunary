@@ -82,7 +82,7 @@ export default function SubstackManagerPage() {
     message: '',
   });
 
-  const [backfillRange, setBackfillRange] = useState({ start: -4, end: -1 });
+  const [backfillRange, setBackfillRange] = useState({ start: -1, end: -4 });
   const [backfillResults, setBackfillResults] = useState<BackfillResult[]>([]);
   const [backfillProgress, setBackfillProgress] = useState<{
     current: number;
@@ -183,7 +183,9 @@ export default function SubstackManagerPage() {
 
   const runBackfill = async () => {
     const weeksToProcess: number[] = [];
-    for (let i = backfillRange.start; i >= backfillRange.end; i--) {
+    // Process oldest weeks first so they appear in chronological order on the blog
+    // (most recently published posts appear at the top of the blog)
+    for (let i = backfillRange.end; i <= backfillRange.start; i++) {
       weeksToProcess.push(i);
     }
 
@@ -194,7 +196,7 @@ export default function SubstackManagerPage() {
 
     if (
       !confirm(
-        `This will publish ${weeksToProcess.length} weeks of posts (${weeksToProcess.length * 2} total posts). Continue?`,
+        `This will publish ${weeksToProcess.length} weeks of posts (${weeksToProcess.length * 2} total posts) in chronological order (oldest first). Continue?`,
       )
     ) {
       return;
@@ -535,14 +537,14 @@ export default function SubstackManagerPage() {
               <div className='grid grid-cols-2 gap-4'>
                 <div>
                   <label className='block text-sm font-medium mb-2'>
-                    From Week
+                    Oldest Week (publish first)
                   </label>
                   <select
-                    value={backfillRange.start}
+                    value={backfillRange.end}
                     onChange={(e) =>
                       setBackfillRange({
                         ...backfillRange,
-                        start: parseInt(e.target.value),
+                        end: parseInt(e.target.value),
                       })
                     }
                     className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
@@ -558,14 +560,14 @@ export default function SubstackManagerPage() {
                 </div>
                 <div>
                   <label className='block text-sm font-medium mb-2'>
-                    To Week
+                    Newest Week (publish last)
                   </label>
                   <select
-                    value={backfillRange.end}
+                    value={backfillRange.start}
                     onChange={(e) =>
                       setBackfillRange({
                         ...backfillRange,
-                        end: parseInt(e.target.value),
+                        start: parseInt(e.target.value),
                       })
                     }
                     className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
@@ -573,7 +575,7 @@ export default function SubstackManagerPage() {
                     {weekOptions
                       .filter(
                         (opt) =>
-                          opt.offset < 0 && opt.offset <= backfillRange.start,
+                          opt.offset < 0 && opt.offset >= backfillRange.end,
                       )
                       .map((opt) => (
                         <option key={opt.offset} value={opt.offset}>
