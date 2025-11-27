@@ -1469,10 +1469,10 @@ export const spells: Spell[] = [
     difficulty: 'intermediate',
     timing: {
       moonPhase: ['New Moon', 'Waxing Crescent'],
-      timeOfDay: 'same time daily',
+      timeOfDay: 'any',
       season: 'any',
     },
-    duration: '7 days (15 min/day)',
+    duration: '7 days (15 min/day, same time each day)',
     ingredients: [
       {
         name: 'Seven day candle (glass-enclosed)',
