@@ -36,15 +36,31 @@ Next.js 15 full-stack application delivering personalized astrological insights,
 
 **Commerce**: Digital product shop with secure token-based downloads, PWA with offline support, push notifications for cosmic events (retrogrades, ingresses, moon phases)
 
+**Moon Circles**: Community feature for sharing insights during new and full moon gatherings, browse past circles, read community insights, and share anonymous reflections
+
+**Collections**: Personal journal to save favorite insights, rituals, tarot readings, chat conversations, and moon circle insights with folder organization and category filters
+
+**Engagement**: Daily check-in streaks with current/longest streak tracking and shareable milestones, morning/evening ritual tracker linked to AI companion, quick check-in for fast mood reflection with personalized transit-based guidance
+
+**Cosmic Reports**: Shareable weekly/monthly/custom cosmic reports with PDF generation and unique share tokens
+
+**Referral Program**: Generate referral links to share with friends; both referrer and referred user receive 30 days free when referred user starts a trial
+
 ### Admin Features
 
-**Content Management**: Automated weekly blog generation with planetary highlights, newsletter manager with subscriber segmentation, social media scheduler (Instagram, X, Bluesky, Reddit, Pinterest)
+**Content Management**: Automated weekly blog generation with planetary highlights, newsletter manager with subscriber segmentation, social media scheduler (Instagram, X, Bluesky, Reddit, Pinterest), Substack publishing integration
 
 **Shop Management**: Programmatic pack generation (PDF + OG images), automatic Stripe product creation and sync, scheduled moon pack generation (monthly/quarterly/yearly)
 
 **Automation**: Multi-frequency cron jobs with execution deduplication, cosmic event detection and notification dispatch
 
 **AI Tools**: Conversion optimization with personalized CTAs, churn prediction, A/B test insights, email copy optimization, funnel analysis
+
+**Re-engagement Campaigns**: Automated email campaigns for inactive users (7/14/30 days), missed streak reminders, and account milestone celebrations
+
+**Analytics**: PostHog integration for product analytics, event tracking, user behavior analysis, and conversion funnels
+
+**SEO**: Competitor comparison landing pages (vs Co-Star, Pattern, Moonly, Arcarae, Lunar Guide), press kit with brand assets, founder bio, and downloadable media resources
 
 ## Technical Implementation
 
@@ -252,6 +268,8 @@ pnpm dev
 ```
 
 **Code Quality**: TypeScript strict mode, ESLint + Prettier, Husky pre-commit hooks
+
+**Testing**: Jest unit/integration tests + Playwright E2E tests covering authentication, birth charts, subscriptions, horoscopes, tarot, grimoire, shop, admin flows, and PWA functionality. See `README_TESTING.md` for complete testing documentation.
 
 ## Deployment
 
