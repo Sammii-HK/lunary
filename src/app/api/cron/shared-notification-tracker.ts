@@ -3,6 +3,13 @@
 
 import { sql } from '@vercel/postgres';
 
+export class DeduplicationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DeduplicationError';
+  }
+}
+
 export async function getSentEvents(date: string): Promise<Set<string>> {
   try {
     const result = await sql`
@@ -18,9 +25,14 @@ export async function getSentEvents(date: string): Promise<Set<string>> {
 
     return sentEvents;
   } catch (error) {
-    console.error('Error fetching sent events:', error);
-    // Fallback to empty set if database query fails
-    return new Set();
+    console.error(
+      'CRITICAL: Error fetching sent events - blocking notifications to prevent duplicates:',
+      error,
+    );
+    throw new DeduplicationError(
+      `Failed to check sent events: ${error instanceof Error ? error.message : 'Unknown error'}. ` +
+        `Blocking notification send to prevent duplicates.`,
+    );
   }
 }
 
@@ -77,8 +89,14 @@ export async function isEventSent(
     `;
     return result.rows.length > 0;
   } catch (error) {
-    console.error('Error checking if event sent:', error);
-    return false;
+    console.error(
+      'CRITICAL: Error checking if event sent - blocking to prevent duplicates:',
+      error,
+    );
+    throw new DeduplicationError(
+      `Failed to check if event sent: ${error instanceof Error ? error.message : 'Unknown error'}. ` +
+        `Blocking notification send to prevent duplicates.`,
+    );
   }
 }
 

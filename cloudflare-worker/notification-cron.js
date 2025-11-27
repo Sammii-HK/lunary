@@ -26,10 +26,11 @@ export default {
       return await handleWeeklyCosmicReport(baseUrl, env, today);
     }
 
-    // Daily at 8 AM - cosmic pulse and cosmic snapshot update
+    // Daily at 8 AM - cosmic pulse, daily cosmic event, and cosmic snapshot update
     if (hour === 8) {
       const results = await Promise.allSettled([
         handleDailyCosmicPulse(baseUrl, env, today),
+        handleDailyCosmicEvent(baseUrl, env, today),
         handleCosmicSnapshotUpdates(baseUrl, env, today),
       ]);
       return new Response(
@@ -288,123 +289,8 @@ async function handleCosmicSnapshotUpdates(baseUrl, env, today) {
       }
     }
 
-    // Also run the original notification check
-    try {
-      // Get cosmic data to check for events
-      const cosmicResponse = await fetch(
-        `${baseUrl}/api/og/cosmic-post/${today}`,
-        {
-          headers: { 'User-Agent': 'Lunary-Cloudflare-Notification/1.0' },
-        },
-      );
-
-      if (!cosmicResponse.ok) {
-        throw new Error(
-          `Failed to fetch cosmic data: ${cosmicResponse.status}`,
-        );
-      }
-
-      const cosmicData = await cosmicResponse.json();
-
-      // Check what events have already been sent today
-      const checkSentResponse = await fetch(
-        `${baseUrl}/api/notifications/check-sent-events?date=${today}`,
-        {
-          headers: {
-            Authorization: `Bearer ${env.CRON_SECRET}`,
-          },
-        },
-      );
-
-      let sentEvents = new Set();
-      if (checkSentResponse.ok) {
-        const sentData = await checkSentResponse.json();
-        if (sentData.events) {
-          sentEvents = new Set(sentData.events);
-        }
-      }
-
-      // Get notification-worthy events using the same logic as Vercel cron
-      const notificationEvents = getNotificationWorthyEvents(cosmicData);
-
-      // Filter out events that have already been sent
-      const newEvents = notificationEvents.filter((event) => {
-        const eventKey = `${event.type}-${event.name}-${event.priority}`;
-        return !sentEvents.has(eventKey);
-      });
-
-      if (newEvents.length > 0) {
-        // Only send 1 notification per check (limit spam)
-        const eventToSend = newEvents[0];
-
-        // Send notification
-        try {
-          const notification = createNotificationFromEvent(
-            eventToSend,
-            cosmicData,
-          );
-
-          const response = await fetch(`${baseUrl}/api/notifications/send`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${env.CRON_SECRET}`,
-            },
-            body: JSON.stringify({
-              payload: {
-                type: getNotificationType(eventToSend.type),
-                title: notification.title,
-                body: notification.body,
-                data: {
-                  date: today,
-                  eventName: eventToSend.name,
-                  priority: eventToSend.priority,
-                  eventType: eventToSend.type,
-                  source: 'cloudflare-worker',
-                },
-              },
-            }),
-          });
-
-          const result = await response.json();
-
-          // Mark event as sent
-          const eventKey = `${eventToSend.type}-${eventToSend.name}-${eventToSend.priority}`;
-          await fetch(`${baseUrl}/api/notifications/mark-sent`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${env.CRON_SECRET}`,
-            },
-            body: JSON.stringify({
-              date: today,
-              eventKey,
-              type: eventToSend.type,
-              name: eventToSend.name,
-              priority: eventToSend.priority,
-              checkType: '4-hourly',
-            }),
-          });
-
-          console.log(`✅ Cloudflare notification sent: ${notification.title}`);
-          results.push({
-            task: 'cosmic-events',
-            notificationsSent: result.recipientCount || 0,
-            eventSent: eventToSend.name,
-          });
-        } catch (eventError) {
-          console.error(
-            `Failed to send notification for event ${eventToSend.name}:`,
-            eventError,
-          );
-        }
-      }
-    } catch (error) {
-      console.error(
-        '[cosmic-snapshots] Original notification check failed:',
-        error,
-      );
-    }
+    // NOTE: Notification sending has been moved to dedicated /api/cron/daily-cosmic-event
+    // to prevent duplicate notifications. This function now ONLY updates snapshots.
 
     return new Response(
       JSON.stringify({
@@ -947,6 +833,36 @@ async function handleDailyCosmicPulse(baseUrl, env, today) {
     });
   } catch (error) {
     console.error('[daily-cosmic-pulse] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleDailyCosmicEvent(baseUrl, env, today) {
+  try {
+    console.log(
+      '[daily-cosmic-event] Starting daily cosmic event notification',
+    );
+    const response = await fetch(`${baseUrl}/api/cron/daily-cosmic-event`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[daily-cosmic-event] Error:', error);
     return new Response(
       JSON.stringify({
         success: false,

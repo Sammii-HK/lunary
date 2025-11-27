@@ -78,6 +78,14 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
             },
             capture_pageview: false,
             capture_pageleave: true,
+            autocapture: true,
+            capture_exceptions: true,
+            disable_session_recording: false,
+            session_recording: {
+              maskAllInputs: false,
+              maskInputOptions: { password: true },
+            },
+            bootstrap: { featureFlags: {} },
           });
         } catch (error) {
           console.error('[PostHog] Failed to initialize:', error);

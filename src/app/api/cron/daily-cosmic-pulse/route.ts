@@ -68,6 +68,28 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Debug: Get counts for each condition to understand filtering
+    const allActiveCount = await sql`
+      SELECT COUNT(*) as count FROM push_subscriptions WHERE is_active = true
+    `;
+    const withBirthdayCount = await sql`
+      SELECT COUNT(*) as count FROM push_subscriptions 
+      WHERE is_active = true 
+      AND preferences->>'birthday' IS NOT NULL 
+      AND preferences->>'birthday' != ''
+    `;
+    const cosmicPulseEnabledCount = await sql`
+      SELECT COUNT(*) as count FROM push_subscriptions 
+      WHERE is_active = true 
+      AND (preferences->>'cosmicPulse' = 'true' OR preferences->>'cosmicPulse' IS NULL)
+    `;
+
+    console.log(`[cosmic-pulse] Debug counts:`, {
+      allActive: allActiveCount.rows[0]?.count,
+      withBirthday: withBirthdayCount.rows[0]?.count,
+      cosmicPulseEnabled: cosmicPulseEnabledCount.rows[0]?.count,
+    });
+
     const subscriptions = await sql`
       SELECT endpoint, p256dh, auth, user_id, user_email, preferences
       FROM push_subscriptions 
@@ -84,11 +106,45 @@ export async function GET(request: NextRequest) {
 
     if (subscriptions.rows.length === 0) {
       console.log('📭 No active cosmic pulse subscriptions found');
+      console.log(
+        '[cosmic-pulse] Reason: Either no subscribers have birthday set, or cosmicPulse is explicitly disabled',
+      );
+
+      // Additional debug: show first few subscriptions and their preferences
+      const sampleSubs = await sql`
+        SELECT user_id, user_email, preferences, is_active
+        FROM push_subscriptions 
+        WHERE is_active = true
+        LIMIT 3
+      `;
+      console.log(
+        '[cosmic-pulse] Sample active subscriptions:',
+        JSON.stringify(
+          sampleSubs.rows.map((s) => ({
+            userId: s.user_id,
+            email: s.user_email ? '***@***' : null,
+            hasBirthday: !!(
+              s.preferences?.birthday && s.preferences.birthday !== ''
+            ),
+            cosmicPulse: s.preferences?.cosmicPulse,
+          })),
+          null,
+          2,
+        ),
+      );
+
       return NextResponse.json({
         success: true,
         notificationsSent: 0,
         emailsSent: 0,
         message: 'No subscribers for cosmic pulse',
+        debug: {
+          allActive: parseInt(allActiveCount.rows[0]?.count || '0'),
+          withBirthday: parseInt(withBirthdayCount.rows[0]?.count || '0'),
+          cosmicPulseEnabled: parseInt(
+            cosmicPulseEnabledCount.rows[0]?.count || '0',
+          ),
+        },
       });
     }
 

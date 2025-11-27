@@ -21,11 +21,6 @@ import { getPriceForCurrency } from '../../../utils/stripe-prices';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
 import { useConversionTracking } from '@/hooks/useConversionTracking';
 import { conversionTracking } from '@/lib/analytics';
-import {
-  getABTestVariant,
-  AB_TESTS,
-  trackABTestConversion,
-} from '@/lib/ab-testing';
 import { SocialProof } from '@/components/SocialProof';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
@@ -193,20 +188,10 @@ export default function PricingPage() {
                 pricing
               </h1>
 
-              {/* A/B Test: CTA Copy */}
-              {(() => {
-                const ctaVariant = getABTestVariant(AB_TESTS.PRICING_CTA);
-                const ctaText =
-                  ctaVariant === 'A'
-                    ? 'Start your free trial - credit card required but no payment taken. Cancel anytime.'
-                    : 'Unlock your cosmic blueprint. Start free trial - credit card required but no charge during trial.';
-
-                return (
-                  <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
-                    {ctaText}
-                  </p>
-                );
-              })()}
+              <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
+                Start your free trial - credit card required but no payment
+                taken. Cancel anytime.
+              </p>
 
               {subscriptionStatus === 'trial' && (
                 <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 bg-purple-500/10 backdrop-blur-sm mt-2'>

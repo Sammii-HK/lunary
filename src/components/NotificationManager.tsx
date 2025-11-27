@@ -171,6 +171,10 @@ export function NotificationManager() {
 
       // Also send to PostgreSQL via API for server-side notifications
       try {
+        const profile = me.profile as any;
+        const birthday = profile?.birthday || null;
+        const userName = profile?.name || null;
+
         await fetch('/api/notifications/subscribe', {
           method: 'POST',
           headers: {
@@ -191,12 +195,18 @@ export function NotificationManager() {
               sabbats: true,
               eclipses: true,
               majorAspects: true,
+              cosmicPulse: true,
+              cosmicEvents: true,
+              birthday: birthday,
+              name: userName,
             },
             userId: (me as any).id || 'unknown',
-            userEmail: me.profile?.name || null, // Better Auth might store email in profile
+            userEmail: profile?.email || null,
           }),
         });
-        console.log('✅ Push subscription also saved to PostgreSQL');
+        console.log('✅ Push subscription also saved to PostgreSQL', {
+          hasBirthday: !!birthday,
+        });
       } catch (pgError) {
         console.error(
           '⚠️ Failed to save to PostgreSQL (client storage still works):',
