@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import { WeeklyUsageCounter } from '@/components/WeeklyUsageCounter';
 import { useAccount } from 'jazz-tools/react';
-import { conversionTracking } from '@/lib/analytics';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { usePathname } from 'next/navigation';
 import { recordCheckIn } from '@/lib/streak/check-in';
@@ -170,16 +169,12 @@ export default function AppDashboard() {
       window.matchMedia('(display-mode: minimal-ui)').matches ||
       (window.navigator as any).standalone === true);
 
-  // Track app opened event and record check-in
+  // Record check-in for streak tracking (session tracking handled by PostHog)
   useEffect(() => {
-    if (authState.isAuthenticated) {
-      const userId = (me as any)?.id;
-      conversionTracking.appOpened(userId, '/app');
+    if (authState.isAuthenticated && !authState.loading) {
       recordCheckIn();
-    } else if (!authState.loading) {
-      conversionTracking.appOpened(undefined, '/app');
     }
-  }, [authState.isAuthenticated, authState.loading, me]);
+  }, [authState.isAuthenticated, authState.loading]);
 
   return (
     <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl mx-auto px-4'>

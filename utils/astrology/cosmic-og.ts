@@ -95,22 +95,34 @@ export function getRealPlanetaryPositions(
 
     // Check for retrograde motion (accounting for 0°/360° wraparound)
     let retrograde = false;
+    let wasRetrograde = false;
     let newRetrograde = false;
+    let newDirect = false;
+
     if (Math.abs(longitude - longitudePast) < 180) {
       retrograde = longitude < longitudePast;
-      newRetrograde =
-        longitude < longitudePast && longitudePast > longitudePastPast;
     } else {
       retrograde = longitude > longitudePast;
-      newRetrograde =
-        longitude > longitudePast && longitudePast < longitudePastPast;
     }
+
+    if (Math.abs(longitudePast - longitudePastPast) < 180) {
+      wasRetrograde = longitudePast < longitudePastPast;
+    } else {
+      wasRetrograde = longitudePast > longitudePastPast;
+    }
+
+    // Detect retrograde station (planet just started moving backwards)
+    newRetrograde = retrograde && !wasRetrograde;
+
+    // Detect direct station (planet just started moving forwards again)
+    newDirect = !retrograde && wasRetrograde;
 
     positions[name] = {
       longitude,
       sign: getZodiacSign(longitude),
       retrograde,
       newRetrograde,
+      newDirect,
     };
   });
 
@@ -514,12 +526,25 @@ export function checkSignIngress(positions: any, date: Date): Array<any> {
 export function checkRetrogradeEvents(positions: any): Array<any> {
   const retrogradeEvents: Array<any> = [];
   Object.entries(positions).forEach(([planet, data]: [string, any]) => {
+    // Detect when a planet stations retrograde (starts moving backwards)
     if (data.newRetrograde) {
       retrogradeEvents.push({
-        name: `${planet} is newly retrograde`,
-        energy: `${planet} is newly retrograde`,
-        priority: 8,
-        type: 'retrograde',
+        name: `${planet} Retrograde Begins`,
+        energy: `${planet} stations retrograde in ${data.sign}`,
+        priority: 9,
+        type: 'retrograde_start',
+        planet,
+        sign: data.sign,
+      });
+    }
+
+    // Detect when a planet stations direct (ends retrograde, starts moving forwards)
+    if (data.newDirect) {
+      retrogradeEvents.push({
+        name: `${planet} Retrograde Ends`,
+        energy: `${planet} stations direct in ${data.sign}`,
+        priority: 9,
+        type: 'retrograde_end',
         planet,
         sign: data.sign,
       });

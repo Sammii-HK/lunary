@@ -107,10 +107,29 @@ export function OnboardingFlow() {
         }
       } catch (chartError) {
         console.error('Failed to generate birth chart:', chartError);
-        // Don't block onboarding if chart generation fails
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Wait for sync
+      // Sync birthday to push subscription for server-side notifications
+      try {
+        const profile = me.profile as any;
+        await fetch('/api/notifications/sync-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            birthday,
+            name: profile?.name || null,
+            email: profile?.email || null,
+          }),
+        });
+        console.log('✅ Birthday synced to push subscription');
+      } catch (syncError) {
+        console.error(
+          'Failed to sync birthday to push subscription:',
+          syncError,
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
       setCurrentStep('intention');
     } catch (error) {
       console.error('Failed to save birthday:', error);

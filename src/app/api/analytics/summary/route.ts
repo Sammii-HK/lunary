@@ -3,6 +3,10 @@ import { sql } from '@vercel/postgres';
 import { formatDate, formatTimestamp } from '@/lib/analytics/date-range';
 import { getSearchConsoleData, getTopPages } from '@/lib/google/search-console';
 import generateSitemap from '@/app/sitemap';
+import {
+  getPostHogActiveUsers,
+  getPostHogAIMetrics,
+} from '@/lib/posthog-server';
 
 // Test user exclusion patterns - matches filtering in conversion events
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -336,9 +340,16 @@ export async function GET(request: NextRequest) {
       `,
     ]);
 
-    const dau = Number(dauResult.rows[0]?.value || 0);
-    const wau = Number(wauResult.rows[0]?.value || 0);
-    const mau = Number(mauResult.rows[0]?.value || 0);
+    // Try PostHog first for DAU/WAU/MAU (more accurate), fallback to DB
+    const posthogActiveUsers = await getPostHogActiveUsers();
+    const dau =
+      posthogActiveUsers?.dau ?? Number(dauResult.rows[0]?.value || 0);
+    const wau =
+      posthogActiveUsers?.wau ?? Number(wauResult.rows[0]?.value || 0);
+    const mau =
+      posthogActiveUsers?.mau ?? Number(mauResult.rows[0]?.value || 0);
+    const activeUsersSource = posthogActiveUsers ? 'posthog' : 'database';
+
     const activeTrials = Number(activeTrialsResult.rows[0]?.count || 0);
     const activeSubscriptions = Number(subscriptionsResult.rows[0]?.count || 0);
     const monthlySubscriptions = Number(
@@ -784,26 +795,44 @@ export async function GET(request: NextRequest) {
       day90Retention: Number(Number(row.day90_retention || 0).toFixed(2)),
     }));
 
-    // AI Engagement metrics
-    const aiEngagementResult = await sql`
-      SELECT
-        COUNT(*) AS sessions,
-        COUNT(DISTINCT user_id) AS unique_users,
-        COALESCE(SUM(token_count), 0) AS total_tokens,
-        COUNT(*) FILTER (WHERE completed) AS completed_sessions
-      FROM analytics_ai_usage
-      WHERE created_at >= ${thirtyDaysAgoTimestamp}
-        AND user_id NOT IN (
-            SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-            UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-          )
-    `;
-    const aiSessions = Number(aiEngagementResult.rows[0]?.sessions || 0);
-    const aiUniqueUsers = Number(aiEngagementResult.rows[0]?.unique_users || 0);
-    const aiTotalTokens = Number(aiEngagementResult.rows[0]?.total_tokens || 0);
-    const aiCompletedSessions = Number(
-      aiEngagementResult.rows[0]?.completed_sessions || 0,
-    );
+    // AI Engagement metrics - try PostHog first, fallback to DB
+    const posthogAIMetrics = await getPostHogAIMetrics(30);
+
+    let aiSessions: number;
+    let aiUniqueUsers: number;
+    let aiTotalTokens: number;
+    let aiCompletedSessions: number;
+    let aiCostFromPostHog: number | null = null;
+
+    if (posthogAIMetrics) {
+      aiSessions = posthogAIMetrics.totalGenerations;
+      aiUniqueUsers = posthogAIMetrics.uniqueUsers;
+      aiTotalTokens =
+        posthogAIMetrics.totalInputTokens + posthogAIMetrics.totalOutputTokens;
+      aiCompletedSessions = posthogAIMetrics.totalGenerations;
+      aiCostFromPostHog = posthogAIMetrics.totalCostUsd;
+    } else {
+      const aiEngagementResult = await sql`
+        SELECT
+          COUNT(*) AS sessions,
+          COUNT(DISTINCT user_id) AS unique_users,
+          COALESCE(SUM(token_count), 0) AS total_tokens,
+          COUNT(*) FILTER (WHERE completed) AS completed_sessions
+        FROM analytics_ai_usage
+        WHERE created_at >= ${thirtyDaysAgoTimestamp}
+          AND user_id NOT IN (
+              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+              UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
+            )
+      `;
+      aiSessions = Number(aiEngagementResult.rows[0]?.sessions || 0);
+      aiUniqueUsers = Number(aiEngagementResult.rows[0]?.unique_users || 0);
+      aiTotalTokens = Number(aiEngagementResult.rows[0]?.total_tokens || 0);
+      aiCompletedSessions = Number(
+        aiEngagementResult.rows[0]?.completed_sessions || 0,
+      );
+    }
+
     const aiTokensPerUser =
       aiUniqueUsers > 0 ? aiTotalTokens / aiUniqueUsers : 0;
     const aiCompletionRate =
@@ -1075,9 +1104,8 @@ export async function GET(request: NextRequest) {
           100
         : 0;
 
-    // API costs
-    // Estimate AI costs: ~$0.002 per 1K tokens (GPT-4o-mini pricing)
-    const aiCost = (aiTotalTokens / 1000) * 0.002;
+    // API costs - use PostHog actual cost if available, otherwise estimate
+    const aiCost = aiCostFromPostHog ?? (aiTotalTokens / 1000) * 0.002;
     const aiCostPerEngagedUser = aiUniqueUsers > 0 ? aiCost / aiUniqueUsers : 0;
 
     // AI Cost Per Paid User
@@ -1194,6 +1222,13 @@ export async function GET(request: NextRequest) {
     const compute = null; // Would need Vercel API
 
     return NextResponse.json({
+      // Metadata about data sources
+      _metadata: {
+        generatedAt: new Date().toISOString(),
+        activeUsersSource: activeUsersSource,
+        aiMetricsSource: posthogAIMetrics ? 'posthog' : 'database',
+      },
+
       // Sheet 1: High-Level KPIs
       highLevelKPIs: {
         dau,
