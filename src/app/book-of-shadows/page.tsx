@@ -21,7 +21,7 @@ import { CopilotQuickActions } from '@/components/CopilotQuickActions';
 import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
-import { RitualTracker } from '@/components/RitualTracker';
+import { captureEvent } from '@/lib/posthog-client';
 
 interface CollectionFolder {
   id: number;
@@ -380,7 +380,14 @@ function BookOfShadowsContent() {
     if (!trimmed || isStreaming) return;
 
     lastSendTimeRef.current = now;
-    clearError?.(); // Clear any previous errors
+    clearError?.();
+
+    captureEvent('chat_started', {
+      message_length: trimmed.length,
+      is_first_message: messages.length === 0,
+      plan_id: planId,
+    });
+
     sendMessage(trimmed);
     setInput('');
   };
@@ -517,7 +524,6 @@ function BookOfShadowsContent() {
               </span>
             ) : null}
           </div>
-          <RitualTracker />
         </header>
 
         <div className='flex min-h-0 flex-1 flex-col gap-4'>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
   ChevronDownIcon,
@@ -16,6 +16,7 @@ import {
   Search,
 } from 'lucide-react';
 import { GrimoireSearch } from './GrimoireSearch';
+import { captureEvent } from '@/lib/posthog-client';
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -145,6 +146,18 @@ export default function GrimoireLayout({
   const currentSection = currentSectionSlug
     ? slugToSection(currentSectionSlug)
     : undefined;
+
+  const trackedSectionRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (currentSection && currentSection !== trackedSectionRef.current) {
+      captureEvent('grimoire_viewed', {
+        section: currentSection,
+        section_title: grimoire[currentSection]?.title,
+      });
+      trackedSectionRef.current = currentSection;
+    }
+  }, [currentSection]);
 
   // Auto-expand active section
   useEffect(() => {
