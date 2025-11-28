@@ -208,6 +208,7 @@ export class SubstackClient {
     success: boolean;
     postUrl?: string;
     draftId?: number;
+    postId?: number;
     error?: string;
   }> {
     try {
@@ -239,6 +240,7 @@ export class SubstackClient {
         success: true,
         postUrl,
         draftId: draft.id,
+        postId: published.id,
       };
     } catch (error) {
       console.error('Failed to publish to Substack:', error);

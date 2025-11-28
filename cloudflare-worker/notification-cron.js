@@ -21,9 +21,24 @@ export default {
       dayOfWeek,
     );
 
-    // Sunday at 10 AM - weekly cosmic report
+    // Sunday at 10 AM - weekly cosmic report + Substack & social
     if (dayOfWeek === 0 && hour === 10) {
-      return await handleWeeklyCosmicReport(baseUrl, env, today);
+      const results = await Promise.allSettled([
+        handleWeeklyCosmicReport(baseUrl, env, today),
+        handleWeeklySubstackSocial(baseUrl, env, today),
+      ]);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          results: results.map((r) =>
+            r.status === 'fulfilled' ? r.value : { error: r.reason },
+          ),
+          timestamp: now.toISOString(),
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     // Daily at 8 AM - cosmic pulse, daily cosmic event, and cosmic snapshot update
@@ -161,6 +176,13 @@ export default {
       return await handleWeeklyCosmicReport(baseUrl, env, today);
     }
 
+    if (
+      url.pathname === '/weekly-substack-social' &&
+      request.method === 'POST'
+    ) {
+      return await handleWeeklySubstackSocial(baseUrl, env, today);
+    }
+
     if (url.pathname === '/moon-circles' && request.method === 'POST') {
       return await handleMoonCircles(baseUrl, env, today);
     }
@@ -182,7 +204,7 @@ export default {
     }
 
     return new Response(
-      'Lunary Notification Worker - Use POST /trigger, /cosmic-changes, /cosmic-snapshots, /daily-cosmic-pulse, /weekly-report, /moon-circles, /daily-posts, /personalized-tarot, /discord-cleanup, or /discord-analytics to test',
+      'Lunary Notification Worker - Use POST /trigger, /cosmic-changes, /cosmic-snapshots, /daily-cosmic-pulse, /weekly-report, /weekly-substack-social, /moon-circles, /daily-posts, /personalized-tarot, /discord-cleanup, or /discord-analytics to test',
       {
         status: 200,
         headers: { 'Content-Type': 'text/plain' },
@@ -891,6 +913,37 @@ async function handleWeeklyCosmicReport(baseUrl, env, today) {
     });
   } catch (error) {
     console.error('[weekly-report] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleWeeklySubstackSocial(baseUrl, env, today) {
+  try {
+    console.log(
+      '[weekly-substack-social] Starting weekly Substack & social publish',
+    );
+    const response = await fetch(`${baseUrl}/api/cron/weekly-substack-social`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    console.log('[weekly-substack-social] Result:', result);
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[weekly-substack-social] Error:', error);
     return new Response(
       JSON.stringify({
         success: false,

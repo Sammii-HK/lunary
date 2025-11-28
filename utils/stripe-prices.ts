@@ -322,12 +322,23 @@ export function getPriceForCurrency(
   if (!planPrices) return null;
 
   // Try exact match first
-  if (planPrices[currency.toUpperCase()]) {
-    return planPrices[currency.toUpperCase()];
+  const currencyKey = currency.toUpperCase() as keyof typeof planPrices;
+  if (currencyKey in planPrices) {
+    return planPrices[currencyKey] as {
+      priceId: string;
+      amount: number;
+      currency: string;
+    };
   }
 
   // Fallback to USD
-  return planPrices['USD'] || null;
+  return (
+    (planPrices['USD' as keyof typeof planPrices] as {
+      priceId: string;
+      amount: number;
+      currency: string;
+    }) || null
+  );
 }
 
 export function getAvailableCurrencies(planId: PlanId): string[] {
