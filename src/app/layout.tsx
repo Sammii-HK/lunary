@@ -138,7 +138,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${roboto.className} w-full min-h-screen bg-zinc-950 text-white`}
+        className={`${roboto.className} flex flex-col w-full h-dvh bg-zinc-950 text-white overflow-hidden`}
         suppressHydrationWarning
       >
         <StructuredData />
@@ -149,7 +149,7 @@ export default function RootLayout({
                 <AuthStatusProvider>
                   <Suspense
                     fallback={
-                      <main className='flex flex-col w-full font-mono text-sm gap-4 overflow-y-auto px-4 h-screen'>
+                      <main className='flex flex-col flex-1 w-full min-h-0 pb-16'>
                         {children}
                       </main>
                     }

@@ -131,12 +131,27 @@ export function ConditionalMainWrapper({
     setShowAppNav(appNav);
   }, [pathname, searchParams]);
 
+  // Check if current page is a full-screen page that manages its own layout
+  const fullScreenPages = ['/book-of-shadows'];
+  const isFullScreenPage = fullScreenPages.some(
+    (page) => pathname === page || pathname?.startsWith(`${page}/`),
+  );
+
+  // Full-screen pages use flex to fill space, pb-16 reserves space for fixed bottom nav
+  if (isFullScreenPage) {
+    return (
+      <main className='flex flex-col flex-1 w-full min-h-0 pb-16'>
+        {children}
+      </main>
+    );
+  }
+
   return (
     <main
       className={cn(
         'flex flex-col w-full font-mono text-sm gap-4 overflow-y-auto px-4',
         showMarketingNav && 'mt-8',
-        showAppNav && 'pb-20',
+        showAppNav && 'pb-16',
         // Calculate height accounting for fixed navs
         showMarketingNav && showAppNav && 'h-[calc(100vh-2rem-5rem)]',
         showMarketingNav && !showAppNav && 'h-[calc(100vh-2rem)]',

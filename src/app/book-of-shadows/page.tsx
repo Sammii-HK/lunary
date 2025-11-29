@@ -10,7 +10,7 @@ import React, {
   Suspense,
 } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowUp, ChevronDown, ChevronUp, Square } from 'lucide-react';
 
 import { useAccount } from 'jazz-tools/react';
 import { Button } from '@/components/ui/button';
@@ -131,9 +131,11 @@ const MessageBubble = ({
     <div
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
     >
-      <div className={`max-w-[80%] ${isUser ? '' : 'flex flex-col gap-2'}`}>
+      <div
+        className={`max-w-[85%] md:max-w-[80%] ${isUser ? '' : 'flex flex-col gap-1 md:gap-2'}`}
+      >
         <div
-          className={`rounded-2xl px-4 py-3 leading-relaxed shadow-sm ${
+          className={`rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm ${
             isUser
               ? 'bg-purple-600/90 text-white'
               : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
@@ -277,7 +279,7 @@ function BookOfShadowsContent() {
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [promptHandled, setPromptHandled] = useState<string | null>(null);
-  const [isAssistExpanded, setIsAssistExpanded] = useState(true);
+  const [isAssistExpanded, setIsAssistExpanded] = useState(false);
   const lastSendTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -436,10 +438,10 @@ function BookOfShadowsContent() {
             <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
               Book of Shadows
             </h1>
-            <p className='text-sm text-zinc-400 md:text-base'>
+            {/* <p className='text-sm text-zinc-400 md:text-base'>
               Your calm astro–tarot companion. Share what's stirring and Lunary
               will gather the sky around you.
-            </p>
+            </p> */}
           </header>
 
           <main className='flex flex-1 flex-col items-center justify-center gap-6'>
@@ -496,18 +498,13 @@ function BookOfShadowsContent() {
   }
 
   return (
-    <div className='h-screen w-full overflow-hidden bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-      <div className='mx-auto flex h-full w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
-        <header className='mb-6 shrink-0 space-y-2'>
-          <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
+    <div className='flex flex-col flex-1 min-h-0 w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+      <div className='mx-auto flex flex-1 min-h-0 w-full max-w-3xl flex-col px-3 pt-3 pb-2 md:px-4 md:py-4'>
+        <header className='mb-2 shrink-0 md:mb-4'>
+          <h1 className='text-xl font-light tracking-tight text-zinc-50 md:text-4xl'>
             Book of Shadows
           </h1>
-          <p className='text-sm text-zinc-400 md:text-base'>
-            Your calm astro–tarot companion. Share what's stirring and Lunary
-            will gather the sky around you.
-          </p>
-
-          <div className='flex flex-wrap items-center gap-2 text-xs text-zinc-500 md:text-sm'>
+          <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-500'>
             {planId ? (
               <span className='rounded-full border border-purple-500/40 px-3 py-1 text-purple-300/90'>
                 Plan: {planId.replace(/_/g, ' ')}
@@ -527,13 +524,13 @@ function BookOfShadowsContent() {
           </div>
         </header>
 
-        <div className='flex min-h-0 flex-1 flex-col gap-4'>
-          <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur'>
+        <div className='flex min-h-0 flex-1 flex-col gap-2'>
+          <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800/60 bg-zinc-950/60'>
             <div
               ref={messagesContainerRef}
-              className='min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-6'
+              className='min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6'
             >
-              <div className='mx-auto flex max-w-2xl flex-col gap-4 md:gap-6'>
+              <div className='mx-auto flex max-w-2xl flex-col gap-3 md:gap-6'>
                 {isLoadingHistory ? (
                   <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
                     Loading your conversation...
@@ -699,7 +696,7 @@ function BookOfShadowsContent() {
             <div className='shrink-0 border-t border-zinc-800/70 bg-zinc-900/40'>
               <button
                 onClick={() => setIsAssistExpanded(!isAssistExpanded)}
-                className='flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-purple-300/90 transition hover:bg-zinc-800/40 md:px-6'
+                className='flex w-full items-center justify-between px-3 py-2 text-sm font-semibold text-purple-300/90 transition hover:bg-zinc-800/40 md:px-6 md:py-3'
               >
                 <span>Assist</span>
                 {isAssistExpanded ? (
@@ -709,7 +706,7 @@ function BookOfShadowsContent() {
                 )}
               </button>
               {isAssistExpanded && (
-                <div className='px-4 pb-3 text-sm text-zinc-300 md:px-6 md:pb-4'>
+                <div className='px-3 pb-2 text-sm text-zinc-300 md:px-6 md:pb-4'>
                   <CopilotQuickActions
                     onActionClick={(prompt) => sendMessage(prompt)}
                     disabled={isStreaming}
@@ -721,38 +718,36 @@ function BookOfShadowsContent() {
 
           <form
             onSubmit={handleSubmit}
-            className='shrink-0 flex flex-col gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-950/80 p-4 shadow-lg shadow-purple-900/10 md:flex-row md:items-end'
+            className='shrink-0 relative flex items-center'
           >
-            <div className='flex-1'>
-              <label htmlFor='book-of-shadows-message' className='sr-only'>
-                Share with Lunary
-              </label>
-              <textarea
-                id='book-of-shadows-message'
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={handleKeyDown}
-                rows={3}
-                placeholder="Write your heart's question…"
-                className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 md:text-base'
-              />
-            </div>
+            <label htmlFor='book-of-shadows-message' className='sr-only'>
+              Share with Lunary
+            </label>
+            <textarea
+              id='book-of-shadows-message'
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              placeholder="Write your heart's question…"
+              className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30'
+            />
             {isStreaming ? (
-              <Button
+              <button
                 type='button'
                 onClick={stop}
-                className='inline-flex items-center gap-2 rounded-xl bg-red-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-red-500 md:self-end'
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-red-600 text-white transition hover:bg-red-500'
               >
-                Stop
-              </Button>
+                <Square className='w-4 h-4' />
+              </button>
             ) : (
-              <Button
+              <button
                 type='submit'
                 disabled={input.trim().length === 0}
-                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-zinc-700 md:self-end'
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-purple-600 text-white transition hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed'
               >
-                Ask Lunary
-              </Button>
+                <ArrowUp className='w-4 h-4' />
+              </button>
             )}
           </form>
         </div>
