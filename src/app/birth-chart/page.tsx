@@ -950,7 +950,7 @@ const BirthChartPage = () => {
   // Check subscription access first
   if (!hasChartAccess) {
     return (
-      <div className='min-h-screen space-y-6 pb-20 px-4'>
+      <div className='min-h-screen space-y-6 pb-16 px-4'>
         <div className='flex items-center justify-center min-h-[60vh]'>
           <div className='text-center max-w-lg px-4'>
             <h1 className='text-3xl font-bold text-white mb-6'>
