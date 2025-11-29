@@ -46,16 +46,15 @@ export async function GET(request: NextRequest) {
     // Load font (fallback to system font if fails)
     const fontData = await loadRobotoFont(request).catch(() => null);
 
-    // Variety of cosmic gradient backgrounds
     const gradients = [
-      'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%)',
-      'linear-gradient(135deg, #1a1a2e 0%, #2d3561 50%, #1e3c72 100%)',
-      'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
-      'linear-gradient(135deg, #1e1e2e 0%, #2c3e50 50%, #34495e 100%)',
-      'linear-gradient(135deg, #0a0a1a 0%, #1a2332 50%, #1e3c72 100%)',
-      'linear-gradient(135deg, #1a1a2e 0%, #2c3e50 50%, #34495e 100%)',
-      'linear-gradient(135deg, #0f0c29 0%, #1a1a2e 50%, #2d3561 100%)',
-      'linear-gradient(135deg, #1e2332 0%, #2d3561 50%, #1e3c72 100%)',
+      'linear-gradient(135deg, #16213e, #1a1a2e, #0a0a1a)',
+      'linear-gradient(135deg, #1e3c72, #2d3561, #1a1a2e)',
+      'linear-gradient(135deg, #24243e, #302b63, #0f0c29)',
+      'linear-gradient(135deg, #34495e, #2c3e50, #1e1e2e)',
+      'linear-gradient(135deg, #1e3c72, #1a2332, #0a0a1a)',
+      'linear-gradient(135deg, #34495e, #2c3e50, #1a1a2e)',
+      'linear-gradient(135deg, #2d3561, #1a1a2e, #0f0c29)',
+      'linear-gradient(135deg, #1e3c72, #2d3561, #1e2332)',
     ];
 
     // Pick gradient based on quote text hash for consistency
