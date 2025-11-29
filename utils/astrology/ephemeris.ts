@@ -76,6 +76,7 @@ const PLANETS = [
   { body: Body.Saturn, name: 'Saturn' },
   { body: Body.Uranus, name: 'Uranus' },
   { body: Body.Neptune, name: 'Neptune' },
+  { body: Body.Pluto, name: 'Pluto' },
 ];
 
 const BRIGHT_STARS = [
