@@ -28,7 +28,7 @@ const Moon = () => {
   }, []);
 
   return (
-    <div className='space-y-8 pb-20'>
+    <div className='space-y-8 pb-16'>
       <div className='mb-6'>
         <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           Complete Moon Guide
