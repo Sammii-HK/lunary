@@ -61,8 +61,17 @@ function getWeekDates(weekOffset: number): string {
   return `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
 }
 
-function getMoonEmoji(weekOffset: number): string {
-  const phases = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
+function getMoonPhasePng(weekOffset: number): string {
+  const phases = [
+    'new-moon',
+    'waxing-cresent-moon',
+    'first-quarter',
+    'waxing-gibbous-moon',
+    'full-moon',
+    'waning-gibbous-moon',
+    'last-quarter',
+    'waning-cresent-moon',
+  ];
   const now = new Date();
   const targetDate = new Date(
     now.getTime() + weekOffset * 7 * 24 * 60 * 60 * 1000,
@@ -83,7 +92,12 @@ export async function GET(request: NextRequest) {
   const weekOffset = parseInt(weekOffsetParam, 10);
   const weekRange = getWeekDates(weekOffset);
   const format = (searchParams.get('format') || 'landscape') as Format;
-  const moonPhase = searchParams.get('moon') || getMoonEmoji(weekOffset);
+  const moonPhasePng = getMoonPhasePng(weekOffset);
+
+  const baseUrl =
+    process.env.NODE_ENV === 'production'
+      ? 'https://lunary.app'
+      : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
 
   const dimensions = FORMATS[format] || FORMATS.landscape;
   const sizes = getResponsiveSizes(format);
@@ -92,7 +106,8 @@ export async function GET(request: NextRequest) {
     (
       <div
         style={{
-          background: `linear-gradient(145deg, ${BRAND_COLORS.zinc900} 0%, #1a1025 50%, ${BRAND_COLORS.zinc900} 100%)`,
+          background:
+            'linear-gradient(160deg, #0a0a0f 0%, #12101a 40%, #0f0d14 70%, #0a0a0f 100%)',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -105,37 +120,28 @@ export async function GET(request: NextRequest) {
           overflow: 'hidden',
         }}
       >
-        {/* Background gradient orbs */}
+        {/* Subtle dark purple glow */}
         <div
           style={{
             position: 'absolute',
-            top: '-20%',
+            top: '-10%',
             left: '-10%',
             width: '60%',
             height: '60%',
-            background: `radial-gradient(circle, ${BRAND_COLORS.purple600}25 0%, transparent 70%)`,
+            background:
+              'radial-gradient(circle, rgba(88, 28, 135, 0.15) 0%, transparent 60%)',
             display: 'flex',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            bottom: '-30%',
-            right: '-20%',
-            width: '70%',
-            height: '70%',
-            background: `radial-gradient(circle, ${BRAND_COLORS.pink600}20 0%, transparent 70%)`,
-            display: 'flex',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '40%',
-            right: '10%',
-            width: '30%',
-            height: '30%',
-            background: `radial-gradient(circle, ${BRAND_COLORS.purple500}15 0%, transparent 60%)`,
+            bottom: '-10%',
+            right: '-10%',
+            width: '50%',
+            height: '50%',
+            background:
+              'radial-gradient(circle, rgba(88, 28, 135, 0.12) 0%, transparent 60%)',
             display: 'flex',
           }}
         />
@@ -181,17 +187,18 @@ export async function GET(request: NextRequest) {
             maxWidth: '90%',
           }}
         >
-          {/* Moon emoji */}
-          <div
+          {/* Moon icon */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${baseUrl}/icons/dotty/moon-phases/${moonPhasePng}.png`}
+            alt='Moon phase'
+            width={sizes.emojiSize + 40}
+            height={sizes.emojiSize + 40}
             style={{
-              fontSize: sizes.emojiSize,
               marginBottom: 24,
-              display: 'flex',
               filter: 'drop-shadow(0 0 20px rgba(168, 85, 247, 0.4))',
             }}
-          >
-            {moonPhase}
-          </div>
+          />
 
           {/* Title */}
           <div
