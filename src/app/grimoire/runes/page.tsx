@@ -95,7 +95,7 @@ Runes work through symbolism, energy, and intention. Each rune carries specific 
           },
         ]}
       />
-      <div className='max-w-4xl mx-auto -mt-8'>
+      <div className='max-w-4xl p-4'>
         <Runes />
       </div>
     </>

@@ -95,7 +95,7 @@ Each Sabbat has specific themes, correspondences, colors, foods, and activities.
           },
         ]}
       />
-      <div className='max-w-4xl mx-auto -mt-8'>
+      <div className='max-w-4xl p-4'>
         <WheelOfTheYear />
       </div>
     </>

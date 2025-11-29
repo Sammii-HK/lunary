@@ -177,7 +177,7 @@ export default function AppDashboard() {
   }, [authState.isAuthenticated, authState.loading]);
 
   return (
-    <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl mx-auto px-4'>
+    <div className='flex h-fit-content w-full flex-col gap-6 max-w-7xl mx-auto p-4'>
       <AstronomyContextProvider>
         {/* Screen reader only H1 for accessibility */}
         <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>

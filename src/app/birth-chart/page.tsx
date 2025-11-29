@@ -938,7 +938,7 @@ const BirthChartPage = () => {
 
   if (!me) {
     return (
-      <div className='h-[91vh] flex items-center justify-center'>
+      <div className='h-full flex items-center justify-center'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4'></div>
           <p className='text-zinc-400'>Loading your birth chart...</p>
@@ -950,7 +950,7 @@ const BirthChartPage = () => {
   // Check subscription access first
   if (!hasChartAccess) {
     return (
-      <div className='min-h-screen space-y-6 pb-16 px-4'>
+      <div className='h-full space-y-6 p-4 overflow-auto'>
         <div className='flex items-center justify-center min-h-[60vh]'>
           <div className='text-center max-w-lg px-4'>
             <h1 className='text-3xl font-bold text-white mb-6'>
@@ -985,7 +985,7 @@ const BirthChartPage = () => {
 
   if (!userBirthday) {
     return (
-      <div className='h-[91vh] flex items-center justify-center'>
+      <div className='h-full flex items-center justify-center'>
         <div className='text-center max-w-md px-4'>
           <h1 className='text-2xl font-bold text-white mb-4'>
             Your Birth Chart
@@ -1009,7 +1009,7 @@ const BirthChartPage = () => {
   // This preserves data for users who had trial/paid but keeps paywall intact
   if (!hasBirthChartData || !birthChartData) {
     return (
-      <div className='h-[91vh] flex items-center justify-center'>
+      <div className='h-full flex items-center justify-center'>
         <div className='text-center max-w-md px-4'>
           <h1 className='text-2xl font-bold text-white mb-4'>
             Generating Birth Chart
@@ -1030,7 +1030,7 @@ const BirthChartPage = () => {
   }
 
   return (
-    <div className='h-[91vh] space-y-6 pb-4 overflow-auto'>
+    <div className='h-full space-y-6 p-4 overflow-auto'>
       <BirthChart
         birthChart={birthChartData}
         userName={userName}

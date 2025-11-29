@@ -101,7 +101,7 @@ Candle magic works through sympathetic magic—the principle that symbolic actio
           { text: 'Moon Rituals', href: '/grimoire/moon-rituals' },
         ]}
       />
-      <div className='max-w-4xl mx-auto -mt-8'>
+      <div className='max-w-4xl p-4'>
         <CandleMagic />
       </div>
     </>

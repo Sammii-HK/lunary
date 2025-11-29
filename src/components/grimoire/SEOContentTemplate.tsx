@@ -118,7 +118,7 @@ export function SEOContentTemplate({
   };
 
   return (
-    <article className='max-w-4xl mx-auto space-y-8 pb-16'>
+    <article className='max-w-4xl mx-auto space-y-8 p-4'>
       {/* JSON-LD Schemas */}
       {faqSchema && (
         <script

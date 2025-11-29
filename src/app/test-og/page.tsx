@@ -99,7 +99,7 @@ export default function TestOGPage() {
   // const nextMonthDates = getNextMonthDates();
 
   return (
-    <div className='flex flex-col items-center gap-6 py-8 px-4'>
+    <div className='flex flex-col items-center gap-6 p-4'>
       <h1 className='text-3xl font-bold text-white mb-6'>Cosmic OG Preview</h1>
 
       {/* Selected Date Image */}

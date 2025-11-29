@@ -350,7 +350,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     })}`;
 
     return (
-      <div className='container mx-auto py-8 px-4 max-w-4xl'>
+      <div className='container mx-auto p-4 max-w-4xl'>
         <Link
           href='/blog'
           className='inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors'
@@ -937,7 +937,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     }
 
     return (
-      <div className='container mx-auto py-8 px-4 max-w-4xl'>
+      <div className='container mx-auto p-4 max-w-4xl'>
         <h1 className='text-2xl font-bold mb-4'>Error loading blog post</h1>
         <p className='text-muted-foreground mb-4'>
           {error instanceof Error ? error.message : 'An unknown error occurred'}

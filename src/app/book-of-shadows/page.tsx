@@ -129,42 +129,38 @@ const MessageBubble = ({
 
   return (
     <div
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
+      className={`flex items-end gap-1.5 ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
     >
       <div
-        className={`max-w-[85%] md:max-w-[80%] ${isUser ? '' : 'flex flex-col gap-1 md:gap-2'}`}
+        className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm ${
+          isUser
+            ? 'bg-purple-600/90 text-white'
+            : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
+        }`}
       >
-        <div
-          className={`rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm ${
-            isUser
-              ? 'bg-purple-600/90 text-white'
-              : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
-          }`}
-        >
-          {renderContent()}
-        </div>
-        {!isUser && (
-          <div className='opacity-0 group-hover:opacity-100 transition-opacity'>
-            <SaveToCollection
-              item={{
-                title: `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}`,
-                description: content.substring(0, 200),
-                category: 'chat',
-                content: { messageId, content, role },
-                tags: ['ai-chat'],
-              }}
-              isSaved={savedCollections?.some(
-                (c) =>
-                  c.title ===
-                    `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}` &&
-                  c.category === 'chat',
-              )}
-              folders={folders}
-              onSaved={onSaved}
-            />
-          </div>
-        )}
+        {renderContent()}
       </div>
+      {!isUser && (
+        <div className='opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mb-1'>
+          <SaveToCollection
+            item={{
+              title: `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}`,
+              description: content.substring(0, 200),
+              category: 'chat',
+              content: { messageId, content, role },
+              tags: ['ai-chat'],
+            }}
+            isSaved={savedCollections?.some(
+              (c) =>
+                c.title ===
+                  `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}` &&
+                c.category === 'chat',
+            )}
+            folders={folders}
+            onSaved={onSaved}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -499,7 +495,7 @@ function BookOfShadowsContent() {
 
   return (
     <div className='flex flex-col flex-1 min-h-0 w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-      <div className='mx-auto flex flex-1 min-h-0 w-full max-w-3xl flex-col px-3 pt-3 pb-2 md:px-4 md:py-4'>
+      <div className='mx-auto flex flex-1 min-h-0 w-full max-w-3xl flex-col p-4'>
         <header className='mb-2 shrink-0 md:mb-4'>
           <h1 className='text-xl font-light tracking-tight text-zinc-50 md:text-4xl'>
             Book of Shadows

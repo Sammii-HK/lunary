@@ -5,7 +5,7 @@ import { stringToKebabCase } from '../../../../utils/string';
 const Chakras = () => {
   const chakraList = Object.keys(chakras);
   return (
-    <div className='space-y-6 pb-16'>
+    <div className='space-y-6'>
       <div className='mb-6'>
         <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           Complete Chakras Guide

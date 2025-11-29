@@ -149,7 +149,7 @@ export default function RootLayout({
                 <AuthStatusProvider>
                   <Suspense
                     fallback={
-                      <main className='flex flex-col flex-1 w-full min-h-0 pb-16'>
+                      <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
                         {children}
                       </main>
                     }

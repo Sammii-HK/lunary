@@ -4,23 +4,45 @@ import { SmartTrialButton } from './SmartTrialButton';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../utils/pricing';
-import { getGeneralTarotReading } from '../../utils/tarot/generalTarot';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import type { GeneralTarotReading } from '../../utils/tarot/generalTarot';
 
 export const TarotWidget = () => {
   const { me } = useAccount();
   const subscription = useSubscription();
   const { currentTarotCard } = useAstronomyContext();
+  const [generalTarot, setGeneralTarot] = useState<GeneralTarotReading | null>(
+    null,
+  );
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
     subscription.plan,
   );
-  const userName = (me?.profile as any)?.name;
+
+  useEffect(() => {
+    if (!hasChartAccess && !generalTarot) {
+      import('../../utils/tarot/generalTarot')
+        .then(({ getGeneralTarotReading }) => {
+          setGeneralTarot(getGeneralTarotReading());
+        })
+        .catch((err) => {
+          console.error('Failed to load tarot reading:', err);
+        });
+    }
+  }, [hasChartAccess, generalTarot]);
 
   // If user doesn't have birth chart access, show general tarot reading
   if (!hasChartAccess) {
-    const generalTarot = getGeneralTarotReading();
+    if (!generalTarot) {
+      return (
+        <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden min-h-64'>
+          <div className='h-full flex items-center justify-center'>
+            <div className='w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin' />
+          </div>
+        </div>
+      );
+    }
     return (
       <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden min-h-64'>
         <div className='space-y-3 flex-1 min-w-0 overflow-y-auto overflow-x-hidden'>
