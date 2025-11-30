@@ -113,7 +113,7 @@ function CollectionsPageContent() {
   if (!authState.isAuthenticated) {
     return (
       <div className='min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-        <div className='max-w-4xl mx-auto px-4 py-8'>
+        <div className='max-w-4xl mx-auto p-4'>
           <div className='text-center py-12'>
             <BookOpen className='w-16 h-16 mx-auto mb-4 text-purple-400' />
             <h1 className='text-3xl font-bold mb-4'>Your Lunary Journal</h1>
@@ -149,7 +149,7 @@ function CollectionsPageContent() {
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-      <div className='max-w-6xl mx-auto px-4 py-8'>
+      <div className='max-w-6xl mx-auto p-4'>
         <header className='mb-8'>
           <h1 className='text-3xl font-bold mb-2 flex items-center gap-3'>
             <BookOpen className='w-8 h-8 text-purple-400' />

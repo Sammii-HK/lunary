@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useTransition } from 'react';
+import { useState, useMemo, useEffect, useTransition, useRef } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { grimoire, grimoireItems } from '@/constants/grimoire';
@@ -48,64 +48,75 @@ export function GrimoireSearch({
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchData, setSearchData] = useState<SearchDataType>(null);
   const [searchDataLoading, setSearchDataLoading] = useState(false);
+  const loadingStarted = useRef(false);
 
-  const loadSearchData = useCallback(async () => {
-    if (searchData || searchDataLoading) return;
-    setSearchDataLoading(true);
-    try {
-      const [
-        { runesList },
-        { tarotSuits, tarotSpreads },
-        { spells },
-        { correspondencesData },
-        { chakras },
-        { annualFullMoons },
-        { monthlyMoonPhases },
-        { zodiacSigns, planetaryBodies },
-        { wheelOfTheYearSabbats },
-        { tarotCards },
-        { crystalDatabase },
-        { angelNumbers, lifePathNumbers },
-        { TAROT_SPREADS },
-      ] = await Promise.all([
-        import('@/constants/runes'),
-        import('@/constants/tarot'),
-        import('@/constants/spells'),
-        import('@/constants/grimoire/correspondences'),
-        import('@/constants/chakras'),
-        import('@/constants/moon/annualFullMoons'),
-        import('../../../utils/moon/monthlyPhases'),
-        import('../../../utils/zodiac/zodiac'),
-        import('@/constants/sabbats'),
-        import('../../../utils/tarot/tarot-cards'),
-        import('@/constants/grimoire/crystals'),
-        import('@/constants/grimoire/numerology-data'),
-        import('@/constants/tarotSpreads'),
-      ]);
-      setSearchData({
-        runesList,
-        tarotSuits,
-        tarotSpreads,
-        spells,
-        correspondencesData,
-        chakras,
-        annualFullMoons,
-        monthlyMoonPhases,
-        zodiacSigns,
-        planetaryBodies,
-        wheelOfTheYearSabbats,
-        tarotCards,
-        crystalDatabase,
-        angelNumbers,
-        lifePathNumbers,
-        TAROT_SPREADS,
-      });
-    } catch (error) {
-      console.error('Failed to load search data:', error);
-    } finally {
-      setSearchDataLoading(false);
+  useEffect(() => {
+    if (loadingStarted.current || searchData) return;
+    loadingStarted.current = true;
+
+    const loadData = async () => {
+      setSearchDataLoading(true);
+      try {
+        const [
+          { runesList },
+          { tarotSuits, tarotSpreads },
+          { spells },
+          { correspondencesData },
+          { chakras },
+          { annualFullMoons },
+          { monthlyMoonPhases },
+          { zodiacSigns, planetaryBodies },
+          { wheelOfTheYearSabbats },
+          { tarotCards },
+          { crystalDatabase },
+          { angelNumbers, lifePathNumbers },
+          { TAROT_SPREADS },
+        ] = await Promise.all([
+          import('@/constants/runes'),
+          import('@/constants/tarot'),
+          import('@/constants/spells'),
+          import('@/constants/grimoire/correspondences'),
+          import('@/constants/chakras'),
+          import('@/constants/moon/annualFullMoons'),
+          import('../../../utils/moon/monthlyPhases'),
+          import('../../../utils/zodiac/zodiac'),
+          import('@/constants/sabbats'),
+          import('../../../utils/tarot/tarot-cards'),
+          import('@/constants/grimoire/crystals'),
+          import('@/constants/grimoire/numerology-data'),
+          import('@/constants/tarotSpreads'),
+        ]);
+        setSearchData({
+          runesList,
+          tarotSuits,
+          tarotSpreads,
+          spells,
+          correspondencesData,
+          chakras,
+          annualFullMoons,
+          monthlyMoonPhases,
+          zodiacSigns,
+          planetaryBodies,
+          wheelOfTheYearSabbats,
+          tarotCards,
+          crystalDatabase,
+          angelNumbers,
+          lifePathNumbers,
+          TAROT_SPREADS,
+        });
+      } catch (error) {
+        console.error('Failed to load search data:', error);
+      } finally {
+        setSearchDataLoading(false);
+      }
+    };
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => loadData());
+    } else {
+      setTimeout(() => loadData(), 100);
     }
-  }, [searchData, searchDataLoading]);
+  }, [searchData]);
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim() || !searchData) return [];
@@ -135,7 +146,7 @@ export function GrimoireSearch({
       });
     });
 
-    Object.entries(searchData.runesList).forEach(
+    Object.entries(searchData.runesList || {}).forEach(
       ([key, rune]: [string, any]) => {
         if (
           rune.name.toLowerCase().includes(query) ||
@@ -152,7 +163,7 @@ export function GrimoireSearch({
       },
     );
 
-    Object.entries(searchData.tarotCards.majorArcana).forEach(
+    Object.entries(searchData.tarotCards?.majorArcana || {}).forEach(
       ([, card]: [string, any]) => {
         if (
           card.name.toLowerCase().includes(query) ||
@@ -168,7 +179,7 @@ export function GrimoireSearch({
       },
     );
 
-    Object.entries(searchData.chakras).forEach(
+    Object.entries(searchData.chakras || {}).forEach(
       ([key, chakra]: [string, any]) => {
         if (
           chakra.name.toLowerCase().includes(query) ||
@@ -184,7 +195,7 @@ export function GrimoireSearch({
       },
     );
 
-    Object.entries(searchData.zodiacSigns).forEach(
+    Object.entries(searchData.zodiacSigns || {}).forEach(
       ([key, sign]: [string, any]) => {
         if (sign.name.toLowerCase().includes(query)) {
           results.push({
@@ -197,7 +208,7 @@ export function GrimoireSearch({
       },
     );
 
-    Object.entries(searchData.planetaryBodies).forEach(
+    Object.entries(searchData.planetaryBodies || {}).forEach(
       ([key, planet]: [string, any]) => {
         if (planet.name.toLowerCase().includes(query)) {
           results.push({
@@ -210,7 +221,7 @@ export function GrimoireSearch({
       },
     );
 
-    searchData.wheelOfTheYearSabbats.forEach((sabbat: any) => {
+    (searchData.wheelOfTheYearSabbats || []).forEach((sabbat: any) => {
       if (sabbat.name.toLowerCase().includes(query)) {
         results.push({
           type: 'sabbat',
@@ -222,7 +233,7 @@ export function GrimoireSearch({
     });
 
     // Search spells
-    searchData.spells.forEach((spell: any) => {
+    (searchData.spells || []).forEach((spell: any) => {
       if (
         spell.title.toLowerCase().includes(query) ||
         spell.category.toLowerCase().includes(query) ||
@@ -240,9 +251,9 @@ export function GrimoireSearch({
     });
 
     // Search Minor Arcana tarot cards
-    Object.entries(searchData.tarotCards.minorArcana).forEach(
+    Object.entries(searchData.tarotCards?.minorArcana || {}).forEach(
       ([, suitCards]: [string, any]) => {
-        Object.entries(suitCards).forEach(([, card]: [string, any]) => {
+        Object.entries(suitCards || {}).forEach(([, card]: [string, any]) => {
           if (
             card.name.toLowerCase().includes(query) ||
             card.keywords?.some((kw: string) =>
@@ -295,7 +306,7 @@ export function GrimoireSearch({
     });
 
     // Search moon phases
-    Object.entries(searchData.monthlyMoonPhases).forEach(
+    Object.entries(searchData.monthlyMoonPhases || {}).forEach(
       ([key, phase]: [string, any]) => {
         if (
           key.toLowerCase().includes(query) ||
@@ -312,7 +323,7 @@ export function GrimoireSearch({
     );
 
     // Search full moons
-    Object.entries(searchData.annualFullMoons).forEach(
+    Object.entries(searchData.annualFullMoons || {}).forEach(
       ([month, moon]: [string, any]) => {
         if (
           month.toLowerCase().includes(query) ||
@@ -504,17 +515,21 @@ export function GrimoireSearch({
     Object.entries(searchData.correspondencesData?.deities || {}).forEach(
       ([pantheon, gods]: [string, any]) => {
         Object.entries(gods || {}).forEach(([deity, data]: [string, any]) => {
+          const domainArray = Array.isArray(data.domain) ? data.domain : [];
+          const domainMatch = domainArray.some((d: string) =>
+            d.toLowerCase().includes(query),
+          );
           if (
             deity.toLowerCase().includes(query) ||
             pantheon.toLowerCase().includes(query) ||
-            data.domain?.toLowerCase().includes(query)
+            domainMatch
           ) {
             results.push({
               type: 'correspondence',
               title: `${deity} (${pantheon})`,
               section: 'correspondences',
               href: `/grimoire/correspondences/deities/${pantheon.toLowerCase()}/${deity.toLowerCase()}`,
-              match: data.domain,
+              match: domainArray.join(', '),
             });
           }
         });
@@ -729,7 +744,6 @@ export function GrimoireSearch({
             setShowSearchResults(e.target.value.length > 0);
           }}
           onFocus={() => {
-            loadSearchData();
             if (searchQuery.length > 0) setShowSearchResults(true);
           }}
           aria-label='Search grimoire content'

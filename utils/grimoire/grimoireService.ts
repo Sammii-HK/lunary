@@ -4,7 +4,7 @@ import {
   crystalCategories,
   getCrystalsByIntention,
   getCrystalsByCategory,
-} from './crystalData';
+} from '../../src/constants/grimoire/crystals';
 import {
   spells,
   spellCategories,
@@ -324,8 +324,8 @@ export const generateGrimoirePack = (
     crystals: allCrystals.map((crystal) => ({
       name: crystal.name,
       properties: crystal.properties,
-      chakra: crystal.chakra,
-      element: crystal.element,
+      chakra: crystal.chakras?.[0] || '',
+      element: crystal.elements?.[0] || '',
       intentions: crystal.intentions,
       colors: crystal.colors,
       usage: `Hold during ${category} work or place on altar for enhanced energy`,

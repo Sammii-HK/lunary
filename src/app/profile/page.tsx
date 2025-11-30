@@ -321,7 +321,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='flex flex-col items-center gap-6 py-8'>
+    <div className='flex flex-col items-center gap-6 p-4'>
       <div className='flex items-center justify-between w-full max-w-3xl'>
         <h1 className='text-2xl font-bold text-white text-center md:text-left'>
           Your Profile

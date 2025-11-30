@@ -102,7 +102,7 @@ Rituals provide structure and meaning to magical work. They create sacred space,
           { text: 'Moon Rituals', href: '/grimoire/moon-rituals' },
         ]}
       />
-      <div className='max-w-4xl mx-auto -mt-8'>
+      <div className='max-w-4xl mx-auto p-4'>
         <Practices />
       </div>
     </>

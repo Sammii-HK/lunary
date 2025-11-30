@@ -33,7 +33,7 @@ const Tarot = () => {
   }, []);
 
   return (
-    <div className='space-y-8 pb-20'>
+    <div className='space-y-8'>
       <div className='mb-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           Tarot

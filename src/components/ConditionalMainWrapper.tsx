@@ -134,13 +134,9 @@ export function ConditionalMainWrapper({
   return (
     <main
       className={cn(
-        'flex flex-col w-full font-mono text-sm gap-4 overflow-y-auto px-4',
-        showMarketingNav && 'mt-8',
-        showAppNav && 'pb-20',
-        // Calculate height accounting for fixed navs
-        showMarketingNav && showAppNav && 'h-[calc(100vh-2rem-5rem)]',
-        showMarketingNav && !showAppNav && 'h-[calc(100vh-2rem)]',
-        !showMarketingNav && showAppNav && 'h-[calc(100vh-5rem)]',
+        'flex flex-col w-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-700 hover:scrollbar-thumb-zinc-600',
+        showMarketingNav && 'mt-8 h-[calc(100vh-2rem)]',
+        showAppNav && 'h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)]',
         !showMarketingNav && !showAppNav && 'h-screen',
       )}
     >

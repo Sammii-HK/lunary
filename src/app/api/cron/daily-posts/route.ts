@@ -17,7 +17,8 @@ import {
   generateTrialExpiredEmailHTML,
   generateTrialExpiredEmailText,
 } from '@/lib/email-templates/trial-expired';
-import { getNextSubreddit } from '@/config/reddit-subreddits';
+// Subreddit rotation available via: import { getNextSubreddit } from '@/config/reddit-subreddits';
+// Daily cosmic posts always go to r/LunaryApp
 import {
   generateCatchyQuote,
   getQuoteImageUrl,
@@ -485,8 +486,8 @@ async function runDailyPosts(dateStr: string) {
   // Cron runs at 2 PM UTC the day before, schedule posts starting at 12 PM UTC next day
   const scheduleBase = new Date(dateStr + 'T12:00:00Z'); // Start at 12 PM UTC on target date
 
-  // Get next subreddit for rotation
-  const subreddit = getNextSubreddit();
+  // Always post to our own subreddit r/LunaryApp
+  const subreddit = { name: 'LunaryApp' };
 
   // Generate Reddit title from cosmic content
   const redditTitle = `Daily Cosmic Guidance - ${dateStr}: ${cosmicContent.primaryEvent.name}`;

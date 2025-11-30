@@ -8,37 +8,63 @@ export default function OGDebugPage() {
     return new Date().toISOString().split('T')[0];
   });
   const [cacheKey, setCacheKey] = useState(() => Date.now());
+  const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
 
-  // Force refresh by adding timestamp to URLs
   const refreshCache = () => {
     setCacheKey(Date.now());
+    setLoadErrors({});
+  };
+
+  const handleImageError = (name: string) => {
+    setLoadErrors((prev) => ({ ...prev, [name]: true }));
   };
 
   const ogTypes = [
     {
-      name: 'Cosmic',
-      url: `/api/og/cosmic/${selectedDate}&t=${cacheKey}`,
-      description: 'Daily cosmic content with astronomical insights',
+      name: 'Cosmic (Square)',
+      url: `/api/og/cosmic/${selectedDate}?t=${cacheKey}`,
+      description: 'Daily cosmic content - square format',
+    },
+    {
+      name: 'Cosmic (Landscape)',
+      url: `/api/og/cosmic/${selectedDate}/landscape?t=${cacheKey}`,
+      description: 'Daily cosmic content - landscape for X/Twitter',
+    },
+    {
+      name: 'Cosmic Post',
+      url: `/api/og/cosmic-post/${selectedDate}?t=${cacheKey}`,
+      description: 'Cosmic post data endpoint (JSON)',
+      isJson: true,
     },
     {
       name: 'Crystal',
-      url: `/api/og/crystal/${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/crystal?date=${selectedDate}&t=${cacheKey}`,
       description: 'Crystal recommendations with chakra info',
     },
     {
       name: 'Tarot',
-      url: `/api/og/tarot/${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/tarot?date=${selectedDate}&t=${cacheKey}`,
       description: 'Tarot cards with suit color variations',
     },
     {
       name: 'Moon',
-      url: `/api/og/moon/${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/moon?date=${selectedDate}&t=${cacheKey}`,
       description: 'Real moon phases with astronomical data',
     },
     {
       name: 'Horoscope',
-      url: `/api/og/horoscope/${selectedDate}&t=${cacheKey}`,
+      url: `/api/og/horoscope?date=${selectedDate}&t=${cacheKey}`,
       description: 'Zodiac signs with daily wisdom',
+    },
+    {
+      name: 'Moon Circle',
+      url: `/api/og/moon-circle?date=${selectedDate}&t=${cacheKey}`,
+      description: 'Moon circle event images',
+    },
+    {
+      name: 'Social Quote',
+      url: `/api/og/social-quote?quote=The+stars+align+today&t=${cacheKey}`,
+      description: 'Quote images for social media',
     },
   ];
 
@@ -95,40 +121,70 @@ export default function OGDebugPage() {
         </div>
 
         {/* OG Images Grid */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-          {ogTypes.map((og) => (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+          {ogTypes.map((og: any) => (
             <div
               key={og.name}
-              className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+              className={`bg-zinc-900 rounded-lg border overflow-hidden ${
+                loadErrors[og.name] ? 'border-red-500' : 'border-zinc-700'
+              }`}
             >
-              {/* Header */}
-              <div className='p-6 border-b border-zinc-700'>
-                <h3 className='text-xl font-bold text-white mb-2'>{og.name}</h3>
-                <p className='text-zinc-400 text-sm'>{og.description}</p>
+              <div className='p-4 border-b border-zinc-700'>
+                <div className='flex items-center justify-between'>
+                  <h3 className='text-lg font-bold text-white'>{og.name}</h3>
+                  {loadErrors[og.name] && (
+                    <span className='px-2 py-1 text-xs bg-red-500/20 text-red-400 rounded'>
+                      ERROR
+                    </span>
+                  )}
+                  {og.isJson && (
+                    <span className='px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded'>
+                      JSON
+                    </span>
+                  )}
+                </div>
+                <p className='text-zinc-400 text-sm mt-1'>{og.description}</p>
               </div>
 
-              {/* Image */}
-              <div className='p-6'>
-                <div className='relative aspect-square rounded-lg overflow-hidden border border-zinc-600 mb-4'>
-                  <Image
-                    src={og.url}
-                    alt={og.name}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    className='hover:scale-105 transition-transform duration-300'
-                    key={`${og.name}-${cacheKey}`} // Force React to reload
-                  />
-                </div>
+              <div className='p-4'>
+                {og.isJson ? (
+                  <div className='bg-zinc-800 rounded p-4 text-xs text-zinc-400 h-48 overflow-auto'>
+                    <a
+                      href={og.url}
+                      target='_blank'
+                      className='text-purple-400 hover:underline'
+                    >
+                      View JSON Response →
+                    </a>
+                  </div>
+                ) : (
+                  <div className='relative aspect-square rounded-lg overflow-hidden border border-zinc-600 mb-3'>
+                    {loadErrors[og.name] ? (
+                      <div className='absolute inset-0 flex items-center justify-center bg-red-900/20 text-red-400 text-sm'>
+                        Failed to load image
+                      </div>
+                    ) : (
+                      <Image
+                        src={og.url}
+                        alt={og.name}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        className='hover:scale-105 transition-transform duration-300'
+                        key={`${og.name}-${cacheKey}`}
+                        onError={() => handleImageError(og.name)}
+                        unoptimized
+                      />
+                    )}
+                  </div>
+                )}
 
-                {/* URL for testing */}
-                <div className='text-xs text-zinc-500 break-all mb-3'>
+                <div className='text-xs text-zinc-500 break-all mb-2 font-mono bg-zinc-800 p-2 rounded'>
                   {og.url}
                 </div>
 
-                {/* Direct link */}
                 <button
                   onClick={() => window.open(og.url, '_blank')}
-                  className='w-full px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm text-white transition-colors'
+                  className='w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm text-white transition-colors'
                 >
                   Open in New Tab
                 </button>

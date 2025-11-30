@@ -16,6 +16,10 @@ import {
   Calendar,
   History,
   AlertCircle,
+  Share2,
+  Image,
+  Download,
+  Copy,
 } from 'lucide-react';
 
 interface SubstackPost {
@@ -87,6 +91,13 @@ export default function SubstackManagerPage() {
   const [backfillProgress, setBackfillProgress] = useState<{
     current: number;
     total: number;
+  } | null>(null);
+
+  const [socialContent, setSocialContent] = useState<{
+    images: Record<string, string>;
+    captions: { short: string; medium: string; long: string };
+    hashtags: string[];
+    platforms: Record<string, Record<string, string>>;
   } | null>(null);
 
   const weekOptions = useMemo(() => {
@@ -179,6 +190,29 @@ export default function SubstackManagerPage() {
     } finally {
       setLoading(null);
     }
+  };
+
+  const generateSocialContent = async () => {
+    setLoading('social');
+    try {
+      const response = await fetch(`/api/social/generate?week=${weekOffset}`);
+      const data = await response.json();
+      setSocialContent({
+        images: data.images,
+        captions: data.captions,
+        hashtags: data.hashtags,
+        platforms: data.platforms,
+      });
+    } catch (error) {
+      console.error('Error generating social content:', error);
+      alert('Failed to generate social content');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   const runBackfill = async () => {
@@ -653,6 +687,163 @@ export default function SubstackManagerPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className='bg-zinc-900 border-zinc-800 mb-6'>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Share2 className='h-5 w-5' />
+              Social Media Content
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-4'>
+              <div className='flex items-center justify-between'>
+                <p className='text-sm text-zinc-400'>
+                  Generate images and captions for the selected week
+                </p>
+                <Button
+                  onClick={generateSocialContent}
+                  disabled={!!loading}
+                  variant='outline'
+                >
+                  {loading === 'social' ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Image className='mr-2 h-4 w-4' />
+                      Generate Content
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {socialContent && (
+                <div className='space-y-6'>
+                  <div>
+                    <p className='text-sm font-medium mb-3'>Images</p>
+                    <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+                      {Object.entries(socialContent.images).map(
+                        ([format, url]) => (
+                          <div key={format} className='space-y-2'>
+                            <div className='aspect-square bg-zinc-800 rounded overflow-hidden'>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={url}
+                                alt={`${format} format preview`}
+                                className='w-full h-full object-cover'
+                              />
+                            </div>
+                            <div className='flex items-center justify-between'>
+                              <span className='text-xs text-zinc-400 capitalize'>
+                                {format}
+                              </span>
+                              <a
+                                href={url}
+                                download={`lunary-${format}.png`}
+                                className='text-purple-400 hover:text-purple-300'
+                              >
+                                <Download className='h-4 w-4' />
+                              </a>
+                            </div>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className='text-sm font-medium mb-3'>Captions</p>
+                    <div className='space-y-3'>
+                      {Object.entries(socialContent.captions).map(
+                        ([length, caption]) => (
+                          <div key={length} className='bg-zinc-800 rounded p-3'>
+                            <div className='flex items-center justify-between mb-2'>
+                              <span className='text-xs text-zinc-400 capitalize'>
+                                {length}
+                              </span>
+                              <button
+                                onClick={() => copyToClipboard(caption)}
+                                className='text-purple-400 hover:text-purple-300'
+                              >
+                                <Copy className='h-4 w-4' />
+                              </button>
+                            </div>
+                            <p className='text-sm text-zinc-300'>{caption}</p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className='text-sm font-medium mb-2'>Hashtags</p>
+                    <div className='flex flex-wrap gap-2'>
+                      {socialContent.hashtags.map((tag) => (
+                        <span
+                          key={tag}
+                          className='text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded'
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() =>
+                        copyToClipboard(socialContent.hashtags.join(' '))
+                      }
+                      className='text-xs text-purple-400 hover:text-purple-300 mt-2'
+                    >
+                      Copy all hashtags
+                    </button>
+                  </div>
+
+                  <div>
+                    <p className='text-sm font-medium mb-3'>
+                      Platform-Ready Captions
+                    </p>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                      {Object.entries(socialContent.platforms).map(
+                        ([platform, content]) => (
+                          <div
+                            key={platform}
+                            className='bg-zinc-800 rounded p-3'
+                          >
+                            <div className='flex items-center justify-between mb-2'>
+                              <span className='text-sm font-medium capitalize'>
+                                {platform}
+                              </span>
+                            </div>
+                            {Object.entries(content).map(([type, text]) => (
+                              <div key={type} className='mb-2'>
+                                <div className='flex items-center justify-between'>
+                                  <span className='text-xs text-zinc-500 capitalize'>
+                                    {type}
+                                  </span>
+                                  <button
+                                    onClick={() => copyToClipboard(text)}
+                                    className='text-purple-400 hover:text-purple-300'
+                                  >
+                                    <Copy className='h-3 w-3' />
+                                  </button>
+                                </div>
+                                <p className='text-xs text-zinc-400 mt-1 line-clamp-2'>
+                                  {text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
