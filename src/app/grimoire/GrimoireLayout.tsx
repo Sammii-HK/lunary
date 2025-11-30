@@ -363,7 +363,7 @@ export default function GrimoireLayout({
       </div>
 
       {/* Main content */}
-      <div className='flex-1 overflow-y-auto min-w-0 p-4'>
+      <div className='flex-1 overflow-y-auto min-w-0 px-4 pt-4 pb-20'>
         {/* Mobile menu button */}
         <button
           onClick={() => setSidebarOpen(true)}

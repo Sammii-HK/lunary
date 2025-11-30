@@ -71,7 +71,9 @@ const AstronomyItems = ({ type }: { type: string }) => {
               className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
             >
               <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
-                {items[item as keyof typeof items]}{' '}
+                <span className='font-astro'>
+                  {items[item as keyof typeof items]}
+                </span>{' '}
                 {(content[item as keyof typeof content] as AstronomyItem).name}
               </h3>
               <p className='text-sm text-zinc-300 leading-relaxed'>

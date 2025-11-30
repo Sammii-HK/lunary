@@ -19,39 +19,39 @@ export type constellationItems =
   | 'rulingPlanet'
   | 'symbol';
 
-// U+FE0E unicode as text
-
+// Astromicon font characters (use with font-astro class)
 export const bodiesSymbols = {
-  sun: '☉',
-  moon: '☽',
-  mercury: '☿',
-  venus: '♀',
-  mars: '♂',
-  jupiter: '♃',
-  saturn: '♄',
-  uranus: '♅',
-  neptune: '♆',
-  pluto: '♇',
+  sun: 'Q',
+  moon: 'R',
+  mercury: 'S',
+  venus: 'T',
+  mars: 'U',
+  jupiter: 'V',
+  saturn: 'W',
+  uranus: 'X',
+  neptune: 'Y',
+  pluto: 'Z',
 };
 
 export const planetSymbols = {
   ...bodiesSymbols,
-  earth: '⊕',
+  earth: 'L',
 };
 
+// Astromicon zodiac characters (use with font-astro class)
 export const zodiacSymbol = {
-  capricorn: '♑',
-  aquarius: '♒',
-  pisces: '♓',
-  aries: '♈',
-  taurus: '♉',
-  gemini: '♊',
-  cancer: '♋',
-  leo: '♌',
-  virgo: '♍',
-  libra: '♎',
-  scorpio: '♏',
-  sagittarius: '♐',
+  aries: 'A',
+  taurus: 'B',
+  gemini: 'C',
+  cancer: 'D',
+  leo: 'E',
+  virgo: 'F',
+  libra: 'G',
+  scorpio: 'H',
+  sagittarius: 'I',
+  capricorn: 'J',
+  aquarius: 'K',
+  pisces: 'L',
 };
 
 export const elementUnicode = {

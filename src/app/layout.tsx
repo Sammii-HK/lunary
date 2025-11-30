@@ -2,12 +2,19 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Roboto_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import { Suspense } from 'react';
 import './globals.css';
 
 const roboto = Roboto_Mono({
   weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
+  display: 'swap',
+});
+
+const astronomicon = localFont({
+  src: '../fonts/Astronomicon.ttf',
+  variable: '--font-astro',
   display: 'swap',
 });
 
@@ -138,7 +145,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${roboto.className} flex flex-col w-full h-dvh bg-zinc-950 text-white overflow-hidden`}
+        className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-zinc-950 text-white overflow-hidden`}
         suppressHydrationWarning
       >
         <StructuredData />

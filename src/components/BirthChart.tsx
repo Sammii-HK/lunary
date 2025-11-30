@@ -109,7 +109,7 @@ export const BirthChart = ({
                 y={y}
                 textAnchor='middle'
                 dominantBaseline='central'
-                className='fill-zinc-500 text-sm font-medium'
+                className='fill-zinc-500 text-sm font-medium font-astro'
                 fontSize='14'
               >
                 {zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol]}
@@ -174,7 +174,7 @@ export const BirthChart = ({
                 textAnchor='middle'
                 dominantBaseline='central'
                 className={cx(
-                  'font-bold',
+                  'font-bold font-astro',
                   retrograde ? 'fill-red-400' : 'fill-white',
                 )}
                 fontSize='16'

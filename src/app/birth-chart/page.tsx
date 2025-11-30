@@ -1088,7 +1088,9 @@ const BirthChartPage = () => {
                       {sun && (
                         <div className='bg-zinc-700 rounded p-3'>
                           <div className='flex items-center gap-2 mb-1'>
-                            <span className='text-lg'>{bodiesSymbols.sun}</span>
+                            <span className='font-astro text-lg'>
+                              {bodiesSymbols.sun}
+                            </span>
                             <span className='text-sm font-medium text-white'>
                               Sun in {sun.sign}
                             </span>
@@ -1102,7 +1104,7 @@ const BirthChartPage = () => {
                       {moon && (
                         <div className='bg-zinc-700 rounded p-3'>
                           <div className='flex items-center gap-2 mb-1'>
-                            <span className='text-lg'>
+                            <span className='font-astro text-lg'>
                               {bodiesSymbols.moon}
                             </span>
                             <span className='text-sm font-medium text-white'>
@@ -1156,7 +1158,7 @@ const BirthChartPage = () => {
                         className='border-l-2 border-blue-400 pl-3'
                       >
                         <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                          <span className='text-lg'>
+                          <span className='font-astro text-lg'>
                             {
                               bodiesSymbols[
                                 planet.body.toLowerCase() as keyof typeof bodiesSymbols
@@ -1195,7 +1197,7 @@ const BirthChartPage = () => {
                         className='border-l-2 border-yellow-400 pl-3'
                       >
                         <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                          <span className='text-lg'>
+                          <span className='font-astro text-lg'>
                             {
                               bodiesSymbols[
                                 planet.body.toLowerCase() as keyof typeof bodiesSymbols
@@ -1234,7 +1236,7 @@ const BirthChartPage = () => {
                         className='border-l-2 border-purple-400 pl-3'
                       >
                         <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                          <span className='text-lg'>
+                          <span className='font-astro text-lg'>
                             {
                               bodiesSymbols[
                                 planet.body.toLowerCase() as keyof typeof bodiesSymbols

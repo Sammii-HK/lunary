@@ -129,6 +129,19 @@ export async function GET(request: NextRequest) {
       const succulentApiUrl = 'https://app.succulent.social/api/posts';
       const scheduledPosts: any[] = [];
 
+      // Helper to get caption based on platformOptions config
+      const getCaption = (
+        captionType: 'short' | 'medium' | 'long',
+        includeHashtags = false,
+      ) => {
+        const caption =
+          content.captions[captionType] || content.captions.medium;
+        if (includeHashtags && content.hashtags) {
+          return `${caption}\n\n${content.hashtags.slice(0, 5).join(' ')}`;
+        }
+        return caption;
+      };
+
       // Schedule for 10 AM today
       const postTime = new Date(now);
       postTime.setHours(10, 0, 0, 0);
@@ -136,11 +149,11 @@ export async function GET(request: NextRequest) {
         postTime.setHours(now.getHours() + 1);
       }
 
-      // 1. Instagram Feed Post (portrait 4:5)
+      // 1. Instagram Feed Post (portrait 4:5) - uses medium caption
       const igFeedPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - Instagram Feed - ${dateStr}`,
-        content: content.platforms.instagram.feed,
+        content: getCaption('medium', true),
         platforms: ['instagram'],
         scheduledDate: postTime.toISOString(),
         media: [
@@ -153,14 +166,14 @@ export async function GET(request: NextRequest) {
         instagramOptions: { type: 'post' },
       };
 
-      // 2. Instagram Story (story format)
+      // 2. Instagram Story (story format) - uses short caption
       const storyTime = new Date(postTime);
       storyTime.setMinutes(storyTime.getMinutes() + 30);
 
       const igStoryPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - Instagram Story - ${dateStr}`,
-        content: content.platforms.instagram.story,
+        content: getCaption('short'),
         platforms: ['instagram'],
         scheduledDate: storyTime.toISOString(),
         media: [
@@ -173,11 +186,11 @@ export async function GET(request: NextRequest) {
         instagramOptions: { type: 'story' },
       };
 
-      // 3. TikTok (story format)
+      // 3. TikTok (story format) - uses short caption with hashtags
       const tiktokPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - TikTok - ${dateStr}`,
-        content: content.platforms.tiktok.video,
+        content: getCaption('short', true),
         platforms: ['tiktok'],
         scheduledDate: storyTime.toISOString(),
         media: [
@@ -189,14 +202,14 @@ export async function GET(request: NextRequest) {
         ],
       };
 
-      // 4. Facebook Post (landscape)
+      // 4. Facebook Post (landscape) - uses long caption
       const fbPostTime = new Date(postTime);
       fbPostTime.setMinutes(fbPostTime.getMinutes() + 15);
 
       const fbPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - Facebook Post - ${dateStr}`,
-        content: content.platforms.facebook.post,
+        content: getCaption('long'),
         platforms: ['facebook'],
         scheduledDate: fbPostTime.toISOString(),
         media: [
@@ -209,11 +222,11 @@ export async function GET(request: NextRequest) {
         facebookOptions: { type: 'post' },
       };
 
-      // 5. Facebook Story (story format)
+      // 5. Facebook Story (story format) - uses short caption
       const fbStoryPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - Facebook Story - ${dateStr}`,
-        content: content.platforms.facebook.story,
+        content: getCaption('short'),
         platforms: ['facebook'],
         scheduledDate: storyTime.toISOString(),
         media: [
@@ -226,11 +239,11 @@ export async function GET(request: NextRequest) {
         facebookOptions: { type: 'story' },
       };
 
-      // 6. Twitter/X (landscape)
+      // 6. Twitter/X (landscape) - uses short caption
       const twitterPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - Twitter - ${dateStr}`,
-        content: content.platforms.twitter.post,
+        content: getCaption('short'),
         platforms: ['twitter'],
         scheduledDate: postTime.toISOString(),
         media: [
@@ -242,11 +255,11 @@ export async function GET(request: NextRequest) {
         ],
       };
 
-      // 7. LinkedIn (landscape)
+      // 7. LinkedIn (landscape) - uses long caption
       const linkedinPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - LinkedIn - ${dateStr}`,
-        content: content.platforms.linkedin.post,
+        content: getCaption('long'),
         platforms: ['linkedin'],
         scheduledDate: fbPostTime.toISOString(),
         media: [

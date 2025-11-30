@@ -78,7 +78,10 @@ const ConstellationItem = ({
     constellation[item],
     constellation,
   );
-  const ExpandedItem = `${icon} ${constellation[item]}`;
 
-  return <p>{ExpandedItem}</p>;
+  return (
+    <p>
+      <span className='font-astro'>{icon}</span> {constellation[item]}
+    </p>
+  );
 };

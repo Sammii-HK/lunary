@@ -95,9 +95,27 @@ export const AstronomyContextProvider = ({
 
   const currentAstrologicalChart = useMemo(() => {
     if (!cosmicData?.planetaryPositions) return [];
-    return Object.entries(cosmicData.planetaryPositions).map(
-      ([body, data]) => ({
-        body: body.charAt(0).toUpperCase() + body.slice(1),
+
+    // Build in explicit solar system order
+    const PLANET_ORDER = [
+      'Sun',
+      'Moon',
+      'Mercury',
+      'Venus',
+      'Mars',
+      'Jupiter',
+      'Saturn',
+      'Uranus',
+      'Neptune',
+      'Pluto',
+    ];
+
+    const result = PLANET_ORDER.filter(
+      (body) => cosmicData.planetaryPositions[body],
+    ).map((body) => {
+      const data = cosmicData.planetaryPositions[body];
+      return {
+        body,
         sign: data.sign,
         formattedDegree: {
           degree: Math.floor(data.longitude % 30),
@@ -105,8 +123,10 @@ export const AstronomyContextProvider = ({
         },
         retrograde: data.retrograde,
         eclipticLongitude: data.longitude,
-      }),
-    ) as AstroChartInformation[];
+      };
+    }) as AstroChartInformation[];
+
+    return result;
   }, [cosmicData]);
 
   const currentMoonPosition = currentAstrologicalChart.find(
