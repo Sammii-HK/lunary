@@ -79,7 +79,7 @@ async function checkRequiredTables() {
 async function checkRequiredIndexes() {
   const requiredIndexes = [
     { table: 'user_profiles', index: 'idx_user_profiles_user_id' },
-    { table: 'shop_packs', index: 'idx_shop_packs_slug' },
+    { table: 'shop_packs', index: 'idx_shop_packs_category' },
     { table: 'shop_purchases', index: 'idx_shop_purchases_user_id' },
     { table: 'user_notes', index: 'idx_user_notes_user_id' },
   ];
