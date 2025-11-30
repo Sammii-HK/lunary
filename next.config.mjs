@@ -234,6 +234,11 @@ const nextConfig = {
       '@radix-ui/react-label',
       '@radix-ui/react-switch',
       'react-day-picker',
+      'dayjs',
+      'recharts',
+      'posthog-js',
+      'date-fns',
+      '@react-email/components',
     ],
   },
 
@@ -347,6 +352,13 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // Blog week URL format normalization
+      {
+        source: '/blog/week/:week(\\d+)-:year(\\d{4})',
+        destination: '/blog/week/week-:week-:year',
+        permanent: true,
+      },
+      // Grimoire section redirects
       {
         source: '/grimoire/sabbats/:sabbat',
         destination: '/grimoire/wheel-of-the-year/:sabbat',
