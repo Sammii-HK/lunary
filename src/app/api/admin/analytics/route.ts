@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { getPostHogActiveUsers } from '@/lib/posthog-server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -185,27 +186,14 @@ export async function GET(request: NextRequest) {
     let stickiness = 0;
 
     try {
-      const dauResult = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM analytics_user_activity
-        WHERE activity_type = 'session' AND activity_date = CURRENT_DATE
-      `;
-      dau = parseInt(dauResult.rows[0]?.count || '0');
-
-      const wauResult = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM analytics_user_activity
-        WHERE activity_type = 'session'
-          AND activity_date >= CURRENT_DATE - INTERVAL '6 days'
-      `;
-      wau = parseInt(wauResult.rows[0]?.count || '0');
-
-      stickiness = wau > 0 ? (dau / wau) * 100 : 0;
+      const posthogData = await getPostHogActiveUsers();
+      if (posthogData) {
+        dau = posthogData.dau;
+        wau = posthogData.wau;
+        stickiness = wau > 0 ? (dau / wau) * 100 : 0;
+      }
     } catch (error) {
-      console.warn(
-        'Error calculating DAU/WAU (table may not exist yet):',
-        error,
-      );
+      console.warn('Error fetching DAU/WAU from PostHog:', error);
     }
 
     let tiktokVisitors = 0;

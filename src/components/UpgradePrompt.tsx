@@ -92,8 +92,9 @@ export function UpgradePrompt({
   }
 
   const planLabel = requiredPlan ? PLAN_LABELS[requiredPlan] : undefined;
+  const dayLabel = trialDaysRemaining === 1 ? 'day' : 'days';
   const defaultTitle = isTrialActive
-    ? `Trial: ${trialDaysRemaining} days left`
+    ? `Trial: ${trialDaysRemaining} ${dayLabel} left`
     : planLabel
       ? `Upgrade to ${planLabel}`
       : 'Unlock Personalized Features';

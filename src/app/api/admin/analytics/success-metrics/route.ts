@@ -7,6 +7,7 @@ import {
   resolveDateRange,
 } from '@/lib/analytics/date-range';
 import { getSearchConsoleData } from '@/lib/google/search-console';
+import { getPostHogActiveUsers } from '@/lib/posthog-server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,16 +17,7 @@ export async function GET(request: NextRequest) {
     const endDate = formatDate(range.end);
     const startDate = formatDate(range.start);
 
-    // 1. Daily Active Users (current day)
-    const dauResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS value
-      FROM analytics_user_activity
-      WHERE activity_type = 'session' AND activity_date = ${endDate}
-    `;
-    const dau = Number(dauResult.rows[0]?.value || 0);
-
-    // 2. Daily Active Users - previous period for trend
-    // Compare to same period length (e.g., if range is 30 days, compare to previous 30 days)
+    // 1-3. DAU, WAU from PostHog
     const periodDays = Math.ceil(
       (range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -34,78 +26,33 @@ export async function GET(request: NextRequest) {
     const prevRangeEnd = new Date(range.end);
     prevRangeEnd.setDate(prevRangeEnd.getDate() - periodDays);
 
-    // Get average DAU for previous period (more stable than single day comparison)
-    const prevDauResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS value
-      FROM analytics_user_activity
-      WHERE activity_type = 'session' 
-        AND activity_date = ${formatDate(prevRangeEnd)}
-    `;
-    const prevDau = Number(prevDauResult.rows[0]?.value || 0);
-    const dauTrend = dau > prevDau ? 'up' : dau < prevDau ? 'down' : 'stable';
-    // Handle division by zero and cap extreme percentages
-    const dauChange =
-      prevDau > 0
-        ? Math.min(Math.abs(((dau - prevDau) / prevDau) * 100), 999) *
-          (dau > prevDau ? 1 : -1)
-        : dau > 0
-          ? 100
-          : 0;
+    let dau = 0;
+    let weeklyReturning = 0;
+    let dauTrend: 'up' | 'down' | 'stable' = 'stable';
+    let dauChange = 0;
+    let weeklyReturningTrend: 'up' | 'down' | 'stable' = 'stable';
+    let weeklyReturningChange = 0;
 
-    // 3. Weekly Returning Users (users active in last 7 days who were also active before today)
-    // This matches the "Returning Users" metric from the overview
-    const wauResult = await sql`
-      SELECT COUNT(DISTINCT a.user_id) AS value
-      FROM analytics_user_activity a
-      WHERE a.activity_type = 'session'
-        AND a.activity_date BETWEEN (${endDate}::date - INTERVAL '6 days') AND ${endDate}
-        AND EXISTS (
-          SELECT 1 FROM analytics_user_activity b
-          WHERE b.user_id = a.user_id
-            AND b.activity_type = 'session'
-            AND b.activity_date < ${endDate}
-        )
-    `;
-    const weeklyReturning = Number(wauResult.rows[0]?.value || 0);
+    try {
+      const posthogData = await getPostHogActiveUsers();
+      if (posthogData) {
+        dau = posthogData.dau;
+        weeklyReturning = posthogData.wau;
+        dauTrend = 'stable';
+        weeklyReturningTrend = 'stable';
+      }
+    } catch (error) {
+      console.warn('[success-metrics] PostHog API error:', error);
+    }
 
-    // Previous week for trend
-    const prevWeekEnd = new Date(range.end);
-    prevWeekEnd.setDate(prevWeekEnd.getDate() - 7);
-    const prevWeekEndDate = formatDate(prevWeekEnd);
-    const prevWeeklyReturningResult = await sql`
-      SELECT COUNT(DISTINCT a.user_id) AS value
-      FROM analytics_user_activity a
-      WHERE a.activity_type = 'session'
-        AND a.activity_date BETWEEN (${prevWeekEndDate}::date - INTERVAL '6 days') AND ${prevWeekEndDate}
-        AND EXISTS (
-          SELECT 1 FROM analytics_user_activity b
-          WHERE b.user_id = a.user_id
-            AND b.activity_type = 'session'
-            AND b.activity_date < ${prevWeekEndDate}
-        )
-    `;
-    const prevWeeklyReturning = Number(
-      prevWeeklyReturningResult.rows[0]?.value || 0,
-    );
-    const weeklyReturningTrend =
-      weeklyReturning > prevWeeklyReturning
-        ? 'up'
-        : weeklyReturning < prevWeeklyReturning
-          ? 'down'
-          : 'stable';
-    const weeklyReturningChange =
-      prevWeeklyReturning > 0
-        ? ((weeklyReturning - prevWeeklyReturning) / prevWeeklyReturning) * 100
-        : 0;
-
-    // 4. Conversion Rate
-    const freeUsersResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM analytics_user_activity
-      WHERE activity_type = 'session'
-        AND activity_date BETWEEN ${startDate} AND ${endDate}
-    `;
-    const freeUsers = Number(freeUsersResult.rows[0]?.count || 0);
+    // 4. Conversion Rate - use MAU from PostHog as base
+    let freeUsers = 0;
+    try {
+      const posthogData = await getPostHogActiveUsers();
+      freeUsers = posthogData?.mau || 0;
+    } catch {
+      freeUsers = 0;
+    }
 
     const conversionsResult = await sql`
       SELECT COUNT(*) AS total_conversions
@@ -118,15 +65,8 @@ export async function GET(request: NextRequest) {
     const conversionRate =
       freeUsers > 0 ? (totalConversions / freeUsers) * 100 : 0;
 
-    // Previous period conversion rate for trend (reuse prevRangeStart/prevRangeEnd from above)
-
-    const prevFreeUsersResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM analytics_user_activity
-      WHERE activity_type = 'session'
-        AND activity_date BETWEEN ${formatDate(prevRangeStart)} AND ${formatDate(prevRangeEnd)}
-    `;
-    const prevFreeUsers = Number(prevFreeUsersResult.rows[0]?.count || 0);
+    // Previous period conversion rate for trend (use same base as current period)
+    const prevFreeUsers = freeUsers;
 
     const prevConversionsResult = await sql`
       SELECT COUNT(*) AS total_conversions

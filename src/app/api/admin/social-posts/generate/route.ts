@@ -5,6 +5,12 @@ import {
   selectSubredditForPostType,
   getSubredditsForPostType,
 } from '@/config/reddit-subreddits';
+import {
+  getArchetypePrompt,
+  getWeightedArchetype,
+  mapPostTypeToArchetype,
+  type ContentArchetype,
+} from '@/lib/social/content-archetypes';
 
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
@@ -21,7 +27,7 @@ function getSocialMediaContext(): string {
     cachedSocialContext = readFileSync(contextPath, 'utf-8');
     return cachedSocialContext;
   } catch (error) {
-    cachedSocialContext = `Lunary: Cosmic astrology app. Personalized birth charts, horoscopes, tarot. Free trial → paid ($4.99/mo or $39.99/yr). Focus: personalization, real astronomy, cosmic/spiritual tone.`;
+    cachedSocialContext = `Lunary: Cosmic astrology app. Personalized birth charts, horoscopes, tarot. Focus: personalization, real astronomy, cosmic/spiritual tone. Unique features: AI chat with memory, tarot pattern analysis, personal transits, 500+ page grimoire.`;
     return cachedSocialContext;
   }
 }
@@ -51,7 +57,7 @@ function getAIContext(): string {
     cachedAIContext = readFileSync(contextPath, 'utf-8');
     return cachedAIContext;
   } catch (error) {
-    cachedAIContext = `Lunary: Cosmic astrology app. Personalized birth charts, horoscopes, tarot. Free trial → paid ($4.99/mo or $39.99/yr). Focus: personalization, real astronomy, cosmic/spiritual tone.`;
+    cachedAIContext = `Lunary: Cosmic astrology app. Personalized birth charts, horoscopes, tarot. Focus: personalization, real astronomy, cosmic/spiritual tone. Unique features: AI chat with memory, tarot pattern analysis, personal transits, 500+ page grimoire.`;
     return cachedAIContext;
   }
 }
@@ -65,29 +71,32 @@ function getCompetitorContext(): string {
     const contextPath = join(process.cwd(), 'docs', 'BEAT_COMPETITORS_SEO.md');
     const fullContent = readFileSync(contextPath, 'utf-8');
 
-    // Extract just the competitive advantages section and reframe positively
-    // Focus on what Lunary does best, not direct competitor comparisons
-    cachedCompetitorContext = `## What Makes Lunary Best:
+    cachedCompetitorContext = `## What Makes Lunary Unique:
 
-1. **Real Astronomical Data** - Lunary uses actual astronomical calculations based on real planetary positions. Every calculation is precise and scientifically accurate.
+1. **Real Astronomical Data** - Uses actual astronomical calculations based on real planetary positions. Scientifically accurate.
 
-2. **Personalized to Exact Birth Chart** - Lunary personalizes everything to YOUR exact birth time, date, and location. Not generic zodiac signs - your unique cosmic blueprint.
+2. **Personalized to Exact Birth Chart** - Everything personalized to YOUR exact birth time, date, and location. Not generic zodiac signs.
 
-3. **Comprehensive Grimoire** - Lunary includes a complete digital grimoire with spells, rituals, crystal guides, and magical correspondences. Rich, detailed content.
+3. **AI Chat with Memory** - Remembers past conversations and builds context over time. Knows your chart, your questions, your journey.
 
-4. **Free Trial** - Lunary offers a 7-day free trial (credit card required but no payment taken). Try before you commit.
+4. **Tarot Pattern Analysis** - Tracks which cards appear frequently and identifies recurring themes across readings over time.
 
-When creating posts, emphasize these strengths naturally. Focus on what Lunary does exceptionally well, not comparisons to others.`;
+5. **Personal Transits** - Shows which houses are being activated in YOUR chart specifically, not generic forecasts.
+
+6. **500+ Page Digital Grimoire** - Spells, rituals, crystal guides, correspondences - comprehensive and always accessible.
+
+Focus on these unique features naturally. Lead with value, curiosity, or education - not sales.`;
     return cachedCompetitorContext;
   } catch (error) {
-    // Fallback: key strengths (positive framing)
-    cachedCompetitorContext = `## What Makes Lunary Best:
-1. Real Astronomical Data - Uses actual astronomical calculations based on real planetary positions
-2. Personalized to Exact Birth Chart - Everything personalized to YOUR exact birth time, date, location
-3. Comprehensive Grimoire - Complete digital grimoire with spells, rituals, crystal guides
-4. Free Trial - 7-day trial, credit card required but no payment taken
+    cachedCompetitorContext = `## What Makes Lunary Unique:
+1. Real Astronomical Data - Actual astronomical calculations, scientifically accurate
+2. Personalized to Exact Birth Chart - YOUR birth time, date, location - not generic
+3. AI Chat with Memory - Remembers conversations and builds context over time
+4. Tarot Pattern Analysis - Tracks recurring themes across readings
+5. Personal Transits - Shows YOUR houses being activated
+6. 500+ Page Grimoire - Comprehensive spells, rituals, crystals
 
-Focus on these strengths naturally. Emphasize what Lunary does exceptionally well.`;
+Lead with value, curiosity, or education - not sales.`;
     return cachedCompetitorContext;
   }
 }
@@ -327,72 +336,44 @@ export async function POST(request: NextRequest) {
         : 'Natural, community-focused. No salesy language.',
     };
 
-    const postTypeGuidelines: Record<string, string> = {
-      feature:
-        'Explain what Lunary does: generates birth charts, personalized horoscopes, tarot readings, grimoire. Be specific about features.',
-      benefit:
-        'Focus on concrete benefits: personalized horoscopes based on YOUR chart (not generic), real astronomical calculations, free trial, digital grimoire included.',
-      educational:
-        'Explain how Lunary works: uses your exact birth time/date/location to calculate planetary positions, then personalizes everything to your chart.',
-      inspirational:
-        'Connect cosmic wisdom to what Lunary provides: personalized insights based on your unique birth chart, not generic zodiac signs.',
-      behind_scenes:
-        'Explain the real astronomy: Lunary calculates actual planetary positions from your birth data, then uses that for personalized horoscopes and tarot.',
-      promotional:
-        'Highlight free trial (7 days - credit card required but no payment taken), what you get (birth chart, personalized horoscopes, tarot, grimoire), and pricing ($4.99/mo).',
-      user_story:
-        'Show concrete value: users get personalized horoscopes based on their exact chart, not generic zodiac signs. Real astronomical data, not generic predictions.',
-    };
+    const archetype: ContentArchetype =
+      mapPostTypeToArchetype(postType || 'benefit') || getWeightedArchetype();
+    const archetypePrompt = getArchetypePrompt(archetype);
 
-    const prompt = `Generate ${count} social media posts for Lunary.
+    const prompt = `Generate ${count} unique social media posts for Lunary.
 
 Platform: ${platform || 'general'}
 ${platform === 'reddit' && redditSubreddit ? `Target Subreddit: r/${redditSubreddit.name}` : ''}
-Type: ${postType || 'benefit'}
 ${topic ? `Topic: ${topic}` : ''}
-${tone ? `Tone: ${tone}` : 'Natural, cosmic, warm'}
-${includeCTA ? 'Include CTA: Yes' : 'Include CTA: No'}
-${platform === 'reddit' && redditSubreddit && !redditSubreddit.allowsSelfPromotion ? 'CRITICAL: This subreddit does NOT allow self-promotion. Do NOT mention Lunary, do NOT include links, do NOT include CTAs. Focus purely on educational value or community discussion.' : ''}
+${tone ? `Tone: ${tone}` : ''}
 
 Platform Guidelines: ${platformGuidelines[platform || 'general'] || 'Natural, engaging'}
-Post Type Guidelines: ${postTypeGuidelines[postType || 'benefit'] || 'Natural, valuable'}
 
-Requirements:
+${archetypePrompt}
+
+${
+  platform === 'reddit' &&
+  redditSubreddit &&
+  !redditSubreddit.allowsSelfPromotion
+    ? `
+CRITICAL REDDIT RULES:
+- This subreddit does NOT allow self-promotion
+- Do NOT mention Lunary or any app name
+- Do NOT include links or CTAs
+- Focus purely on educational value or community discussion
+- Be a helpful community member, not a marketer
+`
+    : ''
+}
+
+REQUIREMENTS:
 - Use sentence case (capitalize first letter of sentences)
-${
-  platform === 'reddit' &&
-  redditSubreddit &&
-  !redditSubreddit.allowsSelfPromotion
-    ? '- DO NOT mention Lunary, app name, or include any links/CTAs'
-    : '- Clearly explain what Lunary DOES (birth chart generation, personalized horoscopes, tarot, grimoire)'
-}
-${
-  platform === 'reddit' &&
-  redditSubreddit &&
-  !redditSubreddit.allowsSelfPromotion
-    ? '- Focus purely on educational value, cosmic insights, or community discussion'
-    : '- Highlight specific USPs: personalized to exact birth chart, real astronomical calculations, free trial'
-}
-- Be concrete about features, not just poetic about astrology
-- Natural and conversational but informative
-${
-  platform === 'reddit' &&
-  redditSubreddit &&
-  !redditSubreddit.allowsSelfPromotion
-    ? '- Community-focused, helpful, educational tone'
-    : '- Conversion-focused but not salesy'
-}
 - Keep within platform character limits
-- Include emojis sparingly (🌙 ✨ 🔮)
-${
-  platform === 'reddit' &&
-  redditSubreddit &&
-  !redditSubreddit.allowsSelfPromotion
-    ? '- NO CTAs, NO links, NO self-promotion'
-    : includeCTA
-      ? '- Include clear but natural CTA'
-      : '- No explicit CTA needed'
-}
+- Include emojis sparingly (🌙 ✨ 🔮) - max 1-2 per post
+- Each post must be DISTINCT - different hooks, angles, and structures
+- NO pricing mentions, NO trial mentions, NO "free" language
+- Lead with curiosity, vulnerability, or education - NOT features
+${!includeCTA ? '- No CTA in these posts - pure value content' : '- Soft CTA only if appropriate: "discover at lunary.app" or "try Lunary"'}
 
 Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
 
@@ -402,13 +383,27 @@ Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
       messages: [
         {
           role: 'system',
-          content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Follow the Lunary Orbit strategy. Emphasize what Lunary does best - focus on strengths and unique value, not competitor comparisons. Create natural, engaging posts that convert. Return only valid JSON.`,
+          content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}
+
+You are creating authentic social media content for Lunary, a cosmic astrology app.
+
+CRITICAL RULES:
+1. NEVER mention pricing, trials, or "free" - just focus on value
+2. Prioritize authenticity over conversion - build trust through genuine content
+3. Vary your content style - rotate between founder stories, education, cosmic insights, and feature deep-dives
+4. 80% of posts should be pure value with no CTA at all
+5. Match the example posts in quality and tone for the given archetype
+6. Each post must feel unique - different hooks, structures, and angles
+7. Be specific about unique features: AI memory, tarot patterns, personal transits, grimoire
+8. Sound human - vulnerable, curious, or educational. Never salesy or generic.
+
+Return only valid JSON.`,
         },
         { role: 'user', content: prompt },
       ],
       response_format: { type: 'json_object' },
-      max_tokens: 800,
-      temperature: 0.8,
+      max_tokens: 1200,
+      temperature: 0.9,
     });
     console.log('✅ OpenAI API call successful');
 

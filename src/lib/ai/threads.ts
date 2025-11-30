@@ -2,6 +2,8 @@ import { randomUUID } from 'crypto';
 
 import { prisma } from '@/lib/prisma';
 
+const MAX_MESSAGES = 50;
+
 export type ThreadMessage = {
   role: 'user' | 'assistant';
   content: string;
@@ -14,6 +16,13 @@ export type ThreadRecord = {
   userId: string;
   title: string | null;
   messages: ThreadMessage[];
+};
+
+const trimMessages = (messages: ThreadMessage[]): ThreadMessage[] => {
+  if (messages.length <= MAX_MESSAGES) {
+    return messages;
+  }
+  return messages.slice(-MAX_MESSAGES);
 };
 
 type AppendThreadParams = {
@@ -105,11 +114,13 @@ export const appendToThread = async ({
   const shouldCreate = !existing;
   const id = existing?.id ?? threadId ?? randomUUID();
 
-  const messages = [
+  const allMessages = [
     ...(existing?.messages ?? []),
     userMessage,
     assistantMessage,
   ];
+
+  const messages = trimMessages(allMessages);
 
   const thread: ThreadRecord = {
     id,
@@ -128,18 +139,56 @@ export const appendToThread = async ({
 };
 
 /**
- * Clean up old threads - keep threads updated in the last 7 days
- * This runs periodically to prevent database bloat
+ * Consolidate threads for a user - keep only the most recent one
+ * This ensures each user has exactly one thread
+ */
+export const consolidateUserThreads = async (
+  userId: string,
+): Promise<number> => {
+  try {
+    const threads = await prisma.aiThread.findMany({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' },
+      select: { id: true },
+    });
+
+    if (threads.length <= 1) {
+      return 0;
+    }
+
+    const threadIdsToDelete = threads.slice(1).map((t) => t.id);
+
+    const result = await prisma.aiThread.deleteMany({
+      where: { id: { in: threadIdsToDelete } },
+    });
+
+    if (result.count > 0) {
+      console.log(
+        `[AI Thread] Consolidated ${result.count} threads for user:`,
+        userId,
+      );
+    }
+
+    return result.count;
+  } catch (error) {
+    console.error('[AI Thread] Failed to consolidate threads', error);
+    return 0;
+  }
+};
+
+/**
+ * Clean up truly orphaned threads - threads for users inactive for 90+ days
+ * Only deletes if the user has been completely inactive
  */
 export const cleanupOldThreads = async (): Promise<number> => {
   try {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
     const result = await prisma.aiThread.deleteMany({
       where: {
         updatedAt: {
-          lt: sevenDaysAgo,
+          lt: ninetyDaysAgo,
         },
       },
     });

@@ -56,11 +56,6 @@ const makeId = () => {
   return Math.random().toString(36).slice(2);
 };
 
-const getThreadStorageKey = (userId: string | null): string | null => {
-  if (!userId) return null;
-  return `lunary-ai-thread-id-${userId}`;
-};
-
 export const useAssistantChat = (options?: { birthday?: string }) => {
   const { user, loading: authLoading } = useAuthStatus();
   const birthday = options?.birthday;
@@ -78,99 +73,72 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
   const streamingMessageIdRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const loadThreadHistory = useCallback(
-    async (id: string) => {
-      try {
-        // Don't set loading to true here - it's already set by initial state
-        // and re-setting it during HMR can cause issues
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+  const loadThread = useCallback(async () => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-        const response = await fetch(`/api/ai/thread?threadId=${id}`, {
-          credentials: 'include',
-          signal: controller.signal,
-        });
+      const response = await fetch('/api/ai/thread', {
+        credentials: 'include',
+        signal: controller.signal,
+      });
 
-        clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
 
-        if (response.ok) {
-          const thread = await response.json();
-          if (thread.messages && Array.isArray(thread.messages)) {
-            const loadedMessages: AssistantMessage[] = thread.messages.map(
-              (msg: any, index: number) => ({
-                id: `${id}-${index}`,
-                role: msg.role,
-                content: msg.content,
-              }),
-            );
-            if (process.env.NODE_ENV === 'development') {
-              console.log(
-                '[AssistantChat] Loaded thread:',
-                id,
-                'with',
-                loadedMessages.length,
-                'messages',
-              );
-            }
-            setMessages(loadedMessages);
-          } else {
-            // Invalid thread data
-            if (process.env.NODE_ENV === 'development') {
-              console.warn(
-                '[AssistantChat] Thread has invalid messages array:',
-                thread,
-              );
-            }
-            setMessages([]);
-          }
-        } else if (response.status === 401) {
-          // Auth not ready yet or session expired - don't clear localStorage
-          // Just show empty state, user can still send messages which will create new thread
-          if (process.env.NODE_ENV === 'development') {
-            console.log(
-              '[AssistantChat] Thread load unauthorized - auth may not be ready yet',
-            );
-          }
-          setMessages([]);
-        } else if (response.status === 404) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[AssistantChat] Thread not found in database:', id);
-            console.log(
-              '[AssistantChat] This thread may have been deleted. Clearing localStorage.',
-            );
-          }
-          // Thread was deleted from database - clear localStorage
-          const storageKey = getThreadStorageKey(userId);
-          if (storageKey && typeof window !== 'undefined') {
-            localStorage.removeItem(storageKey);
-          }
-          setThreadId(null);
-          setMessages([]);
-        } else {
-          const errorText = await response.text().catch(() => 'Unknown error');
-          console.error(
-            '[AssistantChat] Failed to load thread:',
-            response.status,
-            errorText,
+      if (response.ok) {
+        const thread = await response.json();
+        setThreadId(thread.id);
+
+        if (thread.messages && Array.isArray(thread.messages)) {
+          const loadedMessages: AssistantMessage[] = thread.messages.map(
+            (msg: any, index: number) => ({
+              id: `${thread.id}-${index}`,
+              role: msg.role,
+              content: msg.content,
+            }),
           );
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              '[AssistantChat] Loaded thread:',
+              thread.id,
+              'with',
+              loadedMessages.length,
+              'messages',
+            );
+          }
+          setMessages(loadedMessages);
+        } else {
           setMessages([]);
         }
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          console.warn('[AssistantChat] Thread load timed out after 10s');
-        } else {
-          console.error('[AssistantChat] Failed to load thread history', error);
+      } else if (response.status === 401) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            '[AssistantChat] Thread load unauthorized - auth may not be ready yet',
+          );
         }
         setMessages([]);
-      } finally {
-        setIsLoadingHistory(false);
+      } else {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error(
+          '[AssistantChat] Failed to load thread:',
+          response.status,
+          errorText,
+        );
+        setMessages([]);
       }
-    },
-    [userId],
-  );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.warn('[AssistantChat] Thread load timed out after 10s');
+      } else {
+        console.error('[AssistantChat] Failed to load thread', error);
+      }
+      setMessages([]);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Wait for auth to finish loading before attempting to load thread
     if (authLoading) {
       return;
     }
@@ -182,26 +150,8 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
       return;
     }
 
-    const storageKey = getThreadStorageKey(userId);
-    if (!storageKey) {
-      setIsLoadingHistory(false);
-      setMessages([]);
-      return;
-    }
-
-    const storedThreadId =
-      typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
-
-    console.log('[AssistantChat] Init thread:', { storedThreadId });
-
-    if (storedThreadId) {
-      setThreadId(storedThreadId);
-      loadThreadHistory(storedThreadId);
-    } else {
-      setIsLoadingHistory(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, authLoading]);
+    loadThread();
+  }, [userId, authLoading, loadThread]);
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
@@ -323,18 +273,7 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
                 }>(data);
 
                 if (payload?.threadId) {
-                  const newThreadId = payload.threadId;
-                  setThreadId(newThreadId);
-                  const storageKey = getThreadStorageKey(userId);
-                  if (storageKey && typeof window !== 'undefined') {
-                    localStorage.setItem(storageKey, newThreadId);
-                    if (process.env.NODE_ENV === 'development') {
-                      console.log(
-                        '[AssistantChat] Saved thread ID to localStorage:',
-                        newThreadId,
-                      );
-                    }
-                  }
+                  setThreadId(payload.threadId);
                 }
                 if (payload?.usage) {
                   setUsage(payload.usage);

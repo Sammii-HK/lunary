@@ -12,17 +12,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    const endDate = formatDate(range.end);
-    const startDate = formatDate(range.start);
+    const startTs = formatTimestamp(range.start);
+    const endTs = formatTimestamp(range.end);
 
+    // Use conversion_events for signup tracking (not analytics_user_activity)
     const usersWithAiAfterWeekResult = await sql`
       WITH user_signup_dates AS (
         SELECT DISTINCT
           user_id,
-          MIN(activity_date) AS signup_date
-        FROM analytics_user_activity
-        WHERE activity_type = 'session'
-          AND activity_date BETWEEN ${startDate} AND ${endDate}
+          MIN(created_at) AS signup_date
+        FROM conversion_events
+        WHERE event_type = 'signup'
+          AND created_at BETWEEN ${startTs} AND ${endTs}
         GROUP BY user_id
       ),
       users_with_ai_after_week AS (
@@ -32,31 +33,22 @@ export async function GET(request: NextRequest) {
         FROM user_signup_dates usd
         WHERE EXISTS (
           SELECT 1
-          FROM analytics_user_activity aua
-          WHERE aua.user_id = usd.user_id
-            AND aua.activity_type = 'ai_chat'
-            AND aua.activity_date BETWEEN (usd.signup_date + INTERVAL '7 days') AND (usd.signup_date + INTERVAL '14 days')
+          FROM analytics_ai_usage aau
+          WHERE aau.user_id = usd.user_id
+            AND aau.created_at BETWEEN (usd.signup_date + INTERVAL '7 days') AND (usd.signup_date + INTERVAL '14 days')
         )
       )
       SELECT
         COUNT(*) AS count,
-        COUNT(*) FILTER (WHERE signup_date BETWEEN ${startDate} AND ${endDate}) AS in_range_count
+        COUNT(*) FILTER (WHERE signup_date BETWEEN ${startTs} AND ${endTs}) AS in_range_count
       FROM users_with_ai_after_week
     `;
 
     const totalNewUsersResult = await sql`
-      WITH user_signup_dates AS (
-        SELECT DISTINCT
-          user_id,
-          MIN(activity_date) AS signup_date
-        FROM analytics_user_activity
-        WHERE activity_type = 'session'
-          AND activity_date BETWEEN ${startDate} AND ${endDate}
-        GROUP BY user_id
-      )
-      SELECT COUNT(*) AS count
-      FROM user_signup_dates
-      WHERE signup_date BETWEEN ${startDate} AND ${endDate}
+      SELECT COUNT(DISTINCT user_id) AS count
+      FROM conversion_events
+      WHERE event_type = 'signup'
+        AND created_at BETWEEN ${startTs} AND ${endTs}
     `;
 
     const totalNewUsers = Number(totalNewUsersResult.rows[0]?.count || 0);
@@ -72,10 +64,10 @@ export async function GET(request: NextRequest) {
       WITH user_signup_dates AS (
         SELECT DISTINCT
           user_id,
-          MIN(activity_date) AS signup_date
-        FROM analytics_user_activity
-        WHERE activity_type = 'session'
-          AND activity_date BETWEEN ${startDate} AND ${endDate}
+          MIN(created_at) AS signup_date
+        FROM conversion_events
+        WHERE event_type = 'signup'
+          AND created_at BETWEEN ${startTs} AND ${endTs}
         GROUP BY user_id
       ),
       weekly_cohorts AS (
@@ -85,14 +77,13 @@ export async function GET(request: NextRequest) {
           COUNT(DISTINCT CASE
             WHEN EXISTS (
               SELECT 1
-              FROM analytics_user_activity aua
-              WHERE aua.user_id = usd.user_id
-                AND aua.activity_type = 'ai_chat'
-                AND aua.activity_date BETWEEN (usd.signup_date + INTERVAL '7 days') AND (usd.signup_date + INTERVAL '14 days')
+              FROM analytics_ai_usage aau
+              WHERE aau.user_id = usd.user_id
+                AND aau.created_at BETWEEN (usd.signup_date + INTERVAL '7 days') AND (usd.signup_date + INTERVAL '14 days')
             ) THEN user_id
           END) AS users_with_ai
         FROM user_signup_dates usd
-        WHERE signup_date BETWEEN ${startDate} AND ${endDate}
+        WHERE signup_date BETWEEN ${startTs} AND ${endTs}
         GROUP BY DATE_TRUNC('week', signup_date)
       )
       SELECT

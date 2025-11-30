@@ -10,7 +10,7 @@ export default {
     const hour = now.getUTCHours();
     const dayOfWeek = now.getUTCDay();
     const today = now.toISOString().split('T')[0];
-    const baseUrl = 'https://www.lunary.app';
+    const baseUrl = 'https://lunary.app';
 
     console.log(
       '🔔 Cloudflare cron started at:',
@@ -153,7 +153,7 @@ export default {
 
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const baseUrl = 'https://www.lunary.app';
+    const baseUrl = 'https://lunary.app';
     const today = new Date().toISOString().split('T')[0];
 
     if (url.pathname === '/trigger' && request.method === 'POST') {
