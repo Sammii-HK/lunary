@@ -1803,11 +1803,11 @@ async function runNotificationCheck(dateStr: string) {
             (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
           );
 
-          const html = generateTrialReminderEmailHTML(
+          const html = await generateTrialReminderEmailHTML(
             user.name || 'there',
             daysRemaining,
           );
-          const text = generateTrialReminderEmailText(
+          const text = await generateTrialReminderEmailText(
             user.name || 'there',
             daysRemaining,
           );
@@ -1855,11 +1855,11 @@ async function runNotificationCheck(dateStr: string) {
             (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
           );
 
-          const html = generateTrialReminderEmailHTML(
+          const html = await generateTrialReminderEmailHTML(
             user.name || 'there',
             daysRemaining,
           );
-          const text = generateTrialReminderEmailText(
+          const text = await generateTrialReminderEmailText(
             user.name || 'there',
             daysRemaining,
           );
@@ -1931,11 +1931,11 @@ async function runNotificationCheck(dateStr: string) {
           );
           const missedInsights = Math.max(1, daysSince);
 
-          const html = generateTrialExpiredEmailHTML(
+          const html = await generateTrialExpiredEmailHTML(
             user.name || 'there',
             missedInsights,
           );
-          const text = generateTrialExpiredEmailText(
+          const text = await generateTrialExpiredEmailText(
             user.name || 'there',
             missedInsights,
           );

@@ -66,11 +66,11 @@ export async function GET(request: NextRequest) {
           (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
         );
 
-        const html = generateTrialReminderEmailHTML(
+        const html = await generateTrialReminderEmailHTML(
           user.name || 'there',
           daysRemaining,
         );
-        const text = generateTrialReminderEmailText(
+        const text = await generateTrialReminderEmailText(
           user.name || 'there',
           daysRemaining,
         );
@@ -117,11 +117,11 @@ export async function GET(request: NextRequest) {
           (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
         );
 
-        const html = generateTrialReminderEmailHTML(
+        const html = await generateTrialReminderEmailHTML(
           user.name || 'there',
           daysRemaining,
         );
-        const text = generateTrialReminderEmailText(
+        const text = await generateTrialReminderEmailText(
           user.name || 'there',
           daysRemaining,
         );

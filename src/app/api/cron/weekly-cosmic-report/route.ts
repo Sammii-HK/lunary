@@ -103,13 +103,13 @@ export async function GET(request: NextRequest) {
             ? 'https://lunary.app'
             : 'http://localhost:3000';
 
-        const emailHtml = generateWeeklyReportEmailHTML(
+        const emailHtml = await generateWeeklyReportEmailHTML(
           report,
           baseUrl,
           userName,
           userEmail,
         );
-        const emailText = generateWeeklyReportEmailText(
+        const emailText = await generateWeeklyReportEmailText(
           report,
           baseUrl,
           userName,
