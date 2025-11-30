@@ -20,109 +20,116 @@ function getWebhookSecret() {
   return process.env.STRIPE_WEBHOOK_SECRET;
 }
 
-async function getPlanTypeFromSubscription(
+function getPlanTypeFromSubscription(
   subscription: Stripe.Subscription,
-): Promise<string> {
-  // First try to get plan_id from subscription metadata
-  const planIdFromMetadata = subscription.metadata?.plan_id;
-  if (planIdFromMetadata) {
-    return planIdFromMetadata;
+): string {
+  // Try subscription metadata first
+  if (subscription.metadata?.plan_id) {
+    return subscription.metadata.plan_id;
   }
 
-  // Try to get from price metadata
-  const priceId = subscription.items.data[0]?.price?.id;
-  if (priceId) {
-    try {
-      const stripe = getStripe();
-      const price = await stripe.prices.retrieve(priceId, {
-        expand: ['product'],
-      });
-      const product = price.product as Stripe.Product;
-
-      const planIdFromPrice =
-        price.metadata?.plan_id || product.metadata?.plan_id;
-      if (planIdFromPrice) {
-        return planIdFromPrice;
-      }
-
-      // Fallback to price ID mapping
-      const { getPlanIdFromPriceId } = await import(
-        '../../../../../utils/pricing'
-      );
-      const mappedPlanId = getPlanIdFromPriceId(priceId);
-      if (mappedPlanId) {
-        return mappedPlanId;
-      }
-    } catch (error) {
-      console.error('Failed to retrieve price metadata:', error);
-    }
+  // Try price/product metadata
+  const price = subscription.items.data[0]?.price;
+  if (price?.metadata?.plan_id) {
+    return price.metadata.plan_id;
   }
 
-  // Final fallback: use interval-based mapping for backward compatibility
-  // Note: This is less ideal - prefer using price ID mapping or metadata
-  // WARNING: This fallback cannot distinguish between lunary_plus and lunary_plus_ai monthly plans
-  // Only use this fallback if we have actual subscription items (subscription exists)
-  if (
-    subscription.items &&
-    subscription.items.data &&
-    subscription.items.data.length > 0
-  ) {
-    const interval = subscription.items.data[0]?.price?.recurring?.interval;
-    if (interval) {
-      console.warn(
-        `[getPlanTypeFromSubscription] Using interval-based fallback for ${interval} subscription. Price ID mapping should have caught this.`,
-      );
-      // For monthly, default to lunary_plus (lower tier) - this is conservative
-      // For yearly, default to lunary_plus_ai_annual (only yearly plan available)
-      return interval === 'month' ? 'lunary_plus' : 'lunary_plus_ai_annual';
-    }
-  }
+  // Fallback to interval-based mapping
+  const interval = price?.recurring?.interval;
+  if (interval === 'year') return 'lunary_plus_ai_annual';
+  if (interval === 'month') return 'lunary_plus';
 
-  // If we truly can't determine, return free as safest default
-  console.error(
-    '[getPlanTypeFromSubscription] Could not determine plan type from subscription',
-  );
   return 'free';
 }
 
+function mapStripeStatus(status: string): string {
+  switch (status) {
+    case 'trialing':
+      return 'trial';
+    case 'active':
+      return 'active';
+    case 'canceled':
+      return 'cancelled';
+    case 'past_due':
+      return 'past_due';
+    default:
+      return 'free';
+  }
+}
+
+function extractDiscountInfo(subscription: Stripe.Subscription) {
+  const discounts = subscription.discounts || [];
+  if (discounts.length === 0) {
+    const price = subscription.items.data[0]?.price;
+    const unitAmount = (price?.unit_amount || 0) / 100;
+    const interval = price?.recurring?.interval;
+    return {
+      hasDiscount: false,
+      discountPercent: 0,
+      monthlyAmountDue: interval === 'year' ? unitAmount / 12 : unitAmount,
+      couponId: null,
+    };
+  }
+
+  const discount = discounts[0];
+  if (typeof discount === 'string' || !discount?.coupon) {
+    return {
+      hasDiscount: false,
+      discountPercent: 0,
+      monthlyAmountDue: 0,
+      couponId: null,
+    };
+  }
+
+  const price = subscription.items.data[0]?.price;
+  const unitAmount = (price?.unit_amount || 0) / 100;
+  const interval = price?.recurring?.interval;
+  let monthlyAmount = interval === 'year' ? unitAmount / 12 : unitAmount;
+
+  if (discount.coupon.percent_off) {
+    monthlyAmount *= 1 - discount.coupon.percent_off / 100;
+  } else if (discount.coupon.amount_off) {
+    monthlyAmount = Math.max(
+      0,
+      monthlyAmount - discount.coupon.amount_off / 100,
+    );
+  }
+
+  return {
+    hasDiscount: true,
+    discountPercent: discount.coupon.percent_off || 0,
+    monthlyAmountDue: monthlyAmount,
+    couponId: discount.coupon.id,
+  };
+}
+
 export async function POST(request: NextRequest) {
+  const stripe = getStripe();
+  const webhookSecret = getWebhookSecret();
+
+  const body = await request.text();
+  const headersList = await headers();
+  const signature = headersList.get('stripe-signature');
+
+  if (!signature) {
+    return NextResponse.json({ error: 'No signature' }, { status: 400 });
+  }
+
+  let event: Stripe.Event;
   try {
-    const stripe = getStripe();
-    const webhookSecret = getWebhookSecret();
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (err) {
+    console.error('Webhook signature failed:', err);
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  }
 
-    const body = await request.text();
-    const headersList = await headers();
-    const signature = headersList.get('stripe-signature');
-
-    if (!signature) {
-      return NextResponse.json(
-        { error: 'No signature found' },
-        { status: 400 },
-      );
-    }
-
-    // Verify webhook signature
-    let event: Stripe.Event;
-    try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err);
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-    }
-
-    console.log('Received webhook event:', event.type);
-
-    // Handle the event
+  try {
     switch (event.type) {
       case 'customer.subscription.created':
-        await handleSubscriptionCreated(
-          event.data.object as Stripe.Subscription,
-        );
-        break;
-
       case 'customer.subscription.updated':
-        await handleSubscriptionUpdated(
+        await handleSubscriptionChange(
           event.data.object as Stripe.Subscription,
+          event.type === 'customer.subscription.created',
           event.data.previous_attributes as Stripe.Subscription | undefined,
         );
         break;
@@ -132,474 +139,174 @@ export async function POST(request: NextRequest) {
           event.data.object as Stripe.Subscription,
         );
         break;
-
-      case 'invoice.payment_succeeded':
-        await handlePaymentSucceeded(event.data.object as Stripe.Invoice);
-        break;
-
-      case 'invoice.payment_failed':
-        await handlePaymentFailed(event.data.object as Stripe.Invoice);
-        break;
-
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook handler error:', error);
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 },
-    );
+    console.error('Webhook error:', error);
+    return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
   }
 }
 
-// Helper function to extract discount and payment info from Stripe subscription
-function extractDiscountInfo(subscription: Stripe.Subscription) {
-  const discounts = subscription.discounts || [];
-  const hasDiscount = discounts.length > 0;
-
-  // Get total discount percent (if multiple discounts, sum them)
-  let totalDiscountPercent = 0;
-  let couponId: string | null = null;
-
-  if (hasDiscount && discounts.length > 0) {
-    const discount = discounts[0];
-    if (typeof discount !== 'string' && discount?.coupon) {
-      couponId = discount.coupon.id;
-      if (discount.coupon.percent_off) {
-        totalDiscountPercent = discount.coupon.percent_off;
-      } else if (discount.coupon.amount_off) {
-        // For fixed amount discounts, we'd need the subscription amount to calculate percent
-        // For now, mark as having discount but don't calculate percent
-        totalDiscountPercent = 0; // Will be calculated from amount_due
-      }
-    }
-  }
-
-  // Calculate monthly amount due (after discounts)
-  // Get amount from subscription items (price * quantity) and apply discounts
-  const subscriptionItem = subscription.items.data[0];
-  const price = subscriptionItem?.price;
-  const unitAmount = price?.unit_amount || 0; // Price in cents
-  const quantity = subscriptionItem?.quantity || 1;
-  const currency = price?.currency || 'gbp';
-  const interval = price?.recurring?.interval || 'month';
-
-  // Calculate base amount before discounts
-  let baseAmount = (unitAmount * quantity) / 100; // Convert cents to GBP
-
-  // Apply discount if present
-  let monthlyAmountDue = baseAmount;
-  if (hasDiscount && discounts.length > 0) {
-    const discount = discounts[0];
-    if (typeof discount !== 'string' && discount?.coupon) {
-      if (discount.coupon.percent_off) {
-        monthlyAmountDue = baseAmount * (1 - discount.coupon.percent_off / 100);
-      } else if (discount.coupon.amount_off) {
-        // Fixed amount discount
-        const discountAmount = discount.coupon.amount_off / 100; // Convert cents to GBP
-        monthlyAmountDue = Math.max(0, baseAmount - discountAmount);
-      }
-    }
-  }
-
-  // Convert yearly to monthly if needed
-  if (interval === 'year') {
-    monthlyAmountDue = monthlyAmountDue / 12;
-  }
-
-  // If we have a 100% discount, calculate percent
-  if (hasDiscount && monthlyAmountDue === 0 && totalDiscountPercent === 0) {
-    if (baseAmount > 0) {
-      totalDiscountPercent = 100;
-    }
-  }
-
-  return {
-    hasDiscount,
-    discountPercent: totalDiscountPercent,
-    monthlyAmountDue,
-    couponId,
-    isPaying: monthlyAmountDue > 0,
-  };
-}
-
-async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  const stripe = getStripe();
-  console.log('Subscription created:', subscription.id);
-
-  const { updateUserSubscriptionStatus } = await import(
-    '../../../../../utils/subscription'
-  );
-
-  const customerId = subscription.customer as string;
-  const status = subscription.status;
-  const planType = await getPlanTypeFromSubscription(subscription);
-  const discountInfo = extractDiscountInfo(subscription);
-
-  // Get customer to retrieve user_id and email for database sync
-  let userId: string | null = null;
-  let userEmail: string | null = null;
-  try {
-    const customer = await stripe.customers.retrieve(customerId);
-    userId = (customer as any).metadata?.userId || null;
-    userEmail = (customer as any).email || null;
-
-    // If userId is in subscription metadata but not customer metadata, update customer
-    const subscriptionUserId = subscription.metadata?.userId;
-    if (subscriptionUserId && !userId) {
-      try {
-        await stripe.customers.update(customerId, {
-          metadata: { userId: subscriptionUserId },
-        });
-        userId = subscriptionUserId;
-        console.log(
-          `[webhook] Updated customer ${customerId} metadata with userId ${subscriptionUserId}`,
-        );
-      } catch (updateError) {
-        console.warn(
-          '[webhook] Failed to update customer metadata:',
-          updateError,
-        );
-      }
-    }
-
-    console.log('Customer data:', { customerId, userId, userEmail });
-  } catch (error) {
-    console.error('Failed to retrieve customer:', error);
-  }
-
-  // Process referral code if present
-  const referralCode = subscription.metadata?.referralCode;
-  const referrerUserId = subscription.metadata?.referrerUserId;
-
-  if (referralCode && referrerUserId && userId) {
-    try {
-      const { processReferralCode } = await import('@/lib/referrals');
-      const result = await processReferralCode(referralCode, userId);
-
-      if (result.success) {
-        console.log(`✅ Referral processed: ${referralCode} by user ${userId}`);
-      } else {
-        console.error(`Failed to process referral: ${result.error}`);
-      }
-    } catch (error) {
-      console.error('Failed to process referral in webhook:', error);
-    }
-  }
-
-  // Write subscription to database for API access
-  if (userId || userEmail) {
-    try {
-      const mappedStatus =
-        status === 'trialing'
-          ? 'trial'
-          : status === 'active'
-            ? 'active'
-            : status === 'canceled'
-              ? 'cancelled'
-              : status === 'past_due'
-                ? 'past_due'
-                : 'free';
-
-      const trialEndsAt = subscription.trial_end
-        ? new Date(subscription.trial_end * 1000).toISOString()
-        : null;
-      const currentPeriodEnd = (subscription as any).current_period_end
-        ? new Date(
-            (subscription as any).current_period_end * 1000,
-          ).toISOString()
-        : null;
-
-      if (userId) {
-        await sql`
-          INSERT INTO subscriptions (
-            user_id,
-            user_email,
-            status,
-            plan_type,
-            stripe_customer_id,
-            stripe_subscription_id,
-            trial_ends_at,
-            current_period_end,
-            has_discount,
-            discount_percent,
-            monthly_amount_due,
-            coupon_id
-          ) VALUES (
-            ${userId},
-            ${userEmail},
-            ${mappedStatus},
-            ${planType},
-            ${customerId},
-            ${subscription.id},
-            ${trialEndsAt},
-            ${currentPeriodEnd},
-            ${discountInfo.hasDiscount},
-            ${discountInfo.discountPercent || null},
-            ${discountInfo.monthlyAmountDue || null},
-            ${discountInfo.couponId || null}
-          )
-          ON CONFLICT (user_id) DO UPDATE SET
-            status = EXCLUDED.status,
-            plan_type = EXCLUDED.plan_type,
-            stripe_customer_id = EXCLUDED.stripe_customer_id,
-            stripe_subscription_id = EXCLUDED.stripe_subscription_id,
-            trial_ends_at = EXCLUDED.trial_ends_at,
-            current_period_end = EXCLUDED.current_period_end,
-            has_discount = EXCLUDED.has_discount,
-            discount_percent = EXCLUDED.discount_percent,
-            monthly_amount_due = EXCLUDED.monthly_amount_due,
-            coupon_id = EXCLUDED.coupon_id,
-            user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
-            updated_at = NOW()
-        `;
-        console.log(
-          `✅ Subscription written to database for user_id: ${userId}`,
-        );
-      } else if (userEmail) {
-        // Update by email if user_id not available
-        await sql`
-          UPDATE subscriptions
-          SET
-            status = ${mappedStatus},
-            plan_type = ${planType},
-            stripe_customer_id = ${customerId},
-            stripe_subscription_id = ${subscription.id},
-            trial_ends_at = ${trialEndsAt},
-            current_period_end = ${currentPeriodEnd},
-            updated_at = NOW()
-          WHERE user_email = ${userEmail}
-        `;
-        console.log(
-          `✅ Subscription updated in database for email: ${userEmail}`,
-        );
-      }
-    } catch (error) {
-      console.error('Failed to write subscription to database:', error);
-    }
-  }
-
-  const result = await updateUserSubscriptionStatus(customerId, {
-    id: subscription.id,
-    status: status,
-    plan: planType,
-    trialEnd: subscription.trial_end || undefined,
-    currentPeriodEnd: (subscription as any).current_period_end,
-  });
-
-  console.log(
-    `Customer ${customerId} subscribed to ${planType} plan - sync result:`,
-    result,
-  );
-
-  if (userId) {
-    const conversionType =
-      status === 'trialing'
-        ? 'free_to_paid'
-        : status === 'active'
-          ? subscription.trial_end
-            ? 'trial_to_paid'
-            : 'free_to_paid'
-          : 'upgrade';
-
-    await trackConversionEvent({
-      userId,
-      conversionType,
-      fromPlan: 'free',
-      toPlan: planType,
-      triggerFeature: subscription.metadata?.triggerFeature || null,
-      daysToConvert: null,
-      metadata: {
-        stripeSubscriptionId: subscription.id,
-      },
-    });
-
-    captureEvent(userId, 'subscription_started', {
-      plan: planType,
-      status,
-      is_trial: status === 'trialing',
-      has_discount: discountInfo.hasDiscount,
-      discount_percent: discountInfo.discountPercent,
-      monthly_amount: discountInfo.monthlyAmountDue,
-      referral_code: referralCode || null,
-    });
-  }
-}
-
-async function handleSubscriptionUpdated(
+async function handleSubscriptionChange(
   subscription: Stripe.Subscription,
+  isNew: boolean,
   previousAttributes?: Stripe.Subscription,
 ) {
-  console.log('Subscription updated:', subscription.id);
-
-  const { updateUserSubscriptionStatus } = await import(
-    '../../../../../utils/subscription'
-  );
-
   const stripe = getStripe();
   const customerId = subscription.customer as string;
-  const status = subscription.status;
-  const planType = await getPlanTypeFromSubscription(subscription);
+  const status = mapStripeStatus(subscription.status);
+  const planType = getPlanTypeFromSubscription(subscription);
   const discountInfo = extractDiscountInfo(subscription);
 
-  // Get customer to retrieve user_id and email for database sync
-  let userId: string | null = null;
+  // Get userId from customer or subscription metadata
+  let userId = subscription.metadata?.userId || null;
   let userEmail: string | null = null;
+
   try {
     const customer = await stripe.customers.retrieve(customerId);
-    userId = (customer as any).metadata?.userId || null;
+    if (!userId) userId = (customer as any).metadata?.userId || null;
     userEmail = (customer as any).email || null;
+
+    // Sync userId to customer metadata if missing
+    if (subscription.metadata?.userId && !(customer as any).metadata?.userId) {
+      await stripe.customers.update(customerId, {
+        metadata: { userId: subscription.metadata.userId },
+      });
+    }
   } catch (error) {
-    console.error('Failed to retrieve customer:', error);
+    console.error('Failed to get customer:', error);
   }
 
-  // Update subscription in database
-  if (userId || userEmail) {
+  // Process referral on new subscriptions
+  if (isNew && subscription.metadata?.referralCode && userId) {
     try {
-      const mappedStatus =
-        status === 'trialing'
-          ? 'trial'
-          : status === 'active'
-            ? 'active'
-            : status === 'canceled'
-              ? 'cancelled'
-              : status === 'past_due'
-                ? 'past_due'
-                : 'free';
-
-      const trialEndsAt = subscription.trial_end
-        ? new Date(subscription.trial_end * 1000).toISOString()
-        : null;
-      const currentPeriodEnd = (subscription as any).current_period_end
-        ? new Date(
-            (subscription as any).current_period_end * 1000,
-          ).toISOString()
-        : null;
-
-      if (userId) {
-        await sql`
-          UPDATE subscriptions
-          SET
-            status = ${mappedStatus},
-            plan_type = ${planType},
-            stripe_customer_id = ${customerId},
-            stripe_subscription_id = ${subscription.id},
-            trial_ends_at = ${trialEndsAt},
-            current_period_end = ${currentPeriodEnd},
-            has_discount = ${discountInfo.hasDiscount},
-            discount_percent = ${discountInfo.discountPercent || null},
-            monthly_amount_due = ${discountInfo.monthlyAmountDue || null},
-            coupon_id = ${discountInfo.couponId || null},
-            user_email = COALESCE(${userEmail}, subscriptions.user_email),
-            updated_at = NOW()
-          WHERE user_id = ${userId}
-        `;
-      } else if (userEmail) {
-        await sql`
-          UPDATE subscriptions
-          SET
-            status = ${mappedStatus},
-            plan_type = ${planType},
-            stripe_customer_id = ${customerId},
-            stripe_subscription_id = ${subscription.id},
-            trial_ends_at = ${trialEndsAt},
-            current_period_end = ${currentPeriodEnd},
-            has_discount = ${discountInfo.hasDiscount},
-            discount_percent = ${discountInfo.discountPercent || null},
-            monthly_amount_due = ${discountInfo.monthlyAmountDue || null},
-            coupon_id = ${discountInfo.couponId || null},
-            updated_at = NOW()
-          WHERE user_email = ${userEmail}
-        `;
-      }
+      const { processReferralCode } = await import('@/lib/referrals');
+      await processReferralCode(subscription.metadata.referralCode, userId);
     } catch (error) {
-      console.error('Failed to update subscription in database:', error);
+      console.error('Referral error:', error);
     }
   }
 
-  const result = await updateUserSubscriptionStatus(customerId, {
-    id: subscription.id,
-    status: status,
-    plan: planType,
-    trialEnd: subscription.trial_end || undefined,
-    currentPeriodEnd: (subscription as any).current_period_end,
-  });
+  // Write to database
+  if (userId) {
+    const trialEndsAt = subscription.trial_end
+      ? new Date(subscription.trial_end * 1000).toISOString()
+      : null;
+    const currentPeriodEnd = (subscription as any).current_period_end
+      ? new Date((subscription as any).current_period_end * 1000).toISOString()
+      : null;
 
-  console.log(
-    `Customer ${customerId} subscription updated to status: ${status} - sync result:`,
-    result,
-  );
+    try {
+      await sql`
+        INSERT INTO subscriptions (
+          user_id, user_email, status, plan_type,
+          stripe_customer_id, stripe_subscription_id,
+          trial_ends_at, current_period_end,
+          has_discount, discount_percent, monthly_amount_due, coupon_id
+        ) VALUES (
+          ${userId}, ${userEmail}, ${status}, ${planType},
+          ${customerId}, ${subscription.id},
+          ${trialEndsAt}, ${currentPeriodEnd},
+          ${discountInfo.hasDiscount}, ${discountInfo.discountPercent || null},
+          ${discountInfo.monthlyAmountDue || null}, ${discountInfo.couponId || null}
+        )
+        ON CONFLICT (user_id) DO UPDATE SET
+          status = EXCLUDED.status,
+          plan_type = EXCLUDED.plan_type,
+          stripe_customer_id = EXCLUDED.stripe_customer_id,
+          stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+          trial_ends_at = EXCLUDED.trial_ends_at,
+          current_period_end = EXCLUDED.current_period_end,
+          has_discount = EXCLUDED.has_discount,
+          discount_percent = EXCLUDED.discount_percent,
+          monthly_amount_due = EXCLUDED.monthly_amount_due,
+          coupon_id = EXCLUDED.coupon_id,
+          user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+          updated_at = NOW()
+      `;
+    } catch (error) {
+      console.error('DB write failed:', error);
+    }
+  }
 
-  if (
-    userId &&
-    status === 'active' &&
-    previousAttributes?.status === 'trialing'
-  ) {
-    const daysToConvert =
-      subscription.trial_start && subscription.trial_start > 0
-        ? Math.max(
-            0,
-            Math.round(
+  // Analytics
+  if (userId) {
+    if (isNew) {
+      const conversionType =
+        subscription.status === 'trialing'
+          ? 'free_to_paid'
+          : subscription.trial_end
+            ? 'trial_to_paid'
+            : 'free_to_paid';
+
+      await trackConversionEvent({
+        userId,
+        conversionType,
+        fromPlan: 'free',
+        toPlan: planType,
+        triggerFeature: subscription.metadata?.triggerFeature || null,
+        daysToConvert: null,
+        metadata: { stripeSubscriptionId: subscription.id },
+      });
+
+      captureEvent(userId, 'subscription_started', {
+        plan: planType,
+        status,
+        is_trial: subscription.status === 'trialing',
+        has_discount: discountInfo.hasDiscount,
+        discount_percent: discountInfo.discountPercent,
+        monthly_amount: discountInfo.monthlyAmountDue,
+        referral_code: subscription.metadata?.referralCode || null,
+      });
+    } else if (
+      subscription.status === 'active' &&
+      previousAttributes?.status === 'trialing'
+    ) {
+      const daysToConvert =
+        subscription.trial_start && subscription.trial_start > 0
+          ? Math.round(
               (Date.now() - subscription.trial_start * 1000) /
                 (1000 * 60 * 60 * 24),
-            ),
-          )
-        : null;
+            )
+          : null;
 
-    await trackConversionEvent({
-      userId,
-      conversionType: 'trial_to_paid',
-      fromPlan: 'trial',
-      toPlan: planType,
-      triggerFeature: subscription.metadata?.triggerFeature || null,
-      daysToConvert,
-      metadata: {
-        stripeSubscriptionId: subscription.id,
-      },
-    });
+      await trackConversionEvent({
+        userId,
+        conversionType: 'trial_to_paid',
+        fromPlan: 'trial',
+        toPlan: planType,
+        triggerFeature: subscription.metadata?.triggerFeature || null,
+        daysToConvert,
+        metadata: { stripeSubscriptionId: subscription.id },
+      });
+    }
   }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.log('Subscription deleted:', subscription.id);
-
-  const { updateUserSubscriptionStatus } = await import(
-    '../../../../../utils/subscription'
-  );
-
+  const stripe = getStripe();
   const customerId = subscription.customer as string;
 
-  const result = await updateUserSubscriptionStatus(customerId, {
-    id: subscription.id,
-    status: 'cancelled',
-    plan: 'free',
-    trialEnd: undefined,
-    currentPeriodEnd: (subscription as any).current_period_end,
-  });
+  let userId = subscription.metadata?.userId || null;
+  if (!userId) {
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      userId = (customer as any).metadata?.userId || null;
+    } catch {
+      // Customer might be deleted
+    }
+  }
 
-  console.log(
-    `Customer ${customerId} subscription cancelled - sync result:`,
-    result,
-  );
-}
-
-async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  console.log('Payment succeeded for invoice:', invoice.id);
-
-  // TODO: Ensure user has active subscription status
-  const customerId = invoice.customer as string;
-
-  console.log(`Payment succeeded for customer: ${customerId}`);
-}
-
-async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  console.log('Payment failed for invoice:', invoice.id);
-
-  // TODO: Handle failed payment (maybe send notification)
-  const customerId = invoice.customer as string;
-
-  console.log(`Payment failed for customer: ${customerId}`);
+  if (userId) {
+    try {
+      await sql`
+        UPDATE subscriptions
+        SET status = 'cancelled', plan_type = 'free', updated_at = NOW()
+        WHERE user_id = ${userId}
+      `;
+    } catch (error) {
+      console.error('DB update failed:', error);
+    }
+  }
 }

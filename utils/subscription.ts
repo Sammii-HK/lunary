@@ -121,58 +121,6 @@ export function getUpgradeMessage(subscription: any): string {
   return '';
 }
 
-// Simple in-memory store for subscription updates (in production, use Redis/Database)
-const subscriptionRegistry = new Map<string, any>();
-
-// Function to update user subscription status from Stripe webhooks
-export async function updateUserSubscriptionStatus(
-  customerId: string,
-  subscriptionData: {
-    id: string;
-    status: string;
-    plan: string;
-    trialEnd?: number;
-    currentPeriodEnd: number;
-  },
-) {
-  try {
-    console.log('Subscription update received:', {
-      customerId,
-      subscriptionData,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Create standardized subscription object
-    const subscriptionUpdate = {
-      customerId,
-      stripeSubscriptionId: subscriptionData.id,
-      status: mapStripeStatus(subscriptionData.status),
-      plan: subscriptionData.plan,
-      trialEndsAt: subscriptionData.trialEnd
-        ? new Date(subscriptionData.trialEnd * 1000).toISOString()
-        : null,
-      currentPeriodEnd: new Date(
-        subscriptionData.currentPeriodEnd * 1000,
-      ).toISOString(),
-      updatedAt: new Date().toISOString(),
-      stripeCustomerId: customerId,
-    };
-
-    // Store in registry for later sync to Jazz profiles
-    subscriptionRegistry.set(customerId, subscriptionUpdate);
-
-    console.log('Subscription data stored for sync:', subscriptionUpdate);
-
-    return { success: true, data: subscriptionUpdate };
-  } catch (error) {
-    console.error('Error updating user subscription:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
 // Map Stripe status to our internal status
 function mapStripeStatus(stripeStatus: string): string {
   switch (stripeStatus) {
@@ -190,11 +138,6 @@ function mapStripeStatus(stripeStatus: string): string {
     default:
       return 'free';
   }
-}
-
-// Get stored subscription data for a customer
-export function getStoredSubscriptionData(customerId: string) {
-  return subscriptionRegistry.get(customerId);
 }
 
 // Fetch subscription data directly from Stripe (production-ready fallback)
@@ -268,23 +211,14 @@ export async function fetchSubscriptionFromStripe(customerId: string) {
   }
 }
 
-// Sync subscription data to Jazz profile - fetch directly from Stripe for reliability
+// Sync subscription data to Jazz profile - fetch from database
 export async function syncSubscriptionToProfile(
   profile: any,
   customerId: string,
 ) {
   try {
-    // First try stored data (from webhooks)
-    let subscriptionData = getStoredSubscriptionData(customerId);
-
-    // If no stored data, fetch directly from Stripe (more reliable)
-    if (!subscriptionData) {
-      console.log(
-        'No stored data, fetching directly from Stripe for customer:',
-        customerId,
-      );
-      subscriptionData = await fetchSubscriptionFromStripe(customerId);
-    }
+    // Fetch from database (webhooks keep this updated)
+    const subscriptionData = await fetchSubscriptionFromStripe(customerId);
 
     if (!subscriptionData) {
       console.log('No subscription data found for customer:', customerId);
