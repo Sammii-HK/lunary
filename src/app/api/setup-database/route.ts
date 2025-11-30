@@ -38,8 +38,7 @@ export async function POST(request: NextRequest) {
           "retrogrades": true,
           "sabbats": true,
           "eclipses": true,
-          "majorAspects": true,
-          "moonCircles": true
+          "majorAspects": true
         }'::jsonb,
         
         -- Metadata
@@ -180,73 +179,6 @@ export async function POST(request: NextRequest) {
       END $$;
     `;
 
-    // Add trial nurture tracking columns if they don't exist
-    await sql`
-      DO $$ 
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day2_sent') THEN
-          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day2_sent BOOLEAN DEFAULT false;
-        END IF;
-        
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day3_sent') THEN
-          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day3_sent BOOLEAN DEFAULT false;
-        END IF;
-        
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day5_sent') THEN
-          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day5_sent BOOLEAN DEFAULT false;
-        END IF;
-        
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'trial_nurture_day7_sent') THEN
-          ALTER TABLE subscriptions ADD COLUMN trial_nurture_day7_sent BOOLEAN DEFAULT false;
-        END IF;
-      END $$;
-    `;
-
-    // Add discount/coupon tracking columns if they don't exist
-    await sql`
-      DO $$ 
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'has_discount') THEN
-          ALTER TABLE subscriptions ADD COLUMN has_discount BOOLEAN DEFAULT false;
-        END IF;
-        
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'discount_percent') THEN
-          ALTER TABLE subscriptions ADD COLUMN discount_percent DECIMAL(5,2);
-        END IF;
-        
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'monthly_amount_due') THEN
-          ALTER TABLE subscriptions ADD COLUMN monthly_amount_due DECIMAL(10,2);
-        END IF;
-        
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'coupon_id') THEN
-          ALTER TABLE subscriptions ADD COLUMN coupon_id TEXT;
-        END IF;
-      END $$;
-    `;
-
-    // Add generated column for is_paying (computed from monthly_amount_due)
-    await sql`
-      DO $$ 
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                       WHERE table_name = 'subscriptions' AND column_name = 'is_paying') THEN
-          ALTER TABLE subscriptions ADD COLUMN is_paying BOOLEAN GENERATED ALWAYS AS (monthly_amount_due > 0) STORED;
-        END IF;
-      END $$;
-    `;
-
-    // Create indexes for discount tracking
-    await sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_is_paying ON subscriptions(is_paying) WHERE is_paying = true`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_has_discount ON subscriptions(has_discount) WHERE has_discount = true`;
-
     // Create update timestamp trigger function for subscriptions
     await sql`
       CREATE OR REPLACE FUNCTION update_subscriptions_updated_at()
@@ -295,11 +227,6 @@ export async function POST(request: NextRequest) {
 
     await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_user ON tarot_readings(user_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_created ON tarot_readings(created_at DESC)`;
-
-    await sql`
-      ALTER TABLE tarot_readings
-      ADD COLUMN IF NOT EXISTS ai_interpretation TEXT
-    `;
     await sql`
         CREATE INDEX IF NOT EXISTS idx_tarot_readings_active
         ON tarot_readings(user_id, created_at)
@@ -350,47 +277,6 @@ export async function POST(request: NextRequest) {
     await sql`CREATE INDEX IF NOT EXISTS idx_user_sessions_user_timestamp ON user_sessions(user_id, session_timestamp)`;
 
     console.log('✅ User sessions table created');
-
-    // Create the yearly_forecasts table (shared yearly forecast cache)
-    await sql`
-      CREATE TABLE IF NOT EXISTS yearly_forecasts (
-        year INTEGER PRIMARY KEY,
-        summary TEXT,
-        forecast JSONB NOT NULL,
-        stats JSONB,
-        source TEXT DEFAULT 'manual',
-        generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        expires_at TIMESTAMP WITH TIME ZONE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_yearly_forecasts_generated_at ON yearly_forecasts(generated_at)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_yearly_forecasts_updated_at ON yearly_forecasts(updated_at)`;
-
-    await sql`
-      CREATE OR REPLACE FUNCTION update_yearly_forecasts_updated_at()
-      RETURNS TRIGGER AS $$
-      BEGIN
-          NEW.updated_at = NOW();
-          RETURN NEW;
-      END;
-      $$ language 'plpgsql'
-    `;
-
-    await sql`
-      DROP TRIGGER IF EXISTS update_yearly_forecasts_timestamp ON yearly_forecasts
-    `;
-
-    await sql`
-      CREATE TRIGGER update_yearly_forecasts_timestamp
-          BEFORE UPDATE ON yearly_forecasts
-          FOR EACH ROW
-          EXECUTE FUNCTION update_yearly_forecasts_updated_at()
-    `;
-
-    console.log('✅ Yearly forecasts table created');
 
     // Create the ai_threads table for AI conversation threads
     await sql`
@@ -448,31 +334,30 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ AI usage table created');
 
-    // Create the ai_prompts table for daily/weekly personalized prompts
+    // Create user_profiles table
     await sql`
-      CREATE TABLE IF NOT EXISTS ai_prompts (
-        id SERIAL PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        prompt_type VARCHAR(50) NOT NULL,
-        prompt_text TEXT NOT NULL,
-        cosmic_context JSONB,
-        generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        expires_at TIMESTAMPTZ NOT NULL,
-        read_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        CONSTRAINT unique_user_prompt_type_date UNIQUE (user_id, prompt_type, generated_at)
+      CREATE TABLE IF NOT EXISTS user_profiles (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT NOT NULL UNIQUE,
+        name TEXT,
+        birthday TEXT,
+        birth_chart JSONB,
+        personal_card JSONB,
+        location JSONB,
+        stripe_customer_id TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `;
 
-    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_user_id ON ai_prompts(user_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_type ON ai_prompts(prompt_type)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_generated_at ON ai_prompts(generated_at)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_expires_at ON ai_prompts(expires_at)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_ai_prompts_unread ON ai_prompts(user_id, read_at) WHERE read_at IS NULL`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_stripe_customer_id ON user_profiles(stripe_customer_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_birth_chart ON user_profiles USING GIN(birth_chart)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_personal_card ON user_profiles USING GIN(personal_card)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_location ON user_profiles USING GIN(location)`;
 
     await sql`
-      CREATE OR REPLACE FUNCTION update_ai_prompts_updated_at()
+      CREATE OR REPLACE FUNCTION update_user_profiles_updated_at()
       RETURNS TRIGGER AS $$
       BEGIN
           NEW.updated_at = NOW();
@@ -482,252 +367,199 @@ export async function POST(request: NextRequest) {
     `;
 
     await sql`
-      DROP TRIGGER IF EXISTS update_ai_prompts_timestamp ON ai_prompts
+      DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON user_profiles
     `;
 
     await sql`
-      CREATE TRIGGER update_ai_prompts_timestamp
-      BEFORE UPDATE ON ai_prompts
-      FOR EACH ROW
-      EXECUTE FUNCTION update_ai_prompts_updated_at()
+      CREATE TRIGGER update_user_profiles_updated_at
+          BEFORE UPDATE ON user_profiles
+          FOR EACH ROW
+          EXECUTE FUNCTION update_user_profiles_updated_at()
     `;
 
-    console.log('✅ AI prompts table created');
+    console.log('✅ User profiles table created');
 
-    // Create the discord_notification_log table for deduplication and rate limiting
+    // Create shop_packs table
     await sql`
-      CREATE TABLE IF NOT EXISTS discord_notification_log (
-        id SERIAL PRIMARY KEY,
-        dedupe_key TEXT NOT NULL,
+      CREATE TABLE IF NOT EXISTS shop_packs (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
         category TEXT NOT NULL,
-        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        title TEXT,
-        recipient_count INTEGER DEFAULT 0,
-        UNIQUE(dedupe_key, category, sent_at)
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_dedupe_key ON discord_notification_log(dedupe_key)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_category ON discord_notification_log(category)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_sent_at ON discord_notification_log(sent_at)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_log_category_sent_at ON discord_notification_log(category, sent_at)`;
-
-    await sql`
-      CREATE OR REPLACE FUNCTION cleanup_old_discord_logs()
-      RETURNS void AS $$
-      BEGIN
-        DELETE FROM discord_notification_log
-        WHERE sent_at < NOW() - INTERVAL '48 hours';
-      END;
-      $$ LANGUAGE plpgsql
-    `;
-
-    console.log('✅ Discord notification log table created');
-
-    // Create the discord_notification_analytics table for analytics queue
-    await sql`
-      CREATE TABLE IF NOT EXISTS discord_notification_analytics (
-        id SERIAL PRIMARY KEY,
-        category TEXT NOT NULL,
-        event_type TEXT NOT NULL,
-        title TEXT,
-        dedupe_key TEXT,
-        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        subcategory TEXT,
+        price INTEGER NOT NULL,
+        stripe_product_id TEXT,
+        stripe_price_id TEXT,
+        image_url TEXT,
+        download_url TEXT,
+        file_size INTEGER,
+        is_active BOOLEAN DEFAULT true,
         metadata JSONB,
-        skipped_reason TEXT,
-        rate_limited BOOLEAN DEFAULT false,
-        quiet_hours_skipped BOOLEAN DEFAULT false
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_category ON discord_notification_analytics(category)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_event_type ON discord_notification_analytics(event_type)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_sent_at ON discord_notification_analytics(sent_at)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_discord_notification_analytics_dedupe_key ON discord_notification_analytics(dedupe_key)`;
-
-    await sql`
-      CREATE OR REPLACE FUNCTION cleanup_old_discord_analytics()
-      RETURNS void AS $$
-      BEGIN
-        DELETE FROM discord_notification_analytics
-        WHERE sent_at < NOW() - INTERVAL '7 days';
-      END;
-      $$ LANGUAGE plpgsql
-    `;
-
-    console.log('✅ Discord notification analytics table created');
-
-    // Create the admin_activity_log table for tracking admin actions and automation
-    await sql`
-      CREATE TABLE IF NOT EXISTS admin_activity_log (
-        id SERIAL PRIMARY KEY,
-        activity_type TEXT NOT NULL,
-        activity_category TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'pending',
-        message TEXT,
-        metadata JSONB DEFAULT '{}'::jsonb,
-        error_message TEXT,
-        execution_time_ms INTEGER,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_type ON admin_activity_log(activity_type)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_category ON admin_activity_log(activity_category)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_status ON admin_activity_log(status)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_admin_activity_log_created_at ON admin_activity_log(created_at DESC)`;
-
-    console.log('✅ Admin activity log table created');
-
-    // Create the analytics_discord_interactions table for Discord bot analytics
-    await sql`
-      CREATE TABLE IF NOT EXISTS analytics_discord_interactions (
-        id SERIAL PRIMARY KEY,
-        discord_id TEXT NOT NULL,
-        lunary_user_id TEXT,
-        interaction_type TEXT NOT NULL,
-        command_name TEXT,
-        button_action TEXT,
-        destination_url TEXT,
-        source TEXT DEFAULT 'discord',
-        feature TEXT,
-        campaign TEXT,
-        metadata JSONB,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_discord_id ON analytics_discord_interactions(discord_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_lunary_user_id ON analytics_discord_interactions(lunary_user_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_type ON analytics_discord_interactions(interaction_type)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_command ON analytics_discord_interactions(command_name)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_created_at ON analytics_discord_interactions(created_at)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_discord_interactions_feature ON analytics_discord_interactions(feature)`;
-
-    console.log('✅ Discord interactions analytics table created');
-
-    // Create user_streaks table
-    await sql`
-      CREATE TABLE IF NOT EXISTS user_streaks (
-        user_id TEXT PRIMARY KEY,
-        current_streak INTEGER DEFAULT 0,
-        longest_streak INTEGER DEFAULT 0,
-        last_check_in DATE,
-        total_check_ins INTEGER DEFAULT 0,
-        ritual_streak INTEGER DEFAULT 0,
-        longest_ritual_streak INTEGER DEFAULT 0,
-        last_ritual_date DATE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `;
 
-    await sql`CREATE INDEX IF NOT EXISTS idx_user_streaks_last_check_in ON user_streaks(last_check_in)`;
-
-    console.log('✅ User streaks table created');
-
-    // Create ritual_habits table
-    await sql`
-      CREATE TABLE IF NOT EXISTS ritual_habits (
-        user_id TEXT NOT NULL,
-        habit_date DATE NOT NULL,
-        ritual_type TEXT NOT NULL,
-        completed BOOLEAN DEFAULT FALSE,
-        completion_time TIMESTAMP WITH TIME ZONE,
-        metadata JSONB,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        PRIMARY KEY (user_id, habit_date, ritual_type)
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_habits_user_id ON ritual_habits(user_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_habits_date ON ritual_habits(habit_date)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_habits_user_date ON ritual_habits(user_id, habit_date)`;
-
-    console.log('✅ Ritual habits table created');
-
-    // Create onboarding_completion table
-    await sql`
-      CREATE TABLE IF NOT EXISTS onboarding_completion (
-        user_id TEXT PRIMARY KEY,
-        completed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        steps_completed TEXT[] DEFAULT ARRAY[]::TEXT[],
-        skipped BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_onboarding_completion_completed_at ON onboarding_completion(completed_at)`;
-
-    console.log('✅ Onboarding completion table created');
-
-    // Create monthly_insights table
-    await sql`
-      CREATE TABLE IF NOT EXISTS monthly_insights (
-        user_id TEXT NOT NULL,
-        month INTEGER NOT NULL,
-        year INTEGER NOT NULL,
-        insights JSONB NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        PRIMARY KEY (user_id, month, year)
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_user_id ON monthly_insights(user_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_date ON monthly_insights(year, month)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_monthly_insights_updated_at ON monthly_insights(updated_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_packs_category ON shop_packs(category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_packs_is_active ON shop_packs(is_active) WHERE is_active = true`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_packs_stripe_product_id ON shop_packs(stripe_product_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_packs_metadata ON shop_packs USING GIN(metadata)`;
 
     await sql`
-      CREATE OR REPLACE FUNCTION update_monthly_insights_updated_at()
+      CREATE OR REPLACE FUNCTION update_shop_packs_updated_at()
       RETURNS TRIGGER AS $$
       BEGIN
-        NEW.updated_at = NOW();
-        RETURN NEW;
+          NEW.updated_at = NOW();
+          RETURN NEW;
       END;
-      $$ LANGUAGE plpgsql
+      $$ language 'plpgsql'
     `;
 
-    await sql`DROP TRIGGER IF EXISTS update_monthly_insights_timestamp ON monthly_insights`;
-
     await sql`
-      CREATE TRIGGER update_monthly_insights_timestamp
-        BEFORE UPDATE ON monthly_insights
-        FOR EACH ROW
-        EXECUTE FUNCTION update_monthly_insights_updated_at()
+      DROP TRIGGER IF EXISTS update_shop_packs_updated_at ON shop_packs
     `;
 
-    console.log('✅ Monthly insights table created');
-
-    // Create re_engagement_campaigns table
     await sql`
-      CREATE TABLE IF NOT EXISTS re_engagement_campaigns (
-        id SERIAL PRIMARY KEY,
+      CREATE TRIGGER update_shop_packs_updated_at
+          BEFORE UPDATE ON shop_packs
+          FOR EACH ROW
+          EXECUTE FUNCTION update_shop_packs_updated_at()
+    `;
+
+    console.log('✅ Shop packs table created');
+
+    // Create shop_purchases table
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_purchases (
+        id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
-        campaign_type TEXT NOT NULL,
-        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        opened_at TIMESTAMP WITH TIME ZONE,
-        clicked_at TIMESTAMP WITH TIME ZONE,
-        metadata JSONB,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        pack_id TEXT NOT NULL,
+        stripe_session_id TEXT,
+        stripe_payment_intent_id TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        amount INTEGER NOT NULL,
+        download_token TEXT NOT NULL,
+        download_count INTEGER DEFAULT 0,
+        max_downloads INTEGER DEFAULT 5,
+        expires_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `;
 
-    await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_user_id ON re_engagement_campaigns(user_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_type ON re_engagement_campaigns(campaign_type)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_sent_at ON re_engagement_campaigns(sent_at)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_user_type_sent ON re_engagement_campaigns(user_id, campaign_type, sent_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_purchases_user_id ON shop_purchases(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_purchases_pack_id ON shop_purchases(pack_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_purchases_status ON shop_purchases(status)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_purchases_download_token ON shop_purchases(download_token)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_shop_purchases_stripe_session_id ON shop_purchases(stripe_session_id)`;
 
-    console.log('✅ Re-engagement campaigns table created');
+    await sql`
+      CREATE OR REPLACE FUNCTION update_shop_purchases_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_shop_purchases_updated_at ON shop_purchases
+    `;
+
+    await sql`
+      CREATE TRIGGER update_shop_purchases_updated_at
+          BEFORE UPDATE ON shop_purchases
+          FOR EACH ROW
+          EXECUTE FUNCTION update_shop_purchases_updated_at()
+    `;
+
+    console.log('✅ Shop purchases table created');
+
+    // Create user_notes table
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_notes (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_notes_user_id ON user_notes(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_notes_created_at ON user_notes(created_at DESC)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_user_notes_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_user_notes_updated_at ON user_notes
+    `;
+
+    await sql`
+      CREATE TRIGGER update_user_notes_updated_at
+          BEFORE UPDATE ON user_notes
+          FOR EACH ROW
+          EXECUTE FUNCTION update_user_notes_updated_at()
+    `;
+
+    console.log('✅ User notes table created');
+
+    // Create jazz_migration_status table
+    await sql`
+      CREATE TABLE IF NOT EXISTS jazz_migration_status (
+        user_id TEXT PRIMARY KEY,
+        migrated_at TIMESTAMP WITH TIME ZONE,
+        migration_status TEXT NOT NULL DEFAULT 'pending',
+        last_sync_at TIMESTAMP WITH TIME ZONE,
+        jazz_account_id TEXT,
+        error_message TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_jazz_migration_status_status ON jazz_migration_status(migration_status)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_jazz_migration_status_jazz_account_id ON jazz_migration_status(jazz_account_id)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_jazz_migration_status_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_jazz_migration_status_updated_at ON jazz_migration_status
+    `;
+
+    await sql`
+      CREATE TRIGGER update_jazz_migration_status_updated_at
+          BEFORE UPDATE ON jazz_migration_status
+          FOR EACH ROW
+          EXECUTE FUNCTION update_jazz_migration_status_updated_at()
+    `;
+
+    console.log('✅ Jazz migration status table created');
 
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, discord_notification_log, discord_notification_analytics, admin_activity_log, analytics_discord_interactions, user_streaks, onboarding_completion)',
+        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
