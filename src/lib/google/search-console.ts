@@ -111,9 +111,45 @@ export async function getSearchConsoleData(
       averageCtr,
       averagePosition,
     };
-  } catch (error) {
-    console.error('[Search Console] Error fetching data:', error);
-    throw error;
+  } catch (error: unknown) {
+    const googleError = error as {
+      code?: number;
+      message?: string;
+      errors?: Array<{ message: string; domain: string; reason: string }>;
+      response?: { status: number; statusText: string; data?: unknown };
+    };
+
+    console.error('[Search Console] Error fetching data:', {
+      message: googleError.message,
+      code: googleError.code,
+      errors: googleError.errors,
+      responseStatus: googleError.response?.status,
+      responseData: googleError.response?.data,
+      propertyUrl,
+      dateRange: { startDate, endDate },
+    });
+
+    if (googleError.code === 401 || googleError.response?.status === 401) {
+      throw new Error(
+        'Google Search Console: Invalid or expired credentials. Refresh token may need regeneration.',
+      );
+    }
+
+    if (googleError.code === 403 || googleError.response?.status === 403) {
+      throw new Error(
+        `Google Search Console: Permission denied for property "${propertyUrl}". Verify the property exists and you have access.`,
+      );
+    }
+
+    if (googleError.code === 404 || googleError.response?.status === 404) {
+      throw new Error(
+        `Google Search Console: Property "${propertyUrl}" not found. Check GOOGLE_SEARCH_CONSOLE_SITE_URL format (should be "sc-domain:lunary.app" or "https://lunary.app").`,
+      );
+    }
+
+    throw new Error(
+      `Google Search Console API error: ${googleError.message || 'Unknown error'}`,
+    );
   }
 }
 
@@ -164,9 +200,23 @@ export async function getTopQueries(
         position: row.position || 0,
       })) || []
     );
-  } catch (error) {
-    console.error('[Search Console] Error fetching top queries:', error);
-    throw error;
+  } catch (error: unknown) {
+    const googleError = error as {
+      code?: number;
+      message?: string;
+      response?: { status: number };
+    };
+
+    console.error('[Search Console] Error fetching top queries:', {
+      message: googleError.message,
+      code: googleError.code,
+      responseStatus: googleError.response?.status,
+      propertyUrl,
+    });
+
+    throw new Error(
+      `Google Search Console API error (queries): ${googleError.message || 'Unknown error'}`,
+    );
   }
 }
 
@@ -217,8 +267,22 @@ export async function getTopPages(
         position: row.position || 0,
       })) || []
     );
-  } catch (error) {
-    console.error('[Search Console] Error fetching top pages:', error);
-    throw error;
+  } catch (error: unknown) {
+    const googleError = error as {
+      code?: number;
+      message?: string;
+      response?: { status: number };
+    };
+
+    console.error('[Search Console] Error fetching top pages:', {
+      message: googleError.message,
+      code: googleError.code,
+      responseStatus: googleError.response?.status,
+      propertyUrl,
+    });
+
+    throw new Error(
+      `Google Search Console API error (pages): ${googleError.message || 'Unknown error'}`,
+    );
   }
 }

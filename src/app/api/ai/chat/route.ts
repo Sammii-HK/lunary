@@ -26,6 +26,7 @@ import {
   isRitualRequest,
 } from '@/lib/ai/weekly-ritual-usage';
 import { recordAiInteraction } from '@/lib/analytics/tracking';
+import { captureAIGeneration } from '@/lib/posthog-server';
 
 type ChatRequest = {
   message?: string;
@@ -369,6 +370,7 @@ export async function POST(request: NextRequest) {
       grimoireData,
     });
 
+    const aiStartTime = Date.now();
     let composed;
     try {
       composed = await composeAssistantReply({
@@ -476,6 +478,17 @@ export async function POST(request: NextRequest) {
         thread_id: thread.id,
         assist: composed.assistSnippet ? 'assist' : undefined,
       },
+    });
+
+    captureAIGeneration({
+      distinctId: user.id,
+      model: 'gpt-4o-mini',
+      provider: 'openai',
+      inputTokens: tokensIn,
+      outputTokens: tokensOut,
+      latencyMs: Date.now() - aiStartTime,
+      traceId: thread.id,
+      success: true,
     });
 
     const wantsStream =

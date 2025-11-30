@@ -173,13 +173,12 @@ async function generateResponse(
                   ? 'seek balance between'
                   : 'interact through';
 
-      const signAEnergy = getSignDescription(event.signA);
-
-      // Use the primary energy (first sign's energy) for cleaner flow
-      const primaryEnergy = signAEnergy;
+      const signA = event.planetA?.constellation;
+      const signB = event.planetB?.constellation;
+      const signAEnergy = getSignDescription(signA);
 
       highlights.push(
-        `${event.planetA?.name || event.planetA}-${event.planetB?.name || event.planetB} ${event.aspect} in ${event.signA}-${event.signB} at ${event.separation}° - ${aspectDescription} ${primaryEnergy} energy`,
+        `${event.planetA?.name}-${event.planetB?.name} ${event.aspect} in ${signA}-${signB} at ${event.separation}° - ${aspectDescription} ${signAEnergy} energy`,
       );
     }
   });

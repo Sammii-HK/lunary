@@ -658,12 +658,17 @@ export async function sendUnifiedNotification(
           error,
         );
 
-        if (
-          error instanceof Error &&
-          (error.message.includes('410') ||
-            error.message.includes('invalid') ||
-            error.message.includes('expired'))
-        ) {
+        const errorObj = error as any;
+        const isExpired =
+          errorObj?.statusCode === 410 ||
+          errorObj?.statusCode === 404 ||
+          error.message?.includes('410') ||
+          error.message?.includes('404') ||
+          error.message?.includes('invalid') ||
+          error.message?.includes('expired') ||
+          error.message?.includes('unsubscribed');
+
+        if (isExpired) {
           await sql`
             UPDATE push_subscriptions 
             SET is_active = false 

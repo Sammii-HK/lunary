@@ -1,13 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import {
-  spells,
-  spellCategories,
-  getSpellsByCategory,
-  Spell,
-} from '@/constants/spells';
+import { useState, useEffect, useMemo } from 'react';
 import { getMoonPhase } from '../../../../utils/moon/moonPhases';
 import {
   Clock,
@@ -24,23 +18,63 @@ import {
   X,
 } from 'lucide-react';
 
+interface Spell {
+  id: string;
+  title: string;
+  description: string;
+  purpose: string;
+  type: string;
+  difficulty: string;
+  moonPhases?: string[];
+  category?: string;
+}
+
+interface SpellCategory {
+  name: string;
+  description: string;
+}
+
 const Practices = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [spellsData, setSpellsData] = useState<Spell[]>([]);
+  const [categoriesData, setCategoriesData] = useState<
+    Record<string, SpellCategory>
+  >({});
+  const [loading, setLoading] = useState(true);
 
   const currentMoonPhase = getMoonPhase(new Date());
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      const element = document.getElementById(hash);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+    fetch('/api/grimoire/spells')
+      .then((r) => r.json())
+      .then((data) => {
+        setSpellsData(data.spells || []);
+        setCategoriesData(data.categories || {});
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        const element = document.getElementById(hash);
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
       }
     }
-  }, []);
+  }, [loading]);
+
+  const getSpellsByCategory = useMemo(
+    () => (category: string) =>
+      spellsData.filter((s) => s.category === category || s.type === category),
+    [spellsData],
+  );
 
   const getCategoryIcon = (category: string) => {
     const iconMap: { [key: string]: JSX.Element } = {
@@ -65,14 +99,17 @@ const Practices = () => {
     return colorMap[difficulty] || 'text-zinc-400 bg-zinc-800';
   };
 
-  const filteredSpells = selectedCategory
-    ? getSpellsByCategory(selectedCategory)
-    : spells.filter(
-        (spell) =>
-          spell.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          spell.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          spell.purpose.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
+  const filteredSpells = useMemo(() => {
+    if (selectedCategory) {
+      return getSpellsByCategory(selectedCategory);
+    }
+    return spellsData.filter(
+      (spell) =>
+        spell.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        spell.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        spell.purpose.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [selectedCategory, searchTerm, spellsData, getSpellsByCategory]);
 
   return (
     <div className='space-y-6'>
@@ -120,10 +157,10 @@ const Practices = () => {
                   : 'bg-zinc-800/50 text-zinc-300 border border-zinc-700/50 hover:bg-zinc-800'
               }`}
             >
-              All Categories ({spells.length})
+              All Categories ({spellsData.length})
             </button>
 
-            {Object.entries(spellCategories).map(([key, category]) => (
+            {Object.entries(categoriesData).map(([key, category]) => (
               <button
                 key={key}
                 onClick={() => setSelectedCategory(key)}
@@ -140,21 +177,13 @@ const Practices = () => {
           </div>
         </div>
 
-        {selectedCategory && (
+        {selectedCategory && categoriesData[selectedCategory] && (
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
             <h2 className='text-lg font-medium text-purple-400 mb-2'>
-              {
-                spellCategories[
-                  selectedCategory as keyof typeof spellCategories
-                ].name
-              }
+              {categoriesData[selectedCategory].name}
             </h2>
             <p className='text-sm text-zinc-300'>
-              {
-                spellCategories[
-                  selectedCategory as keyof typeof spellCategories
-                ].description
-              }
+              {categoriesData[selectedCategory].description}
             </p>
           </div>
         )}

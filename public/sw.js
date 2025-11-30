@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v14'; // Ensure start_url cached first for iOS PWA
+const CACHE_NAME = 'lunary-v15';
 const STATIC_CACHE_URLS = [
   '/app',
   '/manifest.json?v=20251103-1',
@@ -7,6 +7,22 @@ const STATIC_CACHE_URLS = [
   '/icons/icon-512x512.png',
   '/icons/pwa/icon-192x192.png',
   '/icons/pwa/icon-512x512.png',
+  '/grimoire',
+  '/grimoire/crystals',
+  '/grimoire/moon',
+  '/grimoire/tarot',
+  '/grimoire/runes',
+  '/grimoire/practices',
+  '/grimoire/chakras',
+  '/offline',
+];
+
+const API_CACHE_ROUTES = [
+  '/api/grimoire/crystals',
+  '/api/grimoire/spells',
+  '/api/grimoire/numerology',
+  '/api/grimoire/tarot-spreads',
+  '/api/cosmic/global',
 ];
 
 // Install event - cache static assets
@@ -82,16 +98,43 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // CRITICAL: Skip ALL API routes and authentication - always use network, don't intercept
+  // Skip authentication routes - always use network
   if (
-    url.pathname.startsWith('/api/') ||
     url.pathname.includes('/auth/') ||
     url.pathname.includes('sign-in') ||
     url.pathname.includes('sign-out') ||
     url.pathname.includes('get-session') ||
     url.pathname.includes('get-subscription')
   ) {
-    // Let the request go directly to network without any interception
+    return;
+  }
+
+  // Stale-while-revalidate for cacheable API routes
+  const isCacheableAPI = API_CACHE_ROUTES.some((route) =>
+    url.pathname.startsWith(route),
+  );
+  if (isCacheableAPI) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          const fetchPromise = fetch(event.request)
+            .then((networkResponse) => {
+              if (networkResponse.ok) {
+                cache.put(event.request, networkResponse.clone());
+              }
+              return networkResponse;
+            })
+            .catch(() => cachedResponse);
+
+          return cachedResponse || fetchPromise;
+        });
+      }),
+    );
+    return;
+  }
+
+  // Skip other API routes - always use network
+  if (url.pathname.startsWith('/api/')) {
     return;
   }
 
@@ -166,7 +209,7 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => {
           // Return offline fallback for failed requests
-          return caches.match('/app');
+          return caches.match('/offline') || caches.match('/app');
         });
     }),
   );

@@ -131,13 +131,6 @@ const nextConfig = {
               priority: 20,
               minChunks: 2, // Only create vendor chunk if used in 2+ chunks
             },
-            // Separate chunk for MUI (large library)
-            mui: {
-              name: 'mui',
-              test: /[\\/]node_modules[\\/]@mui[\\/]/,
-              chunks: 'all',
-              priority: 30,
-            },
             // Separate chunk for astrochart (large library)
             astrochart: {
               name: 'astrochart',
@@ -183,13 +176,6 @@ const nextConfig = {
               chunks: 'all',
               test: /[\\/]node_modules[\\/]/,
               priority: 20,
-            },
-            // Separate chunk for MUI (large library)
-            mui: {
-              name: 'mui',
-              test: /[\\/]node_modules[\\/]@mui[\\/]/,
-              chunks: 'all',
-              priority: 30,
             },
             // Separate chunk for astrochart (large library)
             astrochart: {
@@ -242,12 +228,12 @@ const nextConfig = {
   experimental: {
     // Optimize package imports (tree-shake unused exports)
     optimizePackageImports: [
-      '@mui/material',
       'lucide-react',
       '@radix-ui/react-select',
       '@radix-ui/react-tabs',
       '@radix-ui/react-label',
       '@radix-ui/react-switch',
+      'react-day-picker',
     ],
   },
 

@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getMoonPhase, MoonPhaseLabels } from '../../utils/moon/moonPhases';
-import {
-  getSpellsByMoonPhase,
-  spellCategories,
-  Spell,
-} from '@/constants/spells';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import dayjs from 'dayjs';
+
+interface Spell {
+  id: string;
+  title: string;
+  type: string;
+  difficulty: string;
+  purpose: string;
+  moonPhases?: string[];
+}
 
 export const MoonSpellsWidget = () => {
   const [currentMoonPhase, setCurrentMoonPhase] =
@@ -22,8 +25,12 @@ export const MoonSpellsWidget = () => {
     const phase = getMoonPhase(now);
     setCurrentMoonPhase(phase);
 
-    const spells = getSpellsByMoonPhase(phase);
-    setMoonSpells(spells.slice(0, 3)); // Show top 3 spells
+    fetch(`/api/grimoire/spells?moonPhase=${encodeURIComponent(phase)}`)
+      .then((r) => r.json())
+      .then((spells) => {
+        setMoonSpells((spells || []).slice(0, 3));
+      })
+      .catch(() => setMoonSpells([]));
   }, []);
 
   const getMoonPhaseDescription = (phase: MoonPhaseLabels) => {
