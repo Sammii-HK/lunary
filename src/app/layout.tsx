@@ -2,12 +2,19 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Roboto_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import { Suspense } from 'react';
 import './globals.css';
 
 const roboto = Roboto_Mono({
   weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
+  display: 'swap',
+});
+
+const astronomicon = localFont({
+  src: '../fonts/Astronomicon.ttf',
+  variable: '--font-astro',
   display: 'swap',
 });
 
@@ -138,7 +145,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${roboto.className} w-full min-h-screen bg-zinc-950 text-white`}
+        className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-zinc-950 text-white overflow-hidden`}
         suppressHydrationWarning
       >
         <StructuredData />
@@ -149,7 +156,7 @@ export default function RootLayout({
                 <AuthStatusProvider>
                   <Suspense
                     fallback={
-                      <main className='flex flex-col w-full font-mono text-sm gap-4 overflow-y-auto px-4 h-screen'>
+                      <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
                         {children}
                       </main>
                     }

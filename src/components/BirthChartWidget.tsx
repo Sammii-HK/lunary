@@ -110,7 +110,7 @@ export const BirthChartWidget = () => {
       <div className='grid grid-cols-3 gap-2'>
         {keyPlacements.slice(0, 3).map((planet) => (
           <div key={planet.body} className='text-center'>
-            <div className='text-lg mb-1'>
+            <div className='font-astro text-lg mb-1'>
               {
                 bodiesSymbols[
                   planet.body.toLowerCase() as keyof typeof bodiesSymbols
@@ -118,7 +118,7 @@ export const BirthChartWidget = () => {
               }
             </div>
             <div className='text-xs'>
-              <div>
+              <div className='font-astro'>
                 {
                   zodiacSymbol[
                     planet.sign.toLowerCase() as keyof typeof zodiacSymbol
