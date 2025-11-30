@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import { getMoonPhase } from '../../../../utils/moon/moonPhases';
+import type { Spell } from '@/constants/spells';
 import {
   Clock,
   Star,
@@ -17,17 +18,6 @@ import {
   Zap,
   X,
 } from 'lucide-react';
-
-interface Spell {
-  id: string;
-  title: string;
-  description: string;
-  purpose: string;
-  type: string;
-  difficulty: string;
-  moonPhases?: string[];
-  category?: string;
-}
 
 interface SpellCategory {
   name: string;
@@ -76,7 +66,8 @@ const Practices = () => {
     [spellsData],
   );
 
-  const getCategoryIcon = (category: string) => {
+  const getCategoryIcon = (category?: string) => {
+    if (!category) return <Leaf className='w-4 h-4' />;
     const iconMap: { [key: string]: JSX.Element } = {
       protection: <Shield className='w-4 h-4' />,
       love: <Heart className='w-4 h-4' />,
