@@ -2,22 +2,25 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Mail, CheckCircle, XCircle } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, Send } from 'lucide-react';
 
 function UnsubscribeContent() {
   const searchParams = useSearchParams();
-  const email = searchParams.get('email');
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
-    'loading',
-  );
+  const emailFromUrl = searchParams.get('email');
+  const [email, setEmail] = useState(emailFromUrl || '');
+  const [status, setStatus] = useState<
+    'loading' | 'success' | 'error' | 'manual'
+  >(emailFromUrl ? 'loading' : 'manual');
   const [message, setMessage] = useState('');
 
-  const unsubscribe = useCallback(async () => {
-    if (!email) return;
+  const unsubscribe = useCallback(async (emailToUnsubscribe: string) => {
+    if (!emailToUnsubscribe) return;
+
+    setStatus('loading');
 
     try {
       const response = await fetch(
-        `/api/newsletter/subscribers/${encodeURIComponent(email)}`,
+        `/api/newsletter/subscribers/${encodeURIComponent(emailToUnsubscribe)}`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -37,16 +40,21 @@ function UnsubscribeContent() {
       setStatus('error');
       setMessage('An error occurred. Please try again later.');
     }
-  }, [email]);
+  }, []);
 
   useEffect(() => {
-    if (email) {
-      unsubscribe();
-    } else {
-      setStatus('error');
-      setMessage('No email address provided');
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
+      unsubscribe(emailFromUrl);
     }
-  }, [email, unsubscribe]);
+  }, [emailFromUrl, unsubscribe]);
+
+  const handleManualSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      unsubscribe(email.trim());
+    }
+  };
 
   return (
     <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4'>
@@ -54,13 +62,47 @@ function UnsubscribeContent() {
         <div className='text-center mb-6'>
           <Mail className='h-12 w-12 mx-auto mb-4 text-purple-400' />
           <h1 className='text-2xl font-bold mb-2'>Unsubscribe</h1>
-          {email && <p className='text-sm text-zinc-400'>{email}</p>}
+          {email && status !== 'manual' && (
+            <p className='text-sm text-zinc-400'>{email}</p>
+          )}
         </div>
 
         {status === 'loading' && (
           <div className='text-center py-8'>
             <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-4'></div>
             <p className='text-zinc-400'>Processing your request...</p>
+          </div>
+        )}
+
+        {status === 'manual' && (
+          <div className='py-4'>
+            <p className='text-zinc-400 text-center mb-6'>
+              Enter your email address to unsubscribe from Lunary emails.
+            </p>
+            <form onSubmit={handleManualSubmit} className='space-y-4'>
+              <input
+                type='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder='your@email.com'
+                required
+                className='w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+              />
+              <button
+                type='submit'
+                className='w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg transition-colors'
+              >
+                <Send className='h-4 w-4' />
+                Unsubscribe
+              </button>
+            </form>
+            <p className='text-xs text-zinc-500 text-center mt-4'>
+              You can also manage your email preferences from your{' '}
+              <a href='/profile' className='text-purple-400 hover:underline'>
+                profile settings
+              </a>
+              .
+            </p>
           </div>
         )}
 
@@ -85,12 +127,20 @@ function UnsubscribeContent() {
           <div className='text-center py-8'>
             <XCircle className='h-12 w-12 mx-auto mb-4 text-red-400' />
             <p className='text-white mb-4'>{message}</p>
-            <a
-              href='/profile'
-              className='inline-block bg-purple-600 hover:bg-purple-700 text-white py-2 px-6 rounded-md transition-colors'
-            >
-              Go to Profile
-            </a>
+            <div className='space-y-3'>
+              <button
+                onClick={() => setStatus('manual')}
+                className='w-full bg-zinc-700 hover:bg-zinc-600 text-white py-2 px-6 rounded-md transition-colors'
+              >
+                Try with different email
+              </button>
+              <a
+                href='/profile'
+                className='block bg-purple-600 hover:bg-purple-700 text-white py-2 px-6 rounded-md transition-colors'
+              >
+                Go to Profile
+              </a>
+            </div>
           </div>
         )}
       </div>

@@ -301,7 +301,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
               }).format(date);
               const dateSlug = date.toISOString().split('T')[0];
 
-              const emailHtml = generateMoonCircleEmailHTML({
+              const emailHtml = await generateMoonCircleEmailHTML({
                 moonCircleId,
                 moonPhase: moonCircle.moonPhase,
                 dateLabel,
@@ -310,7 +310,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
                 summary: moonCircle.moonSignInfo,
                 appUrl: baseUrl,
               });
-              const emailText = generateMoonCircleEmailText({
+              const emailText = await generateMoonCircleEmailText({
                 moonCircleId,
                 moonPhase: moonCircle.moonPhase,
                 dateLabel,

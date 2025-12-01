@@ -1,6 +1,6 @@
 # Social Media Marketing Context for Lunary
 
-This file contains essential context for generating social media posts about Lunary. Use this to create natural, conversion-focused posts.
+This file contains essential context for generating authentic, varied social media posts about Lunary. Focus on value-first content that builds trust through education, storytelling, and genuine cosmic insights.
 
 ## App Overview
 
@@ -13,11 +13,10 @@ This file contains essential context for generating social media posts about Lun
 3. **Astronomical Precision** - Real astronomical calculations, not generic astrology
 4. **Cross-Device Sync** - Access insights anywhere, anytime
 5. **Digital Grimoire** - Comprehensive library with 500+ pages of spells, rituals, crystal guides, and magical knowledge
-6. **AI-Powered Personalization** - Advanced AI chat companion with context-aware responses, memory system, and assist commands that personalize tarot, horoscopes, and crystal recommendations to your exact birth chart
+6. **AI Chat with Memory** - AI companion that remembers past conversations and builds context over time, personalizing responses to your chart and journey
 7. **Tarot Pattern Analysis** - Deep insights into recurring themes and patterns across your tarot readings, identifying dominant cards and themes over time
 8. **Personal Transits** - Transit calendar personalized to YOUR birth chart showing which areas of life are affected and how transits interact with your natal planets
 9. **Automated Content** - Weekly blog posts, newsletters, and social content generated automatically using real astronomical data
-10. **Affordable Premium** - $4.99/month (less than a coffee) vs competitors charging $10-15/month
 
 ## Brand Voice & Tone
 
@@ -30,62 +29,16 @@ This file contains essential context for generating social media posts about Lun
 
 ## Key Features
 
-**Free Plan (Cosmic Explorer):**
-
-- Daily moon phases & basic insights
-- General tarot card of the day
-- Basic lunar calendar
-- Sun sign horoscope
-- Access to comprehensive grimoire knowledge (500+ pages)
-- 1 free AI ritual/reading per week
-- Basic AI chat (3 messages per day)
-
-**Lunary+ Plan ($4.99/month):**
+**What Lunary Offers:**
 
 - Complete birth chart analysis (Sun, Moon, Rising, all planets)
-- Personalized daily horoscopes (based on YOUR exact birth chart)
-- Personal tarot card & guidance (personalized patterns)
-- Daily transit calendar (personalized to your chart)
-- Tarot pattern analysis (identifies recurring themes and cards)
-- Personalized crystal & herb recommendations
-- Solar return insights
-- Cosmic profile (complete astrological profile)
-- Birthday collection (save multiple birthdays for synastry)
-- Moon Circles (guided virtual gatherings during new/full moons)
-- Ritual Generator (AI-powered ritual suggestions)
-- Collections (save tarot readings, horoscopes, insights)
-- AI chat (50 messages per day) with conversation threads
-- Memory system (remembers past conversations)
-
-**Lunary+ AI Plan ($8.99/month):**
-
-- All Lunary+ features plus:
-- Unlimited AI chat (300 messages per day)
-- Deeper readings (extended analysis with journaling & rituals)
-- Weekly reports (automated weekly cosmic summaries)
-- Saved chat threads (save and revisit conversations)
-- Downloadable reports (export your insights)
-- AI ritual generation (personalized ritual suggestions)
-- Unlimited collections
-- Advanced pattern analysis (deep insights into recurring themes)
-
-**Lunary+ AI Annual Plan ($89.99/year):**
-
-- All Lunary+ AI features plus:
-- Unlimited tarot spreads (unlimited custom spreads)
-- Yearly cosmic forecast (comprehensive year-ahead forecast)
-- Data export (export all your cosmic data including tarot readings, chat threads, collections)
-- Priority access to new features
-
-## Pricing
-
-- **Free Trial** - Credit card required but no payment taken during trial:
-  - Monthly plan: 7-day free trial
-  - Yearly plan: 14-day free trial
-- **Lunary+ (Monthly)**: $4.99/month
-- **Lunary+ AI (Monthly)**: $8.99/month
-- **Lunary+ AI Annual (Yearly)**: $89.99/year (Save 17%) - Best value
-- **Cosmic Explorer**: Free plan with basic features
+- Personalized daily horoscopes based on YOUR exact birth chart
+- Tarot pattern analysis (identifies recurring themes and cards over time)
+- Personal transit calendar showing which houses are activated
+- AI chat companion with memory (remembers past conversations)
+- 500+ page digital grimoire (spells, rituals, crystals, correspondences)
+- Ritual generator and personalized recommendations
+- Collections to save readings, horoscopes, and insights
 
 ## AI Features (Detailed)
 
@@ -93,10 +46,9 @@ This file contains essential context for generating social media posts about Lun
 
 - Personalized astro-tarot companion with context-aware responses
 - Uses your birth chart, current transits, moon phase, tarot history, and mood data
-- Streaming responses for real-time interaction
-- Conversation threads - save and revisit conversations
 - Memory system - remembers past conversations for personalized responses across sessions
-- Plan-based limits: Free (3/day), Lunary+ (50/day), Lunary+ AI (300/day)
+- Conversation threads - save and revisit conversations
+- This is what makes Lunary unique: an AI that actually knows your cosmic story
 
 **Assist Commands (Special Commands for Specific Actions):**
 
@@ -109,11 +61,10 @@ This file contains essential context for generating social media posts about Lun
 
 **Advanced AI Capabilities:**
 
-- Deeper readings (Lunary+ AI) - Extended analysis with journaling & rituals
-- Weekly reports (Lunary+ AI) - Automated weekly cosmic summaries delivered automatically
-- Downloadable reports (Lunary+ AI) - Export your insights as PDFs
-- AI ritual generation - Personalized ritual suggestions based on your chart and current cosmic conditions
-- Advanced pattern analysis - Deep insights into recurring themes across readings
+- Deeper readings with journaling and ritual suggestions
+- Weekly cosmic summaries delivered automatically
+- AI ritual generation based on your chart and current cosmic conditions
+- Advanced pattern analysis showing recurring themes across readings
 
 ## Tarot Pattern Analysis (Detailed)
 
@@ -293,54 +244,52 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 - AI chat companion ("Book of Shadows") with context-aware responses, memory, and assist commands
 - Calculates everything using real astronomical data (not generic astrology)
 
-**Unique Selling Propositions:**
+**What Makes Lunary Unique:**
 
 - "Personalized to YOUR exact birth chart" - Not generic zodiac horoscopes
 - "Real astronomical calculations" - Uses actual planetary positions, not generic predictions
-- "Your cosmic blueprint" - Complete birth chart analysis (Sun, Moon, Rising, all planets)
-- "AI-powered personalization" - Advanced algorithms tailor insights to your unique chart patterns
-- "Free 7-day trial" - Credit card required but no payment taken during trial
+- "AI with memory" - Remembers your conversations and builds context over time
+- "Tarot pattern analysis" - Tracks themes across readings to show your evolution
+- "Personal transits" - Shows which areas of YOUR life are being activated
+- "Complete grimoire" - 500+ pages of spells, rituals, crystals, correspondences
 - "Cross-device sync" - Access your chart and insights anywhere
-- "Digital grimoire included" - Spells, rituals, crystals, magical knowledge
-- "Most affordable premium astrology app" - $4.99/month vs competitors at $10-15/month
-- "Automated weekly content" - Fresh cosmic insights delivered automatically every week
-- "Proven engagement" - High stickiness (DAU/WAU) and AI feature usage rates
 
-**Competitive Advantages vs Arcarae & Others:**
+## Content Philosophy: 80/20 Rule
 
-- **Lower Price Point** - $4.99/month vs Arcarae's likely $10-15/month
-- **Real Astronomy** - Uses actual astronomical calculations vs generic AI-generated content
-- **Automated Content** - Weekly blog, newsletters, social posts generated automatically (competitors need to hire content teams)
-- **Free Trial** - No credit card charge during trial period
-- **Complete Grimoire** - Educational content built-in (spells, rituals, crystals)
-- **Technical Automation** - Can scale without hiring large content teams
-- **Proven Metrics** - Tracking WAU, stickiness, AI usage %, TikTok conversion rates
+**80% of posts should be pure value content (no CTA):**
+
+- Educational insights about astrology/astronomy
+- Cosmic wisdom and guidance
+- Behind-the-scenes founder journey
+- Interesting facts and "did you know" content
+
+**20% of posts can include soft CTAs:**
+
+- "discover at lunary.app"
+- "try Lunary"
+- Never mention pricing, trials, or "free"
+
+## Content Archetypes (Rotate Between These)
+
+1. **Founder/Indie Dev Journey** - Vulnerable, behind-the-scenes content about building Lunary. Share real challenges, learnings, and discoveries. Use "I" statements. No selling.
+
+2. **Educational** - Teach ONE concept clearly. "Did you know" style hooks. Astronomy facts, how features actually work. Make complex topics approachable.
+
+3. **Cosmic Insight** - Value-first cosmic wisdom. Share insights that stand alone without mentioning the app. Be poetic but grounded.
+
+4. **Feature Deep-Dive** - Explain ONE specific unique feature in depth. Focus on AI memory, tarot patterns, personal transits, or the grimoire. Show WHY it matters.
+
+5. **User Transformation** - What people actually experience. Focus on feelings and outcomes, not features. Paint a picture of understanding yourself better.
 
 ## Social Media Best Practices
 
-- Keep posts engaging and natural
-- Use emojis sparingly (🌙 ✨ 🔮 ⭐)
-- Focus on value and personalization
-- Include clear CTAs when appropriate
+- Lead with curiosity, vulnerability, or education - NOT features
+- Use emojis sparingly (🌙 ✨ 🔮) - max 1-2 per post
+- Each post should feel unique - different hooks, angles, structures
+- Sound human - never salesy or generic
+- Focus on value and authenticity over conversion
 - Use storytelling when possible
-- Highlight unique features (real astronomy, personalization)
-- Create urgency naturally (not pushy)
 - Show, don't just tell
-
-## Post Types
-
-1. **Feature Highlights** - Showcase specific features naturally (especially AI-powered personalization, tarot pattern analysis, personal transits)
-2. **User Benefits** - Focus on what users gain
-3. **Educational** - Teach about astrology/astronomy, explain how features work (e.g., "How tarot pattern analysis identifies recurring themes", "Understanding personal transits and house positions")
-4. **Inspirational** - Cosmic wisdom and guidance
-5. **Behind the Scenes** - How the app works (real astronomy calculations, automation, AI personalization)
-6. **User Stories** - Benefits and transformations
-7. **Promotional** - Trials, offers (use sparingly)
-8. **Competitive Comparison** - Subtle mentions of advantages vs competitors (real astronomy, lower price, free trial)
-9. **Value Demonstration** - Show AI usage stats, engagement metrics (proves value)
-10. **TikTok Content** - Short-form videos showing personalized features, birth chart insights
-11. **Grimoire Content** - Educational posts about grimoire topics (moon phases, crystals, tarot, numerology, etc.) - can be purely educational, not promotional
-12. **Feature Deep Dives** - Explain how specific features work (tarot patterns, personal transits, AI chat, etc.)
 
 ## Educational Content Guidelines
 
@@ -362,13 +311,12 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
   - "Tarot card combinations: reading cards together"
   - "How to interpret aspects in your birth chart"
 
-## Conversion Goals
+## Content Goals
 
-- Drive app downloads
-- Encourage free trial signups
-- Build brand awareness
-- Educate about astrology
-- Create community
+- Build trust through authentic, valuable content
+- Educate about astrology and cosmic concepts
+- Create community and connection
+- Drive organic interest in Lunary
 
 ## Hashtags (Use Sparingly)
 
@@ -382,12 +330,15 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 
 ## Avoid
 
-- Overly salesy language
-- Too many emojis
-- Generic astrology content
+- Any pricing mentions (no $4.99, no trial mentions, no "free")
+- Overly salesy or promotional language
+- Generic "unlock your cosmic potential" type content
+- Too many emojis (max 1-2 per post)
+- Starting posts with "Did you know Lunary..." (leads with product)
 - Promising specific outcomes
 - Making medical/health claims
 - Spammy hashtags
+- Repetitive feature lists across posts
 
 ## Post Length Guidelines
 
@@ -396,52 +347,51 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 - **Facebook**: 40-80 characters optimal
 - **LinkedIn**: 150-300 characters
 
-## Examples of Good Posts (Focus on USPs)
+## Example Posts by Archetype
 
-**Promotional/Feature Posts:**
+**Founder/Indie Dev Journey (no CTA):**
 
-- "Lunary generates your complete birth chart from your exact birth time, date, and location. Then it gives you personalized daily horoscopes based on YOUR chart—not generic zodiac signs. Try free for 7 days."
-- "Most horoscopes are generic. Lunary calculates everything from YOUR exact birth chart using real astronomical data. Get personalized insights daily. Free 7-day trial - credit card required but no payment taken."
-- "Your birth chart shows where every planet was when you were born. Lunary uses that to give you personalized horoscopes, tarot readings, and cosmic guidance. Plus a comprehensive grimoire with 500+ pages of spells and rituals. Start your free trial - credit card required but no charge during trial."
-- "Lunary does three things: 1) Generates your complete birth chart 2) Gives you daily horoscopes personalized to YOUR chart 3) Includes a comprehensive grimoire with spells, rituals, and crystals. All based on real astronomy. Try free."
-- "Why pay $15/month for generic astrology? Lunary gives you personalized birth chart insights for $4.99/month. Real astronomical calculations, not AI-generated fluff. Free 7-day trial."
-- "Lunary uses AI to personalize your tarot readings and horoscopes to your exact birth chart. But unlike competitors, we use REAL astronomical data as the foundation. Your chart, your insights, real astronomy."
-- "Most astrology apps charge $10-15/month. Lunary is $4.99/month with the same (or better) features. Plus we use actual astronomical calculations, not generic predictions. Try free for 7 days."
-- "Lunary's AI chat companion remembers your past conversations and personalizes responses based on your birth chart, current transits, and tarot history. It's like having a cosmic guide that knows your story."
-- "Tarot pattern analysis shows you which cards appear most often in your readings and identifies recurring themes. See patterns you might miss on your own."
-- "Personal transits show you which areas of life are being activated right now. See which house each transit affects and how it interacts with your natal planets."
+- "Building an astrology app taught me that most 'horoscopes' are just recycled generic text. I spent 6 months learning real astronomy so Lunary could calculate actual planetary positions. The difference is everything."
+- "I used to think astrology was just sun signs. Then I learned about houses, aspects, transits. Your birth chart is a complete map of the sky the moment you were born. That's what I wanted Lunary to show people."
+- "The hardest part of building Lunary was realizing accuracy matters more than features. I deleted 3 months of work to rebuild the astronomical calculations from scratch."
+- "Why I built an AI that remembers your conversations: astrology isn't one-size-fits-all. Your chart is unique. Your questions deserve context."
 
-**Educational Posts (Non-Promotional):**
+**Educational (no CTA):**
 
-- "Tarot pattern analysis works by tracking your daily, weekly, and personal cards over 30 days. It identifies which cards appear most frequently and what themes keep showing up in your readings."
-- "Personal transits calculate which house each planetary movement activates in your birth chart. A transit to your 7th house affects relationships, while the 10th house relates to career."
-- "Your birth chart has 12 houses, each representing different areas of life. The 1st house is your identity, the 4th is home and family, the 7th is partnerships, and the 10th is career and public image."
-- "Moon phases each have unique magical correspondences. New Moon is for new beginnings, Waxing Moon for growth, Full Moon for manifestation, and Waning Moon for release."
-- "Crystals work with chakras by matching their vibrational frequency. Amethyst aligns with the Third Eye chakra, while Rose Quartz resonates with the Heart chakra."
-- "Tarot card combinations reveal deeper meanings. When The Fool appears with The World, it suggests a journey coming full circle. Card pairs tell stories that single cards can't."
-- "Aspects in your birth chart show how planets interact. Conjunctions amplify energy, oppositions create tension, trines bring ease, and squares challenge growth."
+- "Your birth chart has 12 houses. Each one represents a different area of life - career, relationships, home, creativity. When planets move through these houses, they activate different themes for YOU specifically."
+- "The difference between your sun sign and rising sign: your sun is your core identity. Your rising is how others perceive you. They're often completely different signs."
+- "Mercury retrograde isn't actually moving backwards. It's an optical illusion from Earth's perspective. But the energy shift during these periods? That's real astronomical geometry at work."
+- "Your moon sign shapes your emotional world. It's calculated from the moon's exact position when you were born. Most people don't know theirs - but it explains so much about how you process feelings."
+
+**Cosmic Insight (no CTA):**
+
+- "The moon doesn't create your emotions. It illuminates what's already there. Full moons bring things to light. New moons invite you to plant seeds in the dark."
+- "Every planet in your chart tells a story. Mars is how you take action. Venus is how you connect. Saturn is where you face resistance. The whole sky was arranged uniquely for you."
+- "Retrograde periods aren't punishment. They're invitations to revisit, review, and reconsider. The universe doesn't move against you - it moves with purpose."
+- "Transits don't happen TO you. They happen WITH you. The planets are always moving, always activating different parts of your chart. It's a conversation, not a verdict."
+
+**Feature Deep-Dive (soft CTA):**
+
+- "Most AI chatbots forget you exist between sessions. Lunary's AI remembers your birth chart, your past questions, your recurring themes. Ask about your career today, and it knows you asked about Saturn transits last week."
+- "Tarot apps show you a card. Lunary shows you patterns. Which cards keep appearing? What themes are recurring? Over 30 days, the patterns tell a story single readings can't."
+- "Generic transit forecasts say 'Mars is in Aries.' Personal transits say 'Mars is activating your 7th house - relationships and partnerships are energized.' The difference is YOUR birth chart."
+
+**User Transformation (soft CTA):**
+
+- "Understanding your birth chart doesn't predict your future. It explains your patterns. Why you always react that way. Why certain relationships feel harder. Why some things come naturally. That self-knowledge is the transformation."
+- "Imagine knowing exactly when your energy will be high for starting projects vs. when to rest and reflect. Personal transits give you that - a cosmic calendar aligned to YOUR chart."
+- "You've probably read your sun sign horoscope and thought 'this doesn't feel like me.' That's because you're reading 1/12th of your chart. Your full chart has your moon, rising, and 8 other planets. It's a complete picture."
 
 ## New Content Opportunities
-
-### Substack Strategy
-
-- **Free Substack**: Weekly shortened highlights (drives app signups)
-- **Paid Substack ($5-10/month)**: Full in-depth week ahead with:
-  - Extended planetary analysis
-  - Detailed transit interpretations
-  - Ritual guides for the week
-  - Crystal/spell recommendations
-  - Behind-the-scenes astronomical data
-- **Funnel**: Substack → App → Premium subscription
 
 ### TikTok Content Ideas
 
 - "Your birth chart explained in 60 seconds"
 - "Why generic horoscopes don't work"
-- "How Lunary calculates your chart using real astronomy"
-- "Personalized tarot vs generic readings"
-- "Birth chart patterns that predict your personality"
-- Use TikTok attribution tracking to measure conversion rates
+- "What your moon sign says about your emotions"
+- "The difference between sun sign and rising sign"
+- "Birth chart patterns that explain your personality"
+- Behind-the-scenes of building an astrology app
 
 ### Community Features (Future)
 

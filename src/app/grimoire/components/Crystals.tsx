@@ -1,40 +1,62 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import {
-  crystalDatabase,
-  crystalCategories,
-  getCrystalsByCategory,
-} from '@/constants/grimoire/crystals';
 import { stringToKebabCase } from '../../../../utils/string';
 
+interface Crystal {
+  name: string;
+  description?: string;
+  metaphysicalProperties?: string;
+}
+
+interface CrystalCategory {
+  name: string;
+  crystals: { name: string; properties: string }[];
+}
+
 const Crystals = () => {
-  // Group crystals by category from the grimoire database
-  const crystalCategoriesData = useMemo(() => {
-    return crystalCategories.map((categoryName) => {
-      const crystals = getCrystalsByCategory(categoryName);
-      return {
-        name: categoryName,
-        crystals: crystals.map((crystal) => ({
-          name: crystal.name,
-          properties: crystal.description || crystal.metaphysicalProperties,
-        })),
-      };
-    });
+  const [crystalCategories, setCrystalCategories] = useState<CrystalCategory[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/grimoire/crystals')
+      .then((r) => r.json())
+      .then((data) => {
+        const categories = data.categories.map((categoryName: string) => {
+          const crystalsInCategory = data.crystals.filter(
+            (c: Crystal & { category?: string }) => c.category === categoryName,
+          );
+          return {
+            name: categoryName,
+            crystals: crystalsInCategory.map((crystal: Crystal) => ({
+              name: crystal.name,
+              properties:
+                crystal.description || crystal.metaphysicalProperties || '',
+            })),
+          };
+        });
+        setCrystalCategories(categories);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      const element = document.getElementById(hash);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+    if (!loading) {
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        const element = document.getElementById(hash);
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
       }
     }
-  }, []);
+  }, [loading]);
 
   return (
     <div className='space-y-8'>
@@ -62,34 +84,49 @@ const Crystals = () => {
         <h2 className='text-xl font-medium text-zinc-100'>
           Crystal Categories
         </h2>
-        <div className='space-y-6'>
-          {crystalCategoriesData.map((category) => (
-            <div key={category.name}>
-              <h3 className='text-lg font-medium text-zinc-200 mb-3'>
-                {category.name}
-              </h3>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-                {category.crystals.map((crystal) => {
-                  const crystalSlug = stringToKebabCase(crystal.name);
-                  return (
-                    <Link
-                      key={crystal.name}
-                      href={`/grimoire/crystals/${crystalSlug}`}
-                      className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
-                    >
-                      <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
-                        {crystal.name}
-                      </h4>
-                      <p className='text-sm text-zinc-300 leading-relaxed'>
-                        {crystal.properties}
-                      </p>
-                    </Link>
-                  );
-                })}
+        {loading ? (
+          <div className='space-y-6'>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className='animate-pulse'>
+                <div className='h-6 bg-zinc-800 rounded w-32 mb-3' />
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+                  {[1, 2, 3].map((j) => (
+                    <div key={j} className='h-24 bg-zinc-800/50 rounded-lg' />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className='space-y-6'>
+            {crystalCategories.map((category) => (
+              <div key={category.name}>
+                <h3 className='text-lg font-medium text-zinc-200 mb-3'>
+                  {category.name}
+                </h3>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+                  {category.crystals.map((crystal) => {
+                    const crystalSlug = stringToKebabCase(crystal.name);
+                    return (
+                      <Link
+                        key={crystal.name}
+                        href={`/grimoire/crystals/${crystalSlug}`}
+                        className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                      >
+                        <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                          {crystal.name}
+                        </h4>
+                        <p className='text-sm text-zinc-300 leading-relaxed'>
+                          {crystal.properties}
+                        </p>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <section id='crystal-healing' className='space-y-6'>
@@ -228,7 +265,6 @@ const Crystals = () => {
         </div>
       </section>
 
-      {/* Related Topics Section */}
       <section className='mt-12 pt-8 border-t border-zinc-800/50'>
         <h2 className='text-xl font-medium text-zinc-100 mb-4'>
           Related Topics

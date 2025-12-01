@@ -220,17 +220,26 @@ export async function GET(request: NextRequest) {
         );
 
         // If subscription is invalid, mark as inactive
-        if (
-          error instanceof Error &&
-          (error.message.includes('410') ||
-            error.message.includes('invalid') ||
-            error.message.includes('expired'))
-        ) {
+        const errorObj = error as any;
+        const errorMessage = errorObj?.message || '';
+        const isExpired =
+          errorObj?.statusCode === 410 ||
+          errorObj?.statusCode === 404 ||
+          errorMessage.includes('410') ||
+          errorMessage.includes('404') ||
+          errorMessage.includes('invalid') ||
+          errorMessage.includes('expired') ||
+          errorMessage.includes('unsubscribed');
+
+        if (isExpired) {
           await sql`
             UPDATE push_subscriptions 
             SET is_active = false 
             WHERE endpoint = ${sub.endpoint}
           `;
+          console.log(
+            `Marked subscription as inactive due to expired/invalid endpoint`,
+          );
         }
 
         totalFailed++;

@@ -1,5 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+
+export const revalidate = 3600; // Revalidate every hour for blog content
+
 import {
   ArrowLeft,
   ArrowRight,

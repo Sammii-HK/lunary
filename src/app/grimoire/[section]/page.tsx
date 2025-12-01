@@ -1,3 +1,5 @@
+export const revalidate = 86400;
+
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { grimoire } from '@/constants/grimoire';

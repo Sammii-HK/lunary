@@ -3,7 +3,8 @@
 import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { HelpCircle } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { HelpCircle, Download } from 'lucide-react';
 import {
   generateBirthChart,
   saveBirthChartToProfile,
@@ -20,22 +21,87 @@ import {
   canCollectBirthday,
   hasBirthChartAccess,
 } from '../../../utils/pricing';
-import SubscriptionManagement from '../../components/SubscriptionManagement';
-import LocationRefresh from '../../components/LocationRefresh';
-import { NotificationSettings } from '../../components/NotificationSettings';
-import { EmailSubscriptionSettings } from '../../components/EmailSubscriptionSettings';
-import { ReferralProgram } from '../../components/ReferralProgram';
-import { AuthComponent } from '@/components/Auth';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
-import { Download } from 'lucide-react';
-import { StreakDisplay } from '@/components/StreakDisplay';
-import { RitualTracker } from '@/components/RitualTracker';
-import { MonthlyInsights } from '@/components/MonthlyInsights';
-import { Paywall } from '@/components/Paywall';
+
+const SkeletonCard = () => (
+  <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
+);
+
+const SubscriptionManagement = dynamic(
+  () => import('../../components/SubscriptionManagement'),
+  { loading: () => <SkeletonCard /> },
+);
+const LocationRefresh = dynamic(
+  () => import('../../components/LocationRefresh'),
+  { ssr: false },
+);
+const NotificationSettings = dynamic(
+  () =>
+    import('../../components/NotificationSettings').then((m) => ({
+      default: m.NotificationSettings,
+    })),
+  { ssr: false },
+);
+const EmailSubscriptionSettings = dynamic(
+  () =>
+    import('../../components/EmailSubscriptionSettings').then((m) => ({
+      default: m.EmailSubscriptionSettings,
+    })),
+  { ssr: false },
+);
+const ReferralProgram = dynamic(
+  () =>
+    import('../../components/ReferralProgram').then((m) => ({
+      default: m.ReferralProgram,
+    })),
+  { ssr: false },
+);
+const AuthComponent = dynamic(
+  () => import('@/components/Auth').then((m) => ({ default: m.AuthComponent })),
+  {
+    loading: () => (
+      <div className='h-48 bg-zinc-800 animate-pulse rounded-lg' />
+    ),
+  },
+);
+const SmartTrialButton = dynamic(
+  () =>
+    import('@/components/SmartTrialButton').then((m) => ({
+      default: m.SmartTrialButton,
+    })),
+  { ssr: false },
+);
+const StreakDisplay = dynamic(
+  () =>
+    import('@/components/StreakDisplay').then((m) => ({
+      default: m.StreakDisplay,
+    })),
+  { loading: () => <SkeletonCard /> },
+);
+const RitualTracker = dynamic(
+  () =>
+    import('@/components/RitualTracker').then((m) => ({
+      default: m.RitualTracker,
+    })),
+  { loading: () => <SkeletonCard /> },
+);
+const MonthlyInsights = dynamic(
+  () =>
+    import('@/components/MonthlyInsights').then((m) => ({
+      default: m.MonthlyInsights,
+    })),
+  {
+    loading: () => (
+      <div className='h-64 bg-zinc-800 animate-pulse rounded-xl' />
+    ),
+  },
+);
+const Paywall = dynamic(
+  () => import('@/components/Paywall').then((m) => ({ default: m.Paywall })),
+  { ssr: false },
+);
 
 export default function ProfilePage() {
   // Hooks must be called unconditionally - handle errors inside the hook or in the component

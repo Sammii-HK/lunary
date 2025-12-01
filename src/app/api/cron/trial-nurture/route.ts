@@ -72,11 +72,11 @@ export async function GET(request: NextRequest) {
           (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
         );
 
-        const html = generateTrialDay2EmailHTML(
+        const html = await generateTrialDay2EmailHTML(
           user.name || 'there',
           daysRemaining,
         );
-        const text = generateTrialDay2EmailText(
+        const text = await generateTrialDay2EmailText(
           user.name || 'there',
           daysRemaining,
         );
@@ -137,11 +137,11 @@ export async function GET(request: NextRequest) {
           (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
         );
 
-        const html = generateTrialDay3EmailHTML(
+        const html = await generateTrialDay3EmailHTML(
           user.name || 'there',
           daysRemaining,
         );
-        const text = generateTrialDay3EmailText(
+        const text = await generateTrialDay3EmailText(
           user.name || 'there',
           daysRemaining,
         );
@@ -202,11 +202,11 @@ export async function GET(request: NextRequest) {
           (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
         );
 
-        const html = generateTrialDay5EmailHTML(
+        const html = await generateTrialDay5EmailHTML(
           user.name || 'there',
           daysRemaining,
         );
-        const text = generateTrialDay5EmailText(
+        const text = await generateTrialDay5EmailText(
           user.name || 'there',
           daysRemaining,
         );
@@ -266,11 +266,11 @@ export async function GET(request: NextRequest) {
         // Calculate missed insights (approximate)
         const missedInsights = 7; // Daily insights over 7 days
 
-        const html = generateTrialExpiredEmailHTML(
+        const html = await generateTrialExpiredEmailHTML(
           user.name || 'there',
           missedInsights,
         );
-        const text = generateTrialExpiredEmailText(
+        const text = await generateTrialExpiredEmailText(
           user.name || 'there',
           missedInsights,
         );

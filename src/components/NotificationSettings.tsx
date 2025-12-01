@@ -349,10 +349,16 @@ export function NotificationSettings() {
       setSubscription(subscription);
 
       await sendSubscriptionToServer(subscription);
+
+      // Show success message
+      alert(
+        '✅ Notifications enabled successfully! You can now receive push notifications on this device.',
+      );
     } catch (error) {
       console.error('❌ Error subscribing to push:', error);
 
       let errorMessage = 'Failed to enable notifications. ';
+      let detailedError = '';
 
       if (error instanceof Error) {
         console.error('Error details:', {
@@ -360,6 +366,8 @@ export function NotificationSettings() {
           name: error.name,
           stack: error.stack,
         });
+
+        detailedError = `\n\nError: ${error.message}\nType: ${error.name}`;
 
         if (error.message.includes('registration')) {
           errorMessage +=
@@ -372,13 +380,28 @@ export function NotificationSettings() {
             'Invalid VAPID key configuration. Please contact support.';
         } else if (error.message.includes('permission')) {
           errorMessage +=
-            'Notification permission was denied. Please enable notifications in your browser settings.';
+            'Notification permission was denied. Please enable notifications in your browser settings and try again.';
+        } else if (error.message.includes('not supported')) {
+          errorMessage +=
+            'Push notifications are not supported on this browser/device.';
         } else {
           errorMessage += error.message;
         }
       }
 
-      alert(errorMessage);
+      // Show detailed error in console for debugging
+      console.error('Full subscription error:', {
+        error,
+        userAgent: navigator.userAgent,
+        hasServiceWorker: 'serviceWorker' in navigator,
+        hasPushManager: 'PushManager' in window,
+        permission: Notification.permission,
+        isSecure:
+          window.location.protocol === 'https:' ||
+          window.location.hostname === 'localhost',
+      });
+
+      alert(errorMessage + detailedError);
     }
   };
 

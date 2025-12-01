@@ -179,7 +179,8 @@ async function shouldSendNotification(
     return { shouldSend: false, reason: 'No webhook configured' };
   }
 
-  if (category === 'urgent') {
+  // Urgent and TODO notifications bypass all filters
+  if (category === 'urgent' || category === 'todo') {
     return { shouldSend: true };
   }
 
@@ -201,9 +202,8 @@ async function shouldSendNotification(
     };
   }
 
-  if (category === 'analytics') {
-    return { shouldSend: false, reason: 'Analytics queued for daily summary' };
-  }
+  // Analytics notifications now send immediately (PostHog handles aggregation)
+  // Previously queued for daily summary, but that prevented all analytics from sending
 
   // Quiet hours check (urgent notifications bypass this, already handled above)
   if (isQuietHours()) {
@@ -438,11 +438,13 @@ export async function sendDiscordAdminNotification(
     .replace(/&nbsp;/g, ' ')
     .replace(/<[^>]+>/g, '');
 
+  // Default to 'todo' for admin notifications (content generation needs action)
+  // Only 'emergency'/'high' priority get 'urgent' for bypassing all filters
   const category =
     input.category ||
     (input.priority === 'emergency' || input.priority === 'high'
       ? 'urgent'
-      : undefined);
+      : 'todo');
 
   return sendDiscordNotification({
     title: input.title,

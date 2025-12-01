@@ -37,6 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
+    metadataBase: new URL('https://lunary.app'),
     title: `${moonSymbol} Lunary`,
     description:
       'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily horoscopes, tarot readings, moon phases, and cosmic guidance. Free 7-day trial - credit card required but no payment taken.',
@@ -129,7 +130,9 @@ export default function RootLayout({
       <head>
         {/* Preconnect to critical external services */}
         <link rel='preconnect' href='https://cloud.jazz.tools' />
-        <link rel='preconnect' href='https://us.i.posthog.com' />
+        <link rel='preconnect' href='https://eu.i.posthog.com' />
+        <link rel='preconnect' href='https://api.stripe.com' />
+        <link rel='preconnect' href='https://js.stripe.com' />
         <link
           rel='preconnect'
           href='https://fonts.gstatic.com'

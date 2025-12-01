@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
-import { trackActivity } from '@/lib/analytics/tracking';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,15 +12,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Write to analytics_user_activity for session tracking and DAU/WAU/MAU calculations
-    await trackActivity({
-      userId,
-      activityType: 'session',
-      metadata: {
-        page_path: pagePath,
-        ...(metadata || {}),
-      },
-    });
+    // Session tracking now handled by PostHog client-side
+    // This endpoint is kept for backwards compatibility
 
     return NextResponse.json({ success: true });
   } catch (error) {

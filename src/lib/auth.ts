@@ -175,8 +175,8 @@ function initializeAuth() {
               generateVerificationEmailText,
             } = await import('./email');
 
-            const html = generateVerificationEmailHTML(url, user.email);
-            const text = generateVerificationEmailText(url, user.email);
+            const html = await generateVerificationEmailHTML(url, user.email);
+            const text = await generateVerificationEmailText(url, user.email);
 
             await sendEmail({
               to: user.email,

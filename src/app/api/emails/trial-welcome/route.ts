@@ -14,12 +14,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    const html = generateTrialWelcomeEmailHTML(
+    const html = await generateTrialWelcomeEmailHTML(
       userName || 'there',
       trialDaysRemaining || 7,
       planType || 'monthly',
     );
-    const text = generateTrialWelcomeEmailText(
+    const text = await generateTrialWelcomeEmailText(
       userName || 'there',
       trialDaysRemaining || 7,
       planType || 'monthly',

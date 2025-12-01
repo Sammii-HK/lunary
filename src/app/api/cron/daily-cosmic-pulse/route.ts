@@ -247,13 +247,13 @@ export async function GET(request: NextRequest) {
 
           if (userEmail) {
             try {
-              const emailHtml = generateCosmicPulseEmailHTML(
+              const emailHtml = await generateCosmicPulseEmailHTML(
                 cosmicPulse,
                 deepLinkUrl,
                 userName,
                 userEmail,
               );
-              const emailText = generateCosmicPulseEmailText(
+              const emailText = await generateCosmicPulseEmailText(
                 cosmicPulse,
                 deepLinkUrl,
                 userName,

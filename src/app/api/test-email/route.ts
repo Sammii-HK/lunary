@@ -46,8 +46,14 @@ export async function POST(request: NextRequest) {
     const testVerificationUrl = `${request.nextUrl.origin}/auth/verify-email?token=test-token-123&email=${encodeURIComponent(email)}`;
 
     // Generate email content
-    const html = generateVerificationEmailHTML(testVerificationUrl, email);
-    const text = generateVerificationEmailText(testVerificationUrl, email);
+    const html = await generateVerificationEmailHTML(
+      testVerificationUrl,
+      email,
+    );
+    const text = await generateVerificationEmailText(
+      testVerificationUrl,
+      email,
+    );
 
     console.log('📧 Sending test email to:', email);
 

@@ -65,19 +65,15 @@ export async function getInactiveUsers(daysInactive: number): Promise<
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysInactive);
 
-    // Get users with no activity in analytics_user_activity
-    // Use subscriptions table to get user emails
+    // Use subscriptions updated_at as proxy for last activity
     const result = await sql`
       SELECT DISTINCT 
         sub.user_id, 
         sub.user_email as email, 
-        MAX(aua.activity_date) as last_activity
+        sub.updated_at as last_activity
       FROM subscriptions sub
-      LEFT JOIN analytics_user_activity aua ON aua.user_id = sub.user_id
       WHERE sub.user_email IS NOT NULL
-      GROUP BY sub.user_id, sub.user_email
-      HAVING MAX(aua.activity_date) < ${cutoffDate.toISOString().split('T')[0]}::DATE
-         OR MAX(aua.activity_date) IS NULL
+        AND (sub.updated_at < ${cutoffDate.toISOString()} OR sub.updated_at IS NULL)
       LIMIT 100
     `;
 

@@ -6,6 +6,7 @@ import {
   formatTimestamp,
   resolveDateRange,
 } from '@/lib/analytics/date-range';
+import { getPostHogActiveUsers } from '@/lib/posthog-server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -92,13 +93,14 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Count free users from analytics_user_activity
-    const freeUsersResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM analytics_user_activity
-      WHERE activity_type = 'session'
-        AND activity_date BETWEEN ${formatDate(range.start)} AND ${formatDate(range.end)}
-    `;
+    // Get free users count from PostHog MAU
+    let freeUsersCount = 0;
+    try {
+      const posthogData = await getPostHogActiveUsers();
+      freeUsersCount = posthogData?.mau || 0;
+    } catch {
+      freeUsersCount = 0;
+    }
 
     const trialUsersResult = await sql`
       SELECT COUNT(DISTINCT user_id) AS count
@@ -118,7 +120,7 @@ export async function GET(request: NextRequest) {
         )}
     `;
 
-    const freeUsers = Number(freeUsersResult.rows[0]?.count || 0);
+    const freeUsers = freeUsersCount;
     const trialUsers = Number(trialUsersResult.rows[0]?.count || 0);
     const paidUsers = Number(paidUsersResult.rows[0]?.count || 0);
 

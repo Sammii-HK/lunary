@@ -1,3 +1,5 @@
+export const revalidate = 86400;
+
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Chakras from '../components/Chakras';

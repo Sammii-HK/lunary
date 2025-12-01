@@ -131,13 +131,6 @@ const nextConfig = {
               priority: 20,
               minChunks: 2, // Only create vendor chunk if used in 2+ chunks
             },
-            // Separate chunk for MUI (large library)
-            mui: {
-              name: 'mui',
-              test: /[\\/]node_modules[\\/]@mui[\\/]/,
-              chunks: 'all',
-              priority: 30,
-            },
             // Separate chunk for astrochart (large library)
             astrochart: {
               name: 'astrochart',
@@ -183,13 +176,6 @@ const nextConfig = {
               chunks: 'all',
               test: /[\\/]node_modules[\\/]/,
               priority: 20,
-            },
-            // Separate chunk for MUI (large library)
-            mui: {
-              name: 'mui',
-              test: /[\\/]node_modules[\\/]@mui[\\/]/,
-              chunks: 'all',
-              priority: 30,
             },
             // Separate chunk for astrochart (large library)
             astrochart: {
@@ -242,12 +228,17 @@ const nextConfig = {
   experimental: {
     // Optimize package imports (tree-shake unused exports)
     optimizePackageImports: [
-      '@mui/material',
       'lucide-react',
       '@radix-ui/react-select',
       '@radix-ui/react-tabs',
       '@radix-ui/react-label',
       '@radix-ui/react-switch',
+      'react-day-picker',
+      'dayjs',
+      'recharts',
+      'posthog-js',
+      'date-fns',
+      '@react-email/components',
     ],
   },
 
@@ -361,6 +352,13 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // Blog week URL format normalization
+      {
+        source: '/blog/week/:week(\\d+)-:year(\\d{4})',
+        destination: '/blog/week/week-:week-:year',
+        permanent: true,
+      },
+      // Grimoire section redirects
       {
         source: '/grimoire/sabbats/:sabbat',
         destination: '/grimoire/wheel-of-the-year/:sabbat',

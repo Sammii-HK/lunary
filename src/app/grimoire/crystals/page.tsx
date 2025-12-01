@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Crystals from '../components/Crystals';
 
+export const revalidate = 86400; // Revalidate every 24 hours
+
 export const metadata: Metadata = {
   title: 'Crystals: Complete Guide to Crystal Meanings & Uses - Lunary',
   description:
