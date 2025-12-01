@@ -18,7 +18,7 @@ interface LocationState {
 }
 
 export const useLocation = () => {
-  const { me } = useAccount();
+  const { me } = useAccount(); // Read-only for migration - data syncs to Postgres via useProfile
   const [state, setState] = useState<LocationState>({
     location: null,
     loading: false,
@@ -73,28 +73,31 @@ export const useLocation = () => {
     }));
   }, [me?.profile]);
 
-  const saveLocationToProfile = useCallback(
-    (location: LocationData) => {
-      if (me?.profile) {
-        try {
-          (me.profile as any).$jazz.set('location', {
+  const saveLocationToProfile = useCallback(async (location: LocationData) => {
+    // Save to Postgres only - no Jazz writes
+    try {
+      await fetch('/api/profile/location', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          location: {
             latitude: location.latitude,
             longitude: location.longitude,
             city: location.city || undefined,
             country: location.country || undefined,
             timezone: location.timezone || undefined,
             lastUpdated: new Date().toISOString(),
-          });
-        } catch (error) {
-          console.warn('Failed to save location to profile:', error);
-        }
-      }
+          },
+        }),
+      });
+    } catch (error) {
+      console.warn('Failed to save location:', error);
+    }
 
-      // Also save to localStorage as backup
-      storeLocation(location);
-    },
-    [me?.profile],
-  );
+    // Save to localStorage as backup
+    storeLocation(location);
+  }, []);
 
   const requestUserLocation = useCallback(async () => {
     setState((prev) => ({

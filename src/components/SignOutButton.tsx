@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
-import { useAuthStatus } from './AuthStatus';
+import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 
 export function SignOutButton() {
   const [loading, setLoading] = useState(false);
@@ -12,17 +12,14 @@ export function SignOutButton() {
     setLoading(true);
 
     try {
-      console.log('🔄 Starting comprehensive sign out...');
+      console.log('🔄 Starting sign out...');
 
-      // Step 1: Sign out from Better Auth
       try {
         await betterAuthClient.signOut();
+        invalidateAuthCache();
         console.log('✅ Better Auth signed out');
       } catch (error) {
-        console.log(
-          '⚠️ Better Auth sign out failed (may not be signed in):',
-          error,
-        );
+        console.log('⚠️ Better Auth sign out failed:', error);
       }
 
       // Step 2: Clear ALL localStorage and sessionStorage
