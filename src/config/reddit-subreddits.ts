@@ -10,6 +10,15 @@ export interface SubredditConfig {
 
 export const REDDIT_SUBREDDITS: SubredditConfig[] = [
   {
+    name: 'LunaryApp',
+    memberCount: 100,
+    description:
+      'Official Lunary community - daily cosmic guidance and updates',
+    contentType: 'promotional',
+    allowsSelfPromotion: true,
+    notes: 'Our own subreddit - always safe to post',
+  },
+  {
     name: 'astrology',
     memberCount: 1400000,
     description: 'Main astrology community for discussions and learning',

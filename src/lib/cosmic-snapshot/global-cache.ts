@@ -127,7 +127,9 @@ export async function getGlobalCosmicData(
         } as GlobalCosmicData;
       }
 
-      return null;
+      const freshData = await buildGlobalCosmicData(date);
+      await saveGlobalCosmicData(date, freshData);
+      return freshData;
     },
     [cacheKey],
     {

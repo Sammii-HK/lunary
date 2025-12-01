@@ -2,9 +2,9 @@
 
 import { track } from '@vercel/analytics';
 import { betterAuthClient } from '@/lib/auth-client';
+import { captureEvent } from '@/lib/posthog-client';
 
 export type ConversionEvent =
-  | 'app_opened'
   | 'signup'
   | 'birth_data_submitted'
   | 'trial_started'
@@ -217,27 +217,14 @@ export async function trackConversion(
 
     const payload = sanitizeEventPayload(eventData);
 
-    if (event === 'app_opened' && eventData.userId) {
-      await fetch('/api/analytics/session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: eventData.userId,
-          pagePath:
-            eventData.pagePath ||
-            (typeof window !== 'undefined'
-              ? window.location.pathname
-              : undefined),
-          metadata: eventData.metadata,
-        }),
-      }).catch((error) => {
-        console.error('Failed to track session:', error);
-      });
-    }
-
+    // Track to Vercel Analytics (web vitals focus)
     track(event, payload);
+
+    // Track to PostHog (product analytics)
+    captureEvent(event, {
+      ...payload,
+      $set: eventData.userId ? { user_id: eventData.userId } : undefined,
+    });
 
     const analyticsPromise = fetch('/api/analytics/conversion', {
       method: 'POST',
@@ -247,45 +234,36 @@ export async function trackConversion(
       body: JSON.stringify(payload),
     });
 
-    const notificationPromise =
-      event === 'app_opened'
-        ? null
-        : fetch('/api/admin/notifications/conversion', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              eventType: event,
-              userId: eventData.userId,
-              userEmail: eventData.userEmail,
-              planType: eventData.planType,
-              metadata: eventData.metadata,
-            }),
-          });
+    const notificationPromise = fetch('/api/admin/notifications/conversion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        eventType: event,
+        userId: eventData.userId,
+        userEmail: eventData.userEmail,
+        planType: eventData.planType,
+        metadata: eventData.metadata,
+      }),
+    });
 
-    const settledResults = await Promise.allSettled(
-      notificationPromise
-        ? [analyticsPromise, notificationPromise]
-        : [analyticsPromise],
-    );
+    const settledResults = await Promise.allSettled([
+      analyticsPromise,
+      notificationPromise,
+    ]);
 
-    const analyticsResponse = settledResults[0];
-    const notificationResponse = notificationPromise
-      ? settledResults[1]
-      : undefined;
-
-    if (analyticsResponse.status === 'rejected') {
+    if (settledResults[0].status === 'rejected') {
       console.error(
         'Failed to track conversion event:',
-        analyticsResponse.reason,
+        settledResults[0].reason,
       );
     }
 
-    if (notificationResponse && notificationResponse.status === 'rejected') {
+    if (settledResults[1].status === 'rejected') {
       console.error(
         'Failed to send conversion notification:',
-        notificationResponse.reason,
+        settledResults[1].reason,
       );
     }
   } catch (error) {
@@ -357,9 +335,6 @@ export const conversionTracking = {
 
   birthChartViewed: (userId?: string) =>
     trackConversion('birth_chart_viewed', { userId }),
-
-  appOpened: (userId?: string, pagePath?: string) =>
-    trackConversion('app_opened', { userId, pagePath }),
 
   birthDataSubmitted: (userId?: string) =>
     trackConversion('birth_data_submitted', { userId }),

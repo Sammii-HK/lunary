@@ -5,58 +5,38 @@ import {
   loadGoogleFont,
 } from '../../../../../utils/astrology/cosmic-og';
 
-export const runtime = 'nodejs'; // Node.js runtime required for astronomy-engine calculations
-export const dynamic = 'force-dynamic';
-export const revalidate = 86400; // Cache for 24 hours (content updates daily)
+export const runtime = 'nodejs';
+export const revalidate = 86400;
 
-const crystals = [
-  {
-    name: 'Amethyst',
-    color: '#9333EA',
-    chakra: 'Crown Chakra',
-    keywords: ['Intuition', 'Clarity', 'Protection'],
-  },
-  {
-    name: 'Rose Quartz',
-    color: '#F472B6',
-    chakra: 'Heart Chakra',
-    keywords: ['Love', 'Compassion', 'Peace'],
-  },
-  {
-    name: 'Citrine',
-    color: '#F59E0B',
-    chakra: 'Solar Plexus',
-    keywords: ['Abundance', 'Confidence', 'Joy'],
-  },
-  {
-    name: 'Black Tourmaline',
-    color: '#1F2937',
-    chakra: 'Root Chakra',
-    keywords: ['Protection', 'Grounding', 'Strength'],
-  },
-  {
-    name: 'Clear Quartz',
-    color: '#F3F4F6',
-    chakra: 'All Chakras',
-    keywords: ['Amplification', 'Clarity', 'Healing'],
-  },
-  {
-    name: 'Moonstone',
-    color: '#E5E7EB',
-    chakra: 'Sacral Chakra',
-    keywords: ['Intuition', 'Cycles', 'Feminine'],
-  },
-  {
-    name: 'Carnelian',
-    color: '#EA580C',
-    chakra: 'Sacral Chakra',
-    keywords: ['Creativity', 'Courage', 'Passion'],
-  },
-];
+function getMoonPhaseSvgPath(phaseName: string): string {
+  const lower = phaseName.toLowerCase();
+
+  if (lower.includes('new')) return 'new-moon';
+  if (lower.includes('waxing') && lower.includes('crescent'))
+    return 'waxing-cresent-moon';
+  if (lower.includes('first quarter')) return 'first-quarter';
+  if (lower.includes('waxing') && lower.includes('gibbous'))
+    return 'waxing-gibbous-moon';
+  if (lower.includes('full')) return 'full-moon';
+  if (lower.includes('waning') && lower.includes('gibbous'))
+    return 'waning-gibbous-moon';
+  if (lower.includes('last quarter') || lower.includes('third quarter'))
+    return 'last-quarter';
+  if (lower.includes('waning') && lower.includes('crescent'))
+    return 'waning-cresent-moon';
+
+  return 'full-moon';
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
+
+  // Get base URL for icons
+  const baseUrl =
+    process.env.NODE_ENV === 'production'
+      ? 'https://lunary.app'
+      : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
 
   // Normalize date to noon UTC for consistent moon phase calculation
   let targetDate: Date;
@@ -82,11 +62,11 @@ export async function GET(request: NextRequest) {
   // Blue lunar backgrounds (not crystal colors)
   const dayVariation = targetDate.getDate() % 5;
   const themes = [
-    'linear-gradient(135deg, #1e3a8a15, #0a0a1a)', // Deep blue
-    'linear-gradient(135deg, #1a1a2e, #1e40af20)', // Navy blue
-    'linear-gradient(135deg, #1d4ed812, #2c3e50)', // Royal blue
-    'linear-gradient(135deg, #1e2a3a, #2563eb18)', // Bright blue
-    'linear-gradient(135deg, #3b82f610, #1e3c72)', // Sky blue
+    'linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 50%, #0a0a0f 100%)',
+    'linear-gradient(135deg, #1a0f1f 0%, #1a1a2e 50%, #0a0a0f 100%)',
+    'linear-gradient(135deg, #1a1a2e 0%, #150d1a 50%, #0a0a0f 100%)',
+    'linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #0a0a0f 100%)',
+    'linear-gradient(135deg, #1a1a2e 0%, #0a0a12 50%, #0a0a0f 100%)',
   ];
 
   // Load Roboto Mono font
@@ -108,7 +88,7 @@ export async function GET(request: NextRequest) {
           justifyContent: 'space-between',
         }}
       >
-        {/* Chakra at top */}
+        {/* Illumination at top */}
         <div
           style={{
             display: 'flex',
@@ -116,23 +96,17 @@ export async function GET(request: NextRequest) {
             alignItems: 'center',
             paddingBottom: '40px',
             paddingTop: '100px',
+            fontSize: '24px',
+            fontWeight: '400',
+            color: 'white',
+            textAlign: 'center',
+            letterSpacing: '0.1em',
+            opacity: 0.7,
           }}
         >
-          <div
-            style={{
-              fontSize: '24px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              opacity: 0.7,
-            }}
-          >
-            {Math.round(moonPhase.illumination)}% ILLUMINATED
-          </div>
+          {Math.round(moonPhase.illumination)}% ILLUMINATED
         </div>
 
-        {/* Crystal name in middle - large for mobile */}
         <div
           style={{
             display: 'flex',
@@ -143,11 +117,16 @@ export async function GET(request: NextRequest) {
             width: '100%',
           }}
         >
-          <div style={{ fontSize: '120px', marginBottom: '30px' }}>
-            {moonPhase.emoji}
-          </div>
+          <img
+            src={`${baseUrl}/icons/dotty/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
+            width={180}
+            height={180}
+            alt={moonPhase.name}
+            style={{ marginBottom: '30px' }}
+          />
           <div
             style={{
+              display: 'flex',
               fontSize: '64px',
               fontWeight: '400',
               color: 'white',
@@ -160,6 +139,7 @@ export async function GET(request: NextRequest) {
           </div>
           <div
             style={{
+              display: 'flex',
               fontSize: '24px',
               color: 'white',
               textAlign: 'center',
@@ -171,31 +151,39 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Date */}
         <div
           style={{
-            fontSize: '28px',
-            fontWeight: '300',
-            color: 'white',
-            textAlign: 'center',
-            fontFamily: 'Roboto Mono',
-            marginBottom: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
-          {formattedDate}
-        </div>
+          <div
+            style={{
+              display: 'flex',
+              fontSize: '28px',
+              fontWeight: '300',
+              color: 'white',
+              textAlign: 'center',
+              fontFamily: 'Roboto Mono',
+              marginBottom: '20px',
+            }}
+          >
+            {formattedDate}
+          </div>
 
-        {/* Footer - exactly same as cosmic */}
-        <div
-          style={{
-            fontSize: '28px',
-            fontWeight: '300',
-            color: 'white',
-            letterSpacing: '1px',
-            marginBottom: '40px',
-          }}
-        >
-          lunary.app
+          <div
+            style={{
+              display: 'flex',
+              fontSize: '28px',
+              fontWeight: '300',
+              color: 'white',
+              letterSpacing: '1px',
+              marginBottom: '40px',
+            }}
+          >
+            lunary.app
+          </div>
         </div>
       </div>
     ),

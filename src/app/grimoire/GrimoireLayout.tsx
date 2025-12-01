@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
   ChevronDownIcon,
@@ -16,6 +16,7 @@ import {
   Search,
 } from 'lucide-react';
 import { GrimoireSearch } from './GrimoireSearch';
+import { captureEvent } from '@/lib/posthog-client';
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -146,6 +147,18 @@ export default function GrimoireLayout({
     ? slugToSection(currentSectionSlug)
     : undefined;
 
+  const trackedSectionRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (currentSection && currentSection !== trackedSectionRef.current) {
+      captureEvent('grimoire_viewed', {
+        section: currentSection,
+        section_title: grimoire[currentSection]?.title,
+      });
+      trackedSectionRef.current = currentSection;
+    }
+  }, [currentSection]);
+
   // Auto-expand active section
   useEffect(() => {
     if (currentSection && grimoire[currentSection]?.contents) {
@@ -195,7 +208,7 @@ export default function GrimoireLayout({
   };
 
   return (
-    <div className='flex flex-row h-[93dvh] overflow-hidden relative'>
+    <div className='flex flex-row h-full overflow-hidden relative'>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -350,7 +363,7 @@ export default function GrimoireLayout({
       </div>
 
       {/* Main content */}
-      <div className='flex-1 overflow-y-auto min-w-0'>
+      <div className='flex-1 overflow-y-auto min-w-0 px-4 pt-4 pb-20'>
         {/* Mobile menu button */}
         <button
           onClick={() => setSidebarOpen(true)}
@@ -374,7 +387,7 @@ export default function GrimoireLayout({
             </div>
           </div>
         ) : (
-          <div className='flex items-center justify-center min-h-full text-center px-4 py-8 md:py-12 lg:py-16'>
+          <div className='flex items-center justify-center min-h-full text-center p-4 md:py-12 lg:py-16'>
             <div className='max-w-6xl w-full'>
               <div className='mb-8 md:mb-12'>
                 <Sparkles className='w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 text-purple-400 mx-auto mb-6 md:mb-8' />

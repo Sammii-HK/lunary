@@ -45,19 +45,21 @@ const getMoonPhaseName = (illumination: number) => {
   return 'Unknown';
 };
 
-// Planet unicode icons
+// Planet Astromicon icons (use with font-astro class)
 const getPlanetIcon = (planet: string) => {
   const icons: { [key: string]: string } = {
-    Mercury: '☿',
-    Venus: '♀',
-    Mars: '♂',
-    Jupiter: '♃',
-    Saturn: '♄',
-    Uranus: '♅',
-    Neptune: '♆',
-    Pluto: '♇',
+    Sun: 'S',
+    Moon: 'R',
+    Mercury: 'T',
+    Venus: 'Q',
+    Mars: 'U',
+    Jupiter: 'V',
+    Saturn: 'W',
+    Uranus: 'X',
+    Neptune: 'Y',
+    Pluto: 'Z',
   };
-  return icons[planet] || '🪐';
+  return icons[planet] || 'S';
 };
 
 // Planet colors for chart
@@ -636,7 +638,7 @@ const ObservingConditionsCard = ({
                     key={planet}
                     className='flex items-center gap-2 rounded-full border border-zinc-700/70 bg-zinc-800/50 px-2.5 py-1 text-xs text-zinc-200'
                   >
-                    <span className='text-sm leading-none'>
+                    <span className='font-astro text-sm leading-none'>
                       {getPlanetIcon(planet)}
                     </span>
                     {planet}
@@ -938,7 +940,9 @@ const PlanetCard = ({ planet, timezone, isDetailed = false }: any) => {
     <div className='bg-zinc-700/30 rounded-lg p-3 border border-zinc-600/50'>
       <div className='flex items-center justify-between mb-2'>
         <div className='flex items-center gap-2'>
-          <span className='text-lg'>{getPlanetIcon(planet.body)}</span>
+          <span className='font-astro text-lg'>
+            {getPlanetIcon(planet.body)}
+          </span>
           <div>
             <div className='flex items-center gap-2'>
               <span className='text-sm font-medium text-white'>
@@ -1061,6 +1065,8 @@ export default function EphemerisWidget() {
     () => deriveObservingSummary(ephemerisData, location),
     [ephemerisData, location],
   );
+
+  // Planets are already in solar system order from ephemeris.ts
   const planets = ephemerisData?.planets || [];
 
   if (!location || locationLoading) {
@@ -1143,7 +1149,7 @@ export default function EphemerisWidget() {
                       altitude: 40,
                     },
                   },
-                  ...planets.slice(0, 4).map((p) => ({
+                  ...planets.map((p) => ({
                     name: p.body,
                     riseSet: p.riseSet,
                   })),

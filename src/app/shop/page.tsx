@@ -161,7 +161,7 @@ export default function ShopPage() {
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-slate-900 to-slate-800'>
-      <div className='container mx-auto px-4 py-8'>
+      <div className='container mx-auto p-4'>
         {/* Header */}
         <div className='text-center mb-12'>
           <h1 className='text-4xl md:text-6xl font-light text-white mb-4'>

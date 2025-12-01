@@ -1,4 +1,4 @@
-import { spellDatabase } from '../constants/grimoire/spells';
+import { spells as spellDatabase } from '../constants/spells';
 
 // Cache tarot card names to avoid repeated imports
 let cachedTarotCardNames: string[] | null = null;
@@ -38,6 +38,7 @@ export function initializeTarotCardCache(tarotCards: any) {
 export type ParsedEntity = {
   type: 'tarot' | 'ritual' | 'spell';
   name: string;
+  slug?: string; // URL slug for linking to grimoire
   startIndex: number;
   endIndex: number;
 };
@@ -145,10 +146,12 @@ export function parseMessageContent(content: string): ParsedMessage {
       );
 
       if (!overlaps) {
-        const isRitual = ritualNames.includes(spellName);
+        const spell = spellDatabase.find((s) => s.title === spellName);
+        const isRitual = spell?.type === 'ritual';
         entities.push({
           type: isRitual ? 'ritual' : 'spell',
           name: spellName,
+          slug: spell?.id,
           startIndex: match.index,
           endIndex: match.index + match[0].length,
         });

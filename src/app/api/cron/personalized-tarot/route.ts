@@ -44,6 +44,31 @@ export async function GET(request: NextRequest) {
 
     console.log('🔮 Sending personalized tarot notifications for:', dateStr);
 
+    // Debug: Get counts for each condition to understand filtering
+    const allActiveCount = await sql`
+      SELECT COUNT(*) as count FROM push_subscriptions WHERE is_active = true
+    `;
+    const withBirthdayCount = await sql`
+      SELECT COUNT(*) as count FROM push_subscriptions 
+      WHERE is_active = true 
+      AND preferences->>'birthday' IS NOT NULL 
+      AND preferences->>'birthday' != ''
+    `;
+    const tarotEnabledCount = await sql`
+      SELECT COUNT(*) as count FROM push_subscriptions 
+      WHERE is_active = true 
+      AND (
+        preferences->>'tarotNotifications' = 'true'
+        OR (preferences->>'tarotNotifications')::boolean = true
+      )
+    `;
+
+    console.log(`[personalized-tarot] Debug counts:`, {
+      allActive: allActiveCount.rows[0]?.count,
+      withBirthday: withBirthdayCount.rows[0]?.count,
+      tarotEnabled: tarotEnabledCount.rows[0]?.count,
+    });
+
     // Get all active subscriptions that have tarot notifications enabled
     // and have user data (birthday) stored in preferences
     const subscriptions = await sql`
@@ -60,10 +85,44 @@ export async function GET(request: NextRequest) {
 
     if (subscriptions.rows.length === 0) {
       console.log('📭 No active tarot notification subscriptions found');
+      console.log(
+        '[personalized-tarot] Reason: Either no subscribers have birthday set, or tarotNotifications is not explicitly enabled',
+      );
+      console.log(
+        '[personalized-tarot] Note: tarotNotifications must be explicitly "true" (not null) unlike cosmicPulse',
+      );
+
+      // Additional debug: show tarot preference values
+      const sampleSubs = await sql`
+        SELECT user_id, preferences->>'tarotNotifications' as tarot, 
+               preferences->>'birthday' as birthday_exists
+        FROM push_subscriptions 
+        WHERE is_active = true
+        LIMIT 5
+      `;
+      console.log(
+        '[personalized-tarot] Sample subscriptions tarot status:',
+        JSON.stringify(
+          sampleSubs.rows.map((s) => ({
+            userId: s.user_id,
+            tarotPref: s.tarot,
+            hasBirthday: s.birthday_exists ? 'yes' : 'no',
+          })),
+          null,
+          2,
+        ),
+      );
+
       return NextResponse.json({
         success: true,
         notificationsSent: 0,
         message: 'No subscribers for personalized tarot notifications',
+        debug: {
+          allActive: parseInt(allActiveCount.rows[0]?.count || '0'),
+          withBirthday: parseInt(withBirthdayCount.rows[0]?.count || '0'),
+          tarotEnabled: parseInt(tarotEnabledCount.rows[0]?.count || '0'),
+          note: 'tarotNotifications must be explicitly true (not null)',
+        },
       });
     }
 

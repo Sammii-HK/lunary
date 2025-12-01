@@ -1002,7 +1002,7 @@ export default function CompatibilityChart() {
   const options = getOptions();
 
   return (
-    <article className='space-y-8 pb-20'>
+    <article className='space-y-8'>
       <header className='mb-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           Compatibility Chart

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,12 @@ import {
   XCircle,
   ExternalLink,
   Calendar,
+  History,
+  AlertCircle,
+  Share2,
+  Image,
+  Download,
+  Copy,
 } from 'lucide-react';
 
 interface SubstackPost {
@@ -42,6 +48,26 @@ interface PublishResult {
   tier: 'free' | 'paid';
 }
 
+interface BackfillResult {
+  weekOffset: number;
+  weekStart: string;
+  free: PublishResult;
+  paid: PublishResult;
+}
+
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(d.setDate(diff));
+}
+
+function formatWeekRange(weekStart: Date): string {
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  return `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+}
+
 export default function SubstackManagerPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewData | null>(null);
@@ -59,6 +85,36 @@ export default function SubstackManagerPage() {
     authenticated: null,
     message: '',
   });
+
+  const [backfillRange, setBackfillRange] = useState({ start: -1, end: -4 });
+  const [backfillResults, setBackfillResults] = useState<BackfillResult[]>([]);
+  const [backfillProgress, setBackfillProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+
+  const [socialContent, setSocialContent] = useState<{
+    images: Record<string, string>;
+    captions: { short: string; medium: string; long: string };
+    hashtags: string[];
+    platforms: Record<string, Record<string, string>>;
+  } | null>(null);
+
+  const weekOptions = useMemo(() => {
+    const options = [];
+    const today = new Date();
+    for (let i = 4; i >= -52; i--) {
+      const targetDate = new Date(today);
+      targetDate.setDate(targetDate.getDate() + i * 7);
+      const weekStart = getWeekStart(targetDate);
+      options.push({
+        offset: i,
+        label: formatWeekRange(weekStart),
+        weekStart,
+      });
+    }
+    return options;
+  }, []);
 
   const loadPreview = async () => {
     setLoading('preview');
@@ -136,6 +192,129 @@ export default function SubstackManagerPage() {
     }
   };
 
+  const generateSocialContent = async () => {
+    setLoading('social');
+    try {
+      const response = await fetch(`/api/social/generate?week=${weekOffset}`);
+      const data = await response.json();
+      setSocialContent({
+        images: data.images,
+        captions: data.captions,
+        hashtags: data.hashtags,
+        platforms: data.platforms,
+      });
+    } catch (error) {
+      console.error('Error generating social content:', error);
+      alert('Failed to generate social content');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const runBackfill = async () => {
+    const weeksToProcess: number[] = [];
+    // Process oldest weeks first so they appear in chronological order on the blog
+    // (most recently published posts appear at the top of the blog)
+    for (let i = backfillRange.end; i <= backfillRange.start; i++) {
+      weeksToProcess.push(i);
+    }
+
+    if (weeksToProcess.length === 0) {
+      alert('No weeks selected for backfill');
+      return;
+    }
+
+    if (
+      !confirm(
+        `This will publish ${weeksToProcess.length} weeks of posts (${weeksToProcess.length * 2} total posts) in chronological order (oldest first). Continue?`,
+      )
+    ) {
+      return;
+    }
+
+    setLoading('backfill');
+    setBackfillResults([]);
+    setBackfillProgress({ current: 0, total: weeksToProcess.length });
+
+    const results: BackfillResult[] = [];
+
+    for (let i = 0; i < weeksToProcess.length; i++) {
+      const offset = weeksToProcess[i];
+      setBackfillProgress({ current: i + 1, total: weeksToProcess.length });
+
+      try {
+        const response = await fetch('/api/substack/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            weekOffset: offset,
+            publishFree: true,
+            publishPaid: true,
+          }),
+        });
+
+        const data = await response.json();
+        const weekStart = getWeekStart(new Date());
+        weekStart.setDate(weekStart.getDate() + offset * 7);
+
+        results.push({
+          weekOffset: offset,
+          weekStart: weekStart.toISOString(),
+          free: data.results?.free || {
+            success: false,
+            tier: 'free',
+            error: data.error,
+          },
+          paid: data.results?.paid || {
+            success: false,
+            tier: 'paid',
+            error: data.error,
+          },
+        });
+
+        setBackfillResults([...results]);
+
+        if (i < weeksToProcess.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+      } catch (error) {
+        const weekStart = getWeekStart(new Date());
+        weekStart.setDate(weekStart.getDate() + offset * 7);
+
+        results.push({
+          weekOffset: offset,
+          weekStart: weekStart.toISOString(),
+          free: {
+            success: false,
+            tier: 'free',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+          paid: {
+            success: false,
+            tier: 'paid',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+
+        setBackfillResults([...results]);
+      }
+    }
+
+    setLoading(null);
+    setBackfillProgress(null);
+
+    const successCount = results.filter(
+      (r) => r.free.success && r.paid.success,
+    ).length;
+    alert(
+      `Backfill complete: ${successCount}/${results.length} weeks published successfully`,
+    );
+  };
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
       <div className='max-w-7xl mx-auto'>
@@ -162,7 +341,7 @@ export default function SubstackManagerPage() {
             >
               {verificationStatus.checking ? (
                 <>
-                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2'></div>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   Checking...
                 </>
               ) : (
@@ -198,29 +377,36 @@ export default function SubstackManagerPage() {
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
                 <Calendar className='h-5 w-5' />
-                Week Selection
+                Single Week
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className='space-y-4'>
                 <div>
                   <label className='block text-sm font-medium mb-2'>
-                    Week Offset
+                    Select Week
                   </label>
                   <select
                     value={weekOffset}
                     onChange={(e) => setWeekOffset(parseInt(e.target.value))}
-                    className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2'
+                    className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
                   >
-                    <option value={-1}>Last Week</option>
-                    <option value={0}>This Week</option>
-                    <option value={1}>Next Week</option>
+                    {weekOptions.map((opt) => (
+                      <option key={opt.offset} value={opt.offset}>
+                        {opt.offset === 0
+                          ? `This Week (${opt.label})`
+                          : opt.offset > 0
+                            ? `+${opt.offset} weeks (${opt.label})`
+                            : `${opt.offset} weeks (${opt.label})`}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <Button
                   onClick={loadPreview}
                   disabled={loading === 'preview'}
                   className='w-full'
+                  variant='outline'
                 >
                   {loading === 'preview' ? (
                     <>
@@ -242,7 +428,7 @@ export default function SubstackManagerPage() {
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
                 <Send className='h-5 w-5' />
-                Publishing
+                Publish Selected Week
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -270,7 +456,7 @@ export default function SubstackManagerPage() {
                     onClick={() => publishPosts('free')}
                     disabled={!!loading || !preview}
                     variant='outline'
-                    className='w-full'
+                    size='sm'
                   >
                     {loading === 'publish-free' ? (
                       <Loader2 className='h-4 w-4 animate-spin' />
@@ -282,7 +468,7 @@ export default function SubstackManagerPage() {
                     onClick={() => publishPosts('paid')}
                     disabled={!!loading || !preview}
                     variant='outline'
-                    className='w-full'
+                    size='sm'
                   >
                     {loading === 'publish-paid' ? (
                       <Loader2 className='h-4 w-4 animate-spin' />
@@ -319,7 +505,12 @@ export default function SubstackManagerPage() {
                         )}
                       </div>
                     ) : (
-                      <XCircle className='h-4 w-4 text-red-500' />
+                      <div className='flex items-center gap-2'>
+                        <XCircle className='h-4 w-4 text-red-500' />
+                        <span className='text-xs text-red-400'>
+                          {publishResults.free.error?.substring(0, 30)}
+                        </span>
+                      </div>
                     )}
                   </div>
                 )}
@@ -341,7 +532,12 @@ export default function SubstackManagerPage() {
                         )}
                       </div>
                     ) : (
-                      <XCircle className='h-4 w-4 text-red-500' />
+                      <div className='flex items-center gap-2'>
+                        <XCircle className='h-4 w-4 text-red-500' />
+                        <span className='text-xs text-red-400'>
+                          {publishResults.paid.error?.substring(0, 30)}
+                        </span>
+                      </div>
                     )}
                   </div>
                 )}
@@ -354,6 +550,305 @@ export default function SubstackManagerPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card className='bg-zinc-900 border-zinc-800 mb-6'>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <History className='h-5 w-5' />
+              Batch Backfill
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg'>
+                <AlertCircle className='h-5 w-5 text-amber-400 flex-shrink-0' />
+                <p className='text-sm text-amber-200'>
+                  Backfill publishes multiple weeks at once. Start with a small
+                  range (1-2 weeks) to test before doing a larger backfill.
+                </p>
+              </div>
+
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <label className='block text-sm font-medium mb-2'>
+                    Oldest Week (publish first)
+                  </label>
+                  <select
+                    value={backfillRange.end}
+                    onChange={(e) =>
+                      setBackfillRange({
+                        ...backfillRange,
+                        end: parseInt(e.target.value),
+                      })
+                    }
+                    className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
+                  >
+                    {weekOptions
+                      .filter((opt) => opt.offset < 0)
+                      .map((opt) => (
+                        <option key={opt.offset} value={opt.offset}>
+                          {opt.label}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div>
+                  <label className='block text-sm font-medium mb-2'>
+                    Newest Week (publish last)
+                  </label>
+                  <select
+                    value={backfillRange.start}
+                    onChange={(e) =>
+                      setBackfillRange({
+                        ...backfillRange,
+                        start: parseInt(e.target.value),
+                      })
+                    }
+                    className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
+                  >
+                    {weekOptions
+                      .filter(
+                        (opt) =>
+                          opt.offset < 0 && opt.offset >= backfillRange.end,
+                      )
+                      .map((opt) => (
+                        <option key={opt.offset} value={opt.offset}>
+                          {opt.label}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className='flex items-center justify-between'>
+                <p className='text-sm text-zinc-400'>
+                  {Math.abs(backfillRange.start - backfillRange.end) + 1} weeks
+                  selected (
+                  {(Math.abs(backfillRange.start - backfillRange.end) + 1) * 2}{' '}
+                  posts)
+                </p>
+                <Button
+                  onClick={runBackfill}
+                  disabled={!!loading}
+                  variant='default'
+                >
+                  {loading === 'backfill' ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      {backfillProgress
+                        ? `${backfillProgress.current}/${backfillProgress.total}`
+                        : 'Processing...'}
+                    </>
+                  ) : (
+                    <>
+                      <History className='mr-2 h-4 w-4' />
+                      Start Backfill
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {backfillResults.length > 0 && (
+                <div className='mt-4 space-y-2 max-h-64 overflow-y-auto'>
+                  <p className='text-sm font-medium text-zinc-300'>
+                    Backfill Results:
+                  </p>
+                  {backfillResults.map((result, idx) => (
+                    <div
+                      key={idx}
+                      className='flex items-center justify-between p-2 bg-zinc-800 rounded text-sm'
+                    >
+                      <span className='text-zinc-300'>
+                        {new Date(result.weekStart).toLocaleDateString(
+                          'en-US',
+                          {
+                            month: 'short',
+                            day: 'numeric',
+                          },
+                        )}
+                      </span>
+                      <div className='flex items-center gap-3'>
+                        <span className='flex items-center gap-1'>
+                          Free:
+                          {result.free.success ? (
+                            <CheckCircle className='h-4 w-4 text-green-500' />
+                          ) : (
+                            <XCircle className='h-4 w-4 text-red-500' />
+                          )}
+                        </span>
+                        <span className='flex items-center gap-1'>
+                          Paid:
+                          {result.paid.success ? (
+                            <CheckCircle className='h-4 w-4 text-green-500' />
+                          ) : (
+                            <XCircle className='h-4 w-4 text-red-500' />
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className='bg-zinc-900 border-zinc-800 mb-6'>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Share2 className='h-5 w-5' />
+              Social Media Content
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-4'>
+              <div className='flex items-center justify-between'>
+                <p className='text-sm text-zinc-400'>
+                  Generate images and captions for the selected week
+                </p>
+                <Button
+                  onClick={generateSocialContent}
+                  disabled={!!loading}
+                  variant='outline'
+                >
+                  {loading === 'social' ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Image className='mr-2 h-4 w-4' />
+                      Generate Content
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {socialContent && (
+                <div className='space-y-6'>
+                  <div>
+                    <p className='text-sm font-medium mb-3'>Images</p>
+                    <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+                      {Object.entries(socialContent.images).map(
+                        ([format, url]) => (
+                          <div key={format} className='space-y-2'>
+                            <div className='aspect-square bg-zinc-800 rounded overflow-hidden'>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={url}
+                                alt={`${format} format preview`}
+                                className='w-full h-full object-cover'
+                              />
+                            </div>
+                            <div className='flex items-center justify-between'>
+                              <span className='text-xs text-zinc-400 capitalize'>
+                                {format}
+                              </span>
+                              <a
+                                href={url}
+                                download={`lunary-${format}.png`}
+                                className='text-purple-400 hover:text-purple-300'
+                              >
+                                <Download className='h-4 w-4' />
+                              </a>
+                            </div>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className='text-sm font-medium mb-3'>Captions</p>
+                    <div className='space-y-3'>
+                      {Object.entries(socialContent.captions).map(
+                        ([length, caption]) => (
+                          <div key={length} className='bg-zinc-800 rounded p-3'>
+                            <div className='flex items-center justify-between mb-2'>
+                              <span className='text-xs text-zinc-400 capitalize'>
+                                {length}
+                              </span>
+                              <button
+                                onClick={() => copyToClipboard(caption)}
+                                className='text-purple-400 hover:text-purple-300'
+                              >
+                                <Copy className='h-4 w-4' />
+                              </button>
+                            </div>
+                            <p className='text-sm text-zinc-300'>{caption}</p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className='text-sm font-medium mb-2'>Hashtags</p>
+                    <div className='flex flex-wrap gap-2'>
+                      {socialContent.hashtags.map((tag) => (
+                        <span
+                          key={tag}
+                          className='text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded'
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() =>
+                        copyToClipboard(socialContent.hashtags.join(' '))
+                      }
+                      className='text-xs text-purple-400 hover:text-purple-300 mt-2'
+                    >
+                      Copy all hashtags
+                    </button>
+                  </div>
+
+                  <div>
+                    <p className='text-sm font-medium mb-3'>
+                      Platform-Ready Captions
+                    </p>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                      {Object.entries(socialContent.platforms).map(
+                        ([platform, content]) => (
+                          <div
+                            key={platform}
+                            className='bg-zinc-800 rounded p-3'
+                          >
+                            <div className='flex items-center justify-between mb-2'>
+                              <span className='text-sm font-medium capitalize'>
+                                {platform}
+                              </span>
+                            </div>
+                            {Object.entries(content).map(([type, text]) => (
+                              <div key={type} className='mb-2'>
+                                <div className='flex items-center justify-between'>
+                                  <span className='text-xs text-zinc-500 capitalize'>
+                                    {type}
+                                  </span>
+                                  <button
+                                    onClick={() => copyToClipboard(text)}
+                                    className='text-purple-400 hover:text-purple-300'
+                                  >
+                                    <Copy className='h-3 w-3' />
+                                  </button>
+                                </div>
+                                <p className='text-xs text-zinc-400 mt-1 line-clamp-2'>
+                                  {text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {preview && (
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>

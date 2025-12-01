@@ -7,6 +7,7 @@ import { FEATURE_ACCESS } from '../../utils/pricing';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
 import { X } from 'lucide-react';
+import { captureEvent } from '@/lib/posthog-client';
 
 type FeatureName =
   | 'moon_phases'
@@ -56,9 +57,27 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
     loading,
   } = useSubscription();
   const authState = useAuthStatus();
+  const [paywallTracked, setPaywallTracked] = useState(false);
 
-  // If subscription is still loading, show children (components handle their own loading states)
-  // This prevents premature paywall display while subscription loads
+  const shouldShowPaywall = !loading && !hasAccess(feature) && !fallback;
+
+  useEffect(() => {
+    if (shouldShowPaywall && !paywallTracked) {
+      captureEvent('subscription_viewed', {
+        feature,
+        is_trial_active: isTrialActive,
+        trial_days_remaining: trialDaysRemaining,
+      });
+      setPaywallTracked(true);
+    }
+  }, [
+    shouldShowPaywall,
+    paywallTracked,
+    feature,
+    isTrialActive,
+    trialDaysRemaining,
+  ]);
+
   if (loading) {
     return <>{children}</>;
   }

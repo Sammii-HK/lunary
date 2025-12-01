@@ -1,15 +1,22 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { getGeneralCrystalRecommendation } from '../../../../../utils/crystals/generalCrystals';
+import { loadGoogleFont } from '../../../../../utils/astrology/cosmic-og';
+import { getCrystalByName } from '../../../../constants/grimoire/crystals';
 
 export const runtime = 'nodejs';
+export const revalidate = 86400;
+
+function getCrystalTheme(crystalName: string) {
+  const crystal = getCrystalByName(crystalName);
+  const colorHex = crystal?.ogColor || '#9333EA';
+  return `linear-gradient(135deg, ${colorHex}40, #0a0a1a)`;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
-  const sizeParam = searchParams.get('size');
 
-  // Normalize date to noon UTC for consistent seeding
   let targetDate: Date;
   if (dateParam) {
     targetDate = new Date(dateParam + 'T12:00:00Z');
@@ -18,15 +25,31 @@ export async function GET(request: NextRequest) {
     targetDate = new Date(todayStr + 'T12:00:00Z');
   }
 
-  // Get seeded crystal recommendation for the date
-  const crystalRec = getGeneralCrystalRecommendation(targetDate);
-  const crystal = crystalRec.name;
-  const reason = crystalRec.reason;
+  let crystalRec;
+  try {
+    crystalRec = getGeneralCrystalRecommendation(targetDate);
+  } catch (error) {
+    console.error('Error getting crystal recommendation:', error);
+    crystalRec = {
+      name: 'Clear Quartz',
+      reason: 'A universal crystal for clarity and amplification',
+      properties: ['clarity', 'amplification', 'healing'],
+      guidance: 'Work with Clear Quartz to amplify your intentions.',
+    };
+  }
 
-  // Support landscape size (similar to cosmic route)
-  const isLandscape = sizeParam === 'landscape';
-  const imageWidth = isLandscape ? 1920 : 1200;
-  const imageHeight = isLandscape ? 1080 : 630;
+  const formattedDate = targetDate
+    .toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    .replace(/\//g, '/');
+
+  const theme = getCrystalTheme(crystalRec.name);
+  const robotoFont = await loadGoogleFont(request);
+
+  const propertiesText = crystalRec.properties.slice(0, 3).join(' • ');
 
   return new ImageResponse(
     (
@@ -37,77 +60,114 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          background:
-            'linear-gradient(135deg, #1e1b2e 0%, #2d1b3d 50%, #1e293b 100%)',
-          padding: '60px',
+          background: theme,
+          fontFamily: 'Roboto Mono',
+          color: 'white',
+          padding: '60px 40px',
+          justifyContent: 'space-between',
         }}
       >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingBottom: '40px',
+            paddingTop: '100px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              fontSize: '24px',
+              fontWeight: '400',
+              color: 'white',
+              textAlign: 'center',
+              letterSpacing: '0.1em',
+              opacity: 0.7,
+            }}
+          >
+            {propertiesText}
+          </div>
+        </div>
+
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
+            flex: 1,
             width: '100%',
-            height: '100%',
-            border: '2px solid rgba(139, 92, 246, 0.3)',
-            borderRadius: '24px',
-            padding: '60px',
-            background: 'rgba(0, 0, 0, 0.4)',
           }}
         >
           <div
             style={{
-              fontSize: '72px',
-              fontWeight: 'bold',
-              marginBottom: '30px',
+              display: 'flex',
+              fontSize: '64px',
+              fontWeight: '400',
+              color: 'white',
               textAlign: 'center',
+              letterSpacing: '0.1em',
+              marginBottom: '40px',
             }}
           >
-            💎
+            {crystalRec.name}
           </div>
           <div
             style={{
-              fontSize: '52px',
-              fontWeight: 'bold',
-              color: '#ffffff',
-              marginBottom: '30px',
+              display: 'flex',
+              fontSize: '32px',
+              color: 'white',
               textAlign: 'center',
+              fontWeight: '300',
+              opacity: 0.8,
             }}
           >
-            {crystal}
+            Crystal of the Day
           </div>
-          {reason && (
-            <div
-              style={{
-                fontSize: '28px',
-                color: '#d4d4d8',
-                marginBottom: '20px',
-                textAlign: 'center',
-                maxWidth: '900px',
-                lineHeight: '1.4',
-              }}
-            >
-              {reason.substring(0, 150)}...
-            </div>
-          )}
-          <div
-            style={{
-              fontSize: '20px',
-              color: '#71717a',
-              marginTop: '50px',
-              textAlign: 'center',
-            }}
-          >
-            lunary.app
-          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'white',
+            textAlign: 'center',
+            fontFamily: 'Roboto Mono',
+            marginBottom: '20px',
+          }}
+        >
+          {formattedDate}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'white',
+            letterSpacing: '1px',
+            marginBottom: '40px',
+          }}
+        >
+          lunary.app
         </div>
       </div>
     ),
     {
-      width: imageWidth,
-      height: imageHeight,
+      width: 1200,
+      height: 1200,
+      fonts: robotoFont
+        ? [
+            {
+              name: 'Roboto Mono',
+              data: robotoFont,
+              style: 'normal',
+            },
+          ]
+        : [],
     },
   );
 }

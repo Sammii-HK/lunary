@@ -76,6 +76,7 @@ export function getRealPlanetaryPositions(
     { body: Body.Saturn, name: 'Saturn' },
     { body: Body.Uranus, name: 'Uranus' },
     { body: Body.Neptune, name: 'Neptune' },
+    { body: Body.Pluto, name: 'Pluto' },
   ];
 
   const positions: any = {};
@@ -95,22 +96,34 @@ export function getRealPlanetaryPositions(
 
     // Check for retrograde motion (accounting for 0°/360° wraparound)
     let retrograde = false;
+    let wasRetrograde = false;
     let newRetrograde = false;
+    let newDirect = false;
+
     if (Math.abs(longitude - longitudePast) < 180) {
       retrograde = longitude < longitudePast;
-      newRetrograde =
-        longitude < longitudePast && longitudePast > longitudePastPast;
     } else {
       retrograde = longitude > longitudePast;
-      newRetrograde =
-        longitude > longitudePast && longitudePast < longitudePastPast;
     }
+
+    if (Math.abs(longitudePast - longitudePastPast) < 180) {
+      wasRetrograde = longitudePast < longitudePastPast;
+    } else {
+      wasRetrograde = longitudePast > longitudePastPast;
+    }
+
+    // Detect retrograde station (planet just started moving backwards)
+    newRetrograde = retrograde && !wasRetrograde;
+
+    // Detect direct station (planet just started moving forwards again)
+    newDirect = !retrograde && wasRetrograde;
 
     positions[name] = {
       longitude,
       sign: getZodiacSign(longitude),
       retrograde,
       newRetrograde,
+      newDirect,
     };
   });
 
@@ -224,6 +237,7 @@ export function getPlanetSymbol(planetName: string): string {
     Saturn: 'W',
     Uranus: 'X',
     Neptune: 'Y',
+    Pluto: 'Z',
   };
   return symbols[planetName] || 'S';
 }
@@ -514,12 +528,25 @@ export function checkSignIngress(positions: any, date: Date): Array<any> {
 export function checkRetrogradeEvents(positions: any): Array<any> {
   const retrogradeEvents: Array<any> = [];
   Object.entries(positions).forEach(([planet, data]: [string, any]) => {
+    // Detect when a planet stations retrograde (starts moving backwards)
     if (data.newRetrograde) {
       retrogradeEvents.push({
-        name: `${planet} is newly retrograde`,
-        energy: `${planet} is newly retrograde`,
-        priority: 8,
-        type: 'retrograde',
+        name: `${planet} Retrograde Begins`,
+        energy: `${planet} stations retrograde in ${data.sign}`,
+        priority: 9,
+        type: 'retrograde_start',
+        planet,
+        sign: data.sign,
+      });
+    }
+
+    // Detect when a planet stations direct (ends retrograde, starts moving forwards)
+    if (data.newDirect) {
+      retrogradeEvents.push({
+        name: `${planet} Retrograde Ends`,
+        energy: `${planet} stations direct in ${data.sign}`,
+        priority: 9,
+        type: 'retrograde_end',
         planet,
         sign: data.sign,
       });
@@ -598,26 +625,31 @@ export function generateDayGuidanceSummary(
       guidance = `The ${primaryEvent.name} in ${moonSign} presents a critical decision point in the lunar cycle. This dynamic phase supports decisive action and breakthrough moments that align with your authentic path.`;
     }
   } else if (primaryEvent.aspect) {
+    const planetAName = primaryEvent.planetA?.name || primaryEvent.planetA;
+    const planetBName = primaryEvent.planetB?.name || primaryEvent.planetB;
+
     if (primaryEvent.aspect === 'conjunction') {
       if (
-        (primaryEvent.planetA === 'Saturn' &&
-          primaryEvent.planetB === 'Neptune') ||
-        (primaryEvent.planetA === 'Neptune' &&
-          primaryEvent.planetB === 'Saturn')
+        (planetAName === 'Saturn' && planetBName === 'Neptune') ||
+        (planetAName === 'Neptune' && planetBName === 'Saturn')
       ) {
         guidance = `Saturn and Neptune form a rare conjunction, merging practical structure with mystical vision. This alignment supports giving tangible form to dreams while remaining receptive to spiritual guidance.`;
       } else if (
-        (primaryEvent.planetA === 'Venus' && primaryEvent.planetB === 'Mars') ||
-        (primaryEvent.planetA === 'Mars' && primaryEvent.planetB === 'Venus')
+        (planetAName === 'Venus' && planetBName === 'Mars') ||
+        (planetAName === 'Mars' && planetBName === 'Venus')
       ) {
         guidance = `Venus and Mars unite in conjunction, harmonizing the principles of love and action. This passionate alignment favors creative endeavors, romantic initiatives, and projects requiring both heart and courage.`;
       } else {
-        guidance = `${primaryEvent.planetA} and ${primaryEvent.planetB} unite in conjunction, creating integrated opportunities for purposeful growth and aligned action.`;
+        guidance = `${planetAName} and ${planetBName} unite in conjunction, creating integrated opportunities for purposeful growth and aligned action.`;
       }
     } else if (primaryEvent.aspect === 'trine') {
-      guidance = `${primaryEvent.planetA} forms a harmonious trine with ${primaryEvent.planetB}, creating effortless flow and natural synchronicity. This supportive aspect encourages trusting instincts and allowing opportunities to unfold organically.`;
+      guidance = `${planetAName} forms a harmonious trine with ${planetBName}, creating effortless flow and natural synchronicity. This supportive aspect encourages trusting instincts and allowing opportunities to unfold organically.`;
     } else if (primaryEvent.aspect === 'square') {
-      guidance = `${primaryEvent.planetA} forms a dynamic square with ${primaryEvent.planetB}, generating creative tension that can fuel breakthrough moments. This challenging aspect supports channeling resistance into constructive action and innovative solutions.`;
+      guidance = `${planetAName} forms a dynamic square with ${planetBName}, generating creative tension that can fuel breakthrough moments. This challenging aspect supports channeling resistance into constructive action and innovative solutions.`;
+    } else if (primaryEvent.aspect === 'sextile') {
+      guidance = `${planetAName} forms a supportive sextile with ${planetBName}, opening doors to collaborative opportunities and harmonious growth.`;
+    } else if (primaryEvent.aspect === 'opposition') {
+      guidance = `${planetAName} and ${planetBName} form an opposition, inviting balance between polarities and integration of complementary energies.`;
     }
   } else if (primaryEvent.type === 'seasonal') {
     guidance = `The ${primaryEvent.name} marks a significant turning point in the seasonal cycle. This celestial milestone invites alignment with natural rhythms and conscious engagement with transformative seasonal energies.`;
@@ -629,16 +661,19 @@ export function generateDayGuidanceSummary(
   if (secondaryEvents.length > 0) {
     const secondaryGuidance: string[] = [];
 
-    secondaryEvents.forEach((event, index) => {
+    secondaryEvents.forEach((event) => {
+      const evtPlanetA = event.planetA?.name || event.planetA;
+      const evtPlanetB = event.planetB?.name || event.planetB;
+
       if (event.aspect === 'trine') {
         if (
-          (event.planetA === 'Sun' && event.planetB === 'Moon') ||
-          (event.planetA === 'Moon' && event.planetB === 'Sun')
+          (evtPlanetA === 'Sun' && evtPlanetB === 'Moon') ||
+          (evtPlanetA === 'Moon' && evtPlanetB === 'Sun')
         ) {
           secondaryGuidance.push('emotional and conscious alignment');
         } else if (
-          (event.planetA === 'Moon' && event.planetB === 'Mercury') ||
-          (event.planetA === 'Mercury' && event.planetB === 'Moon')
+          (evtPlanetA === 'Moon' && evtPlanetB === 'Mercury') ||
+          (evtPlanetA === 'Mercury' && evtPlanetB === 'Moon')
         ) {
           secondaryGuidance.push('enhanced intuitive communication');
         } else {

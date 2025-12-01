@@ -106,15 +106,18 @@ const describeContext = (
     context.tarot.lastReading?.cards &&
     context.tarot.lastReading.cards.length > 0
   ) {
+    const spreadName = context.tarot.lastReading.spread || 'Unknown Spread';
     const cardDetails = context.tarot.lastReading.cards
       .map((c) => {
-        const position = c.position ? ` (${c.position})` : '';
-        const reversed = c.reversed ? ' [reversed]' : '';
-        return `${c.name}${position}${reversed}`;
+        const positionLabel = c.position || '';
+        const positionMeaning = (c as any).positionMeaning
+          ? ` - "${(c as any).positionMeaning}"`
+          : '';
+        const reversed = c.reversed ? ' [REVERSED]' : '';
+        return `${positionLabel}: ${c.name}${reversed}${positionMeaning}`;
       })
-      .join(', ');
-    const spreadName = context.tarot.lastReading.spread || 'Unknown Spread';
-    parts.push(`SAVED SPREAD: ${spreadName} | Cards: ${cardDetails}`);
+      .join(' | ');
+    parts.push(`SAVED SPREAD: ${spreadName}\nPositions: ${cardDetails}`);
   }
 
   // Today's personalized daily card
@@ -283,25 +286,50 @@ If no data found, say "I don't see recent daily pulls to analyze."`;
     content.includes('spread interpretation')
   ) {
     return `\n\nMODE: Tarot Spread Interpretation
-ABSOLUTE LIMIT: 150 words maximum. NO EXCEPTIONS.
+WORD LIMIT: 100-150 words. Complete your thought but stay concise.
 
-Format EXACTLY like this:
-"Your [Spread Name] reveals: [Position 1] - [Card]: [one short phrase]. [Position 2] - [Card]: [one short phrase]. [Continue for each card]. Overall: [one sentence guidance]."
+Use the SAVED SPREAD data above. Each position has a specific meaning - interpret the card IN CONTEXT of that position.
 
-RULES:
-- ONE short phrase per card (max 10 words each)
-- NO paragraphs, NO lengthy explanations
-- Each card ties to its POSITION meaning, not generic card meaning
-- Focus on how positions work TOGETHER as a story
+Format:
+"Your [Spread Name] reveals:
 
-If no SAVED SPREAD found, say "I don't see a saved spread to interpret."`;
+**[Position Name]** - [Card Name]: [interpretation tied to what this position asks about - 10-15 words]
+
+[Repeat for each position]
+
+**Overall guidance**: [One sentence connecting all cards into actionable insight]"
+
+CRITICAL RULES:
+- Use the position meanings from the SAVED SPREAD data
+- Each card interpretation MUST relate to its position's purpose
+- Focus on how the cards TOGETHER tell a story
+- End with clear, actionable guidance
+- COMPLETE your sentences - never cut off mid-thought
+
+If no SAVED SPREAD found in context above, say "I don't see a saved spread to interpret. You can save a spread from the Tarot page."`;
   }
 
   if (
     content.includes('ritual') &&
     (content.includes('moon') || content.includes('tonight'))
   ) {
-    return '\n\nMODE: Ritual Generation\nProvide a specific, actionable ritual suggestion based on the current moon phase and sign. Include steps, timing, and intention. Make it practical and accessible.';
+    return `\n\nMODE: Ritual Suggestion
+WORD LIMIT: 80-100 words. Brief and actionable.
+
+Format:
+"**[Ritual Name]** - aligned with [Moon Phase] in [Sign]
+
+**You'll need**: [2-3 simple items]
+
+**Steps**:
+1. [Brief step]
+2. [Brief step]
+3. [Brief step]
+
+**Intention**: [One sentence]"
+
+Keep it simple - users can click the ritual name for full details in the Grimoire.
+ALWAYS complete your sentences - never cut off mid-thought.`;
   }
 
   if (
@@ -309,30 +337,46 @@ If no SAVED SPREAD found, say "I don't see a saved spread to interpret."`;
     content.includes('summarise my week')
   ) {
     return `\n\nMODE: Weekly Overview
-CRITICAL: This is a COMPREHENSIVE weekly guide, NOT a vague summary. Write 10-15 sentences (3-4 paragraphs).
+WORD LIMIT: 120-150 words. Be concise and specific.
 
-DO NOT:
-- List vague adjectives like "sensitive, grounded, expansive" 
-- Repeat the tarot pattern analysis (user can ask separately)
-- Write generic horoscope-style fluff
+Format:
+"**This Week's Energy**: [1-2 sentences on the dominant theme]
 
-DO:
-1. COSMIC HIGHLIGHTS (3-4 sentences): Name the TOP 2-3 planetary transits this week. Be specific - "Venus conjunct Mars on Thursday brings passion" not "the week has creative energy". Mention the exact days when key transits peak.
+**Key Transits**: [Name 2-3 specific transits with days, e.g., "Venus conjunct Mars peaks Thursday"]
 
-2. LUNAR JOURNEY (2-3 sentences): What moon phase are we in? When does it change? What sign is the moon in and when does it shift? How does this affect emotional energy?
+**Moon Phase**: [Current phase, sign, and when it shifts]
 
-3. YOUR WEEK AHEAD (4-5 sentences): Based on their birth chart placements and the transits, give specific day-by-day guidance. Example: "Monday-Tuesday favor introspection as the moon moves through your 12th house. By Wednesday, Mercury's trine to your natal Jupiter makes it ideal for important conversations."
+**Best Days For**:
+- [Day]: [specific activity]
+- [Day]: [specific activity]
 
-4. KEY DAYS (2-3 sentences): Highlight 2-3 specific days and what makes them significant. "Friday stands out with the Sun sextile Neptune - perfect for creative projects or spiritual practice."
+**Watch For**: [One thing to be mindful of]"
 
-Be SPECIFIC with transit names, days, and practical actions. No vague "honor yourself" language.`;
+RULES:
+- Name specific transits and exact days
+- No vague language like "honor yourself" or "embrace the energy"
+- Tie guidance to their birth chart if available
+- Complete your thoughts - never cut off`;
   }
 
   if (
     content.includes('journal entry') ||
     content.includes('format as journal')
   ) {
-    return '\n\nMODE: Journal Entry Format\nFormat your response as a journal entry with date, cosmic context, and reflective prompts. Use first-person perspective and include space for the user to add their own thoughts.';
+    return `\n\nMODE: Journal Entry Format
+WORD LIMIT: 80-100 words. Keep it intimate and brief.
+
+Format:
+"**[Today's Date] - [Moon Phase] in [Sign]**
+
+[2-3 sentences of cosmic context - what energies are present]
+
+**Reflect on**: [One focused question or prompt]
+
+**Intention**: [Space for user to write]"
+
+Keep it simple and spacious - a journal entry is a starting point, not a wall of text.
+ALWAYS complete your sentences - never cut off mid-thought.`;
   }
 
   return '';

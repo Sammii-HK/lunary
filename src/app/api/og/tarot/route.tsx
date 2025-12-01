@@ -89,21 +89,9 @@ function getTarotOGProperties(cardName: string): {
   };
 }
 
-function getTarotTheme(card: any, date: dayjs.Dayjs) {
-  const dayVariation = date.date() % 5;
-
-  // Subtle card color backgrounds (like crystal system)
-  const cardColorHex = card.color;
-  const suitThemes = [
-    `linear-gradient(135deg, ${cardColorHex}15, #0a0a1a)`,
-    `linear-gradient(135deg, #1a1a2e, ${cardColorHex}18)`,
-    `linear-gradient(135deg, ${cardColorHex}12, #2c3e50)`,
-    `linear-gradient(135deg, #1e2a3a, ${cardColorHex}20)`,
-    `linear-gradient(135deg, ${cardColorHex}10, #1e3c72)`,
-  ];
-
+function getTarotTheme(colorHex: string) {
   return {
-    background: suitThemes[dayVariation],
+    background: `linear-gradient(135deg, ${colorHex}, #0a0a1a)`,
     textShadow: '0 2px 8px rgba(0,0,0,0.8)',
   };
 }
@@ -124,8 +112,7 @@ export async function GET(request: NextRequest) {
   // Format date for display using dayjs
   const formattedDate = dateObj.format('DD/MM/YYYY');
 
-  // Same theme system as cosmic - use card color for theme
-  const theme = getTarotTheme(card, dateObj);
+  const theme = getTarotTheme(card.color);
 
   // Load Roboto Mono font
   const robotoFont = await loadGoogleFont(request);

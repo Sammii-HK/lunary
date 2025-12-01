@@ -10,6 +10,7 @@ import { updateUsage } from './usage';
 import { captureMemory, getMemorySnippets } from './memory';
 import { saveConversationSnippet } from './tool-adapters';
 import { recordAiInteraction } from '@/lib/analytics/tracking';
+import { captureAIGeneration } from '@/lib/posthog-server';
 import {
   incrementWeeklyRitualUsage,
   isRitualRequest,
@@ -129,6 +130,7 @@ export const createStreamingChatResponse = async ({
 
   const tokensIn = estimateTokenCount(userMessage);
   const data = new StreamData();
+  const startTime = Date.now();
 
   const result = streamText({
     model: openai('gpt-4o-mini'),
@@ -213,6 +215,17 @@ export const createStreamingChatResponse = async ({
             thread_id: thread.id,
             assist: assistCommand.type ?? undefined,
           },
+        });
+
+        captureAIGeneration({
+          distinctId: userId,
+          model: 'gpt-4o-mini',
+          provider: 'openai',
+          inputTokens: aiUsage?.promptTokens || tokensIn,
+          outputTokens: aiUsage?.completionTokens || tokensOut,
+          latencyMs: Date.now() - startTime,
+          traceId: thread.id,
+          success: true,
         });
       } catch (error) {
         console.error('[AI Stream] onFinish error:', error);

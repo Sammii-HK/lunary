@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className='flex flex-row h-[93dvh] overflow-hidden relative'>
+    <div className='flex flex-row h-full overflow-hidden relative'>
       <div className='flex-1 overflow-y-auto min-w-0'>
         <div className='p-4 md:p-6 lg:p-8 min-h-full'>
           <div className='space-y-6'>

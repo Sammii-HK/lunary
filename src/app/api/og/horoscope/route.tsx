@@ -1,23 +1,29 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { loadGoogleFont } from '../../../../../utils/astrology/cosmic-og';
+import {
+  loadGoogleFont,
+  getRealPlanetaryPositions,
+  getAccurateMoonPhase,
+  generateDayGuidanceSummary,
+  calculateRealAspects,
+  checkSeasonalEvents,
+} from '../../../../../utils/astrology/cosmic-og';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 86400; // Cache for 24 hours (content updates daily)
+export const runtime = 'nodejs';
+export const revalidate = 86400;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
-  const sizeParam = searchParams.get('size') || 'square';
 
   let targetDate: Date;
   if (dateParam) {
     targetDate = new Date(dateParam + 'T12:00:00Z');
   } else {
-    targetDate = new Date();
+    const todayStr = new Date().toISOString().split('T')[0];
+    targetDate = new Date(todayStr + 'T12:00:00Z');
   }
 
-  // Format date for display
   const formattedDate = targetDate
     .toLocaleDateString('en-GB', {
       day: '2-digit',
@@ -26,63 +32,55 @@ export async function GET(request: NextRequest) {
     })
     .replace(/\//g, '/');
 
-  // Define responsive sizes and styles
-  const sizes = {
-    square: {
-      width: 1200,
-      height: 1200,
-      padding: '60px 40px',
-      titleSize: 24,
-      contentSize: 36,
-      dateSize: 28,
-      footerSize: 28,
-    },
-    portrait: {
-      width: 1080,
-      height: 1920,
-      padding: '80px 60px',
-      titleSize: 32,
-      contentSize: 44,
-      dateSize: 36,
-      footerSize: 36,
-    },
-    landscape: {
-      width: 1920,
-      height: 1080,
-      padding: '40px 80px',
-      titleSize: 20,
-      contentSize: 28,
-      dateSize: 24,
-      footerSize: 24,
-    },
-  };
-
-  // Fetch real horoscope snippet from cosmic content
-  const dateStr = targetDate.toISOString().split('T')[0];
-  let horoscopeSnippet =
-    "Trust your inner wisdom and embrace today's cosmic possibilities";
-
+  // Generate horoscope content directly (no HTTP fetch)
+  let horoscopeSnippet: string;
   try {
-    const cosmicResponse = await fetch(
-      `https://lunary.app/api/og/cosmic-post?date=${dateStr}`,
-    );
-    if (cosmicResponse.ok) {
-      const cosmicContent = await cosmicResponse.json();
-      horoscopeSnippet = cosmicContent.horoscopeSnippet || horoscopeSnippet;
+    const positions = getRealPlanetaryPositions(targetDate);
+    const moonPhase = getAccurateMoonPhase(targetDate);
+    const aspects = calculateRealAspects(positions);
+    const seasonalEvents = checkSeasonalEvents(positions);
+
+    // Build events for guidance
+    const allEvents: any[] = [];
+    if (moonPhase.isSignificant) {
+      allEvents.push({
+        name: moonPhase.name,
+        energy: moonPhase.energy,
+        priority: 10,
+        type: 'moon',
+      });
     }
+    allEvents.push(...aspects.slice(0, 2));
+    allEvents.push(...seasonalEvents);
+    if (allEvents.length === 0) {
+      allEvents.push({
+        name: 'Cosmic Flow',
+        energy: 'Universal Harmony',
+        priority: 1,
+        type: 'general',
+      });
+    }
+
+    horoscopeSnippet = generateDayGuidanceSummary(
+      allEvents.slice(0, 3),
+      positions,
+      moonPhase,
+    );
   } catch (error) {
-    console.error('Error fetching horoscope snippet:', error);
+    console.error('Error generating horoscope:', error);
+    horoscopeSnippet =
+      "Trust your inner wisdom and embrace today's cosmic possibilities";
   }
 
   // Use cosmic-style backgrounds
   const dayVariation =
     Math.floor(targetDate.getTime() / (1000 * 60 * 60 * 24)) % 5;
   const themes = [
-    'linear-gradient(135deg, #0a0a1a, #1a1a2e)',
-    'linear-gradient(135deg, #1a1a2e, #2d3561)',
-    'linear-gradient(135deg, #2c3e50, #34495e)',
-    'linear-gradient(135deg, #1e2a3a, #2c3e50)',
-    'linear-gradient(135deg, #1a2332, #1e3c72)',
+    'linear-gradient(135deg, #1a1a2e, #0a0a1a)',
+    'linear-gradient(135deg, #2d3561, #1a1a2e)',
+    'linear-gradient(135deg, #34495e, #2c3e50)',
+    'linear-gradient(135deg, #2c3e50, #1e2a3a)',
+    'linear-gradient(135deg, #1e3c72, #1a2332)',
   ];
 
   // Load Roboto Mono font

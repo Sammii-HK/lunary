@@ -224,10 +224,16 @@ export const getTarotLastReading = async ({
   userId,
   now = new Date(),
 }: TarotProviderParams): Promise<
-  (TarotReading & { id?: string; aiInterpretation?: string }) | null
+  | (TarotReading & {
+      id?: string;
+      aiInterpretation?: string;
+      positionMeanings?: Record<string, string>;
+    })
+  | null
 > => {
   try {
     const { sql } = await import('@vercel/postgres');
+    const { TAROT_SPREADS } = await import('@/constants/tarotSpreads');
 
     const result = await sql`
       SELECT id, cards, spread_name, spread_slug, ai_interpretation, created_at
@@ -245,13 +251,25 @@ export const getTarotLastReading = async ({
         ? row.cards
         : JSON.parse(row.cards || '[]');
 
+      // Look up spread definition to get position meanings
+      const spreadDef = TAROT_SPREADS.find(
+        (s) => s.slug === row.spread_slug || s.name === row.spread_name,
+      );
+      const positionMeanings: Record<string, string> = {};
+      if (spreadDef) {
+        spreadDef.positions.forEach((pos) => {
+          positionMeanings[pos.id] = pos.prompt;
+          positionMeanings[pos.label] = pos.prompt;
+        });
+      }
+
       const reading = {
         id: row.id,
         spread: row.spread_name || 'Three Card Insight',
         cards: cards
           .map((card: any) => {
             const cardName = card.card?.name || card.name;
-            const cardPosition =
+            const cardPositionId =
               card.positionId || card.positionLabel || card.position;
             const cardReversed = card.card?.reversed || card.reversed || false;
 
@@ -260,9 +278,15 @@ export const getTarotLastReading = async ({
               return null;
             }
 
+            // Get position meaning from spread definition
+            const positionMeaning = cardPositionId
+              ? positionMeanings[cardPositionId] || cardPositionId
+              : undefined;
+
             return {
               name: cardName,
-              position: cardPosition,
+              position: cardPositionId,
+              positionMeaning,
               reversed: cardReversed,
             };
           })
@@ -271,13 +295,22 @@ export const getTarotLastReading = async ({
               card: {
                 name: string;
                 position?: string;
+                positionMeaning?: string;
                 reversed: boolean;
               } | null,
-            ): card is { name: string; position?: string; reversed: boolean } =>
-              card !== null,
+            ): card is {
+              name: string;
+              position?: string;
+              positionMeaning?: string;
+              reversed: boolean;
+            } => card !== null,
           ),
         timestamp: row.created_at || dayjs(now).toISOString(),
         aiInterpretation: row.ai_interpretation || undefined,
+        positionMeanings:
+          Object.keys(positionMeanings).length > 0
+            ? positionMeanings
+            : undefined,
       };
 
       console.log(

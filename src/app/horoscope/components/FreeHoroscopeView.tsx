@@ -11,7 +11,7 @@ export function FreeHoroscopeView() {
   const upcomingTransits = getUpcomingTransits();
 
   return (
-    <div className='min-h-screen space-y-6 pb-20 px-4'>
+    <div className='h-full space-y-6 p-4 overflow-auto'>
       <div className='pt-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           Your Horoscope

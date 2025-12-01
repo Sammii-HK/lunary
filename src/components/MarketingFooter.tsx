@@ -163,7 +163,8 @@ export function MarketingFooter() {
         {/* Copyright */}
         <div className='mt-8 pt-8 border-t border-zinc-800/50'>
           <p className='text-xs text-zinc-500 text-center'>
-            © {new Date().getFullYear()} Lunary. All rights reserved.
+            © {new Date().getFullYear()} Lunar Computing, Inc. All rights
+            reserved.
           </p>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { sql } from '@vercel/postgres';
 
 import { trackConversionEvent } from '@/lib/analytics/tracking';
+import { captureEvent } from '@/lib/posthog-server';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -414,6 +415,16 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       metadata: {
         stripeSubscriptionId: subscription.id,
       },
+    });
+
+    captureEvent(userId, 'subscription_started', {
+      plan: planType,
+      status,
+      is_trial: status === 'trialing',
+      has_discount: discountInfo.hasDiscount,
+      discount_percent: discountInfo.discountPercent,
+      monthly_amount: discountInfo.monthlyAmountDue,
+      referral_code: referralCode || null,
     });
   }
 }

@@ -175,9 +175,11 @@ test.describe('QA Checklist - Indexing', () => {
     const response = await request.get(`${BASE_URL}/sitemap.xml`);
     const content = await response.text();
 
-    expect(content).toContain(`${BASE_URL}/`);
-    expect(content).toContain(`${BASE_URL}/pricing`);
-    expect(content).toContain(`${BASE_URL}/blog`);
+    // Sitemap uses canonical production URLs (https://lunary.app)
+    const canonicalUrl = 'https://lunary.app';
+    expect(content).toContain(`${canonicalUrl}/`);
+    expect(content).toContain(`${canonicalUrl}/pricing`);
+    expect(content).toContain(`${canonicalUrl}/blog`);
   });
 });
 
@@ -268,6 +270,10 @@ test.describe('QA Checklist - Accessibility', () => {
 test.describe('QA Checklist - SEO', () => {
   test('Pages should have proper heading hierarchy', async ({ page }) => {
     await page.goto(`${BASE_URL}/`);
+    await page.waitForLoadState('networkidle');
+
+    // Wait for h1 to be visible (handles dynamic rendering)
+    await page.waitForSelector('h1', { timeout: 10000 }).catch(() => {});
 
     // Check for h1
     const h1Count = await page.locator('h1').count();
