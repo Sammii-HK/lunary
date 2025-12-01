@@ -142,7 +142,6 @@ export async function GET(request: NextRequest) {
       {
         error: 'Failed to load tarot readings',
         errorDetails: error instanceof Error ? error.message : 'Unknown error',
-        errorStack: error instanceof Error ? error.stack : undefined,
         spreadsUnlocked,
       },
       { status: 500 },

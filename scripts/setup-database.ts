@@ -378,11 +378,23 @@ async function setupDatabase() {
           notes TEXT,
           tags TEXT[],
           metadata JSONB,
+          ai_interpretation TEXT,
           archived_at TIMESTAMP WITH TIME ZONE,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         )
       `;
+
+    // Add ai_interpretation column if it doesn't exist (for existing tables)
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'tarot_readings' AND column_name = 'ai_interpretation') THEN
+          ALTER TABLE tarot_readings ADD COLUMN ai_interpretation TEXT;
+        END IF;
+      END $$;
+    `;
 
     await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_user ON tarot_readings(user_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_tarot_readings_created ON tarot_readings(created_at DESC)`;
@@ -1407,6 +1419,22 @@ async function setupDatabase() {
     await sql`CREATE INDEX IF NOT EXISTS idx_re_engagement_campaigns_user_type_sent ON re_engagement_campaigns(user_id, campaign_type, sent_at)`;
 
     console.log('✅ Re-engagement campaigns table created');
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS journal_patterns (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        pattern_type TEXT NOT NULL,
+        pattern_data JSONB NOT NULL,
+        generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        expires_at TIMESTAMP WITH TIME ZONE
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_journal_patterns_user_id ON journal_patterns(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_journal_patterns_expires ON journal_patterns(expires_at)`;
+
+    console.log('✅ Journal patterns table created');
 
     console.log('✅ Database setup complete!');
     console.log(
