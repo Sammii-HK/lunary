@@ -405,13 +405,13 @@ export async function POST(request: NextRequest) {
     for (const [platform, plan] of Object.entries(platformPlan)) {
       const platformInfo = PLATFORM_POSTING_TIMES[platform];
       const dayNames = [
-        'Sunday',
         'Monday',
         'Tuesday',
         'Wednesday',
         'Thursday',
         'Friday',
         'Saturday',
+        'Sunday',
       ];
 
       for (let i = 0; i < plan.count; i++) {
