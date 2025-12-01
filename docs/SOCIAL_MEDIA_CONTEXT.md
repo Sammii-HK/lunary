@@ -6,6 +6,22 @@ This file contains essential context for generating authentic, varied social med
 
 **Lunary** is a cosmic/spiritual astrology app that provides personalized astrological insights, birth chart analysis, tarot readings, and daily cosmic guidance.
 
+## Beta Launch Promo
+
+**STARGAZER** - Use code STARGAZER for 12 months of Lunary+ free during our beta launch. This is our way of thanking early adopters who join during beta.
+
+## Discord Community
+
+**Join our Discord**: https://discord.gg/2WCJncKrKj
+
+Encourage users to join the Lunary Discord for:
+
+- Real-time cosmic discussions and daily insights
+- Community support and connection with fellow stargazers
+- Early access to new features and announcements
+- Direct feedback and feature requests to the founder
+- Beta testing opportunities
+
 ## Core Value Propositions
 
 1. **Personalized Birth Chart Analysis** - Complete planetary positions calculated from exact birth time, date, and location
@@ -35,20 +51,36 @@ This file contains essential context for generating authentic, varied social med
 - Personalized daily horoscopes based on YOUR exact birth chart
 - Tarot pattern analysis (identifies recurring themes and cards over time)
 - Personal transit calendar showing which houses are activated
-- AI chat companion with memory (remembers past conversations)
+- Astral Guide - AI chat companion with memory (remembers past conversations, knows your chart)
+- Book of Shadows - Personal journal with pattern analysis across entries
 - 500+ page digital grimoire (spells, rituals, crystals, correspondences)
-- Ritual generator and personalized recommendations
+- Moon Circles - Guided lunar rituals and community gatherings for new/full moons
+- Yearly Forecast - Comprehensive personalized astrological outlook for the year ahead
+- Cosmic Report Generator - Create detailed shareable PDF reports
+- Cosmic State - Live view of current planetary positions and influences
+- Shop - Curated crystals, tools, and grimoire packs
 - Collections to save readings, horoscopes, and insights
+- Ritual generator and personalized recommendations
 
 ## AI Features (Detailed)
 
-**AI Chat Companion ("Book of Shadows"):**
+**Astral Guide (AI Chat Companion):**
 
 - Personalized astro-tarot companion with context-aware responses
 - Uses your birth chart, current transits, moon phase, tarot history, and mood data
 - Memory system - remembers past conversations for personalized responses across sessions
 - Conversation threads - save and revisit conversations
+- Quick actions for common queries (cosmic weather, transit feelings, ritual generation)
 - This is what makes Lunary unique: an AI that actually knows your cosmic story
+
+**Book of Shadows (Personal Journal):**
+
+- Digital journal for reflections, intentions, and cosmic observations
+- Pattern analysis across entries - identifies recurring themes, moods, and card references
+- Moon phase tagging - automatically records the moon phase for each entry
+- Card references - link entries to specific tarot cards that appeared
+- Mood tags - track emotional patterns over time
+- Entries can be created manually or saved from Astral Guide conversations
 
 **Assist Commands (Special Commands for Specific Actions):**
 
@@ -248,10 +280,14 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 
 - "Personalized to YOUR exact birth chart" - Not generic zodiac horoscopes
 - "Real astronomical calculations" - Uses actual planetary positions, not generic predictions
-- "AI with memory" - Remembers your conversations and builds context over time
+- "Astral Guide" - AI companion that remembers your conversations and knows your chart
+- "Book of Shadows" - Personal journal with pattern analysis across entries
 - "Tarot pattern analysis" - Tracks themes across readings to show your evolution
 - "Personal transits" - Shows which areas of YOUR life are being activated
+- "Moon Circles" - Guided rituals for every new and full moon
+- "Yearly Forecast" - Personalized astrological outlook for the year ahead
 - "Complete grimoire" - 500+ pages of spells, rituals, crystals, correspondences
+- "Cosmic Report Generator" - Shareable PDF reports of your birth chart
 - "Cross-device sync" - Access your chart and insights anywhere
 
 ## Content Philosophy: 80/20 Rule
@@ -267,7 +303,8 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 
 - "discover at lunary.app"
 - "try Lunary"
-- Never mention pricing, trials, or "free"
+- For promotional posts during beta: mention code STARGAZER for 12 months free
+- Outside of dedicated promo posts, avoid pricing/trial mentions
 
 ## Content Archetypes (Rotate Between These)
 
@@ -372,9 +409,22 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 
 **Feature Deep-Dive (soft CTA):**
 
-- "Most AI chatbots forget you exist between sessions. Lunary's AI remembers your birth chart, your past questions, your recurring themes. Ask about your career today, and it knows you asked about Saturn transits last week."
+- "Most AI chatbots forget you exist between sessions. The Astral Guide remembers your birth chart, your past questions, your recurring themes. Ask about your career today, and it knows you asked about Saturn transits last week."
 - "Tarot apps show you a card. Lunary shows you patterns. Which cards keep appearing? What themes are recurring? Over 30 days, the patterns tell a story single readings can't."
 - "Generic transit forecasts say 'Mars is in Aries.' Personal transits say 'Mars is activating your 7th house - relationships and partnerships are energized.' The difference is YOUR birth chart."
+- "Your Book of Shadows isn't just a journal. It tracks patterns across entries - recurring moods, card references, moon phases. Over time, you see your own cosmic story emerge."
+- "Moon Circles guide you through new moon intentions and full moon releases. Each lunation has a theme, focus points, and community insights."
+
+**Beta Launch Promo (use sparingly):**
+
+- "We're in beta and inviting early adopters to join. Use code STARGAZER for 12 months of Lunary+ free. Real astronomical data, personalized insights, an AI that remembers your journey."
+- "Building Lunary has been a two-year journey. For our beta launch, we're giving early adopters 12 months free with code STARGAZER. Come grow with us."
+
+**Discord Community (encourage joining):**
+
+- "We're building a community of stargazers. Join us on Discord for daily cosmic insights, beta access, and real conversations about what the stars reveal. discord.gg/yatwZTf7"
+- "The best part of building Lunary? The community. Join our Discord - we share daily cosmic weather, discuss transits, and genuinely want to hear what features you'd love. discord.gg/yatwZTf7"
+- "Want to shape the future of Lunary? Join our Discord. Beta testers get early access to new features and direct input on what we build next. discord.gg/yatwZTf7"
 
 **User Transformation (soft CTA):**
 
@@ -393,9 +443,24 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 - "Birth chart patterns that explain your personality"
 - Behind-the-scenes of building an astrology app
 
-### Community Features (Future)
+### Moon Circles (Live Feature)
 
-- **Moon Circles** - Virtual gatherings during new/full moons
-- Shared rituals and intentions
-- Community support and connection
-- Guided experiences tied to lunar cycles
+- **Moon Circles** - Guided lunar rituals and community gatherings
+- Available for every new moon and full moon
+- Themed rituals with focus points (intention setting, release work, manifestation)
+- Community insights - see what others are working on during each lunation
+- Access previous moon circles to revisit past intentions and reflections
+
+### Yearly Forecast
+
+- Personalized astrological outlook for the entire year ahead
+- Major transits affecting YOUR chart specifically
+- Key dates and themes for each month
+- Comprehensive cosmic roadmap based on your birth chart
+
+### Cosmic Report Generator
+
+- Generate detailed PDF reports for birth charts
+- Shareable reports with unique tokens/links
+- Professional-quality cosmic reports for yourself or as gifts
+- Complete natal chart interpretation in printable format

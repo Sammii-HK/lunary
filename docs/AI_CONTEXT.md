@@ -6,6 +6,22 @@ This file contains essential context about Lunary for AI-powered conversion opti
 
 **Lunary** is a cosmic/spiritual astrology app that provides personalized astrological insights, birth chart analysis, tarot readings, and daily cosmic guidance.
 
+## Beta Launch Promo
+
+**STARGAZER** - Use code STARGAZER for 12 months of Lunary+ free during our beta launch. This is our way of thanking early adopters who join during beta.
+
+## Discord Community
+
+**Join our Discord**: https://discord.gg/2WCJncKrKj
+
+Benefits for users:
+
+- Real-time cosmic discussions and daily insights
+- Community support and connection with fellow stargazers
+- Early access to new features and announcements
+- Direct feedback and feature requests to the founder
+- Beta testing opportunities
+
 ## Core Value Propositions
 
 1. **Personalized Birth Chart Analysis** - Complete planetary positions calculated from exact birth time, date, and location
@@ -79,14 +95,24 @@ This file contains essential context about Lunary for AI-powered conversion opti
 
 ## AI Features (Detailed)
 
-**AI Chat Companion ("Book of Shadows"):**
+**Astral Guide (AI Chat Companion):**
 
 - Personalized astro-tarot companion with context-aware responses
 - Uses user's birth chart, current transits, moon phase, tarot history, and mood data
 - Streaming responses for real-time interaction
 - Conversation threads - save and revisit conversations
 - Memory system - remembers past conversations for personalized responses across sessions
+- Quick actions for common queries (cosmic weather, transit feelings, ritual generation)
 - Plan-based limits: Free (3/day), Lunary+ (50/day), Lunary+ AI (300/day)
+
+**Book of Shadows (Personal Journal):**
+
+- Digital journal for reflections, intentions, and cosmic observations
+- Pattern analysis across entries - identifies recurring themes, moods, and card references
+- Moon phase tagging - automatically records the moon phase for each entry
+- Card references - link entries to specific tarot cards that appeared
+- Mood tags - track emotional patterns over time
+- Entries can be created manually or saved from Astral Guide conversations
 
 **Assist Commands (Special Commands for Specific Actions):**
 
@@ -142,6 +168,70 @@ This file contains essential context about Lunary for AI-powered conversion opti
 - Understand which areas of life are being activated (houses)
 - Know how transits interact with natal planets
 - Get personalized interpretations of what each transit means
+
+## Moon Circles (Detailed)
+
+**How It Works:**
+
+- Guided lunar rituals for every new moon and full moon
+- Each moon circle has a theme based on zodiac sign and astrological context
+- Focus points for intention setting (new moon) or release work (full moon)
+- Community insights - see what others are working on during each lunation
+- Historical access to past moon circles and intentions
+
+**Value Proposition:**
+
+- Never miss a new or full moon opportunity
+- Guided ritual structure for each lunation
+- Community connection during lunar events
+- Track your intentions and releases over time
+
+## Yearly Forecast (Detailed)
+
+**How It Works:**
+
+- Comprehensive personalized astrological outlook for the entire year
+- Major transits affecting user's specific birth chart
+- Key dates and themes for each month
+- Eclipses, retrogrades, and major planetary shifts personalized to chart
+
+**Value Proposition:**
+
+- Plan ahead with personalized cosmic roadmap
+- Understand major themes for the year
+- Know when key transits will affect specific life areas
+- Available for current and upcoming years
+
+## Cosmic Report Generator (Detailed)
+
+**How It Works:**
+
+- Generate detailed PDF reports of birth charts
+- Shareable reports with unique tokens/links
+- Complete natal chart interpretation
+- Professional-quality formatting for printing or sharing
+
+**Value Proposition:**
+
+- Create gift-quality reports for friends and family
+- Printable cosmic profiles
+- Shareable links for birth chart insights
+- Professional presentation of astrological data
+
+## Cosmic State (Detailed)
+
+**How It Works:**
+
+- Live view of current planetary positions
+- Current aspects and their meanings
+- Moon phase and sign information
+- Overview of cosmic weather right now
+
+**Value Proposition:**
+
+- Quick check of current planetary positions
+- Understand today's cosmic energy
+- See what's happening in the sky right now
 
 ## Grimoire Index (Comprehensive)
 
@@ -200,14 +290,16 @@ Tertiary: Reduce churn, increase retention
 - "Discover what the cosmos reveals about you"
 - "Your unique planetary positions"
 - "Tailored to your cosmic signature"
-- "AI-powered personalization with real astronomy"
-- "AI chat companion that remembers your story"
+- "Astral Guide - AI that remembers your journey"
+- "Book of Shadows - journal with pattern analysis"
 - "Tarot pattern analysis reveals recurring themes"
 - "Personal transits show which areas of life are activated"
+- "Moon Circles - guided rituals for every lunation"
+- "Yearly Forecast - your personalized cosmic roadmap"
 - "500+ pages of grimoire knowledge"
-- "Most affordable premium astrology app"
-- "Automated weekly cosmic insights"
-- "Proven engagement and value"
+- "Cosmic Report Generator - shareable PDF reports"
+- "Beta launch: STARGAZER code for 12 months free"
+- "Join our Discord community - discord.gg/yatwZTf7"
 
 ## Competitive Positioning vs Arcarae
 
@@ -241,21 +333,23 @@ Tertiary: Reduce churn, increase retention
 ## Conversion Optimization Priorities
 
 1. **Onboarding** - Get users to provide birth data quickly
-2. **Trial Experience** - Show value immediately (highlight AI chat, tarot patterns, personal transits)
+2. **Trial Experience** - Show value immediately (highlight Astral Guide, tarot patterns, personal transits)
 3. **Trial Reminders** - Re-engage before trial ends
 4. **Post-Trial** - Win-back campaigns for expired trials
-5. **Feature Discovery** - Help users find personalized features (AI chat, tarot patterns, personal transits, grimoire)
+5. **Feature Discovery** - Help users find personalized features (Astral Guide, Book of Shadows, Moon Circles, tarot patterns, personal transits, grimoire)
 6. **AI Feature Education** - Educate users about AI capabilities (assist commands, memory system, deeper readings)
 7. **Pattern Recognition** - Show value of tarot pattern analysis and personal transits
+8. **Beta Promo** - Promote STARGAZER code for 12 months free during beta launch
 
 ## Common Objections
 
 - "Is this accurate?" → Emphasize real astronomical calculations, personal transits show exact house positions
-- "Too expensive" → Frame as less than a coffee, emphasize value (AI chat, tarot patterns, personal transits, 500+ page grimoire)
-- "Not sure if it's for me" → Free trial, credit card required but no payment taken, highlight AI chat and educational grimoire
+- "Too expensive" → Beta launch: STARGAZER code for 12 months free. Otherwise, frame as less than a coffee, emphasize value (Astral Guide, tarot patterns, personal transits, 500+ page grimoire)
+- "Not sure if it's for me" → Free trial, or use STARGAZER for 12 months free during beta. Highlight Astral Guide and educational grimoire
 - "Generic astrology" → Highlight personalization to exact birth chart, tarot pattern analysis, personal transits
-- "What makes AI chat different?" → Context-aware responses using birth chart, memory system, assist commands
+- "What makes Astral Guide different?" → Context-aware responses using birth chart, memory system, assist commands - it actually knows your cosmic story
 - "Why do I need tarot patterns?" → Identifies recurring themes you might miss, shows deeper insights over time
+- "What is Book of Shadows?" → Personal journal with pattern analysis - tracks moods, card references, moon phases across entries
 
 ## Email Types
 
