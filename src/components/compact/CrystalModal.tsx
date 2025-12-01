@@ -109,7 +109,7 @@ export const CrystalPreview = () => {
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className='w-full py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group text-left'
+        className='w-full h-full py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group text-left'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>

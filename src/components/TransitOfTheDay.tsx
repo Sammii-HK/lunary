@@ -95,7 +95,7 @@ export const TransitOfTheDay = () => {
     return (
       <Link
         href='/pricing'
-        className='block py-3 px-4 border border-purple-500/30 bg-purple-500/5 rounded-md w-full hover:bg-purple-500/10 transition-colors'
+        className='block py-3 px-4 border border-purple-500/30 bg-purple-500/5 rounded-md w-full h-full hover:bg-purple-500/10 transition-colors'
       >
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
@@ -126,7 +126,7 @@ export const TransitOfTheDay = () => {
   return (
     <Link
       href='/horoscope'
-      className='block py-3 px-4 border border-stone-800 rounded-md w-full hover:border-purple-500/50 transition-colors group'
+      className='block py-3 px-4 border border-stone-800 rounded-md w-full h-full hover:border-purple-500/50 transition-colors group'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>

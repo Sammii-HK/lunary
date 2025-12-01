@@ -53,49 +53,44 @@ export const DailyCardPreview = () => {
 
   if (!dailyCard.isPersonalized) {
     return (
-      <div className='space-y-2'>
-        <Link
-          href='/tarot'
-          className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group'
-        >
-          <div className='flex items-start justify-between gap-3'>
-            <div className='flex-1 min-w-0'>
-              <div className='flex items-center gap-2 mb-1'>
-                <Layers className='w-4 h-4 text-purple-400' />
-                <span className='text-sm font-medium text-zinc-200'>
-                  Daily Card
-                </span>
-              </div>
-              <p className='text-sm text-purple-300 font-medium'>
-                {dailyCard.name}
-              </p>
-              <p className='text-xs text-zinc-500'>
-                {dailyCard.keywords.join(' • ')}
-              </p>
-              {dailyCard.information && (
-                <p className='hidden md:block text-xs text-zinc-400 mt-2 line-clamp-2'>
-                  {dailyCard.information}
-                </p>
-              )}
+      <Link
+        href='/tarot'
+        className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group h-full'
+      >
+        <div className='flex items-start justify-between gap-3'>
+          <div className='flex-1 min-w-0'>
+            <div className='flex items-center gap-2 mb-1'>
+              <Layers className='w-4 h-4 text-purple-400' />
+              <span className='text-sm font-medium text-zinc-200'>
+                Daily Card
+              </span>
             </div>
-            <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1' />
+            <p className='text-sm text-purple-300 font-medium'>
+              {dailyCard.name}
+            </p>
+            <p className='text-xs text-zinc-500'>
+              {dailyCard.keywords.join(' • ')}
+            </p>
+            {dailyCard.information && (
+              <p className='hidden md:block text-xs text-zinc-400 mt-2 line-clamp-2'>
+                {dailyCard.information}
+              </p>
+            )}
+            <div className='flex items-center gap-1.5 mt-2 text-xs text-purple-400 group-hover:text-purple-300'>
+              <Lock className='w-3 h-3' />
+              <span>Unlock personalized tarot</span>
+            </div>
           </div>
-        </Link>
-        <Link
-          href='/pricing'
-          className='flex items-center gap-2 px-4 py-2 text-xs text-purple-400 hover:text-purple-300 transition-colors'
-        >
-          <Lock className='w-3 h-3' />
-          Unlock personalized tarot
-        </Link>
-      </div>
+          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1' />
+        </div>
+      </Link>
     );
   }
 
   return (
     <Link
       href='/tarot'
-      className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group'
+      className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group h-full'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>

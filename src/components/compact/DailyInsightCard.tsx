@@ -54,41 +54,36 @@ export const DailyInsightCard = () => {
 
   if (!insight.isPersonalized) {
     return (
-      <div className='space-y-2'>
-        <Link
-          href='/horoscope'
-          className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group'
-        >
-          <div className='flex items-start justify-between gap-3'>
-            <div className='flex-1 min-w-0'>
-              <div className='flex items-center gap-2 mb-1'>
-                <Sparkles className='w-4 h-4 text-purple-400' />
-                <span className='text-sm font-medium text-zinc-200'>
-                  Your Day
-                </span>
-              </div>
-              <p className='text-sm text-zinc-300 leading-relaxed'>
-                {insight.text}
-              </p>
+      <Link
+        href='/horoscope'
+        className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group h-full'
+      >
+        <div className='flex items-start justify-between gap-3'>
+          <div className='flex-1 min-w-0'>
+            <div className='flex items-center gap-2 mb-1'>
+              <Sparkles className='w-4 h-4 text-purple-400' />
+              <span className='text-sm font-medium text-zinc-200'>
+                Your Day
+              </span>
             </div>
-            <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1' />
+            <p className='text-sm text-zinc-300 leading-relaxed'>
+              {insight.text}
+            </p>
+            <div className='flex items-center gap-1.5 mt-2 text-xs text-purple-400 group-hover:text-purple-300'>
+              <Lock className='w-3 h-3' />
+              <span>Unlock personalized horoscopes</span>
+            </div>
           </div>
-        </Link>
-        <Link
-          href='/pricing'
-          className='flex items-center gap-2 px-4 py-2 text-xs text-purple-400 hover:text-purple-300 transition-colors'
-        >
-          <Lock className='w-3 h-3' />
-          Unlock personalized horoscopes
-        </Link>
-      </div>
+          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1' />
+        </div>
+      </Link>
     );
   }
 
   return (
     <Link
       href='/horoscope'
-      className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group'
+      className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group h-full'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>

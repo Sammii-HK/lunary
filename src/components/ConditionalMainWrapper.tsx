@@ -36,10 +36,13 @@ export function ConditionalMainWrapper({
       '/cosmic-state',
       '/cosmic-report-generator',
       '/blog',
+      '/explore',
+      '/guide',
     ];
 
     // Define explore pages
     const explorePages = [
+      '/explore',
       '/shop',
       '/moon-circles',
       '/collections',
@@ -75,6 +78,8 @@ export function ConditionalMainWrapper({
       '/profile',
       '/cosmic-state',
       '/cosmic-report-generator',
+      '/explore',
+      '/guide',
     ];
 
     // Check if referrer is an app page (must be same origin to be reliable)
