@@ -4,7 +4,7 @@ import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { HelpCircle, Download } from 'lucide-react';
+import { HelpCircle, Stars, Layers, X } from 'lucide-react';
 import {
   generateBirthChart,
   hasBirthChart,
@@ -118,6 +118,7 @@ export default function ProfilePage() {
   const [openSettingsSections, setOpenSettingsSections] = useState<string[]>(
     [],
   );
+  const [showPersonalCardModal, setShowPersonalCardModal] = useState(false);
 
   // Check if user can collect birthday data
   const canCollectBirthdayData = canCollectBirthday(subscription.status);
@@ -606,10 +607,33 @@ export default function ProfilePage() {
 
       {authState.isAuthenticated && !isEditing && (
         <div className='w-full max-w-3xl space-y-4'>
-          <StreakDisplay />
-          <RitualTracker />
+          <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg'>
+            <h2 className='text-sm font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+              Your Journey
+            </h2>
+            <div className='grid grid-cols-2 gap-3'>
+              <StreakDisplay />
+              <RitualTracker />
+            </div>
+            <Paywall feature='monthly_insights'>
+              <div className='mt-3 pt-3 border-t border-zinc-800'>
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById('monthly-insights')
+                      ?.scrollIntoView({ behavior: 'smooth' })
+                  }
+                  className='text-sm text-purple-400 hover:text-purple-300 transition-colors'
+                >
+                  View Monthly Insights →
+                </button>
+              </div>
+            </Paywall>
+          </div>
           <Paywall feature='monthly_insights'>
-            <MonthlyInsights />
+            <div id='monthly-insights'>
+              <MonthlyInsights />
+            </div>
           </Paywall>
         </div>
       )}
@@ -619,180 +643,52 @@ export default function ProfilePage() {
         birthday &&
         hasBirthChartAccessData && (
           <>
-            <div className='w-full max-w-3xl rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/80 via-zinc-900 to-blue-950/60 p-6 shadow-xl'>
-              <div className='flex flex-col gap-5'>
-                <div className='flex flex-wrap items-start justify-between gap-3'>
-                  <div>
-                    <h3 className='text-2xl font-semibold text-white'>
-                      Your Birth Chart
-                    </h3>
-                    <p className='text-sm text-purple-200/80'>
-                      Expanded highlights of your cosmic fingerprint.
-                    </p>
-                  </div>
-                  <a
-                    href='/birth-chart'
-                    className='inline-flex items-center gap-2 rounded-full border border-purple-400/40 px-4 py-2 text-sm font-medium text-purple-100 transition-colors hover:bg-purple-500/10'
-                  >
-                    View full chart
-                  </a>
-                </div>
-                {(() => {
-                  const hasBirthChartData = hasBirthChart(me?.profile);
-                  const birthChartData = hasBirthChartData
-                    ? getBirthChartFromProfile(me?.profile)
-                    : null;
-
-                  if (birthChartData && birthChartData.length > 0) {
-                    const prioritizedBodies = [
-                      'Sun',
-                      'Moon',
-                      'Ascendant',
-                      'Rising',
-                      'Mercury',
-                      'Venus',
-                      'Mars',
-                      'Jupiter',
-                      'Saturn',
-                    ];
-
-                    const prioritizedPlacements = prioritizedBodies
-                      .map((bodyName) =>
-                        birthChartData.find(
-                          (planet) =>
-                            planet.body.toLowerCase() ===
-                            bodyName.toLowerCase(),
-                        ),
-                      )
-                      .filter(
-                        (
-                          planet,
-                        ): planet is NonNullable<
-                          (typeof birthChartData)[number]
-                        > => Boolean(planet),
-                      );
-
-                    const remainingPlacements = birthChartData
-                      .filter(
-                        (planet) =>
-                          !prioritizedPlacements.some(
-                            (prioritized) =>
-                              prioritized.body.toLowerCase() ===
-                              planet.body.toLowerCase(),
-                          ),
-                      )
-                      .sort((a, b) => a.body.localeCompare(b.body));
-
-                    const displayPlacements = [
-                      ...prioritizedPlacements,
-                      ...remainingPlacements,
-                    ];
-
-                    return (
-                      <>
-                        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-                          {displayPlacements.map((planet) => (
-                            <div
-                              key={`${planet.body}-${planet.sign}`}
-                              className='rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm'
-                            >
-                              <div className='flex items-start justify-between gap-4'>
-                                <div>
-                                  <p className='text-sm font-semibold text-white'>
-                                    {planet.body}
-                                  </p>
-                                  <p className='text-xs text-purple-200/80'>
-                                    {planet.degree}° {planet.minute}'
-                                  </p>
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                  <span className='text-lg font-medium text-purple-100'>
-                                    {planet.sign}
-                                  </span>
-                                  {planet.retrograde && (
-                                    <span className='rounded-full border border-amber-300/60 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wide text-amber-200'>
-                                      Retrograde
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 px-4 py-3 text-sm text-purple-100'>
-                          Ground yourself in these placements to understand the
-                          themes shaping your journey.
-                        </div>
-                      </>
-                    );
-                  }
-
-                  return (
-                    <div className='text-center text-purple-100/80'>
-                      <p className='mb-3 text-sm'>
-                        Generate your complete birth chart with planetary
-                        positions and cosmic insights.
+            <div className='w-full max-w-3xl'>
+              <h2 className='text-sm font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+                Cosmic Profile
+              </h2>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                <Link
+                  href='/birth-chart'
+                  className='group rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-950/60 to-zinc-900 p-4 shadow-lg hover:border-purple-500/50 transition-colors'
+                >
+                  <div className='flex items-center justify-between'>
+                    <div>
+                      <h3 className='text-lg font-medium text-white group-hover:text-purple-300 transition-colors'>
+                        Birth Chart
+                      </h3>
+                      <p className='text-xs text-purple-200/70'>
+                        View your cosmic fingerprint
                       </p>
-                      <button
-                        onClick={handleSave}
-                        className='rounded-md bg-purple-600 px-4 py-2 text-sm text-white transition-colors hover:bg-purple-700'
-                      >
-                        Generate Birth Chart
-                      </button>
                     </div>
+                    <Stars className='w-6 h-6 text-purple-400' />
+                  </div>
+                </Link>
+
+                {(() => {
+                  const personalCard = getPersonalCardFromProfile(me?.profile);
+                  return (
+                    <button
+                      onClick={() => setShowPersonalCardModal(true)}
+                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-purple-500/30 transition-colors text-left w-full'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div>
+                          <h3 className='text-lg font-medium text-white group-hover:text-purple-300 transition-colors'>
+                            Personal Card
+                          </h3>
+                          <p className='text-xs text-zinc-400'>
+                            {personalCard
+                              ? personalCard.name
+                              : 'Your tarot signature'}
+                          </p>
+                        </div>
+                        <Layers className='w-6 h-6 text-purple-400' />
+                      </div>
+                    </button>
                   );
                 })()}
               </div>
-            </div>
-
-            <div className='w-full max-w-3xl rounded-2xl border border-zinc-700 bg-zinc-900/70 p-6 shadow-lg'>
-              <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
-                <h3 className='text-xl font-semibold text-purple-300'>
-                  Your Personal Card
-                </h3>
-                <span className='text-xs uppercase tracking-[0.2em] text-zinc-500'>
-                  Tarot Signature
-                </span>
-              </div>
-              {(() => {
-                const personalCard = getPersonalCardFromProfile(me?.profile);
-
-                if (personalCard) {
-                  return (
-                    <div className='space-y-3'>
-                      <div className='text-center'>
-                        <h4 className='text-lg font-bold text-white'>
-                          {personalCard.name}
-                        </h4>
-                        <p className='text-sm text-purple-300'>
-                          {personalCard.keywords.slice(0, 3).join(' • ')}
-                        </p>
-                      </div>
-                      <p className='text-sm text-zinc-300'>
-                        {personalCard.information}
-                      </p>
-                      <p className='text-xs italic text-zinc-500'>
-                        {personalCard.reason}
-                      </p>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className='text-center text-zinc-400'>
-                    <p className='mb-3 text-sm'>
-                      Generate your personalized tarot card based on your
-                      birthday and name.
-                    </p>
-                    <button
-                      onClick={handleSave}
-                      className='rounded-md bg-purple-600 px-4 py-2 text-sm text-white transition-colors hover:bg-purple-700'
-                    >
-                      Generate Personal Card
-                    </button>
-                  </div>
-                );
-              })()}
             </div>
           </>
         )}
@@ -844,58 +740,6 @@ export default function ProfilePage() {
               (me?.profile as any)?.subscription?.stripeSubscriptionId
             }
           />
-
-          {subscription.hasAccess('data_export') && (
-            <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg p-6'>
-              <h2 className='text-lg font-semibold text-white mb-2'>
-                Export Your Data
-              </h2>
-              <p className='text-sm text-zinc-400 mb-4'>
-                Download all your cosmic data including birth chart, tarot
-                readings, collections, and more.
-              </p>
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await fetch('/api/export/data');
-                    if (!response.ok) {
-                      if (response.status === 403) {
-                        alert(
-                          'Upgrade to Lunary+ AI Annual to export your data',
-                        );
-                      } else {
-                        alert('Failed to export data');
-                      }
-                      return;
-                    }
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    const contentDisposition = response.headers.get(
-                      'Content-Disposition',
-                    );
-                    const filename = contentDisposition
-                      ? contentDisposition
-                          .split('filename=')[1]
-                          ?.replace(/"/g, '')
-                      : `lunary-export-${new Date().toISOString().split('T')[0]}.json`;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                  } catch (error) {
-                    alert('Failed to export data');
-                  }
-                }}
-                className='inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700'
-              >
-                <Download className='w-4 h-4' />
-                Export Data (JSON)
-              </button>
-            </div>
-          )}
         </div>
       )}
 
@@ -927,6 +771,76 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Personal Card Modal */}
+      {showPersonalCardModal &&
+        (() => {
+          const personalCard = getPersonalCardFromProfile(me?.profile);
+          return (
+            <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+              <div className='bg-zinc-900 rounded-lg p-6 w-full max-w-md relative border border-zinc-700'>
+                <button
+                  onClick={() => setShowPersonalCardModal(false)}
+                  className='absolute top-4 right-4 text-zinc-400 hover:text-white'
+                >
+                  <X size={20} />
+                </button>
+                {personalCard ? (
+                  <>
+                    <div className='text-center mb-4'>
+                      <Layers className='w-12 h-12 text-purple-400 mx-auto mb-3' />
+                      <h3 className='text-xl font-bold text-white'>
+                        {personalCard.name}
+                      </h3>
+                      <p className='text-sm text-purple-300'>
+                        Your Personal Card
+                      </p>
+                    </div>
+                    <div className='space-y-4 text-sm text-zinc-300'>
+                      {personalCard.keywords &&
+                        personalCard.keywords.length > 0 && (
+                          <div className='flex flex-wrap gap-2 justify-center'>
+                            {personalCard.keywords.map(
+                              (keyword: string, i: number) => (
+                                <span
+                                  key={i}
+                                  className='px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs'
+                                >
+                                  {keyword}
+                                </span>
+                              ),
+                            )}
+                          </div>
+                        )}
+                      {personalCard.information && (
+                        <p className='leading-relaxed'>
+                          {personalCard.information}
+                        </p>
+                      )}
+                      {personalCard.reason && (
+                        <div>
+                          <h4 className='text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1'>
+                            Why This Card
+                          </h4>
+                          <p className='leading-relaxed'>
+                            {personalCard.reason}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className='text-center py-8'>
+                    <Layers className='w-12 h-12 text-zinc-600 mx-auto mb-3' />
+                    <p className='text-zinc-400'>
+                      Add your birthday to discover your personal tarot card
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
       {/* Auth Modal */}
       {showAuthModal && (

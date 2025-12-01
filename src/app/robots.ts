@@ -31,6 +31,16 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: ['/api/', '/admin/', '/auth/', '/profile', '/test-', '/pwa-'],
       },
+      {
+        userAgent: 'GPTBot',
+        allow: '/',
+        disallow: ['/api/', '/admin/', '/auth/', '/profile'],
+      },
+      {
+        userAgent: 'ChatGPT-User',
+        allow: '/',
+        disallow: ['/api/', '/admin/', '/auth/', '/profile'],
+      },
     ],
     sitemap: 'https://lunary.app/sitemap.xml',
   };

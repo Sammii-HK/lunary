@@ -22,6 +22,18 @@ export function FreeHoroscopeView() {
       </div>
 
       <div className='space-y-6'>
+        <HoroscopeSection title="Today's Horoscope" color='purple'>
+          <p className='text-sm text-zinc-300 leading-relaxed'>
+            {generalHoroscope.reading}
+          </p>
+        </HoroscopeSection>
+
+        <HoroscopeSection title='Cosmic Highlight' color='emerald'>
+          <p className='text-sm text-zinc-300 leading-relaxed'>
+            {generalHoroscope.generalAdvice}
+          </p>
+        </HoroscopeSection>
+
         <FeaturePreview
           title='Personal Insight'
           description='Get insights specifically tailored to your birth chart and cosmic profile'
@@ -42,74 +54,6 @@ export function FreeHoroscopeView() {
             </div>
           }
         />
-
-        <HoroscopeSection title='Cosmic Highlight' color='purple'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            {generalHoroscope.generalAdvice}
-          </p>
-        </HoroscopeSection>
-
-        <HoroscopeSection title='Cosmic Insight' color='blue'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            The planetary alignments today create opportunities for growth and
-            understanding. Pay attention to synchronicities and trust your
-            intuitive insights as they guide you toward meaningful experiences
-            and connections.
-          </p>
-        </HoroscopeSection>
-
-        <FeaturePreview
-          title='Your Lucky Elements'
-          description='Get colors, crystals, and timing based on your unique birth chart'
-          blurredContent={
-            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60'>
-              <p className='text-sm text-zinc-400 mb-3'>
-                ●●●●●●●●●● ●●●●● ●●●●●●● ●●●●● ●● ●●●●●●●● ●●●●●●●●●, ●●●●●●●●●,
-                ●●● ●●●● ●●●●● ●●●●●
-              </p>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                {[...Array(4)].map((_, index) => (
-                  <div
-                    key={index}
-                    className='rounded border border-zinc-700/50 bg-zinc-800/50 p-3'
-                  >
-                    <p className='text-sm font-medium text-center text-zinc-300'>
-                      ●●●●●● & ●●●●●●
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          }
-        />
-
-        <HoroscopeSection title='Cosmic Elements' color='indigo'>
-          <p className='text-sm text-zinc-400 mb-4'>
-            Universal elements favored by today&apos;s planetary positions
-          </p>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-            <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/15 transition-colors'>
-              <p className='text-sm font-medium text-center text-zinc-100'>
-                Purple & Silver
-              </p>
-            </div>
-            <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/15 transition-colors'>
-              <p className='text-sm font-medium text-center text-zinc-100'>
-                Amethyst & Moonstone
-              </p>
-            </div>
-            <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/15 transition-colors'>
-              <p className='text-sm font-medium text-center text-zinc-100'>
-                Evening Hours
-              </p>
-            </div>
-            <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/15 transition-colors'>
-              <p className='text-sm font-medium text-center text-zinc-100'>
-                Water Element
-              </p>
-            </div>
-          </div>
-        </HoroscopeSection>
 
         <FeaturePreview
           title='Solar Return Insights'
@@ -207,7 +151,6 @@ export function FreeHoroscopeView() {
           </p>
           <ul className='text-xs text-zinc-400 space-y-2 mb-4'>
             <li>• Personal insight based on your birth chart</li>
-            <li>• Lucky elements customized for you</li>
             <li>• Solar return birthday analysis</li>
             <li>• Personal transit impact reports</li>
             <li>• Complete cosmic profile features</li>

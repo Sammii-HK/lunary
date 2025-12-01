@@ -1,11 +1,18 @@
+'use client';
+
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
+import dayjs from 'dayjs';
 import { getEnhancedPersonalizedHoroscope } from '../../../../utils/astrology/enhancedHoroscope';
-import { getBirthChartFromProfile } from '../../../../utils/astrology/birthChart';
+import {
+  getBirthChartFromProfile,
+  BirthChartData,
+} from '../../../../utils/astrology/birthChart';
+import { getAstrologicalChart } from '../../../../utils/astrology/astrology';
 import { getSolarReturnInsights } from '../../../../utils/astrology/transitCalendar';
 import { getPersonalTransitImpacts } from '../../../../utils/astrology/personalTransits';
 import { getUpcomingTransits } from '../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
-import { LuckyElements } from './LuckyElements';
 import { PersonalTransitImpactCard } from './PersonalTransitImpact';
 
 interface PaidHoroscopeViewProps {
@@ -14,17 +21,498 @@ interface PaidHoroscopeViewProps {
   profile: any;
 }
 
+const generatePersonalizedHoroscope = (
+  birthChart: BirthChartData[],
+  currentTransits: any[],
+  userName?: string,
+  userBirthday?: string,
+): string => {
+  const today = dayjs();
+
+  const sunSign = birthChart.find((p) => p.body === 'Sun')?.sign || 'Aries';
+  const moonSign = birthChart.find((p) => p.body === 'Moon')?.sign || 'Aries';
+
+  const transitSun = currentTransits.find((p) => p.body === 'Sun');
+  const transitMoon = currentTransits.find((p) => p.body === 'Moon');
+  const transitMercury = currentTransits.find((p) => p.body === 'Mercury');
+  const transitVenus = currentTransits.find((p) => p.body === 'Venus');
+  const transitMars = currentTransits.find((p) => p.body === 'Mars');
+
+  const aspects = calculateKeyAspects(birthChart, currentTransits);
+  const horoscopeElements: string[] = [];
+
+  const dayOfWeek = today.format('dddd');
+  const numerologyInfluence = getDailyNumerology(today);
+
+  horoscopeElements.push(
+    `${dayOfWeek} brings ${numerologyInfluence.meaning} to your ${sunSign} nature.`,
+  );
+
+  if (transitSun) {
+    if (transitSun.sign === sunSign) {
+      horoscopeElements.push(
+        `With the Sun illuminating your natal sign, this is your season of maximum vitality and authentic self-expression. Your natural ${sunSign} qualities are magnified, making this an ideal time to step into leadership roles and pursue goals that align with your core identity.`,
+      );
+    } else {
+      horoscopeElements.push(
+        `Sun in ${transitSun.sign} highlights ${getSunTransitMeaning(transitSun.sign)}.`,
+      );
+    }
+  }
+
+  if (transitMoon) {
+    if (transitMoon.sign === moonSign) {
+      horoscopeElements.push(
+        `The Moon's return to your natal ${moonSign} creates an emotionally familiar and comfortable atmosphere. Your instinctive responses are heightened, and you may find yourself naturally gravitating toward activities that nurture your soul.`,
+      );
+    } else {
+      horoscopeElements.push(
+        `Moon in ${transitMoon.sign} ${getMoonInfluence(transitMoon.sign)}.`,
+      );
+    }
+  }
+
+  const primaryAspect = aspects[0];
+  if (primaryAspect) {
+    const birthPlanetSign = getBirthPlanetSign(
+      primaryAspect.natalPlanet,
+      birthChart,
+    );
+    horoscopeElements.push(
+      `Today's most significant cosmic influence is ${primaryAspect.transitPlanet} in ${getCurrentTransitSign(primaryAspect.transitPlanet, currentTransits)} ${getAspectDescription(primaryAspect)} your birth ${primaryAspect.natalPlanet} in ${birthPlanetSign}. ${getDetailedAspectMeaning(primaryAspect)} This creates a powerful focus on ${getPlanetTheme(primaryAspect.natalPlanet)} in your life.`,
+    );
+  }
+
+  const secondaryAspect = aspects[1];
+  if (secondaryAspect) {
+    const birthPlanetSign = getBirthPlanetSign(
+      secondaryAspect.natalPlanet,
+      birthChart,
+    );
+    horoscopeElements.push(
+      `A secondary influence comes from ${secondaryAspect.transitPlanet} ${getAspectDescription(secondaryAspect)} your birth ${secondaryAspect.natalPlanet} in ${birthPlanetSign}, adding ${getAspectQuality(secondaryAspect.type)} energy to ${getPlanetTheme(secondaryAspect.natalPlanet)} matters.`,
+    );
+  }
+
+  if (transitMercury) {
+    const mercuryAspect = aspects.find((a) => a.transitPlanet === 'Mercury');
+    if (mercuryAspect) {
+      horoscopeElements.push(
+        `Mercury's current position particularly emphasizes ${getMercuryGuidance(transitMercury.sign)}, while its connection to your natal chart suggests this is an especially significant day for mental clarity and purposeful communication.`,
+      );
+    } else {
+      horoscopeElements.push(
+        `With Mercury in ${transitMercury.sign}, the intellectual atmosphere supports ${getMercuryGuidance(transitMercury.sign)}.`,
+      );
+    }
+  }
+
+  const venusAspect = aspects.find((a) => a.transitPlanet === 'Venus');
+  if (venusAspect && transitVenus) {
+    horoscopeElements.push(
+      `Venus in ${transitVenus.sign} highlights ${getVenusGuidance(transitVenus.sign)} in ${getPlanetTheme(venusAspect.natalPlanet)}.`,
+    );
+  }
+
+  const marsAspect = aspects.find((a) => a.transitPlanet === 'Mars');
+  if (marsAspect && transitMars) {
+    horoscopeElements.push(
+      `Mars in ${transitMars.sign} energizes ${getPlanetTheme(marsAspect.natalPlanet)}. Channel this drive constructively.`,
+    );
+  }
+
+  const retrogradeInfluences = getRetrogradeInfluences(
+    currentTransits,
+    birthChart,
+  );
+  if (retrogradeInfluences.length > 0) {
+    horoscopeElements.push(retrogradeInfluences.join(' '));
+  }
+
+  const jupiterAspect = aspects.find((a) => a.transitPlanet === 'Jupiter');
+  if (jupiterAspect) {
+    horoscopeElements.push(
+      `Jupiter opens doorways for growth and broader perspectives.`,
+    );
+  }
+
+  if (userBirthday) {
+    const personalDay = getPersonalDayNumber(userBirthday, today);
+    if (personalDay.number !== numerologyInfluence.number) {
+      horoscopeElements.push(
+        `Personal day ${personalDay.number} (${personalDay.meaning}).`,
+      );
+    }
+  }
+
+  if (aspects.length > 1) {
+    const hasChallengingAspects = aspects.some(
+      (a) => a.type === 'square' || a.type === 'opposition',
+    );
+    const hasHarmoniousAspects = aspects.some(
+      (a) => a.type === 'trine' || a.type === 'sextile',
+    );
+
+    if (hasChallengingAspects && hasHarmoniousAspects) {
+      horoscopeElements.push(`Mixed energies today.`);
+    } else if (hasChallengingAspects) {
+      horoscopeElements.push(
+        `Growth emerges from today's constructive challenges.`,
+      );
+    } else if (hasHarmoniousAspects) {
+      horoscopeElements.push(`Harmonious energies support advancement today.`);
+    }
+  }
+
+  const closingOptions = [
+    `Trust your ${sunSign} instincts today.`,
+    `Honor your ${moonSign} emotional wisdom.`,
+    `The cosmic currents support your growth.`,
+    `Trust your ${sunSign} nature.`,
+  ];
+
+  const closingIndex = today.dayOfYear() % closingOptions.length;
+  horoscopeElements.push(closingOptions[closingIndex]);
+
+  return horoscopeElements.join(' ');
+};
+
+const calculateKeyAspects = (
+  birthChart: BirthChartData[],
+  currentTransits: any[],
+) => {
+  const aspects: any[] = [];
+
+  for (const transit of currentTransits) {
+    for (const natal of birthChart) {
+      let diff = Math.abs(transit.eclipticLongitude - natal.eclipticLongitude);
+      if (diff > 180) diff = 360 - diff;
+
+      if (Math.abs(diff - 0) <= 10) {
+        aspects.push({
+          type: 'conjunction',
+          transitPlanet: transit.body,
+          natalPlanet: natal.body,
+          orb: Math.abs(diff - 0),
+          intensity: 10 - Math.abs(diff - 0),
+        });
+      } else if (Math.abs(diff - 180) <= 10) {
+        aspects.push({
+          type: 'opposition',
+          transitPlanet: transit.body,
+          natalPlanet: natal.body,
+          orb: Math.abs(diff - 180),
+          intensity: 10 - Math.abs(diff - 180),
+        });
+      } else if (Math.abs(diff - 120) <= 8) {
+        aspects.push({
+          type: 'trine',
+          transitPlanet: transit.body,
+          natalPlanet: natal.body,
+          orb: Math.abs(diff - 120),
+          intensity: 8 - Math.abs(diff - 120),
+        });
+      } else if (Math.abs(diff - 90) <= 8) {
+        aspects.push({
+          type: 'square',
+          transitPlanet: transit.body,
+          natalPlanet: natal.body,
+          orb: Math.abs(diff - 90),
+          intensity: 8 - Math.abs(diff - 90),
+        });
+      }
+    }
+  }
+
+  return aspects.sort((a, b) => b.intensity - a.intensity);
+};
+
+const getSunTransitMeaning = (transitSign: string): string => {
+  const meanings: Record<string, string> = {
+    Aries: 'new beginnings and taking initiative',
+    Taurus: 'stability and material security',
+    Gemini: 'communication and learning',
+    Cancer: 'home and emotional connections',
+    Leo: 'creativity and self-expression',
+    Virgo: 'organization and health matters',
+    Libra: 'relationships and balance',
+    Scorpio: 'transformation and depth',
+    Sagittarius: 'adventure and higher learning',
+    Capricorn: 'career and long-term goals',
+    Aquarius: 'innovation and friendship',
+    Pisces: 'spirituality and compassion',
+  };
+  return meanings[transitSign] || 'personal growth';
+};
+
+const getMoonInfluence = (moonSign: string): string => {
+  const influences: Record<string, string> = {
+    Aries: 'encourages bold emotional expressions',
+    Taurus: 'brings stability to your feelings',
+    Gemini: 'stimulates curiosity and conversation',
+    Cancer: 'heightens intuition and sensitivity',
+    Leo: 'amplifies dramatic and generous feelings',
+    Virgo: 'focuses on practical emotional needs',
+    Libra: 'seeks harmony in relationships',
+    Scorpio: 'intensifies emotional depth',
+    Sagittarius: 'inspires optimistic expansion',
+    Capricorn: 'grounds emotions in reality',
+    Aquarius: 'detaches from conventional feelings',
+    Pisces: 'enhances empathy and imagination',
+  };
+  return influences[moonSign] || 'influences your emotional state';
+};
+
+const getMercuryGuidance = (mercurySign: string): string => {
+  const guidance: Record<string, string> = {
+    Aries: 'direct communication and quick decisions',
+    Taurus: 'practical thinking and steady planning',
+    Gemini: 'versatile communication and idea sharing',
+    Cancer: 'intuitive thinking and emotional intelligence',
+    Leo: 'confident expression and creative communication',
+    Virgo: 'detailed analysis and precise communication',
+    Libra: 'diplomatic conversation and fair consideration',
+    Scorpio: 'deep investigation and transformative thinking',
+    Sagittarius: 'big picture thinking and philosophical discussion',
+    Capricorn: 'structured communication and goal-oriented planning',
+    Aquarius: 'innovative ideas and unique perspectives',
+    Pisces: 'intuitive communication and creative expression',
+  };
+  return guidance[mercurySign] || 'clear thinking and communication';
+};
+
+const getVenusGuidance = (venusSign: string): string => {
+  const guidance: Record<string, string> = {
+    Aries: 'passionate attraction and bold romantic gestures',
+    Taurus: 'sensual pleasure and stable affection',
+    Gemini: 'intellectual connection and playful romance',
+    Cancer: 'emotional intimacy and nurturing love',
+    Leo: 'dramatic expression and generous affection',
+    Virgo: 'practical service and thoughtful care',
+    Libra: 'harmonious partnership and aesthetic beauty',
+    Scorpio: 'intense bonding and transformative relationships',
+    Sagittarius: 'adventurous love and philosophical connection',
+    Capricorn: 'committed partnership and traditional values',
+    Aquarius: 'friendship-based love and unconventional attraction',
+    Pisces: 'spiritual connection and compassionate love',
+  };
+  return guidance[venusSign] || 'love and aesthetic appreciation';
+};
+
+const getAspectDescription = (aspect: any): string => {
+  const orbDescription =
+    aspect.orb <= 3 ? 'closely' : aspect.orb <= 6 ? 'moderately' : 'loosely';
+
+  const descriptions: Record<string, string> = {
+    conjunction: `is ${orbDescription} conjunct`,
+    opposition: `is ${orbDescription} opposite`,
+    trine: `forms a ${orbDescription} supportive trine with`,
+    square: `forms a ${orbDescription} challenging square with`,
+    sextile: `forms a ${orbDescription} helpful sextile with`,
+  };
+
+  return descriptions[aspect.type] || `aspects`;
+};
+
+const getPlanetTheme = (planet: string): string => {
+  const themes: Record<string, string> = {
+    Sun: 'identity and self-expression',
+    Moon: 'emotions and intuition',
+    Mercury: 'communication and thinking',
+    Venus: 'relationships and values',
+    Mars: 'action and motivation',
+    Jupiter: 'growth and expansion',
+    Saturn: 'responsibility and structure',
+    Uranus: 'innovation and change',
+    Neptune: 'dreams and spirituality',
+    Pluto: 'transformation and power',
+  };
+  return themes[planet] || 'personal development';
+};
+
+const getCurrentTransitSign = (planetName: string, transits: any[]): string => {
+  const transit = transits.find((t) => t.body === planetName);
+  return transit?.sign || '';
+};
+
+const getDetailedAspectMeaning = (aspect: any): string => {
+  const meanings: Record<string, string> = {
+    conjunction:
+      'When planets are in the same area of the sky, their energies blend and amplify each other.',
+    opposition: 'Opposition creates tension requiring balance.',
+    trine:
+      'When planets are 120° apart, they create easy, flowing energy that supports natural talents.',
+    square:
+      'When planets are 90° apart, they create friction that pushes you to grow and take action.',
+    sextile:
+      'When planets are 60° apart, they offer helpful opportunities and cooperative energy.',
+  };
+  return (
+    meanings[aspect.type] ||
+    'This planetary relationship brings significant influence.'
+  );
+};
+
+const getAspectQuality = (aspectType: string): string => {
+  const qualities: Record<string, string> = {
+    conjunction: 'intensified',
+    opposition: 'balancing',
+    trine: 'harmonious',
+    square: 'challenging yet motivating',
+    sextile: 'supportive',
+  };
+  return qualities[aspectType] || 'significant';
+};
+
+const getBirthPlanetSign = (
+  planetName: string,
+  birthChart: BirthChartData[],
+): string => {
+  const planet = birthChart.find((p) => p.body === planetName);
+  return planet?.sign || '';
+};
+
+const getRetrogradeInfluences = (
+  currentTransits: any[],
+  birthChart: BirthChartData[],
+): string[] => {
+  const influences: string[] = [];
+  const retrogradeTransits = currentTransits.filter(
+    (transit) => transit.retrograde,
+  );
+
+  retrogradeTransits.forEach((transit) => {
+    const aspects = birthChart.filter((birthPlanet) => {
+      let diff = Math.abs(
+        transit.eclipticLongitude - birthPlanet.eclipticLongitude,
+      );
+      if (diff > 180) diff = 360 - diff;
+      return (
+        Math.abs(diff - 0) <= 10 ||
+        Math.abs(diff - 180) <= 10 ||
+        Math.abs(diff - 120) <= 8 ||
+        Math.abs(diff - 90) <= 8
+      );
+    });
+
+    if (aspects.length > 0) {
+      const retroMessage = getRetrogradeMessage(transit.body);
+      influences.push(
+        `${transit.body} is currently retrograde in ${transit.sign}, ${retroMessage}`,
+      );
+    } else {
+      influences.push(
+        `${transit.body} retrograde in ${transit.sign} brings introspective energy.`,
+      );
+    }
+  });
+
+  return influences.slice(0, 2);
+};
+
+const getRetrogradeMessage = (planet: string): string => {
+  const messages: Record<string, string> = {
+    Mercury: `encouraging you to review communication patterns and double-check details`,
+    Venus: `inviting you to reconsider your values and what truly brings you joy`,
+    Mars: `asking you to redirect your energy inward and reassess your goals`,
+    Jupiter: `prompting you to reassess your beliefs and approach to growth`,
+    Saturn: `encouraging deep reflection on your responsibilities and structures`,
+    Uranus: `bringing unconventional insights and encouraging you to break free from outdated patterns`,
+    Neptune: `enhancing intuition while requiring discernment between illusion and truth`,
+    Pluto: `intensifying transformation processes and bringing hidden truths to the surface`,
+  };
+  return (
+    messages[planet] ||
+    `encouraging reflection on ${planet.toLowerCase()} themes`
+  );
+};
+
+const getDailyNumerology = (
+  date: dayjs.Dayjs,
+): { number: number; meaning: string } => {
+  const dateString = date.format('DDMMYYYY');
+  let sum = 0;
+
+  for (let i = 0; i < dateString.length; i++) {
+    sum += parseInt(dateString[i]);
+  }
+
+  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+    const digits = sum.toString().split('');
+    sum = digits.reduce((acc, digit) => acc + parseInt(digit), 0);
+  }
+
+  const numerologyMeanings: Record<number, string> = {
+    1: 'leadership energy and new beginnings',
+    2: 'cooperation, balance, and partnership',
+    3: 'creativity, communication, and joy',
+    4: 'stability, hard work, and foundation-building',
+    5: 'freedom, adventure, and dynamic change',
+    6: 'nurturing, responsibility, and healing',
+    7: 'spiritual insight, introspection, and wisdom',
+    8: 'material success, power, and achievement',
+    9: 'completion, compassion, and universal love',
+    11: 'master intuition and spiritual illumination',
+    22: 'master builder energy and manifestation power',
+    33: 'master teacher vibration and selfless service',
+  };
+
+  return {
+    number: sum,
+    meaning: numerologyMeanings[sum] || 'transformative energy',
+  };
+};
+
+const getPersonalDayNumber = (
+  birthdate: string,
+  currentDate: dayjs.Dayjs,
+): { number: number; meaning: string } => {
+  const birth = dayjs(birthdate);
+  const birthMonth = birth.month() + 1;
+  const birthDay = birth.date();
+  const currentYear = currentDate.year();
+  const currentMonth = currentDate.month() + 1;
+  const currentDay = currentDate.date();
+
+  let sum = birthMonth + birthDay + currentYear + currentMonth + currentDay;
+
+  while (sum > 9) {
+    const digits = sum.toString().split('');
+    sum = digits.reduce((acc, digit) => acc + parseInt(digit), 0);
+  }
+
+  const personalDayMeanings: Record<number, string> = {
+    1: 'new beginnings',
+    2: 'cooperation',
+    3: 'creativity',
+    4: 'organization',
+    5: 'change',
+    6: 'service',
+    7: 'reflection',
+    8: 'leadership',
+    9: 'completion',
+  };
+
+  return {
+    number: sum,
+    meaning: personalDayMeanings[sum] || 'personal growth and development',
+  };
+};
+
 export function PaidHoroscopeView({
   userBirthday,
   userName,
   profile,
 }: PaidHoroscopeViewProps) {
+  const [observer, setObserver] = useState<any>(null);
+  const [fullHoroscope, setFullHoroscope] = useState<string | null>(null);
+
+  const birthChart = getBirthChartFromProfile(profile);
   const horoscope = getEnhancedPersonalizedHoroscope(
     userBirthday,
     userName,
     profile,
   );
-  const birthChart = getBirthChartFromProfile(profile);
   const solarReturnData = userBirthday
     ? getSolarReturnInsights(userBirthday)
     : null;
@@ -32,6 +520,27 @@ export function PaidHoroscopeView({
   const personalTransitImpacts = birthChart
     ? getPersonalTransitImpacts(upcomingTransits, birthChart, 10)
     : [];
+
+  useEffect(() => {
+    import('astronomy-engine').then((module) => {
+      const { Observer } = module;
+      setObserver(new Observer(51.4769, 0.0005, 0));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!observer || !birthChart || !userBirthday) return;
+
+    const normalizedDate = new Date(dayjs().format('YYYY-MM-DD') + 'T12:00:00');
+    const currentTransits = getAstrologicalChart(normalizedDate, observer);
+    const generatedHoroscope = generatePersonalizedHoroscope(
+      birthChart,
+      currentTransits,
+      userName,
+      userBirthday,
+    );
+    setFullHoroscope(generatedHoroscope);
+  }, [observer, birthChart, userBirthday, userName]);
 
   return (
     <div className='h-full space-y-6 p-4 overflow-auto'>
@@ -45,25 +554,33 @@ export function PaidHoroscopeView({
       </div>
 
       <div className='space-y-6'>
-        <HoroscopeSection title='Personal Insight' color='emerald'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            {horoscope.personalInsight}
-          </p>
+        <HoroscopeSection title="Today's Horoscope" color='purple'>
+          {fullHoroscope ? (
+            <p className='text-sm text-zinc-300 leading-relaxed'>
+              {fullHoroscope}
+            </p>
+          ) : (
+            <div className='space-y-2'>
+              <div className='h-4 bg-zinc-800 rounded animate-pulse' />
+              <div className='h-4 bg-zinc-800 rounded animate-pulse w-5/6' />
+              <div className='h-4 bg-zinc-800 rounded animate-pulse w-4/6' />
+            </div>
+          )}
         </HoroscopeSection>
 
-        <HoroscopeSection title='Cosmic Highlight' color='purple'>
+        <HoroscopeSection title='Cosmic Highlight' color='emerald'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             {horoscope.cosmicHighlight}
           </p>
         </HoroscopeSection>
 
-        <HoroscopeSection title='Your Lucky Elements' color='indigo'>
-          <p className='text-sm text-zinc-400 mb-4'>
-            Personalized daily elements based on planetary positions,
-            numerology, and your birth chart
-          </p>
-          <LuckyElements elements={horoscope.luckyElements} />
-        </HoroscopeSection>
+        {horoscope.dailyAffirmation && (
+          <HoroscopeSection title='Daily Affirmation' color='amber'>
+            <p className='text-sm text-zinc-300 leading-relaxed italic'>
+              "{horoscope.dailyAffirmation}"
+            </p>
+          </HoroscopeSection>
+        )}
 
         <HoroscopeSection title='Personal Transit Impact' color='indigo'>
           <p className='text-sm text-zinc-400 mb-4'>

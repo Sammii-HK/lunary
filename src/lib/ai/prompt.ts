@@ -1,6 +1,27 @@
 import { LunaryContext } from './types';
 import { constellations } from '../../../utils/constellations';
 
+const ZODIAC_SIGNS = [
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
+];
+
+const getZodiacIndex = (sign: string): number => {
+  if (!sign) return -1;
+  const normalised = sign.charAt(0).toUpperCase() + sign.slice(1).toLowerCase();
+  return ZODIAC_SIGNS.indexOf(normalised);
+};
+
 const getConstellationInfo = (
   sign: string,
 ): { name: string; information: string } | null => {
@@ -223,9 +244,34 @@ const describeContext = (
         const house = p.house ? ` (H${p.house})` : '';
         return `${p.planet}: ${p.sign}${house}`;
       })
-      .slice(0, 8); // Increased from 6 to 8
+      .slice(0, 8);
     if (keyPlacements.length > 0) {
       parts.push(`BIRTH CHART: ${keyPlacements.join(', ')}`);
+    }
+
+    // Add transit house positions if we have transits
+    if (context.currentTransits && context.currentTransits.length > 0) {
+      const ascendant = context.birthChart.placements.find(
+        (p) =>
+          p.planet === 'Ascendant' ||
+          p.planet === 'Rising' ||
+          p.planet === 'ASC',
+      );
+      if (ascendant?.sign) {
+        const transitHouses = context.currentTransits
+          .filter((t) => t.aspect === 'ingress')
+          .map((t) => {
+            const signIndex = getZodiacIndex(t.to);
+            const ascIndex = getZodiacIndex(ascendant.sign);
+            if (signIndex === -1 || ascIndex === -1) return null;
+            const houseNum = ((signIndex - ascIndex + 12) % 12) + 1;
+            return `${t.from} in H${houseNum}`;
+          })
+          .filter(Boolean);
+        if (transitHouses.length > 0) {
+          parts.push(`TRANSIT HOUSES: ${transitHouses.join(', ')}`);
+        }
+      }
     }
   }
 

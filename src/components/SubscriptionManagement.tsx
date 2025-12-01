@@ -174,17 +174,17 @@ export default function SubscriptionManagement({
       displaySubscription.status === 'free')
   ) {
     return (
-      <div className='bg-zinc-800 rounded-lg p-4 w-full max-w-md border border-zinc-700'>
+      <div className='border border-stone-800 rounded-md p-4 w-full'>
         <div className='text-center'>
-          <h3 className='text-lg font-semibold text-white mb-2'>
+          <h3 className='text-base font-medium text-zinc-100 mb-2'>
             Start Your Cosmic Journey
           </h3>
-          <p className='text-zinc-300 text-sm mb-4'>
+          <p className='text-zinc-400 text-sm mb-4'>
             Unlock personalized horoscopes, birth charts, and mystical insights
           </p>
           <a
             href='/pricing'
-            className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-md font-medium transition-all duration-300'
+            className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2 rounded-md text-sm font-medium transition-all duration-300'
           >
             View Plans
           </a>
@@ -199,9 +199,9 @@ export default function SubscriptionManagement({
   const customerIdToUse = customerId || stripeSubscription?.customerId;
 
   return (
-    <div className='bg-zinc-800 rounded-lg p-4 w-full max-w-md border border-zinc-700'>
+    <div className='border border-stone-800 rounded-md p-4 w-full'>
       <div className='flex justify-between items-start mb-3'>
-        <h3 className='text-lg font-semibold text-white'>Subscription</h3>
+        <h3 className='text-base font-medium text-zinc-100'>Subscription</h3>
         <div className='flex items-center gap-2'>
           <button
             onClick={handleRefresh}

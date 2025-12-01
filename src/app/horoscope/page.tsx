@@ -5,7 +5,6 @@ import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 import { FreeHoroscopeView } from './components/FreeHoroscopeView';
 import { PaidHoroscopeView } from './components/PaidHoroscopeView';
-import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 
@@ -41,27 +40,14 @@ export default function HoroscopePage() {
   }
 
   if (!hasChartAccess) {
-    return (
-      <div className='space-y-6'>
-        <FreeHoroscopeView />
-        <UpgradePrompt
-          variant='card'
-          featureName='personalized_horoscope'
-          title='Unlock Personalized Horoscopes'
-          description='Get daily cosmic guidance tailored to your unique birth chart'
-          className='max-w-2xl mx-auto'
-        />
-      </div>
-    );
+    return <FreeHoroscopeView />;
   }
 
   return (
-    <div className='space-y-6'>
-      <PaidHoroscopeView
-        userBirthday={userBirthday}
-        userName={userName}
-        profile={me.profile}
-      />
-    </div>
+    <PaidHoroscopeView
+      userBirthday={userBirthday}
+      userName={userName}
+      profile={me.profile}
+    />
   );
 }

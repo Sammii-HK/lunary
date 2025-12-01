@@ -1,3 +1,8 @@
+/**
+ * @deprecated This component was removed from the horoscope page during the consolidation redesign.
+ * Lucky Elements were deemed low value compared to Transit Impacts and Crystal recommendations.
+ * This file can be safely deleted.
+ */
 interface LuckyElementsProps {
   elements: string[];
 }

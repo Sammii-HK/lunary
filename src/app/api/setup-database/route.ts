@@ -554,6 +554,22 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Jazz migration status table created');
 
+    await sql`
+      CREATE TABLE IF NOT EXISTS journal_patterns (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        pattern_type TEXT NOT NULL,
+        pattern_data JSONB NOT NULL,
+        generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        expires_at TIMESTAMP WITH TIME ZONE
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_journal_patterns_user_id ON journal_patterns(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_journal_patterns_expires ON journal_patterns(expires_at)`;
+
+    console.log('✅ Journal patterns table created');
+
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({

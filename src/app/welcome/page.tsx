@@ -1,357 +1,550 @@
 import Link from 'next/link';
-import { Calendar, Sparkles, MessageSquare } from 'lucide-react';
+import {
+  Telescope,
+  Sparkles,
+  NotebookPen,
+  LayoutDashboard,
+  MessageCircle,
+  BookOpen,
+  Layers,
+  Calendar,
+  Map,
+  MessagesSquare,
+  X,
+  Check,
+  Gem,
+} from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
 export default function WelcomePage() {
   return (
-    <main className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col pt-16'>
-      <div className='max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16 space-y-16 flex-1'>
-        {/* Hero Section */}
-        <section className='grid gap-10 md:grid-cols-2 items-center'>
-          {/* Left: Text */}
-          <div className='space-y-6'>
-            <p className='text-sm text-zinc-400 uppercase tracking-wider'>
-              A calm AI companion for cosmic self-reflection
-            </p>
-            <h1 className='text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 leading-tight'>
-              Your AI-powered astral guide
-            </h1>
-            <p className='text-lg md:text-xl text-zinc-400 leading-relaxed'>
-              Lunary blends real astronomy, birth chart astrology, tarot and
-              lunar cycles into a personalised guide that learns your patterns
-              and helps you understand how the sky mirrors your inner world.
-            </p>
-            <ul className='space-y-3 text-zinc-300'>
-              <li className='flex items-start'>
-                <span className='mr-3 text-purple-400'>•</span>
-                <span>Daily energy insights based on your birth chart</span>
-              </li>
-              <li className='flex items-start'>
-                <span className='mr-3 text-purple-400'>•</span>
-                <span>AI interpretations of transits, tarot and moods</span>
-              </li>
-              <li className='flex items-start'>
-                <span className='mr-3 text-purple-400'>•</span>
-                <span>A living Book of Shadows that grows with you</span>
-              </li>
-            </ul>
-            <div className='flex flex-col sm:flex-row gap-4 pt-4'>
-              <Link
-                href='/profile'
-                className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-3 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
-              >
-                Start free trial
-              </Link>
-              <Link
-                href='/book-of-shadows'
-                className='inline-flex items-center justify-center text-sm text-zinc-300 underline underline-offset-4 hover:text-zinc-100 transition-colors'
-              >
-                Meet your astral guide
-              </Link>
-              <Link
-                href='/help'
-                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-              >
-                Help
-              </Link>
+    <main className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
+      {/* Section 1: Hero */}
+      <section className='relative px-4 md:px-6 pt-20 pb-12 md:pt-28 md:pb-20'>
+        <div className='max-w-3xl mx-auto text-center space-y-6'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 leading-tight tracking-tight'>
+            Personalised astrology for clarity and self understanding
+          </h1>
+          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+            Lunary brings together your birth chart, today's sky, tarot and
+            lunar cycles to give you calm and personal daily guidance.
+            Understand your emotions and patterns with insight that helps you
+            move through your day with clarity.
+          </p>
+          <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
+            <Link
+              href='/profile'
+              className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
+            >
+              Start free trial
+            </Link>
+            <a
+              href='#how-it-works'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              See how it works
+            </a>
+          </div>
+          <p className='text-sm text-zinc-500'>Free to begin. No commitment.</p>
+        </div>
+      </section>
+
+      {/* Section 2: Social Proof Strip */}
+      <section className='border-y border-zinc-800/50 py-6 md:py-8'>
+        <div className='max-w-4xl mx-auto px-4 md:px-6 text-center'>
+          <p className='text-base md:text-lg text-zinc-300 font-light'>
+            A calm alternative to noisy horoscope apps
+          </p>
+          <p className='text-sm text-zinc-500 mt-1.5'>
+            Built for people who want depth, not drama.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 3: Differentiator Block */}
+      <section className='py-12 md:py-20 px-4 md:px-6'>
+        <div className='max-w-4xl mx-auto text-center space-y-5'>
+          <h2 className='text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100 leading-tight'>
+            Most astrology apps entertain you.
+            <br />
+            <span className='text-purple-300/80'>
+              Lunary helps you understand yourself.
+            </span>
+          </h2>
+          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+            Most apps give generic sun sign predictions. Lunary uses your full
+            birth chart, real astronomical data and intelligent interpretation
+            to offer meaningful insight you can actually use.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 4: Three Pillars */}
+      <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
+        <div className='max-w-5xl mx-auto'>
+          <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
+            <div className='text-center space-y-3'>
+              <Telescope
+                className='w-8 h-8 text-purple-400 mx-auto'
+                strokeWidth={1.5}
+              />
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Based on real astronomy
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Every insight starts with the actual planetary positions and
+                your precise chart.
+              </p>
+            </div>
+            <div className='text-center space-y-3'>
+              <Sparkles
+                className='w-8 h-8 text-purple-400 mx-auto'
+                strokeWidth={1.5}
+              />
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Interpreted intelligently
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Tarot, transits, moods and lunar cycles connected into one clear
+                message.
+              </p>
+            </div>
+            <div className='text-center space-y-3'>
+              <NotebookPen
+                className='w-8 h-8 text-purple-400 mx-auto'
+                strokeWidth={1.5}
+              />
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Designed as a daily practice
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Calm and reflective guidance that supports self understanding
+                rather than predicting your fate.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 5: Feature Spotlights */}
+      <section className='py-12 md:py-20 px-4 md:px-6'>
+        <div className='max-w-5xl mx-auto space-y-12 md:space-y-20'>
+          {/* Feature 1: Daily Cosmic Dashboard */}
+          <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
+            <div className='space-y-3'>
+              <LayoutDashboard
+                className='w-7 h-7 text-purple-400'
+                strokeWidth={1.5}
+              />
+              <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
+                Daily Cosmic Dashboard
+              </h3>
+              <p className='text-base text-zinc-300'>
+                Your whole sky, interpreted for you
+              </p>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Today's transits, moon phase, tarot card and crystal, all
+                personalised to your birth chart and current themes.
+              </p>
+            </div>
+            <div className='space-y-2'>
+              <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
+                <div className='flex items-center gap-2 mb-1'>
+                  <span className='text-lg'>🌘</span>
+                  <span className='text-sm font-medium text-zinc-200'>
+                    Waning Crescent
+                  </span>
+                </div>
+                <p className='text-xs text-zinc-500'>in Scorpio</p>
+                <p className='text-xs text-zinc-600 mt-1'>
+                  3 days until New Moon
+                </p>
+              </div>
+              <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
+                <div className='flex items-center gap-2 mb-1'>
+                  <Layers className='w-4 h-4 text-purple-400' />
+                  <span className='text-sm font-medium text-zinc-200'>
+                    Daily Card
+                  </span>
+                  <span className='text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded'>
+                    Personal
+                  </span>
+                </div>
+                <p className='text-sm text-purple-300'>The Star</p>
+                <p className='text-xs text-zinc-500'>
+                  Hope • Renewal • Serenity
+                </p>
+              </div>
+              <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
+                <div className='flex items-center gap-2 mb-1'>
+                  <Gem className='w-4 h-4 text-purple-400' />
+                  <span className='text-sm font-medium text-zinc-200'>
+                    Amethyst
+                  </span>
+                  <span className='text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded'>
+                    For you
+                  </span>
+                </div>
+                <p className='text-xs text-zinc-500'>
+                  Supports intuition during this reflective phase
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Right: Preview Card */}
-          <div className='relative'>
-            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-6 shadow-[0_0_40px_rgba(139,92,246,0.2)]'>
-              <div className='mb-4'>
-                <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-                  Astral Guide
-                </h3>
-                <div className='space-y-4'>
-                  {/* User message */}
-                  <div className='flex justify-end'>
-                    <div className='max-w-[80%]'>
-                      <div className='rounded-2xl bg-purple-600/90 px-4 py-3 text-white text-sm leading-relaxed shadow-sm'>
-                        How is today's energy affecting my creativity?
-                      </div>
+          {/* Feature 2: Astral Guide Chat */}
+          <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
+            <div className='order-2 md:order-1 rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
+              <div className='space-y-3'>
+                <div className='flex justify-end'>
+                  <div className='max-w-[80%]'>
+                    <div className='rounded-2xl bg-purple-600/80 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
+                      Why am I feeling so restless today?
                     </div>
                   </div>
-                  {/* Assistant messages */}
-                  <div className='flex justify-start'>
-                    <div className='max-w-[80%]'>
-                      <div className='rounded-2xl bg-zinc-800/80 border border-zinc-700/40 px-4 py-3 text-zinc-100 text-sm leading-relaxed shadow-sm'>
-                        Today's waning crescent in Scorpio invites you to
-                        release what no longer serves you. With your Sun in
-                        Scorpio, this is a powerful moment for deep
-                        transformation.
-                      </div>
-                    </div>
-                  </div>
-                  <div className='flex justify-start'>
-                    <div className='max-w-[80%]'>
-                      <div className='rounded-2xl bg-zinc-800/80 border border-zinc-700/40 px-4 py-3 text-zinc-100 text-sm leading-relaxed shadow-sm'>
-                        The Two of Wands suggests you're at a crossroads. Trust
-                        your intuition—your chart shows strong water placements
-                        that guide you well.
-                      </div>
+                </div>
+                <div className='flex justify-start'>
+                  <div className='max-w-[85%]'>
+                    <div className='rounded-2xl bg-zinc-800/80 border border-zinc-700/40 px-3.5 py-2.5 text-zinc-100 text-sm leading-relaxed'>
+                      With Mars currently transiting your 3rd house and the Moon
+                      in Gemini, your mind is seeking stimulation. This is a
+                      good day for movement and short conversations.
                     </div>
                   </div>
                 </div>
               </div>
-              <div className='flex flex-wrap gap-2 pt-4 border-t border-zinc-800'>
-                <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs'>
-                  ☀ Sun in Scorpio
-                </span>
-                <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs'>
-                  🌙 Waning Crescent in Scorpio
-                </span>
-                <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs'>
-                  🃏 Two of Wands
-                </span>
-                <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs'>
-                  💎 Cacoxenite Quartz
-                </span>
-              </div>
+            </div>
+            <div className='order-1 md:order-2 space-y-3'>
+              <MessageCircle
+                className='w-7 h-7 text-purple-400'
+                strokeWidth={1.5}
+              />
+              <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
+                Astral Guide Chat
+              </h3>
+              <p className='text-base text-zinc-300'>
+                Ask anything and receive personalised insight
+              </p>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Ask about your emotions, energy, creativity or relationships.
+                Lunary responds with context from your chart and the current
+                sky.
+              </p>
             </div>
           </div>
-        </section>
 
-        {/* What you get inside Lunary */}
-        <section className='space-y-6'>
-          <div className='text-center max-w-3xl mx-auto mb-8'>
-            <p className='text-lg text-zinc-400'>
-              Everything in Lunary is built around your birth chart, current sky
-              and emotional landscape. Here's what you unlock once you sign in.
-            </p>
-          </div>
-          <div className='grid md:grid-cols-3 gap-6'>
-            {/* Card 1 */}
-            <div className='rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur p-6 hover:border-purple-500/30 transition-colors'>
-              <div className='mb-4'>
-                <span className='inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs mb-3'>
-                  Personalised
-                </span>
-                <h3 className='text-xl font-medium text-zinc-100 mb-2'>
-                  Daily cosmic dashboard
-                </h3>
-                <p className='text-zinc-400 text-sm leading-relaxed'>
-                  See today's moon phase, transits, tarot card and crystal – all
-                  interpreted through your chart and current themes.
-                </p>
-              </div>
+          {/* Feature 3: Living Book of Shadows */}
+          <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
+            <div className='space-y-3'>
+              <BookOpen className='w-7 h-7 text-purple-400' strokeWidth={1.5} />
+              <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
+                Living Book of Shadows
+              </h3>
+              <p className='text-base text-zinc-300'>
+                Your reflections and patterns connected
+              </p>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Record your insights and moods in one place. Lunary highlights
+                the threads between your entries, transits and tarot pulls.
+              </p>
             </div>
-
-            {/* Card 2 */}
-            <div className='rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur p-6 hover:border-purple-500/30 transition-colors shadow-[0_0_40px_rgba(139,92,246,0.2)]'>
-              <div className='mb-4'>
-                <span className='inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs mb-3'>
-                  AI-assisted
-                </span>
-                <h3 className='text-xl font-medium text-zinc-100 mb-2'>
-                  Living Book of Shadows
-                </h3>
-                <p className='text-zinc-400 text-sm leading-relaxed'>
-                  Save rituals, reflections and AI insights in one place. Let
-                  Lunary weave patterns between your entries, transits and
-                  tarot.
-                </p>
-              </div>
-            </div>
-
-            {/* Card 3 */}
-            <div className='rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur p-6 hover:border-purple-500/30 transition-colors'>
-              <div className='mb-4'>
-                <span className='inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs mb-3'>
-                  AI-powered
-                </span>
-                <h3 className='text-xl font-medium text-zinc-100 mb-2'>
-                  Astral Guide chat
-                </h3>
-                <p className='text-zinc-400 text-sm leading-relaxed'>
-                  Ask questions about how you're feeling, today's sky, your
-                  relationships or creative energy – and get context-aware
-                  answers grounded in your chart.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* How Lunary works */}
-        <section className='space-y-6'>
-          <div className='grid md:grid-cols-3 gap-8 max-w-5xl mx-auto'>
-            {/* Step 1 */}
-            <div className='text-center space-y-4'>
-              <div className='w-16 h-16 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
-                <Calendar
-                  className='w-8 h-8 text-purple-400'
-                  strokeWidth={1.5}
-                />
-              </div>
-              <div className='space-y-2'>
-                <div className='text-sm text-purple-400 font-medium'>
-                  Step 1
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
+              <div className='space-y-2.5'>
+                <div className='p-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
+                  <p className='text-xs text-zinc-500 mb-0.5'>Nov 28</p>
+                  <p className='text-sm text-zinc-300'>
+                    Feeling introspective. The Star appeared again.
+                  </p>
                 </div>
-                <h3 className='text-lg font-medium text-zinc-100'>
-                  Share your details
-                </h3>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Enter your birth date, time and location so Lunary can
-                  calculate your chart.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className='text-center space-y-4'>
-              <div className='w-16 h-16 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
-                <Sparkles
-                  className='w-8 h-8 text-purple-400'
-                  strokeWidth={1.5}
-                />
-              </div>
-              <div className='space-y-2'>
-                <div className='text-sm text-purple-400 font-medium'>
-                  Step 2
+                <div className='p-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
+                  <p className='text-xs text-zinc-500 mb-0.5'>Nov 25</p>
+                  <p className='text-sm text-zinc-300'>
+                    New Moon intention: trust the process.
+                  </p>
                 </div>
-                <h3 className='text-lg font-medium text-zinc-100'>
-                  Explore your cosmic map
-                </h3>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Lunary maps your natal placements, current transits, tarot and
-                  moon phases into a single view.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className='text-center space-y-4'>
-              <div className='w-16 h-16 mx-auto rounded-full border border-zinc-700 bg-zinc-900/50 flex items-center justify-center'>
-                <MessageSquare
-                  className='w-8 h-8 text-purple-400'
-                  strokeWidth={1.5}
-                />
-              </div>
-              <div className='space-y-2'>
-                <div className='text-sm text-purple-400 font-medium'>
-                  Step 3
+                <div className='text-xs text-purple-400/80 pl-1'>
+                  Pattern: Hope themes recurring during Sagittarius season
                 </div>
-                <h3 className='text-lg font-medium text-zinc-100'>
-                  Talk to your astral guide
-                </h3>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Ask questions, explore patterns and receive gentle prompts and
-                  rituals tailored to your energy.
-                </p>
               </div>
             </div>
           </div>
-        </section>
 
-        {/* Why Lunary is different */}
-        <section className='space-y-6 md:grid md:grid-cols-2 md:gap-10 md:items-start'>
-          <div className='space-y-6'>
-            <h2 className='text-3xl md:text-4xl font-light text-zinc-100'>
-              Why Lunary is different from generic astrology apps
-            </h2>
-            <ul className='space-y-4 text-zinc-300'>
-              <li className='flex items-start'>
-                <span className='mr-3 text-purple-400'>•</span>
-                <span>
-                  Astrology, tarot and lunar cycles interpreted together – not
-                  in isolation.
-                </span>
-              </li>
-              <li className='flex items-start'>
-                <span className='mr-3 text-purple-400'>•</span>
-                <span>
-                  An AI guide that responds to your birth chart, not random sun
-                  sign content.
-                </span>
-              </li>
-              <li className='flex items-start'>
-                <span className='mr-3 text-purple-400'>•</span>
-                <span>
-                  A focus on calm reflection, not doom, drama or fatalistic
-                  predictions.
-                </span>
-              </li>
-              <li className='flex items-start'>
-                <span className='mr-3 text-purple-400'>•</span>
-                <span>
-                  A living archive of your own cosmic patterns, moods and
-                  rituals.
-                </span>
-              </li>
-            </ul>
-          </div>
-          <div className='rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur p-6'>
-            <div className='space-y-4'>
-              <div>
-                <h3 className='text-sm font-medium text-zinc-400 mb-2'>
-                  Most apps:
-                </h3>
-                <p className='text-sm text-zinc-500'>
-                  Generic horoscopes, daily notifications, no context.
-                </p>
-              </div>
-              <div>
-                <h3 className='text-sm font-medium text-purple-400 mb-2'>
-                  Lunary:
-                </h3>
-                <p className='text-sm text-zinc-300'>
-                  A personalised, evolving practice grounded in the real sky
-                  above you.
-                </p>
+          {/* Feature 4: Tarot and Transit Patterns */}
+          <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
+            <div className='order-2 md:order-1 rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
+              <div className='space-y-3'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-sm text-zinc-400'>
+                    Recurring themes
+                  </span>
+                  <span className='text-xs text-zinc-500'>Last 30 days</span>
+                </div>
+                <div className='space-y-2'>
+                  <div className='flex items-center gap-3'>
+                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <span className='text-sm text-zinc-300'>
+                      Transformation
+                    </span>
+                    <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
+                      <div className='w-3/4 h-full bg-purple-500/60 rounded-full'></div>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-3'>
+                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <span className='text-sm text-zinc-300'>
+                      New beginnings
+                    </span>
+                    <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
+                      <div className='w-1/2 h-full bg-purple-500/60 rounded-full'></div>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-3'>
+                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <span className='text-sm text-zinc-300'>Inner wisdom</span>
+                    <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
+                      <div className='w-2/5 h-full bg-purple-500/60 rounded-full'></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+            <div className='order-1 md:order-2 space-y-3'>
+              <Layers className='w-7 h-7 text-purple-400' strokeWidth={1.5} />
+              <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
+                Tarot and Transit Patterns
+              </h3>
+              <p className='text-base text-zinc-300'>
+                See the themes shaping your life
+              </p>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Understand repeating cycles and ongoing lessons with clarity.
+              </p>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Plans teaser */}
-        <section className='space-y-4 text-center max-w-2xl mx-auto'>
-          <h2 className='text-3xl md:text-4xl font-light text-zinc-100'>
+      {/* Section 6: How It Works */}
+      <section
+        id='how-it-works'
+        className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30 scroll-mt-16'
+      >
+        <div className='max-w-5xl mx-auto'>
+          <h2 className='text-2xl md:text-3xl font-light text-zinc-100 text-center mb-10 md:mb-14'>
+            How it works
+          </h2>
+          <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
+            <div className='text-center space-y-3'>
+              <Calendar
+                className='w-8 h-8 text-purple-400 mx-auto'
+                strokeWidth={1.5}
+              />
+              <div className='text-sm text-purple-400 font-medium'>1</div>
+              <h3 className='text-base font-medium text-zinc-100'>
+                Enter your birth details
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Lunary creates an accurate map of your chart.
+              </p>
+              <p className='text-xs text-zinc-500'>
+                Sets the foundation for personalised insight.
+              </p>
+            </div>
+            <div className='text-center space-y-3'>
+              <Map
+                className='w-8 h-8 text-purple-400 mx-auto'
+                strokeWidth={1.5}
+              />
+              <div className='text-sm text-purple-400 font-medium'>2</div>
+              <h3 className='text-base font-medium text-zinc-100'>
+                Explore your cosmic map
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Your personalised dashboard reveals today's themes and patterns.
+              </p>
+              <p className='text-xs text-zinc-500'>
+                See what is influencing your day.
+              </p>
+            </div>
+            <div className='text-center space-y-3'>
+              <MessagesSquare
+                className='w-8 h-8 text-purple-400 mx-auto'
+                strokeWidth={1.5}
+              />
+              <div className='text-sm text-purple-400 font-medium'>3</div>
+              <h3 className='text-base font-medium text-zinc-100'>
+                Talk to your astral guide
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Ask questions and receive grounded insight that supports your
+                day.
+              </p>
+              <p className='text-xs text-zinc-500'>
+                Your companion for clarity and reflection.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 7: Comparison */}
+      <section className='py-12 md:py-20 px-4 md:px-6'>
+        <div className='max-w-3xl mx-auto'>
+          <div className='grid md:grid-cols-2 gap-4 md:gap-6'>
+            {/* Other Apps */}
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-5 md:p-6'>
+              <h3 className='text-sm font-medium text-zinc-500 uppercase tracking-wider mb-5'>
+                Other apps
+              </h3>
+              <ul className='space-y-3'>
+                <li className='flex items-start gap-3'>
+                  <X
+                    className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
+                    strokeWidth={2}
+                  />
+                  <span className='text-sm text-zinc-500'>
+                    Generic horoscopes
+                  </span>
+                </li>
+                <li className='flex items-start gap-3'>
+                  <X
+                    className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
+                    strokeWidth={2}
+                  />
+                  <span className='text-sm text-zinc-500'>Sun sign only</span>
+                </li>
+                <li className='flex items-start gap-3'>
+                  <X
+                    className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
+                    strokeWidth={2}
+                  />
+                  <span className='text-sm text-zinc-500'>
+                    Drama and predictions
+                  </span>
+                </li>
+                <li className='flex items-start gap-3'>
+                  <X
+                    className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
+                    strokeWidth={2}
+                  />
+                  <span className='text-sm text-zinc-500'>
+                    Notification spam
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Lunary */}
+            <div className='rounded-2xl border border-purple-500/30 bg-zinc-900/50 p-5 md:p-6'>
+              <h3 className='text-sm font-medium text-purple-400 uppercase tracking-wider mb-5'>
+                Lunary
+              </h3>
+              <ul className='space-y-3'>
+                <li className='flex items-start gap-3'>
+                  <Check
+                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    strokeWidth={2}
+                  />
+                  <span className='text-sm text-zinc-200'>
+                    Personalised to your complete birth chart
+                  </span>
+                </li>
+                <li className='flex items-start gap-3'>
+                  <Check
+                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    strokeWidth={2}
+                  />
+                  <span className='text-sm text-zinc-200'>
+                    Connected tarot and lunar insights
+                  </span>
+                </li>
+                <li className='flex items-start gap-3'>
+                  <Check
+                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    strokeWidth={2}
+                  />
+                  <span className='text-sm text-zinc-200'>
+                    Calm and reflective
+                  </span>
+                </li>
+                <li className='flex items-start gap-3'>
+                  <Check
+                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    strokeWidth={2}
+                  />
+                  <span className='text-sm text-zinc-200'>
+                    A daily practice, not a feed
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 8: Pricing Teaser */}
+      <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
+        <div className='max-w-2xl mx-auto text-center space-y-5'>
+          <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
             Choose the depth that feels right for you
           </h2>
-          <p className='text-lg text-zinc-400'>
-            Start exploring Lunary for free, then upgrade if you'd like deeper
-            daily insights, AI-guided rituals and advanced readings.
+          <p className='text-base md:text-lg text-zinc-400 leading-relaxed'>
+            Explore Lunary for free. Upgrade only if you want deeper
+            interpretations and guided rituals.
           </p>
-          <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-4'>
+          <div className='pt-2'>
             <Link
               href='/pricing'
-              className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-3 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
+              className='inline-flex items-center justify-center rounded-full border border-zinc-700 bg-zinc-800/50 px-8 py-3.5 text-sm font-medium text-zinc-200 hover:bg-zinc-800 hover:border-zinc-600 transition-colors'
             >
               View plans
             </Link>
-            <p className='text-sm text-zinc-500'>
-              No commitment. Cancel any time.
-            </p>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Final CTA */}
-        <section className='py-10 text-center space-y-4 max-w-2xl mx-auto'>
-          <h2 className='text-3xl md:text-4xl font-light text-zinc-100'>
-            Ready to meet your astral guide?
-          </h2>
-          <p className='text-lg text-zinc-400'>
-            Begin your free trial and let Lunary translate the sky into language
-            your heart understands.
+      {/* Section 9: Why Lunary Feels Different */}
+      <section className='py-12 md:py-16 px-4 md:px-6'>
+        <div className='max-w-2xl mx-auto text-center space-y-4'>
+          <h3 className='text-lg md:text-xl font-medium text-zinc-200'>
+            Why Lunary feels different
+          </h3>
+          <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
+            Lunary uses real astronomical data, your natal placements and the
+            current sky to build a personalised understanding of your emotional
+            landscape.
           </p>
-          <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-4'>
+        </div>
+      </section>
+
+      {/* Section 10: Final CTA */}
+      <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/20'>
+        <div className='max-w-2xl mx-auto text-center space-y-5'>
+          <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            Ready to understand yourself more deeply
+          </h2>
+          <p className='text-base md:text-lg text-zinc-400 leading-relaxed'>
+            Begin your free trial and let Lunary translate the sky into clarity
+            and personal meaning.
+          </p>
+          <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
             <Link
               href='/profile'
-              className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-3 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
+              className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
             >
               Start free trial
             </Link>
             <Link
-              href='/'
-              className='text-sm text-zinc-300 underline underline-offset-4 hover:text-zinc-100 transition-colors'
+              href='/app'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
             >
-              Open Lunary app
+              Open the app
             </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      {/* Footer */}
       <div className='mt-auto'>
         <MarketingFooter />
       </div>

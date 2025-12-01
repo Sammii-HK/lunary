@@ -11,6 +11,7 @@ export type PersonalTransitImpact = {
   significance: 'low' | 'medium' | 'high';
   type: 'sign_change' | 'retrograde' | 'direct' | 'aspect' | 'lunar_phase';
   personalImpact: string;
+  actionableGuidance: string;
   house?: number;
   houseMeaning?: string;
   aspectToNatal?: {
@@ -143,6 +144,189 @@ const getOrdinalSuffix = (n: number): string => {
   }
 };
 
+const getActionableGuidanceByHouse = (
+  planet: string,
+  house: number,
+): string => {
+  const houseActions: Record<number, Record<string, string>> = {
+    1: {
+      Sun: 'Focus on self-expression and personal goals',
+      Moon: 'Tune into your emotional needs and self-care',
+      Mercury: 'Update your personal brand, start important conversations',
+      Venus: 'Refresh your appearance, attract positive attention',
+      Mars: 'Take initiative on personal projects, assert yourself',
+      Jupiter: 'Expand your horizons, embrace new opportunities',
+      Saturn: 'Build discipline around personal habits',
+      default: 'Focus on yourself and your identity',
+    },
+    2: {
+      Sun: 'Review your finances and values',
+      Moon: 'Emotional security through stability matters now',
+      Mercury: 'Good time to negotiate, review budgets',
+      Venus: 'Attract abundance, treat yourself mindfully',
+      Mars: 'Take action on financial goals',
+      Jupiter: 'Opportunities for increased income',
+      Saturn: 'Build long-term financial security',
+      default: 'Focus on finances and self-worth',
+    },
+    3: {
+      Sun: 'Express your ideas, connect with siblings',
+      Moon: 'Write, journal, process your thoughts',
+      Mercury: 'Excellent for learning, writing, short trips',
+      Venus: 'Harmonious conversations, creative writing',
+      Mars: 'Speak up, tackle mental projects',
+      Jupiter: 'Expand your knowledge, take a course',
+      Saturn: 'Focus on important communications',
+      default: 'Communicate and learn something new',
+    },
+    4: {
+      Sun: 'Focus on home and family matters',
+      Moon: 'Nurture yourself at home, connect with family',
+      Mercury: 'Have important family conversations',
+      Venus: 'Beautify your home, enjoy family time',
+      Mars: 'Tackle home projects, set boundaries',
+      Jupiter: 'Expand your living space or family',
+      Saturn: 'Address family responsibilities',
+      default: 'Focus on home and emotional foundation',
+    },
+    5: {
+      Sun: 'Express creativity, enjoy romance and fun',
+      Moon: 'Follow your heart, do what brings joy',
+      Mercury: 'Creative writing, playful conversations',
+      Venus: 'Romance flourishes, artistic pursuits shine',
+      Mars: 'Take creative risks, pursue passion projects',
+      Jupiter: 'Luck in romance and creative ventures',
+      Saturn: 'Commit to creative discipline',
+      default: 'Express yourself creatively and have fun',
+    },
+    6: {
+      Sun: 'Focus on health routines and daily habits',
+      Moon: 'Listen to your body, adjust your routine',
+      Mercury: 'Organize, plan, improve workflows',
+      Venus: 'Make work pleasant, self-care rituals',
+      Mars: 'Push through health goals, tackle tasks',
+      Jupiter: 'Improve health habits, work opportunities',
+      Saturn: 'Build sustainable health practices',
+      default: 'Focus on health and daily routines',
+    },
+    7: {
+      Sun: 'Focus on partnerships and collaboration',
+      Moon: 'Nurture close relationships',
+      Mercury: 'Important partnership discussions',
+      Venus: 'Harmony in relationships, attract love',
+      Mars: 'Address relationship dynamics directly',
+      Jupiter: 'Partnership opportunities expand',
+      Saturn: 'Commit to relationship responsibilities',
+      default: 'Focus on important relationships',
+    },
+    8: {
+      Sun: 'Deep transformation, address shared resources',
+      Moon: 'Process deep emotions, trust your intuition',
+      Mercury: 'Research, investigate, deep conversations',
+      Venus: 'Deepen intimacy, joint financial benefits',
+      Mars: 'Face fears, take transformative action',
+      Jupiter: 'Financial gains through others, inheritance',
+      Saturn: 'Face deep responsibilities, let go',
+      default: 'Embrace transformation and shared resources',
+    },
+    9: {
+      Sun: 'Explore, learn, expand your worldview',
+      Moon: 'Seek meaning, follow your beliefs',
+      Mercury: 'Study, publish, plan long-distance travel',
+      Venus: 'Love of learning, foreign cultures attract',
+      Mars: 'Pursue big goals, defend your beliefs',
+      Jupiter: 'Travel, education, luck in expansion',
+      Saturn: 'Commit to higher education or teaching',
+      default: 'Expand your horizons and seek wisdom',
+    },
+    10: {
+      Sun: 'Career spotlight, focus on reputation',
+      Moon: 'Public recognition for emotional intelligence',
+      Mercury: 'Important career communications',
+      Venus: 'Career charm, professional recognition',
+      Mars: 'Ambitious action, career advancement',
+      Jupiter: 'Career luck and expansion',
+      Saturn: 'Career responsibilities, long-term goals',
+      default: 'Focus on career and public image',
+    },
+    11: {
+      Sun: 'Connect with groups, pursue your vision',
+      Moon: 'Nurture friendships, community belonging',
+      Mercury: 'Network, join groups, share ideas',
+      Venus: 'Social harmony, meet new friends',
+      Mars: 'Take action on group goals, lead',
+      Jupiter: 'Social luck, expand your network',
+      Saturn: 'Commit to community responsibilities',
+      default: 'Connect with friends and community',
+    },
+    12: {
+      Sun: 'Rest, reflect, spiritual practices',
+      Moon: 'Deep rest, dreams, subconscious work',
+      Mercury: 'Meditation, journaling, therapy',
+      Venus: 'Compassion, artistic inspiration, solitude',
+      Mars: 'Inner work, release old patterns',
+      Jupiter: 'Spiritual growth, hidden blessings',
+      Saturn: 'Face hidden fears, healing work',
+      default: 'Rest, reflect, and do inner work',
+    },
+  };
+
+  const actions = houseActions[house] || houseActions[1];
+  return actions[planet] || actions.default;
+};
+
+const getActionableGuidanceByType = (type: string, planet: string): string => {
+  if (type === 'retrograde') {
+    const retroActions: Record<string, string> = {
+      Mercury:
+        'Slow down communications, double-check details, revisit old ideas',
+      Venus: 'Reflect on relationships and values, avoid major purchases',
+      Mars: 'Review your actions, redirect energy inward',
+      Jupiter: 'Reassess growth plans, internal expansion',
+      Saturn: 'Review responsibilities, restructure slowly',
+      default: 'Slow down and review this area of life',
+    };
+    return retroActions[planet] || retroActions.default;
+  }
+
+  if (type === 'direct') {
+    return `${planet} moves forward again - time to act on what you reviewed`;
+  }
+
+  return '';
+};
+
+const generateActionableGuidance = (
+  planet: string,
+  type: string,
+  house?: number,
+  aspectToNatal?: { natalPlanet: string; aspectType: string },
+): string => {
+  const parts: string[] = [];
+
+  if (type === 'retrograde' || type === 'direct') {
+    parts.push(getActionableGuidanceByType(type, planet));
+  } else if (house) {
+    parts.push(getActionableGuidanceByHouse(planet, house));
+  }
+
+  if (aspectToNatal) {
+    const aspectAdvice: Record<string, string> = {
+      conjunction: 'Powerful energy - use it intentionally',
+      opposition: 'Balance is key - consider other perspectives',
+      trine: 'Easy flow - take advantage of this harmony',
+      square: 'Tension brings growth - push through challenges',
+    };
+    if (aspectAdvice[aspectToNatal.aspectType]) {
+      parts.push(aspectAdvice[aspectToNatal.aspectType]);
+    }
+  }
+
+  return parts.length > 0
+    ? parts.join('. ')
+    : 'Stay aware of cosmic influences today';
+};
+
 // Get personal transit impacts for upcoming transits
 export const getPersonalTransitImpacts = (
   upcomingTransits: TransitEvent[],
@@ -204,9 +388,18 @@ export const getPersonalTransitImpacts = (
       aspectToNatal || undefined,
     );
 
+    // Generate actionable guidance
+    const actionableGuidance = generateActionableGuidance(
+      transit.planet,
+      transit.type,
+      house,
+      aspectToNatal || undefined,
+    );
+
     impacts.push({
       ...transit,
       personalImpact,
+      actionableGuidance,
       house,
       houseMeaning,
       aspectToNatal: aspectToNatal || undefined,
