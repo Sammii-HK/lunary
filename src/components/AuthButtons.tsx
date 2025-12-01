@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { betterAuthClient } from '@/lib/auth-client';
-import { useAccount } from 'jazz-tools/react';
+import { invalidateAuthCache } from './AuthStatus';
 
 interface AuthUser {
   id: string;
@@ -16,12 +16,9 @@ interface AuthButtonsProps {
   className?: string;
 }
 
-// Skip auth checks ONLY in Playwright e2e tests (NOT Jest unit tests)
 function isTestMode(): boolean {
   if (typeof window === 'undefined') return false;
 
-  // Jest unit tests run in jsdom (Node.js), not real browser
-  // Only skip for Playwright e2e tests which run in real browser
   return (
     window.navigator.userAgent.includes('HeadlessChrome') ||
     (window as any).__PLAYWRIGHT_TEST__ === true ||
@@ -35,12 +32,10 @@ export function AuthButtons({
   className = '',
 }: AuthButtonsProps) {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(!isTestMode()); // Skip loading in test mode
-  const account = useAccount();
+  const [loading, setLoading] = useState(!isTestMode());
 
   useEffect(() => {
     if (isTestMode()) {
-      // In Playwright e2e test mode, skip auth check entirely
       setLoading(false);
       return;
     }
@@ -50,8 +45,14 @@ export function AuthButtons({
   const checkAuthStatus = async () => {
     try {
       const session = await betterAuthClient.getSession();
-      if ('user' in session && session.user) {
-        const user = session.user as any;
+      const user =
+        session && typeof session === 'object'
+          ? 'user' in session
+            ? (session as any).user
+            : (session as any)?.data?.user
+          : null;
+
+      if (user) {
         setAuthUser({
           id: user.id,
           email: user.email,
@@ -72,17 +73,16 @@ export function AuthButtons({
     try {
       setLoading(true);
       await betterAuthClient.signOut();
+      invalidateAuthCache();
       setAuthUser(null);
     } catch (error) {
       console.error('Sign out failed:', error);
-      // Even if sign out fails, clear local state
       setAuthUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading state
   if (loading) {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
@@ -92,9 +92,8 @@ export function AuthButtons({
     );
   }
 
-  // Only show as authenticated if BOTH Jazz account exists AND Better Auth session exists
-  if (authUser && account?.me) {
-    const displayName = authUser?.name || account?.me?.profile?.name || 'User';
+  if (authUser) {
+    const displayName = authUser.name || 'User';
 
     if (variant === 'navbar') {
       return (

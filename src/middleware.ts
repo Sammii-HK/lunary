@@ -1,5 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const camelToKebab = (str: string) =>
+  str
+    .replace(/([A-Z])/g, '-$1')
+    .toLowerCase()
+    .replace(/^-/, '');
+
+function handleLegacyGrimoireRedirects(pathname: string): string | null {
+  const tarotSuitMatch = pathname.match(
+    /^\/grimoire\/tarot\/(swords|cups|wands|pentacles)\/([a-zA-Z]+)$/,
+  );
+  if (tarotSuitMatch) {
+    const cardCamelCase = tarotSuitMatch[2];
+    return `/grimoire/tarot/${camelToKebab(cardCamelCase)}`;
+  }
+
+  if (pathname.includes(' ') || pathname.includes('%20')) {
+    const decoded = decodeURIComponent(pathname);
+    if (decoded.includes(' ')) {
+      return decoded.replace(/ /g, '-').toLowerCase();
+    }
+  }
+
+  if (pathname.startsWith('/grimoire/') && /[A-Z]/.test(pathname)) {
+    const segments = pathname.split('/');
+    const kebabSegments = segments.map((segment, index) => {
+      if (index > 1 && /[A-Z]/.test(segment)) {
+        return camelToKebab(segment);
+      }
+      return segment;
+    });
+    const newPath = kebabSegments.join('/');
+    if (newPath !== pathname) {
+      return newPath;
+    }
+  }
+
+  return null;
+}
+
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname =
@@ -71,6 +110,14 @@ export function middleware(request: NextRequest) {
           new URL(`/grimoire/${slug}${hash}`, request.url),
         );
       }
+    }
+
+    const legacyGrimoireRedirect = handleLegacyGrimoireRedirects(url.pathname);
+    if (legacyGrimoireRedirect) {
+      return NextResponse.redirect(
+        new URL(legacyGrimoireRedirect, request.url),
+        301,
+      );
     }
 
     return NextResponse.next();
@@ -198,6 +245,15 @@ export function middleware(request: NextRequest) {
         new URL(`/grimoire/${slug}${hash}`, request.url),
       );
     }
+  }
+
+  // Redirect legacy grimoire URLs from old sitemap formats
+  const legacyGrimoireRedirect = handleLegacyGrimoireRedirects(url.pathname);
+  if (legacyGrimoireRedirect) {
+    return NextResponse.redirect(
+      new URL(legacyGrimoireRedirect, request.url),
+      301,
+    );
   }
 
   return NextResponse.next();

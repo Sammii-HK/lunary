@@ -6,8 +6,8 @@ import {
   createContext,
   useContext,
   ReactNode,
+  useCallback,
 } from 'react';
-import { useAccount } from 'jazz-tools/react';
 import { betterAuthClient } from '@/lib/auth-client';
 
 interface AuthState {
@@ -17,7 +17,6 @@ interface AuthState {
   loading: boolean;
 }
 
-// Skip auth checks ONLY in Playwright e2e tests (NOT Jest unit tests)
 function isTestMode(): boolean {
   if (typeof window === 'undefined') return false;
 
@@ -36,25 +35,36 @@ const defaultAuthState: AuthState = {
   loading: true,
 };
 
-const AuthContext = createContext<AuthState>(defaultAuthState);
+const AuthContext = createContext<AuthState & { refreshAuth: () => void }>({
+  ...defaultAuthState,
+  refreshAuth: () => {},
+});
 
-// Cache for auth state to prevent duplicate requests
 let cachedAuthState: AuthState | null = null;
 let authPromise: Promise<AuthState> | null = null;
 
-export function AuthStatusProvider({ children }: { children: ReactNode }) {
-  const { me } = useAccount();
+export function invalidateAuthCache() {
+  cachedAuthState = null;
+  authPromise = null;
+}
 
+export function AuthStatusProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>(() => {
     if (isTestMode()) {
       return { ...defaultAuthState, loading: false };
     }
-    // Return cached state if available
-    if (cachedAuthState) {
+    if (cachedAuthState && cachedAuthState.isAuthenticated) {
       return cachedAuthState;
     }
     return defaultAuthState;
   });
+
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const refreshAuth = useCallback(() => {
+    invalidateAuthCache();
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     if (isTestMode()) return;
@@ -62,35 +72,25 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     const checkAuth = async () => {
-      // Only use cache if user is already authenticated
-      // This ensures we re-check after sign-in
       if (
         cachedAuthState &&
         !cachedAuthState.loading &&
         cachedAuthState.isAuthenticated
       ) {
         if (isMounted) {
-          setAuthState({
-            ...cachedAuthState,
-            profile: me?.profile || cachedAuthState.profile,
-          });
+          setAuthState(cachedAuthState);
         }
         return;
       }
 
-      // If there's already a request in flight, wait for it
       if (authPromise) {
         const result = await authPromise;
         if (isMounted) {
-          setAuthState({
-            ...result,
-            profile: me?.profile || result.profile,
-          });
+          setAuthState(result);
         }
         return;
       }
 
-      // Make the actual request with timeout
       authPromise = (async () => {
         try {
           const timeoutPromise = new Promise<null>((_, reject) =>
@@ -112,7 +112,7 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
           const newState: AuthState = {
             isAuthenticated: !!user,
             user,
-            profile: me?.profile || null,
+            profile: user || null,
             loading: false,
           };
           cachedAuthState = newState;
@@ -121,7 +121,7 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
           const newState: AuthState = {
             isAuthenticated: false,
             user: null,
-            profile: me?.profile || null,
+            profile: null,
             loading: false,
           };
           cachedAuthState = newState;
@@ -142,20 +142,15 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, [me]);
-
-  // Update profile when me changes
-  useEffect(() => {
-    if (me?.profile && authState.profile !== me.profile) {
-      setAuthState((prev) => ({ ...prev, profile: me.profile }));
-    }
-  }, [me?.profile, authState.profile]);
+  }, [refreshTrigger]);
 
   return (
-    <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ ...authState, refreshAuth }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
-export function useAuthStatus(): AuthState {
+export function useAuthStatus() {
   return useContext(AuthContext);
 }

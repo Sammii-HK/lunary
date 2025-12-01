@@ -3,10 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useAccount } from 'jazz-tools/react';
-import { useSubscriptionSync } from '../../hooks/useSubscriptionSync';
-import { createTrialSubscriptionInProfile } from '../../../utils/subscription';
-import { syncSubscriptionAfterCheckout } from '../../../utils/productionSubscriptionSync';
 import { conversionTracking } from '@/lib/analytics';
 
 interface CheckoutSession {
@@ -27,142 +23,71 @@ export default function SuccessPage() {
   const [session, setSession] = useState<CheckoutSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [synced, setSynced] = useState(false);
 
   const sessionId = searchParams.get('session_id');
 
-  // Try to get Jazz account
-  let me: any, profile: any;
-  try {
-    const account = useAccount();
-    me = account.me;
-    profile = me?.profile;
-  } catch (error) {
-    console.log('Jazz account not available');
-  }
-
-  const [trialCreated, setTrialCreated] = useState(false);
-
   useEffect(() => {
-    async function createTrial() {
-      console.log(
-        'createTrial effect - session:',
-        !!session?.subscription,
-        'profile:',
-        !!profile,
-        'trialCreated:',
-        trialCreated,
-        'existingSubscription:',
-        !!(profile as any)?.subscription,
-      );
+    async function syncToPostgres() {
+      if (!session?.subscription || synced) return;
 
-      if (
-        session?.subscription &&
-        profile &&
-        !trialCreated &&
-        !(profile as any).subscription
-      ) {
-        try {
-          console.log('🔄 Processing subscription for session:', sessionId);
+      try {
+        if (session.customer_id) {
+          await fetch('/api/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ stripeCustomerId: session.customer_id }),
+          });
+        }
 
-          // Use the production-ready sync that connects Better Auth to Jazz
-          const syncResult = await syncSubscriptionAfterCheckout(
-            profile,
-            sessionId || '',
+        const planType =
+          (session.subscription as any)?.metadata?.planType || 'monthly';
+        const isTrial =
+          session.subscription?.trial_end &&
+          session.subscription.trial_end > Date.now() / 1000;
+
+        if (isTrial) {
+          conversionTracking.trialStarted(
+            undefined,
+            session.customer_email,
+            planType as 'monthly' | 'yearly',
           );
 
-          if (syncResult.success) {
-            setTrialCreated(true);
-            console.log('✅ Subscription synced successfully after checkout');
-
-            const planType =
-              (session.subscription as any)?.metadata?.planType || 'monthly';
-            const isTrial =
-              session.subscription?.trial_end &&
-              session.subscription.trial_end > Date.now() / 1000;
-
-            if (isTrial) {
-              conversionTracking.trialStarted(
-                me?.id,
-                session.customer_email,
-                planType as 'monthly' | 'yearly',
-              );
-
-              // Send trial welcome email
-              try {
-                const trialDays = planType === 'yearly' ? 14 : 7;
-                const userName = (me?.profile as any)?.name || 'there';
-
-                await fetch('/api/emails/trial-welcome', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    email: session.customer_email,
-                    userName,
-                    trialDaysRemaining: trialDays,
-                    planType,
-                  }),
-                });
-              } catch (emailError) {
-                console.error(
-                  'Failed to send trial welcome email:',
-                  emailError,
-                );
-                // Don't block success page
-              }
-            } else {
-              conversionTracking.subscriptionStarted(
-                me?.id,
-                session.customer_email,
-                planType as 'monthly' | 'yearly',
-              );
-            }
-          } else {
-            console.error('Subscription sync failed:', syncResult.message);
-            // Try the old method as fallback
-            if (session.customer_id) {
-              profile.$jazz.set('stripeCustomerId', session.customer_id);
-              console.log(
-                '✅ Customer ID saved to profile (fallback):',
-                session.customer_id,
-              );
-            }
-            setTrialCreated(true); // Don't block the success page
-          }
-        } catch (error) {
-          console.error('Error syncing subscription:', error);
-          // Fallback: at least save the customer ID
           try {
-            if (session.customer_id) {
-              profile.$jazz.set('stripeCustomerId', session.customer_id);
-              console.log(
-                '✅ Customer ID saved (error fallback):',
-                session.customer_id,
-              );
-            }
-          } catch (fallbackError) {
-            console.error('Even fallback failed:', fallbackError);
+            const trialDays = planType === 'yearly' ? 14 : 7;
+            await fetch('/api/emails/trial-welcome', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: session.customer_email,
+                userName: 'there',
+                trialDaysRemaining: trialDays,
+                planType,
+              }),
+            });
+          } catch (emailError) {
+            console.error('Failed to send trial welcome email:', emailError);
           }
-          setTrialCreated(true); // Don't block the success page
+        } else {
+          conversionTracking.subscriptionStarted(
+            undefined,
+            session.customer_email,
+            planType as 'monthly' | 'yearly',
+          );
         }
-      } else {
-        console.log('Skipping subscription sync - conditions not met');
-        setTrialCreated(true); // Mark as processed if not needed
+
+        setSynced(true);
+      } catch (error) {
+        console.error('Error syncing subscription:', error);
+        setSynced(true);
       }
     }
 
-    // Only run if we have session data and haven't tried yet
-    if (session && !trialCreated) {
-      createTrial();
+    if (session && !synced) {
+      syncToPostgres();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, profile, trialCreated, sessionId]);
-
-  // Create a mock sync result for the UI
-  const syncResult = {
-    loading: false,
-    synced: trialCreated,
-    error: !trialCreated && profile ? 'Waiting for trial creation' : undefined,
-  };
+  }, [session, synced]);
 
   useEffect(() => {
     if (sessionId) {
@@ -263,32 +188,13 @@ export default function SuccessPage() {
           <div className='bg-gray-900 rounded-lg p-8 mb-8'>
             <h2 className='text-2xl font-light mb-6'>Subscription Details</h2>
 
-            {/* Sync Status Indicator */}
-            {profile && (
+            {synced && (
               <div className='mb-4 p-3 rounded-lg bg-gray-800 border border-gray-700'>
                 <div className='flex items-center gap-3'>
-                  {syncResult.loading ? (
-                    <>
-                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400'></div>
-                      <span className='text-sm text-blue-400'>
-                        Syncing subscription to your profile...
-                      </span>
-                    </>
-                  ) : syncResult.synced ? (
-                    <>
-                      <div className='w-4 h-4 bg-green-500 rounded-full'></div>
-                      <span className='text-sm text-green-400'>
-                        ✅ Subscription synced to your cosmic profile
-                      </span>
-                    </>
-                  ) : syncResult.error ? (
-                    <>
-                      <div className='w-4 h-4 bg-yellow-500 rounded-full'></div>
-                      <span className='text-sm text-yellow-400'>
-                        ⚠️ Subscription will sync when you log in
-                      </span>
-                    </>
-                  ) : null}
+                  <div className='w-4 h-4 bg-green-500 rounded-full'></div>
+                  <span className='text-sm text-green-400'>
+                    Subscription synced to your profile
+                  </span>
                 </div>
               </div>
             )}

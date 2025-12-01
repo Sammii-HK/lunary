@@ -116,12 +116,6 @@ export function NotificationManager() {
         return;
       }
 
-      const root = me.root as any;
-
-      if (!root.pushSubscriptions) {
-        root.$jazz.set('pushSubscriptions', []);
-      }
-
       const json = subscription.toJSON();
 
       if (!json?.keys?.p256dh || !json?.keys?.auth) {
@@ -136,42 +130,9 @@ export function NotificationManager() {
         throw new Error('Subscription JSON missing required keys');
       }
 
-      const clientSubscription = PushSubscription.create({
-        endpoint,
-        p256dh,
-        auth,
-        userAgent: navigator.userAgent,
-        createdAt: new Date().toISOString(),
-        preferences: {
-          moonPhases: true,
-          planetaryTransits: true,
-          retrogrades: true,
-          sabbats: true,
-          eclipses: true,
-          majorAspects: true,
-          moonCircles: true,
-        },
-      });
-
-      const pushSubscriptions = (root.pushSubscriptions || []) as any[];
-      const existingIndex = pushSubscriptions.findIndex(
-        (sub: any) => sub?.endpoint === subscription.endpoint,
-      );
-
-      const updatedSubscriptions =
-        existingIndex >= 0
-          ? pushSubscriptions.map((sub, index) =>
-              index === existingIndex ? clientSubscription : sub,
-            )
-          : [...pushSubscriptions, clientSubscription];
-
-      root.$jazz.set('pushSubscriptions', updatedSubscriptions);
-
-      console.log('✅ Push subscription saved to client storage');
-
-      // Also send to PostgreSQL via API for server-side notifications
+      // Save to PostgreSQL only
       try {
-        const profile = me.profile as any;
+        const profile = me?.profile as any;
         const birthday = profile?.birthday || null;
         const userName = profile?.name || null;
 
@@ -227,22 +188,7 @@ export function NotificationManager() {
       await subscription.unsubscribe();
       setSubscription(null);
 
-      if (me?.root) {
-        const root = me.root as any;
-        const pushSubscriptions = (root.pushSubscriptions || []) as any[];
-        const subscriptionIndex = pushSubscriptions.findIndex(
-          (sub: any) => sub?.endpoint === subscription.endpoint,
-        );
-
-        if (subscriptionIndex >= 0) {
-          const updatedSubscriptions = pushSubscriptions.filter(
-            (_sub, index) => index !== subscriptionIndex,
-          );
-          root.$jazz.set('pushSubscriptions', updatedSubscriptions);
-          console.log('✅ Push subscription removed from client storage');
-        }
-      }
-
+      // Remove from Postgres only
       try {
         await fetch('/api/notifications/unsubscribe', {
           method: 'POST',
@@ -253,9 +199,9 @@ export function NotificationManager() {
             endpoint: subscription.endpoint,
           }),
         });
-        console.log('✅ Push subscription removed from PostgreSQL');
+        console.log('✅ Push subscription removed');
       } catch (pgError) {
-        console.error('⚠️ Failed to remove from PostgreSQL:', pgError);
+        console.error('Failed to remove subscription:', pgError);
       }
     } catch (error) {
       console.error('Error unsubscribing:', error);

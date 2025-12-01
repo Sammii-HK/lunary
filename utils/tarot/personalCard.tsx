@@ -13,7 +13,7 @@ type PersonalCardData = {
 };
 
 // Calculate personal card based on birth date (unchanging)
-const calculatePersonalCard = (
+export const calculatePersonalCard = (
   userBirthday: string,
   userName?: string,
 ): PersonalCardData => {

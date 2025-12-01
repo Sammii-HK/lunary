@@ -9,7 +9,6 @@ import {
   getTrialDaysRemaining,
   normalizePlanType,
 } from '../../utils/pricing';
-import { syncSubscriptionToProfile } from '../../utils/subscription';
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
@@ -43,7 +42,6 @@ export function useSubscription(): SubscriptionStatus {
   const [subscriptionState, setSubscriptionState] =
     useState<SubscriptionStatus>(defaultState);
   const [hasCheckedStripe, setHasCheckedStripe] = useState(false);
-  const [hasSyncedProfile, setHasSyncedProfile] = useState(false);
   const [stripeSubscriptionData, setStripeSubscriptionData] = useState<{
     plan: string;
     status: string;
@@ -178,29 +176,6 @@ export function useSubscription(): SubscriptionStatus {
               status: sub.status,
               customerId: sub.customerId,
             });
-
-            // Sync to profile if plan differs (to prevent infinite loops)
-            if (me?.profile?.subscription && !hasSyncedProfile) {
-              const profilePlan = me.profile.subscription.plan;
-              const needsSync =
-                (profilePlan === 'monthly' || profilePlan === 'yearly') &&
-                !profilePlan.includes('lunary') &&
-                planFromApi !== profilePlan;
-
-              if (needsSync) {
-                setHasSyncedProfile(true);
-                // Sync in background - don't await to prevent blocking
-                syncSubscriptionToProfile(me.profile, sub.customerId).catch(
-                  (err) => {
-                    console.error(
-                      '[useSubscription] Failed to sync profile:',
-                      err,
-                    );
-                    setHasSyncedProfile(false); // Allow retry on error
-                  },
-                );
-              }
-            }
 
             setSubscriptionState(stripeBasedState);
             return;

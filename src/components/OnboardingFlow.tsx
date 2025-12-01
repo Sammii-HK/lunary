@@ -17,10 +17,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import {
-  generateBirthChart,
-  saveBirthChartToProfile,
-} from '../../utils/astrology/birthChart';
+import { generateBirthChart } from '../../utils/astrology/birthChart';
 import { conversionTracking } from '@/lib/analytics';
 import { OnboardingFeatureTour } from './OnboardingFeatureTour';
 
@@ -73,24 +70,22 @@ export function OnboardingFlow() {
   ]);
 
   const handleSaveBirthday = async () => {
-    if (!birthday || !me?.profile) return;
+    if (!birthday) return;
 
     setSaving(true);
     try {
-      (me.profile as any).$jazz.set('birthday', birthday);
+      // Save to Postgres
+      await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ birthday }),
+      });
 
       // Track birth data submission
       const userId = (me as any)?.id;
       if (userId) {
         conversionTracking.birthDataSubmitted(userId);
-      }
-
-      // Save birth time and location if provided
-      if (birthTime) {
-        (me.profile as any).$jazz.set('birthTime', birthTime);
-      }
-      if (birthLocation) {
-        (me.profile as any).$jazz.set('birthLocation', birthLocation);
       }
 
       // Generate birth chart immediately after birthday is saved
@@ -100,10 +95,15 @@ export function OnboardingFlow() {
           birthTime || undefined,
           birthLocation || undefined,
         );
-        if (birthChart && me.profile) {
-          await saveBirthChartToProfile(me.profile, birthChart);
+        if (birthChart) {
+          await fetch('/api/profile/birth-chart', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ birthChart }),
+          });
           setBirthChartPreview(birthChart);
-          console.log('✅ Birth chart generated and saved immediately');
+          console.log('✅ Birth chart generated and saved to Postgres');
         }
       } catch (chartError) {
         console.error('Failed to generate birth chart:', chartError);
@@ -111,14 +111,14 @@ export function OnboardingFlow() {
 
       // Sync birthday to push subscription for server-side notifications
       try {
-        const profile = me.profile as any;
         await fetch('/api/notifications/sync-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             birthday,
-            name: profile?.name || null,
-            email: profile?.email || null,
+            name: authState.user?.name || null,
+            email: authState.user?.email || null,
           }),
         });
         console.log('✅ Birthday synced to push subscription');

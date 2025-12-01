@@ -7,12 +7,10 @@ import dynamic from 'next/dynamic';
 import { HelpCircle, Download } from 'lucide-react';
 import {
   generateBirthChart,
-  saveBirthChartToProfile,
   hasBirthChart,
   getBirthChartFromProfile,
 } from '../../../utils/astrology/birthChart';
 import {
-  savePersonalCardToProfile,
   hasPersonalCard,
   getPersonalCardFromProfile,
 } from '../../../utils/tarot/personalCard';
@@ -237,76 +235,76 @@ export default function ProfilePage() {
   }, [canEditProfile, isEditing]);
 
   const handleSave = async () => {
-    if (me?.profile) {
-      try {
-        // Actually save to Jazz profile using correct API
-        me.profile.$jazz.set('name', name);
-        (me.profile as any).$jazz.set('birthday', birthday);
-        if (birthTime) {
-          (me.profile as any).$jazz.set('birthTime', birthTime);
-        } else {
-          (me.profile as any).$jazz.set('birthTime', undefined);
-        }
-        if (birthLocation) {
-          (me.profile as any).$jazz.set('birthLocation', birthLocation);
-        } else {
-          (me.profile as any).$jazz.set('birthLocation', undefined);
-        }
+    try {
+      // Save basic profile to Postgres
+      const profileResponse = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ name, birthday }),
+      });
 
-        // Generate and save cosmic data if birthday is provided
-        if (birthday) {
-          console.log('Profile before cosmic data generation:', me.profile);
-
-          const hasExistingChart = hasBirthChart(me.profile);
-          const hasExistingPersonalCard = hasPersonalCard(me.profile);
-
-          console.log('Cosmic data check:', {
-            hasChart: hasExistingChart,
-            hasPersonalCard: hasExistingPersonalCard,
-            birthday,
-            birthTime,
-            birthLocation,
-            name,
-          });
-
-          // Regenerate chart if birthday, time, or location changed
-          const shouldRegenerateChart =
-            !hasExistingChart ||
-            (birthTime && birthTime !== (me.profile as any)?.birthTime) ||
-            (birthLocation &&
-              birthLocation !== (me.profile as any)?.birthLocation);
-
-          if (shouldRegenerateChart) {
-            console.log('Generating birth chart with time/location...');
-            const birthChart = await generateBirthChart(
-              birthday,
-              birthTime || undefined,
-              birthLocation || undefined,
-            );
-            await saveBirthChartToProfile(me.profile, birthChart);
-          }
-
-          if (!hasExistingPersonalCard) {
-            console.log('Generating personal card for:', name, birthday);
-            await savePersonalCardToProfile(me.profile, birthday, name);
-            console.log('Personal card generation completed');
-            console.log('Profile after personal card save:', me.profile);
-          } else {
-            console.log('Personal card already exists, skipping generation');
-          }
-        }
-
-        setIsEditing(false);
-
-        if (birthday) {
-          conversionTracking.birthdayEntered(authState.user?.id);
-        }
-        if (name && birthday) {
-          conversionTracking.profileCompleted(authState.user?.id);
-        }
-      } catch (error) {
-        console.error('Error saving profile:', error);
+      if (!profileResponse.ok) {
+        throw new Error('Failed to save profile');
       }
+
+      // Generate and save cosmic data if birthday is provided
+      if (birthday) {
+        const hasExistingChart = me?.profile
+          ? hasBirthChart(me.profile)
+          : false;
+        const hasExistingPersonalCard = me?.profile
+          ? hasPersonalCard(me.profile)
+          : false;
+
+        const shouldRegenerateChart =
+          !hasExistingChart ||
+          (birthTime && birthTime !== (me?.profile as any)?.birthTime) ||
+          (birthLocation &&
+            birthLocation !== (me?.profile as any)?.birthLocation);
+
+        if (shouldRegenerateChart) {
+          console.log('Generating birth chart...');
+          const birthChart = await generateBirthChart(
+            birthday,
+            birthTime || undefined,
+            birthLocation || undefined,
+          );
+
+          await fetch('/api/profile/birth-chart', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ birthChart }),
+          });
+        }
+
+        if (!hasExistingPersonalCard) {
+          console.log('Generating personal card...');
+          const { calculatePersonalCard } = await import(
+            '../../../utils/tarot/personalCard'
+          );
+          const personalCard = calculatePersonalCard(birthday, name);
+
+          await fetch('/api/profile/personal-card', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ personalCard }),
+          });
+        }
+      }
+
+      setIsEditing(false);
+
+      if (birthday) {
+        conversionTracking.birthdayEntered(authState.user?.id);
+      }
+      if (name && birthday) {
+        conversionTracking.profileCompleted(authState.user?.id);
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
     }
   };
 

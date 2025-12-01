@@ -415,62 +415,14 @@ export function NotificationSettings() {
         return;
       }
 
-      const root = me.root as any;
+      // Serialize subscription for API
+      const subscriptionJson = subscription.toJSON();
 
-      if (!root.pushSubscriptions) {
-        root.$jazz.set('pushSubscriptions', []);
-      }
-
-      const json = subscription.toJSON();
-
-      if (!json?.keys?.p256dh || !json?.keys?.auth) {
+      if (!subscriptionJson?.keys?.p256dh || !subscriptionJson?.keys?.auth) {
         throw new Error('Subscription keys missing');
       }
 
-      const endpoint = json?.endpoint;
-      const p256dh = json?.keys?.p256dh;
-      const auth = json?.keys?.auth;
-
-      if (!endpoint || !p256dh || !auth) {
-        throw new Error('Subscription JSON missing required keys');
-      }
-
-      const clientSubscription = PushSubscription.create({
-        endpoint,
-        p256dh,
-        auth,
-        userAgent: navigator.userAgent,
-        createdAt: new Date().toISOString(),
-        preferences: {
-          moonPhases: true,
-          planetaryTransits: true,
-          retrogrades: true,
-          sabbats: true,
-          eclipses: true,
-          majorAspects: true,
-          moonCircles: true,
-        },
-      });
-
-      const pushSubscriptions = (root.pushSubscriptions || []) as any[];
-      const existingIndex = pushSubscriptions.findIndex(
-        (sub: any) => sub?.endpoint === subscription.endpoint,
-      );
-
-      const updatedSubscriptions =
-        existingIndex >= 0
-          ? pushSubscriptions.map((sub, index) =>
-              index === existingIndex ? clientSubscription : sub,
-            )
-          : [...pushSubscriptions, clientSubscription];
-
-      root.$jazz.set('pushSubscriptions', updatedSubscriptions);
-      console.log('✅ Push subscription saved to client storage');
-
       try {
-        // Serialize subscription properly for API
-        const subscriptionJson = subscription.toJSON();
-
         if (!subscriptionJson?.keys?.p256dh || !subscriptionJson?.keys?.auth) {
           throw new Error('Subscription keys are missing');
         }
@@ -547,22 +499,7 @@ export function NotificationSettings() {
       await subscription.unsubscribe();
       setSubscription(null);
 
-      if (me?.root) {
-        const root = me.root as any;
-        const pushSubscriptions = (root.pushSubscriptions || []) as any[];
-        const subscriptionIndex = pushSubscriptions.findIndex(
-          (sub: any) => sub?.endpoint === subscription.endpoint,
-        );
-
-        if (subscriptionIndex >= 0) {
-          const updatedSubscriptions = pushSubscriptions.filter(
-            (_sub, index) => index !== subscriptionIndex,
-          );
-          root.$jazz.set('pushSubscriptions', updatedSubscriptions);
-          console.log('✅ Push subscription removed from client storage');
-        }
-      }
-
+      // Remove from Postgres
       try {
         await fetch('/api/notifications/unsubscribe', {
           method: 'POST',
@@ -575,7 +512,7 @@ export function NotificationSettings() {
         });
         console.log('✅ Push subscription removed from PostgreSQL');
       } catch (pgError) {
-        console.error('⚠️ Failed to remove from PostgreSQL:', pgError);
+        console.error('Failed to remove subscription:', pgError);
       }
 
       setPermission({

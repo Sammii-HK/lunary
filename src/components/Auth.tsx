@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
-import { useAccount } from 'jazz-tools/react';
-import { useAuthStatus } from './AuthStatus';
+import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 
 interface AuthFormData {
@@ -37,8 +36,7 @@ export function AuthComponent({
     name: '',
   });
 
-  const account = useAccount();
-  const authState = useAuthStatus();
+  const { refreshAuth, ...authState } = useAuthStatus();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,22 +101,11 @@ export function AuthComponent({
       }
 
       if (isSignUp) {
-        const signUpPromise = betterAuthClient.signUp.email(
-          {
-            email: formData.email,
-            password: formData.password,
-            name: formData.name || 'User',
-          },
-          {
-            onSuccess: async () => {
-              // According to Jazz docs: "Don't forget to update the profile's name. It's not done automatically."
-              if (account?.me?.profile) {
-                account.me.profile.$jazz.set('name', formData.name || 'User');
-                console.log('✅ Updated Jazz profile name:', formData.name);
-              }
-            },
-          },
-        );
+        const signUpPromise = betterAuthClient.signUp.email({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name || 'User',
+        });
 
         const result = await Promise.race([
           signUpPromise,
@@ -139,14 +126,14 @@ export function AuthComponent({
         setSuccess('Account created successfully! You are now signed in.');
         setFormData({ email: '', password: '', name: '' });
 
-        // Wait for session to be established, then trigger React state update
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Call onSuccess callback to trigger React re-render (no redirect needed)
+        invalidateAuthCache();
+        refreshAuth();
+
         if (onSuccess) {
           onSuccess();
         } else {
-          // Instead of redirecting, just close the modal and let React handle the state change
           setSuccess('Account created successfully! Welcome to Lunary.');
         }
       } else {
@@ -205,10 +192,11 @@ export function AuthComponent({
         setSuccess('Signed in successfully!');
         setFormData({ email: '', password: '', name: '' });
 
-        // Wait for session to be established
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Call onSuccess callback to close modal and trigger re-render
+        invalidateAuthCache();
+        refreshAuth();
+
         if (onSuccess) {
           onSuccess();
         } else {
@@ -250,11 +238,10 @@ export function AuthComponent({
 
   const handleSignOut = async () => {
     try {
-      // Use Better Auth's sign out method - Jazz will automatically sync
       await betterAuthClient.signOut();
+      invalidateAuthCache();
+      refreshAuth();
       console.log('✅ Signed out successfully');
-
-      console.log('✅ Auth state will refresh automatically');
     } catch (err) {
       console.error('Sign out error:', err);
     }

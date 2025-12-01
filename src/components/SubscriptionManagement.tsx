@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useSubscription } from '../hooks/useSubscription';
-import { useAccount } from 'jazz-tools/react';
-import { syncSubscriptionToProfile } from '../../utils/subscription';
 import { Settings, ExternalLink, RefreshCw } from 'lucide-react';
 
 interface SubscriptionManagementProps {
@@ -30,7 +28,6 @@ export default function SubscriptionManagement({
   subscriptionId,
 }: SubscriptionManagementProps) {
   const subscription = useSubscription();
-  const { me } = useAccount();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [stripeSubscription, setStripeSubscription] =
@@ -69,37 +66,6 @@ export default function SubscriptionManagement({
         const data = await response.json();
         if (data.subscription) {
           setStripeSubscription(data.subscription);
-          // Sync to profile for use across site
-          if (me?.profile && data.subscription.customerId) {
-            try {
-              const syncResult = await syncSubscriptionToProfile(
-                me.profile,
-                data.subscription.customerId,
-              );
-              if (process.env.NODE_ENV === 'development') {
-                console.log(
-                  '[SubscriptionManagement] Synced subscription to profile:',
-                  syncResult,
-                );
-                // Log the synced subscription data
-                const syncedSub = (me.profile as any)?.subscription;
-                console.log(
-                  '[SubscriptionManagement] Profile subscription after sync:',
-                  {
-                    status: syncedSub?.status,
-                    plan: syncedSub?.plan,
-                    trialEndsAt: syncedSub?.trialEndsAt,
-                  },
-                );
-              }
-            } catch (syncError) {
-              console.error(
-                '[SubscriptionManagement] Failed to sync subscription to profile:',
-                syncError,
-              );
-              // Don't show error to user - subscription display still works
-            }
-          }
         }
       }
     } catch (error) {
