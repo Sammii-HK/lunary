@@ -2,30 +2,28 @@
 
 import { usePathname } from 'next/navigation';
 import {
-  BookMarked,
-  Eclipse,
-  Notebook,
-  Sparkles,
-  User,
-  WandSparkles,
+  Home,
+  Layers,
+  Orbit,
+  MessageCircle,
+  MoreHorizontal,
+  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { ExploreMenu } from './ExploreMenu';
 
 export const Navbar = () => {
   const pathname = usePathname();
 
-  // Early return if pathname is not available yet
   if (!pathname) {
     return null;
   }
 
-  // Define app pages where navbar should show
   const appPages = [
     '/app',
     '/tarot',
     '/horoscope',
     '/birth-chart',
+    '/guide',
     '/book-of-shadows',
     '/grimoire',
     '/profile',
@@ -37,68 +35,52 @@ export const Navbar = () => {
     '/moon-circles',
     '/collections',
     '/forecast',
+    '/explore',
   ];
 
-  // Define marketing pages (excluding contextual pages like blog/pricing)
   const coreMarketingRoutes = ['/', '/welcome', '/help', '/auth'];
 
   const isCoreMarketingRoute =
     coreMarketingRoutes.includes(pathname) || pathname.startsWith('/admin');
 
-  // Show navbar on app pages for all users (including unauthenticated for SEO)
   const isAppPage = appPages.some(
     (page) => pathname === page || pathname.startsWith(`${page}/`),
   );
 
-  // CRITICAL: Never show on core marketing routes
-  // But allow on contextual pages (blog/pricing) - AppChrome controls this
   if (isCoreMarketingRoute) {
     return null;
   }
 
-  // Only show on app pages (contextual pages handled by AppChrome)
   if (!isAppPage) {
     return null;
   }
 
   return (
     <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
-      <div className='flex w-full h-12 md:h-16 items-center justify-between px-4 py-2 text-white md:justify-evenly md:px-6'>
-        <NavLink
-          href='/app'
-          icon={Eclipse}
-          label='Home'
-          activePath={pathname}
-        />
+      <div className='flex w-full h-12 md:h-14 items-center justify-around px-2 py-2 text-white max-w-lg'>
+        <NavLink href='/app' icon={Home} label='Home' activePath={pathname} />
         <NavLink
           href='/tarot'
-          icon={Sparkles}
+          icon={Layers}
           label='Tarot'
           activePath={pathname}
         />
         <NavLink
           href='/horoscope'
-          icon={WandSparkles}
+          icon={Orbit}
           label='Horoscope'
           activePath={pathname}
         />
         <NavLink
-          href='/book-of-shadows'
-          icon={Notebook}
-          label='Book of Shadows'
+          href='/guide'
+          icon={MessageCircle}
+          label='Guide'
           activePath={pathname}
         />
         <NavLink
-          href='/grimoire'
-          icon={BookMarked}
-          label='Grimoire'
-          activePath={pathname}
-        />
-        <ExploreMenu />
-        <NavLink
-          href='/profile'
-          icon={User}
-          label='Account'
+          href='/explore'
+          icon={MoreHorizontal}
+          label='More'
           activePath={pathname}
         />
       </div>
@@ -110,44 +92,47 @@ const isActive = (pathname: string | null, href: string) => {
   if (!pathname) return false;
   if (href === '/app') return pathname === '/app' || pathname === '/';
   if (href === '/') return pathname === '/';
+  if (href === '/explore') {
+    const explorePages = [
+      '/explore',
+      '/grimoire',
+      '/profile',
+      '/birth-chart',
+      '/book-of-shadows/journal',
+      '/blog',
+      '/pricing',
+      '/shop',
+      '/moon-circles',
+      '/collections',
+      '/forecast',
+      '/cosmic-report-generator',
+      '/cosmic-state',
+    ];
+    return explorePages.some(
+      (page) => pathname === page || pathname.startsWith(`${page}/`),
+    );
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 };
 
 type NavLinkProps = {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   label: string;
   activePath: string | null;
 };
 
 const NavLink = ({ href, icon: Icon, label, activePath }: NavLinkProps) => {
   const active = isActive(activePath, href);
-  const isBookOfShadows = href === '/book-of-shadows';
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs transition md:flex-1 md:min-w-0 ${
-        active
-          ? isBookOfShadows
-            ? 'text-purple-400'
-            : 'text-zinc-200'
-          : isBookOfShadows
-            ? 'text-purple-200 hover:text-purple-400'
-            : 'text-zinc-400 hover:text-zinc-200'
+      className={`flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
+        active ? 'text-purple-400' : 'text-zinc-500 hover:text-zinc-300'
       }`}
     >
-      <Icon
-        className={`h-5 w-5 ${
-          isBookOfShadows
-            ? active
-              ? 'text-purple-200'
-              : 'text-purple-400'
-            : ''
-        }`}
-      />
-      <span className='hidden text-[10px] uppercase tracking-wide md:block md:text-center md:leading-tight md:w-full md:break-words'>
-        {label}
-      </span>
+      <Icon className='h-4 w-4 md:h-5 md:w-5' strokeWidth={active ? 2 : 1.5} />
+      <span className='text-[10px] uppercase tracking-wide'>{label}</span>
     </Link>
   );
 };
