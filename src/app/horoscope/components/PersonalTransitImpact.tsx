@@ -35,13 +35,21 @@ export function PersonalTransitImpactCard({
       <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
         {impact.description}
       </p>
-      <div className='mt-2 pt-2 border-t border-indigo-500/20'>
+      <div className='mt-2 pt-2 border-t border-indigo-500/20 space-y-2'>
         <p className='text-xs text-indigo-300/90 leading-relaxed'>
           <span className='font-medium text-indigo-200'>Personal Impact:</span>{' '}
           {impact.personalImpact}
         </p>
+        {impact.actionableGuidance && (
+          <div className='bg-purple-500/10 border border-purple-500/20 rounded p-2'>
+            <p className='text-xs text-purple-200 leading-relaxed'>
+              <span className='font-medium'>What to do:</span>{' '}
+              {impact.actionableGuidance}
+            </p>
+          </div>
+        )}
         {impact.aspectToNatal && (
-          <p className='text-xs text-purple-300/80 mt-1'>
+          <p className='text-xs text-purple-300/80'>
             <span className='font-medium text-purple-200'>Aspect:</span>{' '}
             {impact.aspectToNatal.aspectType} your natal{' '}
             {impact.aspectToNatal.natalPlanet}

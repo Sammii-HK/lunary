@@ -22,6 +22,18 @@ export function FreeHoroscopeView() {
       </div>
 
       <div className='space-y-6'>
+        <HoroscopeSection title="Today's Horoscope" color='purple'>
+          <p className='text-sm text-zinc-300 leading-relaxed'>
+            {generalHoroscope.reading}
+          </p>
+        </HoroscopeSection>
+
+        <HoroscopeSection title='Cosmic Highlight' color='emerald'>
+          <p className='text-sm text-zinc-300 leading-relaxed'>
+            {generalHoroscope.generalAdvice}
+          </p>
+        </HoroscopeSection>
+
         <FeaturePreview
           title='Personal Insight'
           description='Get insights specifically tailored to your birth chart and cosmic profile'
@@ -42,21 +54,6 @@ export function FreeHoroscopeView() {
             </div>
           }
         />
-
-        <HoroscopeSection title='Cosmic Highlight' color='purple'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            {generalHoroscope.generalAdvice}
-          </p>
-        </HoroscopeSection>
-
-        <HoroscopeSection title='Cosmic Insight' color='blue'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            The planetary alignments today create opportunities for growth and
-            understanding. Pay attention to synchronicities and trust your
-            intuitive insights as they guide you toward meaningful experiences
-            and connections.
-          </p>
-        </HoroscopeSection>
 
         <FeaturePreview
           title='Your Lucky Elements'
