@@ -240,7 +240,7 @@ async function exportJazzData() {
       accountSecret: jazzSecret,
       syncServer:
         process.env.JAZZ_SYNC_SERVER ||
-        `wss://cloud.jazz.tools/?key=${process.env.JAZZ_SYNC_KEY || 'sam@lunary.com'}`,
+        `wss://cloud.jazz.tools/?key=${process.env.JAZZ_SYNC_KEY}`,
       skipInboxLoad: true,
       asActiveAccount: false,
     });

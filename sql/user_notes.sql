@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS user_notes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL,
-  title TEXT NOT NULL,
+  title TEXT,
   content TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
