@@ -352,6 +352,12 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // Book of Shadows -> Guide redirect (chat renamed)
+      {
+        source: '/book-of-shadows',
+        destination: '/guide',
+        permanent: true,
+      },
       // Blog week URL format normalization
       {
         source: '/blog/week/:week(\\d+)-:year(\\d{4})',
