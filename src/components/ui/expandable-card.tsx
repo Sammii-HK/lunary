@@ -1,0 +1,137 @@
+'use client';
+
+import { ReactNode, useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface ExpandableCardProps {
+  preview: ReactNode;
+  expanded: ReactNode;
+  defaultExpanded?: boolean;
+  autoExpandOnDesktop?: boolean;
+  className?: string;
+  previewClassName?: string;
+  expandedClassName?: string;
+  onToggle?: (isExpanded: boolean) => void;
+}
+
+export const ExpandableCard = ({
+  preview,
+  expanded,
+  defaultExpanded = false,
+  autoExpandOnDesktop = false,
+  className,
+  previewClassName,
+  expandedClassName,
+  onToggle,
+}: ExpandableCardProps) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    if (!autoExpandOnDesktop) return;
+
+    const checkDesktop = () => {
+      const isNowDesktop = window.matchMedia('(min-width: 768px)').matches;
+      setIsDesktop(isNowDesktop);
+      if (isNowDesktop) {
+        setIsExpanded(true);
+      }
+    };
+
+    checkDesktop();
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    mediaQuery.addEventListener('change', checkDesktop);
+    return () => mediaQuery.removeEventListener('change', checkDesktop);
+  }, [autoExpandOnDesktop]);
+
+  const handleToggle = () => {
+    const newState = !isExpanded;
+    setIsExpanded(newState);
+    onToggle?.(newState);
+  };
+
+  return (
+    <div
+      className={cn(
+        'border border-stone-800 rounded-md w-full overflow-hidden transition-all relative',
+        isExpanded && 'border-purple-500/30',
+        className,
+      )}
+    >
+      <button
+        onClick={handleToggle}
+        className={cn(
+          'w-full py-3 px-4 text-left hover:bg-zinc-900/50 transition-colors group',
+          previewClassName,
+        )}
+      >
+        <div className='w-full'>{preview}</div>
+        <div className='absolute top-1 right-2'>
+          {isExpanded ? (
+            <ChevronUp className='w-4 h-4 text-purple-400' />
+          ) : (
+            <ChevronDown className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors' />
+          )}
+        </div>
+      </button>
+
+      <div
+        className={cn(
+          'overflow-hidden transition-all duration-300 ease-in-out',
+          isExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0',
+        )}
+      >
+        <div
+          className={cn(
+            'px-4 pb-4 border-t border-stone-800/50 max-h-[400px] overflow-y-auto',
+            expandedClassName,
+          )}
+        >
+          {expanded}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface ExpandableCardHeaderProps {
+  icon?: ReactNode;
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  badgeVariant?: 'default' | 'highlight' | 'warning' | 'danger';
+}
+
+export const ExpandableCardHeader = ({
+  icon,
+  title,
+  subtitle,
+  badge,
+  badgeVariant = 'default',
+}: ExpandableCardHeaderProps) => {
+  const badgeClasses = {
+    default: 'bg-zinc-700/50 text-zinc-300',
+    highlight: 'bg-purple-500/20 text-purple-300',
+    warning: 'bg-amber-500/20 text-amber-300',
+    danger: 'bg-red-500/20 text-red-300',
+  };
+
+  return (
+    <div className='flex items-center gap-2'>
+      {icon && <span className='text-purple-400'>{icon}</span>}
+      <span className='text-sm font-medium text-zinc-200'>{title}</span>
+      {subtitle && <span className='text-xs text-zinc-500'>{subtitle}</span>}
+      {badge && (
+        <span
+          className={cn(
+            'text-xs px-1.5 py-0.5 rounded',
+            badgeClasses[badgeVariant],
+          )}
+        >
+          {badge}
+        </span>
+      )}
+    </div>
+  );
+};
