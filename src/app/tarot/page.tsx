@@ -574,6 +574,22 @@ const TarotReadings = () => {
           </p>
         </div>
 
+        <div className='flex gap-3'>
+          <button
+            onClick={() => {
+              const spreadsSection = document.getElementById(
+                'tarot-spreads-section-free',
+              );
+              if (spreadsSection) {
+                spreadsSection.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className='flex-1 py-3 px-4 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-300 font-medium hover:bg-purple-500/30 transition-colors'
+          >
+            Do a Reading
+          </button>
+        </div>
+
         <div className='space-y-6'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
             <h2 className='text-xl font-medium text-zinc-100'>
@@ -739,14 +755,16 @@ const TarotReadings = () => {
             <SmartTrialButton />
           </div>
 
-          <CollapsibleSection title='Tarot Spreads' defaultCollapsed={true}>
-            <TarotSpreadExperience
-              userId={userId}
-              userName={userName}
-              subscriptionPlan={tarotPlan}
-              onCardPreview={(card) => setSelectedCard(card)}
-            />
-          </CollapsibleSection>
+          <div id='tarot-spreads-section-free'>
+            <CollapsibleSection title='Tarot Spreads' defaultCollapsed={false}>
+              <TarotSpreadExperience
+                userId={userId}
+                userName={userName}
+                subscriptionPlan={tarotPlan}
+                onCardPreview={(card) => setSelectedCard(card)}
+              />
+            </CollapsibleSection>
+          </div>
 
           <div>
             <div className='flex justify-between items-center mb-4'>
@@ -826,6 +844,22 @@ const TarotReadings = () => {
         <p className='text-sm text-zinc-400'>
           Personalized guidance based on your cosmic signature
         </p>
+      </div>
+
+      <div className='flex gap-3'>
+        <button
+          onClick={() => {
+            const spreadsSection = document.getElementById(
+              'tarot-spreads-section',
+            );
+            if (spreadsSection) {
+              spreadsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+          className='flex-1 py-3 px-4 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-300 font-medium hover:bg-purple-500/30 transition-colors'
+        >
+          Do a Reading
+        </button>
       </div>
 
       <div className='space-y-6'>
@@ -1088,14 +1122,16 @@ const TarotReadings = () => {
           </HoroscopeSection>
         )}
 
-        <CollapsibleSection title='Tarot Spreads' defaultCollapsed={true}>
-          <TarotSpreadExperience
-            userId={userId}
-            userName={userName}
-            subscriptionPlan={tarotPlan}
-            onCardPreview={(card) => setSelectedCard(card)}
-          />
-        </CollapsibleSection>
+        <div id='tarot-spreads-section'>
+          <CollapsibleSection title='Tarot Spreads' defaultCollapsed={false}>
+            <TarotSpreadExperience
+              userId={userId}
+              userName={userName}
+              subscriptionPlan={tarotPlan}
+              onCardPreview={(card) => setSelectedCard(card)}
+            />
+          </CollapsibleSection>
+        </div>
       </div>
 
       <TarotCardModal

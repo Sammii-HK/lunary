@@ -396,10 +396,27 @@ export function AdvancedPatterns({
                             key={index}
                             className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'
                           >
-                            <p className='font-medium text-zinc-100 mb-2'>
-                              {pattern.suit} ({pattern.count}/
-                              {basicPatterns.timeFrame} days, {percentage}%)
-                            </p>
+                            <div className='flex items-center justify-between mb-2'>
+                              <span className='font-medium text-zinc-100'>
+                                {pattern.suit}
+                              </span>
+                              <span className='text-xs text-zinc-400'>
+                                {pattern.count}/{basicPatterns.timeFrame} days
+                              </span>
+                            </div>
+                            <div className='flex items-center gap-3 mb-2'>
+                              <div className='flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden'>
+                                <div
+                                  className='h-full bg-purple-500/70 rounded-full transition-all duration-300'
+                                  style={{
+                                    width: `${Math.min(percentage, 100)}%`,
+                                  }}
+                                />
+                              </div>
+                              <span className='text-xs text-purple-300 font-medium w-10 text-right'>
+                                {percentage}%
+                              </span>
+                            </div>
                             {pattern.reading && (
                               <p className='text-sm text-zinc-400 leading-relaxed'>
                                 {pattern.reading}
@@ -766,30 +783,44 @@ export function AdvancedPatterns({
                   </h4>
                   <div className='grid gap-4 md:grid-cols-2'>
                     <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-purple-300/90 mb-2'>
+                      <h5 className='text-xs font-medium text-purple-300/90 mb-3'>
                         Suit Distribution
                       </h5>
-                      <div className='space-y-2'>
+                      <div className='space-y-2.5'>
                         {analysis.enhancedTarot.multiDimensional.suitPatterns.map(
                           (suit) => (
-                            <div
-                              key={suit.suit}
-                              className='flex items-center justify-between text-xs'
-                            >
-                              <span className='text-zinc-300'>{suit.suit}</span>
-                              <span className='text-zinc-400'>
-                                {suit.count} ({suit.percentage}%)
-                              </span>
+                            <div key={suit.suit} className='space-y-1'>
+                              <div className='flex items-center justify-between text-xs'>
+                                <span className='text-zinc-300'>
+                                  {suit.suit}
+                                </span>
+                                <span className='text-zinc-400'>
+                                  {suit.count}x
+                                </span>
+                              </div>
+                              <div className='flex items-center gap-2'>
+                                <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
+                                  <div
+                                    className='h-full bg-purple-500/60 rounded-full transition-all duration-300'
+                                    style={{
+                                      width: `${Math.min(suit.percentage, 100)}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className='text-[10px] text-purple-300/80 font-medium w-8 text-right'>
+                                  {suit.percentage}%
+                                </span>
+                              </div>
                             </div>
                           ),
                         )}
                       </div>
                     </div>
                     <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-indigo-300/90 mb-2'>
+                      <h5 className='text-xs font-medium text-indigo-300/90 mb-3'>
                         Arcana Balance
                       </h5>
-                      <div className='space-y-2 text-xs'>
+                      <div className='space-y-2.5 text-xs'>
                         {(() => {
                           const total =
                             analysis.enhancedTarot.multiDimensional
@@ -816,29 +847,55 @@ export function AdvancedPatterns({
                               : 0;
                           return (
                             <>
-                              <div className='flex items-center justify-between'>
-                                <span className='text-zinc-300'>
-                                  Major Arcana
-                                </span>
-                                <span className='text-zinc-400'>
-                                  {
-                                    analysis.enhancedTarot.multiDimensional
-                                      .arcanaBalance.major
-                                  }{' '}
-                                  ({majorPercentage}%)
-                                </span>
+                              <div className='space-y-1'>
+                                <div className='flex items-center justify-between'>
+                                  <span className='text-zinc-300'>
+                                    Major Arcana
+                                  </span>
+                                  <span className='text-zinc-400'>
+                                    {
+                                      analysis.enhancedTarot.multiDimensional
+                                        .arcanaBalance.major
+                                    }
+                                    x
+                                  </span>
+                                </div>
+                                <div className='flex items-center gap-2'>
+                                  <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
+                                    <div
+                                      className='h-full bg-indigo-500/60 rounded-full transition-all duration-300'
+                                      style={{ width: `${majorPercentage}%` }}
+                                    />
+                                  </div>
+                                  <span className='text-[10px] text-indigo-300/80 font-medium w-8 text-right'>
+                                    {majorPercentage}%
+                                  </span>
+                                </div>
                               </div>
-                              <div className='flex items-center justify-between'>
-                                <span className='text-zinc-300'>
-                                  Minor Arcana
-                                </span>
-                                <span className='text-zinc-400'>
-                                  {
-                                    analysis.enhancedTarot.multiDimensional
-                                      .arcanaBalance.minor
-                                  }{' '}
-                                  ({minorPercentage}%)
-                                </span>
+                              <div className='space-y-1'>
+                                <div className='flex items-center justify-between'>
+                                  <span className='text-zinc-300'>
+                                    Minor Arcana
+                                  </span>
+                                  <span className='text-zinc-400'>
+                                    {
+                                      analysis.enhancedTarot.multiDimensional
+                                        .arcanaBalance.minor
+                                    }
+                                    x
+                                  </span>
+                                </div>
+                                <div className='flex items-center gap-2'>
+                                  <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
+                                    <div
+                                      className='h-full bg-indigo-500/60 rounded-full transition-all duration-300'
+                                      style={{ width: `${minorPercentage}%` }}
+                                    />
+                                  </div>
+                                  <span className='text-[10px] text-indigo-300/80 font-medium w-8 text-right'>
+                                    {minorPercentage}%
+                                  </span>
+                                </div>
                               </div>
                             </>
                           );
@@ -849,10 +906,10 @@ export function AdvancedPatterns({
                   {analysis.enhancedTarot.multiDimensional.numberPatterns
                     .length > 0 && (
                     <div className='mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-emerald-300/90 mb-2'>
+                      <h5 className='text-xs font-medium text-emerald-300/90 mb-3'>
                         Number Patterns
                       </h5>
-                      <div className='space-y-2'>
+                      <div className='space-y-3'>
                         {analysis.enhancedTarot.multiDimensional.numberPatterns.map(
                           (pattern) => (
                             <div key={pattern.number} className='text-xs'>
@@ -861,7 +918,20 @@ export function AdvancedPatterns({
                                   {pattern.number}
                                 </span>
                                 <span className='text-zinc-400'>
-                                  {pattern.count}x ({pattern.percentage}%)
+                                  {pattern.count}x
+                                </span>
+                              </div>
+                              <div className='flex items-center gap-2 mb-1.5'>
+                                <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
+                                  <div
+                                    className='h-full bg-emerald-500/60 rounded-full transition-all duration-300'
+                                    style={{
+                                      width: `${Math.min(pattern.percentage, 100)}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className='text-[10px] text-emerald-300/80 font-medium w-8 text-right'>
+                                  {pattern.percentage}%
                                 </span>
                               </div>
                               <p className='text-zinc-400'>{pattern.meaning}</p>

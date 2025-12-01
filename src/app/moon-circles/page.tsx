@@ -120,7 +120,7 @@ export default async function MoonCirclesPage({
   );
 
   return (
-    <div className='space-y-12 py-8'>
+    <div className='space-y-12 p-4'>
       <header className='space-y-6 text-center'>
         <p className='text-xs uppercase tracking-[0.3em] text-purple-200/80'>
           Moon Circle Community
