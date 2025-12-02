@@ -15,20 +15,17 @@ import { render } from '@react-email/render';
 const getBaseUrl = () =>
   process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
-interface TrialExpiredEmailProps {
+interface AnnualWelcomeEmailProps {
   userName: string;
-  missedInsights: number;
   userEmail?: string;
 }
 
-export function TrialExpiredEmail({
+export function AnnualWelcomeEmail({
   userName,
-  missedInsights,
   userEmail,
-}: TrialExpiredEmailProps) {
+}: AnnualWelcomeEmailProps) {
   const baseUrl = getBaseUrl();
   const greeting = userName || 'there';
-  const insightLabel = missedInsights !== 1 ? 's' : '';
   const unsubscribeUrl = userEmail
     ? `${baseUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`
     : `${baseUrl}/unsubscribe`;
@@ -36,10 +33,10 @@ export function TrialExpiredEmail({
   return (
     <Html>
       <Head>
-        <title>Your Trial Has Ended - Lunary</title>
+        <title>Welcome to Lunary+ Annual - Lunary</title>
       </Head>
       <Preview>
-        {`Your free trial has ended. You've missed ${missedInsights} personalized insight${insightLabel}!`}
+        Welcome to Lunary+ Annual! Here are your exclusive features.
       </Preview>
       <Body
         style={{
@@ -70,24 +67,39 @@ export function TrialExpiredEmail({
               width='120'
               style={{ margin: '0 auto 20px', display: 'block' }}
             />
+            <Text
+              style={{
+                display: 'inline-block',
+                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                color: '#ffffff',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '20px',
+              }}
+            >
+              Annual Member
+            </Text>
             <Heading
               as='h1'
               style={{ color: '#6366f1', fontSize: '28px', margin: 0 }}
             >
-              Your Trial Has Ended
+              Welcome to Lunary+ Annual!
             </Heading>
           </Section>
 
           <Section style={{ margin: '30px 0' }}>
             <Text>Hi {greeting},</Text>
             <Text>
-              Your free trial has ended, but your cosmic journey doesn&apos;t
-              have to!
+              Thank you for choosing Lunary+ Annual! As an annual member, you
+              have access to exclusive features designed for deeper cosmic
+              exploration.
             </Text>
 
             <Section
               style={{
-                background: '#fef3c7',
+                background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
                 borderLeft: '4px solid #f59e0b',
                 padding: '20px',
                 borderRadius: '6px',
@@ -98,29 +110,54 @@ export function TrialExpiredEmail({
                 as='h3'
                 style={{ marginTop: 0, color: '#92400e', fontSize: '16px' }}
               >
-                You&apos;ve missed {missedInsights} personalized insight
-                {insightLabel} 🌙
+                Your Exclusive Annual Features:
               </Heading>
-              <Text style={{ color: '#78350f', marginBottom: 0 }}>
-                Your birth chart analysis, daily horoscopes, and tarot patterns
-                are waiting for you.
+              <Text style={{ color: '#78350f', margin: 0 }}>
+                🌟 <strong>Yearly Forecast</strong> - Your personalised cosmic
+                outlook for the entire year
+                <br />
+                <br />
+                📊 <strong>Data Export</strong> - Download your journal entries
+                and insights
+                <br />
+                <br />⭐ <strong>Priority Features</strong> - Early access to
+                new features
+                <br />
+                <br />
+                💎 <strong>Best Value</strong> - Save compared to monthly
               </Text>
             </Section>
 
-            <Text>Rejoin Lunary to continue receiving:</Text>
-            <Text style={{ margin: '15px 0' }}>
-              🌟 Personalized birth chart insights
-              <br />
-              🔮 Daily horoscopes tailored to your chart
-              <br />
-              ✨ Personalized tarot readings
-              <br />
-              🌙 Transit calendars and cosmic guidance
-            </Text>
+            <Section
+              style={{
+                background: '#f3f4f6',
+                padding: '20px',
+                borderRadius: '6px',
+                margin: '20px 0',
+              }}
+            >
+              <Heading
+                as='h3'
+                style={{ marginTop: 0, color: '#6366f1', fontSize: '16px' }}
+              >
+                Start Exploring:
+              </Heading>
+              <Text style={{ margin: 0 }}>
+                🔮 <strong>Yearly Forecast</strong> - See what the cosmos has in
+                store
+                <br />
+                💬 <strong>Astral Guide</strong> - Your AI companion with memory
+                <br />
+                📓 <strong>Book of Shadows</strong> - Journal with pattern
+                analysis
+                <br />
+                🌙 <strong>Moon Circles</strong> - Lunar rituals and guidance
+              </Text>
+            </Section>
 
             <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
               <Link
-                href={`${baseUrl}/pricing`}
+                href={`${baseUrl}/forecast`}
                 style={{
                   display: 'inline-block',
                   background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -132,9 +169,14 @@ export function TrialExpiredEmail({
                   fontSize: '16px',
                 }}
               >
-                Continue Your Journey →
+                View Your Yearly Forecast →
               </Link>
             </Section>
+
+            <Text>
+              We&apos;re thrilled to have you as an annual member. If you have
+              any questions, just reply to this email.
+            </Text>
           </Section>
 
           <Section
@@ -167,49 +209,46 @@ export function TrialExpiredEmail({
   );
 }
 
-export async function generateTrialExpiredEmailHTML(
+export async function generateAnnualWelcomeEmailHTML(
   userName: string,
-  missedInsights: number,
   userEmail?: string,
 ): Promise<string> {
   return await render(
-    <TrialExpiredEmail
-      userName={userName}
-      missedInsights={missedInsights}
-      userEmail={userEmail}
-    />,
+    <AnnualWelcomeEmail userName={userName} userEmail={userEmail} />,
   );
 }
 
-export function generateTrialExpiredEmailText(
+export function generateAnnualWelcomeEmailText(
   userName: string,
-  missedInsights: number,
   userEmail?: string,
 ): string {
   const baseUrl = getBaseUrl();
-  const insightLabel = missedInsights !== 1 ? 's' : '';
   const unsubscribeUrl = userEmail
     ? `${baseUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`
     : `${baseUrl}/unsubscribe`;
 
   return `
-Your Trial Has Ended - Lunary
+Welcome to Lunary+ Annual! 🌟
 
 Hi ${userName || 'there'},
 
-Your free trial has ended, but your cosmic journey doesn't have to!
+Thank you for choosing Lunary+ Annual! As an annual member, you have access to exclusive features designed for deeper cosmic exploration.
 
-You've missed ${missedInsights} personalized insight${insightLabel} 🌙
+Your Exclusive Annual Features:
+- 🌟 Yearly Forecast - Your personalised cosmic outlook for the entire year
+- 📊 Data Export - Download your journal entries and insights
+- ⭐ Priority Features - Early access to new features
+- 💎 Best Value - Save compared to monthly
 
-Your birth chart analysis, daily horoscopes, and tarot patterns are waiting for you.
+Start Exploring:
+- 🔮 Yearly Forecast - See what the cosmos has in store
+- 💬 Astral Guide - Your AI companion with memory
+- 📓 Book of Shadows - Journal with pattern analysis
+- 🌙 Moon Circles - Lunar rituals and guidance
 
-Rejoin Lunary to continue receiving:
-- 🌟 Personalized birth chart insights
-- 🔮 Daily horoscopes tailored to your chart
-- ✨ Personalized tarot readings
-- 🌙 Transit calendars and cosmic guidance
+View your Yearly Forecast: ${baseUrl}/forecast
 
-Continue your journey: ${baseUrl}/pricing
+We're thrilled to have you as an annual member. If you have any questions, just reply to this email.
 
 ---
 Unsubscribe: ${unsubscribeUrl}

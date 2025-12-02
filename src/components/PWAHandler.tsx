@@ -203,7 +203,7 @@ export function PWAHandler({
     isInstalled ||
     !showInstallPrompt ||
     authState.loading ||
-    (!allowUnauthenticatedInstall && !authState.isAuthenticated);
+    !authState.isAuthenticated;
 
   if (shouldHideBanner) {
     return null;
@@ -211,7 +211,7 @@ export function PWAHandler({
 
   return (
     <div className='fixed top-0 left-0 right-0 z-50 safe-area-inset-top'>
-      <div className='bg-gradient-to-r from-purple-600/90 to-pink-600/90 border-b border-purple-500/30 px-4 py-3 shadow-lg backdrop-blur-sm'>
+      <div className='bg-gradient-to-r from-purple-900/70 to-pink-900/70 border-b border-purple-500/20 px-4 py-3 backdrop-blur-md'>
         <div className='max-w-4xl mx-auto flex items-center justify-between'>
           <div className='flex-1'>
             <h3 className='text-sm font-semibold text-white'>

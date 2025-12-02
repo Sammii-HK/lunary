@@ -2,12 +2,12 @@
 
 ## ✅ Implemented Features
 
-### 1. Trial Expired Discount
+### 1. Cancellation Win-Back
 
-- **Discount Code**: `TRIAL20` (20% off first month)
-- **Email**: Sent automatically when trial expires
-- **Usage**: Users can enter code at checkout
-- **Next Step**: Create Stripe coupon `TRIAL20` in Stripe dashboard
+- **Discount Code**: `GUIDANCE` (1 month free)
+- **Email**: Sent when user cancels subscription
+- **Usage**: Users can enter code at checkout to return
+- **Note**: Trial users auto-convert to paid (no trial expired email needed)
 
 ### 2. Referral Program
 
@@ -41,7 +41,7 @@ You already have excellent push notifications:
 
 ```bash
 # In Stripe Dashboard or via API:
-# Create coupon "TRIAL20" with 20% off, one-time use
+# Create coupon "GUIDANCE" for 1 month free
 ```
 
 ### 2. Run Database Migrations
@@ -58,7 +58,7 @@ You already have excellent push notifications:
 
 ## 🎯 Next Steps
 
-1. **Create Stripe coupon** `TRIAL20` (20% off)
+1. **Create Stripe coupon** `GUIDANCE` (1 month free)
 2. **Run referral SQL** migration
 3. **Test referral flow** end-to-end
 4. **Monitor A/B test** results in analytics dashboard

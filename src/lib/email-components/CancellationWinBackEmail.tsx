@@ -15,20 +15,17 @@ import { render } from '@react-email/render';
 const getBaseUrl = () =>
   process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
-interface TrialExpiredEmailProps {
+interface CancellationWinBackEmailProps {
   userName: string;
-  missedInsights: number;
   userEmail?: string;
 }
 
-export function TrialExpiredEmail({
+export function CancellationWinBackEmail({
   userName,
-  missedInsights,
   userEmail,
-}: TrialExpiredEmailProps) {
+}: CancellationWinBackEmailProps) {
   const baseUrl = getBaseUrl();
   const greeting = userName || 'there';
-  const insightLabel = missedInsights !== 1 ? 's' : '';
   const unsubscribeUrl = userEmail
     ? `${baseUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`
     : `${baseUrl}/unsubscribe`;
@@ -36,10 +33,11 @@ export function TrialExpiredEmail({
   return (
     <Html>
       <Head>
-        <title>Your Trial Has Ended - Lunary</title>
+        <title>We&apos;ll Miss You - Lunary</title>
       </Head>
       <Preview>
-        {`Your free trial has ended. You've missed ${missedInsights} personalized insight${insightLabel}!`}
+        We&apos;re sorry to see you go. Here&apos;s a gift if you change your
+        mind.
       </Preview>
       <Body
         style={{
@@ -74,48 +72,57 @@ export function TrialExpiredEmail({
               as='h1'
               style={{ color: '#6366f1', fontSize: '28px', margin: 0 }}
             >
-              Your Trial Has Ended
+              We&apos;ll Miss You
             </Heading>
           </Section>
 
           <Section style={{ margin: '30px 0' }}>
             <Text>Hi {greeting},</Text>
             <Text>
-              Your free trial has ended, but your cosmic journey doesn&apos;t
-              have to!
+              We&apos;re sorry to see you go. We hope Lunary brought some cosmic
+              clarity to your days.
+            </Text>
+            <Text>
+              If you ever want to return, we&apos;d love to have you back.
+              Here&apos;s a gift for whenever you&apos;re ready:
             </Text>
 
             <Section
               style={{
-                background: '#fef3c7',
-                borderLeft: '4px solid #f59e0b',
+                background: 'linear-gradient(135deg, #e0e7ff, #c7d2fe)',
+                borderLeft: '4px solid #6366f1',
                 padding: '20px',
                 borderRadius: '6px',
                 margin: '20px 0',
+                textAlign: 'center' as const,
               }}
             >
               <Heading
                 as='h3'
-                style={{ marginTop: 0, color: '#92400e', fontSize: '16px' }}
+                style={{ marginTop: 0, color: '#4338ca', fontSize: '16px' }}
               >
-                You&apos;ve missed {missedInsights} personalized insight
-                {insightLabel} 🌙
+                1 Month Free
               </Heading>
-              <Text style={{ color: '#78350f', marginBottom: 0 }}>
-                Your birth chart analysis, daily horoscopes, and tarot patterns
-                are waiting for you.
+              <Text
+                style={{
+                  fontSize: '28px',
+                  fontWeight: '700',
+                  color: '#6366f1',
+                  margin: '10px 0',
+                  letterSpacing: '2px',
+                }}
+              >
+                GUIDANCE
+              </Text>
+              <Text style={{ color: '#3730a3', margin: 0, fontSize: '14px' }}>
+                Use this code when you&apos;re ready to return
               </Text>
             </Section>
 
-            <Text>Rejoin Lunary to continue receiving:</Text>
-            <Text style={{ margin: '15px 0' }}>
-              🌟 Personalized birth chart insights
-              <br />
-              🔮 Daily horoscopes tailored to your chart
-              <br />
-              ✨ Personalized tarot readings
-              <br />
-              🌙 Transit calendars and cosmic guidance
+            <Text>
+              Your cosmic data is safe with us. If you return, everything will
+              be waiting for you—your birth chart, journal entries, and
+              patterns.
             </Text>
 
             <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
@@ -132,9 +139,13 @@ export function TrialExpiredEmail({
                   fontSize: '16px',
                 }}
               >
-                Continue Your Journey →
+                Return to Lunary →
               </Link>
             </Section>
+
+            <Text style={{ fontSize: '14px', color: '#6b7280' }}>
+              No pressure—this code doesn&apos;t expire. Take your time.
+            </Text>
           </Section>
 
           <Section
@@ -167,49 +178,44 @@ export function TrialExpiredEmail({
   );
 }
 
-export async function generateTrialExpiredEmailHTML(
+export async function generateCancellationWinBackEmailHTML(
   userName: string,
-  missedInsights: number,
   userEmail?: string,
 ): Promise<string> {
   return await render(
-    <TrialExpiredEmail
-      userName={userName}
-      missedInsights={missedInsights}
-      userEmail={userEmail}
-    />,
+    <CancellationWinBackEmail userName={userName} userEmail={userEmail} />,
   );
 }
 
-export function generateTrialExpiredEmailText(
+export function generateCancellationWinBackEmailText(
   userName: string,
-  missedInsights: number,
   userEmail?: string,
 ): string {
   const baseUrl = getBaseUrl();
-  const insightLabel = missedInsights !== 1 ? 's' : '';
   const unsubscribeUrl = userEmail
     ? `${baseUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`
     : `${baseUrl}/unsubscribe`;
 
   return `
-Your Trial Has Ended - Lunary
+We'll Miss You - Lunary 🌙
 
 Hi ${userName || 'there'},
 
-Your free trial has ended, but your cosmic journey doesn't have to!
+We're sorry to see you go. We hope Lunary brought some cosmic clarity to your days.
 
-You've missed ${missedInsights} personalized insight${insightLabel} 🌙
+If you ever want to return, we'd love to have you back. Here's a gift for whenever you're ready:
 
-Your birth chart analysis, daily horoscopes, and tarot patterns are waiting for you.
+---
+1 MONTH FREE
+Code: GUIDANCE
+Use this code when you're ready to return
+---
 
-Rejoin Lunary to continue receiving:
-- 🌟 Personalized birth chart insights
-- 🔮 Daily horoscopes tailored to your chart
-- ✨ Personalized tarot readings
-- 🌙 Transit calendars and cosmic guidance
+Your cosmic data is safe with us. If you return, everything will be waiting for you—your birth chart, journal entries, and patterns.
 
-Continue your journey: ${baseUrl}/pricing
+Return to Lunary: ${baseUrl}/pricing
+
+No pressure—this code doesn't expire. Take your time.
 
 ---
 Unsubscribe: ${unsubscribeUrl}
