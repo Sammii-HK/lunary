@@ -22,8 +22,14 @@ import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { captureEvent } from '@/lib/posthog-client';
-import { dismissRitualBadge, useRitualBadge } from '@/hooks/useRitualBadge';
+import {
+  dismissRitualBadge,
+  useRitualBadge,
+  trackRitualShown,
+  trackRitualEngaged,
+} from '@/hooks/useRitualBadge';
 import { useSubscription } from '@/hooks/useSubscription';
+import { WeeklyInsights } from '@/lib/rituals/engine';
 
 interface CollectionFolder {
   id: number;
@@ -172,8 +178,26 @@ function BookOfShadowsContent() {
   const searchParams = useSearchParams();
   const { me } = useAccount();
   const userBirthday = (me?.profile as any)?.birthday;
+  const userName = (me?.profile as any)?.name?.split(' ')[0];
   const { isSubscribed } = useSubscription();
-  const ritualState = useRitualBadge(isSubscribed);
+  const [weeklyInsights, setWeeklyInsights] = useState<
+    WeeklyInsights | undefined
+  >(undefined);
+
+  useEffect(() => {
+    const now = new Date();
+    const isSunday = now.getDay() === 0;
+    const isMorning = now.getHours() < 14;
+
+    if (isSubscribed && isSunday && isMorning) {
+      fetch('/api/rituals/weekly-insights')
+        .then((res) => res.json())
+        .then((data) => setWeeklyInsights(data))
+        .catch(() => {});
+    }
+  }, [isSubscribed]);
+
+  const ritualState = useRitualBadge(isSubscribed, userName, weeklyInsights);
 
   const {
     messages,
@@ -279,23 +303,38 @@ function BookOfShadowsContent() {
 
   // Inject ritual message when user visits during ritual time
   const [ritualInjected, setRitualInjected] = useState(false);
+  const [shownRitualId, setShownRitualId] = useState<string | null>(null);
+  const [shownRitualContext, setShownRitualContext] = useState<string | null>(
+    null,
+  );
+  const [ritualEngagementTracked, setRitualEngagementTracked] = useState(false);
+
   useEffect(() => {
     if (
       !isLoadingHistory &&
       !ritualInjected &&
       ritualState.hasUnreadMessage &&
       ritualState.message &&
+      ritualState.messageId &&
       messages.length === 0
     ) {
-      const messageId =
+      const chatMessageId =
         typeof crypto !== 'undefined' && crypto.randomUUID
           ? crypto.randomUUID()
           : `ritual-${Date.now()}`;
+
       addMessage({
-        id: messageId,
+        id: chatMessageId,
         role: 'assistant',
         content: ritualState.message,
       });
+
+      if (ritualState.ritualType && ritualState.messageId) {
+        trackRitualShown(ritualState.messageId, ritualState.ritualType, me?.id);
+        setShownRitualId(ritualState.messageId);
+        setShownRitualContext(ritualState.ritualType);
+      }
+
       setRitualInjected(true);
       dismissRitualBadge(isSubscribed);
     }
@@ -306,6 +345,26 @@ function BookOfShadowsContent() {
     ritualInjected,
     addMessage,
     isSubscribed,
+    me?.id,
+  ]);
+
+  useEffect(() => {
+    if (
+      shownRitualId &&
+      shownRitualContext &&
+      !ritualEngagementTracked &&
+      messages.length >= 2 &&
+      messages[messages.length - 1]?.role === 'user'
+    ) {
+      trackRitualEngaged(shownRitualId, shownRitualContext as any, me?.id);
+      setRitualEngagementTracked(true);
+    }
+  }, [
+    messages,
+    shownRitualId,
+    shownRitualContext,
+    ritualEngagementTracked,
+    me?.id,
   ]);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);

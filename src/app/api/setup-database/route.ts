@@ -570,12 +570,30 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Journal patterns table created');
 
+    // Ritual message events for A/B testing (tracks shown + engagement)
+    await sql`
+      CREATE TABLE IF NOT EXISTS ritual_message_events (
+        id SERIAL PRIMARY KEY,
+        message_id VARCHAR(100) NOT NULL,
+        context VARCHAR(50) NOT NULL,
+        user_id VARCHAR(255) DEFAULT 'anonymous',
+        shown_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        engaged BOOLEAN DEFAULT FALSE,
+        engaged_at TIMESTAMP WITH TIME ZONE
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_message_performance ON ritual_message_events(message_id, context)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_message_user ON ritual_message_events(user_id, shown_at DESC)`;
+
+    console.log('✅ Ritual message events table created');
+
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status)',
+        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status, ritual_message_events)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

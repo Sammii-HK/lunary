@@ -631,6 +631,24 @@ async function setupDatabase() {
 
     console.log('✅ Journal patterns table created');
 
+    // Ritual message events for A/B testing (tracks shown + engagement)
+    await sql`
+      CREATE TABLE IF NOT EXISTS ritual_message_events (
+        id SERIAL PRIMARY KEY,
+        message_id VARCHAR(100) NOT NULL,
+        context VARCHAR(50) NOT NULL,
+        user_id VARCHAR(255) DEFAULT 'anonymous',
+        shown_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        engaged BOOLEAN DEFAULT FALSE,
+        engaged_at TIMESTAMP WITH TIME ZONE
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_message_performance ON ritual_message_events(message_id, context)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ritual_message_user ON ritual_message_events(user_id, shown_at DESC)`;
+
+    console.log('✅ Ritual message events table created');
+
     console.log('✅ Database setup complete!');
     console.log(
       '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, and notes',
