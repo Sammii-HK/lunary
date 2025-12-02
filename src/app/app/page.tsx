@@ -120,7 +120,10 @@ export default function AppDashboard() {
   const { me } = useAccount();
   const authState = useAuthStatus();
   const userName = (me?.profile as any)?.name;
-  const firstName = userName ? userName.split(' ')[0] : null;
+  const firstName =
+    authState.isAuthenticated && userName?.trim()
+      ? userName.split(' ')[0]
+      : null;
 
   useEffect(() => {
     if (authState.isAuthenticated && !authState.loading) {
@@ -146,7 +149,9 @@ export default function AppDashboard() {
           <p className='text-lg text-zinc-300'>
             {greeting()}
             {firstName && (
-              <span className='text-purple-400'>, {firstName}</span>
+              <>
+                , <span className='text-purple-400'>{firstName}</span>
+              </>
             )}
           </p>
           <DateWidget />

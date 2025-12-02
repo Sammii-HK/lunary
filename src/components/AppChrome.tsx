@@ -10,6 +10,7 @@ import { NotificationManager } from '@/components/NotificationManager';
 import { ExitIntent } from '@/components/ExitIntent';
 import { OnboardingFlow } from '@/components/OnboardingFlow';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
+import { BetaBanner } from '@/components/BetaBanner';
 import { useAuthStatus } from './AuthStatus';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
@@ -137,6 +138,7 @@ export function AppChrome() {
 
   // Define explore pages (can show app nav if coming from app)
   const explorePages = [
+    '/explore',
     '/shop',
     '/moon-circles',
     '/collections',
@@ -180,6 +182,7 @@ export function AppChrome() {
     <>
       {!isAdminSurface && (
         <>
+          {showMarketingNav && <BetaBanner />}
           {showMarketingNav && <MarketingNavbar />}
           {showAppNav && (
             <>
