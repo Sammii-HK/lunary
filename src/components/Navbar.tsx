@@ -10,9 +10,13 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRitualBadge } from '@/hooks/useRitualBadge';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const { isSubscribed } = useSubscription();
+  const { hasUnreadMessage } = useRitualBadge(isSubscribed);
 
   if (!pathname) {
     return null;
@@ -76,6 +80,7 @@ export const Navbar = () => {
           icon={MessageCircle}
           label='Guide'
           activePath={pathname}
+          showBadge={hasUnreadMessage}
         />
         <NavLink
           href='/explore'
@@ -120,18 +125,33 @@ type NavLinkProps = {
   icon: LucideIcon;
   label: string;
   activePath: string | null;
+  showBadge?: boolean;
 };
 
-const NavLink = ({ href, icon: Icon, label, activePath }: NavLinkProps) => {
+const NavLink = ({
+  href,
+  icon: Icon,
+  label,
+  activePath,
+  showBadge,
+}: NavLinkProps) => {
   const active = isActive(activePath, href);
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
+      className={`relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
         active ? 'text-purple-400' : 'text-zinc-500 hover:text-zinc-300'
       }`}
     >
-      <Icon className='h-4 w-4 md:h-5 md:w-5' strokeWidth={active ? 2 : 1.5} />
+      <div className='relative'>
+        <Icon
+          className='h-4 w-4 md:h-5 md:w-5'
+          strokeWidth={active ? 2 : 1.5}
+        />
+        {showBadge && (
+          <span className='absolute -top-1 -right-1 h-2 w-2 rounded-full bg-purple-500' />
+        )}
+      </div>
       <span className='text-[10px] uppercase tracking-wide'>{label}</span>
     </Link>
   );

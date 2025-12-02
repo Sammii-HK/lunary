@@ -21,31 +21,10 @@ export default {
       dayOfWeek,
     );
 
-    // Sunday at 10 AM - weekly cosmic report + Substack & social
-    if (dayOfWeek === 0 && hour === 10) {
-      const results = await Promise.allSettled([
-        handleWeeklyCosmicReport(baseUrl, env, today),
-        handleWeeklySubstackSocial(baseUrl, env, today),
-      ]);
-      return new Response(
-        JSON.stringify({
-          success: true,
-          results: results.map((r) =>
-            r.status === 'fulfilled' ? r.value : { error: r.reason },
-          ),
-          timestamp: now.toISOString(),
-        }),
-        {
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-    }
-
-    // Daily at 8 AM - cosmic pulse, daily cosmic event, and cosmic snapshot update
+    // Daily at 8 AM - Daily Insight + Tarot notification (consolidated, most valuable)
     if (hour === 8) {
       const results = await Promise.allSettled([
-        handleDailyCosmicPulse(baseUrl, env, today),
-        handleDailyCosmicEvent(baseUrl, env, today),
+        handleDailyInsightNotification(baseUrl, env, today),
         handleCosmicSnapshotUpdates(baseUrl, env, today),
       ]);
       return new Response(
@@ -62,12 +41,13 @@ export default {
       );
     }
 
-    // Daily at 2 PM - daily posts (created the day before for next day) and cosmic changes notification
+    // Daily at 2 PM - Personal transit (paid users), daily posts, cosmic changes
     if (hour === 14) {
       const tomorrow = new Date(now);
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
       const tomorrowStr = tomorrow.toISOString().split('T')[0];
       const results = await Promise.allSettled([
+        handlePersonalTransitNotification(baseUrl, env, today),
         handleDailyPosts(baseUrl, env, tomorrowStr),
         handleCosmicChangesNotification(baseUrl, env, today),
       ]);
@@ -83,11 +63,6 @@ export default {
           headers: { 'Content-Type': 'application/json' },
         },
       );
-    }
-
-    // Daily at 6 PM - personalized tarot
-    if (hour === 18) {
-      return await handlePersonalizedTarot(baseUrl, env, today);
     }
 
     // Daily at 2 AM - cleanup, analytics summary, and SEO metrics sync
@@ -111,12 +86,24 @@ export default {
       );
     }
 
-    // Daily at 10 AM - moon circles check and cosmic snapshot update
+    // Daily at 10 AM - Weekly notifications (Mon/Fri/Sun), Cosmic events
+    // Moon notifications now handled by 8am daily insight rotation
+    // Also handles Sunday weekly cosmic report + Substack & social
     if (hour === 10) {
-      const results = await Promise.allSettled([
+      const tasks = [
+        handleWeeklyNotifications(baseUrl, env, today, dayOfWeek),
+        handleDailyCosmicEvent(baseUrl, env, today),
         handleMoonCircles(baseUrl, env, today),
         handleCosmicSnapshotUpdates(baseUrl, env, today),
-      ]);
+      ];
+
+      // Sunday only: add weekly cosmic report and Substack social
+      if (dayOfWeek === 0) {
+        tasks.push(handleWeeklyCosmicReport(baseUrl, env, today));
+        tasks.push(handleWeeklySubstackSocial(baseUrl, env, today));
+      }
+
+      const results = await Promise.allSettled(tasks);
       return new Response(
         JSON.stringify({
           success: true,
@@ -168,10 +155,6 @@ export default {
       return await handleCosmicSnapshotUpdates(baseUrl, env, today);
     }
 
-    if (url.pathname === '/daily-cosmic-pulse' && request.method === 'POST') {
-      return await handleDailyCosmicPulse(baseUrl, env, today);
-    }
-
     if (url.pathname === '/weekly-report' && request.method === 'POST') {
       return await handleWeeklyCosmicReport(baseUrl, env, today);
     }
@@ -191,10 +174,6 @@ export default {
       return await handleDailyPosts(baseUrl, env, today);
     }
 
-    if (url.pathname === '/personalized-tarot' && request.method === 'POST') {
-      return await handlePersonalizedTarot(baseUrl, env, today);
-    }
-
     if (url.pathname === '/discord-cleanup' && request.method === 'POST') {
       return await handleDiscordLogsCleanup(baseUrl, env);
     }
@@ -203,8 +182,21 @@ export default {
       return await handleDiscordAnalyticsDaily(baseUrl, env);
     }
 
+    if (url.pathname === '/daily-insight' && request.method === 'POST') {
+      return await handleDailyInsightNotification(baseUrl, env, today);
+    }
+
+    if (url.pathname === '/weekly-notifications' && request.method === 'POST') {
+      const dayOfWeek = new Date().getUTCDay();
+      return await handleWeeklyNotifications(baseUrl, env, today, dayOfWeek);
+    }
+
+    if (url.pathname === '/personal-transit' && request.method === 'POST') {
+      return await handlePersonalTransitNotification(baseUrl, env, today);
+    }
+
     return new Response(
-      'Lunary Notification Worker - Use POST /trigger, /cosmic-changes, /cosmic-snapshots, /daily-cosmic-pulse, /weekly-report, /weekly-substack-social, /moon-circles, /daily-posts, /personalized-tarot, /discord-cleanup, or /discord-analytics to test',
+      'Lunary Notification Worker - Endpoints: POST /trigger, /cosmic-changes, /cosmic-snapshots, /weekly-report, /weekly-substack-social, /moon-circles, /daily-posts, /discord-cleanup, /discord-analytics, /daily-insight, /weekly-notifications, /personal-transit',
       {
         status: 200,
         headers: { 'Content-Type': 'text/plain' },
@@ -840,34 +832,6 @@ function getPlanetEmoji(event) {
   return '⭐';
 }
 
-async function handleDailyCosmicPulse(baseUrl, env, today) {
-  try {
-    console.log('[daily-cosmic-pulse] Starting daily cosmic pulse');
-    const response = await fetch(`${baseUrl}/api/cron/daily-cosmic-pulse`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${env.CRON_SECRET}`,
-      },
-    });
-    const result = await response.json();
-    return new Response(JSON.stringify(result), {
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    console.error('[daily-cosmic-pulse] Error:', error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || 'Unknown error',
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      },
-    );
-  }
-}
-
 async function handleDailyCosmicEvent(baseUrl, env, today) {
   try {
     console.log(
@@ -1013,34 +977,6 @@ async function handleDailyPosts(baseUrl, env, today) {
   }
 }
 
-async function handlePersonalizedTarot(baseUrl, env, today) {
-  try {
-    console.log('[personalized-tarot] Starting personalized tarot');
-    const response = await fetch(`${baseUrl}/api/cron/personalized-tarot`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${env.CRON_SECRET}`,
-      },
-    });
-    const result = await response.json();
-    return new Response(JSON.stringify(result), {
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    console.error('[personalized-tarot] Error:', error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || 'Unknown error',
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      },
-    );
-  }
-}
-
 async function handleDiscordLogsCleanup(baseUrl, env) {
   try {
     console.log('[discord-cleanup] Starting Discord logs cleanup');
@@ -1115,6 +1051,117 @@ async function handleSEOMetricsSync(baseUrl, env) {
     });
   } catch (error) {
     console.error('[seo-sync] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleDailyInsightNotification(baseUrl, env, today) {
+  try {
+    console.log('[daily-insight] Starting tiered daily insight notification');
+    const response = await fetch(
+      `${baseUrl}/api/cron/daily-insight-notification`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${env.CRON_SECRET}`,
+        },
+      },
+    );
+    const result = await response.json();
+    console.log('[daily-insight] Result:', result);
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[daily-insight] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handleWeeklyNotifications(baseUrl, env, today, dayOfWeek) {
+  try {
+    if (![0, 1, 5].includes(dayOfWeek)) {
+      console.log(
+        `[weekly-notifications] Skipping - not a scheduled day (day: ${dayOfWeek})`,
+      );
+      return new Response(
+        JSON.stringify({
+          success: true,
+          skipped: true,
+          reason: `Not a scheduled day (${dayOfWeek})`,
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    }
+
+    console.log('[weekly-notifications] Starting weekly notification');
+    const response = await fetch(`${baseUrl}/api/cron/weekly-notifications`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+    });
+    const result = await response.json();
+    console.log('[weekly-notifications] Result:', result);
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[weekly-notifications] Error:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+}
+
+async function handlePersonalTransitNotification(baseUrl, env, today) {
+  try {
+    console.log(
+      '[personal-transit] Starting personal transit notification (paid users)',
+    );
+    const response = await fetch(
+      `${baseUrl}/api/cron/personal-transit-notification`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${env.CRON_SECRET}`,
+        },
+      },
+    );
+    const result = await response.json();
+    console.log('[personal-transit] Result:', result);
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[personal-transit] Error:', error);
     return new Response(
       JSON.stringify({
         success: false,

@@ -1,44 +1,232 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Share2, X, Download, Copy, Check, Loader2 } from 'lucide-react';
+import { useAccount } from 'jazz-tools/react';
+import { getTarotCard } from '../../utils/tarot/tarot';
+import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCrystals';
+import {
+  calculateCrystalRecommendation,
+  getCrystalGuidance,
+} from '../../utils/crystals/personalizedCrystals';
+import {
+  getBirthChartFromProfile,
+  hasBirthChart,
+} from '../../utils/astrology/birthChart';
+import { getAstrologicalChart } from '../../utils/astrology/astrology';
+import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
+import { getUpcomingTransits } from '../../utils/astrology/transitCalendar';
+import {
+  getPersonalTransitImpacts,
+  PersonalTransitImpact,
+} from '../../utils/astrology/personalTransits';
+import { useSubscription } from '../hooks/useSubscription';
+import { hasBirthChartAccess } from '../../utils/pricing';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
 
-interface CardData {
-  date: string;
-  moonPhase: string;
-  moonSign: string;
-  moonEmoji: string;
-  tarot: { name: string; keywords: string[] };
-  crystal: { name: string; reason: string };
-  transit: string;
-  insight: string;
-  isPersonalized: boolean;
-  ogImageUrl: string;
-}
+dayjs.extend(utc);
+dayjs.extend(dayOfYear);
 
 export function ShareDailyInsight() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [cardData, setCardData] = useState<CardData | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [observer, setObserver] = useState<any>(null);
+
+  const { me } = useAccount();
+  const subscription = useSubscription();
+
+  const userName = (me?.profile as any)?.name;
+  const userBirthday = (me?.profile as any)?.birthday;
+  const firstName = userName?.trim() ? userName.split(' ')[0] : '';
+
+  const hasChartAccess = hasBirthChartAccess(
+    subscription.status,
+    subscription.plan,
+  );
+
+  const hasBirthChartData = hasBirthChart(me?.profile);
+  const birthChart = hasBirthChartData
+    ? getBirthChartFromProfile(me?.profile)
+    : null;
+
+  useEffect(() => {
+    import('astronomy-engine').then((module) => {
+      const { Observer } = module;
+      setObserver(new Observer(51.4769, 0.0005, 0));
+    });
+  }, []);
+
+  const today = useMemo(() => dayjs(), []);
+  const dateStr = today.format('YYYY-MM-DD');
+  const normalizedDate = useMemo(() => {
+    return new Date(dateStr + 'T12:00:00');
+  }, [dateStr]);
+
+  const tarotData = useMemo(() => {
+    if (hasChartAccess && userName && userBirthday) {
+      const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
+      return {
+        name: card.name,
+        keywords: card.keywords?.slice(0, 3) || [],
+        isPersonalized: true,
+      };
+    }
+
+    const nowUtc = today.utc();
+    const dayOfYearUtc = nowUtc.dayOfYear();
+    const generalSeed = `cosmic-${nowUtc.format('YYYY-MM-DD')}-${dayOfYearUtc}-energy`;
+    const card = getTarotCard(generalSeed);
+    return {
+      name: card.name,
+      keywords: card.keywords?.slice(0, 3) || [],
+      isPersonalized: false,
+    };
+  }, [hasChartAccess, userName, userBirthday, dateStr, today]);
+
+  const crystalData = useMemo(() => {
+    if (!hasChartAccess || !birthChart || !observer) {
+      const general = getGeneralCrystalRecommendation(normalizedDate);
+      return {
+        name: general.name,
+        reason: general.reason,
+        isPersonalized: false,
+      };
+    }
+
+    const currentTransits = getAstrologicalChart(normalizedDate, observer);
+    const sunSign = birthChart.find((p) => p.body === 'Sun')?.sign || 'Aries';
+    const { crystal, reasons } = calculateCrystalRecommendation(
+      birthChart,
+      currentTransits,
+      normalizedDate,
+      userBirthday,
+    );
+
+    const guidance = getCrystalGuidance(crystal, reasons, sunSign);
+
+    return {
+      name: crystal.name,
+      reason: guidance || crystal.properties?.slice(0, 2).join(', ') || '',
+      isPersonalized: true,
+    };
+  }, [hasChartAccess, birthChart, observer, normalizedDate, userBirthday]);
+
+  const horoscope = useMemo(() => {
+    const general = getGeneralHoroscope(normalizedDate);
+    return general.reading.split('.').slice(0, 2).join('.') + '.';
+  }, [normalizedDate]);
+
+  const getOrdinalSuffix = (n: number): string => {
+    if (n >= 11 && n <= 13) return 'th';
+    switch (n % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  };
+
+  const transitData = useMemo((): {
+    planet: string;
+    title: string;
+    desc: string;
+    date: string;
+  } | null => {
+    if (!hasChartAccess || !birthChart || birthChart.length === 0) {
+      return null;
+    }
+
+    const upcomingTransits = getUpcomingTransits();
+    const personalImpacts = getPersonalTransitImpacts(
+      upcomingTransits,
+      birthChart,
+      20,
+    );
+
+    if (personalImpacts.length === 0) return null;
+
+    const todayDayjs = dayjs().startOf('day');
+    const nextWeek = todayDayjs.add(7, 'day');
+
+    const relevantTransits = personalImpacts.filter((t) => {
+      const transitDate = dayjs(t.date);
+      return (
+        transitDate.isAfter(todayDayjs.subtract(1, 'day')) &&
+        transitDate.isBefore(nextWeek)
+      );
+    });
+
+    let transit: PersonalTransitImpact;
+    if (relevantTransits.length === 0) {
+      transit = personalImpacts[0];
+    } else {
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      const sorted = relevantTransits.sort((a, b) => {
+        const priorityDiff =
+          priorityOrder[b.significance] - priorityOrder[a.significance];
+        if (priorityDiff !== 0) return priorityDiff;
+        return dayjs(a.date).diff(dayjs(b.date));
+      });
+      transit = sorted[0];
+    }
+
+    const transitDate = dayjs(transit.date);
+    const isToday = transitDate.isSame(dayjs(), 'day');
+    const isTomorrow = transitDate.isSame(dayjs().add(1, 'day'), 'day');
+    const dateLabel = isToday
+      ? 'Today'
+      : isTomorrow
+        ? 'Tomorrow'
+        : transitDate.format('MMM D').toUpperCase();
+
+    const title =
+      transit.planet === 'Moon'
+        ? `${transit.event}${transit.house ? ` → your ${transit.house}${getOrdinalSuffix(transit.house)} house` : ''}`
+        : `${transit.event}${transit.house ? ` → your ${transit.house}${getOrdinalSuffix(transit.house)} house` : ''}`;
+
+    return {
+      planet: transit.planet,
+      title,
+      desc: transit.actionableGuidance,
+      date: dateLabel,
+    };
+  }, [hasChartAccess, birthChart]);
+
+  const isPersonalized =
+    hasChartAccess && tarotData.isPersonalized && crystalData.isPersonalized;
 
   const generateCard = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/share/daily-insight');
-      if (!response.ok) throw new Error('Failed to fetch card data');
+      const ogParams = new URLSearchParams({
+        name: firstName,
+        tarot: tarotData.name,
+        tarotKeywords: tarotData.keywords.join(' • '),
+        crystal: crystalData.name,
+        crystalReason: crystalData.reason.substring(0, 100),
+        insight: horoscope.substring(0, 200),
+        personalized: isPersonalized ? 'true' : 'false',
+        transitDate: transitData?.date || today.format('MMM D').toUpperCase(),
+        transitPlanet: transitData?.planet || 'Moon',
+        transitTitle: transitData?.title || 'Full Moon → your 5th house',
+        transitDesc:
+          transitData?.desc || 'Follow your heart, do what brings joy',
+      });
 
-      const data = await response.json();
-      if (!data.success)
-        throw new Error(data.error || 'Failed to generate card');
+      const ogImageUrl = `/api/og/daily-insight?${ogParams.toString()}`;
 
-      setCardData(data.card);
-
-      const imageResponse = await fetch(data.card.ogImageUrl);
+      const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) throw new Error('Failed to generate image');
 
       const blob = await imageResponse.blob();
@@ -49,17 +237,25 @@ export function ShareDailyInsight() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [
+    firstName,
+    tarotData,
+    crystalData,
+    horoscope,
+    isPersonalized,
+    today,
+    transitData,
+  ]);
 
   const handleOpen = async () => {
     setIsOpen(true);
-    if (!cardData) {
+    if (!imageBlob) {
       await generateCard();
     }
   };
 
   const handleShare = async () => {
-    if (!imageBlob || !cardData) return;
+    if (!imageBlob) return;
 
     const file = new File([imageBlob], 'lunary-daily-insight.png', {
       type: 'image/png',
@@ -70,7 +266,7 @@ export function ShareDailyInsight() {
         await navigator.share({
           files: [file],
           title: 'My Daily Cosmic Insight',
-          text: `${cardData.moonPhase} in ${cardData.moonSign} • ${cardData.tarot.name} • ${cardData.crystal.name}`,
+          text: `${tarotData.name} • ${crystalData.name}`,
         });
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {

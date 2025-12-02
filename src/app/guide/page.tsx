@@ -22,6 +22,8 @@ import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { captureEvent } from '@/lib/posthog-client';
+import { dismissRitualBadge, useRitualBadge } from '@/hooks/useRitualBadge';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface CollectionFolder {
   id: number;
@@ -170,6 +172,8 @@ function BookOfShadowsContent() {
   const searchParams = useSearchParams();
   const { me } = useAccount();
   const userBirthday = (me?.profile as any)?.birthday;
+  const { isSubscribed } = useSubscription();
+  const ritualState = useRitualBadge(isSubscribed);
 
   const {
     messages,
@@ -272,6 +276,37 @@ function BookOfShadowsContent() {
       recordCheckIn();
     }
   }, [authState.isAuthenticated, authState.loading]);
+
+  // Inject ritual message when user visits during ritual time
+  const [ritualInjected, setRitualInjected] = useState(false);
+  useEffect(() => {
+    if (
+      !isLoadingHistory &&
+      !ritualInjected &&
+      ritualState.hasUnreadMessage &&
+      ritualState.message &&
+      messages.length === 0
+    ) {
+      const messageId =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `ritual-${Date.now()}`;
+      addMessage({
+        id: messageId,
+        role: 'assistant',
+        content: ritualState.message,
+      });
+      setRitualInjected(true);
+      dismissRitualBadge(isSubscribed);
+    }
+  }, [
+    isLoadingHistory,
+    ritualState,
+    messages.length,
+    ritualInjected,
+    addMessage,
+    isSubscribed,
+  ]);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [promptHandled, setPromptHandled] = useState<string | null>(null);
