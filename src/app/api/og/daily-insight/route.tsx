@@ -13,62 +13,143 @@ export const runtime = 'nodejs';
 
 let astronomiconFont: Buffer | null = null;
 let robotoFont: Buffer | null = null;
-let logoData: Buffer | null = null;
 
 function loadAssets() {
   if (!astronomiconFont) {
     try {
-      const fontPath = join(
-        process.cwd(),
-        'public',
-        'fonts',
-        'Astronomicon.ttf',
+      astronomiconFont = readFileSync(
+        join(process.cwd(), 'public', 'fonts', 'Astronomicon.ttf'),
       );
-      astronomiconFont = readFileSync(fontPath);
-    } catch (error) {
-      console.error('Failed to load Astronomicon font:', error);
+    } catch (e) {
+      console.error('Failed to load Astronomicon font:', e);
     }
   }
   if (!robotoFont) {
     try {
-      const fontPath = join(
-        process.cwd(),
-        'public',
-        'fonts',
-        'RobotoMono-Regular.ttf',
+      robotoFont = readFileSync(
+        join(process.cwd(), 'public', 'fonts', 'RobotoMono-Regular.ttf'),
       );
-      robotoFont = readFileSync(fontPath);
-    } catch (error) {
-      console.error('Failed to load Roboto Mono font:', error);
-    }
-  }
-  if (!logoData) {
-    try {
-      const logoPath = join(process.cwd(), 'public', 'logo.png');
-      logoData = readFileSync(logoPath);
-    } catch (error) {
-      console.error('Failed to load logo:', error);
+    } catch (e) {
+      console.error('Failed to load Roboto Mono font:', e);
     }
   }
 }
+
+const TelescopeIcon = ({ size = 28 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox='0 0 24 24'
+    fill='none'
+    stroke='#d8b4fe'
+    strokeWidth='2'
+    strokeLinecap='round'
+    strokeLinejoin='round'
+  >
+    <path d='m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44' />
+    <path d='m13.56 11.747 4.332-.924' />
+    <path d='m16 21-3.105-6.21' />
+    <path d='M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z' />
+    <path d='m6.158 8.633 1.114 4.456' />
+    <path d='m8 21 3.105-6.21' />
+  </svg>
+);
+
+const SparklesIcon = ({ size = 28 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox='0 0 24 24'
+    fill='none'
+    stroke='#d8b4fe'
+    strokeWidth='2'
+    strokeLinecap='round'
+    strokeLinejoin='round'
+  >
+    <path d='M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z' />
+    <path d='M20 3v4' />
+    <path d='M22 5h-4' />
+    <path d='M4 17v2' />
+    <path d='M5 18H3' />
+  </svg>
+);
+
+const LayersIcon = ({ size = 28 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox='0 0 24 24'
+    fill='none'
+    stroke='#d8b4fe'
+    strokeWidth='2'
+    strokeLinecap='round'
+    strokeLinejoin='round'
+  >
+    <path d='m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z' />
+    <path d='m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65' />
+    <path d='m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65' />
+  </svg>
+);
+
+const GemIcon = ({ size = 28 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox='0 0 24 24'
+    fill='none'
+    stroke='#d8b4fe'
+    strokeWidth='2'
+    strokeLinecap='round'
+    strokeLinejoin='round'
+  >
+    <path d='M6 3h12l4 6-10 13L2 9Z' />
+    <path d='M11 3 8 9l4 13 4-13-3-6' />
+    <path d='M2 9h20' />
+  </svg>
+);
+
+const LunaryLogo = ({ size = 28 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox='0 0 256 256' fill='none'>
+    <circle
+      cx='128'
+      cy='128'
+      r='83'
+      fill='#FEFFFF'
+      stroke='#101827'
+      strokeWidth='4'
+    />
+    <circle cx='99' cy='99' r='10' fill='#D2D5DB' />
+    <circle cx='151' cy='141' r='15' fill='#D2D5DB' />
+    <circle cx='120' cy='161' r='6' fill='#D2D5DB' />
+    <circle cx='161' cy='99' r='8' fill='#D2D5DB' />
+  </svg>
+);
 
 export async function GET(request: NextRequest): Promise<Response> {
   try {
     loadAssets();
 
-    const logoSrc = logoData
-      ? `data:image/png;base64,${logoData.toString('base64')}`
-      : null;
-
     const { searchParams } = new URL(request.url);
-
     const userName = searchParams.get('name') || '';
-    const tarotCard = searchParams.get('tarot') || 'The Star';
+    const tarotCard = searchParams.get('tarot') || 'Two of Wands';
     const tarotKeywords =
-      searchParams.get('tarotKeywords') || 'Hope • Inspiration • Renewal';
-    const crystal = searchParams.get('crystal') || 'Clear Quartz';
-    const insight = searchParams.get('insight') || '';
+      searchParams.get('tarotKeywords') ||
+      'future planning • progress • decisions';
+    const crystal = searchParams.get('crystal') || 'Amethyst';
+    const crystalReason =
+      searchParams.get('crystalReason') ||
+      'Resonates with Sun in Sagittarius. Supports Uranus-Saturn square.';
+    const insight =
+      searchParams.get('insight') ||
+      'Mars in Sagittarius brings adventurous and direct energy to your 11th house, your social life becomes active and you may take leadership in groups.';
     const isPersonalized = searchParams.get('personalized') === 'true';
+    const transitDate = searchParams.get('transitDate') || 'DEC 5';
+    const transitPlanet = searchParams.get('transitPlanet') || 'Moon';
+    const transitTitle =
+      searchParams.get('transitTitle') || 'Full Moon → your 5th house';
+    const transitDesc =
+      searchParams.get('transitDesc') ||
+      'Follow your heart, do what brings joy';
 
     const today = new Date();
     const dateStr = today.toLocaleDateString('en-GB', {
@@ -95,9 +176,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       (p) => positions[p]?.retrograde,
     ).length;
 
-    const title = userName
-      ? `${userName}'s Lunary Insight`
-      : 'Your Lunary Insight for Today';
+    const firstName = userName ? userName.split(' ')[0] : '';
 
     const fonts: {
       name: string;
@@ -105,7 +184,6 @@ export async function GET(request: NextRequest): Promise<Response> {
       style: 'normal';
       weight?: 400 | 700;
     }[] = [];
-
     if (astronomiconFont) {
       fonts.push({
         name: 'Astronomicon',
@@ -115,68 +193,13 @@ export async function GET(request: NextRequest): Promise<Response> {
       });
     }
     if (robotoFont) {
-      fonts.push({
-        name: 'Roboto Mono',
-        data: robotoFont,
-        style: 'normal',
-      });
+      fonts.push({ name: 'Roboto Mono', data: robotoFont, style: 'normal' });
     }
 
-    // Inline SVG icons (Lucide-style)
-    const SparklesIcon = (
-      <svg
-        width='28'
-        height='28'
-        viewBox='0 0 24 24'
-        fill='none'
-        stroke='rgba(216, 180, 254, 0.8)'
-        strokeWidth='2'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      >
-        <path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z' />
-        <path d='M5 3v4' />
-        <path d='M19 17v4' />
-        <path d='M3 5h4' />
-        <path d='M17 19h4' />
-      </svg>
-    );
+    const titleContent = firstName
+      ? `${firstName}'s Lunary Insight`
+      : 'Lunary Insight';
 
-    const LayersIcon = (
-      <svg
-        width='24'
-        height='24'
-        viewBox='0 0 24 24'
-        fill='none'
-        stroke='rgba(216, 180, 254, 0.8)'
-        strokeWidth='2'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      >
-        <path d='m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z' />
-        <path d='m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65' />
-        <path d='m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65' />
-      </svg>
-    );
-
-    const GemIcon = (
-      <svg
-        width='24'
-        height='24'
-        viewBox='0 0 24 24'
-        fill='none'
-        stroke='rgba(216, 180, 254, 0.8)'
-        strokeWidth='2'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      >
-        <path d='M6 3h12l4 6-10 13L2 9Z' />
-        <path d='M11 3 8 9l4 13 4-13-3-6' />
-        <path d='M2 9h20' />
-      </svg>
-    );
-
-    // Match mobile view - tighter spacing to fit in view
     const response = new ImageResponse(
       (
         <div
@@ -186,44 +209,33 @@ export async function GET(request: NextRequest): Promise<Response> {
             display: 'flex',
             flexDirection: 'column',
             background: '#09090b',
-            fontFamily: robotoFont ? 'Roboto Mono' : 'system-ui',
+            fontFamily: 'Roboto Mono, monospace',
             color: 'white',
-            padding: '48px 40px',
+            padding: '40px 44px',
           }}
         >
-          {/* Header */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              marginBottom: '32px',
+              marginBottom: '24px',
             }}
           >
             <div
               style={{
-                fontSize: '44px',
+                fontSize: '48px',
                 display: 'flex',
-                alignItems: 'center',
+                color: firstName ? '#d8b4fe' : '#e4e4e7',
               }}
             >
-              <span style={{ color: '#e4e4e7', display: 'flex' }}>
-                Good morning,{' '}
-              </span>
-              <span
-                style={{
-                  color: 'rgba(216, 180, 254, 0.8)',
-                  display: 'flex',
-                }}
-              >
-                {userName || 'friend'}
-              </span>
+              {titleContent}
             </div>
             <div
               style={{
-                fontSize: '28px',
-                color: '#71717a',
-                marginTop: '6px',
+                fontSize: '30px',
+                color: '#a1a1aa',
+                marginTop: '8px',
                 display: 'flex',
               }}
             >
@@ -231,53 +243,13 @@ export async function GET(request: NextRequest): Promise<Response> {
             </div>
           </div>
 
-          {/* Moon Phase Card - compact */}
-          <div
-            style={{
-              display: 'flex',
-              border: '1px solid #27272a',
-              borderRadius: '14px',
-              padding: '20px 28px',
-              marginBottom: '12px',
-              background: '#18181b',
-              alignItems: 'center',
-              gap: '14px',
-            }}
-          >
-            <div style={{ fontSize: '36px', display: 'flex' }}>
-              {moonPhase.emoji}
-            </div>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <span
-                style={{
-                  fontSize: '28px',
-                  color: '#e4e4e7',
-                  fontWeight: 500,
-                  display: 'flex',
-                }}
-              >
-                {moonPhase.name}
-              </span>
-              <span
-                style={{
-                  fontSize: '24px',
-                  color: '#71717a',
-                  display: 'flex',
-                }}
-              >
-                in {positions.Moon?.sign || 'Aries'}
-              </span>
-            </div>
-          </div>
-
-          {/* Sky Now Card */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               border: '1px solid #27272a',
-              borderRadius: '14px',
-              padding: '20px 28px',
+              borderRadius: '16px',
+              padding: '18px 24px',
               marginBottom: '12px',
               background: '#18181b',
             }}
@@ -286,83 +258,147 @@ export async function GET(request: NextRequest): Promise<Response> {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
-                marginBottom: '16px',
+                gap: '16px',
               }}
             >
-              {SparklesIcon}
-              <span
-                style={{ fontSize: '24px', color: '#e4e4e7', display: 'flex' }}
+              <div style={{ fontSize: '44px', display: 'flex' }}>
+                {moonPhase.emoji}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '12px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '36px',
+                      fontWeight: 600,
+                      color: '#fafafa',
+                      display: 'flex',
+                    }}
+                  >
+                    {moonPhase.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '30px',
+                      color: '#a1a1aa',
+                      display: 'flex',
+                    }}
+                  >
+                    in {positions.Moon?.sign || 'Aries'}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    fontSize: '24px',
+                    color: '#a1a1aa',
+                    marginTop: '4px',
+                    display: 'flex',
+                  }}
+                >
+                  4 days until Full Moon
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '16px',
+              padding: '18px 24px',
+              marginBottom: '12px',
+              background: '#18181b',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '14px',
+              }}
+            >
+              <TelescopeIcon size={28} />
+              <div
+                style={{ fontSize: '32px', color: '#fafafa', display: 'flex' }}
               >
                 Sky Now
-              </span>
+              </div>
               {retrogradeCount > 0 && (
-                <span
+                <div
                   style={{
-                    fontSize: '18px',
+                    fontSize: '20px',
                     color: '#f87171',
                     background: 'rgba(248, 113, 113, 0.15)',
-                    padding: '4px 12px',
+                    padding: '4px 14px',
                     borderRadius: '8px',
                     display: 'flex',
                   }}
                 >
                   {retrogradeCount} Retrograde
-                </span>
+                </div>
               )}
             </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '8px',
+              }}
+            >
+              {planets.map((planet) => (
+                <div
+                  key={planet}
+                  style={{
+                    fontFamily: 'Astronomicon',
+                    fontSize: '38px',
+                    color: positions[planet]?.retrograde
+                      ? '#f87171'
+                      : '#e4e4e7',
+                    width: '10%',
+                    textAlign: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {getPlanetSymbol(planet)}
+                </div>
+              ))}
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              {planets.map((planet) => {
-                const pos = positions[planet];
-                const isRetrograde = pos?.retrograde;
-                return (
-                  <div
-                    key={planet}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: astronomiconFont
-                          ? 'Astronomicon'
-                          : 'system-ui',
-                        fontSize: '32px',
-                        color: isRetrograde ? '#f87171' : '#e4e4e7',
-                        display: 'flex',
-                      }}
-                    >
-                      {getPlanetSymbol(planet)}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: astronomiconFont
-                          ? 'Astronomicon'
-                          : 'system-ui',
-                        fontSize: '20px',
-                        color: '#52525b',
-                        marginTop: '4px',
-                        display: 'flex',
-                      }}
-                    >
-                      {getZodiacSymbol(pos?.sign || 'Aries')}
-                    </span>
-                  </div>
-                );
-              })}
+              {planets.map((planet) => (
+                <div
+                  key={`z-${planet}`}
+                  style={{
+                    fontFamily: 'Astronomicon',
+                    fontSize: '30px',
+                    color: '#a1a1aa',
+                    width: '10%',
+                    textAlign: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {getZodiacSymbol(positions[planet]?.sign || 'Aries')}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Your Day Card */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               border: '1px solid #27272a',
-              borderRadius: '14px',
-              padding: '20px 28px',
+              borderRadius: '16px',
+              padding: '18px 24px',
               marginBottom: '12px',
               background: '#18181b',
             }}
@@ -371,196 +407,229 @@ export async function GET(request: NextRequest): Promise<Response> {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
-                marginBottom: '12px',
+                gap: '12px',
+                marginBottom: '10px',
               }}
             >
-              {SparklesIcon}
-              <span
-                style={{
-                  fontSize: '24px',
-                  color: '#e4e4e7',
-                  display: 'flex',
-                }}
+              <SparklesIcon size={28} />
+              <div
+                style={{ fontSize: '32px', color: '#fafafa', display: 'flex' }}
               >
                 Your Day
-              </span>
+              </div>
               {isPersonalized && (
-                <span
+                <div
                   style={{
-                    fontSize: '16px',
-                    color: 'rgba(216, 180, 254, 0.8)',
-                    background: 'rgba(192, 132, 252, 0.15)',
+                    fontSize: '18px',
+                    color: '#d8b4fe',
+                    background: 'rgba(216, 180, 254, 0.15)',
                     padding: '4px 12px',
                     borderRadius: '8px',
                     display: 'flex',
                   }}
                 >
                   Personal
-                </span>
+                </div>
               )}
             </div>
             <div
               style={{
-                fontSize: '22px',
+                fontSize: '24px',
                 color: '#a1a1aa',
-                lineHeight: 1.5,
+                lineHeight: 1.4,
                 display: 'flex',
               }}
             >
-              {insight
-                ? insight.substring(0, 200) +
-                  (insight.length > 200 ? '...' : '')
-                : 'Your cosmic insight for today awaits.'}
+              {insight.length > 180
+                ? insight.substring(0, 180) + '...'
+                : insight}
             </div>
           </div>
 
-          {/* Bottom row: Daily Card + Crystal side by side */}
-          <div style={{ display: 'flex', gap: '12px' }}>
-            {/* Daily Card */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                flex: 1,
-                border: '1px solid #27272a',
-                borderRadius: '14px',
-                padding: '20px 24px',
-                background: '#18181b',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '10px',
-                }}
-              >
-                {LayersIcon}
-                <span
-                  style={{
-                    fontSize: '20px',
-                    color: '#e4e4e7',
-                    display: 'flex',
-                  }}
-                >
-                  Daily Card
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: '24px',
-                  color: 'rgba(216, 180, 254, 0.8)',
-                  marginBottom: '6px',
-                  display: 'flex',
-                }}
-              >
-                {tarotCard}
-              </div>
-              <div
-                style={{
-                  fontSize: '16px',
-                  color: '#71717a',
-                  display: 'flex',
-                }}
-              >
-                {tarotKeywords}
-              </div>
-            </div>
-
-            {/* Crystal Card */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                flex: 1,
-                border: '1px solid #27272a',
-                borderRadius: '14px',
-                padding: '20px 24px',
-                background: '#18181b',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '10px',
-                }}
-              >
-                {GemIcon}
-                <span
-                  style={{
-                    fontSize: '20px',
-                    color: '#e4e4e7',
-                    display: 'flex',
-                  }}
-                >
-                  Crystal
-                </span>
-                {isPersonalized && (
-                  <span
-                    style={{
-                      fontSize: '14px',
-                      color: 'rgba(216, 180, 254, 0.8)',
-                      background: 'rgba(192, 132, 252, 0.15)',
-                      padding: '3px 10px',
-                      borderRadius: '6px',
-                      display: 'flex',
-                    }}
-                  >
-                    For you
-                  </span>
-                )}
-              </div>
-              <div
-                style={{
-                  fontSize: '24px',
-                  color: 'rgba(216, 180, 254, 0.8)',
-                  display: 'flex',
-                }}
-              >
-                {crystal}
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
           <div
             style={{
-              marginTop: 'auto',
               display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingTop: '24px',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '16px',
+              padding: '18px 24px',
+              marginBottom: '12px',
+              background: '#18181b',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '14px',
+                gap: '12px',
+                marginBottom: '8px',
               }}
             >
-              {logoSrc && (
-                <img
-                  src={logoSrc}
-                  alt=''
-                  width={44}
-                  height={44}
-                  style={{ display: 'flex' }}
-                />
+              <LayersIcon size={28} />
+              <div
+                style={{ fontSize: '32px', color: '#fafafa', display: 'flex' }}
+              >
+                Daily Card
+              </div>
+              {isPersonalized && (
+                <div
+                  style={{
+                    fontSize: '18px',
+                    color: '#d8b4fe',
+                    background: 'rgba(216, 180, 254, 0.15)',
+                    padding: '4px 12px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                  }}
+                >
+                  Personal
+                </div>
               )}
+            </div>
+            <div
+              style={{
+                fontSize: '32px',
+                color: '#d8b4fe',
+                marginBottom: '6px',
+                display: 'flex',
+              }}
+            >
+              {tarotCard}
+            </div>
+            <div
+              style={{ fontSize: '24px', color: '#a1a1aa', display: 'flex' }}
+            >
+              {tarotKeywords}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '16px',
+              padding: '18px 24px',
+              marginBottom: '12px',
+              background: '#18181b',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '8px',
+              }}
+            >
               <div
                 style={{
-                  fontSize: '28px',
-                  color: 'rgba(216, 180, 254, 0.8)',
+                  fontFamily: 'Astronomicon',
+                  fontSize: '32px',
+                  color: '#d8b4fe',
                   display: 'flex',
                 }}
               >
-                lunary.app
+                {getPlanetSymbol(transitPlanet)}
               </div>
+              <div
+                style={{ fontSize: '30px', color: '#a1a1aa', display: 'flex' }}
+              >
+                {transitDate}
+              </div>
+              <div
+                style={{
+                  fontSize: '18px',
+                  color: '#fbbf24',
+                  background: 'rgba(251, 191, 36, 0.15)',
+                  padding: '4px 12px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                }}
+              >
+                Major
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: '28px',
+                color: '#fafafa',
+                marginBottom: '6px',
+                display: 'flex',
+              }}
+            >
+              {transitPlanet === 'Moon'
+                ? transitTitle
+                : `${transitPlanet} ${transitTitle}`}
+            </div>
+            <div
+              style={{ fontSize: '24px', color: '#a1a1aa', display: 'flex' }}
+            >
+              {transitDesc}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '16px',
+              padding: '18px 24px',
+              background: '#18181b',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '8px',
+              }}
+            >
+              <GemIcon size={28} />
+              <div
+                style={{ fontSize: '32px', color: '#fafafa', display: 'flex' }}
+              >
+                {crystal}
+              </div>
+              {isPersonalized && (
+                <div
+                  style={{
+                    fontSize: '18px',
+                    color: '#d8b4fe',
+                    background: 'rgba(216, 180, 254, 0.15)',
+                    padding: '4px 12px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                  }}
+                >
+                  For you
+                </div>
+              )}
+            </div>
+            <div
+              style={{ fontSize: '24px', color: '#a1a1aa', display: 'flex' }}
+            >
+              {crystalReason}
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 'auto',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingTop: '20px',
+              gap: '14px',
+            }}
+          >
+            <LunaryLogo size={40} />
+            <div
+              style={{ fontSize: '32px', color: '#d8b4fe', display: 'flex' }}
+            >
+              lunary.app
             </div>
           </div>
         </div>
@@ -573,10 +642,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     );
 
     const headers = new Headers(response.headers);
-    headers.set(
-      'Cache-Control',
-      'public, s-maxage=3600, stale-while-revalidate=1800, max-age=3600',
-    );
+    headers.set('Cache-Control', 'no-store, max-age=0');
 
     return new Response(response.body, {
       status: response.status,
