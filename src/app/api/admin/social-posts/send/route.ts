@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lunary.app'
-        : 'http://localhost:3000';
+    // Use production URL on any Vercel deployment
+    const baseUrl = process.env.VERCEL
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
 
     const platforms = [platform];
 

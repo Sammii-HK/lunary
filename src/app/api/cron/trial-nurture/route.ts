@@ -10,10 +10,6 @@ import {
   generateTrialDay5EmailHTML,
   generateTrialDay5EmailText,
 } from '@/lib/email-templates/trial-nurture';
-import {
-  generateTrialExpiredEmailHTML,
-  generateTrialExpiredEmailText,
-} from '@/lib/email-templates/trial-expired';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,13 +36,9 @@ export async function GET(request: NextRequest) {
     const day5Date = new Date(today);
     day5Date.setDate(day5Date.getDate() - 5);
 
-    const day7Date = new Date(today);
-    day7Date.setDate(day7Date.getDate() - 7);
-
     let sentDay2 = 0;
     let sentDay3 = 0;
     let sentDay5 = 0;
-    let sentDay7 = 0;
     const errors: string[] = [];
 
     // Day 2: Birth Chart Reveals
@@ -244,78 +236,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Day 7: Trial Ended
-    const day7Trials = await sql`
-      SELECT DISTINCT
-        s.user_id,
-        s.user_email as email,
-        s.user_name as name,
-        s.trial_ends_at,
-        s.created_at as trial_started_at
-      FROM subscriptions s
-      WHERE s.status = 'trial'
-      AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.trial_ends_at) <= ${formatDate(today)}
-      AND DATE(s.created_at) = ${formatDate(day7Date)}
-      AND (s.trial_nurture_day7_sent = false OR s.trial_nurture_day7_sent IS NULL)
-      AND s.user_email IS NOT NULL
-    `;
-
-    for (const user of day7Trials.rows) {
-      try {
-        // Calculate missed insights (approximate)
-        const missedInsights = 7; // Daily insights over 7 days
-
-        const html = await generateTrialExpiredEmailHTML(
-          user.name || 'there',
-          missedInsights,
-        );
-        const text = await generateTrialExpiredEmailText(
-          user.name || 'there',
-          missedInsights,
-        );
-
-        await sendEmail({
-          to: user.email,
-          subject: '🌙 Your Trial Ended',
-          html,
-          text,
-          tracking: {
-            userId: user.user_id,
-            notificationType: 'trial_nurture',
-            notificationId: `trial-nurture-day7-${user.user_id}`,
-            utm: {
-              source: 'email',
-              medium: 'lifecycle',
-              campaign: 'trial_nurture',
-              content: 'day7',
-            },
-          },
-        });
-
-        await sql`
-          UPDATE subscriptions
-          SET trial_nurture_day7_sent = true
-          WHERE user_id = ${user.user_id}
-          AND status = 'trial'
-        `;
-
-        sentDay7++;
-      } catch (error) {
-        errors.push(
-          `Failed to send Day 7 email to ${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        );
-      }
-    }
-
     return NextResponse.json({
       success: true,
       sent: {
         day2: sentDay2,
         day3: sentDay3,
         day5: sentDay5,
-        day7: sentDay7,
-        total: sentDay2 + sentDay3 + sentDay5 + sentDay7,
+        total: sentDay2 + sentDay3 + sentDay5,
       },
       errors: errors.length > 0 ? errors : undefined,
     });

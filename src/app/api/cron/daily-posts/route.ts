@@ -1552,10 +1552,9 @@ async function runNotificationCheck(dateStr: string) {
     '🔔 Checking for significant astronomical events via PostgreSQL...',
   );
 
-  const baseUrl =
-    process.env.NODE_ENV === 'production'
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+  const baseUrl = process.env.VERCEL
+    ? 'https://lunary.app'
+    : 'http://localhost:3000';
 
   try {
     // First, get the cosmic data to determine what notifications to send
@@ -2555,9 +2554,8 @@ function createNotificationFromEvent(event: any, cosmicData?: any) {
 }
 
 function getBaseUrl(request: NextRequest): string {
-  return process.env.NODE_ENV === 'production'
-    ? 'https://lunary.app'
-    : request.nextUrl.origin;
+  // Use production URL on any Vercel deployment
+  return process.env.VERCEL ? 'https://lunary.app' : request.nextUrl.origin;
 }
 
 // Dynamic content generators

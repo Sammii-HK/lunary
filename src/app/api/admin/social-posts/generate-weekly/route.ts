@@ -595,10 +595,11 @@ Return JSON: {"posts": ["Post content"]}`;
     }
 
     // Generate OG image URLs for Instagram posts
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lunary.app'
-        : 'http://localhost:3000';
+    // Always use production URL for stored image URLs (they get saved to DB and used later)
+    // Use production URL on any Vercel deployment (VERCEL env var is set on all Vercel deployments)
+    const baseUrl = process.env.VERCEL
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
 
     // Save all posts to database with image URLs
     // Use quote pool for Instagram posts (quotes are stored and reused, not regenerated each time)
