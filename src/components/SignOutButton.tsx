@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { betterAuthClient } from '@/lib/auth-client';
-import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
+import { useAuthStatus } from './AuthStatus';
 
 export function SignOutButton() {
   const [loading, setLoading] = useState(false);
-  const authState = useAuthStatus();
+  const { isAuthenticated, refreshAuth } = useAuthStatus();
+  const router = useRouter();
 
   const handleSignOut = async () => {
     setLoading(true);
@@ -14,15 +16,18 @@ export function SignOutButton() {
     try {
       console.log('🔄 Starting sign out...');
 
+      // Step 1: Sign out from better-auth (server-side session)
       try {
         await betterAuthClient.signOut();
-        invalidateAuthCache();
         console.log('✅ Better Auth signed out');
       } catch (error) {
         console.log('⚠️ Better Auth sign out failed:', error);
       }
 
-      // Step 2: Clear ALL localStorage and sessionStorage
+      // Step 2: Trigger auth refresh to update all components
+      refreshAuth();
+
+      // Step 3: Clear ALL localStorage and sessionStorage
       if (typeof window !== 'undefined') {
         console.log('🗑️ Clearing all browser storage...');
 
@@ -68,7 +73,7 @@ export function SignOutButton() {
         console.log('✅ Cleared all storage completely');
       }
 
-      // Step 3: Clear cookies
+      // Step 4: Clear cookies
       if (typeof document !== 'undefined') {
         document.cookie.split(';').forEach((c) => {
           const eqPos = c.indexOf('=');
@@ -82,7 +87,7 @@ export function SignOutButton() {
         console.log('✅ Cleared cookies');
       }
 
-      // Step 4: Clear service worker caches for subscription API responses
+      // Step 5: Clear service worker caches for subscription API responses
       try {
         if ('caches' in window) {
           const cacheNames = await caches.keys();
@@ -95,18 +100,24 @@ export function SignOutButton() {
         console.warn('Could not clear service worker caches:', e);
       }
 
-      // Step 5: Force page reload to clear React state
-      window.location.href = '/';
-
       console.log('🎉 Complete sign out finished');
+
+      // Step 6: Refresh the router to update server components
+      router.refresh();
+
+      // Step 7: Navigate to home
+      router.push('/');
     } catch (error) {
       console.error('❌ Sign out error:', error);
+      // Even on error, try to refresh
+      refreshAuth();
+      router.push('/');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!authState.isAuthenticated) {
+  if (!isAuthenticated) {
     return null;
   }
 

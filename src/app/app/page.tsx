@@ -8,6 +8,7 @@ import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import { recordCheckIn } from '@/lib/streak/check-in';
 
 import { DateWidget } from '@/components/DateWidget';
+import { ShareDailyInsight } from '@/components/ShareDailyInsight';
 
 const MoonPreview = dynamic(
   () =>
@@ -120,10 +121,7 @@ export default function AppDashboard() {
   const { me } = useAccount();
   const authState = useAuthStatus();
   const userName = (me?.profile as any)?.name;
-  const firstName =
-    authState.isAuthenticated && userName?.trim()
-      ? userName.split(' ')[0]
-      : null;
+  const firstName = userName?.trim() ? userName.split(' ')[0] : null;
 
   useEffect(() => {
     if (authState.isAuthenticated && !authState.loading) {
@@ -145,16 +143,24 @@ export default function AppDashboard() {
 
         <PostTrialMessaging />
 
-        <header className='text-center py-4'>
-          <p className='text-lg text-zinc-300'>
-            {greeting()}
-            {firstName && (
-              <>
-                , <span className='text-purple-400'>{firstName}</span>
-              </>
-            )}
-          </p>
-          <DateWidget />
+        <header className='py-4'>
+          <div className='flex items-center justify-between mb-2'>
+            <div className='w-16' />
+            <p className='text-lg text-zinc-300 text-center flex-1'>
+              {greeting()}
+              {firstName && (
+                <>
+                  , <span className='text-purple-400'>{firstName}</span>
+                </>
+              )}
+            </p>
+            <div className='w-16 flex justify-end'>
+              <ShareDailyInsight />
+            </div>
+          </div>
+          <div className='text-center'>
+            <DateWidget />
+          </div>
         </header>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>

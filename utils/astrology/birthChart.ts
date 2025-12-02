@@ -244,12 +244,6 @@ export const getBirthChartFromProfile = (
 };
 
 export const hasBirthChart = (profile: any): boolean => {
-  const result = !!profile?.birthChart && profile.birthChart.length > 0;
-  console.log('hasBirthChart check:', {
-    profile: !!profile,
-    birthChart: !!profile?.birthChart,
-    length: profile?.birthChart?.length,
-    result,
-  });
-  return result;
+  if (!profile?.birthChart) return false;
+  return profile.birthChart.length > 0;
 };
