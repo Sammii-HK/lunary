@@ -6,17 +6,14 @@ import generateSitemap from '@/app/sitemap';
 import {
   getPostHogActiveUsers,
   getPostHogAIMetrics,
+  getPostHogRetention,
+  getPostHogProductUsage,
 } from '@/lib/posthog-server';
 
 // Test user exclusion patterns - matches filtering in conversion events
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 const EXCLUDED_EMAIL = 'kellow.sammii@gmail.com';
-
-async function calculateRetention() {
-  // Retention now tracked by PostHog - view in PostHog dashboard
-  return { day_1: null, day_7: null, day_30: null };
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,7 +46,6 @@ export async function GET(request: NextRequest) {
       yearlySubscriptionsResult,
       trialConversions30dResult,
       totalTrials30dResult,
-      retentionResult,
       marketingAttributionResult,
       churnReasonsResult,
       ltvDataResult,
@@ -105,7 +101,6 @@ export async function GET(request: NextRequest) {
           AND created_at >= ${thirtyDaysAgoTimestamp}
           AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
       `,
-      calculateRetention(),
       sql`
         SELECT
           metadata->>'utm_source' AS utm_source,
@@ -159,8 +154,14 @@ export async function GET(request: NextRequest) {
       `,
     ]);
 
-    // DAU/WAU/MAU from PostHog
-    const posthogActiveUsers = await getPostHogActiveUsers();
+    // DAU/WAU/MAU and Retention from PostHog
+    const [posthogActiveUsers, posthogRetention, posthogProductUsage] =
+      await Promise.all([
+        getPostHogActiveUsers(),
+        getPostHogRetention(),
+        getPostHogProductUsage(30),
+      ]);
+
     const dau = posthogActiveUsers?.dau ?? 0;
     const wau = posthogActiveUsers?.wau ?? 0;
     const mau = posthogActiveUsers?.mau ?? 0;
@@ -195,10 +196,17 @@ export async function GET(request: NextRequest) {
     const trialToPaidConversionRate30d =
       totalTrials30d > 0 ? (trialConversions30d / totalTrials30d) * 100 : 0;
 
-    const retention = retentionResult;
+    const retention = posthogRetention
+      ? {
+          day_1: posthogRetention.day1,
+          day_7: posthogRetention.day7,
+          day_30: posthogRetention.day30,
+        }
+      : { day_1: null, day_7: null, day_30: null };
+
     const churnRate =
-      retention.day_30 !== null && retention.day_30 !== undefined
-        ? Math.max(0, 100 - retention.day_30)
+      posthogRetention !== null
+        ? Math.max(0, 100 - posthogRetention.day30)
         : null;
 
     // Correct pricing:
@@ -337,10 +345,10 @@ export async function GET(request: NextRequest) {
     // Tarot engagement now tracked by PostHog
     const tarotEngagementType: Record<string, number> = {};
 
-    // Crystal lookups now tracked by PostHog
-    const crystalUsers = 0;
-    const crystalTotalLookups = 0;
-    const crystalLookupsPerUser = 0;
+    // Crystal lookups from PostHog
+    const crystalUsers = posthogProductUsage?.crystalSearches ?? 0;
+    const crystalTotalLookups = posthogProductUsage?.crystalSearches ?? 0;
+    const crystalLookupsPerUser = crystalUsers > 0 ? 1 : 0;
 
     const stickiness = mau > 0 ? (dau / mau) * 100 : 0;
     const stickinessDauWau = wau > 0 ? (dau / wau) * 100 : 0;
@@ -541,9 +549,9 @@ export async function GET(request: NextRequest) {
     const cohorts = cohortRetentionResult.rows.map((row) => ({
       startDate: formatDate(new Date(row.cohort_start)),
       day0Users: Number(row.day0_users || 0),
-      day1Retention: null,
-      day7Retention: null,
-      day30Retention: null,
+      day1Retention: posthogRetention?.day1 ?? null,
+      day7Retention: posthogRetention?.day7 ?? null,
+      day30Retention: posthogRetention?.day30 ?? null,
       day90Retention: null,
     }));
 
@@ -810,13 +818,13 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Product usage metrics - now tracked by PostHog
-    const birthChartViews = 0;
-    const tarotPulls = 0;
-    const ritualsGenerated = 0;
-    const crystalSearches = 0;
-    const collectionsCreated = 0;
-    const reportsDownloaded = 0;
+    // Product usage metrics from PostHog
+    const birthChartViews = posthogProductUsage?.birthChartViews ?? 0;
+    const tarotPulls = posthogProductUsage?.tarotPulls ?? 0;
+    const ritualsGenerated = 0; // Not currently tracked
+    const crystalSearches = posthogProductUsage?.crystalSearches ?? 0;
+    const collectionsCreated = 0; // Not currently tracked
+    const reportsDownloaded = 0; // Not currently tracked
 
     // Pricing tier breakdown
     const freeUsersCount = await sql`

@@ -22,15 +22,36 @@ export interface SearchConsoleData {
 
 /**
  * Get authenticated Google Search Console client
+ * Supports both Service Account (preferred) and OAuth2 (fallback)
  */
 function getSearchConsoleClient() {
+  // Try Service Account first (never expires)
+  const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (serviceAccountJson) {
+    try {
+      const credentials = JSON.parse(serviceAccountJson);
+      const auth = new google.auth.GoogleAuth({
+        credentials,
+        scopes: SCOPES,
+      });
+
+      return google.searchconsole({
+        version: 'v1',
+        auth,
+      });
+    } catch (error) {
+      console.error('[Search Console] Invalid service account JSON:', error);
+    }
+  }
+
+  // Fallback to OAuth2 (requires manual token refresh)
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error(
-      'Missing Google Search Console credentials. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN environment variables.',
+      'Missing Google Search Console credentials. Set either GOOGLE_SERVICE_ACCOUNT_JSON (recommended) or GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN.',
     );
   }
 
