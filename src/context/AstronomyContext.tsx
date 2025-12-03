@@ -14,7 +14,7 @@ import {
   MoonPhaseLabels,
   stringToCamelCase,
 } from '../../utils/moon/moonPhases';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 
 type GlobalCosmicData = {
   moonPhase: {
@@ -64,9 +64,9 @@ export const AstronomyContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const account = useAccount();
-  const userName = account?.me?.profile?.name;
-  const userBirthday = (account?.me?.profile as any)?.birthday;
+  const { user } = useUser();
+  const userName = user?.name;
+  const userBirthday = user?.birthday;
 
   const [currentDateTime, setCurrentDateTime] = useState(dayjs().toDate());
   const [currentDate, setCurrentDate] = useState(

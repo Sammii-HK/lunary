@@ -27,6 +27,7 @@ import { StructuredData } from '@/components/StructuredData';
 import { AppChrome } from '@/components/AppChrome';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { AuthStatusProvider } from '@/components/AuthStatus';
+import { UserProvider } from '@/context/UserContext';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -157,22 +158,24 @@ export default function RootLayout({
             <ErrorBoundaryWrapper>
               <LunaryJazzProvider>
                 <AuthStatusProvider>
-                  <Suspense
-                    fallback={
-                      <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
-                        {children}
-                      </main>
-                    }
-                  >
-                    <ConditionalMainWrapper>
-                      <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                      <Analytics />
-                      <SpeedInsights />
-                    </ConditionalMainWrapper>
-                  </Suspense>
-                  <Suspense fallback={null}>
-                    <AppChrome />
-                  </Suspense>
+                  <UserProvider>
+                    <Suspense
+                      fallback={
+                        <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
+                          {children}
+                        </main>
+                      }
+                    >
+                      <ConditionalMainWrapper>
+                        <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                        <Analytics />
+                        <SpeedInsights />
+                      </ConditionalMainWrapper>
+                    </Suspense>
+                    <Suspense fallback={null}>
+                      <AppChrome />
+                    </Suspense>
+                  </UserProvider>
                 </AuthStatusProvider>
               </LunaryJazzProvider>
             </ErrorBoundaryWrapper>

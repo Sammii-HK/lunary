@@ -54,6 +54,7 @@ export function AppChrome() {
       '/profile',
       '/cosmic-state',
       '/cosmic-report-generator',
+      '/guide',
     ];
 
     const isCurrentAppPage = appPagesForContext.some(
@@ -127,6 +128,7 @@ export function AppChrome() {
     '/profile',
     '/cosmic-state',
     '/cosmic-report-generator',
+    '/guide',
     '/blog',
   ];
 

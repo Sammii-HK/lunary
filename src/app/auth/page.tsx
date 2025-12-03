@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { MarketingFooter } from '@/components/MarketingFooter';
+import { Logo } from '@/components/Logo';
 
 // Skip auth redirects ONLY in Playwright e2e tests (NOT Jest unit tests)
 function isTestMode(): boolean {
@@ -57,9 +58,10 @@ export default function AuthPage() {
       <div className='flex-1 flex items-center justify-center p-4'>
         <div className='w-full max-w-md'>
           <div className='text-center mb-8'>
-            <h1 className='text-4xl font-bold text-purple-400 mb-2'>
-              🌙 Lunary
-            </h1>
+            <div className='flex items-center justify-center gap-3 mb-2'>
+              <Logo size={48} />
+              <h1 className='text-4xl font-bold text-purple-400'>Lunary</h1>
+            </div>
             <p className='text-zinc-400'>Your Personal Cosmic Journey</p>
           </div>
 

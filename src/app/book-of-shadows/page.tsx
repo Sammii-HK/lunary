@@ -12,7 +12,7 @@ import React, {
 import { useSearchParams } from 'next/navigation';
 import { ArrowUp, ChevronDown, ChevronUp, Square } from 'lucide-react';
 
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -168,8 +168,8 @@ const MessageBubble = ({
 function BookOfShadowsContent() {
   const authState = useAuthStatus();
   const searchParams = useSearchParams();
-  const { me } = useAccount();
-  const userBirthday = (me?.profile as any)?.birthday;
+  const { user } = useUser();
+  const userBirthday = user?.birthday;
 
   const {
     messages,

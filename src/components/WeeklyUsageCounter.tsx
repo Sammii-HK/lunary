@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { Sparkles } from 'lucide-react';
 
 export function WeeklyUsageCounter() {
-  const { me } = useAccount();
+  const { user } = useUser();
   const [weeklyCount, setWeeklyCount] = useState<number | null>(null);
-  const userId = (me as any)?.id;
+  const userId = user?.id;
 
   useEffect(() => {
     // Calculate weekly usage count

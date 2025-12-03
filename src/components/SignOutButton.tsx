@@ -1,119 +1,56 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from './AuthStatus';
 
 export function SignOutButton() {
   const [loading, setLoading] = useState(false);
-  const { isAuthenticated, refreshAuth } = useAuthStatus();
+  const { isAuthenticated, signOut } = useAuthStatus();
   const router = useRouter();
+  const isSigningOut = useRef(false);
 
   const handleSignOut = async () => {
+    if (isSigningOut.current || loading) return;
+
+    isSigningOut.current = true;
     setLoading(true);
 
+    // Step 1: IMMEDIATELY update auth state - UI reacts instantly
+    signOut();
+
     try {
-      console.log('🔄 Starting sign out...');
-
-      // Step 1: Sign out from better-auth (server-side session)
-      try {
-        await betterAuthClient.signOut();
-        console.log('✅ Better Auth signed out');
-      } catch (error) {
-        console.log('⚠️ Better Auth sign out failed:', error);
-      }
-
-      // Step 2: Trigger auth refresh to update all components
-      refreshAuth();
-
-      // Step 3: Clear ALL localStorage and sessionStorage
+      // Step 2: Clear storage
       if (typeof window !== 'undefined') {
-        console.log('🗑️ Clearing all browser storage...');
-
-        // Clear everything - nuclear option
         localStorage.clear();
         sessionStorage.clear();
-
-        // Also manually clear specific keys that might persist
-        const specificKeys = [
-          'auth_token',
-          'better-auth',
-          'migration_completed',
-          'migration_data',
-          'migration_profile_data',
-          'migration_user_name',
-          'user_session',
-          'jazz',
-          'co-',
-          'account',
-          'subscription',
-          'stripe_subscription',
-          'subscription_data',
-          'trialUpgradeModalDismissed',
-          'exitIntentDismissed',
-        ];
-
-        // Clear subscription-related keys with prefixes
-        Object.keys(localStorage).forEach((key) => {
-          if (
-            key.startsWith('weekly_insights_') ||
-            key.startsWith('subscription_') ||
-            key.startsWith('stripe_')
-          ) {
-            localStorage.removeItem(key);
-          }
-        });
-
-        specificKeys.forEach((key) => {
-          localStorage.removeItem(key);
-          sessionStorage.removeItem(key);
-        });
-
-        console.log('✅ Cleared all storage completely');
       }
+
+      // Step 3: Sign out from better-auth (fire and forget)
+      betterAuthClient.signOut().catch(() => {});
 
       // Step 4: Clear cookies
       if (typeof document !== 'undefined') {
         document.cookie.split(';').forEach((c) => {
-          const eqPos = c.indexOf('=');
-          const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+          const name = c.split('=')[0].trim();
           if (name) {
             document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
           }
         });
-        console.log('✅ Cleared cookies');
       }
 
-      // Step 5: Clear service worker caches for subscription API responses
-      try {
-        if ('caches' in window) {
-          const cacheNames = await caches.keys();
-          await Promise.all(
-            cacheNames.map((cacheName) => caches.delete(cacheName)),
-          );
-          console.log('✅ Cleared service worker caches');
-        }
-      } catch (e) {
-        console.warn('Could not clear service worker caches:', e);
-      }
-
-      console.log('🎉 Complete sign out finished');
-
-      // Step 6: Refresh the router to update server components
+      // Step 5: Navigate home
+      router.replace('/');
       router.refresh();
-
-      // Step 7: Navigate to home
-      router.push('/');
     } catch (error) {
-      console.error('❌ Sign out error:', error);
-      // Even on error, try to refresh
-      refreshAuth();
-      router.push('/');
+      console.error('Sign out cleanup error:', error);
+      router.replace('/');
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        isSigningOut.current = false;
+      }, 1000);
     }
   };
 
@@ -127,14 +64,7 @@ export function SignOutButton() {
       disabled={loading}
       className='bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-colors'
     >
-      {loading ? (
-        <>
-          <span className='animate-spin mr-2'>⏳</span>
-          Signing Out...
-        </>
-      ) : (
-        '🚪 Sign Out'
-      )}
+      {loading ? 'Signing Out...' : '🚪 Sign Out'}
     </button>
   );
 }

@@ -2,7 +2,7 @@
 
 import dayjs from 'dayjs';
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
@@ -153,11 +153,11 @@ const getSolarSeason = (date: dayjs.Dayjs) => {
 const sanitizeInsightForParam = (value: string) => value.replace(/\|/g, ' / ');
 
 const TarotReadings = () => {
-  const { me } = useAccount();
+  const { user, loading } = useUser();
   const subscription = useSubscription();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
-  const userId = (me as any)?.id as string | undefined;
+  const userName = user?.name;
+  const userBirthday = user?.birthday;
+  const userId = user?.id;
   const tarotPlan = {
     plan: subscription.plan as TarotPlan,
     status: subscription.status as SubscriptionStatus,
@@ -541,15 +541,12 @@ const TarotReadings = () => {
   );
 
   useEffect(() => {
-    if (hasChartAccess && personalizedReading) {
-      const userId = (me as any)?.id;
-      if (userId) {
-        conversionTracking.tarotViewed(userId);
-      }
+    if (hasChartAccess && personalizedReading && userId) {
+      conversionTracking.tarotViewed(userId);
     }
-  }, [hasChartAccess, personalizedReading, me]);
+  }, [hasChartAccess, personalizedReading, userId]);
 
-  if (!me) {
+  if (loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>

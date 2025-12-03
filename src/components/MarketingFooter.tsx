@@ -5,6 +5,7 @@ import {
   SOCIAL_HANDLES,
   SOCIAL_PLATFORM_LABELS,
 } from '@/constants/socialHandles';
+import { Logo } from './Logo';
 
 export function MarketingFooter() {
   const socialLinks = [
@@ -88,8 +89,9 @@ export function MarketingFooter() {
           <div className='space-y-4'>
             <Link
               href='/'
-              className='text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
+              className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
             >
+              <Logo size={28} />
               Lunary
             </Link>
             <p className='text-sm text-zinc-400'>

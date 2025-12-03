@@ -3,18 +3,16 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Share2, Copy, Check } from 'lucide-react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 
 export function ShareCosmicCard() {
-  const accountResult = useAccount();
-  const me = accountResult?.me || null;
+  const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cardData, setCardData] = useState<any>(null);
 
   const generateCard = async () => {
-    const userId = (me as any)?.id;
-    if (!userId) return;
+    if (!user?.id) return;
 
     setLoading(true);
     try {
@@ -68,7 +66,7 @@ export function ShareCosmicCard() {
     }
   };
 
-  if (!me) {
+  if (!user) {
     return null;
   }
 

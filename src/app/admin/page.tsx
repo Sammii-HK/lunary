@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { betterAuthClient } from '@/lib/auth-client';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -150,14 +150,9 @@ function LockedAdminBackdrop() {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { me } = useAccount();
+  const { user } = useUser();
   const authState = useAuthStatus();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-  const [testingNotification, setTestingNotification] = useState(false);
-  const [testingRealNotification, setTestingRealNotification] = useState(false);
-  const [testingDaily, setTestingDaily] = useState(false);
-  const [testingEmail, setTestingEmail] = useState(false);
-  const [testEmailAddress, setTestEmailAddress] = useState('');
   const [substackPreview, setSubstackPreview] = useState<any>(null);
   const [substackLoading, setSubstackLoading] = useState(false);
   const [substackWeekOffset, setSubstackWeekOffset] = useState(0);
@@ -264,10 +259,9 @@ export default function AdminDashboard() {
           }
         }
 
-        // Final fallback: check Jazz profile
-        if (!userEmail && me?.profile) {
-          const profile = me.profile as any;
-          userEmail = profile.email;
+        // Final fallback: check user context
+        if (!userEmail && user) {
+          userEmail = (authState.user as any)?.email;
           console.log(
             '🔍 Checked Jazz profile, email:',
             userEmail || 'NOT FOUND',
@@ -282,8 +276,8 @@ export default function AdminDashboard() {
             ? JSON.stringify(session.data.user, null, 2)
             : 'MISSING',
           sessionStructure: session ? Object.keys(session) : 'NO SESSION',
-          meProfile: me?.profile ? 'EXISTS' : 'MISSING',
-          meProfileEmail: (me?.profile as any)?.email || 'NOT FOUND',
+          userContext: user ? 'EXISTS' : 'MISSING',
+          authEmail: (authState.user as any)?.email || 'NOT FOUND',
         });
 
         // Dev-only bypass: if on localhost and Jazz account exists, allow access
@@ -293,8 +287,8 @@ export default function AdminDashboard() {
             window.location.hostname === 'admin.localhost');
 
         if (!userEmail) {
-          const hasJazzAccount = !!me;
-          if (isLocalhost && hasJazzAccount) {
+          const hasUserContext = !!user;
+          if (isLocalhost && hasUserContext) {
             console.warn(
               '⚠️ Dev bypass: Allowing access on localhost with Jazz account',
               { hasAccount: true },
@@ -307,7 +301,7 @@ export default function AdminDashboard() {
               userEmail,
               adminEmailsCount: adminEmails.length,
               isLocalhost,
-              hasJazzAccount,
+              hasUserContext: !!user,
               fix: !userEmail
                 ? 'Wait for session to load or check Better Auth session. If on localhost, ensure Jazz account is loaded.'
                 : 'Set NEXT_PUBLIC_ADMIN_EMAILS in .env.local with your email',
@@ -379,7 +373,13 @@ export default function AdminDashboard() {
     };
 
     checkAdminAccess();
-  }, [router, me, authState.isAuthenticated, authState.loading]);
+  }, [
+    router,
+    user,
+    authState.isAuthenticated,
+    authState.loading,
+    authState.user,
+  ]);
 
   // Fetch recent activity
   useEffect(() => {
@@ -466,71 +466,6 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const testRealNotification = async () => {
-    setTestingRealNotification(true);
-    try {
-      const response = await fetch('/api/test-real-notification');
-      const result = await response.json();
-
-      if (result.success) {
-        alert(
-          `✅ Real notification test sent!\n\nEvent: ${result.primaryEvent || 'No significant events today'}\nNotifications sent: ${result.notificationsSent}\n\nThis is what subscribers receive for REAL cosmic events.`,
-        );
-      } else {
-        alert(`❌ Real notification test failed: ${result.error}`);
-      }
-    } catch (error) {
-      alert('❌ Error testing real notification');
-    } finally {
-      setTestingRealNotification(false);
-    }
-  };
-
-  const testPushNotification = async () => {
-    setTestingNotification(true);
-    try {
-      const response = await fetch('/api/test-notification');
-      const result = await response.json();
-
-      if (result.success) {
-        alert('✅ Test notification sent! Check your phone.');
-      } else {
-        alert(
-          `❌ Notification failed: ${result.error}\n\nTroubleshooting:\n${result.troubleshooting?.join('\n')}`,
-        );
-      }
-    } catch (error) {
-      alert('❌ Error testing notification');
-    } finally {
-      setTestingNotification(false);
-    }
-  };
-
-  const testDailyNotification = async () => {
-    setTestingDaily(true);
-    try {
-      const response = await fetch('/api/test-daily-notification');
-      const result = await response.json();
-
-      if (result.success) {
-        alert(`✅ Daily overview test sent! Check your phone for 2 rich notifications:
-
-1. 👀 Daily Preview (with cosmic image)
-2. ✅ Cron Success (with schedule details)
-
-Today's cosmic event: ${result.cosmicEvent?.name || 'Cosmic Flow'}
-
-This is exactly what you'll get every day at 8 AM UTC!`);
-      } else {
-        alert(`❌ Daily test failed: ${result.error}`);
-      }
-    } catch (error) {
-      alert('❌ Error testing daily notification');
-    } finally {
-      setTestingDaily(false);
-    }
-  };
-
   const testSubstackPreview = async () => {
     setSubstackLoading(true);
     setSubstackPreview(null);
@@ -604,42 +539,6 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       console.error(error);
     } finally {
       setSubstackPublishing(false);
-    }
-  };
-
-  const testEmail = async () => {
-    if (!testEmailAddress) {
-      alert('Please enter an email address to test');
-      return;
-    }
-
-    setTestingEmail(true);
-    try {
-      const response = await fetch('/api/test-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: testEmailAddress }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        alert(
-          `✅ Test email sent successfully!\n\nTo: ${result.details.to}\nFrom: ${result.details.from}\nMessage ID: ${result.details.emailId || 'N/A'}\n\nCheck your inbox (and spam folder) for the test email.`,
-        );
-      } else {
-        alert(
-          `❌ Email test failed: ${result.error}\n\nTroubleshooting:\n${result.troubleshooting?.commonIssues?.join('\n') || result.details || 'Check server logs'}`,
-        );
-      }
-    } catch (error) {
-      alert(
-        `❌ Error testing email: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    } finally {
-      setTestingEmail(false);
     }
   };
 
@@ -812,15 +711,6 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       // eslint-disable-next-line jsx-a11y/alt-text
       icon: <Image className='h-5 w-5' />,
       category: 'tools',
-    },
-    {
-      title: 'Test Calendar Generator',
-      description:
-        'Generate and test cosmic calendars without creating Stripe products',
-      href: '/admin/test-calendar',
-      icon: <Download className='h-5 w-5' />,
-      category: 'tools',
-      status: 'new',
     },
     {
       title: 'Crystal Gallery',
@@ -1206,124 +1096,6 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                   ))}
                 </div>
               )}
-
-              {/* Email Testing */}
-              <Card className='bg-zinc-900/50 border-zinc-800/50'>
-                <CardHeader className='pb-4'>
-                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
-                    <Mail className='h-5 w-5' />
-                    Email Testing (Brevo)
-                  </CardTitle>
-                  <CardDescription className='text-xs md:text-sm text-zinc-500'>
-                    Test email sending with Brevo
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-4'>
-                    <div className='flex flex-col md:flex-row gap-4'>
-                      <input
-                        type='email'
-                        placeholder='Enter your email address'
-                        value={testEmailAddress}
-                        onChange={(e) => setTestEmailAddress(e.target.value)}
-                        className='flex-1 px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500/50 text-sm'
-                        disabled={testingEmail}
-                      />
-                      <Button
-                        onClick={testEmail}
-                        disabled={testingEmail || !testEmailAddress}
-                        variant='outline'
-                        className='h-auto px-6 py-2 bg-blue-600/50 hover:bg-blue-700/50 border-blue-500/50 text-white transition-all disabled:opacity-50 text-sm'
-                      >
-                        <Send className='h-4 w-4 mr-2' />
-                        {testingEmail ? 'Sending...' : 'Send Test Email'}
-                      </Button>
-                    </div>
-                    <p className='text-xs text-zinc-600'>
-                      Make sure BREVO_API_KEY is set in your environment
-                      variables. The email will be sent from{' '}
-                      <code className='bg-zinc-800/50 px-2 py-1 rounded text-zinc-400'>
-                        cosmic@lunary.app
-                      </code>
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* PWA Notification Testing */}
-              <Card className='bg-zinc-900/50 border-zinc-800/50'>
-                <CardHeader className='pb-4'>
-                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
-                    <Bell className='h-5 w-5' />
-                    PWA Notification Testing
-                  </CardTitle>
-                  <CardDescription className='text-xs md:text-sm text-zinc-500'>
-                    Test push notifications on your device
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                    <Button
-                      onClick={testRealNotification}
-                      disabled={testingRealNotification}
-                      variant='outline'
-                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-purple-500/30 text-white transition-all text-sm'
-                    >
-                      <div className='flex flex-col items-center gap-2 w-full'>
-                        <Bell className='h-6 w-6 text-purple-400/70' />
-                        <div className='text-center'>
-                          <div className='font-semibold text-sm mb-1'>
-                            {testingRealNotification
-                              ? 'Sending...'
-                              : 'Test Real Event'}
-                          </div>
-                          <div className='text-xs text-zinc-500'>
-                            Uses today's actual cosmic events
-                          </div>
-                        </div>
-                      </div>
-                    </Button>
-
-                    <Button
-                      onClick={testDailyNotification}
-                      disabled={testingDaily}
-                      variant='outline'
-                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-blue-500/30 text-white transition-all text-sm'
-                    >
-                      <div className='flex flex-col items-center gap-2 w-full'>
-                        <Calendar className='h-6 w-6 text-blue-400/70' />
-                        <div className='text-center'>
-                          <div className='font-semibold text-sm mb-1'>
-                            {testingDaily ? 'Sending...' : 'Test Daily Preview'}
-                          </div>
-                          <div className='text-xs text-zinc-500'>
-                            Rich notifications with images
-                          </div>
-                        </div>
-                      </div>
-                    </Button>
-
-                    <Button
-                      onClick={testPushNotification}
-                      disabled={testingNotification}
-                      variant='outline'
-                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-green-500/30 text-white transition-all text-sm'
-                    >
-                      <div className='flex flex-col items-center gap-2 w-full'>
-                        <Smartphone className='h-6 w-6 text-green-400/70' />
-                        <div className='text-center'>
-                          <div className='font-semibold text-sm mb-1'>
-                            {testingNotification ? 'Sending...' : 'Test Basic'}
-                          </div>
-                          <div className='text-xs text-zinc-500'>
-                            Simple notification test
-                          </div>
-                        </div>
-                      </div>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Substack Testing */}
               <Card className='bg-zinc-900/50 border-zinc-800/50'>

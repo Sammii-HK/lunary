@@ -80,5 +80,3 @@ export const planets = {
       'Pluto represents transformation, power, and rebirth. This is a time for deep personal change, confronting your shadows, and embracing renewal. Focus on letting go of the old to make way for the new, and harnessing your inner strength.',
   },
 };
-
-console.log(planets);

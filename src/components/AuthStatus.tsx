@@ -9,6 +9,7 @@ import {
   useCallback,
 } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
+import { useJazzMigration } from '@/hooks/useProfile';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -35,9 +36,12 @@ const defaultAuthState: AuthState = {
   loading: true,
 };
 
-const AuthContext = createContext<AuthState & { refreshAuth: () => void }>({
+const AuthContext = createContext<
+  AuthState & { refreshAuth: () => void; signOut: () => void }
+>({
   ...defaultAuthState,
   refreshAuth: () => {},
+  signOut: () => {},
 });
 
 let cachedAuthState: AuthState | null = null;
@@ -61,9 +65,24 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  // Trigger Jazz to PostgreSQL migration when user is authenticated
+  useJazzMigration();
+
   const refreshAuth = useCallback(() => {
     invalidateAuthCache();
     setRefreshTrigger((prev) => prev + 1);
+  }, []);
+
+  // Immediately update UI to logged-out state
+  const signOut = useCallback(() => {
+    const loggedOutState: AuthState = {
+      isAuthenticated: false,
+      user: null,
+      profile: null,
+      loading: false,
+    };
+    cachedAuthState = loggedOutState;
+    setAuthState(loggedOutState);
   }, []);
 
   useEffect(() => {
@@ -72,15 +91,15 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     const checkAuth = async () => {
-      if (
-        cachedAuthState &&
-        !cachedAuthState.loading &&
-        cachedAuthState.isAuthenticated
-      ) {
+      // Skip if we already have a valid cached state
+      if (cachedAuthState && !cachedAuthState.loading) {
         if (isMounted) {
           setAuthState(cachedAuthState);
         }
-        return;
+        // Only return early if authenticated - always re-check when logged out
+        if (cachedAuthState.isAuthenticated) {
+          return;
+        }
       }
 
       if (authPromise) {
@@ -145,7 +164,7 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
   }, [refreshTrigger]);
 
   return (
-    <AuthContext.Provider value={{ ...authState, refreshAuth }}>
+    <AuthContext.Provider value={{ ...authState, refreshAuth, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,12 +1,8 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import {
-  getBirthChartFromProfile,
-  hasBirthChart,
-  BirthChartData,
-} from '../../../utils/astrology/birthChart';
+import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { BirthChart } from '@/components/BirthChart';
 import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
 import { useSubscription } from '../../hooks/useSubscription';
@@ -795,10 +791,11 @@ const getBowlPattern = (birthChart: BirthChartData[]): ChartPattern | null => {
 };
 
 const BirthChartPage = () => {
-  const { me } = useAccount();
+  const { user, loading } = useUser();
   const subscription = useSubscription();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
+  const userName = user?.name;
+  const userBirthday = user?.birthday;
+  const birthChartData = user?.birthChart || null;
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
@@ -815,12 +812,6 @@ const BirthChartPage = () => {
     if (value.length <= limit) return value;
     return `${value.slice(0, limit - 1).trimEnd()}…`;
   }, []);
-
-  const profile = me?.profile;
-  const hasBirthChartData = profile ? hasBirthChart(profile) : false;
-  const birthChartData = hasBirthChartData
-    ? getBirthChartFromProfile(profile)
-    : null;
 
   const birthChartShare = useMemo(() => {
     if (!birthChartData) return null;
@@ -928,15 +919,12 @@ const BirthChartPage = () => {
   }, []);
 
   useEffect(() => {
-    if (hasChartAccess && hasBirthChart(me?.profile)) {
-      const userId = (me as any)?.id;
-      if (userId) {
-        conversionTracking.birthChartViewed(userId);
-      }
+    if (hasChartAccess && user?.hasBirthChart && user?.id) {
+      conversionTracking.birthChartViewed(user.id);
     }
-  }, [hasChartAccess, me?.profile, me]);
+  }, [hasChartAccess, user?.hasBirthChart, user?.id]);
 
-  if (!me) {
+  if (loading) {
     return (
       <div className='h-full flex items-center justify-center'>
         <div className='text-center'>
@@ -1007,7 +995,7 @@ const BirthChartPage = () => {
 
   // Note: Even if birth chart exists, user still can't access it without subscription
   // This preserves data for users who had trial/paid but keeps paywall intact
-  if (!hasBirthChartData || !birthChartData) {
+  if (!user?.hasBirthChart || !birthChartData) {
     return (
       <div className='h-full flex items-center justify-center'>
         <div className='text-center max-w-md px-4'>

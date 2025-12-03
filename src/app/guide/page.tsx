@@ -12,7 +12,7 @@ import React, {
 import { useSearchParams } from 'next/navigation';
 import { ArrowUp, ChevronDown, ChevronUp, Square } from 'lucide-react';
 
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -176,9 +176,9 @@ const MessageBubble = ({
 function BookOfShadowsContent() {
   const authState = useAuthStatus();
   const searchParams = useSearchParams();
-  const { me } = useAccount();
-  const userBirthday = (me?.profile as any)?.birthday;
-  const userName = (me?.profile as any)?.name?.split(' ')[0];
+  const { user } = useUser();
+  const userBirthday = user?.birthday;
+  const userName = user?.name?.split(' ')[0];
   const { isSubscribed } = useSubscription();
   const [weeklyInsights, setWeeklyInsights] = useState<
     WeeklyInsights | undefined
@@ -310,13 +310,13 @@ function BookOfShadowsContent() {
   const [ritualEngagementTracked, setRitualEngagementTracked] = useState(false);
 
   useEffect(() => {
+    // Inject ritual message when there's an unread ritual (morning/evening)
     if (
       !isLoadingHistory &&
       !ritualInjected &&
       ritualState.hasUnreadMessage &&
       ritualState.message &&
-      ritualState.messageId &&
-      messages.length === 0
+      ritualState.messageId
     ) {
       const chatMessageId =
         typeof crypto !== 'undefined' && crypto.randomUUID
@@ -330,7 +330,11 @@ function BookOfShadowsContent() {
       });
 
       if (ritualState.ritualType && ritualState.messageId) {
-        trackRitualShown(ritualState.messageId, ritualState.ritualType, me?.id);
+        trackRitualShown(
+          ritualState.messageId,
+          ritualState.ritualType,
+          user?.id,
+        );
         setShownRitualId(ritualState.messageId);
         setShownRitualContext(ritualState.ritualType);
       }
@@ -341,11 +345,10 @@ function BookOfShadowsContent() {
   }, [
     isLoadingHistory,
     ritualState,
-    messages.length,
     ritualInjected,
     addMessage,
     isSubscribed,
-    me?.id,
+    user?.id,
   ]);
 
   useEffect(() => {
@@ -356,7 +359,7 @@ function BookOfShadowsContent() {
       messages.length >= 2 &&
       messages[messages.length - 1]?.role === 'user'
     ) {
-      trackRitualEngaged(shownRitualId, shownRitualContext as any, me?.id);
+      trackRitualEngaged(shownRitualId, shownRitualContext as any, user?.id);
       setRitualEngagementTracked(true);
     }
   }, [
@@ -364,7 +367,7 @@ function BookOfShadowsContent() {
     shownRitualId,
     shownRitualContext,
     ritualEngagementTracked,
-    me?.id,
+    user?.id,
   ]);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);

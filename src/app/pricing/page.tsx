@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import {
@@ -26,7 +26,7 @@ import { MarketingFooter } from '@/components/MarketingFooter';
 
 // Metadata is handled in layout.tsx for client components
 export default function PricingPage() {
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
   const authState = useAuthStatus();
   const { trackEvent } = useConversionTracking();
@@ -113,8 +113,7 @@ export default function PricingPage() {
     try {
       // Get referral code from localStorage if present
       const storedReferralCode = localStorage.getItem('lunary_referral_code');
-      const currentUserId =
-        authState.user?.id || ((me as any)?.id as string | undefined);
+      const currentUserId = authState.user?.id || user?.id;
 
       const { sessionId } = await createCheckoutSession(
         priceId,

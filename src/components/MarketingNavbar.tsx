@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStatus } from './AuthStatus';
+import { Logo } from './Logo';
 
 export function MarketingNavbar() {
   const pathname = usePathname();
@@ -19,8 +20,9 @@ export function MarketingNavbar() {
           {/* Logo */}
           <Link
             href='/'
-            className='text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
+            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
           >
+            <Logo size={28} />
             Lunary
           </Link>
 

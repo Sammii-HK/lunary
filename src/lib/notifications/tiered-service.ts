@@ -64,7 +64,7 @@ export async function getUsersWithTierInfo(): Promise<
       ps.preferences->>'birthday' as birthday,
       ps.preferences->>'timezone' as timezone,
       COALESCE(s.status, 'free') as subscription_status,
-      COALESCE(s.plan_type, 'free') as plan_type
+      COALESCE(s.plan, 'free') as plan_type
     FROM push_subscriptions ps
     LEFT JOIN subscriptions s ON ps.user_id = s.user_id
     WHERE ps.is_active = true
@@ -102,8 +102,8 @@ export async function getUserBirthChartData(userId: string): Promise<{
   try {
     const result = await sql`
       SELECT birth_chart
-      FROM accounts
-      WHERE id = ${userId}
+      FROM user_profiles
+      WHERE user_id = ${userId}
       LIMIT 1
     `;
 

@@ -16,7 +16,11 @@ function loadAssets() {
         'fonts',
         'RobotoMono-Regular.ttf',
       );
-      robotoFont = readFileSync(fontPath);
+      const buffer = readFileSync(fontPath);
+      robotoFont = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength,
+      );
     } catch (error) {
       console.error('Failed to load Roboto Mono font:', error);
     }
@@ -39,7 +43,7 @@ export async function GET(): Promise<Response> {
       name: string;
       data: ArrayBuffer;
       style: 'normal';
-      weight?: number;
+      weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
     }[] = [];
 
     if (robotoFont) {
@@ -47,6 +51,7 @@ export async function GET(): Promise<Response> {
         name: 'Roboto Mono',
         data: robotoFont,
         style: 'normal',
+        weight: 400,
       });
     }
 

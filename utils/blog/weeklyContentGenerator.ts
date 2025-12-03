@@ -205,10 +205,6 @@ export async function generateWeeklyContent(
     };
   }
 
-  console.log(
-    `🗓️ Generating weekly content for ${weekStart.toDateString()} - ${weekEnd.toDateString()}`,
-  );
-
   // Generate all astronomical data for the week (aspects and moon phases needed for daily forecasts)
   const [
     planetaryHighlights,
@@ -1451,10 +1447,6 @@ function generateWeeklyCrystalGuide(
     // Return empty array - this will be handled gracefully by the UI
     return crystalGuide;
   }
-
-  console.log(
-    `[Crystal Guide] Database has ${crystalDatabase.length} crystals available`,
-  );
 
   // Map planetary rulers to planet names used in crystal database
   const planetMap: { [key: string]: string } = {

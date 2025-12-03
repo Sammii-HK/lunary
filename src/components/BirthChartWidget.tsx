@@ -1,21 +1,17 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from './SmartTrialButton';
-import {
-  getBirthChartFromProfile,
-  hasBirthChart,
-} from '../../utils/astrology/birthChart';
+import { useUser } from '@/context/UserContext';
 import { bodiesSymbols, zodiacSymbol } from '../../utils/zodiac/zodiac';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../utils/pricing';
 import Link from 'next/link';
 
 export const BirthChartWidget = () => {
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
+  const userBirthday = user?.birthday;
+  const birthChart = user?.birthChart;
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
@@ -56,7 +52,7 @@ export const BirthChartWidget = () => {
     );
   }
 
-  if (!me || !userBirthday) {
+  if (!user || !userBirthday) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
@@ -72,12 +68,7 @@ export const BirthChartWidget = () => {
     );
   }
 
-  const hasBirthChartData = hasBirthChart(me.profile);
-  const birthChartData = hasBirthChartData
-    ? getBirthChartFromProfile(me.profile)
-    : null;
-
-  if (!birthChartData) {
+  if (!birthChart || birthChart.length === 0) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
@@ -89,20 +80,17 @@ export const BirthChartWidget = () => {
     );
   }
 
-  // Get the most important placements (Sun, Moon, Rising - but we don't have rising, so Mercury)
   const keyPlacements = ['Sun', 'Moon', 'Mercury']
-    .map((bodyName) =>
-      birthChartData.find((planet) => planet.body === bodyName),
-    )
+    .map((bodyName) => birthChart.find((planet) => planet.body === bodyName))
     .filter((planet): planet is NonNullable<typeof planet> => Boolean(planet));
 
   return (
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
       <div className='text-center mb-3'>
         <h3 className='font-bold'>Birth Chart</h3>
-        {userName && (
+        {user.name && (
           <p className='text-zinc-400 text-xs'>
-            {userName}&apos;s Natal Placements
+            {user.name}&apos;s Natal Placements
           </p>
         )}
       </div>

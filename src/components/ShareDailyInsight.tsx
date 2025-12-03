@@ -1,18 +1,15 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import Image from 'next/image';
 import { Share2, X, Download, Copy, Check, Loader2 } from 'lucide-react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { getTarotCard } from '../../utils/tarot/tarot';
 import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCrystals';
 import {
   calculateCrystalRecommendation,
   getCrystalGuidance,
 } from '../../utils/crystals/personalizedCrystals';
-import {
-  getBirthChartFromProfile,
-  hasBirthChart,
-} from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
 import { getUpcomingTransits } from '../../utils/astrology/transitCalendar';
@@ -37,22 +34,18 @@ export function ShareDailyInsight() {
   const [error, setError] = useState<string | null>(null);
   const [observer, setObserver] = useState<any>(null);
 
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
 
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
+  const userName = user?.name;
+  const userBirthday = user?.birthday;
   const firstName = userName?.trim() ? userName.split(' ')[0] : '';
+  const birthChart = user?.birthChart;
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
     subscription.plan,
   );
-
-  const hasBirthChartData = hasBirthChart(me?.profile);
-  const birthChart = hasBirthChartData
-    ? getBirthChartFromProfile(me?.profile)
-    : null;
 
   useEffect(() => {
     import('astronomy-engine').then((module) => {
@@ -356,10 +349,13 @@ export function ShareDailyInsight() {
               {!loading && !error && imageBlob && (
                 <>
                   <div className='mb-6 rounded-lg overflow-hidden border border-zinc-700'>
-                    <img
+                    <Image
                       src={URL.createObjectURL(imageBlob)}
                       alt='Your Daily Cosmic Insight'
-                      className='w-full'
+                      width={1080}
+                      height={1350}
+                      className='w-full h-auto'
+                      unoptimized
                     />
                   </div>
 

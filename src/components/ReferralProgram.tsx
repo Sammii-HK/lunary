@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { Copy, Check, Users, Gift, Share2, RefreshCw } from 'lucide-react';
 
 export function ReferralProgram() {
-  const { me } = useAccount();
+  const { user } = useUser();
   const authState = useAuthStatus();
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [stats, setStats] = useState({ totalReferrals: 0, activeReferrals: 0 });
@@ -26,8 +26,7 @@ export function ReferralProgram() {
   }, []);
 
   const loadReferralData = useCallback(async () => {
-    const userId = (me as any)?.id;
-    if (!userId) {
+    if (!user?.id) {
       setLoading(false);
       return;
     }
@@ -36,7 +35,7 @@ export function ReferralProgram() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/referrals/stats?userId=${userId}`);
+      const response = await fetch(`/api/referrals/stats?userId=${user?.id}`);
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(
@@ -61,7 +60,7 @@ export function ReferralProgram() {
     } finally {
       setLoading(false);
     }
-  }, [me]);
+  }, [user?.id]);
 
   useEffect(() => {
     if (authState.isAuthenticated) {
@@ -127,8 +126,8 @@ export function ReferralProgram() {
   };
 
   const handleCreateLink = async () => {
-    const userId = (me as any)?.id;
-    if (!userId) return;
+    if (!user?.id) return;
+    const userId = user.id;
 
     setIsGenerating(true);
     setError(null);

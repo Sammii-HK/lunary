@@ -1,13 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { Sparkles, ArrowRight } from 'lucide-react';
-import {
-  getBirthChartFromProfile,
-  hasBirthChart,
-} from '../../utils/astrology/birthChart';
 import { getUpcomingTransits } from '../../utils/astrology/transitCalendar';
 import {
   getPersonalTransitImpacts,
@@ -38,7 +34,7 @@ const getPlanetSymbol = (planet: string): string => {
 };
 
 export const TransitOfTheDay = () => {
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
 
   const hasChartAccess = hasBirthChartAccess(
@@ -47,13 +43,8 @@ export const TransitOfTheDay = () => {
   );
 
   const transit = useMemo((): PersonalTransitImpact | null => {
-    if (!me || !hasChartAccess) return null;
-
-    const hasBirthChartData = hasBirthChart(me.profile);
-    const birthChart = hasBirthChartData
-      ? getBirthChartFromProfile(me.profile)
-      : null;
-
+    if (!user || !hasChartAccess) return null;
+    const birthChart = user.birthChart;
     if (!birthChart || birthChart.length === 0) return null;
 
     const upcomingTransits = getUpcomingTransits();
@@ -89,7 +80,7 @@ export const TransitOfTheDay = () => {
     });
 
     return sorted[0];
-  }, [me, hasChartAccess]);
+  }, [user, hasChartAccess]);
 
   if (!hasChartAccess) {
     return (

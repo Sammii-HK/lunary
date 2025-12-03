@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from './SmartTrialButton';
@@ -22,7 +22,7 @@ import { conversionTracking } from '@/lib/analytics';
 import { OnboardingFeatureTour } from './OnboardingFeatureTour';
 
 export function OnboardingFlow() {
-  const { me } = useAccount();
+  const { user, updateProfile } = useUser();
   const authState = useAuthStatus();
   const subscription = useSubscription();
   const router = useRouter();
@@ -50,8 +50,7 @@ export function OnboardingFlow() {
     if (
       authState.isAuthenticated &&
       !authState.loading &&
-      me?.profile &&
-      !(me.profile as any)?.birthday &&
+      !user?.birthday &&
       !subscription.isSubscribed &&
       !subscription.isTrialActive
     ) {
@@ -64,7 +63,7 @@ export function OnboardingFlow() {
   }, [
     authState.isAuthenticated,
     authState.loading,
-    me,
+    user?.birthday,
     subscription.isSubscribed,
     subscription.isTrialActive,
   ]);
@@ -83,9 +82,8 @@ export function OnboardingFlow() {
       });
 
       // Track birth data submission
-      const userId = (me as any)?.id;
-      if (userId) {
-        conversionTracking.birthDataSubmitted(userId);
+      if (user?.id) {
+        conversionTracking.birthDataSubmitted(user.id);
       }
 
       // Generate birth chart immediately after birthday is saved

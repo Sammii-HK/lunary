@@ -221,8 +221,6 @@ export class SubstackClient {
         audience: options.audience || 'everyone',
       });
 
-      console.log(`📝 Draft created with ID: ${draft.id}`);
-
       const published = await this.publishDraft(
         draft.id,
         options.sendEmail ?? true,
@@ -233,8 +231,6 @@ export class SubstackClient {
         (draft.slug
           ? `https://${this.publicationSubdomain}.substack.com/p/${draft.slug}`
           : `https://${this.publicationSubdomain}.substack.com/p/${draft.id}`);
-
-      console.log(`🚀 Post published: ${postUrl}`);
 
       return {
         success: true,

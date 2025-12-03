@@ -1,14 +1,9 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react';
 import { useMemo, useState, useEffect } from 'react';
 import { SmartTrialButton } from './SmartTrialButton';
 import { conversionTracking } from '../lib/analytics';
-import {
-  getBirthChartFromProfile,
-  hasBirthChart,
-  BirthChartData,
-} from '../../utils/astrology/birthChart';
+import { useUser } from '@/context/UserContext';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCrystals';
 import {
@@ -26,14 +21,13 @@ import { Popover } from '@base-ui-components/react/popover';
 import { Paywall } from './Paywall';
 
 export const CrystalWidget = () => {
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
   const { currentDateTime } = useAstronomyContext();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
+  const userBirthday = user?.birthday;
+  const birthChart = user?.birthChart;
   const [observer, setObserver] = useState<any>(null);
 
-  // Lazy load astronomy-engine
   useEffect(() => {
     import('astronomy-engine').then((module) => {
       const { Observer } = module;
@@ -46,20 +40,12 @@ export const CrystalWidget = () => {
     subscription.plan,
   );
 
-  // Normalize date to date-only (no time) to ensure daily seed consistency
   const normalizedDate = useMemo(() => {
     const dateStr = dayjs(currentDateTime).format('YYYY-MM-DD');
-    return new Date(dateStr + 'T12:00:00'); // Use noon to avoid timezone issues
+    return new Date(dateStr + 'T12:00:00');
   }, [currentDateTime]);
 
-  // Check date access for paywall
   const canAccessDate = hasDateAccess(normalizedDate, subscription.status);
-
-  // Get birth chart data (needed for hooks)
-  const hasBirthChartData = hasBirthChart(me?.profile);
-  const birthChart = hasBirthChartData
-    ? getBirthChartFromProfile(me?.profile)
-    : null;
 
   // Memoize general crystal for non-premium users
   const generalCrystal = useMemo(() => {
@@ -102,13 +88,10 @@ export const CrystalWidget = () => {
   ]);
 
   useEffect(() => {
-    if (crystalData && hasChartAccess) {
-      const userId = (me as any)?.id;
-      if (userId) {
-        conversionTracking.crystalRecommendationsViewed(userId);
-      }
+    if (crystalData && hasChartAccess && user?.id) {
+      conversionTracking.crystalRecommendationsViewed(user.id);
     }
-  }, [crystalData, hasChartAccess, me]);
+  }, [crystalData, hasChartAccess, user?.id]);
 
   // Check date access - show paywall if date is restricted
   if (!canAccessDate) {
@@ -167,8 +150,7 @@ export const CrystalWidget = () => {
     );
   }
 
-  // For premium users, we need both profile data AND subscription access
-  if (!me || !userBirthday) {
+  if (!user || !userBirthday) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import { recordCheckIn } from '@/lib/streak/check-in';
@@ -118,10 +118,9 @@ function isTestMode(): boolean {
 }
 
 export default function AppDashboard() {
-  const { me } = useAccount();
+  const { user } = useUser();
   const authState = useAuthStatus();
-  const userName = (me?.profile as any)?.name;
-  const firstName = userName?.trim() ? userName.split(' ')[0] : null;
+  const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
 
   useEffect(() => {
     if (authState.isAuthenticated && !authState.loading) {

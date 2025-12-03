@@ -251,7 +251,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
       try {
         const preferences = sub.preferences || {};
         const userName = (preferences.name as string) || undefined;
-        const userEmail = sub.user_email || undefined;
+        const userEmail = sub.email || undefined;
         const userId = sub.user_id;
 
         const isNewMoon = moonCircle.moonPhase.toLowerCase().includes('new');

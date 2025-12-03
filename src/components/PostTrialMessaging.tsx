@@ -1,36 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount } from 'jazz-tools/react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from './SmartTrialButton';
 import { Calendar, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export function PostTrialMessaging() {
-  const { me } = useAccount();
   const subscription = useSubscription();
   const [missedInsights, setMissedInsights] = useState<number | null>(null);
 
-  // Only show for users who had a trial but don't have active subscription
-  const hadTrialButExpired =
-    subscription.status === 'free' &&
-    (me?.profile as any)?.subscription?.status === 'cancelled';
+  const hadTrialButExpired = subscription.status === 'cancelled';
 
   useEffect(() => {
     if (hadTrialButExpired) {
-      // Calculate days since trial ended
-      const trialEndDate = (me?.profile as any)?.subscription?.trialEndsAt;
-      if (trialEndDate) {
-        const daysSince = Math.floor(
-          (Date.now() - new Date(trialEndDate).getTime()) /
-            (1000 * 60 * 60 * 24),
-        );
-        // Estimate missed insights (1 per day)
-        setMissedInsights(Math.max(1, daysSince));
-      }
+      setMissedInsights(7);
     }
-  }, [hadTrialButExpired, me]);
+  }, [hadTrialButExpired]);
 
   if (!hadTrialButExpired || !missedInsights) {
     return null;

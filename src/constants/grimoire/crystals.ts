@@ -8,6 +8,9 @@ export interface Crystal {
   chakras: string[];
   elements: string[];
   zodiacSigns: string[];
+  sunSigns?: string[];
+  moonSigns?: string[];
+  aspects?: string[];
   moonPhases: string[];
   planets: string[];
   intentions: string[];
@@ -19,10 +22,9 @@ export interface Crystal {
   metaphysicalProperties: string;
   physicalProperties?: string;
   historicalUse?: string;
-  // OG Image properties
-  ogColor?: string; // Hex color code for OG images
-  primaryChakra?: string; // Formatted chakra name for OG display (e.g., "Crown Chakra")
-  keywords?: string[]; // Top keywords for OG display
+  ogColor?: string;
+  primaryChakra?: string;
+  keywords?: string[];
   workingWith: {
     meditation: string;
     spellwork: string;
@@ -48,6 +50,36 @@ export interface Crystal {
   };
 }
 
+function deriveAstrologicalProps(
+  zodiacSigns: string[],
+  planets: string[],
+): {
+  sunSigns: string[];
+  moonSigns: string[];
+  aspects: string[];
+} {
+  const waterSigns = ['Cancer', 'Scorpio', 'Pisces'];
+  const moonSigns = zodiacSigns.filter(
+    (s) => waterSigns.includes(s) || s === 'Taurus',
+  );
+
+  const aspects: string[] = [];
+  planets.forEach((p) => {
+    aspects.push(`${p.toLowerCase()}-aspects`);
+  });
+  if (zodiacSigns.some((s) => waterSigns.includes(s))) aspects.push('trine');
+  if (planets.includes('Saturn') || planets.includes('Mars'))
+    aspects.push('square');
+  if (planets.includes('Neptune') || planets.includes('Moon'))
+    aspects.push('opposition');
+
+  return {
+    sunSigns: zodiacSigns.slice(0, 3),
+    moonSigns: moonSigns.length > 0 ? moonSigns : zodiacSigns.slice(0, 3),
+    aspects: [...new Set(aspects)],
+  };
+}
+
 export const crystalDatabase: Crystal[] = [
   {
     id: 'amethyst',
@@ -69,6 +101,16 @@ export const crystalDatabase: Crystal[] = [
     chakras: ['Crown', 'Third Eye'],
     elements: ['Air', 'Water'],
     zodiacSigns: ['Pisces', 'Aquarius', 'Sagittarius', 'Capricorn'],
+    sunSigns: ['Pisces', 'Aquarius', 'Sagittarius'],
+    moonSigns: ['Pisces', 'Cancer', 'Scorpio'],
+    aspects: [
+      'opposition',
+      'square',
+      'conjunction-neptune',
+      'neptune-aspects',
+      'jupiter-aspects',
+      'moon-aspects',
+    ],
     moonPhases: ['Full Moon', 'New Moon', 'Waning Moon'],
     planets: ['Neptune', 'Jupiter', 'Moon'],
     intentions: [
@@ -7336,3 +7378,25 @@ const getColorFromName = (colorName: string): string => {
 const capitalize = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
+
+export function getCrystalWithAstrology(crystal: Crystal): Crystal & {
+  sunSigns: string[];
+  moonSigns: string[];
+  aspects: string[];
+} {
+  if (crystal.sunSigns && crystal.moonSigns && crystal.aspects) {
+    return crystal as Crystal & {
+      sunSigns: string[];
+      moonSigns: string[];
+      aspects: string[];
+    };
+  }
+
+  const derived = deriveAstrologicalProps(crystal.zodiacSigns, crystal.planets);
+  return {
+    ...crystal,
+    sunSigns: crystal.sunSigns || derived.sunSigns,
+    moonSigns: crystal.moonSigns || derived.moonSigns,
+    aspects: crystal.aspects || derived.aspects,
+  };
+}

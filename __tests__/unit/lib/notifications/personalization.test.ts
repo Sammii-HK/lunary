@@ -39,6 +39,7 @@ describe('Notification Personalization', () => {
         userId: '123',
         name: 'Jane Smith',
         birthday: '1990-01-01',
+        subscription: { status: 'active', planType: 'monthly', isPaid: true },
       };
       const result = personalizeNotificationBody(body, 'moon', userProfile);
       expect(result).toBe('Jane, a powerful reset point for manifestation');
@@ -50,6 +51,7 @@ describe('Notification Personalization', () => {
         userId: '123',
         name: 'Madonna',
         birthday: '1990-01-01',
+        subscription: { status: 'active', planType: 'monthly', isPaid: true },
       };
       const result = personalizeNotificationBody(body, 'moon', userProfile);
       expect(result).toBe('Madonna, peak illumination brings clarity');
@@ -71,11 +73,12 @@ describe('Notification Personalization', () => {
       expect(shouldPersonalize()).toBe(false);
     });
 
-    it('returns true for moon events with birthday', () => {
+    it('returns true for moon events with birthday and paid subscription', () => {
       const userProfile: UserProfile = {
         userId: '123',
         name: 'John',
         birthday: '1990-01-01',
+        subscription: { status: 'active', planType: 'monthly', isPaid: true },
       };
       expect(shouldPersonalize(userProfile, 'moon')).toBe(true);
     });

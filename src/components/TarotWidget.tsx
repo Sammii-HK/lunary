@@ -1,5 +1,4 @@
 'use client';
-import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from './SmartTrialButton';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useSubscription } from '../hooks/useSubscription';
@@ -8,7 +7,6 @@ import { useState, useEffect } from 'react';
 import type { GeneralTarotReading } from '../../utils/tarot/generalTarot';
 
 export const TarotWidget = () => {
-  const { me } = useAccount();
   const subscription = useSubscription();
   const { currentTarotCard } = useAstronomyContext();
   const [generalTarot, setGeneralTarot] = useState<GeneralTarotReading | null>(

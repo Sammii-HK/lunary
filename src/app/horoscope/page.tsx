@@ -1,6 +1,6 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 import { FreeHoroscopeView } from './components/FreeHoroscopeView';
@@ -9,26 +9,21 @@ import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 
 export default function HoroscopePage() {
-  const { me } = useAccount();
+  const { user, loading } = useUser();
   const subscription = useSubscription();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
     subscription.plan,
   );
 
   useEffect(() => {
-    if (hasChartAccess) {
-      const userId = (me as any)?.id;
-      if (userId) {
-        conversionTracking.horoscopeViewed(userId);
-        conversionTracking.personalizedHoroscopeViewed(userId);
-      }
+    if (hasChartAccess && user?.id) {
+      conversionTracking.horoscopeViewed(user.id);
+      conversionTracking.personalizedHoroscopeViewed(user.id);
     }
-  }, [hasChartAccess, me]);
+  }, [hasChartAccess, user?.id]);
 
-  if (!me) {
+  if (loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
@@ -45,9 +40,9 @@ export default function HoroscopePage() {
 
   return (
     <PaidHoroscopeView
-      userBirthday={userBirthday}
-      userName={userName}
-      profile={me.profile}
+      userBirthday={user?.birthday}
+      userName={user?.name}
+      profile={{ birthday: user?.birthday, birthChart: user?.birthChart }}
     />
   );
 }

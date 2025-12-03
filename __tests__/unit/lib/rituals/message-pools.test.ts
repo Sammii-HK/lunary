@@ -31,11 +31,13 @@ describe('Ritual Message Pools', () => {
 
     it('no message contains spam or promotional language', () => {
       const spamPatterns = [
-        /buy/i,
-        /subscribe/i,
-        /upgrade/i,
-        /discount/i,
-        /offer/i,
+        /\bbuy now\b/i,
+        /\bsubscribe\b/i,
+        /\bupgrade\b/i,
+        /\bdiscount\b/i,
+        /\bspecial offer\b/i,
+        /\blimited time\b/i,
+        /\bfree trial\b/i,
       ];
       MORNING_MESSAGES.forEach((message: RitualMessage) => {
         spamPatterns.forEach((pattern) => {

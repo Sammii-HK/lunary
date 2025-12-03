@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
         JSON.stringify(
           sampleSubs.rows.map((s) => ({
             userId: s.user_id,
-            email: s.user_email ? '***@***' : null,
+            email: s.email ? '***@***' : null,
             hasBirthday: !!(
               s.preferences?.birthday && s.preferences.birthday !== ''
             ),
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
         const preferences = sub.preferences || {};
         const birthday = preferences.birthday as string;
         const userName = (preferences.name as string) || undefined;
-        const userEmail = sub.user_email || undefined;
+        const userEmail = sub.email || undefined;
         const userId = sub.user_id;
 
         if (!birthday || !userId) {

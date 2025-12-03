@@ -1,19 +1,11 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { HelpCircle, Stars, Layers, X } from 'lucide-react';
-import {
-  generateBirthChart,
-  hasBirthChart,
-  getBirthChartFromProfile,
-} from '../../../utils/astrology/birthChart';
-import {
-  hasPersonalCard,
-  getPersonalCardFromProfile,
-} from '../../../utils/tarot/personalCard';
+import { generateBirthChart } from '../../../utils/astrology/birthChart';
 import { useSubscription } from '../../hooks/useSubscription';
 import {
   canCollectBirthday,
@@ -102,10 +94,7 @@ const Paywall = dynamic(
 );
 
 export default function ProfilePage() {
-  // Hooks must be called unconditionally - handle errors inside the hook or in the component
-  const accountResult = useAccount();
-  const me = accountResult?.me || null;
-
+  const { user, updateProfile, refetch: refetchUser } = useUser();
   const subscription = useSubscription();
   const authState = useAuthStatus();
   const [name, setName] = useState('');
@@ -152,18 +141,41 @@ export default function ProfilePage() {
 
   // Load existing profile data when component mounts
   useEffect(() => {
-    if (me?.profile) {
+    if (user) {
       try {
-        let profileName = (me.profile as any)?.name || '';
-        const profileBirthday = (me.profile as any)?.birthday || '';
-        const profileBirthTime = (me.profile as any)?.birthTime || '';
-        const profileBirthLocation = (me.profile as any)?.birthLocation || '';
+        let profileName = user.name || '';
+        const profileBirthday = user.birthday || '';
+        const profileBirthTime = (user as any)?.birthTime || '';
+        const profileBirthLocation = (user as any)?.birthLocation || '';
 
         setName(profileName);
         setBirthday(profileBirthday);
         setBirthTime(profileBirthTime);
         setBirthLocation(profileBirthLocation);
         setIsEditing(!profileName && !profileBirthday);
+
+        // Auto-generate birth chart if missing but birthday exists
+        if (profileBirthday && !user.hasBirthChart) {
+          (async () => {
+            console.log('[Profile] Auto-generating missing birth chart...');
+            const birthChart = await generateBirthChart(
+              profileBirthday,
+              profileBirthTime || undefined,
+              profileBirthLocation || undefined,
+            );
+            await fetch('/api/profile/birth-chart', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ birthChart }),
+            });
+            console.log('[Profile] Birth chart generated and saved!');
+            // Refetch user data
+            if (typeof window !== 'undefined') {
+              window.location.reload();
+            }
+          })();
+        }
 
         // // Check if we have migrated profile data to restore
         // if (typeof window !== 'undefined') {
@@ -227,7 +239,7 @@ export default function ProfilePage() {
       setIsLoading(false);
       setIsEditing(false);
     }
-  }, [me?.profile]);
+  }, [user]);
 
   useEffect(() => {
     if (!canEditProfile && isEditing) {
@@ -251,18 +263,13 @@ export default function ProfilePage() {
 
       // Generate and save cosmic data if birthday is provided
       if (birthday) {
-        const hasExistingChart = me?.profile
-          ? hasBirthChart(me.profile)
-          : false;
-        const hasExistingPersonalCard = me?.profile
-          ? hasPersonalCard(me.profile)
-          : false;
+        const hasExistingChart = user?.hasBirthChart || false;
+        const hasExistingPersonalCard = user?.personalCard ? true : false;
 
         const shouldRegenerateChart =
           !hasExistingChart ||
-          (birthTime && birthTime !== (me?.profile as any)?.birthTime) ||
-          (birthLocation &&
-            birthLocation !== (me?.profile as any)?.birthLocation);
+          (birthTime && birthTime !== (user as any)?.birthTime) ||
+          (birthLocation && birthLocation !== (user as any)?.birthLocation);
 
         if (shouldRegenerateChart) {
           console.log('Generating birth chart...');
@@ -561,7 +568,7 @@ export default function ProfilePage() {
             {authState.isAuthenticated && !canCollectBirthdayData && (
               <div className='rounded-lg border border-purple-500/30 bg-gradient-to-r from-purple-900/40 to-pink-900/40 p-4'>
                 <h4 className='mb-2 font-medium text-white'>
-                  🎂 Birthday Collection
+                  🌍 Birthday Collection
                 </h4>
                 <p className='mb-3 text-sm text-zinc-300'>
                   Unlock personalized astrology by providing your birthday. Get
@@ -666,7 +673,7 @@ export default function ProfilePage() {
                 </Link>
 
                 {(() => {
-                  const personalCard = getPersonalCardFromProfile(me?.profile);
+                  const personalCard = user?.personalCard;
                   return (
                     <button
                       onClick={() => setShowPersonalCardModal(true)}
@@ -732,13 +739,8 @@ export default function ProfilePage() {
       {authState.isAuthenticated && (
         <div className='w-full max-w-3xl space-y-6'>
           <SubscriptionManagement
-            customerId={
-              (me?.profile as any)?.stripeCustomerId ||
-              (me?.profile as any)?.subscription?.stripeCustomerId
-            }
-            subscriptionId={
-              (me?.profile as any)?.subscription?.stripeSubscriptionId
-            }
+            customerId={user?.stripeCustomerId || undefined}
+            subscriptionId={subscription.subscriptionId}
           />
         </div>
       )}
@@ -775,7 +777,7 @@ export default function ProfilePage() {
       {/* Personal Card Modal */}
       {showPersonalCardModal &&
         (() => {
-          const personalCard = getPersonalCardFromProfile(me?.profile);
+          const personalCard = user?.personalCard;
           return (
             <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
               <div className='bg-zinc-900 rounded-lg p-6 w-full max-w-md relative border border-zinc-700'>

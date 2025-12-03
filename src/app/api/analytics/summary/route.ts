@@ -664,11 +664,11 @@ export async function GET(request: NextRequest) {
       WITH new_paid_users AS (
         SELECT DISTINCT
           ce.user_id,
-          s.plan_type,
+          s.plan,
           CASE
-            WHEN s.plan_type = 'monthly' OR s.plan_type = 'lunary_plus' THEN 4.99
-            WHEN s.plan_type = 'lunary_plus_ai' THEN 8.99
-            WHEN s.plan_type = 'yearly' OR s.plan_type = 'lunary_plus_ai_annual' THEN 89.99 / 12
+            WHEN s.plan = 'monthly' OR s.plan = 'lunary_plus' THEN 4.99
+            WHEN s.plan = 'lunary_plus_ai' THEN 8.99
+            WHEN s.plan = 'yearly' OR s.plan = 'lunary_plus_ai_annual' THEN 89.99 / 12
             ELSE 0
           END AS mrr_contribution
         FROM conversion_events ce
@@ -677,7 +677,7 @@ export async function GET(request: NextRequest) {
           AND ce.created_at >= ${thirtyDaysAgoTimestamp}
           AND s.status = 'active'
           AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT} AND ce.user_email != ${EXCLUDED_EMAIL}))
-          AND (s.user_email IS NULL OR (s.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND s.user_email != ${TEST_EMAIL_EXACT} AND s.user_email != ${EXCLUDED_EMAIL}))
+          AND (s.email IS NULL OR (s.email NOT LIKE ${TEST_EMAIL_PATTERN} AND s.email != ${TEST_EMAIL_EXACT} AND s.email != ${EXCLUDED_EMAIL}))
       )
       SELECT
         COUNT(DISTINCT user_id) AS new_paid_users,

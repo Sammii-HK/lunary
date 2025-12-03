@@ -649,6 +649,80 @@ async function setupDatabase() {
 
     console.log('✅ Ritual message events table created');
 
+    // Create user_streaks table
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_streaks (
+        user_id TEXT PRIMARY KEY,
+        current_streak INTEGER DEFAULT 0,
+        longest_streak INTEGER DEFAULT 0,
+        ritual_streak INTEGER DEFAULT 0,
+        longest_ritual_streak INTEGER DEFAULT 0,
+        last_check_in DATE,
+        total_check_ins INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_streaks_last_check_in ON user_streaks(last_check_in)`;
+
+    // Add ritual_streak columns if they don't exist (for existing tables)
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'user_streaks' AND column_name = 'ritual_streak') THEN
+          ALTER TABLE user_streaks ADD COLUMN ritual_streak INTEGER DEFAULT 0;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'user_streaks' AND column_name = 'longest_ritual_streak') THEN
+          ALTER TABLE user_streaks ADD COLUMN longest_ritual_streak INTEGER DEFAULT 0;
+        END IF;
+      END $$;
+    `;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_user_streaks_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_user_streaks_updated_at ON user_streaks
+    `;
+
+    await sql`
+      CREATE TRIGGER update_user_streaks_updated_at
+          BEFORE UPDATE ON user_streaks
+          FOR EACH ROW
+          EXECUTE FUNCTION update_user_streaks_updated_at()
+    `;
+
+    console.log('✅ User streaks table created');
+
+    // Create email_events table for tracking sent emails
+    await sql`
+      CREATE TABLE IF NOT EXISTS email_events (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        email_type TEXT NOT NULL,
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        metadata JSONB,
+        UNIQUE(user_id, email_type)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_email_events_user_id ON email_events(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_email_events_email_type ON email_events(email_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_email_events_sent_at ON email_events(sent_at)`;
+
+    console.log('✅ Email events table created');
+
     console.log('✅ Database setup complete!');
     console.log(
       '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, and notes',
