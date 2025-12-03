@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
-import { SmartTrialButton } from './SmartTrialButton';
 import {
   X,
   Sparkles,
@@ -46,13 +45,20 @@ export function OnboardingFlow() {
   const [birthChartPreview, setBirthChartPreview] = useState<any>(null);
 
   useEffect(() => {
-    // Only show onboarding for authenticated users without birthday
+    // Only show onboarding for authenticated subscribers who haven't added birth details
+    // Conditions:
+    // 1. User is logged in
+    // 2. User has a subscription (active or trial)
+    // 3. User has NOT added their birthday yet
+    const hasSubscription =
+      subscription.isSubscribed || subscription.isTrialActive;
+    const needsBirthDetails = !user?.birthday;
+
     if (
       authState.isAuthenticated &&
       !authState.loading &&
-      !user?.birthday &&
-      !subscription.isSubscribed &&
-      !subscription.isTrialActive
+      hasSubscription &&
+      needsBirthDetails
     ) {
       // Check if user has seen onboarding before
       const hasSeenOnboarding = localStorage.getItem('lunary_onboarding_seen');
@@ -184,11 +190,8 @@ export function OnboardingFlow() {
     await trackStepCompletion(currentStep, false);
     localStorage.setItem('lunary_onboarding_seen', 'true');
     setShowOnboarding(false);
-    if (subscription.isSubscribed || subscription.isTrialActive) {
-      router.push('/book-of-shadows');
-    } else {
-      router.push('/pricing');
-    }
+    // User already has subscription, send them to personalized content
+    router.push('/book-of-shadows');
   };
 
   const handleNext = async () => {
@@ -481,10 +484,10 @@ export function OnboardingFlow() {
           <div className='space-y-6'>
             <div className='text-center'>
               <h2 className='text-2xl font-bold text-white mb-2'>
-                Unlock Lunary AI
+                Your Cosmic Profile
               </h2>
               <p className='text-zinc-300 text-sm'>
-                See what personalized guidance looks like
+                Here&apos;s what we&apos;ve unlocked for you
               </p>
             </div>
 
@@ -514,7 +517,7 @@ export function OnboardingFlow() {
             <div className='p-4 bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-lg border border-purple-500/30'>
               <h3 className='text-sm font-medium text-white mb-2 flex items-center gap-2'>
                 <Sparkles className='w-4 h-4 text-purple-300' />
-                What You Unlock with Lunary AI
+                What&apos;s Now Available to You
               </h3>
               <ul className='space-y-2 text-xs text-zinc-300'>
                 <li className='flex items-start gap-2'>
@@ -540,24 +543,12 @@ export function OnboardingFlow() {
               </ul>
             </div>
 
-            <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
-              <h3 className='text-sm font-medium text-white mb-2'>
-                Quick Transit Explanation
-              </h3>
-              <p className='text-xs text-zinc-300 leading-relaxed'>
-                Transits are when current planetary positions interact with your
-                birth chart. For example, when Jupiter transits your Sun sign,
-                it brings expansion and growth opportunities. Lunary AI explains
-                these in simple, meaningful ways.
-              </p>
-            </div>
-
             <div className='pt-4 space-y-3'>
               <button
-                onClick={() => setCurrentStep('complete')}
+                onClick={handleComplete}
                 className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
-                Start Free Trial
+                Start Exploring
               </button>
               <button
                 onClick={() => setCurrentStep('intention')}
@@ -575,20 +566,19 @@ export function OnboardingFlow() {
               <Star className='w-8 h-8 text-green-300' />
             </div>
             <h2 className='text-2xl font-bold text-white mb-2'>
-              You're All Set!
+              You&apos;re All Set!
             </h2>
             <p className='text-zinc-300 mb-6'>
-              Start your free trial to unlock personalized horoscopes, birth
-              chart analysis, and cosmic insights.
+              Your personalized cosmic experience is ready. Explore your birth
+              chart, daily horoscopes, and more.
             </p>
 
             <div className='pt-4'>
-              <SmartTrialButton size='lg' fullWidth />
               <button
                 onClick={handleComplete}
-                className='w-full mt-3 text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+                className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
-                Explore free features
+                Open Book of Shadows
               </button>
             </div>
           </div>

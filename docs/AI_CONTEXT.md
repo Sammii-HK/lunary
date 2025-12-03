@@ -51,7 +51,7 @@ Benefits for users:
 - Daily moon phases & basic insights
 - General tarot card of the day
 - Basic lunar calendar
-- Sun sign horoscope
+- General daily horoscope
 - Access to comprehensive grimoire knowledge (500+ pages)
 - 1 free AI ritual/reading per week
 - Basic AI chat (3 messages per day)
@@ -63,7 +63,7 @@ Benefits for users:
 - Personal tarot card & guidance (personalized patterns)
 - Daily transit calendar (personalized to your chart)
 - Tarot pattern analysis (identifies recurring themes and cards)
-- Personalized crystal & herb recommendations
+- Personalized crystal recommendations
 - Solar return insights
 - Cosmic profile (complete astrological profile)
 - Birthday collection (save multiple birthdays for synastry)

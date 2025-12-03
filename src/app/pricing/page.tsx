@@ -11,7 +11,15 @@ import {
   type PricingPlan,
 } from '../../../utils/pricing';
 import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
-import { Check, Sparkles, Moon, Star, ArrowRight } from 'lucide-react';
+import {
+  Check,
+  Sparkles,
+  Moon,
+  Star,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useCurrency, formatPrice } from '../../hooks/useCurrency';
@@ -29,9 +37,22 @@ export default function PricingPage() {
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
   const [loadingPlans, setLoadingPlans] = useState(true);
+  const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>(
     'monthly',
   );
+
+  const togglePlanExpanded = (planId: string) => {
+    setExpandedPlans((prev) => {
+      const next = new Set(prev);
+      if (next.has(planId)) {
+        next.delete(planId);
+      } else {
+        next.add(planId);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     async function loadPricingPlans() {
@@ -240,19 +261,27 @@ export default function PricingPage() {
             ) : (
               <div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
                 {displayPlans.map((plan: any, index: number) => {
+                  // Most Popular logic:
+                  // - Monthly view: Lunary+ is most popular
+                  // - Annual view: Annual plan is most popular (not Plus)
                   const isPopular =
-                    plan.popular ||
-                    (billingCycle === 'annual' &&
-                      plan.id === 'lunary_plus_ai_annual');
+                    billingCycle === 'monthly'
+                      ? plan.id === 'lunary_plus'
+                      : plan.id === 'lunary_plus_ai_annual';
                   const isFree = plan.price === 0;
+                  const isExpanded = expandedPlans.has(plan.id);
+                  const visibleFeatures = isExpanded
+                    ? plan.features
+                    : plan.features.slice(0, 6);
+                  const hasMoreFeatures = plan.features.length > 6;
 
                   return (
                     <div
                       key={plan.id}
-                      className={`relative rounded-2xl p-6 flex flex-col transition-all duration-300 ${
+                      className={`relative rounded-2xl p-6 flex flex-col transition-all duration-300 border-2 ${
                         isPopular
-                          ? 'bg-gradient-to-b from-purple-950/40 to-zinc-900/60 border-2 border-purple-500/30 shadow-xl shadow-purple-500/5'
-                          : 'bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700/60'
+                          ? 'bg-gradient-to-b from-purple-950/40 to-zinc-900/60 border-purple-500/30 shadow-xl shadow-purple-500/5'
+                          : 'bg-zinc-900/40 border-zinc-800/60 hover:border-zinc-700/60'
                       }`}
                     >
                       {isPopular && (
@@ -306,20 +335,31 @@ export default function PricingPage() {
                       </div>
 
                       <div className='space-y-3 flex-1 mb-6'>
-                        {plan.features
-                          .slice(0, 6)
-                          .map((feature: string, i: number) => (
-                            <div key={i} className='flex items-start gap-2.5'>
-                              <Check className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0' />
-                              <span className='text-sm text-zinc-400'>
-                                {feature}
-                              </span>
-                            </div>
-                          ))}
-                        {plan.features.length > 6 && (
-                          <div className='text-xs text-zinc-600 pl-6'>
-                            +{plan.features.length - 6} more features
+                        {visibleFeatures.map((feature: string, i: number) => (
+                          <div key={i} className='flex items-start gap-2.5'>
+                            <Check className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0' />
+                            <span className='text-sm text-zinc-400'>
+                              {feature}
+                            </span>
                           </div>
+                        ))}
+                        {hasMoreFeatures && (
+                          <button
+                            onClick={() => togglePlanExpanded(plan.id)}
+                            className='flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 pl-6 transition-colors'
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className='w-3 h-3' />
+                                Show less
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className='w-3 h-3' />+
+                                {plan.features.length - 6} more features
+                              </>
+                            )}
+                          </button>
                         )}
                       </div>
 
@@ -407,20 +447,20 @@ export default function PricingPage() {
                   desc: 'Personalized insights calculated from your natal chart',
                 },
                 {
-                  title: 'Tarot Readings',
-                  desc: 'AI-powered spreads with deep symbolic interpretation',
+                  title: 'Personal Transit Impacts',
+                  desc: 'See how current planets specifically affect your chart',
                 },
                 {
-                  title: 'Transit Calendar',
-                  desc: 'Track how current planets aspect your birth chart',
+                  title: 'Solar Return Insights',
+                  desc: 'Birthday themes & personal year number based on your chart',
                 },
                 {
                   title: 'Moon Circles',
                   desc: 'New and full moon rituals personalized to your chart',
                 },
                 {
-                  title: 'Crystal & Herb Guide',
-                  desc: 'Recommendations based on your current transits',
+                  title: 'Crystal Recommendations',
+                  desc: 'Personalized crystals based on your birth chart & transits',
                 },
               ].map((item, i) => (
                 <div
