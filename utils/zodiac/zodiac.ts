@@ -54,6 +54,37 @@ export const zodiacSymbol = {
   pisces: 'L',
 };
 
+// Unicode zodiac symbols (readable without special font)
+export const zodiacUnicode = {
+  aries: '♈',
+  taurus: '♉',
+  gemini: '♊',
+  cancer: '♋',
+  leo: '♌',
+  virgo: '♍',
+  libra: '♎',
+  scorpio: '♏',
+  sagittarius: '♐',
+  capricorn: '♑',
+  aquarius: '♒',
+  pisces: '♓',
+};
+
+// Unicode planet symbols (readable without special font)
+export const planetUnicode = {
+  sun: '☉',
+  moon: '☽',
+  mercury: '☿',
+  venus: '♀',
+  earth: '⊕',
+  mars: '♂',
+  jupiter: '♃',
+  saturn: '♄',
+  uranus: '♅',
+  neptune: '♆',
+  pluto: '♇',
+};
+
 export const elementUnicode = {
   earth: '🜃',
   fire: '🜂',

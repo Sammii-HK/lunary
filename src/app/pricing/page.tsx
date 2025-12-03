@@ -8,34 +8,30 @@ import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import {
   PRICING_PLANS,
   getPricingPlansWithStripeData,
-  hasFeatureAccess,
-  getTrialDaysRemaining,
   type PricingPlan,
 } from '../../../utils/pricing';
 import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
-import { Check, Star, Zap } from 'lucide-react';
+import { Check, Sparkles, Moon, Star, ArrowRight } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useCurrency, formatPrice } from '../../hooks/useCurrency';
 import { getPriceForCurrency } from '../../../utils/stripe-prices';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
-import { useConversionTracking } from '@/hooks/useConversionTracking';
 import { conversionTracking } from '@/lib/analytics';
-import { SocialProof } from '@/components/SocialProof';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
-// Metadata is handled in layout.tsx for client components
 export default function PricingPage() {
   const { user } = useUser();
   const subscription = useSubscription();
   const authState = useAuthStatus();
-  const { trackEvent } = useConversionTracking();
   const currency = useCurrency();
   const [loading, setLoading] = useState<string | null>(null);
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
   const [loadingPlans, setLoadingPlans] = useState(true);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>(
+    'monthly',
+  );
 
   useEffect(() => {
     async function loadPricingPlans() {
@@ -49,12 +45,9 @@ export default function PricingPage() {
       }
     }
 
-    // Check for referral code in URL
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
     if (ref) {
-      setReferralCode(ref);
-      // Store in localStorage for checkout
       localStorage.setItem('lunary_referral_code', ref);
     }
 
@@ -64,7 +57,7 @@ export default function PricingPage() {
   const subscriptionStatus = subscription.status || 'free';
   const trialDaysRemaining = subscription.trialDaysRemaining;
 
-  // Compute prices with currency mapping
+  // Compute prices with currency mapping - simplified to show monthly vs annual
   const plansWithCurrency = useMemo(() => {
     return pricingPlans.map((plan) => {
       if (plan.price === 0) return plan;
@@ -73,10 +66,8 @@ export default function PricingPage() {
       const displayPrice = currencyPrice?.amount || plan.price;
       const displayCurrency = currencyPrice?.currency.toUpperCase() || currency;
 
-      // Calculate dynamic savings for annual plan
       let calculatedSavings: string | undefined = plan.savings;
       if (plan.interval === 'year' && plan.id === 'lunary_plus_ai_annual') {
-        // Find the monthly AI plan price in the same currency
         const monthlyAIPrice = getPriceForCurrency(
           'lunary_plus_ai' as any,
           currency,
@@ -89,29 +80,40 @@ export default function PricingPage() {
         }
       }
 
-      // Always prefer currency-specific price ID, never fall back to env var
-      // as it might point to old prices
       return {
         ...plan,
         displayPrice,
         displayCurrency,
-        currencyPriceId: currencyPrice?.priceId || undefined, // Don't fall back to old env var
+        currencyPriceId: currencyPrice?.priceId || undefined,
         calculatedSavings,
       };
     });
   }, [pricingPlans, currency]);
 
+  // Get the main plans for display
+  const freePlan = plansWithCurrency.find((p) => p.id === 'free');
+  const plusPlan = plansWithCurrency.find((p) => p.id === 'lunary_plus');
+  const aiPlan = plansWithCurrency.find((p) => p.id === 'lunary_plus_ai');
+  const annualPlan = plansWithCurrency.find(
+    (p) => p.id === 'lunary_plus_ai_annual',
+  );
+
+  // Display plans based on billing cycle
+  const displayPlans =
+    billingCycle === 'monthly'
+      ? [freePlan, plusPlan, aiPlan].filter(Boolean)
+      : [freePlan, plusPlan, annualPlan].filter(Boolean);
+
   const handleSubscribe = async (priceId: string, planId: string) => {
     if (!priceId) return;
 
     setLoading(planId);
-
     conversionTracking.upgradeClicked(
       planId === 'monthly' ? 'monthly_plan' : 'yearly_plan',
       '/pricing',
     );
+
     try {
-      // Get referral code from localStorage if present
       const storedReferralCode = localStorage.getItem('lunary_referral_code');
       const currentUserId = authState.user?.id || user?.id;
 
@@ -139,182 +141,193 @@ export default function PricingPage() {
     {
       question: "What's included in the free trial?",
       answer:
-        'Get full access to all personalized features including your complete birth chart analysis, personalized daily horoscopes, tarot patterns, and cosmic insights. Credit card required but no payment taken during trial.',
+        'Full access to all personalized features including birth chart analysis, daily horoscopes, and AI chat. Credit card required but no payment taken during trial.',
     },
     {
       question: 'Can I cancel anytime?',
       answer:
-        "Absolutely. Cancel your subscription at any time through your account settings. You'll continue to have access to premium features until the end of your billing period.",
+        "Yes. Cancel through your account settings anytime. You'll keep access until the end of your billing period.",
     },
     {
-      question: 'How accurate are the birth chart calculations?',
+      question: 'How accurate are the calculations?',
       answer:
-        'We use accurate astronomical algorithms to calculate planetary positions precise to your exact birth time, date, and location. Every calculation considers your unique cosmic signature.',
+        'We use precise astronomical algorithms based on your exact birth time, date, and location.',
     },
     {
-      question: 'Can I use Lunary offline?',
+      question: 'What makes Lunary different?',
       answer:
-        'Yes! Lunary is a Progressive Web App (PWA). Install it on your device for offline access to your birth chart, saved insights, and cosmic data. Works on mobile, tablet, and desktop.',
-    },
-    {
-      question: 'Do you have push notifications?',
-      answer:
-        'Yes! Once you install Lunary as a PWA and sign in, you can enable push notifications for significant cosmic events, daily insights, and important transits. Stay connected to your cosmic rhythm.',
-    },
-    {
-      question: 'What makes this different from other astrology apps?',
-      answer:
-        'Unlike apps that give generic horoscopes, every insight is calculated from your exact birth chart. We respect your intelligence with thoughtful guidance, never prescriptive advice.',
+        'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes.',
     },
   ];
 
   return (
     <>
       <FAQStructuredData faqs={faqs} />
-      <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+      <div className='min-h-screen bg-[#0a0a0f] text-zinc-100 flex flex-col'>
+        {/* Subtle gradient background */}
+        <div className='fixed inset-0 bg-gradient-to-b from-purple-950/20 via-transparent to-transparent pointer-events-none' />
+
         {/* Header */}
-        <section className='relative overflow-hidden border-b border-zinc-800/50'>
-          <div className='absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-transparent'></div>
-          <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-24'>
-            <div className='text-center max-w-4xl mx-auto space-y-4 sm:space-y-6'>
-              <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-zinc-100 leading-[1.1] tracking-tight'>
-                Simple,{' '}
-                <span className='font-normal text-purple-300/80'>
-                  transparent
+        <section className='relative pt-24 pb-16 md:pt-32 md:pb-20'>
+          <div className='max-w-5xl mx-auto px-6 text-center'>
+            <div className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 mb-8'>
+              <Moon className='w-3.5 h-3.5 text-purple-400' />
+              <span className='text-xs font-medium text-purple-300'>
+                7-day free trial
+              </span>
+            </div>
+
+            <h1 className='text-4xl md:text-6xl font-light tracking-tight mb-6'>
+              Your cosmic journey
+              <br />
+              <span className='text-purple-300/80'>starts here</span>
+            </h1>
+
+            <p className='text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed'>
+              Personalized astrology based on your exact birth chart. No generic
+              horoscopes.
+            </p>
+
+            {subscriptionStatus === 'trial' && trialDaysRemaining && (
+              <div className='mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20'>
+                <Sparkles className='w-4 h-4 text-amber-400' />
+                <span className='text-sm text-amber-300'>
+                  {trialDaysRemaining} days left in trial
                 </span>
-                <br className='hidden sm:block' />
-                <span className='sm:hidden'> </span>
-                pricing
-              </h1>
+              </div>
+            )}
+          </div>
+        </section>
 
-              <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light'>
-                Start your free trial - credit card required but no payment
-                taken. Cancel anytime.
-              </p>
-
-              {subscriptionStatus === 'trial' && (
-                <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 bg-purple-500/10 backdrop-blur-sm mt-2'>
-                  <Zap className='w-4 h-4 text-purple-300/90' strokeWidth={2} />
-                  <span className='text-sm font-medium text-purple-300/90'>
-                    {trialDaysRemaining} days left in your free trial
-                  </span>
-                </div>
-              )}
+        {/* Billing Toggle */}
+        <section className='relative pb-8'>
+          <div className='flex justify-center'>
+            <div className='inline-flex items-center p-1 rounded-full bg-zinc-900/80 border border-zinc-800'>
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                  billingCycle === 'monthly'
+                    ? 'bg-zinc-800 text-white'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle('annual')}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                  billingCycle === 'annual'
+                    ? 'bg-zinc-800 text-white'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                Annual
+                <span className='text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30'>
+                  Save 25%
+                </span>
+              </button>
             </div>
           </div>
         </section>
 
         {/* Pricing Cards */}
-        <section className='py-12 sm:py-16 md:py-20 lg:py-24 border-b border-zinc-800/50'>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <section className='relative pb-24'>
+          <div className='max-w-5xl mx-auto px-6'>
             {loadingPlans ? (
-              <div className='flex justify-center items-center py-20'>
-                <div className='flex items-center gap-3'>
-                  <div className='w-5 h-5 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin'></div>
-                  <span className='text-zinc-400 text-sm'>
-                    Loading pricing information...
-                  </span>
-                </div>
+              <div className='flex justify-center py-20'>
+                <div className='w-5 h-5 border-2 border-zinc-700 border-t-purple-500 rounded-full animate-spin' />
               </div>
             ) : (
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-6 xl:gap-8 max-w-6xl mx-auto'>
-                {plansWithCurrency.map((plan: any) => (
-                  <div
-                    key={plan.id}
-                    className={`relative rounded-xl p-6 md:p-6 lg:p-7 border transition-all duration-300 flex flex-col ${
-                      plan.popular
-                        ? 'border-purple-500/40 bg-zinc-900/60 hover:bg-zinc-900/80 shadow-lg shadow-purple-500/10'
-                        : 'border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-zinc-700/50'
-                    }`}
-                  >
-                    {plan.popular && (
-                      <div className='absolute -top-3 left-1/2 transform -translate-x-1/2 z-20'>
-                        <div className='flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-500/40 bg-purple-500/15 backdrop-blur-sm'>
-                          <Star
-                            className='w-3 h-3 text-purple-300/90'
-                            strokeWidth={2}
-                            fill='currentColor'
-                          />
-                          <span className='text-xs font-semibold text-purple-300/90'>
-                            Most Popular
-                          </span>
-                        </div>
-                      </div>
-                    )}
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
+                {displayPlans.map((plan: any, index: number) => {
+                  const isPopular =
+                    plan.popular ||
+                    (billingCycle === 'annual' &&
+                      plan.id === 'lunary_plus_ai_annual');
+                  const isFree = plan.price === 0;
 
-                    {(plan.calculatedSavings || plan.savings) && (
-                      <div className='absolute -top-3 right-3 z-20'>
-                        <div className='px-2.5 py-1 rounded-full border border-zinc-700/50 bg-zinc-800/80 backdrop-blur-sm'>
-                          <span className='text-xs font-semibold text-zinc-300'>
-                            {plan.calculatedSavings || plan.savings}
-                          </span>
+                  return (
+                    <div
+                      key={plan.id}
+                      className={`relative rounded-2xl p-6 flex flex-col transition-all duration-300 ${
+                        isPopular
+                          ? 'bg-gradient-to-b from-purple-950/40 to-zinc-900/60 border-2 border-purple-500/30 shadow-xl shadow-purple-500/5'
+                          : 'bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700/60'
+                      }`}
+                    >
+                      {isPopular && (
+                        <div className='absolute -top-3 left-1/2 -translate-x-1/2'>
+                          <div className='flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30'>
+                            <Star
+                              className='w-3 h-3 text-purple-400'
+                              fill='currentColor'
+                            />
+                            <span className='text-xs font-semibold text-purple-300'>
+                              Most Popular
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    <div className='space-y-5 flex-1 flex flex-col'>
-                      {/* Plan Header */}
-                      <div className='space-y-2'>
-                        <h3 className='text-xl md:text-2xl font-medium text-zinc-100'>
+                      <div className='mb-6'>
+                        <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                           {plan.name}
                         </h3>
-                        <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
+                        <p className='text-sm text-zinc-500'>
                           {plan.description}
                         </p>
                       </div>
 
-                      {/* Price */}
-                      <div className='pb-3'>
-                        {plan.price === 0 ? (
-                          <div className='text-4xl md:text-5xl font-light text-zinc-100'>
-                            Free
-                          </div>
+                      <div className='mb-6'>
+                        {isFree ? (
+                          <div className='text-4xl font-light'>Free</div>
                         ) : (
-                          <div className='space-y-1'>
-                            <div className='text-5xl md:text-6xl font-light text-zinc-100 leading-none'>
+                          <div>
+                            <span className='text-4xl font-light'>
                               {formatPrice(
                                 plan.displayPrice,
                                 plan.displayCurrency,
                               )}
-                              <span className='text-xl md:text-2xl font-normal text-zinc-400 ml-2'>
-                                /{plan.interval}
-                              </span>
-                            </div>
+                            </span>
+                            <span className='text-zinc-500 ml-1'>
+                              /{plan.interval}
+                            </span>
                             {plan.interval === 'year' && (
-                              <div className='text-sm text-zinc-500'>
-                                Just{' '}
+                              <div className='text-xs text-zinc-600 mt-1'>
                                 {formatPrice(
                                   plan.displayPrice / 12,
                                   plan.displayCurrency,
                                 )}
-                                /month billed annually
+                                /month
                               </div>
                             )}
                           </div>
                         )}
                       </div>
 
-                      {/* Features */}
-                      <div className='space-y-2.5 pt-4 border-t border-zinc-800/50 flex-1'>
-                        {plan.features.map((feature: string, index: number) => (
-                          <div key={index} className='flex items-start gap-3'>
-                            <Check
-                              className='w-4 h-4 text-zinc-500 mt-0.5 flex-shrink-0'
-                              strokeWidth={2}
-                            />
-                            <span className='text-sm md:text-base text-zinc-400 leading-relaxed'>
-                              {feature}
-                            </span>
+                      <div className='space-y-3 flex-1 mb-6'>
+                        {plan.features
+                          .slice(0, 6)
+                          .map((feature: string, i: number) => (
+                            <div key={i} className='flex items-start gap-2.5'>
+                              <Check className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0' />
+                              <span className='text-sm text-zinc-400'>
+                                {feature}
+                              </span>
+                            </div>
+                          ))}
+                        {plan.features.length > 6 && (
+                          <div className='text-xs text-zinc-600 pl-6'>
+                            +{plan.features.length - 6} more features
                           </div>
-                        ))}
+                        )}
                       </div>
 
-                      {/* CTA Button */}
-                      <div className='pt-4 mt-auto'>
+                      <div className='mt-auto'>
                         {plan.id === 'free' && subscriptionStatus === 'free' ? (
                           <Link
                             href='/'
-                            className='w-full block text-center py-3 px-4 rounded-lg border border-zinc-700/50 bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 text-sm font-medium transition-colors'
+                            className='w-full block text-center py-3 rounded-xl border border-zinc-800 text-zinc-400 text-sm font-medium hover:bg-zinc-800/50 transition-colors'
                           >
                             Current Plan
                           </Link>
@@ -323,12 +336,9 @@ export default function PricingPage() {
                           subscription.plan === plan.id ? (
                           <Link
                             href='/profile'
-                            className='w-full block text-center py-3 px-4 rounded-lg border border-purple-500/40 bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 text-sm font-medium transition-colors'
+                            className='w-full block text-center py-3 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 text-sm font-medium hover:bg-purple-500/15 transition-colors'
                           >
                             Current Plan
-                            {subscriptionStatus === 'trial'
-                              ? ` (${trialDaysRemaining} days left)`
-                              : ''}
                           </Link>
                         ) : (
                           <button
@@ -336,470 +346,177 @@ export default function PricingPage() {
                               const priceId =
                                 (plan as any).currencyPriceId ||
                                 plan.stripePriceId;
-                              if (!priceId) {
-                                console.error(
-                                  'No price ID available for plan:',
-                                  plan.id,
-                                );
-                                alert(
-                                  'Price not available. Please refresh the page.',
-                                );
+                              if (!priceId && !isFree) {
+                                alert('Price not available. Please refresh.');
+                                return;
+                              }
+                              if (isFree) {
+                                window.location.href = '/';
                                 return;
                               }
                               handleSubscribe(priceId, plan.id);
                             }}
-                            disabled={
-                              loading === plan.id ||
-                              !(
-                                (plan as any).currencyPriceId ||
-                                plan.stripePriceId
-                              )
-                            }
-                            className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
-                              plan.popular
-                                ? 'bg-purple-500/15 hover:bg-purple-500/20 text-purple-300/90 border-2 border-purple-500/30 hover:border-purple-500/40'
-                                : 'bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 border border-zinc-700/50 hover:border-zinc-600/50'
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            disabled={loading === plan.id}
+                            className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
+                              isPopular
+                                ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30'
+                                : 'bg-zinc-800/60 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/50'
+                            } disabled:opacity-50`}
                           >
                             {loading === plan.id ? (
-                              <div className='flex items-center justify-center gap-2'>
-                                <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin'></div>
+                              <span className='flex items-center justify-center gap-2'>
+                                <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin' />
                                 Loading...
-                              </div>
-                            ) : subscriptionStatus === 'trial' ? (
-                              'Upgrade Now'
+                              </span>
+                            ) : isFree ? (
+                              'Get Started'
                             ) : (
-                              `Start ${plan.interval === 'month' ? '7' : '14'}-Day Free Trial`
+                              'Start Free Trial'
                             )}
                           </button>
                         )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
+
+            <p className='text-center text-xs text-zinc-600 mt-8'>
+              All paid plans include a 7-day free trial. Cancel anytime.
+            </p>
           </div>
         </section>
 
-        {/* Social Proof */}
-        <section className='py-12 sm:py-16 md:py-20 border-b border-zinc-800/50'>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <SocialProof />
-          </div>
-        </section>
+        {/* What's Included */}
+        <section className='relative py-20 border-t border-zinc-800/50'>
+          <div className='max-w-4xl mx-auto px-6'>
+            <h2 className='text-2xl md:text-3xl font-light text-center mb-12'>
+              Everything you get with{' '}
+              <span className='text-purple-300'>Lunary+</span>
+            </h2>
 
-        {/* Feature Comparison Table */}
-        <section className='py-12 sm:py-16 md:py-20 border-b border-zinc-800/50 bg-zinc-900/20'>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <div className='text-center mb-10 md:mb-16 space-y-3 sm:space-y-4'>
-              <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
-                Compare Plans
-              </h2>
-              <p className='text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
-                Find the perfect plan for your cosmic journey
-              </p>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              {[
+                {
+                  title: 'Complete Birth Chart',
+                  desc: 'Precise planetary positions based on your exact birth details',
+                },
+                {
+                  title: 'Daily Horoscopes',
+                  desc: 'Personalized insights calculated from your natal chart',
+                },
+                {
+                  title: 'Tarot Readings',
+                  desc: 'AI-powered spreads with deep symbolic interpretation',
+                },
+                {
+                  title: 'Transit Calendar',
+                  desc: 'Track how current planets aspect your birth chart',
+                },
+                {
+                  title: 'Moon Circles',
+                  desc: 'New and full moon rituals personalized to your chart',
+                },
+                {
+                  title: 'Crystal & Herb Guide',
+                  desc: 'Recommendations based on your current transits',
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className='flex gap-4 p-4 rounded-xl bg-zinc-900/30 border border-zinc-800/50'
+                >
+                  <div className='w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0'>
+                    <Check className='w-4 h-4 text-purple-400' />
+                  </div>
+                  <div>
+                    <h3 className='text-sm font-medium text-zinc-200 mb-1'>
+                      {item.title}
+                    </h3>
+                    <p className='text-xs text-zinc-500'>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className='overflow-x-auto'>
-              <table className='w-full border-collapse'>
-                <thead>
-                  <tr className='border-b border-zinc-800/50'>
-                    <th className='text-left py-4 px-4 text-sm font-medium text-zinc-400'>
-                      Features
-                    </th>
-                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
-                      Free
-                    </th>
-                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
-                      Lunary+
-                    </th>
-                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
-                      Lunary+ AI
-                    </th>
-                    <th className='text-center py-4 px-4 text-sm font-medium text-zinc-400'>
-                      Annual
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className='divide-y divide-zinc-800/50'>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Daily moon phases & basic insights
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      General tarot card of the day
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-zinc-500 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Tarot spreads per month
-                    </td>
-                    <td className='py-4 px-4 text-center text-zinc-400'>2</td>
-                    <td className='py-4 px-4 text-center text-zinc-400'>10</td>
-                    <td className='py-4 px-4 text-center text-zinc-400'>10</td>
-                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
-                      Unlimited
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Complete birth chart analysis
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Personalized daily horoscopes
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Personal tarot card & guidance
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Daily transit calendar
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Crystal & herb recommendations
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Moon Circles (New & Full Moon)
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Unlimited AI chat (Lunary Copilot)
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Deeper tarot readings
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Personalized weekly reports
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Downloadable cosmic reports
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Yearly cosmic forecast
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <span className='text-zinc-600'>—</span>
-                    </td>
-                    <td className='py-4 px-4 text-center'>
-                      <Check className='w-5 h-5 text-purple-400 mx-auto' />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className='py-4 px-4 text-sm text-zinc-300'>
-                      Free trial period
-                    </td>
-                    <td className='py-4 px-4 text-center text-zinc-400'>—</td>
-                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
-                      7 days
-                    </td>
-                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
-                      7 days
-                    </td>
-                    <td className='py-4 px-4 text-center text-purple-300 font-medium'>
-                      14 days
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className='mt-12 p-6 rounded-2xl bg-gradient-to-r from-purple-950/30 to-pink-950/30 border border-purple-500/20'>
+              <div className='flex flex-col md:flex-row items-center justify-between gap-6'>
+                <div>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                    Lunary+ AI includes everything above, plus:
+                  </h3>
+                  <p className='text-sm text-zinc-400'>
+                    Unlimited AI chat, weekly reports, downloadable PDFs, and
+                    advanced pattern analysis
+                  </p>
+                </div>
+                <Link
+                  href='#'
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className='flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-300 text-sm font-medium hover:bg-purple-500/30 transition-colors flex-shrink-0'
+                >
+                  Choose Plan
+                  <ArrowRight className='w-4 h-4' />
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Newsletter CTA */}
-        <section className='py-12 sm:py-16 md:py-20 border-b border-zinc-800/50'>
-          <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
+        {/* FAQ */}
+        <section className='relative py-20 border-t border-zinc-800/50 bg-zinc-900/20'>
+          <div className='max-w-3xl mx-auto px-6'>
+            <h2 className='text-2xl md:text-3xl font-light text-center mb-12'>
+              Common questions
+            </h2>
+
+            <div className='space-y-4'>
+              {faqs.map((faq, i) => (
+                <div
+                  key={i}
+                  className='p-5 rounded-xl bg-zinc-900/50 border border-zinc-800/50'
+                >
+                  <h3 className='text-sm font-medium text-zinc-200 mb-2'>
+                    {faq.question}
+                  </h3>
+                  <p className='text-sm text-zinc-500 leading-relaxed'>
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Newsletter */}
+        <section className='relative py-16 border-t border-zinc-800/50'>
+          <div className='max-w-xl mx-auto px-6'>
             <NewsletterSignupForm
               align='center'
               source='pricing_page_section'
               className='border-zinc-800/60 bg-zinc-950/50 shadow-none'
-              headline='Stay in the loop with Lunary'
-              description='Not ready to upgrade yet? Get weekly product updates, cosmic reports, and special offers delivered to your inbox.'
-              ctaLabel='Subscribe to updates'
-              successMessage='Welcome aboard! Check your inbox to confirm your subscription.'
+              headline='Not ready yet?'
+              description='Get weekly cosmic insights and product updates.'
+              ctaLabel='Subscribe'
+              successMessage='Welcome! Check your inbox.'
             />
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section className='py-12 sm:py-16 md:py-20 lg:py-24 border-b border-zinc-800/50 bg-zinc-900/20'>
-          <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <div className='text-center mb-10 md:mb-16 space-y-3 sm:space-y-4'>
-              <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
-                Frequently Asked Questions
-              </h2>
-              <p className='text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
-                Everything you need to know about getting started.
-              </p>
-            </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'>
-              <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
-                <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
-                  What's included in the free trial?
-                </h3>
-                <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
-                  Get full access to all personalized features including your
-                  complete birth chart analysis, personalized daily horoscopes,
-                  tarot patterns, and cosmic insights. Credit card required but
-                  no payment taken during trial to start.
-                </p>
-              </div>
-
-              <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
-                <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
-                  Can I cancel anytime?
-                </h3>
-                <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
-                  Absolutely. Cancel your subscription at any time through your
-                  account settings. You'll continue to have access to premium
-                  features until the end of your billing period.
-                </p>
-              </div>
-
-              <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
-                <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
-                  How accurate are the birth chart calculations?
-                </h3>
-                <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
-                  We use accurate astronomical algorithms to calculate planetary
-                  positions precise to your exact birth time, date, and
-                  location. Every calculation considers your unique cosmic
-                  signature.
-                </p>
-              </div>
-
-              <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
-                <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
-                  Can I use Lunary offline?
-                </h3>
-                <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
-                  Yes! Lunary is a Progressive Web App (PWA). Install it on your
-                  device for offline access to your birth chart, saved insights,
-                  and cosmic data. Works on mobile, tablet, and desktop.
-                </p>
-              </div>
-
-              <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
-                <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
-                  Do you have push notifications?
-                </h3>
-                <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
-                  Yes! Once you install Lunary as a PWA and sign in, you can
-                  enable push notifications for significant cosmic events, daily
-                  insights, and important transits. Stay connected to your
-                  cosmic rhythm.
-                </p>
-              </div>
-
-              <div className='p-6 md:p-8 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'>
-                <h3 className='text-lg md:text-xl font-medium text-zinc-100 mb-3'>
-                  What makes this different from other astrology apps?
-                </h3>
-                <p className='text-sm md:text-base text-zinc-400 leading-relaxed'>
-                  Unlike apps that give generic horoscopes, every insight is
-                  calculated from your exact birth chart. We respect your
-                  intelligence with thoughtful guidance, never prescriptive
-                  advice.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer CTA */}
-        <section className='py-12 sm:py-16 md:py-20 lg:py-24'>
-          <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8'>
-            <h2 className='text-3xl sm:text-4xl md:text-5xl font-light text-zinc-100'>
-              Ready to discover your cosmic blueprint?
+        {/* Final CTA */}
+        <section className='relative py-20 border-t border-zinc-800/50'>
+          <div className='max-w-2xl mx-auto px-6 text-center'>
+            <h2 className='text-3xl md:text-4xl font-light mb-4'>
+              Ready to explore your chart?
             </h2>
-            <p className='text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
-              Experience astrology that's actually about you. Credit card
-              required but no payment taken during trial. Cancel anytime.
+            <p className='text-zinc-500 mb-8'>
+              Start your free trial today. No payment required.
             </p>
-
-            <div className='pt-4'>
-              <SmartTrialButton />
-            </div>
-
-            <div className='pt-8'>
-              <Link
-                href='/welcome'
-                className='text-sm text-zinc-500 hover:text-zinc-400 transition-colors inline-block'
-              >
-                Learn more about features →
-              </Link>
-            </div>
+            <SmartTrialButton />
           </div>
         </section>
 
