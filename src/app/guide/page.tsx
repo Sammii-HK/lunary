@@ -323,11 +323,14 @@ function BookOfShadowsContent() {
           ? crypto.randomUUID()
           : `ritual-${Date.now()}`;
 
-      addMessage({
-        id: chatMessageId,
-        role: 'assistant',
-        content: ritualState.message,
-      });
+      addMessage(
+        {
+          id: chatMessageId,
+          role: 'assistant',
+          content: ritualState.message,
+        },
+        true,
+      );
 
       if (ritualState.ritualType && ritualState.messageId) {
         trackRitualShown(
