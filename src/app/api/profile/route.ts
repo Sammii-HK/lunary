@@ -27,6 +27,8 @@ async function migrateFromJazz(userId: string) {
       jazzData.personalCard ||
       jazzData.location
     ) {
+      // Encrypt sensitive PII data
+      const encryptedName = jazzData.name ? encrypt(jazzData.name) : null;
       const encryptedBirthday = jazzData.birthday
         ? encrypt(jazzData.birthday)
         : null;
@@ -35,7 +37,7 @@ async function migrateFromJazz(userId: string) {
         INSERT INTO user_profiles (user_id, name, birthday, birth_chart, personal_card, location)
         VALUES (
           ${userId}, 
-          ${jazzData.name}, 
+          ${encryptedName}, 
           ${encryptedBirthday},
           ${jazzData.birthChart ? JSON.stringify(jazzData.birthChart) : null}::jsonb,
           ${jazzData.personalCard ? JSON.stringify(jazzData.personalCard) : null}::jsonb,
@@ -93,13 +95,19 @@ export async function GET(request: NextRequest) {
     `;
     const subscription = subscriptionResult.rows[0] || null;
 
+    // Decrypt sensitive PII fields (name and birthday are encrypted)
+    const decryptedName = profile?.name ? decrypt(profile.name) : null;
+    const decryptedBirthday = profile?.birthday
+      ? decrypt(profile.birthday)
+      : null;
+
     return NextResponse.json({
       profile: profile
         ? {
             id: profile.id,
             userId: profile.user_id,
-            name: profile.name,
-            birthday: profile.birthday ? decrypt(profile.birthday) : null,
+            name: decryptedName,
+            birthday: decryptedBirthday,
             birthChart: profile.birth_chart,
             personalCard: profile.personal_card,
             location: profile.location,
@@ -147,13 +155,15 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { name, birthday, birthChart, personalCard, location } = body;
 
+    // Encrypt sensitive PII data
+    const encryptedName = name ? encrypt(name) : null;
     const encryptedBirthday = birthday ? encrypt(birthday) : null;
 
     const result = await sql`
       INSERT INTO user_profiles (user_id, name, birthday, birth_chart, personal_card, location)
       VALUES (
         ${user.id}, 
-        ${name || null}, 
+        ${encryptedName}, 
         ${encryptedBirthday},
         ${birthChart ? JSON.stringify(birthChart) : null}::jsonb,
         ${personalCard ? JSON.stringify(personalCard) : null}::jsonb,
@@ -170,11 +180,12 @@ export async function PUT(request: NextRequest) {
     `;
 
     const profile = result.rows[0];
+
     return NextResponse.json({
       profile: {
         id: profile.id,
         userId: profile.user_id,
-        name: profile.name,
+        name: profile.name ? decrypt(profile.name) : null,
         birthday: profile.birthday ? decrypt(profile.birthday) : null,
         birthChart: profile.birth_chart,
         personalCard: profile.personal_card,

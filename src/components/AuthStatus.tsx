@@ -113,7 +113,7 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
       authPromise = (async () => {
         try {
           const timeoutPromise = new Promise<null>((_, reject) =>
-            setTimeout(() => reject(new Error('Auth timeout')), 5000),
+            setTimeout(() => reject(new Error('Auth timeout')), 10000),
           );
 
           const session = await Promise.race([

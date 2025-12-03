@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 
 import { auth } from '@/lib/auth';
+import { decrypt } from '@/lib/encryption';
 import { normalizePlanType } from '../../../utils/pricing';
 
 export type AuthenticatedUser = {
@@ -100,7 +101,8 @@ export const requireUser = async (
             SELECT birthday FROM user_profiles WHERE user_id = ${user.id} LIMIT 1
           `;
           if (profileResult.rows.length > 0 && profileResult.rows[0].birthday) {
-            dbBirthday = profileResult.rows[0].birthday;
+            // Birthday is encrypted in the database - decrypt it
+            dbBirthday = decrypt(profileResult.rows[0].birthday);
           }
         } catch (profileError: any) {
           // Silently ignore if user_profiles table doesn't exist (42P01)

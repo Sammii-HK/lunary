@@ -58,6 +58,8 @@ export async function POST(request: NextRequest) {
       stripeCustomerId,
     } = body;
 
+    // Encrypt sensitive PII data
+    const encryptedName = name ? encrypt(name) : null;
     const encryptedBirthday = birthday ? encrypt(birthday) : null;
 
     await sql`
@@ -66,7 +68,7 @@ export async function POST(request: NextRequest) {
       )
       VALUES (
         ${user.id}, 
-        ${name || null}, 
+        ${encryptedName}, 
         ${encryptedBirthday}, 
         ${birthChart ? JSON.stringify(birthChart) : null}::jsonb,
         ${personalCard ? JSON.stringify(personalCard) : null}::jsonb,
