@@ -30,8 +30,6 @@ export async function publishToSubstack(
 
     const audience = tier === 'paid' ? 'only_paid' : 'everyone';
 
-    console.log(`📝 Publishing ${tier} post: "${post.title}"`);
-
     const result = await client.createAndPublish(post.title, post.content, {
       subtitle: post.subtitle,
       audience,
@@ -39,7 +37,6 @@ export async function publishToSubstack(
     });
 
     if (result.success) {
-      console.log(`✅ ${tier} post published: ${result.postUrl}`);
       return {
         success: true,
         postUrl: result.postUrl,
@@ -66,8 +63,6 @@ export async function publishBothTiers(
   freePost: SubstackPost,
   paidPost: SubstackPost,
 ): Promise<{ free: PublishResult; paid: PublishResult }> {
-  console.log('📬 Publishing both free and paid posts to Substack...');
-
   const freeResult = await publishToSubstack(freePost, 'free');
   const paidResult = await publishToSubstack(paidPost, 'paid');
 

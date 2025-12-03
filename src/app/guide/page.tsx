@@ -12,7 +12,7 @@ import React, {
 import { useSearchParams } from 'next/navigation';
 import { ArrowUp, ChevronDown, ChevronUp, Square } from 'lucide-react';
 
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 import { useAssistantChat } from '@/hooks/useAssistantChat';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -22,6 +22,14 @@ import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { captureEvent } from '@/lib/posthog-client';
+import {
+  dismissRitualBadge,
+  useRitualBadge,
+  trackRitualShown,
+  trackRitualEngaged,
+} from '@/hooks/useRitualBadge';
+import { useSubscription } from '@/hooks/useSubscription';
+import { WeeklyInsights } from '@/lib/rituals/engine';
 
 interface CollectionFolder {
   id: number;
@@ -168,8 +176,28 @@ const MessageBubble = ({
 function BookOfShadowsContent() {
   const authState = useAuthStatus();
   const searchParams = useSearchParams();
-  const { me } = useAccount();
-  const userBirthday = (me?.profile as any)?.birthday;
+  const { user } = useUser();
+  const userBirthday = user?.birthday;
+  const userName = user?.name?.split(' ')[0];
+  const { isSubscribed } = useSubscription();
+  const [weeklyInsights, setWeeklyInsights] = useState<
+    WeeklyInsights | undefined
+  >(undefined);
+
+  useEffect(() => {
+    const now = new Date();
+    const isSunday = now.getDay() === 0;
+    const isMorning = now.getHours() < 14;
+
+    if (isSubscribed && isSunday && isMorning) {
+      fetch('/api/rituals/weekly-insights')
+        .then((res) => res.json())
+        .then((data) => setWeeklyInsights(data))
+        .catch(() => {});
+    }
+  }, [isSubscribed]);
+
+  const ritualState = useRitualBadge(isSubscribed, userName, weeklyInsights);
 
   const {
     messages,
@@ -272,6 +300,78 @@ function BookOfShadowsContent() {
       recordCheckIn();
     }
   }, [authState.isAuthenticated, authState.loading]);
+
+  // Inject ritual message when user visits during ritual time
+  const [ritualInjected, setRitualInjected] = useState(false);
+  const [shownRitualId, setShownRitualId] = useState<string | null>(null);
+  const [shownRitualContext, setShownRitualContext] = useState<string | null>(
+    null,
+  );
+  const [ritualEngagementTracked, setRitualEngagementTracked] = useState(false);
+
+  useEffect(() => {
+    // Inject ritual message when there's an unread ritual (morning/evening)
+    if (
+      !isLoadingHistory &&
+      !ritualInjected &&
+      ritualState.hasUnreadMessage &&
+      ritualState.message &&
+      ritualState.messageId
+    ) {
+      const chatMessageId =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `ritual-${Date.now()}`;
+
+      addMessage(
+        {
+          id: chatMessageId,
+          role: 'assistant',
+          content: ritualState.message,
+        },
+        true,
+      );
+
+      if (ritualState.ritualType && ritualState.messageId) {
+        trackRitualShown(
+          ritualState.messageId,
+          ritualState.ritualType,
+          user?.id,
+        );
+        setShownRitualId(ritualState.messageId);
+        setShownRitualContext(ritualState.ritualType);
+      }
+
+      setRitualInjected(true);
+      dismissRitualBadge(isSubscribed);
+    }
+  }, [
+    isLoadingHistory,
+    ritualState,
+    ritualInjected,
+    addMessage,
+    isSubscribed,
+    user?.id,
+  ]);
+
+  useEffect(() => {
+    if (
+      shownRitualId &&
+      shownRitualContext &&
+      !ritualEngagementTracked &&
+      messages.length >= 2 &&
+      messages[messages.length - 1]?.role === 'user'
+    ) {
+      trackRitualEngaged(shownRitualId, shownRitualContext as any, user?.id);
+      setRitualEngagementTracked(true);
+    }
+  }, [
+    messages,
+    shownRitualId,
+    shownRitualContext,
+    ritualEngagementTracked,
+    user?.id,
+  ]);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [promptHandled, setPromptHandled] = useState<string | null>(null);

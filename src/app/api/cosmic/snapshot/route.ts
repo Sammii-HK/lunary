@@ -44,9 +44,9 @@ async function hydrateProfileFromDatabase(
 ): Promise<SnapshotProfile> {
   try {
     const result = await sql`
-      SELECT email, name, birthday, timezone, locale
-      FROM accounts
-      WHERE id = ${userId}
+      SELECT name, birthday
+      FROM user_profiles
+      WHERE user_id = ${userId}
       LIMIT 1
     `;
 
@@ -56,17 +56,17 @@ async function hydrateProfileFromDatabase(
     }
 
     return {
-      email: baseProfile.email ?? dbProfile.email ?? undefined,
+      email: baseProfile.email ?? undefined,
       name: baseProfile.name ?? dbProfile.name ?? undefined,
-      timezone: baseProfile.timezone ?? dbProfile.timezone ?? DEFAULT_TIMEZONE,
-      locale: baseProfile.locale ?? dbProfile.locale ?? DEFAULT_LOCALE,
+      timezone: baseProfile.timezone ?? DEFAULT_TIMEZONE,
+      locale: baseProfile.locale ?? DEFAULT_LOCALE,
       birthday: baseProfile.birthday ?? dbProfile.birthday ?? undefined,
     };
   } catch (error: any) {
-    // 42P01 = relation does not exist (accounts table missing in some envs)
+    // 42P01 = relation does not exist (user_profiles table missing in some envs)
     if (error?.code === '42P01') {
       console.warn(
-        '[cosmic/snapshot] accounts table not found – skipping DB profile fallback',
+        '[cosmic/snapshot] user_profiles table not found – skipping DB profile fallback',
       );
       return baseProfile;
     }

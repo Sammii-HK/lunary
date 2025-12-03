@@ -3,6 +3,10 @@ import { sql } from '@vercel/postgres';
 
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
 
+// Test user exclusion patterns
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
+
 type NotificationBucket = {
   sent: number;
   delivered: number;
@@ -33,6 +37,11 @@ export async function GET(request: NextRequest) {
             range.end,
           )}
             AND notification_type = ${notificationType}
+            AND user_id NOT IN (
+              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+              UNION
+              SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+            )
           GROUP BY notification_type
         `
       : await sql`
@@ -46,6 +55,11 @@ export async function GET(request: NextRequest) {
           WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
             range.end,
           )}
+            AND user_id NOT IN (
+              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+              UNION
+              SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+            )
           GROUP BY notification_type
         `;
 

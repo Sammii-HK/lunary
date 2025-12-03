@@ -179,7 +179,7 @@ export function generateNewMoonEmailHTML(
           </div>
           
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.</p>
+            <p>© ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.</p>
             <p><a href="${baseUrl}/unsubscribe" style="color: #94a3b8; text-decoration: underline;">Unsubscribe</a></p>
           </div>
         </div>
@@ -218,7 +218,7 @@ Join the Moon Circle: ${baseUrl}/moon-circles?date=${dateStr}
 
 The New Moon is a time of darkness and potential. Embrace the quiet, set your intentions, and trust in the cycle of renewal.
 
-© ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.
+© ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.
   `.trim();
 }
 
@@ -391,7 +391,7 @@ export function generateFullMoonEmailHTML(
           </div>
           
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.</p>
+            <p>© ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.</p>
             <p><a href="${baseUrl}/unsubscribe" style="color: #94a3b8; text-decoration: underline;">Unsubscribe</a></p>
           </div>
         </div>
@@ -430,6 +430,6 @@ Join the Moon Circle: ${baseUrl}/moon-circles?date=${dateStr}
 
 The Full Moon brings clarity and completion. Trust in the process, release with grace, and honor the journey you've taken.
 
-© ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.
+© ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.
   `.trim();
 }

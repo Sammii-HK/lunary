@@ -35,10 +35,10 @@ export async function POST(request: NextRequest) {
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
 
     // Get the base URL for the application (dev vs prod)
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lunary.app'
-        : 'http://localhost:3000';
+    // Use production URL on any Vercel deployment
+    const baseUrl = process.env.VERCEL
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
 
     console.log('🔑 Weekly scheduler environment check:', {
       hasApiKey: !!apiKey,

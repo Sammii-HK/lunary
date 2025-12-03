@@ -247,7 +247,7 @@ export function SEOContentTemplate({
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>Symbols</h2>
           <div className='flex gap-4 text-4xl'>
             {glyphs.map((glyph, index) => (
-              <span key={index} className='text-zinc-300'>
+              <span key={index} className='text-zinc-300 font-astro'>
                 {glyph}
               </span>
             ))}

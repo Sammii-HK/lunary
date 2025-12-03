@@ -1552,10 +1552,9 @@ async function runNotificationCheck(dateStr: string) {
     '🔔 Checking for significant astronomical events via PostgreSQL...',
   );
 
-  const baseUrl =
-    process.env.NODE_ENV === 'production'
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+  const baseUrl = process.env.VERCEL
+    ? 'https://lunary.app'
+    : 'http://localhost:3000';
 
   try {
     // First, get the cosmic data to determine what notifications to send
@@ -1766,30 +1765,30 @@ async function runNotificationCheck(dateStr: string) {
       const threeDayReminders = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.user_email as email,
+          s.email as email,
           s.user_name as name,
           s.trial_ends_at,
-          s.plan_type
+          s.plan
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(threeDaysFromNow)}
         AND (s.trial_reminder_3d_sent = false OR s.trial_reminder_3d_sent IS NULL)
-        AND s.user_email IS NOT NULL
+        AND s.email IS NOT NULL
       `;
 
       // Get trials ending in 1 day (final reminder)
       const oneDayReminders = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.user_email as email,
+          s.email as email,
           s.user_name as name,
           s.trial_ends_at,
-          s.plan_type
+          s.plan
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(oneDayFromNow)}
         AND (s.trial_reminder_1d_sent = false OR s.trial_reminder_1d_sent IS NULL)
-        AND s.user_email IS NOT NULL
+        AND s.email IS NOT NULL
       `;
 
       let sent3Day = 0;
@@ -1912,14 +1911,14 @@ async function runNotificationCheck(dateStr: string) {
       const expiredTrials = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.user_email as email,
+          s.email as email,
           s.user_name as name,
           s.trial_ends_at
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(yesterday)}
         AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
-        AND s.user_email IS NOT NULL
+        AND s.email IS NOT NULL
       `;
 
       let sentExpired = 0;
@@ -2555,9 +2554,8 @@ function createNotificationFromEvent(event: any, cosmicData?: any) {
 }
 
 function getBaseUrl(request: NextRequest): string {
-  return process.env.NODE_ENV === 'production'
-    ? 'https://lunary.app'
-    : request.nextUrl.origin;
+  // Use production URL on any Vercel deployment
+  return process.env.VERCEL ? 'https://lunary.app' : request.nextUrl.origin;
 }
 
 // Dynamic content generators

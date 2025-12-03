@@ -1,112 +1,62 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 
 export function SignOutButton() {
   const [loading, setLoading] = useState(false);
-  const authState = useAuthStatus();
+  const { isAuthenticated, signOut } = useAuthStatus();
+  const router = useRouter();
+  const isSigningOut = useRef(false);
 
   const handleSignOut = async () => {
+    if (isSigningOut.current || loading) return;
+
+    isSigningOut.current = true;
     setLoading(true);
 
-    try {
-      console.log('🔄 Starting sign out...');
+    // Step 1: IMMEDIATELY update auth state - UI reacts instantly
+    signOut();
 
-      try {
-        await betterAuthClient.signOut();
-        invalidateAuthCache();
-        console.log('✅ Better Auth signed out');
-      } catch (error) {
-        console.log('⚠️ Better Auth sign out failed:', error);
-      }
-
-      // Step 2: Clear ALL localStorage and sessionStorage
-      if (typeof window !== 'undefined') {
-        console.log('🗑️ Clearing all browser storage...');
-
-        // Clear everything - nuclear option
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // Also manually clear specific keys that might persist
-        const specificKeys = [
-          'auth_token',
-          'better-auth',
-          'migration_completed',
-          'migration_data',
-          'migration_profile_data',
-          'migration_user_name',
-          'user_session',
-          'jazz',
-          'co-',
-          'account',
-          'subscription',
-          'stripe_subscription',
-          'subscription_data',
-          'trialUpgradeModalDismissed',
-          'exitIntentDismissed',
-        ];
-
-        // Clear subscription-related keys with prefixes
-        Object.keys(localStorage).forEach((key) => {
-          if (
-            key.startsWith('weekly_insights_') ||
-            key.startsWith('subscription_') ||
-            key.startsWith('stripe_')
-          ) {
-            localStorage.removeItem(key);
-          }
-        });
-
-        specificKeys.forEach((key) => {
-          localStorage.removeItem(key);
-          sessionStorage.removeItem(key);
-        });
-
-        console.log('✅ Cleared all storage completely');
-      }
-
-      // Step 3: Clear cookies
-      if (typeof document !== 'undefined') {
-        document.cookie.split(';').forEach((c) => {
-          const eqPos = c.indexOf('=');
-          const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
-          if (name) {
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
-          }
-        });
-        console.log('✅ Cleared cookies');
-      }
-
-      // Step 4: Clear service worker caches for subscription API responses
-      try {
-        if ('caches' in window) {
-          const cacheNames = await caches.keys();
-          await Promise.all(
-            cacheNames.map((cacheName) => caches.delete(cacheName)),
-          );
-          console.log('✅ Cleared service worker caches');
-        }
-      } catch (e) {
-        console.warn('Could not clear service worker caches:', e);
-      }
-
-      // Step 5: Force page reload to clear React state
-      window.location.href = '/';
-
-      console.log('🎉 Complete sign out finished');
-    } catch (error) {
-      console.error('❌ Sign out error:', error);
-    } finally {
-      setLoading(false);
+    // Step 2: Clear all storage first
+    if (typeof window !== 'undefined') {
+      localStorage.clear();
+      sessionStorage.clear();
     }
+
+    // Step 3: Clear cookies
+    if (typeof document !== 'undefined') {
+      document.cookie.split(';').forEach((c) => {
+        const name = c.split('=')[0].trim();
+        if (name) {
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+        }
+      });
+    }
+
+    // Step 4: Sign out from better-auth - AWAIT this
+    try {
+      await betterAuthClient.signOut();
+    } catch {
+      // Ignore errors, session might already be gone
+    }
+
+    // Step 5: Invalidate cache again after server signout
+    invalidateAuthCache();
+
+    // Step 6: Navigate home (no refresh needed - cache is cleared)
+    router.replace('/');
+
+    setLoading(false);
+    setTimeout(() => {
+      isSigningOut.current = false;
+    }, 500);
   };
 
-  if (!authState.isAuthenticated) {
+  if (!isAuthenticated) {
     return null;
   }
 
@@ -116,14 +66,7 @@ export function SignOutButton() {
       disabled={loading}
       className='bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-colors'
     >
-      {loading ? (
-        <>
-          <span className='animate-spin mr-2'>⏳</span>
-          Signing Out...
-        </>
-      ) : (
-        '🚪 Sign Out'
-      )}
+      {loading ? 'Signing Out...' : 'Sign Out'}
     </button>
   );
 }

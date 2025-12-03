@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 
 import { auth } from '@/lib/auth';
+import { decrypt } from '@/lib/encryption';
 import { normalizePlanType } from '../../../utils/pricing';
 
 export type AuthenticatedUser = {
@@ -93,21 +94,22 @@ export const requireUser = async (
         }
       }
 
-      // Fetch birthday from accounts table if not in session
+      // Fetch birthday from user_profiles table if not in session
       if (!user.birthday && !user.birthDate) {
         try {
-          const accountResult = await sql`
-            SELECT birthday FROM accounts WHERE id = ${user.id} LIMIT 1
+          const profileResult = await sql`
+            SELECT birthday FROM user_profiles WHERE user_id = ${user.id} LIMIT 1
           `;
-          if (accountResult.rows.length > 0 && accountResult.rows[0].birthday) {
-            dbBirthday = accountResult.rows[0].birthday;
+          if (profileResult.rows.length > 0 && profileResult.rows[0].birthday) {
+            // Birthday is encrypted in the database - decrypt it
+            dbBirthday = decrypt(profileResult.rows[0].birthday);
           }
-        } catch (accError: any) {
-          // Silently ignore if accounts table doesn't exist (42P01)
-          if (accError?.code !== '42P01') {
+        } catch (profileError: any) {
+          // Silently ignore if user_profiles table doesn't exist (42P01)
+          if (profileError?.code !== '42P01') {
             console.error(
-              '[AI Auth] Failed to fetch birthday from accounts',
-              accError,
+              '[AI Auth] Failed to fetch birthday from user_profiles',
+              profileError,
             );
           }
         }

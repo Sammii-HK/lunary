@@ -135,12 +135,6 @@ export function TrialExpiredEmail({
                 Continue Your Journey →
               </Link>
             </Section>
-
-            <Text style={{ fontSize: '14px', color: '#6b7280' }}>
-              <strong>Special offer:</strong> Use code{' '}
-              <strong style={{ color: '#6366f1' }}>TRIAL20</strong> for 20% off
-              your first month when you rejoin within 7 days.
-            </Text>
           </Section>
 
           <Section
@@ -216,8 +210,6 @@ Rejoin Lunary to continue receiving:
 - 🌙 Transit calendars and cosmic guidance
 
 Continue your journey: ${baseUrl}/pricing
-
-Special offer: Rejoin within 7 days and get 20% off your first month.
 
 ---
 Unsubscribe: ${unsubscribeUrl}

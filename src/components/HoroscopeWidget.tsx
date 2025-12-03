@@ -1,13 +1,9 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react';
 import { SmartTrialButton } from './SmartTrialButton';
 import { useState, useEffect, useRef, useMemo } from 'react';
-import {
-  getBirthChartFromProfile,
-  hasBirthChart,
-  BirthChartData,
-} from '../../utils/astrology/birthChart';
+import { useUser } from '@/context/UserContext';
+import { BirthChartData } from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
 import { bodiesSymbols } from '../../utils/zodiac/zodiac';
@@ -643,11 +639,12 @@ const getAspectInterpretation = (aspect: any): string => {
 };
 
 export const HoroscopeWidget = () => {
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
   const { currentDateTime } = useAstronomyContext();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
+  const userName = user?.name;
+  const userBirthday = user?.birthday;
+  const birthChart = user?.birthChart;
   const [observer, setObserver] = useState<any>(null);
 
   // Normalize date to date-only (no time) to ensure daily seed consistency
@@ -753,7 +750,7 @@ export const HoroscopeWidget = () => {
   }
 
   // For premium users, we need both profile data AND subscription access
-  if (!me || !userBirthday) {
+  if (!user || !userBirthday) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='text-center'>
@@ -770,12 +767,7 @@ export const HoroscopeWidget = () => {
     );
   }
 
-  const hasBirthChartData = hasBirthChart(me.profile);
-  const birthChart = hasBirthChartData
-    ? getBirthChartFromProfile(me.profile)
-    : null;
-
-  if (!birthChart) {
+  if (!birthChart || birthChart.length === 0) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='text-center'>

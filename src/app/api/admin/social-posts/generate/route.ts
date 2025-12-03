@@ -416,10 +416,10 @@ Return only valid JSON.`,
     const dbErrors: string[] = [];
 
     // Generate OG image URL for Instagram posts
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lunary.app'
-        : 'http://localhost:3000';
+    // Use production URL on any Vercel deployment (VERCEL env var is set on all Vercel deployments)
+    const baseUrl = process.env.VERCEL
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
 
     // Use quote pool for Instagram posts (quotes are stored and reused)
     const { generateCatchyQuote, getQuoteImageUrl } = await import(

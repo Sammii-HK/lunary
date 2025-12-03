@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAccount } from 'jazz-tools/react';
-import { PushSubscription } from '../../schema';
+import { useUser } from '@/context/UserContext';
 
 interface NotificationPermission {
   granted: boolean;
@@ -11,7 +10,7 @@ interface NotificationPermission {
 }
 
 export function NotificationManager() {
-  const { me } = useAccount();
+  const { user } = useUser();
   const [permission, setPermission] = useState<NotificationPermission>({
     granted: false,
     denied: false,
@@ -111,7 +110,7 @@ export function NotificationManager() {
     subscription: globalThis.PushSubscription,
   ) => {
     try {
-      if (!me?.root) {
+      if (!user) {
         console.error('No user account available');
         return;
       }
@@ -132,9 +131,8 @@ export function NotificationManager() {
 
       // Save to PostgreSQL only
       try {
-        const profile = me?.profile as any;
-        const birthday = profile?.birthday || null;
-        const userName = profile?.name || null;
+        const birthday = user?.birthday || null;
+        const userName = user?.name || null;
 
         await fetch('/api/notifications/subscribe', {
           method: 'POST',
@@ -161,8 +159,8 @@ export function NotificationManager() {
               birthday: birthday,
               name: userName,
             },
-            userId: (me as any).id || 'unknown',
-            userEmail: profile?.email || null,
+            userId: user?.id || 'unknown',
+            userEmail: null,
           }),
         });
         console.log('✅ Push subscription also saved to PostgreSQL', {

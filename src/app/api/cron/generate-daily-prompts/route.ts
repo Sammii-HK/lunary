@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const users = await sql`
       SELECT DISTINCT
         s.user_id,
-        s.user_email,
+        s.email,
         s.user_name,
         ps.preferences->>'birthday' as birthday,
         ps.preferences->>'timezone' as timezone,
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         ps.preferences->>'birthday' IS NOT NULL
         AND ps.preferences->>'birthday' != ''
       )
-      GROUP BY s.user_id, s.user_email, s.user_name, ps.preferences
+      GROUP BY s.user_id, s.email, s.user_name, ps.preferences
     `;
 
     if (users.rows.length === 0) {

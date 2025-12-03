@@ -180,10 +180,10 @@ export async function GET(request: NextRequest) {
 
           notificationsSent++;
 
-          if (sub.user_email) {
+          if (sub.email) {
             try {
               await sendEmail({
-                to: sub.user_email,
+                to: sub.email,
                 subject: notificationTitle,
                 html: `
                   <h2>${notificationTitle}</h2>
@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
               emailsSent++;
             } catch (emailError) {
               console.error(
-                `Failed to send email to ${sub.user_email}:`,
+                `Failed to send email to ${sub.email}:`,
                 emailError,
               );
             }

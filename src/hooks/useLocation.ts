@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import {
   LocationData,
   requestLocation,
@@ -18,86 +18,78 @@ interface LocationState {
 }
 
 export const useLocation = () => {
-  const { me } = useAccount(); // Read-only for migration - data syncs to Postgres via useProfile
+  const { user, refetch } = useUser();
   const [state, setState] = useState<LocationState>({
     location: null,
-    loading: false,
+    loading: true,
     error: null,
     hasPermission: false,
   });
 
   useEffect(() => {
-    // First try to get from Jazz profile (most reliable source)
-    if (me?.profile) {
-      const profileLocation = (me.profile as any)?.location;
-      if (
-        profileLocation &&
-        profileLocation.latitude &&
-        profileLocation.longitude
-      ) {
-        const locationData: LocationData = {
-          latitude: profileLocation.latitude,
-          longitude: profileLocation.longitude,
-          city: profileLocation.city,
-          country: profileLocation.country,
-          timezone: profileLocation.timezone,
-        };
-        setState((prev) => ({
-          ...prev,
-          location: locationData,
-          hasPermission: true,
-        }));
-        // Also update localStorage as backup
-        storeLocation(locationData);
-        return;
-      }
-    }
-
-    // Fallback to localStorage (persists across sessions)
-    const storedLocation = getStoredLocation();
-    if (storedLocation && storedLocation.latitude && storedLocation.longitude) {
-      setState((prev) => ({
-        ...prev,
-        location: storedLocation,
+    if (user?.location) {
+      const locationData: LocationData = {
+        latitude: user.location.latitude,
+        longitude: user.location.longitude,
+        city: user.location.city,
+        country: user.location.country,
+        timezone: user.location.timezone,
+      };
+      setState({
+        location: locationData,
+        loading: false,
+        error: null,
         hasPermission: true,
-      }));
+      });
+      storeLocation(locationData);
       return;
     }
 
-    // Only use default location if no saved location exists
-    // This prevents unnecessary location requests
-    setState((prev) => ({
-      ...prev,
-      location: getDefaultLocation(),
-      hasPermission: false, // Default location doesn't mean we have permission
-    }));
-  }, [me?.profile]);
-
-  const saveLocationToProfile = useCallback(async (location: LocationData) => {
-    // Save to Postgres only - no Jazz writes
-    try {
-      await fetch('/api/profile/location', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          location: {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            city: location.city || undefined,
-            country: location.country || undefined,
-            timezone: location.timezone || undefined,
-            lastUpdated: new Date().toISOString(),
-          },
-        }),
+    const storedLocation = getStoredLocation();
+    if (storedLocation && storedLocation.latitude && storedLocation.longitude) {
+      setState({
+        location: storedLocation,
+        loading: false,
+        error: null,
+        hasPermission: true,
       });
-    } catch (error) {
-      console.warn('Failed to save location:', error);
+      return;
     }
 
-    // Save to localStorage as backup
-    storeLocation(location);
-  }, []);
+    setState({
+      location: getDefaultLocation(),
+      loading: false,
+      error: null,
+      hasPermission: false,
+    });
+  }, [user?.location]);
+
+  const saveLocationToProfile = useCallback(
+    async (location: LocationData) => {
+      try {
+        await fetch('/api/profile/location', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            location: {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              city: location.city || undefined,
+              country: location.country || undefined,
+              timezone: location.timezone || undefined,
+              lastUpdated: new Date().toISOString(),
+            },
+          }),
+        });
+        refetch();
+      } catch {
+        // Silently fail - localStorage backup will be used
+      }
+      storeLocation(location);
+    },
+    [refetch],
+  );
 
   const requestUserLocation = useCallback(async () => {
     setState((prev) => ({
@@ -109,31 +101,32 @@ export const useLocation = () => {
     try {
       const location = await requestLocation();
       saveLocationToProfile(location);
-      setState((prev) => ({
-        ...prev,
+      setState({
         location,
         loading: false,
+        error: null,
         hasPermission: true,
-      }));
+      });
     } catch (error) {
-      setState((prev) => ({
-        ...prev,
+      setState({
+        location: getDefaultLocation(),
         loading: false,
         error:
           error instanceof Error ? error.message : 'Location request failed',
-        location: getDefaultLocation(),
-      }));
+        hasPermission: false,
+      });
     }
   }, [saveLocationToProfile]);
 
   const updateLocation = useCallback(
     (newLocation: LocationData) => {
       saveLocationToProfile(newLocation);
-      setState((prev) => ({
-        ...prev,
+      setState({
         location: newLocation,
+        loading: false,
+        error: null,
         hasPermission: true,
-      }));
+      });
     },
     [saveLocationToProfile],
   );
@@ -142,6 +135,6 @@ export const useLocation = () => {
     ...state,
     requestLocation: requestUserLocation,
     updateLocation,
-    isLoggedIn: !!me,
+    isLoggedIn: !!user,
   };
 };

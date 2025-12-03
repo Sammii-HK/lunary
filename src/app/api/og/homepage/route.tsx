@@ -1,239 +1,196 @@
-import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
-import {
-  loadAstronomiconFont,
-  loadGoogleFont,
-} from '../../../../../utils/astrology/cosmic-og';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export const runtime = 'nodejs';
 
-export async function GET(req: NextRequest): Promise<Response> {
-  let astronomiconFont: ArrayBuffer | null = null;
-  let robotoFont: ArrayBuffer | null = null;
+let robotoFont: ArrayBuffer | null = null;
+let logoData: Buffer | null = null;
 
-  try {
-    astronomiconFont = await loadAstronomiconFont(req);
-  } catch (error) {
-    console.error('Failed to load Astronomicon font:', error);
+function loadAssets() {
+  if (!robotoFont) {
+    try {
+      const fontPath = join(
+        process.cwd(),
+        'public',
+        'fonts',
+        'RobotoMono-Regular.ttf',
+      );
+      const buffer = readFileSync(fontPath);
+      robotoFont = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength,
+      );
+    } catch (error) {
+      console.error('Failed to load Roboto Mono font:', error);
+    }
   }
-
-  try {
-    robotoFont = await loadGoogleFont(req);
-  } catch (error) {
-    console.error('Failed to load Roboto Mono font:', error);
+  if (!logoData) {
+    try {
+      const logoPath = join(process.cwd(), 'public', 'logo.png');
+      logoData = readFileSync(logoPath);
+    } catch (error) {
+      console.error('Failed to load logo:', error);
+    }
   }
+}
 
-  const response = new ImageResponse(
-    (
-      <div
-        style={{
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background:
-            'linear-gradient(145deg, #09090b 0%, #18181b 40%, #1e1b4b 80%, #0f0a1a 100%)',
-          fontFamily: 'Roboto Mono',
-          color: 'white',
-          padding: '60px 80px',
-        }}
-      >
+export async function GET(): Promise<Response> {
+  try {
+    loadAssets();
+
+    const fonts: {
+      name: string;
+      data: ArrayBuffer;
+      style: 'normal';
+      weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+    }[] = [];
+
+    if (robotoFont) {
+      fonts.push({
+        name: 'Roboto Mono',
+        data: robotoFont,
+        style: 'normal',
+        weight: 400,
+      });
+    }
+
+    const logoSrc = logoData
+      ? `data:image/png;base64,${logoData.toString('base64')}`
+      : null;
+
+    const response = new ImageResponse(
+      (
         <div
           style={{
+            height: '100%',
+            width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '40px',
+            backgroundColor: '#0a0a0a',
+            fontFamily: robotoFont ? 'Roboto Mono' : 'system-ui',
+            color: 'white',
+            padding: '120px 160px',
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '24px',
-            }}
-          >
-            {astronomiconFont && (
-              <div
-                style={{
-                  fontSize: '72px',
-                  color: 'rgba(192, 132, 252, 0.9)',
-                  fontFamily: 'Astronomicon',
-                  lineHeight: 1,
-                }}
-              >
-                C
-              </div>
-            )}
-            <div
-              style={{
-                fontSize: '56px',
-                fontWeight: '300',
-                letterSpacing: '0.08em',
-                color: 'white',
-              }}
-            >
-              Lunary
-            </div>
-          </div>
-
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '24px',
-              maxWidth: '900px',
+              justifyContent: 'center',
+              gap: '48px',
             }}
           >
+            {logoSrc && (
+              <img
+                src={logoSrc}
+                width={200}
+                height={200}
+                style={{ marginTop: '-40px' }}
+              />
+            )}
+
             <div
               style={{
-                fontSize: '36px',
-                fontWeight: '300',
-                color: 'white',
-                textAlign: 'center',
-                lineHeight: 1.3,
+                fontSize: '40px',
+                color: 'rgba(216, 180, 254, 0.8)',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                display: 'flex',
               }}
             >
-              Personalised astrology for clarity
-              <br />
-              and self understanding
+              A calm AI companion for cosmic self understanding
             </div>
 
             <div
               style={{
-                fontSize: '20px',
-                fontWeight: '400',
-                color: 'rgba(161, 161, 170, 0.9)',
-                textAlign: 'center',
-                lineHeight: 1.6,
-                maxWidth: '700px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '48px',
               }}
             >
-              Birth chart insights, tarot, lunar cycles and AI guidance —
-              connected into one calm daily practice
+              <div
+                style={{
+                  fontSize: '104px',
+                  fontWeight: '300',
+                  color: '#fafafa',
+                  textAlign: 'center',
+                  lineHeight: 1.1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <span style={{ display: 'flex', justifyContent: 'center' }}>
+                  Personalised astrology for clarity
+                </span>
+                <span style={{ display: 'flex', justifyContent: 'center' }}>
+                  and self understanding
+                </span>
+              </div>
+
+              <div
+                style={{
+                  fontSize: '52px',
+                  fontWeight: '400',
+                  color: '#a1a1aa',
+                  textAlign: 'center',
+                  lineHeight: 1.5,
+                  maxWidth: '1800px',
+                  display: 'flex',
+                }}
+              >
+                Lunary brings together your birth chart, today's sky, tarot and
+                lunar cycles to give you calm and personal daily guidance.
+              </div>
             </div>
           </div>
 
           <div
             style={{
+              marginTop: '80px',
               display: 'flex',
               alignItems: 'center',
-              gap: '32px',
-              marginTop: '20px',
+              gap: '24px',
+              color: 'rgba(216, 180, 254, 0.8)',
+              fontSize: '48px',
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: 'rgba(192, 132, 252, 0.8)',
-                fontSize: '16px',
-              }}
-            >
-              <span style={{ fontSize: '20px' }}>✦</span>
-              <span>Real astronomy</span>
-            </div>
-            <div
-              style={{
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(113, 113, 122, 0.6)',
-              }}
-            />
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: 'rgba(192, 132, 252, 0.8)',
-                fontSize: '16px',
-              }}
-            >
-              <span style={{ fontSize: '20px' }}>✦</span>
-              <span>Birth chart based</span>
-            </div>
-            <div
-              style={{
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(113, 113, 122, 0.6)',
-              }}
-            />
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: 'rgba(192, 132, 252, 0.8)',
-                fontSize: '16px',
-              }}
-            >
-              <span style={{ fontSize: '20px' }}>✦</span>
-              <span>AI guided</span>
-            </div>
+            <span style={{ display: 'flex' }}>lunary.app</span>
           </div>
         </div>
+      ),
+      {
+        width: 2400,
+        height: 1260,
+        fonts,
+      },
+    );
 
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            color: 'rgba(113, 113, 122, 0.7)',
-            fontSize: '16px',
-          }}
-        >
-          lunary.app
-        </div>
-      </div>
-    ),
-    {
-      width: 1200,
-      height: 630,
-      fonts: [
-        ...(astronomiconFont
-          ? [
-              {
-                name: 'Astronomicon',
-                data: astronomiconFont,
-                style: 'normal' as const,
-                weight: 400 as const,
-              },
-            ]
-          : []),
-        ...(robotoFont
-          ? [
-              {
-                name: 'Roboto Mono',
-                data: robotoFont,
-                style: 'normal' as const,
-              },
-            ]
-          : []),
-      ],
-    },
-  );
+    const headers = new Headers(response.headers);
+    headers.set(
+      'Cache-Control',
+      'public, s-maxage=86400, stale-while-revalidate=43200, max-age=86400',
+    );
+    headers.set('CDN-Cache-Control', 'public, s-maxage=86400');
+    headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=86400');
 
-  const headers = new Headers(response.headers);
-  headers.set(
-    'Cache-Control',
-    'public, s-maxage=86400, stale-while-revalidate=43200, max-age=86400',
-  );
-  headers.set('CDN-Cache-Control', 'public, s-maxage=86400');
-  headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=86400');
-
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  } catch (error) {
+    console.error('Homepage OG image generation failed:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to generate image',
+        details: String(error),
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
 }

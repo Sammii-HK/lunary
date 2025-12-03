@@ -1,6 +1,6 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
@@ -17,8 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function CosmicStatePage() {
-  const accountResult = useAccount();
-  const me = accountResult?.me || null;
+  const { user: contextUser } = useUser();
   const subscription = useSubscription();
   const [loading, setLoading] = useState(true);
   const [cosmicData, setCosmicData] = useState<any>(null);

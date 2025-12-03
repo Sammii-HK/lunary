@@ -167,13 +167,13 @@ export async function GET(request: NextRequest) {
     const year = now.getFullYear();
 
     const insightsReady = await sql`
-      SELECT DISTINCT mi.user_id, sub.user_email as email
+      SELECT DISTINCT mi.user_id, sub.email as email
       FROM monthly_insights mi
       INNER JOIN subscriptions sub ON sub.user_id = mi.user_id
       WHERE mi.month = ${month}
         AND mi.year = ${year}
         AND mi.updated_at >= NOW() - INTERVAL '24 hours'
-        AND sub.user_email IS NOT NULL
+        AND sub.email IS NOT NULL
       LIMIT 50
     `;
 

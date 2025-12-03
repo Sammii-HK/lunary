@@ -1,7 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { zodiacSigns, zodiacSymbol } from '../../../../../utils/zodiac/zodiac';
+import {
+  zodiacSigns,
+  zodiacSymbol,
+  zodiacUnicode,
+} from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
 
 const signSlugs = Object.keys(zodiacSigns);
@@ -100,6 +104,7 @@ export default async function ZodiacSignPage({
 
   const signData = zodiacSigns[signKey as keyof typeof zodiacSigns];
   const symbol = zodiacSymbol[signKey as keyof typeof zodiacSymbol];
+  const unicodeSymbol = zodiacUnicode[signKey as keyof typeof zodiacUnicode];
 
   // Generate comprehensive content
   const elementDescriptions: Record<string, string> = {
@@ -170,9 +175,9 @@ export default async function ZodiacSignPage({
         canonicalUrl={`https://lunary.app/grimoire/zodiac/${sign}`}
         whatIs={{
           question: `What is ${signData.name}?`,
-          answer: `${signData.name} is the ${signSlugs.indexOf(signKey) + 1}${signSlugs.indexOf(signKey) === 0 ? 'st' : signSlugs.indexOf(signKey) === 1 ? 'nd' : signSlugs.indexOf(signKey) === 2 ? 'rd' : 'th'} sign of the zodiac, spanning ${signData.dates}. It is a ${signData.element} sign represented by the symbol ${symbol}. ${signData.name} individuals are characterized by ${signData.mysticalProperties.toLowerCase()}. As a ${quality.toLowerCase()} sign, ${signData.name} ${quality === 'Cardinal' ? 'initiates action and leads' : quality === 'Fixed' ? 'is stable and persistent' : 'adapts and is flexible'}.`,
+          answer: `${signData.name} is the ${signSlugs.indexOf(signKey) + 1}${signSlugs.indexOf(signKey) === 0 ? 'st' : signSlugs.indexOf(signKey) === 1 ? 'nd' : signSlugs.indexOf(signKey) === 2 ? 'rd' : 'th'} sign of the zodiac, spanning ${signData.dates}. It is a ${signData.element} sign represented by the symbol ${unicodeSymbol}. ${signData.name} individuals are characterized by ${signData.mysticalProperties.toLowerCase()}. As a ${quality.toLowerCase()} sign, ${signData.name} ${quality === 'Cardinal' ? 'initiates action and leads' : quality === 'Fixed' ? 'is stable and persistent' : 'adapts and is flexible'}.`,
         }}
-        intro={`The ${signData.name} zodiac sign, represented by the symbol ${symbol}, is a ${signData.element} sign that governs those born between ${signData.dates}. ${signData.name} is known for ${signData.mysticalProperties.toLowerCase()}.`}
+        intro={`The ${signData.name} zodiac sign, represented by the symbol ${unicodeSymbol}, is a ${signData.element} sign that governs those born between ${signData.dates}. ${signData.name} is known for ${signData.mysticalProperties.toLowerCase()}.`}
         tldr={`${signData.name} (${signData.dates}) is a ${signData.element} sign representing ${signData.mysticalProperties.toLowerCase()}.`}
         meaning={`${signData.name} is the ${signSlugs.indexOf(signKey) + 1}${signSlugs.indexOf(signKey) === 0 ? 'st' : signSlugs.indexOf(signKey) === 1 ? 'nd' : signSlugs.indexOf(signKey) === 2 ? 'rd' : 'th'} sign of the zodiac, spanning ${signData.dates}. As a ${signData.element} sign, ${signData.name} embodies the qualities of ${elementDescriptions[signData.element].toLowerCase()}
 
@@ -210,7 +215,7 @@ Spiritually, ${signData.name} teaches lessons about ${signData.element.toLowerCa
         astrologyCorrespondences={`Element: ${signData.element}
 Quality: ${quality}
 Ruling Planet: (varies by sign)
-Symbol: ${symbol}
+Symbol: ${unicodeSymbol}
 Dates: ${signData.dates}
 Season: (varies by sign)`}
         relatedItems={[

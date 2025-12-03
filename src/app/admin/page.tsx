@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import { betterAuthClient } from '@/lib/auth-client';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -150,14 +150,9 @@ function LockedAdminBackdrop() {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { me } = useAccount();
+  const { user } = useUser();
   const authState = useAuthStatus();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-  const [testingNotification, setTestingNotification] = useState(false);
-  const [testingRealNotification, setTestingRealNotification] = useState(false);
-  const [testingDaily, setTestingDaily] = useState(false);
-  const [testingEmail, setTestingEmail] = useState(false);
-  const [testEmailAddress, setTestEmailAddress] = useState('');
   const [substackPreview, setSubstackPreview] = useState<any>(null);
   const [substackLoading, setSubstackLoading] = useState(false);
   const [substackWeekOffset, setSubstackWeekOffset] = useState(0);
@@ -264,10 +259,9 @@ export default function AdminDashboard() {
           }
         }
 
-        // Final fallback: check Jazz profile
-        if (!userEmail && me?.profile) {
-          const profile = me.profile as any;
-          userEmail = profile.email;
+        // Final fallback: check user context
+        if (!userEmail && user) {
+          userEmail = (authState.user as any)?.email;
           console.log(
             '🔍 Checked Jazz profile, email:',
             userEmail || 'NOT FOUND',
@@ -282,8 +276,8 @@ export default function AdminDashboard() {
             ? JSON.stringify(session.data.user, null, 2)
             : 'MISSING',
           sessionStructure: session ? Object.keys(session) : 'NO SESSION',
-          meProfile: me?.profile ? 'EXISTS' : 'MISSING',
-          meProfileEmail: (me?.profile as any)?.email || 'NOT FOUND',
+          userContext: user ? 'EXISTS' : 'MISSING',
+          authEmail: (authState.user as any)?.email || 'NOT FOUND',
         });
 
         // Dev-only bypass: if on localhost and Jazz account exists, allow access
@@ -293,8 +287,8 @@ export default function AdminDashboard() {
             window.location.hostname === 'admin.localhost');
 
         if (!userEmail) {
-          const hasJazzAccount = !!me;
-          if (isLocalhost && hasJazzAccount) {
+          const hasUserContext = !!user;
+          if (isLocalhost && hasUserContext) {
             console.warn(
               '⚠️ Dev bypass: Allowing access on localhost with Jazz account',
               { hasAccount: true },
@@ -307,7 +301,7 @@ export default function AdminDashboard() {
               userEmail,
               adminEmailsCount: adminEmails.length,
               isLocalhost,
-              hasJazzAccount,
+              hasUserContext: !!user,
               fix: !userEmail
                 ? 'Wait for session to load or check Better Auth session. If on localhost, ensure Jazz account is loaded.'
                 : 'Set NEXT_PUBLIC_ADMIN_EMAILS in .env.local with your email',
@@ -379,7 +373,13 @@ export default function AdminDashboard() {
     };
 
     checkAdminAccess();
-  }, [router, me, authState.isAuthenticated, authState.loading]);
+  }, [
+    router,
+    user,
+    authState.isAuthenticated,
+    authState.loading,
+    authState.user,
+  ]);
 
   // Fetch recent activity
   useEffect(() => {
@@ -466,71 +466,6 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const testRealNotification = async () => {
-    setTestingRealNotification(true);
-    try {
-      const response = await fetch('/api/test-real-notification');
-      const result = await response.json();
-
-      if (result.success) {
-        alert(
-          `✅ Real notification test sent!\n\nEvent: ${result.primaryEvent || 'No significant events today'}\nNotifications sent: ${result.notificationsSent}\n\nThis is what subscribers receive for REAL cosmic events.`,
-        );
-      } else {
-        alert(`❌ Real notification test failed: ${result.error}`);
-      }
-    } catch (error) {
-      alert('❌ Error testing real notification');
-    } finally {
-      setTestingRealNotification(false);
-    }
-  };
-
-  const testPushNotification = async () => {
-    setTestingNotification(true);
-    try {
-      const response = await fetch('/api/test-notification');
-      const result = await response.json();
-
-      if (result.success) {
-        alert('✅ Test notification sent! Check your phone.');
-      } else {
-        alert(
-          `❌ Notification failed: ${result.error}\n\nTroubleshooting:\n${result.troubleshooting?.join('\n')}`,
-        );
-      }
-    } catch (error) {
-      alert('❌ Error testing notification');
-    } finally {
-      setTestingNotification(false);
-    }
-  };
-
-  const testDailyNotification = async () => {
-    setTestingDaily(true);
-    try {
-      const response = await fetch('/api/test-daily-notification');
-      const result = await response.json();
-
-      if (result.success) {
-        alert(`✅ Daily overview test sent! Check your phone for 2 rich notifications:
-
-1. 👀 Daily Preview (with cosmic image)
-2. ✅ Cron Success (with schedule details)
-
-Today's cosmic event: ${result.cosmicEvent?.name || 'Cosmic Flow'}
-
-This is exactly what you'll get every day at 8 AM UTC!`);
-      } else {
-        alert(`❌ Daily test failed: ${result.error}`);
-      }
-    } catch (error) {
-      alert('❌ Error testing daily notification');
-    } finally {
-      setTestingDaily(false);
-    }
-  };
-
   const testSubstackPreview = async () => {
     setSubstackLoading(true);
     setSubstackPreview(null);
@@ -607,183 +542,24 @@ This is exactly what you'll get every day at 8 AM UTC!`);
     }
   };
 
-  const testEmail = async () => {
-    if (!testEmailAddress) {
-      alert('Please enter an email address to test');
-      return;
-    }
-
-    setTestingEmail(true);
-    try {
-      const response = await fetch('/api/test-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: testEmailAddress }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        alert(
-          `✅ Test email sent successfully!\n\nTo: ${result.details.to}\nFrom: ${result.details.from}\nMessage ID: ${result.details.emailId || 'N/A'}\n\nCheck your inbox (and spam folder) for the test email.`,
-        );
-      } else {
-        alert(
-          `❌ Email test failed: ${result.error}\n\nTroubleshooting:\n${result.troubleshooting?.commonIssues?.join('\n') || result.details || 'Check server logs'}`,
-        );
-      }
-    } catch (error) {
-      alert(
-        `❌ Error testing email: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    } finally {
-      setTestingEmail(false);
-    }
-  };
-
-  // Vital tools - most important, always at top
-  const vitalTools: AdminTool[] = [
+  // Section 1: Analytics
+  const analyticsTools: AdminTool[] = [
     {
-      title: 'Post Approval Queue',
-      description:
-        'Review and approve generated posts before sending to Succulent',
-      href: '/admin/social-posts/approve',
-      icon: <Bell className='h-6 w-6' />,
-      category: 'content',
-      status: 'active',
-    },
-    {
-      title: 'Cron Monitor',
-      description:
-        'Monitor and trigger master cron job (daily posts, weekly blog, moon packs)',
-      href: '/admin/cron-monitor',
-      icon: <Activity className='h-6 w-6' />,
-      category: 'monitoring',
-      status: 'active',
-    },
-    {
-      title: 'Conversion Analytics',
-      description: 'Track user conversions, trials, and subscription metrics',
+      title: 'Dashboard',
+      description: 'Main analytics dashboard with conversion metrics',
       href: '/admin/analytics',
-      icon: <Activity className='h-6 w-6' />,
+      icon: <Activity className='h-5 w-5' />,
       category: 'monitoring',
       status: 'active',
     },
-  ];
-
-  // Essential tools - frequently used
-  const essentialTools: AdminTool[] = [
     {
-      title: 'Shop Manager',
-      description:
-        'Manage grimoire packs - auto-generates PDFs, uploads to Blob, and syncs to Stripe (SSOT)',
-      href: '/admin/shop-manager',
-      icon: <Store className='h-6 w-6' />,
-      category: 'shop',
-    },
-    {
-      title: 'Substack Manager',
-      description:
-        'Generate and publish weekly Substack posts (Free: newsletter content, Paid: $3/month enhanced)',
-      href: '/admin/substack',
-      icon: <Send className='h-6 w-6' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Social Media Posts',
-      description: 'AI-powered social media post generator for marketing',
-      href: '/admin/social-posts',
-      icon: <Send className='h-6 w-6' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Blog Manager',
-      description:
-        'Generate weekly cosmic content and newsletters with retrograde tracking',
-      href: '/admin/blog-manager',
-      icon: <BookOpen className='h-6 w-6' />,
-      category: 'content',
-      status: 'new',
-    },
-  ];
-
-  // Frequently used tools
-  const frequentlyUsedTools: AdminTool[] = [
-    {
-      title: 'Newsletter Manager',
-      description:
-        'Manage email subscribers and send weekly newsletters with Brevo',
-      href: '/admin/newsletter-manager',
-      icon: <Mail className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Scheduler',
-      description: 'Schedule and manage automated content publishing',
-      href: '/admin/scheduler',
-      icon: <Calendar className='h-5 w-5' />,
-      category: 'automation',
-    },
-    {
-      title: 'Notifications',
-      description: 'View and manage push notification subscribers',
-      href: '/admin/notifications',
-      icon: <Bell className='h-5 w-5' />,
+      title: 'AI Conversion Analysis',
+      description: 'AI engagement and conversion optimization',
+      href: '/admin/ai-conversion',
+      icon: <Zap className='h-5 w-5' />,
       category: 'monitoring',
+      status: 'beta',
     },
-  ];
-
-  // Content tools
-  const contentTools: AdminTool[] = [
-    {
-      title: 'Daily Posts Preview',
-      description: 'Preview and test daily social media posts',
-      href: '/admin/daily-posts-preview',
-      icon: <FileText className='h-5 w-5' />,
-      category: 'content',
-    },
-    {
-      title: 'Weekly Report Preview',
-      description: "Preview weekly cosmic reports before they're sent to users",
-      href: '/admin/weekly-report-preview',
-      icon: <Eye className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Substack Manager',
-      description:
-        'Generate and publish weekly Substack posts (Free: newsletter content, Paid: $3/month enhanced)',
-      href: '/admin/substack',
-      icon: <Send className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Grimoire Packs',
-      description:
-        'Create magical packs using grimoire database with proper naming',
-      href: '/admin/grimoire-packs',
-      icon: <Sparkles className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'New Post',
-      description: 'Create and publish new content manually',
-      href: '/admin/new-post',
-      icon: <Mail className='h-5 w-5' />,
-      category: 'content',
-    },
-  ];
-
-  // Monitoring & Analytics
-  const monitoringTools: AdminTool[] = [
     {
       title: 'A/B Testing',
       description: 'Analyze experiments with AI-powered insights',
@@ -793,34 +569,65 @@ This is exactly what you'll get every day at 8 AM UTC!`);
       status: 'new',
     },
     {
-      title: 'AI Conversion Optimizer',
-      description:
-        'AI-powered conversion optimization tools (uses real data only)',
-      href: '/admin/ai-conversion',
-      icon: <Zap className='h-5 w-5' />,
+      title: 'Cron Monitor',
+      description: 'Monitor and trigger automated jobs',
+      href: '/admin/cron-monitor',
+      icon: <Clock className='h-5 w-5' />,
       category: 'monitoring',
-      status: 'beta',
+      status: 'active',
     },
   ];
 
-  // Testing & Utilities (low priority - moved to bottom)
-  const testingTools: AdminTool[] = [
+  // Section 2: Content
+  const contentTools: AdminTool[] = [
     {
-      title: 'OG Debug',
-      description: 'Test and debug Open Graph image generation',
-      href: '/admin/og-debug',
-      // eslint-disable-next-line jsx-a11y/alt-text
-      icon: <Image className='h-5 w-5' />,
-      category: 'tools',
+      title: 'Content Preview Hub',
+      description: 'Preview all OG images, daily posts, and weekly reports',
+      href: '/admin/daily-posts-preview',
+      icon: <Eye className='h-5 w-5' />,
+      category: 'content',
+      status: 'active',
     },
     {
-      title: 'Test Calendar Generator',
-      description:
-        'Generate and test cosmic calendars without creating Stripe products',
-      href: '/admin/test-calendar',
-      icon: <Download className='h-5 w-5' />,
-      category: 'tools',
+      title: 'Social Media Manager',
+      description: 'Generate and approve social media posts',
+      href: '/admin/social-posts',
+      icon: <Send className='h-5 w-5' />,
+      category: 'content',
       status: 'new',
+    },
+    {
+      title: 'Blog & Newsletter',
+      description: 'Manage blog posts and email newsletters',
+      href: '/admin/blog-manager',
+      icon: <BookOpen className='h-5 w-5' />,
+      category: 'content',
+    },
+    {
+      title: 'Substack Publishing',
+      description: 'Generate and publish Substack posts',
+      href: '/admin/substack',
+      icon: <Mail className='h-5 w-5' />,
+      category: 'content',
+    },
+    {
+      title: 'Grimoire Packs',
+      description: 'Create magical packs with grimoire database',
+      href: '/admin/grimoire-packs',
+      icon: <Sparkles className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+  ];
+
+  // Section 3: Shop & Assets
+  const shopTools: AdminTool[] = [
+    {
+      title: 'Shop Manager',
+      description: 'Manage products, PDFs, and Stripe sync',
+      href: '/admin/shop-manager',
+      icon: <Store className='h-5 w-5' />,
+      category: 'shop',
     },
     {
       title: 'Crystal Gallery',
@@ -838,37 +645,77 @@ This is exactly what you'll get every day at 8 AM UTC!`);
     },
   ];
 
-  // All tools for category-based display (legacy)
-  const adminTools: AdminTool[] = [
-    ...essentialTools,
-    ...frequentlyUsedTools,
-    ...contentTools,
-    ...monitoringTools,
-    ...testingTools,
+  // Section 4: Engagement
+  const engagementTools: AdminTool[] = [
+    {
+      title: 'Notifications',
+      description: 'View sent notifications and subscriber stats',
+      href: '/admin/notifications',
+      icon: <Bell className='h-5 w-5' />,
+      category: 'monitoring',
+    },
+    {
+      title: 'Scheduler',
+      description: 'Schedule and manage automated publishing',
+      href: '/admin/scheduler',
+      icon: <Calendar className='h-5 w-5' />,
+      category: 'automation',
+    },
   ];
 
-  const categories = {
-    content: {
-      name: 'Content Management',
-      color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  // Section 5: Debug & Testing
+  const debugTools: AdminTool[] = [
+    {
+      title: 'OG Debug',
+      description: 'Test and debug Open Graph image generation',
+      href: '/admin/og-debug',
+      // eslint-disable-next-line jsx-a11y/alt-text
+      icon: <Image className='h-5 w-5' />,
+      category: 'tools',
     },
-    shop: {
-      name: 'Shop & Products',
-      color: 'bg-green-500/10 text-green-400 border-green-500/20',
+    {
+      title: 'Social Preview',
+      description: 'Preview social media image formats',
+      href: '/admin/social-preview',
+      icon: <Smartphone className='h-5 w-5' />,
+      category: 'tools',
     },
-    automation: {
-      name: 'Automation',
-      color: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  ];
+
+  const sections = [
+    {
+      title: 'Analytics',
+      icon: <Activity className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: analyticsTools,
+      color: 'from-orange-600/20 to-orange-600/5',
+      iconColor: 'text-orange-400',
+      borderColor: 'border-orange-500/30',
     },
-    monitoring: {
-      name: 'Monitoring',
-      color: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    {
+      title: 'Content',
+      icon: <FileText className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: contentTools,
+      color: 'from-blue-600/20 to-blue-600/5',
+      iconColor: 'text-blue-400',
+      borderColor: 'border-blue-500/30',
     },
-    tools: {
-      name: 'Tools & Utilities',
-      color: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+    {
+      title: 'Shop & Assets',
+      icon: <Store className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: shopTools,
+      color: 'from-green-600/20 to-green-600/5',
+      iconColor: 'text-green-400',
+      borderColor: 'border-green-500/30',
     },
-  };
+    {
+      title: 'Engagement',
+      icon: <Bell className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: engagementTools,
+      color: 'from-purple-600/20 to-purple-600/5',
+      iconColor: 'text-purple-400',
+      borderColor: 'border-purple-500/30',
+    },
+  ];
 
   const getStatusBadge = (status?: string) => {
     switch (status) {
@@ -913,238 +760,51 @@ This is exactly what you'll get every day at 8 AM UTC!`);
           </div>
         </div>
 
-        {/* Vital Tools - Most Important */}
-        <div className='mb-8 md:mb-10 lg:mb-12'>
-          <div className='flex items-center gap-3 mb-6'>
-            <h2 className='text-2xl md:text-3xl lg:text-4xl font-bold'>
-              Vital Tools
-            </h2>
-            <Badge className='bg-red-500/20 text-red-400 border-red-500/30'>
-              Priority
-            </Badge>
-          </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
-            {vitalTools.map((tool) => (
-              <Card
-                key={tool.href}
-                className='group hover:shadow-xl transition-all bg-gradient-to-br from-zinc-900 to-zinc-800 border-zinc-700 hover:border-purple-500/50 cursor-pointer'
+        {/* Organized Sections */}
+        {sections.map((section) => (
+          <div key={section.title} className='mb-8 md:mb-10 lg:mb-12'>
+            <div
+              className={`flex items-center gap-3 mb-6 p-4 rounded-xl bg-gradient-to-r ${section.color} border ${section.borderColor}`}
+            >
+              <div className={section.iconColor}>{section.icon}</div>
+              <h2 className='text-xl md:text-2xl font-bold'>{section.title}</h2>
+              <Badge
+                className={`ml-auto ${section.borderColor} bg-black/30 text-zinc-300`}
               >
-                <Link href={tool.href} className='block'>
-                  <CardHeader className='pb-4'>
-                    <div className='flex items-center justify-between mb-3'>
-                      <div className='p-3 rounded-xl bg-purple-500/10 text-purple-400 group-hover:bg-purple-500/20 transition-colors'>
-                        {tool.icon}
-                      </div>
-                      {getStatusBadge(tool.status)}
-                    </div>
-                    <CardTitle className='text-lg md:text-xl mb-2'>
-                      {tool.title}
-                    </CardTitle>
-                    <CardDescription className='text-sm text-zinc-400 line-clamp-2'>
-                      {tool.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant='ghost'
-                      className='w-full justify-between group-hover:text-purple-400 transition-colors'
-                    >
-                      Open Tool
-                      <ExternalLink className='h-4 w-4 ml-2' />
-                    </Button>
-                  </CardContent>
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Essential Tools */}
-        <div className='mb-8 md:mb-10 lg:mb-12'>
-          <div className='flex items-center gap-3 mb-6'>
-            <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-              Essential Tools
-            </h2>
-            <Badge className='bg-purple-500/20 text-purple-400 border-purple-500/30'>
-              Most Used
-            </Badge>
-          </div>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-            {essentialTools.map((tool) => (
-              <Card
-                key={tool.href}
-                className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-              >
-                <Link href={tool.href} className='block'>
-                  <CardHeader className='pb-3'>
-                    <div className='flex items-center justify-between mb-2'>
-                      <div className='flex items-center gap-2'>
-                        <div className='text-zinc-400'>{tool.icon}</div>
-                        <CardTitle className='text-base md:text-lg'>
-                          {tool.title}
-                        </CardTitle>
-                      </div>
-                      {getStatusBadge(tool.status)}
-                    </div>
-                    <CardDescription className='text-xs md:text-sm text-zinc-400'>
-                      {tool.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant='outline'
-                      className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
-                    >
-                      Open
-                      <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
-                    </Button>
-                  </CardContent>
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Frequently Used Tools */}
-        {frequentlyUsedTools.length > 0 && (
-          <div className='mb-8 md:mb-10 lg:mb-12'>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-                Frequently Used
-              </h2>
-            </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-              {frequentlyUsedTools.map((tool) => (
-                <Card
-                  key={tool.href}
-                  className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-                >
-                  <Link href={tool.href} className='block'>
-                    <CardHeader className='pb-3'>
-                      <div className='flex items-center justify-between mb-2'>
-                        <div className='flex items-center gap-2'>
-                          <div className='text-zinc-400'>{tool.icon}</div>
-                          <CardTitle className='text-base md:text-lg'>
-                            {tool.title}
-                          </CardTitle>
-                        </div>
-                        {getStatusBadge(tool.status)}
-                      </div>
-                      <CardDescription className='text-xs md:text-sm text-zinc-400'>
-                        {tool.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        variant='outline'
-                        className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
-                      >
-                        Open
-                        <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
-                      </Button>
-                    </CardContent>
-                  </Link>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Content Tools */}
-        {contentTools.length > 0 && (
-          <div className='mb-8 md:mb-10 lg:mb-12'>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-                Content Management
-              </h2>
-              <Badge className='bg-blue-500/10 text-blue-400 border-blue-500/20'>
-                {contentTools.length}
+                {section.tools.length}
               </Badge>
             </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-              {contentTools.map((tool) => (
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5'>
+              {section.tools.map((tool) => (
                 <Card
                   key={tool.href}
-                  className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                  className='group hover:shadow-lg transition-all bg-zinc-900/80 border-zinc-800 hover:border-zinc-600 cursor-pointer'
                 >
-                  <Link href={tool.href} className='block'>
+                  <Link href={tool.href} className='block h-full'>
                     <CardHeader className='pb-3'>
                       <div className='flex items-center justify-between mb-2'>
                         <div className='flex items-center gap-2'>
-                          <div className='text-zinc-400'>{tool.icon}</div>
-                          <CardTitle className='text-base md:text-lg'>
+                          <div
+                            className={`${section.iconColor} opacity-80 group-hover:opacity-100 transition-opacity`}
+                          >
+                            {tool.icon}
+                          </div>
+                          <CardTitle className='text-sm md:text-base font-medium'>
                             {tool.title}
                           </CardTitle>
                         </div>
                         {getStatusBadge(tool.status)}
                       </div>
-                      <CardDescription className='text-xs md:text-sm text-zinc-400'>
+                      <CardDescription className='text-xs text-zinc-500 line-clamp-2'>
                         {tool.description}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <Button
-                        variant='outline'
-                        className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
-                      >
-                        Open
-                        <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
-                      </Button>
-                    </CardContent>
                   </Link>
                 </Card>
               ))}
             </div>
           </div>
-        )}
-
-        {/* Monitoring & Analytics */}
-        {monitoringTools.length > 0 && (
-          <div className='mb-8 md:mb-10 lg:mb-12'>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-                Monitoring & Analytics
-              </h2>
-              <Badge className='bg-orange-500/10 text-orange-400 border-orange-500/20'>
-                {monitoringTools.length}
-              </Badge>
-            </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
-              {monitoringTools.map((tool) => (
-                <Card
-                  key={tool.href}
-                  className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-                >
-                  <Link href={tool.href} className='block'>
-                    <CardHeader className='pb-3'>
-                      <div className='flex items-center justify-between mb-2'>
-                        <div className='flex items-center gap-2'>
-                          <div className='text-zinc-400'>{tool.icon}</div>
-                          <CardTitle className='text-base md:text-lg'>
-                            {tool.title}
-                          </CardTitle>
-                        </div>
-                        {getStatusBadge(tool.status)}
-                      </div>
-                      <CardDescription className='text-xs md:text-sm text-zinc-400'>
-                        {tool.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        variant='outline'
-                        className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
-                      >
-                        Open
-                        <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
-                      </Button>
-                    </CardContent>
-                  </Link>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+        ))}
 
         {/* Debug & Testing Utilities - Collapsible */}
         <div className='mb-8 md:mb-10 lg:mb-12'>
@@ -1153,11 +813,12 @@ This is exactly what you'll get every day at 8 AM UTC!`);
             className='flex items-center justify-between w-full mb-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:bg-zinc-900 transition-colors'
           >
             <div className='flex items-center gap-3'>
-              <h2 className='text-lg md:text-xl lg:text-2xl font-bold text-zinc-400'>
-                Debug & Testing Utilities
+              <Settings className='h-5 w-5 text-zinc-500' />
+              <h2 className='text-lg md:text-xl font-bold text-zinc-400'>
+                Debug & Testing
               </h2>
               <Badge className='bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs'>
-                Low Priority
+                {debugTools.length}
               </Badge>
             </div>
             {showDebugTools ? (
@@ -1169,10 +830,10 @@ This is exactly what you'll get every day at 8 AM UTC!`);
 
           {showDebugTools && (
             <div className='space-y-6'>
-              {/* Testing Tools Grid */}
-              {testingTools.length > 0 && (
+              {/* Debug Tools Grid */}
+              {debugTools.length > 0 && (
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-                  {testingTools.map((tool) => (
+                  {debugTools.map((tool) => (
                     <Card
                       key={tool.href}
                       className='hover:shadow-lg transition-all bg-zinc-900/50 border-zinc-800/50 hover:border-zinc-700/50'
@@ -1192,138 +853,11 @@ This is exactly what you'll get every day at 8 AM UTC!`);
                             {tool.description}
                           </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <Button
-                            variant='outline'
-                            className='w-full bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 border-zinc-700/50 text-sm'
-                          >
-                            Open
-                            <ExternalLink className='h-3 w-3 ml-2' />
-                          </Button>
-                        </CardContent>
                       </Link>
                     </Card>
                   ))}
                 </div>
               )}
-
-              {/* Email Testing */}
-              <Card className='bg-zinc-900/50 border-zinc-800/50'>
-                <CardHeader className='pb-4'>
-                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
-                    <Mail className='h-5 w-5' />
-                    Email Testing (Brevo)
-                  </CardTitle>
-                  <CardDescription className='text-xs md:text-sm text-zinc-500'>
-                    Test email sending with Brevo
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-4'>
-                    <div className='flex flex-col md:flex-row gap-4'>
-                      <input
-                        type='email'
-                        placeholder='Enter your email address'
-                        value={testEmailAddress}
-                        onChange={(e) => setTestEmailAddress(e.target.value)}
-                        className='flex-1 px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500/50 text-sm'
-                        disabled={testingEmail}
-                      />
-                      <Button
-                        onClick={testEmail}
-                        disabled={testingEmail || !testEmailAddress}
-                        variant='outline'
-                        className='h-auto px-6 py-2 bg-blue-600/50 hover:bg-blue-700/50 border-blue-500/50 text-white transition-all disabled:opacity-50 text-sm'
-                      >
-                        <Send className='h-4 w-4 mr-2' />
-                        {testingEmail ? 'Sending...' : 'Send Test Email'}
-                      </Button>
-                    </div>
-                    <p className='text-xs text-zinc-600'>
-                      Make sure BREVO_API_KEY is set in your environment
-                      variables. The email will be sent from{' '}
-                      <code className='bg-zinc-800/50 px-2 py-1 rounded text-zinc-400'>
-                        cosmic@lunary.app
-                      </code>
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* PWA Notification Testing */}
-              <Card className='bg-zinc-900/50 border-zinc-800/50'>
-                <CardHeader className='pb-4'>
-                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
-                    <Bell className='h-5 w-5' />
-                    PWA Notification Testing
-                  </CardTitle>
-                  <CardDescription className='text-xs md:text-sm text-zinc-500'>
-                    Test push notifications on your device
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                    <Button
-                      onClick={testRealNotification}
-                      disabled={testingRealNotification}
-                      variant='outline'
-                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-purple-500/30 text-white transition-all text-sm'
-                    >
-                      <div className='flex flex-col items-center gap-2 w-full'>
-                        <Bell className='h-6 w-6 text-purple-400/70' />
-                        <div className='text-center'>
-                          <div className='font-semibold text-sm mb-1'>
-                            {testingRealNotification
-                              ? 'Sending...'
-                              : 'Test Real Event'}
-                          </div>
-                          <div className='text-xs text-zinc-500'>
-                            Uses today's actual cosmic events
-                          </div>
-                        </div>
-                      </div>
-                    </Button>
-
-                    <Button
-                      onClick={testDailyNotification}
-                      disabled={testingDaily}
-                      variant='outline'
-                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-blue-500/30 text-white transition-all text-sm'
-                    >
-                      <div className='flex flex-col items-center gap-2 w-full'>
-                        <Calendar className='h-6 w-6 text-blue-400/70' />
-                        <div className='text-center'>
-                          <div className='font-semibold text-sm mb-1'>
-                            {testingDaily ? 'Sending...' : 'Test Daily Preview'}
-                          </div>
-                          <div className='text-xs text-zinc-500'>
-                            Rich notifications with images
-                          </div>
-                        </div>
-                      </div>
-                    </Button>
-
-                    <Button
-                      onClick={testPushNotification}
-                      disabled={testingNotification}
-                      variant='outline'
-                      className='h-auto p-4 bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-green-500/30 text-white transition-all text-sm'
-                    >
-                      <div className='flex flex-col items-center gap-2 w-full'>
-                        <Smartphone className='h-6 w-6 text-green-400/70' />
-                        <div className='text-center'>
-                          <div className='font-semibold text-sm mb-1'>
-                            {testingNotification ? 'Sending...' : 'Test Basic'}
-                          </div>
-                          <div className='text-xs text-zinc-500'>
-                            Simple notification test
-                          </div>
-                        </div>
-                      </div>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Substack Testing */}
               <Card className='bg-zinc-900/50 border-zinc-800/50'>

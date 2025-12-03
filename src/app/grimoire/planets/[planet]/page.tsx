@@ -4,6 +4,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import {
   planetaryBodies,
   planetSymbols,
+  planetUnicode,
 } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
 
@@ -119,6 +120,9 @@ export default async function PlanetPage({
 
   const rulingSigns = rulingSignsMap[planetKey] || [];
 
+  const unicodeSymbol =
+    planetUnicode[planetKey as keyof typeof planetUnicode] || symbol;
+
   const faqs = [
     {
       question: `What does ${planetData.name} represent in astrology?`,
@@ -138,7 +142,7 @@ export default async function PlanetPage({
     },
     {
       question: `What is ${planetData.name}'s symbol?`,
-      answer: `${planetData.name}'s astrological symbol is ${symbol}. This symbol represents the planet's energy and influence in astrology.`,
+      answer: `${planetData.name}'s astrological symbol is ${unicodeSymbol}. This symbol represents the planet's energy and influence in astrology.`,
     },
   ];
 
@@ -155,8 +159,8 @@ export default async function PlanetPage({
           `${planetData.name} symbol`,
         ]}
         canonicalUrl={`https://lunary.app/grimoire/planets/${planet}`}
-        intro={`${planetData.name}, represented by the symbol ${symbol}, is ${planetData.properties.toLowerCase()}. In astrology, ${planetData.name} represents ${planetData.mysticalProperties.toLowerCase()}.`}
-        tldr={`${planetData.name} (${symbol}) represents ${planetData.mysticalProperties.toLowerCase()}.`}
+        intro={`${planetData.name}, represented by the symbol ${unicodeSymbol}, is ${planetData.properties.toLowerCase()}. In astrology, ${planetData.name} represents ${planetData.mysticalProperties.toLowerCase()}.`}
+        tldr={`${planetData.name} (${unicodeSymbol}) represents ${planetData.mysticalProperties.toLowerCase()}.`}
         meaning={`${planetData.name} is one of the key planetary bodies in astrology, representing ${planetData.mysticalProperties.toLowerCase()}. 
 
 ${planetData.properties}
@@ -175,7 +179,7 @@ Understanding ${planetData.name} in your chart helps you understand ${planetData
           `Use ${planetData.name} energy for growth and development`,
         ]}
         astrologyCorrespondences={`Planet: ${planetData.name}
-Symbol: ${symbol}
+Symbol: ${unicodeSymbol}
 Properties: ${planetData.properties}
 Ruling Signs: ${rulingSigns.join(', ')}
 Mystical Properties: ${planetData.mysticalProperties}`}

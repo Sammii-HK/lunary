@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useAccount } from 'jazz-tools/react';
-import { PushSubscription } from '../../schema';
+import { useUser } from '@/context/UserContext';
 
 interface NotificationPermission {
   granted: boolean;
@@ -11,7 +10,7 @@ interface NotificationPermission {
 }
 
 export function NotificationSettings() {
-  const { me } = useAccount();
+  const { user } = useUser();
   const [permission, setPermission] = useState<NotificationPermission>({
     granted: false,
     denied: false,
@@ -189,7 +188,7 @@ export function NotificationSettings() {
       return;
     }
 
-    const birthday = (me?.profile as any)?.birthday;
+    const birthday = user?.birthday;
     if (!birthday && !tarotEnabled) {
       alert(
         'Please add your birthday to your profile to enable personalized tarot notifications',
@@ -200,7 +199,7 @@ export function NotificationSettings() {
     setTarotLoading(true);
     try {
       const endpoint = subscription.endpoint;
-      const userName = (me?.profile as any)?.name || undefined;
+      const userName = user?.name || undefined;
 
       if (tarotEnabled) {
         // Disable
@@ -219,7 +218,7 @@ export function NotificationSettings() {
         }
       } else {
         // Enable
-        const userId = (me as any)?.id;
+        const userId = user?.id;
         const response = await fetch('/api/notifications/enable-tarot', {
           method: 'POST',
           headers: {
@@ -409,7 +408,7 @@ export function NotificationSettings() {
     subscription: globalThis.PushSubscription,
   ) => {
     try {
-      if (!me?.root) {
+      if (!user) {
         console.error('No user account available');
         alert('Please log in to enable notifications');
         return;
@@ -449,8 +448,8 @@ export function NotificationSettings() {
               eclipses: true,
               majorAspects: true,
             },
-            userId: (me as any).id || 'unknown',
-            userEmail: (me.profile as any)?.name || null,
+            userId: user?.id || 'unknown',
+            userEmail: user?.name || null,
           }),
         });
 
@@ -631,7 +630,7 @@ export function NotificationSettings() {
           </div>
 
           {/* Personalized Tarot Notifications Toggle */}
-          {(me?.profile as any)?.birthday && (
+          {user?.birthday && (
             <div className='pt-3 border-t border-zinc-700'>
               <div className='flex items-center justify-between mb-2'>
                 <div>
@@ -664,7 +663,7 @@ export function NotificationSettings() {
           )}
 
           {/* Weekly Cosmic Report Toggle */}
-          {(me?.profile as any)?.birthday && (
+          {user?.birthday && (
             <div className='pt-3 border-t border-zinc-700'>
               <div className='flex items-center justify-between mb-2'>
                 <div>

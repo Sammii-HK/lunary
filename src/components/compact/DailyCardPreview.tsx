@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { ArrowRight, Lock, Layers } from 'lucide-react';
 import { getTarotCard } from '../../../utils/tarot/tarot';
@@ -15,10 +15,10 @@ dayjs.extend(utc);
 dayjs.extend(dayOfYear);
 
 export const DailyCardPreview = () => {
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
+  const userName = user?.name;
+  const userBirthday = user?.birthday;
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,

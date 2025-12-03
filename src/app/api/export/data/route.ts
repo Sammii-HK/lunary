@@ -75,13 +75,13 @@ export async function GET(request: NextRequest) {
     }
 
     const userProfile = await sql`
-      SELECT email, name, birthday
-      FROM accounts
-      WHERE id = ${user.id}
+      SELECT name, birthday
+      FROM user_profiles
+      WHERE user_id = ${user.id}
       LIMIT 1
     `;
 
-    const profile = userProfile.rows[0];
+    const profile = userProfile.rows[0] || {};
 
     const tarotReadingsResult = await sql`
       SELECT id, spread_name, summary, created_at

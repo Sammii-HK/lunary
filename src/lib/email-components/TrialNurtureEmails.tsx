@@ -449,8 +449,8 @@ export function TrialDay2Email({
             </Section>
 
             <Text style={{ fontSize: '14px', color: '#6b7280' }}>
-              <strong>{trialDaysRemaining} days left</strong> in your trial to
-              explore all personalized insights.
+              Your Astral Guide is ready to chat whenever you need cosmic
+              guidance.
             </Text>
           </Section>
 
@@ -557,8 +557,8 @@ export function TrialDay3Email({
             </Section>
 
             <Text style={{ fontSize: '14px', color: '#6b7280' }}>
-              <strong>{trialDaysRemaining} days left</strong> to experience
-              personalized cosmic guidance every day.
+              Check in daily to build your cosmic rhythm and track patterns over
+              time.
             </Text>
           </Section>
 
@@ -569,22 +569,17 @@ export function TrialDay3Email({
   );
 }
 
-export function TrialDay5Email({
-  userName,
-  trialDaysRemaining,
-  userEmail,
-}: TrialEmailProps) {
+export function TrialDay5Email({ userName, userEmail }: TrialEmailProps) {
   const baseUrl = getBaseUrl();
   const greeting = userName || 'there';
-  const dayLabel = trialDaysRemaining === 1 ? 'day' : 'days';
 
   return (
     <Html>
       <Head>
-        <title>2 Days Left—Here&apos;s What You&apos;ll Miss - Lunary</title>
+        <title>Explore the Grimoire &amp; More - Lunary</title>
       </Head>
       <Preview>
-        {`Your trial ends in ${trialDaysRemaining} ${dayLabel}. Here's what you'll lose access to.`}
+        Discover 500+ pages of cosmic wisdom in your digital Grimoire.
       </Preview>
       <Body
         style={{
@@ -608,29 +603,26 @@ export function TrialDay5Email({
               width='120'
               style={{ margin: '0 auto 20px', display: 'block' }}
             />
-            <UrgencyBadge daysRemaining={trialDaysRemaining} variant='red' />
             <Heading
               as='h1'
               style={{ color: '#6366f1', fontSize: '28px', margin: 0 }}
             >
-              Here&apos;s What You&apos;ll Miss
+              Explore the Grimoire &amp; More
             </Heading>
           </Section>
 
           <Section style={{ margin: '30px 0' }}>
             <Text>Hi {greeting},</Text>
             <Text>
-              Your trial ends in just{' '}
-              <strong>
-                {trialDaysRemaining} {dayLabel}
-              </strong>
-              . Here&apos;s what you&apos;ll lose access to:
+              Have you explored the Grimoire yet? It&apos;s your complete
+              digital library of cosmic wisdom—over 500 pages of knowledge at
+              your fingertips.
             </Text>
 
             <Section
               style={{
-                background: 'linear-gradient(135deg, #fee2e2, #fecaca)',
-                borderLeft: '4px solid #ef4444',
+                background: 'linear-gradient(135deg, #e0e7ff, #c7d2fe)',
+                borderLeft: '4px solid #6366f1',
                 padding: '20px',
                 borderRadius: '6px',
                 margin: '20px 0',
@@ -638,24 +630,22 @@ export function TrialDay5Email({
             >
               <Heading
                 as='h3'
-                style={{ marginTop: 0, color: '#991b1b', fontSize: '16px' }}
+                style={{ marginTop: 0, color: '#4338ca', fontSize: '16px' }}
               >
-                What You&apos;ll Miss:
+                Inside the Grimoire:
               </Heading>
-              <Text style={{ color: '#7f1d1d', margin: 0 }}>
-                🌟 Personalized birth chart insights
+              <Text style={{ color: '#3730a3', margin: 0 }}>
+                📚 500+ pages of cosmic knowledge
                 <br />
-                🔮 Daily horoscopes tailored to your chart
+                💎 Crystal meanings and recommendations
                 <br />
-                ✨ Personalized tarot readings
+                🌿 Herbal correspondences
                 <br />
-                🌙 Moon phase guidance and rituals
+                🌙 Moon rituals and practices
                 <br />
-                📚 Complete digital grimoire access
+                ✨ Tarot card deep dives
                 <br />
-                🪐 Transit calendars and cosmic insights
-                <br />
-                📊 Weekly cosmic reports
+                🔮 Planetary influences explained
               </Text>
             </Section>
 
@@ -671,35 +661,31 @@ export function TrialDay5Email({
                 as='h3'
                 style={{ marginTop: 0, color: '#6366f1', fontSize: '16px' }}
               >
-                Don&apos;t Miss Out On:
+                More to Explore:
               </Heading>
               <Text style={{ margin: 0 }}>
-                Daily personalized guidance
+                🌕 Moon Circles for lunar rituals
                 <br />
-                Birth chart deep dives
+                📓 Book of Shadows for journaling
                 <br />
-                Moon circle rituals
+                🪐 Transit calendar for cosmic timing
                 <br />
-                Cosmic snapshot tracking
-                <br />
-                AI-powered astral insights
+                💬 Astral Guide for personalised answers
               </Text>
             </Section>
 
             <Text>
-              Continue your cosmic journey and never miss a personalized
-              insight.
+              Take your time exploring—there&apos;s so much to discover.
             </Text>
 
             <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
-              <CTAButton href={`${baseUrl}/pricing`}>
-                Continue Your Journey →
+              <CTAButton href={`${baseUrl}/grimoire`}>
+                Explore the Grimoire →
               </CTAButton>
             </Section>
 
             <Text style={{ fontSize: '14px', color: '#6b7280' }}>
-              <strong>No commitment</strong> - cancel anytime. Your subscription
-              only starts after your trial ends.
+              Questions? Just reply to this email—we love hearing from you.
             </Text>
           </Section>
 
@@ -859,7 +845,7 @@ Every planet, every angle, every aspect tells a story about who you are and who 
 
 Discover your chart: ${baseUrl}/birth-chart
 
-${trialDaysRemaining} days left in your trial to explore all personalized insights.
+Your Astral Guide is ready to chat whenever you need cosmic guidance.
 
 ---
 Unsubscribe: ${unsubscribeUrl}
@@ -911,7 +897,7 @@ Every morning, receive insights that speak directly to your cosmic blueprint. No
 
 Get your daily guidance: ${baseUrl}/horoscope
 
-${trialDaysRemaining} days left to experience personalized cosmic guidance every day.
+Check in daily to build your cosmic rhythm and track patterns over time.
 
 ---
 Unsubscribe: ${unsubscribeUrl}
@@ -937,43 +923,40 @@ export async function generateTrialDay5EmailHTML(
 
 export function generateTrialDay5EmailText(
   userName: string,
-  trialDaysRemaining: number,
+  _trialDaysRemaining: number,
   userEmail?: string,
 ): string {
   const baseUrl = getBaseUrl();
-  const dayLabel = trialDaysRemaining === 1 ? 'day' : 'days';
   const unsubscribeUrl = userEmail
     ? `${baseUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`
     : `${baseUrl}/unsubscribe`;
 
   return `
-2 Days Left—Here's What You'll Miss - Lunary ⏰
+Explore the Grimoire & More - Lunary 📚
 
 Hi ${userName || 'there'},
 
-Your trial ends in just ${trialDaysRemaining} ${dayLabel}. Here's what you'll lose access to:
+Have you explored the Grimoire yet? It's your complete digital library of cosmic wisdom—over 500 pages of knowledge at your fingertips.
 
-What You'll Miss:
-- 🌟 Personalized birth chart insights
-- 🔮 Daily horoscopes tailored to your chart
-- ✨ Personalized tarot readings
-- 🌙 Moon phase guidance and rituals
-- 📚 Complete digital grimoire access
-- 🪐 Transit calendars and cosmic insights
-- 📊 Weekly cosmic reports
+Inside the Grimoire:
+- 📚 500+ pages of cosmic knowledge
+- 💎 Crystal meanings and recommendations
+- 🌿 Herbal correspondences
+- 🌙 Moon rituals and practices
+- ✨ Tarot card deep dives
+- 🔮 Planetary influences explained
 
-Don't Miss Out On:
-- Daily personalized guidance
-- Birth chart deep dives
-- Moon circle rituals
-- Cosmic snapshot tracking
-- AI-powered astral insights
+More to Explore:
+- 🌕 Moon Circles for lunar rituals
+- 📓 Book of Shadows for journaling
+- 🪐 Transit calendar for cosmic timing
+- 💬 Astral Guide for personalised answers
 
-Continue your cosmic journey and never miss a personalized insight.
+Take your time exploring—there's so much to discover.
 
-Continue your journey: ${baseUrl}/pricing
+Explore the Grimoire: ${baseUrl}/grimoire
 
-No commitment - cancel anytime. Your subscription only starts after your trial ends.
+Questions? Just reply to this email—we love hearing from you.
 
 ---
 Unsubscribe: ${unsubscribeUrl}

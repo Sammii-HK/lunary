@@ -15,13 +15,17 @@ import {
   Gem,
 } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
+import Image from 'next/image';
 
 export default function WelcomePage() {
   return (
     <main className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
       {/* Section 1: Hero */}
-      <section className='relative px-4 md:px-6 pt-20 pb-12 md:pt-28 md:pb-20'>
+      <section className='relative px-4 md:px-6 pt-20 pb-10 md:pt-28 md:pb-16 bg-zinc-950'>
         <div className='max-w-3xl mx-auto text-center space-y-6'>
+          <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>
+            A calm AI companion for cosmic self understanding
+          </p>
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 leading-tight tracking-tight'>
             Personalised astrology for clarity and self understanding
           </h1>
@@ -47,10 +51,25 @@ export default function WelcomePage() {
           </div>
           <p className='text-sm text-zinc-500'>Free to begin. No commitment.</p>
         </div>
+
+        {/* Hero Screenshot */}
+        <div className='mt-[72px] flex justify-center'>
+          <Image
+            src='/lunary_hero.png'
+            alt='Lunary app dashboard showing personalized cosmic insights'
+            className='w-full max-w-[420px] md:max-w-[380px] h-auto rounded-2xl border border-zinc-700/50'
+            width={380}
+            height={827}
+            style={{
+              boxShadow:
+                '0 18px 28px rgba(0, 0, 0, 0.28), 0 0 22px rgba(178, 126, 255, 0.18)',
+            }}
+          />
+        </div>
       </section>
 
       {/* Section 2: Social Proof Strip */}
-      <section className='border-y border-zinc-800/50 py-6 md:py-8'>
+      <section className='border-t border-zinc-800/30 py-6 md:py-8'>
         <div className='max-w-4xl mx-auto px-4 md:px-6 text-center'>
           <p className='text-base md:text-lg text-zinc-300 font-light'>
             A calm alternative to noisy horoscope apps

@@ -7,6 +7,10 @@ import {
   resolveDateRange,
 } from '@/lib/analytics/date-range';
 
+// Test user exclusion patterns - matches filtering in other analytics endpoints
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -23,6 +27,9 @@ export async function GET(request: NextRequest) {
       WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
         range.end,
       )}
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}           UNION
+          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}         )
     `;
 
     const row = summary.rows[0] || {};
@@ -40,6 +47,9 @@ export async function GET(request: NextRequest) {
       WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
         range.end,
       )}
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}           UNION
+          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}         )
       GROUP BY COALESCE(mode, 'unknown')
       ORDER BY count DESC
     `;
@@ -65,6 +75,9 @@ export async function GET(request: NextRequest) {
       WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
         range.end,
       )}
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}           UNION
+          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}         )
       GROUP BY DATE(created_at)
       ORDER BY date ASC
     `;

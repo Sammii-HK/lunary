@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { Body, Ecliptic, GeoVector, MakeTime } from 'astronomy-engine';
 
 import {
   AiMessageRole,
@@ -12,6 +13,29 @@ import {
   TarotReading,
   TransitRecord,
 } from './types';
+
+function getCurrentMoonSign(date: Date = new Date()): string {
+  const astroTime = MakeTime(date);
+  const vector = GeoVector(Body.Moon, astroTime, true);
+  const ecl = Ecliptic(vector);
+  const longitude = ecl.elon;
+  const signIndex = Math.floor(longitude / 30);
+  const SIGNS = [
+    'Aries',
+    'Taurus',
+    'Gemini',
+    'Cancer',
+    'Leo',
+    'Virgo',
+    'Libra',
+    'Scorpio',
+    'Sagittarius',
+    'Capricorn',
+    'Aquarius',
+    'Pisces',
+  ];
+  return SIGNS[signIndex];
+}
 
 const ZODIAC_SIGNS = [
   'Aries',
@@ -599,10 +623,9 @@ export const getDailyHighlight = async ({
   userId,
   now = new Date(),
 }: DailyHighlightProviderParams): Promise<DailyHighlight | null> => {
-  const seed = hashStringToNumber(userId || 'lunary');
-  const sign = pickFromArray(ZODIAC_SIGNS, seed, 3);
+  const moonSign = getCurrentMoonSign(now);
   return {
-    primaryEvent: `${sign} moon invites gentle reflection`,
+    primaryEvent: `${moonSign} moon invites gentle reflection`,
     date: dayjs(now).format('YYYY-MM-DD'),
   };
 };

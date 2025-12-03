@@ -128,7 +128,7 @@ export function generateNewsletterVerificationEmailHTML(
           <div class="footer">
             <p>If you didn't subscribe to Lunary, you can safely ignore this email.</p>
             <p>Questions? Reply to this email or visit our support page.</p>
-            <p>© ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.</p>
+            <p>© ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.</p>
           </div>
         </div>
       </body>
@@ -158,6 +158,6 @@ If you didn't subscribe to Lunary, you can safely ignore this email.
 
 Questions? Reply to this email or visit our support page.
 
-© ${new Date().getFullYear()} Lunary. Made with 🌙 for your cosmic journey.
+© ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.
   `.trim();
 }

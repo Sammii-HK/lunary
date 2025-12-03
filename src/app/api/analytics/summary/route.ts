@@ -6,17 +6,13 @@ import generateSitemap from '@/app/sitemap';
 import {
   getPostHogActiveUsers,
   getPostHogAIMetrics,
+  getPostHogRetention,
+  getPostHogProductUsage,
 } from '@/lib/posthog-server';
 
 // Test user exclusion patterns - matches filtering in conversion events
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-const EXCLUDED_EMAIL = 'kellow.sammii@gmail.com';
-
-async function calculateRetention() {
-  // Retention now tracked by PostHog - view in PostHog dashboard
-  return { day_1: null, day_7: null, day_30: null };
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,7 +45,6 @@ export async function GET(request: NextRequest) {
       yearlySubscriptionsResult,
       trialConversions30dResult,
       totalTrials30dResult,
-      retentionResult,
       marketingAttributionResult,
       churnReasonsResult,
       ltvDataResult,
@@ -59,34 +54,34 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(DISTINCT user_id) AS count
         FROM subscriptions
         WHERE status = 'trial'
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
         FROM subscriptions
         WHERE status = 'active'
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
         FROM subscriptions
         WHERE status = 'active' 
           AND (plan_type = 'monthly' OR plan_type = 'lunary_plus')
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
         FROM subscriptions
         WHERE status = 'active' 
           AND plan_type = 'lunary_plus_ai'
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
         FROM subscriptions
         WHERE status = 'active' 
           AND (plan_type = 'yearly' OR plan_type = 'lunary_plus_ai_annual')
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
@@ -94,18 +89,15 @@ export async function GET(request: NextRequest) {
         WHERE conversion_type = 'trial_to_paid'
           AND created_at >= ${thirtyDaysAgoTimestamp}
           AND user_id NOT IN (
-            SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-            UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-          )
+            SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}           )
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
         FROM conversion_events
         WHERE event_type = 'trial_started'
           AND created_at >= ${thirtyDaysAgoTimestamp}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
-      calculateRetention(),
       sql`
         SELECT
           metadata->>'utm_source' AS utm_source,
@@ -114,7 +106,7 @@ export async function GET(request: NextRequest) {
         FROM conversion_events
         WHERE event_type = 'signup'
           AND created_at >= ${thirtyDaysAgoTimestamp}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
         GROUP BY metadata->>'utm_source', metadata->>'referrer'
       `,
       sql`
@@ -124,7 +116,7 @@ export async function GET(request: NextRequest) {
         FROM subscriptions
         WHERE status IN ('cancelled', 'canceled')
           AND updated_at >= ${thirtyDaysAgoTimestamp}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT
@@ -140,7 +132,7 @@ export async function GET(request: NextRequest) {
           ) AS avg_ltv
         FROM subscriptions
         WHERE status = 'active'
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
         GROUP BY plan_type
       `,
       sql`
@@ -150,17 +142,21 @@ export async function GET(request: NextRequest) {
         FROM analytics_conversions
         WHERE created_at >= ${thirtyDaysAgoTimestamp}
           AND user_id NOT IN (
-            SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-            UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-          )
+            SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}           )
         GROUP BY COALESCE(trigger_feature, 'unknown')
         ORDER BY count DESC
         LIMIT 10
       `,
     ]);
 
-    // DAU/WAU/MAU from PostHog
-    const posthogActiveUsers = await getPostHogActiveUsers();
+    // DAU/WAU/MAU and Retention from PostHog
+    const [posthogActiveUsers, posthogRetention, posthogProductUsage] =
+      await Promise.all([
+        getPostHogActiveUsers(),
+        getPostHogRetention(),
+        getPostHogProductUsage(30),
+      ]);
+
     const dau = posthogActiveUsers?.dau ?? 0;
     const wau = posthogActiveUsers?.wau ?? 0;
     const mau = posthogActiveUsers?.mau ?? 0;
@@ -195,10 +191,17 @@ export async function GET(request: NextRequest) {
     const trialToPaidConversionRate30d =
       totalTrials30d > 0 ? (trialConversions30d / totalTrials30d) * 100 : 0;
 
-    const retention = retentionResult;
+    const retention = posthogRetention
+      ? {
+          day_1: posthogRetention.day1,
+          day_7: posthogRetention.day7,
+          day_30: posthogRetention.day30,
+        }
+      : { day_1: null, day_7: null, day_30: null };
+
     const churnRate =
-      retention.day_30 !== null && retention.day_30 !== undefined
-        ? Math.max(0, 100 - retention.day_30)
+      posthogRetention !== null
+        ? Math.max(0, 100 - posthogRetention.day30)
         : null;
 
     // Correct pricing:
@@ -337,10 +340,10 @@ export async function GET(request: NextRequest) {
     // Tarot engagement now tracked by PostHog
     const tarotEngagementType: Record<string, number> = {};
 
-    // Crystal lookups now tracked by PostHog
-    const crystalUsers = 0;
-    const crystalTotalLookups = 0;
-    const crystalLookupsPerUser = 0;
+    // Crystal lookups from PostHog
+    const crystalUsers = posthogProductUsage?.crystalSearches ?? 0;
+    const crystalTotalLookups = posthogProductUsage?.crystalSearches ?? 0;
+    const crystalLookupsPerUser = crystalUsers > 0 ? 1 : 0;
 
     const stickiness = mau > 0 ? (dau / mau) * 100 : 0;
     const stickinessDauWau = wau > 0 ? (dau / wau) * 100 : 0;
@@ -375,7 +378,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type = 'signup'
         AND created_at >= ${thirtyDaysAgoTimestamp}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
     `;
     const freeUsers = Number(freeUsersResult.rows[0]?.count || 0);
     const conversionRate =
@@ -403,7 +406,7 @@ export async function GET(request: NextRequest) {
       FROM subscriptions
       WHERE status = 'active'
         AND created_at >= ${thisMonthStart}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
     `;
     const newMrr = Number(newSubscriptionsThisMonth.rows[0]?.new_mrr || 0);
 
@@ -423,7 +426,7 @@ export async function GET(request: NextRequest) {
         FROM subscriptions
         WHERE updated_at >= ${thisMonthStart}
           AND status = 'active'
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
         ORDER BY user_id, updated_at DESC
       ) upgrades
       WHERE old_plan IS NOT NULL
@@ -442,7 +445,7 @@ export async function GET(request: NextRequest) {
       FROM subscriptions
       WHERE status IN ('cancelled', 'canceled')
         AND updated_at >= ${thisMonthStart}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
     `;
     const churnedMrr = Number(churnedMrrResult.rows[0]?.churned_mrr || 0);
     const netRevenue = mrr - churnedMrr;
@@ -460,7 +463,7 @@ export async function GET(request: NextRequest) {
         WHERE status = 'active'
           AND (plan_type = 'monthly' OR plan_type = 'lunary_plus' OR plan_type = 'lunary_plus_ai')
           AND created_at < ${thisMonthStart}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
@@ -468,7 +471,7 @@ export async function GET(request: NextRequest) {
         WHERE status IN ('cancelled', 'canceled')
           AND (plan_type = 'monthly' OR plan_type = 'lunary_plus' OR plan_type = 'lunary_plus_ai')
           AND updated_at >= ${thisMonthStart}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
@@ -476,7 +479,7 @@ export async function GET(request: NextRequest) {
         WHERE status = 'active'
           AND (plan_type = 'yearly' OR plan_type = 'lunary_plus_ai_annual')
           AND created_at < ${thisMonthStart}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
       sql`
         SELECT COUNT(DISTINCT user_id) AS count
@@ -484,7 +487,7 @@ export async function GET(request: NextRequest) {
         WHERE status IN ('cancelled', 'canceled')
           AND (plan_type = 'yearly' OR plan_type = 'lunary_plus_ai_annual')
           AND updated_at >= ${thisMonthStart}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       `,
     ]);
 
@@ -532,7 +535,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type = 'signup'
         AND created_at >= ${formatTimestamp(new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000))}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
       GROUP BY DATE_TRUNC('week', created_at)
       ORDER BY cohort_start DESC
       LIMIT 12
@@ -541,9 +544,9 @@ export async function GET(request: NextRequest) {
     const cohorts = cohortRetentionResult.rows.map((row) => ({
       startDate: formatDate(new Date(row.cohort_start)),
       day0Users: Number(row.day0_users || 0),
-      day1Retention: null,
-      day7Retention: null,
-      day30Retention: null,
+      day1Retention: posthogRetention?.day1 ?? null,
+      day7Retention: posthogRetention?.day7 ?? null,
+      day30Retention: posthogRetention?.day30 ?? null,
       day90Retention: null,
     }));
 
@@ -573,9 +576,7 @@ export async function GET(request: NextRequest) {
         FROM analytics_ai_usage
         WHERE created_at >= ${thirtyDaysAgoTimestamp}
           AND user_id NOT IN (
-              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-              UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-            )
+              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}               UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}             )
       `;
       aiSessions = Number(aiEngagementResult.rows[0]?.sessions || 0);
       aiUniqueUsers = Number(aiEngagementResult.rows[0]?.unique_users || 0);
@@ -595,9 +596,7 @@ export async function GET(request: NextRequest) {
       FROM analytics_ai_usage
       WHERE created_at >= ${thirtyDaysAgoTimestamp}
         AND user_id NOT IN (
-            SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-            UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-          )
+            SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}           )
       GROUP BY COALESCE(mode, 'unknown')
       ORDER BY count DESC
       LIMIT 10
@@ -615,7 +614,7 @@ export async function GET(request: NextRequest) {
         COUNT(DISTINCT CASE WHEN event_type IN ('trial_converted', 'subscription_started') THEN user_id END) AS paid_users
       FROM conversion_events
       WHERE created_at >= ${thirtyDaysAgoTimestamp}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
     `;
     const funnelFreeUsers = Number(funnelResult.rows[0]?.free_users || 0);
     const funnelTrialStarts = Number(funnelResult.rows[0]?.trial_starts || 0);
@@ -627,7 +626,7 @@ export async function GET(request: NextRequest) {
       FROM subscriptions
       WHERE plan_type = 'lunary_plus_ai'
         AND updated_at >= ${thirtyDaysAgoTimestamp}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
         AND EXISTS (
           SELECT 1 FROM subscriptions s2
           WHERE s2.user_id = subscriptions.user_id
@@ -646,7 +645,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type IN ('trial_started', 'subscription_started')
         AND created_at >= ${thirtyDaysAgoTimestamp}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
         AND EXISTS (
           SELECT 1 FROM conversion_events ce2
           WHERE ce2.user_id = conversion_events.user_id
@@ -664,11 +663,11 @@ export async function GET(request: NextRequest) {
       WITH new_paid_users AS (
         SELECT DISTINCT
           ce.user_id,
-          s.plan_type,
+          s.plan,
           CASE
-            WHEN s.plan_type = 'monthly' OR s.plan_type = 'lunary_plus' THEN 4.99
-            WHEN s.plan_type = 'lunary_plus_ai' THEN 8.99
-            WHEN s.plan_type = 'yearly' OR s.plan_type = 'lunary_plus_ai_annual' THEN 89.99 / 12
+            WHEN s.plan = 'monthly' OR s.plan = 'lunary_plus' THEN 4.99
+            WHEN s.plan = 'lunary_plus_ai' THEN 8.99
+            WHEN s.plan = 'yearly' OR s.plan = 'lunary_plus_ai_annual' THEN 89.99 / 12
             ELSE 0
           END AS mrr_contribution
         FROM conversion_events ce
@@ -676,8 +675,8 @@ export async function GET(request: NextRequest) {
         WHERE ce.event_type = 'signup'
           AND ce.created_at >= ${thirtyDaysAgoTimestamp}
           AND s.status = 'active'
-          AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT} AND ce.user_email != ${EXCLUDED_EMAIL}))
-          AND (s.user_email IS NULL OR (s.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND s.user_email != ${TEST_EMAIL_EXACT} AND s.user_email != ${EXCLUDED_EMAIL}))
+          AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT} ))
+          AND (s.email IS NULL OR (s.email NOT LIKE ${TEST_EMAIL_PATTERN} AND s.email != ${TEST_EMAIL_EXACT} ))
       )
       SELECT
         COUNT(DISTINCT user_id) AS new_paid_users,
@@ -695,7 +694,7 @@ export async function GET(request: NextRequest) {
         COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) AS total_signups
       FROM conversion_events
       WHERE created_at >= ${thirtyDaysAgoTimestamp}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
     `;
     const activatedUsers = Number(
       activationRateResult.rows[0]?.activated_users || 0,
@@ -810,20 +809,20 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Product usage metrics - now tracked by PostHog
-    const birthChartViews = 0;
-    const tarotPulls = 0;
-    const ritualsGenerated = 0;
-    const crystalSearches = 0;
-    const collectionsCreated = 0;
-    const reportsDownloaded = 0;
+    // Product usage metrics from PostHog
+    const birthChartViews = posthogProductUsage?.birthChartViews ?? 0;
+    const tarotPulls = posthogProductUsage?.tarotPulls ?? 0;
+    const ritualsGenerated = 0; // Not currently tracked
+    const crystalSearches = posthogProductUsage?.crystalSearches ?? 0;
+    const collectionsCreated = 0; // Not currently tracked
+    const reportsDownloaded = 0; // Not currently tracked
 
     // Pricing tier breakdown
     const freeUsersCount = await sql`
       SELECT COUNT(DISTINCT user_id) AS count
       FROM conversion_events
       WHERE event_type = 'signup'
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
     `;
     const freeUsersTotal = Number(freeUsersCount.rows[0]?.count || 0);
     const arppu = activeSubscriptions > 0 ? mrr / activeSubscriptions : 0;
@@ -848,9 +847,7 @@ export async function GET(request: NextRequest) {
       WHERE aau.created_at >= ${thirtyDaysAgoTimestamp}
         AND s.status = 'active'
         AND (aau.user_id NOT IN (
-          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-          UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT} OR user_email = ${EXCLUDED_EMAIL}
-        ))
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}           UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}         ))
     `;
     const paidAiUsers = Number(
       aiCostPerPaidUserResult.rows[0]?.paid_ai_users || 0,
@@ -880,7 +877,7 @@ export async function GET(request: NextRequest) {
             ELSE 0
           END) AS initial_mrr
         FROM subscriptions
-        WHERE (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        WHERE (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
         GROUP BY DATE_TRUNC('month', created_at)
       ),
       current_status AS (
@@ -899,7 +896,7 @@ export async function GET(request: NextRequest) {
             ELSE 0
           END) AS current_mrr
         FROM subscriptions
-        WHERE (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} AND user_email != ${EXCLUDED_EMAIL}))
+        WHERE (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
         GROUP BY DATE_TRUNC('month', created_at)
       ),
       expansion_by_cohort AS (
@@ -915,7 +912,7 @@ export async function GET(request: NextRequest) {
         INNER JOIN subscriptions s2 ON s1.user_id = s2.user_id
         WHERE s2.updated_at > s1.created_at
           AND s2.status = 'active'
-          AND (s1.user_email IS NULL OR (s1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND s1.user_email != ${TEST_EMAIL_EXACT} AND s1.user_email != ${EXCLUDED_EMAIL}))
+          AND (s1.user_email IS NULL OR (s1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND s1.user_email != ${TEST_EMAIL_EXACT} ))
         GROUP BY DATE_TRUNC('month', s1.created_at)
       )
       SELECT

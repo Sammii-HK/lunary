@@ -348,9 +348,26 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
     [isStreaming, threadId, userId],
   );
 
-  const addMessage = useCallback((message: AssistantMessage) => {
-    setMessages((prev) => [...prev, message]);
-  }, []);
+  const addMessage = useCallback(
+    (message: AssistantMessage, persist = false) => {
+      setMessages((prev) => [...prev, message]);
+
+      if (persist && threadId && message.role === 'assistant') {
+        fetch('/api/ai/inject-message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            threadId,
+            message: { role: message.role, content: message.content },
+          }),
+        }).catch((err) =>
+          console.error('[AddMessage] Failed to persist:', err),
+        );
+      }
+    },
+    [threadId],
+  );
 
   return {
     messages,

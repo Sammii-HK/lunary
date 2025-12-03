@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
     for (const sub of subscriptions.rows) {
       try {
         const userId = sub.user_id;
-        const userEmail = sub.user_email;
+        const userEmail = sub.email;
         const preferences = sub.preferences || {};
         const userName = (preferences.name as string) || undefined;
 
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
         emailsSent++;
       } catch (error) {
         console.error(
-          `Failed to send moon event email to ${sub.user_email}:`,
+          `Failed to send moon event email to ${sub.email}:`,
           error,
         );
         emailsFailed++;

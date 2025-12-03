@@ -23,9 +23,7 @@ export interface NotificationResult {
 export async function sendPushoverNotification(
   notification: PushNotification,
 ): Promise<NotificationResult> {
-  // Only send Pushover notifications in production
   if (process.env.NODE_ENV !== 'production') {
-    console.log('📱 Pushover notifications disabled in development, skipping');
     return { success: false, service: 'pushover', error: 'Development mode' };
   }
 
@@ -33,7 +31,6 @@ export async function sendPushoverNotification(
   const userKey = process.env.PUSHOVER_USER_KEY;
 
   if (!apiToken || !userKey) {
-    console.log('📱 Pushover not configured, skipping notification');
     return { success: false, service: 'pushover', error: 'Not configured' };
   }
 
@@ -93,7 +90,6 @@ export async function sendPushoverNotification(
               : 'png';
           formData.append('attachment', iconBlob, `lunary-icon.${extension}`);
           attachmentAdded = true;
-          console.log('📎 Attached Lunary icon as notification icon');
         } else {
           console.warn(
             '📎 Icon file too large for Pushover (must be < 2.5 MB)',
@@ -122,7 +118,6 @@ export async function sendPushoverNotification(
                 : 'png';
             formData.append('attachment', imageBlob, `preview.${extension}`);
             attachmentAdded = true;
-            console.log('📷 Attached preview image');
           } else {
             console.warn(
               '📷 Image file too large for Pushover (must be < 2.5 MB)',
@@ -154,7 +149,6 @@ export async function sendPushoverNotification(
                 ? 'jpg'
                 : 'png';
             formData.append('attachment', imageBlob, `preview.${extension}`);
-            console.log('📷 Attached first image from images array');
           }
         }
       } catch (imageError) {
@@ -173,7 +167,6 @@ export async function sendPushoverNotification(
     const result = await response.json();
 
     if (response.ok && result.status === 1) {
-      console.log('✅ Pushover notification sent successfully');
       return {
         success: true,
         service: 'pushover',
@@ -201,8 +194,6 @@ export async function sendPushoverNotification(
 export async function sendAdminNotification(
   notification: PushNotification,
 ): Promise<NotificationResult> {
-  console.log('📱 Sending admin notification:', notification.title);
-
   // Try Discord first
   try {
     const { sendDiscordAdminNotification } = await import('@/lib/discord');
@@ -214,7 +205,6 @@ export async function sendAdminNotification(
     });
 
     if (discordResult.ok) {
-      console.log('📱 Discord notification sent successfully');
       return {
         success: true,
         service: 'pushover', // Keep same return type for compatibility
@@ -228,15 +218,7 @@ export async function sendAdminNotification(
   }
 
   // Fallback to Pushover if Discord fails
-  const result = await sendPushoverNotification(notification);
-
-  if (result.success) {
-    console.log('📱 Pushover notification sent successfully');
-  } else {
-    console.error('📱 Pushover notification failed:', result.error);
-  }
-
-  return result;
+  return await sendPushoverNotification(notification);
 }
 
 // Rich notification templates with images and detailed content

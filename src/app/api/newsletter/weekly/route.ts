@@ -90,11 +90,19 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Newsletter generation error:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('Newsletter generation error:', {
+      message: errorMessage,
+      stack: errorStack,
+    });
     return NextResponse.json(
       {
+        success: false,
         error: 'Failed to generate newsletter',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: errorMessage,
+        timestamp: new Date().toISOString(),
       },
       { status: 500 },
     );

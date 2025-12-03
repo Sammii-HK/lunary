@@ -9,6 +9,10 @@ import {
 import { getSearchConsoleData } from '@/lib/google/search-console';
 import { getPostHogActiveUsers } from '@/lib/posthog-server';
 
+// Test user exclusion patterns
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -58,6 +62,11 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(*) AS total_conversions
       FROM analytics_conversions
       WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+          UNION
+          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        )
     `;
     const totalConversions = Number(
       conversionsResult.rows[0]?.total_conversions || 0,
@@ -72,6 +81,11 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(*) AS total_conversions
       FROM analytics_conversions
       WHERE created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+          UNION
+          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        )
     `;
     const prevTotalConversions = Number(
       prevConversionsResult.rows[0]?.total_conversions || 0,
@@ -219,6 +233,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type = 'trial_started'
         AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
     const trialStarted = Number(trialStartedResult.rows[0]?.count || 0);
 
@@ -227,6 +242,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type IN ('trial_converted', 'subscription_started')
         AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
         AND EXISTS (
           SELECT 1 FROM conversion_events ce2
           WHERE ce2.user_id = conversion_events.user_id
@@ -245,6 +261,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type = 'trial_started'
         AND created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
     const prevTrialStarted = Number(prevTrialStartedResult.rows[0]?.count || 0);
 
@@ -253,6 +270,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE event_type IN ('trial_converted', 'subscription_started')
         AND created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
         AND EXISTS (
           SELECT 1 FROM conversion_events ce2
           WHERE ce2.user_id = conversion_events.user_id
@@ -291,6 +309,11 @@ export async function GET(request: NextRequest) {
       WHERE completed_at IS NOT NULL
         AND completed_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
         AND message_count > 0
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+          UNION
+          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        )
     `;
     const aiMessages = Number(aiMessagesResult.rows[0]?.total_messages || 0);
 
@@ -302,6 +325,11 @@ export async function GET(request: NextRequest) {
       WHERE completed_at IS NOT NULL
         AND completed_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
         AND message_count > 0
+        AND user_id NOT IN (
+          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+          UNION
+          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        )
     `;
     const prevAiMessages = Number(
       prevAiMessagesResult.rows[0]?.total_messages || 0,

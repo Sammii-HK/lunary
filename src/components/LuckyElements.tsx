@@ -1,14 +1,13 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react-core';
-import { getBirthChartFromProfile } from '../../utils/astrology/birthChart';
+import { useUser } from '@/context/UserContext';
 import { buildUserPersonalization } from '../../utils/personalization';
 
 export const LuckyElements = () => {
-  const { me } = useAccount();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
-  const birthChart = getBirthChartFromProfile(me?.profile);
+  const { user } = useUser();
+  const userName = user?.name;
+  const userBirthday = user?.birthday;
+  const birthChart = user?.birthChart || null;
   const today = new Date();
 
   const personalization = buildUserPersonalization(

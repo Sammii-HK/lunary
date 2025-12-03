@@ -90,22 +90,31 @@ export class SubstackClient {
       Referer: `https://${this.publicationSubdomain}.substack.com/publish`,
     };
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...headers,
-        ...(options.headers || {}),
-      },
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...headers,
+          ...(options.headers || {}),
+        },
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `Substack API error: ${response.status} ${response.statusText} - ${errorText}`,
-      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Substack API error: ${response.status} ${response.statusText} - ${errorText}`,
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('fetch failed')) {
+        throw new Error(
+          `Substack API network error: Unable to connect to ${url}. Check if cookies are valid and not expired.`,
+        );
+      }
+      throw error;
     }
-
-    return response.json();
   }
 
   async verifyAuthentication(): Promise<{
@@ -221,8 +230,6 @@ export class SubstackClient {
         audience: options.audience || 'everyone',
       });
 
-      console.log(`📝 Draft created with ID: ${draft.id}`);
-
       const published = await this.publishDraft(
         draft.id,
         options.sendEmail ?? true,
@@ -233,8 +240,6 @@ export class SubstackClient {
         (draft.slug
           ? `https://${this.publicationSubdomain}.substack.com/p/${draft.slug}`
           : `https://${this.publicationSubdomain}.substack.com/p/${draft.id}`);
-
-      console.log(`🚀 Post published: ${postUrl}`);
 
       return {
         success: true,

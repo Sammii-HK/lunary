@@ -103,7 +103,7 @@ export async function shutdownPostHog(): Promise<void> {
 }
 
 const POSTHOG_API_HOST =
-  process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
+  process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com';
 
 async function queryPostHogAPI<T>(
   endpoint: string,
@@ -283,4 +283,254 @@ export async function getPostHogAIMetrics(
           result.results[5].data.filter((v) => v > 0).length
         : 0,
   };
+}
+
+export interface PostHogRetention {
+  day1: number;
+  day7: number;
+  day30: number;
+}
+
+export async function getPostHogRetention(): Promise<PostHogRetention | null> {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+  const result = await queryPostHogAPI<{
+    result: Array<{
+      values: Array<{ count: number }>;
+    }>;
+  }>('/insights/retention/', {
+    method: 'POST',
+    body: JSON.stringify({
+      retention_type: 'retention_first_time',
+      target_entity: { id: '$pageview', type: 'events' },
+      returning_entity: { id: '$pageview', type: 'events' },
+      date_from: thirtyDaysAgoStr,
+      date_to: todayStr,
+      period: 'Day',
+      total_intervals: 31,
+    }),
+  });
+
+  if (!result?.result || result.result.length === 0) {
+    return null;
+  }
+
+  const cohorts = result.result;
+  let day1Total = 0,
+    day1Retained = 0;
+  let day7Total = 0,
+    day7Retained = 0;
+  let day30Total = 0,
+    day30Retained = 0;
+
+  for (const cohort of cohorts) {
+    const values = cohort.values || [];
+    const day0Count = values[0]?.count || 0;
+
+    if (day0Count > 0) {
+      if (values[1]) {
+        day1Total += day0Count;
+        day1Retained += values[1].count || 0;
+      }
+      if (values[7]) {
+        day7Total += day0Count;
+        day7Retained += values[7].count || 0;
+      }
+      if (values[30]) {
+        day30Total += day0Count;
+        day30Retained += values[30].count || 0;
+      }
+    }
+  }
+
+  return {
+    day1: day1Total > 0 ? (day1Retained / day1Total) * 100 : 0,
+    day7: day7Total > 0 ? (day7Retained / day7Total) * 100 : 0,
+    day30: day30Total > 0 ? (day30Retained / day30Total) * 100 : 0,
+  };
+}
+
+export interface PostHogProductUsage {
+  birthChartViews: number;
+  tarotPulls: number;
+  horoscopeViews: number;
+  crystalSearches: number;
+  personalizedTarotViews: number;
+  personalizedHoroscopeViews: number;
+}
+
+export async function getPostHogProductUsage(
+  daysBack: number = 30,
+): Promise<PostHogProductUsage | null> {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - daysBack);
+  const startDateStr = startDate.toISOString().split('T')[0];
+
+  const result = await queryPostHogAPI<{
+    results: Array<{
+      count: number;
+      data: number[];
+    }>;
+  }>('/insights/trend/', {
+    method: 'POST',
+    body: JSON.stringify({
+      events: [
+        { id: 'birth_chart_viewed', math: 'total' },
+        { id: 'tarot_viewed', math: 'total' },
+        { id: 'horoscope_viewed', math: 'total' },
+        { id: 'crystal_recommendations_viewed', math: 'total' },
+        { id: 'personalized_tarot_viewed', math: 'total' },
+        { id: 'personalized_horoscope_viewed', math: 'total' },
+      ],
+      date_from: startDateStr,
+      date_to: todayStr,
+    }),
+  });
+
+  if (!result?.results) {
+    return null;
+  }
+
+  const sumData = (data: number[] | undefined) =>
+    data?.reduce((sum, val) => sum + (val || 0), 0) || 0;
+
+  return {
+    birthChartViews: sumData(result.results[0]?.data),
+    tarotPulls: sumData(result.results[1]?.data),
+    horoscopeViews: sumData(result.results[2]?.data),
+    crystalSearches: sumData(result.results[3]?.data),
+    personalizedTarotViews: sumData(result.results[4]?.data),
+    personalizedHoroscopeViews: sumData(result.results[5]?.data),
+  };
+}
+
+export interface PostHogFeatureUsageItem {
+  feature: string;
+  uniqueUsers: number;
+  totalEvents: number;
+  avgPerUser: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+export interface PostHogFeatureUsage {
+  features: PostHogFeatureUsageItem[];
+  heatmap: Array<{
+    date: string;
+    features: Record<string, number>;
+  }>;
+}
+
+export async function getPostHogFeatureUsage(
+  daysBack: number = 7,
+): Promise<PostHogFeatureUsage | null> {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - daysBack);
+  const startDateStr = startDate.toISOString().split('T')[0];
+
+  const featureEvents = [
+    'birth_chart_viewed',
+    'tarot_viewed',
+    'horoscope_viewed',
+    'crystal_recommendations_viewed',
+    'personalized_tarot_viewed',
+    'personalized_horoscope_viewed',
+    'pricing_page_viewed',
+    'upgrade_clicked',
+  ];
+
+  const [totalResult, uniqueResult] = await Promise.all([
+    queryPostHogAPI<{
+      results: Array<{
+        label: string;
+        count: number;
+        data: number[];
+        labels: string[];
+      }>;
+    }>('/insights/trend/', {
+      method: 'POST',
+      body: JSON.stringify({
+        events: featureEvents.map((id) => ({ id, math: 'total' })),
+        date_from: startDateStr,
+        date_to: todayStr,
+        interval: 'day',
+      }),
+    }),
+    queryPostHogAPI<{
+      results: Array<{
+        label: string;
+        count: number;
+        data: number[];
+      }>;
+    }>('/insights/trend/', {
+      method: 'POST',
+      body: JSON.stringify({
+        events: featureEvents.map((id) => ({ id, math: 'dau' })),
+        date_from: startDateStr,
+        date_to: todayStr,
+        interval: 'day',
+      }),
+    }),
+  ]);
+
+  if (!totalResult?.results || !uniqueResult?.results) {
+    return null;
+  }
+
+  const features: PostHogFeatureUsageItem[] = featureEvents.map(
+    (feature, index) => {
+      const totalData = totalResult.results[index]?.data || [];
+      const uniqueData = uniqueResult.results[index]?.data || [];
+
+      const totalEvents = totalData.reduce((sum, val) => sum + (val || 0), 0);
+      const uniqueUsers = uniqueData.reduce((sum, val) => sum + (val || 0), 0);
+      const avgPerUser = uniqueUsers > 0 ? totalEvents / uniqueUsers : 0;
+
+      const recentHalf = totalData.slice(-Math.ceil(totalData.length / 2));
+      const olderHalf = totalData.slice(0, Math.floor(totalData.length / 2));
+      const recentAvg =
+        recentHalf.length > 0
+          ? recentHalf.reduce((a, b) => a + b, 0) / recentHalf.length
+          : 0;
+      const olderAvg =
+        olderHalf.length > 0
+          ? olderHalf.reduce((a, b) => a + b, 0) / olderHalf.length
+          : 0;
+
+      let trend: 'up' | 'down' | 'stable' = 'stable';
+      if (recentAvg > olderAvg * 1.1) trend = 'up';
+      else if (recentAvg < olderAvg * 0.9) trend = 'down';
+
+      return {
+        feature,
+        uniqueUsers,
+        totalEvents,
+        avgPerUser: Number(avgPerUser.toFixed(2)),
+        trend,
+      };
+    },
+  );
+
+  features.sort((a, b) => b.totalEvents - a.totalEvents);
+
+  const heatmap: Array<{ date: string; features: Record<string, number> }> = [];
+  const labels = totalResult.results[0]?.labels || [];
+
+  for (let i = 0; i < labels.length; i++) {
+    const dateStr = labels[i];
+    const featuresData: Record<string, number> = {};
+    featureEvents.forEach((feature, featureIndex) => {
+      featuresData[feature] = totalResult.results[featureIndex]?.data[i] || 0;
+    });
+    heatmap.push({ date: dateStr, features: featuresData });
+  }
+
+  return { features, heatmap };
 }

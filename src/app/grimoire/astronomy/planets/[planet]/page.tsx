@@ -4,6 +4,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import {
   planetaryBodies,
   bodiesSymbols,
+  planetUnicode,
 } from '../../../../../../utils/zodiac/zodiac';
 
 const planetKeys = Object.keys(planetaryBodies);
@@ -100,6 +101,9 @@ export default async function PlanetPage({
   const planetData = planetaryBodies[planetKey as keyof typeof planetaryBodies];
   const symbol = bodiesSymbols[planetKey as keyof typeof bodiesSymbols] || '';
 
+  const unicodeSymbol =
+    planetUnicode[planetKey as keyof typeof planetUnicode] || symbol;
+
   const planetCorrespondences: Record<
     string,
     { day: string; colors: string[]; themes: string[] }
@@ -190,7 +194,7 @@ export default async function PlanetPage({
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       <SEOContentTemplate
         title={`${planetData.name} - Lunary`}
-        h1={`${planetData.name} ${symbol}: Astrological Meaning`}
+        h1={`${planetData.name} ${unicodeSymbol}: Astrological Meaning`}
         description={`Discover ${planetData.name}'s astrological meaning and influence. Learn about its mystical properties and how to work with ${planetData.name} energy.`}
         keywords={[
           `${planetData.name} astrology`,
@@ -199,8 +203,8 @@ export default async function PlanetPage({
           'planetary astrology',
         ]}
         canonicalUrl={`https://lunary.app/grimoire/astronomy/planets/${planet}`}
-        intro={`${planetData.name} ${symbol} is a powerful celestial body in astrology. ${planetData.properties}. ${planetData.mysticalProperties}`}
-        tldr={`${planetData.name} ${symbol} rules ${correspondences.day} and governs ${correspondences.themes.join(', ').toLowerCase()}.`}
+        intro={`${planetData.name} ${unicodeSymbol} is a powerful celestial body in astrology. ${planetData.properties}. ${planetData.mysticalProperties}`}
+        tldr={`${planetData.name} ${unicodeSymbol} rules ${correspondences.day} and governs ${correspondences.themes.join(', ').toLowerCase()}.`}
         meaning={`In astrology, each planet carries unique energy and influence that shapes our lives in different ways. ${planetData.name} holds a special place in the cosmic order.
 
 ${planetData.properties}
@@ -226,7 +230,7 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
             title: `${planetData.name} Correspondences`,
             headers: ['Aspect', 'Details'],
             rows: [
-              ['Symbol', symbol || 'N/A'],
+              ['Symbol', unicodeSymbol || 'N/A'],
               ['Ruling Day', correspondences.day],
               ['Colors', correspondences.colors.join(', ')],
               ['Themes', correspondences.themes.join(', ')],

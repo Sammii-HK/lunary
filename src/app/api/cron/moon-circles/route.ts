@@ -251,18 +251,23 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
       try {
         const preferences = sub.preferences || {};
         const userName = (preferences.name as string) || undefined;
-        const userEmail = sub.user_email || undefined;
+        const userEmail = sub.email || undefined;
         const userId = sub.user_id;
 
+        const isNewMoon = moonCircle.moonPhase.toLowerCase().includes('new');
+        const moonEmoji = isNewMoon ? '🌑' : '🌕';
+
         const pushNotification = {
-          title: `🌙 Moon Circle: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
-          body: `${moonCircle.intention} - Join the circle`,
+          title: 'Lunary',
+          body: isNewMoon
+            ? `${moonEmoji} The new moon is here. Join the Moon Circle.`
+            : `${moonEmoji} The full moon has arrived. Join the Moon Circle.`,
           icon: '/icons/icon-192x192.png',
           badge: '/icons/icon-72x72.png',
           vibrate: [200, 100, 200],
           tag: 'lunary-moon-circle',
           data: {
-            url: `${baseUrl}/moon-circles?date=${dateStr}`,
+            url: `/moon-circles?date=${dateStr}`,
             type: 'moon_circle',
             date: dateStr,
             phase: moonCircle.moonPhase,
@@ -271,7 +276,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
           actions: [
             {
               action: 'view',
-              title: 'View Moon Circle',
+              title: 'Join Circle',
               icon: '/icons/icon-72x72.png',
             },
           ],

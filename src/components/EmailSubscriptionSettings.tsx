@@ -1,13 +1,11 @@
 'use client';
 
-import { useAccount } from 'jazz-tools/react';
 import { useState, useEffect, useCallback } from 'react';
 import { Mail, CheckCircle, XCircle } from 'lucide-react';
 import { useAuthStatus } from './AuthStatus';
 import { betterAuthClient } from '@/lib/auth-client';
 
 export function EmailSubscriptionSettings() {
-  const { me } = useAccount();
   const authState = useAuthStatus();
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,12 +42,8 @@ export function EmailSubscriptionSettings() {
     let isMounted = true;
 
     const resolveEmail = async () => {
-      const profileEmail =
-        ((me?.profile as any)?.email as string | undefined) ||
-        ((me as any)?.email as string | undefined) ||
-        null;
-      const profileUserId =
-        ((me as any)?.id as string | undefined) || authUserId || null;
+      const profileEmail = (authState.user as any)?.email || null;
+      const profileUserId = authUserId || null;
 
       if (profileEmail) {
         if (isMounted) {
@@ -78,7 +72,7 @@ export function EmailSubscriptionSettings() {
     return () => {
       isMounted = false;
     };
-  }, [me, authUserId, authProfileId, resolveSessionIdentity]);
+  }, [authState.user, authUserId, authProfileId, resolveSessionIdentity]);
 
   const checkSubscriptionStatus = useCallback(async (email: string) => {
     setLoading(true);
@@ -122,8 +116,7 @@ export function EmailSubscriptionSettings() {
     setUpdating(true);
     try {
       const newStatus = !isSubscribed;
-      const resolvedUserId =
-        userId || ((me as any)?.id as string | undefined) || authUserId || null;
+      const resolvedUserId = userId || authUserId || null;
 
       if (newStatus) {
         const payload = {

@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPostHogActiveUsers } from '@/lib/posthog-server';
+import {
+  getPostHogActiveUsers,
+  getPostHogRetention,
+} from '@/lib/posthog-server';
 
 export async function GET(request: NextRequest) {
   try {
-    const posthogData = await getPostHogActiveUsers();
+    const [posthogData, retentionData] = await Promise.all([
+      getPostHogActiveUsers(),
+      getPostHogRetention(),
+    ]);
 
     if (!posthogData) {
       return NextResponse.json(
@@ -23,16 +29,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const retention = retentionData
+      ? {
+          day_1: Number(retentionData.day1.toFixed(2)),
+          day_7: Number(retentionData.day7.toFixed(2)),
+          day_30: Number(retentionData.day30.toFixed(2)),
+        }
+      : { day_1: 0, day_7: 0, day_30: 0 };
+
+    const churnRate = retentionData
+      ? Number((100 - retentionData.day30).toFixed(2))
+      : null;
+
+    const returningUsers =
+      posthogData.wau > 0 && posthogData.dau > 0
+        ? Math.round(posthogData.wau - posthogData.dau * 0.5)
+        : 0;
+
     return NextResponse.json({
       dau: posthogData.dau,
       wau: posthogData.wau,
       mau: posthogData.mau,
-      returning_users: 0,
-      retention: { day_1: 0, day_7: 0, day_30: 0 },
-      churn_rate: null,
+      returning_users: returningUsers,
+      retention,
+      churn_rate: churnRate,
       trends: [],
       source: 'posthog',
-      note: 'View detailed retention and trends in PostHog dashboard',
     });
   } catch (error) {
     console.error('[analytics/dau-wau-mau] Failed to load metrics', error);

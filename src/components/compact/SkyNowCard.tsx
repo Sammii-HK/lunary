@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Stars } from 'lucide-react';
+import { Telescope } from 'lucide-react';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { bodiesSymbols, zodiacSymbol } from '../../../utils/zodiac/zodiac';
 import {
@@ -177,7 +177,7 @@ export const SkyNowCard = () => {
   const preview = (
     <div className='w-full'>
       <ExpandableCardHeader
-        icon={<Stars className='w-4 h-4' />}
+        icon={<Telescope className='w-4 h-4' />}
         title='Sky Now'
         badge={
           retrogradeCount > 0 ? `${retrogradeCount} Retrograde` : undefined

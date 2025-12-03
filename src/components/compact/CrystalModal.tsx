@@ -1,13 +1,9 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { X, Gem, ArrowRight, Sparkles, Lock } from 'lucide-react';
-import {
-  getBirthChartFromProfile,
-  hasBirthChart,
-} from '../../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../../utils/astrology/astrology';
 import { getGeneralCrystalRecommendation } from '../../../utils/crystals/generalCrystals';
 import {
@@ -20,7 +16,7 @@ import { useAstronomyContext } from '../../context/AstronomyContext';
 import dayjs from 'dayjs';
 
 export const CrystalPreview = () => {
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
   const { currentDateTime } = useAstronomyContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,11 +39,8 @@ export const CrystalPreview = () => {
     });
   }, []);
 
-  const hasBirthChartData = hasBirthChart(me?.profile);
-  const birthChart = hasBirthChartData
-    ? getBirthChartFromProfile(me?.profile)
-    : null;
-  const userBirthday = (me?.profile as any)?.birthday;
+  const birthChart = user?.birthChart;
+  const userBirthday = user?.birthday;
 
   const generalCrystal = useMemo(() => {
     if (hasChartAccess) return null;

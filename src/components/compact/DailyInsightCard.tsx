@@ -1,33 +1,25 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useAccount } from 'jazz-tools/react';
+import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { Sparkles, ArrowRight, Lock } from 'lucide-react';
-import {
-  getBirthChartFromProfile,
-  hasBirthChart,
-} from '../../../utils/astrology/birthChart';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 
 export const DailyInsightCard = () => {
-  const { me } = useAccount();
+  const { user } = useUser();
   const subscription = useSubscription();
-  const userName = (me?.profile as any)?.name;
-  const userBirthday = (me?.profile as any)?.birthday;
+  const userName = user?.name;
+  const userBirthday = user?.birthday;
+  const birthChart = user?.birthChart;
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
     subscription.plan,
   );
-
-  const hasBirthChartData = hasBirthChart(me?.profile);
-  const birthChart = hasBirthChartData
-    ? getBirthChartFromProfile(me?.profile)
-    : null;
 
   const insight = useMemo(() => {
     const today = new Date();
@@ -35,8 +27,8 @@ export const DailyInsightCard = () => {
     if (hasChartAccess && userBirthday && birthChart) {
       const horoscope = getEnhancedPersonalizedHoroscope(
         userBirthday,
-        userName,
-        me?.profile,
+        userName || undefined,
+        { birthday: userBirthday, birthChart },
       );
       return {
         text: horoscope.personalInsight,
@@ -50,7 +42,7 @@ export const DailyInsightCard = () => {
       text: firstSentence,
       isPersonalized: false,
     };
-  }, [hasChartAccess, userBirthday, userName, birthChart, me?.profile]);
+  }, [hasChartAccess, userBirthday, userName, birthChart]);
 
   if (!insight.isPersonalized) {
     return (
