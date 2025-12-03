@@ -11,6 +11,23 @@ interface NotificationPreview {
   wouldSend: boolean;
 }
 
+interface SentNotification {
+  id: number;
+  date: string;
+  eventKey: string;
+  eventType: string;
+  eventName: string;
+  priority: number;
+  sentBy: string;
+  sentAt: string;
+}
+
+interface SentSummary {
+  type: string;
+  count: number;
+  lastSent: string;
+}
+
 export default function NotificationAdminPage() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
@@ -19,11 +36,33 @@ export default function NotificationAdminPage() {
   const [notifications, setNotifications] = useState<NotificationPreview[]>([]);
   const [loading, setLoading] = useState(false);
   const [subscribers, setSubscribers] = useState(0);
+  const [sentHistory, setSentHistory] = useState<SentNotification[]>([]);
+  const [sentSummary, setSentSummary] = useState<SentSummary[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'preview' | 'history'>('preview');
 
   useEffect(() => {
     loadNotificationPreview(selectedDate);
+    loadSentHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
+
+  const loadSentHistory = async () => {
+    setHistoryLoading(true);
+    try {
+      const response = await fetch(
+        '/api/admin/notifications/sent-history?days=7&limit=50',
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setSentHistory(data.notifications || []);
+        setSentSummary(data.summary || []);
+      }
+    } catch (error) {
+      console.error('Error loading sent history:', error);
+    }
+    setHistoryLoading(false);
+  };
 
   const loadNotificationPreview = async (date: string) => {
     setLoading(true);
@@ -517,98 +556,225 @@ export default function NotificationAdminPage() {
           Notification Admin Dashboard
         </h1>
 
-        {/* Date Selector */}
-        <div className='mb-6 md:mb-8'>
-          <label className='block text-sm font-medium mb-2'>
-            Preview Date:
-          </label>
-          <input
-            type='date'
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className='bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-white'
-          />
-          <div className='text-sm text-zinc-400 mt-2'>
-            Active Subscribers: {subscribers}
-          </div>
+        {/* Tab Navigation */}
+        <div className='flex gap-4 mb-6 border-b border-zinc-800'>
+          <button
+            onClick={() => setActiveTab('preview')}
+            className={`pb-3 px-1 text-sm font-medium transition-colors ${
+              activeTab === 'preview'
+                ? 'border-b-2 border-blue-500 text-blue-400'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            Preview
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`pb-3 px-1 text-sm font-medium transition-colors ${
+              activeTab === 'history'
+                ? 'border-b-2 border-blue-500 text-blue-400'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            Sent History
+          </button>
         </div>
 
-        {/* Loading */}
-        {loading && (
-          <div className='text-center py-8'>
-            <div className='text-zinc-400'>Loading cosmic data...</div>
-          </div>
+        {activeTab === 'preview' && (
+          <>
+            {/* Date Selector */}
+            <div className='mb-6 md:mb-8'>
+              <label className='block text-sm font-medium mb-2'>
+                Preview Date:
+              </label>
+              <input
+                type='date'
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className='bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-white'
+              />
+              <div className='text-sm text-zinc-400 mt-2'>
+                Active Subscribers: {subscribers}
+              </div>
+            </div>
+          </>
         )}
 
-        {/* Notification Previews */}
-        {!loading && (
-          <div className='space-y-6'>
-            <h2 className='text-xl font-semibold'>
-              Notifications for {selectedDate}
-            </h2>
-
-            {notifications.length === 0 ? (
-              <div className='text-zinc-400 text-center py-8'>
-                No notifications would be sent for this date
+        {activeTab === 'preview' && (
+          <>
+            {/* Loading */}
+            {loading && (
+              <div className='text-center py-8'>
+                <div className='text-zinc-400'>Loading cosmic data...</div>
               </div>
-            ) : (
-              <div className='grid gap-4'>
-                {notifications.map((notification, index) => (
-                  <div
-                    key={index}
-                    className={`border rounded-lg p-4 md:p-6 ${
-                      notification.wouldSend
-                        ? 'border-green-600 bg-green-950/20'
-                        : 'border-zinc-700 bg-zinc-800/50'
-                    }`}
-                  >
-                    <div className='flex flex-col md:flex-row md:justify-between md:items-start gap-4'>
-                      <div className='flex-1'>
-                        <div className='font-semibold text-lg md:text-xl mb-2'>
-                          {notification.title}
-                        </div>
-                        <div className='text-zinc-300 mb-3 md:mb-4'>
-                          {notification.body}
-                        </div>
-                        <div className='flex flex-wrap gap-4 text-sm text-zinc-400'>
-                          <span>Priority: {notification.priority}</span>
-                          <span>Type: {notification.type}</span>
-                          <span
-                            className={
-                              notification.wouldSend
-                                ? 'text-green-400'
-                                : 'text-red-400'
-                            }
+            )}
+
+            {/* Notification Previews */}
+            {!loading && (
+              <div className='space-y-6'>
+                <h2 className='text-xl font-semibold'>
+                  Notifications for {selectedDate}
+                </h2>
+
+                {notifications.length === 0 ? (
+                  <div className='text-zinc-400 text-center py-8'>
+                    No notifications would be sent for this date
+                  </div>
+                ) : (
+                  <div className='grid gap-4'>
+                    {notifications.map((notification, index) => (
+                      <div
+                        key={index}
+                        className={`border rounded-lg p-4 md:p-6 ${
+                          notification.wouldSend
+                            ? 'border-green-600 bg-green-950/20'
+                            : 'border-zinc-700 bg-zinc-800/50'
+                        }`}
+                      >
+                        <div className='flex flex-col md:flex-row md:justify-between md:items-start gap-4'>
+                          <div className='flex-1'>
+                            <div className='font-semibold text-lg md:text-xl mb-2'>
+                              {notification.title}
+                            </div>
+                            <div className='text-zinc-300 mb-3 md:mb-4'>
+                              {notification.body}
+                            </div>
+                            <div className='flex flex-wrap gap-4 text-sm text-zinc-400'>
+                              <span>Priority: {notification.priority}</span>
+                              <span>Type: {notification.type}</span>
+                              <span
+                                className={
+                                  notification.wouldSend
+                                    ? 'text-green-400'
+                                    : 'text-red-400'
+                                }
+                              >
+                                {notification.wouldSend
+                                  ? 'Will Send'
+                                  : 'Filtered Out'}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => sendTestNotification(notification)}
+                            className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors whitespace-nowrap'
                           >
-                            {notification.wouldSend
-                              ? 'Will Send'
-                              : 'Filtered Out'}
-                          </span>
+                            Test Send
+                          </button>
                         </div>
                       </div>
-                      <button
-                        onClick={() => sendTestNotification(notification)}
-                        className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors whitespace-nowrap'
-                      >
-                        Test Send
-                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Cosmic Data Debug */}
+                {cosmicData && (
+                  <details className='mt-8'>
+                    <summary className='cursor-pointer text-zinc-400 hover:text-white'>
+                      Debug: Raw Cosmic Data
+                    </summary>
+                    <pre className='bg-zinc-900 p-4 rounded mt-2 text-xs overflow-auto'>
+                      {JSON.stringify(cosmicData, null, 2)}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'history' && (
+          <div className='space-y-6'>
+            {/* Summary Cards */}
+            {sentSummary.length > 0 && (
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                {sentSummary.map((item) => (
+                  <div
+                    key={item.type}
+                    className='bg-zinc-800/50 border border-zinc-700 rounded-lg p-4'
+                  >
+                    <div className='text-2xl font-bold'>{item.count}</div>
+                    <div className='text-sm text-zinc-400 capitalize'>
+                      {item.type.replace(/_/g, ' ')}
+                    </div>
+                    <div className='text-xs text-zinc-500 mt-1'>
+                      Last: {new Date(item.lastSent).toLocaleDateString()}
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Cosmic Data Debug */}
-            {cosmicData && (
-              <details className='mt-8'>
-                <summary className='cursor-pointer text-zinc-400 hover:text-white'>
-                  Debug: Raw Cosmic Data
-                </summary>
-                <pre className='bg-zinc-900 p-4 rounded mt-2 text-xs overflow-auto'>
-                  {JSON.stringify(cosmicData, null, 2)}
-                </pre>
-              </details>
+            <h2 className='text-xl font-semibold'>
+              Recently Sent Notifications (Last 7 Days)
+            </h2>
+
+            {historyLoading ? (
+              <div className='text-center py-8'>
+                <div className='text-zinc-400'>Loading sent history...</div>
+              </div>
+            ) : sentHistory.length === 0 ? (
+              <div className='text-zinc-400 text-center py-8'>
+                No notifications sent in the last 7 days
+              </div>
+            ) : (
+              <div className='overflow-x-auto'>
+                <table className='w-full text-sm'>
+                  <thead>
+                    <tr className='text-left text-zinc-400 border-b border-zinc-800'>
+                      <th className='pb-3 pr-4'>Date</th>
+                      <th className='pb-3 pr-4'>Event</th>
+                      <th className='pb-3 pr-4'>Type</th>
+                      <th className='pb-3 pr-4'>Priority</th>
+                      <th className='pb-3'>Sent By</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sentHistory.map((notification) => (
+                      <tr
+                        key={notification.id}
+                        className='border-b border-zinc-800/50 hover:bg-zinc-800/30'
+                      >
+                        <td className='py-3 pr-4 text-zinc-300'>
+                          {new Date(notification.sentAt).toLocaleString()}
+                        </td>
+                        <td className='py-3 pr-4 font-medium'>
+                          {notification.eventName}
+                        </td>
+                        <td className='py-3 pr-4'>
+                          <span className='px-2 py-1 bg-zinc-700 rounded text-xs capitalize'>
+                            {notification.eventType.replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td className='py-3 pr-4'>
+                          <span
+                            className={`${
+                              notification.priority >= 9
+                                ? 'text-red-400'
+                                : notification.priority >= 7
+                                  ? 'text-yellow-400'
+                                  : 'text-zinc-400'
+                            }`}
+                          >
+                            {notification.priority}
+                          </span>
+                        </td>
+                        <td className='py-3 text-zinc-400'>
+                          {notification.sentBy}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
+
+            <button
+              onClick={loadSentHistory}
+              className='px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded transition-colors'
+            >
+              Refresh History
+            </button>
           </div>
         )}
       </div>

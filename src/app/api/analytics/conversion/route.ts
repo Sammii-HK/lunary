@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { trackActivity } from '@/lib/analytics/tracking';
 
-const EXCLUDED_EMAILS = new Set(['kellow.sammii@gmail.com']);
-
 function normalizeEmail(email: unknown): string | undefined {
   if (typeof email !== 'string') {
     return undefined;
@@ -59,20 +57,6 @@ export async function POST(request: NextRequest) {
         : typeof userId === 'number' || typeof userId === 'bigint'
           ? String(userId)
           : null;
-
-    if (normalizedEmail && EXCLUDED_EMAILS.has(normalizedEmail)) {
-      console.info(
-        `[analytics] Skipping conversion event "${event}" for excluded user ${normalizedEmail}`,
-      );
-      return NextResponse.json(
-        {
-          success: true,
-          skipped: true,
-          reason: 'Excluded user',
-        },
-        { status: 200 },
-      );
-    }
 
     await sql`
       INSERT INTO conversion_events (

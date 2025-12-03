@@ -542,147 +542,24 @@ export default function AdminDashboard() {
     }
   };
 
-  // Vital tools - most important, always at top
-  const vitalTools: AdminTool[] = [
+  // Section 1: Analytics
+  const analyticsTools: AdminTool[] = [
     {
-      title: 'Post Approval Queue',
-      description:
-        'Review and approve generated posts before sending to Succulent',
-      href: '/admin/social-posts/approve',
-      icon: <Bell className='h-6 w-6' />,
-      category: 'content',
-      status: 'active',
-    },
-    {
-      title: 'Cron Monitor',
-      description:
-        'Monitor and trigger master cron job (daily posts, weekly blog, moon packs)',
-      href: '/admin/cron-monitor',
-      icon: <Activity className='h-6 w-6' />,
-      category: 'monitoring',
-      status: 'active',
-    },
-    {
-      title: 'Conversion Analytics',
-      description: 'Track user conversions, trials, and subscription metrics',
+      title: 'Dashboard',
+      description: 'Main analytics dashboard with conversion metrics',
       href: '/admin/analytics',
-      icon: <Activity className='h-6 w-6' />,
+      icon: <Activity className='h-5 w-5' />,
       category: 'monitoring',
       status: 'active',
     },
-  ];
-
-  // Essential tools - frequently used
-  const essentialTools: AdminTool[] = [
     {
-      title: 'Shop Manager',
-      description:
-        'Manage grimoire packs - auto-generates PDFs, uploads to Blob, and syncs to Stripe (SSOT)',
-      href: '/admin/shop-manager',
-      icon: <Store className='h-6 w-6' />,
-      category: 'shop',
-    },
-    {
-      title: 'Substack Manager',
-      description:
-        'Generate and publish weekly Substack posts (Free: newsletter content, Paid: $3/month enhanced)',
-      href: '/admin/substack',
-      icon: <Send className='h-6 w-6' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Social Media Posts',
-      description: 'AI-powered social media post generator for marketing',
-      href: '/admin/social-posts',
-      icon: <Send className='h-6 w-6' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Blog Manager',
-      description:
-        'Generate weekly cosmic content and newsletters with retrograde tracking',
-      href: '/admin/blog-manager',
-      icon: <BookOpen className='h-6 w-6' />,
-      category: 'content',
-      status: 'new',
-    },
-  ];
-
-  // Frequently used tools
-  const frequentlyUsedTools: AdminTool[] = [
-    {
-      title: 'Newsletter Manager',
-      description:
-        'Manage email subscribers and send weekly newsletters with Brevo',
-      href: '/admin/newsletter-manager',
-      icon: <Mail className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Scheduler',
-      description: 'Schedule and manage automated content publishing',
-      href: '/admin/scheduler',
-      icon: <Calendar className='h-5 w-5' />,
-      category: 'automation',
-    },
-    {
-      title: 'Notifications',
-      description: 'View and manage push notification subscribers',
-      href: '/admin/notifications',
-      icon: <Bell className='h-5 w-5' />,
+      title: 'AI Conversion Analysis',
+      description: 'AI engagement and conversion optimization',
+      href: '/admin/ai-conversion',
+      icon: <Zap className='h-5 w-5' />,
       category: 'monitoring',
+      status: 'beta',
     },
-  ];
-
-  // Content tools
-  const contentTools: AdminTool[] = [
-    {
-      title: 'Daily Posts Preview',
-      description: 'Preview and test daily social media posts',
-      href: '/admin/daily-posts-preview',
-      icon: <FileText className='h-5 w-5' />,
-      category: 'content',
-    },
-    {
-      title: 'Weekly Report Preview',
-      description: "Preview weekly cosmic reports before they're sent to users",
-      href: '/admin/weekly-report-preview',
-      icon: <Eye className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Substack Manager',
-      description:
-        'Generate and publish weekly Substack posts (Free: newsletter content, Paid: $3/month enhanced)',
-      href: '/admin/substack',
-      icon: <Send className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Grimoire Packs',
-      description:
-        'Create magical packs using grimoire database with proper naming',
-      href: '/admin/grimoire-packs',
-      icon: <Sparkles className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'New Post',
-      description: 'Create and publish new content manually',
-      href: '/admin/new-post',
-      icon: <Mail className='h-5 w-5' />,
-      category: 'content',
-    },
-  ];
-
-  // Monitoring & Analytics
-  const monitoringTools: AdminTool[] = [
     {
       title: 'A/B Testing',
       description: 'Analyze experiments with AI-powered insights',
@@ -692,25 +569,65 @@ export default function AdminDashboard() {
       status: 'new',
     },
     {
-      title: 'AI Conversion Optimizer',
-      description:
-        'AI-powered conversion optimization tools (uses real data only)',
-      href: '/admin/ai-conversion',
-      icon: <Zap className='h-5 w-5' />,
+      title: 'Cron Monitor',
+      description: 'Monitor and trigger automated jobs',
+      href: '/admin/cron-monitor',
+      icon: <Clock className='h-5 w-5' />,
       category: 'monitoring',
-      status: 'beta',
+      status: 'active',
     },
   ];
 
-  // Testing & Utilities (low priority - moved to bottom)
-  const testingTools: AdminTool[] = [
+  // Section 2: Content
+  const contentTools: AdminTool[] = [
     {
-      title: 'OG Debug',
-      description: 'Test and debug Open Graph image generation',
-      href: '/admin/og-debug',
-      // eslint-disable-next-line jsx-a11y/alt-text
-      icon: <Image className='h-5 w-5' />,
-      category: 'tools',
+      title: 'Content Preview Hub',
+      description: 'Preview all OG images, daily posts, and weekly reports',
+      href: '/admin/daily-posts-preview',
+      icon: <Eye className='h-5 w-5' />,
+      category: 'content',
+      status: 'active',
+    },
+    {
+      title: 'Social Media Manager',
+      description: 'Generate and approve social media posts',
+      href: '/admin/social-posts',
+      icon: <Send className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
+      title: 'Blog & Newsletter',
+      description: 'Manage blog posts and email newsletters',
+      href: '/admin/blog-manager',
+      icon: <BookOpen className='h-5 w-5' />,
+      category: 'content',
+    },
+    {
+      title: 'Substack Publishing',
+      description: 'Generate and publish Substack posts',
+      href: '/admin/substack',
+      icon: <Mail className='h-5 w-5' />,
+      category: 'content',
+    },
+    {
+      title: 'Grimoire Packs',
+      description: 'Create magical packs with grimoire database',
+      href: '/admin/grimoire-packs',
+      icon: <Sparkles className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+  ];
+
+  // Section 3: Shop & Assets
+  const shopTools: AdminTool[] = [
+    {
+      title: 'Shop Manager',
+      description: 'Manage products, PDFs, and Stripe sync',
+      href: '/admin/shop-manager',
+      icon: <Store className='h-5 w-5' />,
+      category: 'shop',
     },
     {
       title: 'Crystal Gallery',
@@ -728,37 +645,77 @@ export default function AdminDashboard() {
     },
   ];
 
-  // All tools for category-based display (legacy)
-  const adminTools: AdminTool[] = [
-    ...essentialTools,
-    ...frequentlyUsedTools,
-    ...contentTools,
-    ...monitoringTools,
-    ...testingTools,
+  // Section 4: Engagement
+  const engagementTools: AdminTool[] = [
+    {
+      title: 'Notifications',
+      description: 'View sent notifications and subscriber stats',
+      href: '/admin/notifications',
+      icon: <Bell className='h-5 w-5' />,
+      category: 'monitoring',
+    },
+    {
+      title: 'Scheduler',
+      description: 'Schedule and manage automated publishing',
+      href: '/admin/scheduler',
+      icon: <Calendar className='h-5 w-5' />,
+      category: 'automation',
+    },
   ];
 
-  const categories = {
-    content: {
-      name: 'Content Management',
-      color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  // Section 5: Debug & Testing
+  const debugTools: AdminTool[] = [
+    {
+      title: 'OG Debug',
+      description: 'Test and debug Open Graph image generation',
+      href: '/admin/og-debug',
+      // eslint-disable-next-line jsx-a11y/alt-text
+      icon: <Image className='h-5 w-5' />,
+      category: 'tools',
     },
-    shop: {
-      name: 'Shop & Products',
-      color: 'bg-green-500/10 text-green-400 border-green-500/20',
+    {
+      title: 'Social Preview',
+      description: 'Preview social media image formats',
+      href: '/admin/social-preview',
+      icon: <Smartphone className='h-5 w-5' />,
+      category: 'tools',
     },
-    automation: {
-      name: 'Automation',
-      color: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  ];
+
+  const sections = [
+    {
+      title: 'Analytics',
+      icon: <Activity className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: analyticsTools,
+      color: 'from-orange-600/20 to-orange-600/5',
+      iconColor: 'text-orange-400',
+      borderColor: 'border-orange-500/30',
     },
-    monitoring: {
-      name: 'Monitoring',
-      color: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    {
+      title: 'Content',
+      icon: <FileText className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: contentTools,
+      color: 'from-blue-600/20 to-blue-600/5',
+      iconColor: 'text-blue-400',
+      borderColor: 'border-blue-500/30',
     },
-    tools: {
-      name: 'Tools & Utilities',
-      color: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+    {
+      title: 'Shop & Assets',
+      icon: <Store className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: shopTools,
+      color: 'from-green-600/20 to-green-600/5',
+      iconColor: 'text-green-400',
+      borderColor: 'border-green-500/30',
     },
-  };
+    {
+      title: 'Engagement',
+      icon: <Bell className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: engagementTools,
+      color: 'from-purple-600/20 to-purple-600/5',
+      iconColor: 'text-purple-400',
+      borderColor: 'border-purple-500/30',
+    },
+  ];
 
   const getStatusBadge = (status?: string) => {
     switch (status) {
@@ -803,238 +760,51 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Vital Tools - Most Important */}
-        <div className='mb-8 md:mb-10 lg:mb-12'>
-          <div className='flex items-center gap-3 mb-6'>
-            <h2 className='text-2xl md:text-3xl lg:text-4xl font-bold'>
-              Vital Tools
-            </h2>
-            <Badge className='bg-red-500/20 text-red-400 border-red-500/30'>
-              Priority
-            </Badge>
-          </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
-            {vitalTools.map((tool) => (
-              <Card
-                key={tool.href}
-                className='group hover:shadow-xl transition-all bg-gradient-to-br from-zinc-900 to-zinc-800 border-zinc-700 hover:border-purple-500/50 cursor-pointer'
+        {/* Organized Sections */}
+        {sections.map((section) => (
+          <div key={section.title} className='mb-8 md:mb-10 lg:mb-12'>
+            <div
+              className={`flex items-center gap-3 mb-6 p-4 rounded-xl bg-gradient-to-r ${section.color} border ${section.borderColor}`}
+            >
+              <div className={section.iconColor}>{section.icon}</div>
+              <h2 className='text-xl md:text-2xl font-bold'>{section.title}</h2>
+              <Badge
+                className={`ml-auto ${section.borderColor} bg-black/30 text-zinc-300`}
               >
-                <Link href={tool.href} className='block'>
-                  <CardHeader className='pb-4'>
-                    <div className='flex items-center justify-between mb-3'>
-                      <div className='p-3 rounded-xl bg-purple-500/10 text-purple-400 group-hover:bg-purple-500/20 transition-colors'>
-                        {tool.icon}
-                      </div>
-                      {getStatusBadge(tool.status)}
-                    </div>
-                    <CardTitle className='text-lg md:text-xl mb-2'>
-                      {tool.title}
-                    </CardTitle>
-                    <CardDescription className='text-sm text-zinc-400 line-clamp-2'>
-                      {tool.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant='ghost'
-                      className='w-full justify-between group-hover:text-purple-400 transition-colors'
-                    >
-                      Open Tool
-                      <ExternalLink className='h-4 w-4 ml-2' />
-                    </Button>
-                  </CardContent>
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Essential Tools */}
-        <div className='mb-8 md:mb-10 lg:mb-12'>
-          <div className='flex items-center gap-3 mb-6'>
-            <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-              Essential Tools
-            </h2>
-            <Badge className='bg-purple-500/20 text-purple-400 border-purple-500/30'>
-              Most Used
-            </Badge>
-          </div>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-            {essentialTools.map((tool) => (
-              <Card
-                key={tool.href}
-                className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-              >
-                <Link href={tool.href} className='block'>
-                  <CardHeader className='pb-3'>
-                    <div className='flex items-center justify-between mb-2'>
-                      <div className='flex items-center gap-2'>
-                        <div className='text-zinc-400'>{tool.icon}</div>
-                        <CardTitle className='text-base md:text-lg'>
-                          {tool.title}
-                        </CardTitle>
-                      </div>
-                      {getStatusBadge(tool.status)}
-                    </div>
-                    <CardDescription className='text-xs md:text-sm text-zinc-400'>
-                      {tool.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant='outline'
-                      className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
-                    >
-                      Open
-                      <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
-                    </Button>
-                  </CardContent>
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Frequently Used Tools */}
-        {frequentlyUsedTools.length > 0 && (
-          <div className='mb-8 md:mb-10 lg:mb-12'>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-                Frequently Used
-              </h2>
-            </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-              {frequentlyUsedTools.map((tool) => (
-                <Card
-                  key={tool.href}
-                  className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-                >
-                  <Link href={tool.href} className='block'>
-                    <CardHeader className='pb-3'>
-                      <div className='flex items-center justify-between mb-2'>
-                        <div className='flex items-center gap-2'>
-                          <div className='text-zinc-400'>{tool.icon}</div>
-                          <CardTitle className='text-base md:text-lg'>
-                            {tool.title}
-                          </CardTitle>
-                        </div>
-                        {getStatusBadge(tool.status)}
-                      </div>
-                      <CardDescription className='text-xs md:text-sm text-zinc-400'>
-                        {tool.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        variant='outline'
-                        className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
-                      >
-                        Open
-                        <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
-                      </Button>
-                    </CardContent>
-                  </Link>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Content Tools */}
-        {contentTools.length > 0 && (
-          <div className='mb-8 md:mb-10 lg:mb-12'>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-                Content Management
-              </h2>
-              <Badge className='bg-blue-500/10 text-blue-400 border-blue-500/20'>
-                {contentTools.length}
+                {section.tools.length}
               </Badge>
             </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-              {contentTools.map((tool) => (
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5'>
+              {section.tools.map((tool) => (
                 <Card
                   key={tool.href}
-                  className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                  className='group hover:shadow-lg transition-all bg-zinc-900/80 border-zinc-800 hover:border-zinc-600 cursor-pointer'
                 >
-                  <Link href={tool.href} className='block'>
+                  <Link href={tool.href} className='block h-full'>
                     <CardHeader className='pb-3'>
                       <div className='flex items-center justify-between mb-2'>
                         <div className='flex items-center gap-2'>
-                          <div className='text-zinc-400'>{tool.icon}</div>
-                          <CardTitle className='text-base md:text-lg'>
+                          <div
+                            className={`${section.iconColor} opacity-80 group-hover:opacity-100 transition-opacity`}
+                          >
+                            {tool.icon}
+                          </div>
+                          <CardTitle className='text-sm md:text-base font-medium'>
                             {tool.title}
                           </CardTitle>
                         </div>
                         {getStatusBadge(tool.status)}
                       </div>
-                      <CardDescription className='text-xs md:text-sm text-zinc-400'>
+                      <CardDescription className='text-xs text-zinc-500 line-clamp-2'>
                         {tool.description}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <Button
-                        variant='outline'
-                        className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
-                      >
-                        Open
-                        <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
-                      </Button>
-                    </CardContent>
                   </Link>
                 </Card>
               ))}
             </div>
           </div>
-        )}
-
-        {/* Monitoring & Analytics */}
-        {monitoringTools.length > 0 && (
-          <div className='mb-8 md:mb-10 lg:mb-12'>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-xl md:text-2xl lg:text-3xl font-bold'>
-                Monitoring & Analytics
-              </h2>
-              <Badge className='bg-orange-500/10 text-orange-400 border-orange-500/20'>
-                {monitoringTools.length}
-              </Badge>
-            </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
-              {monitoringTools.map((tool) => (
-                <Card
-                  key={tool.href}
-                  className='hover:shadow-lg transition-all bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-                >
-                  <Link href={tool.href} className='block'>
-                    <CardHeader className='pb-3'>
-                      <div className='flex items-center justify-between mb-2'>
-                        <div className='flex items-center gap-2'>
-                          <div className='text-zinc-400'>{tool.icon}</div>
-                          <CardTitle className='text-base md:text-lg'>
-                            {tool.title}
-                          </CardTitle>
-                        </div>
-                        {getStatusBadge(tool.status)}
-                      </div>
-                      <CardDescription className='text-xs md:text-sm text-zinc-400'>
-                        {tool.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        variant='outline'
-                        className='w-full bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
-                      >
-                        Open
-                        <ExternalLink className='h-3 w-3 md:h-4 md:w-4 ml-2' />
-                      </Button>
-                    </CardContent>
-                  </Link>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+        ))}
 
         {/* Debug & Testing Utilities - Collapsible */}
         <div className='mb-8 md:mb-10 lg:mb-12'>
@@ -1043,11 +813,12 @@ export default function AdminDashboard() {
             className='flex items-center justify-between w-full mb-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:bg-zinc-900 transition-colors'
           >
             <div className='flex items-center gap-3'>
-              <h2 className='text-lg md:text-xl lg:text-2xl font-bold text-zinc-400'>
-                Debug & Testing Utilities
+              <Settings className='h-5 w-5 text-zinc-500' />
+              <h2 className='text-lg md:text-xl font-bold text-zinc-400'>
+                Debug & Testing
               </h2>
               <Badge className='bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs'>
-                Low Priority
+                {debugTools.length}
               </Badge>
             </div>
             {showDebugTools ? (
@@ -1059,10 +830,10 @@ export default function AdminDashboard() {
 
           {showDebugTools && (
             <div className='space-y-6'>
-              {/* Testing Tools Grid */}
-              {testingTools.length > 0 && (
+              {/* Debug Tools Grid */}
+              {debugTools.length > 0 && (
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
-                  {testingTools.map((tool) => (
+                  {debugTools.map((tool) => (
                     <Card
                       key={tool.href}
                       className='hover:shadow-lg transition-all bg-zinc-900/50 border-zinc-800/50 hover:border-zinc-700/50'
@@ -1082,15 +853,6 @@ export default function AdminDashboard() {
                             {tool.description}
                           </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <Button
-                            variant='outline'
-                            className='w-full bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 border-zinc-700/50 text-sm'
-                          >
-                            Open
-                            <ExternalLink className='h-3 w-3 ml-2' />
-                          </Button>
-                        </CardContent>
                       </Link>
                     </Card>
                   ))}

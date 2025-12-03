@@ -47,7 +47,6 @@ type AuthContext = {
   userEmail?: string;
 };
 
-const EXCLUDED_EMAILS = new Set(['kellow.sammii@gmail.com']);
 const AUTH_CACHE_TTL = 1000 * 60; // 1 minute
 
 let cachedAuthContext: AuthContext | null = null;
@@ -206,13 +205,6 @@ export async function trackConversion(
     const normalizedEmail = normalizeEmail(eventData.userEmail);
     if (normalizedEmail) {
       eventData.userEmail = normalizedEmail;
-    }
-
-    if (normalizedEmail && EXCLUDED_EMAILS.has(normalizedEmail)) {
-      console.info(
-        `[analytics] Skipping conversion event "${event}" for excluded user ${normalizedEmail}`,
-      );
-      return;
     }
 
     const payload = sanitizeEventPayload(eventData);
