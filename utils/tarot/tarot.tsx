@@ -5,15 +5,15 @@ type TarotSuit = 'cups' | 'swords' | 'wands' | 'pentacles';
 const tarotSuits = ['cups', 'swords', 'wands', 'pentacles'];
 
 /**
- * Ultra-simple cross-browser consistent hash function
- * Only uses addition - no multiplication that could overflow differently
+ * djb2 hash - excellent distribution, cross-browser consistent
+ * Bitwise ops work on 32-bit integers consistently across all JS engines
  */
 const hashString = (str: string): number => {
-  let hash = 0;
+  let hash = 5381;
   for (let i = 0; i < str.length; i++) {
-    hash = hash + str.charCodeAt(i) + i * 7;
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
   }
-  return hash;
+  return hash >>> 0;
 };
 
 const sanitizeSeedComponent = (value?: string): string | undefined => {
