@@ -1,4 +1,4 @@
-import { MoonPhase } from 'astronomy-engine';
+import { MoonPhase, Illumination, Body, AstroTime } from 'astronomy-engine';
 import { monthlyMoonPhases } from './monthlyPhases';
 import dayjs from 'dayjs';
 
@@ -58,7 +58,17 @@ export type MoonPhaseLabels =
   | 'Waning Crescent';
 
 export function getMoonPhase(date: Date): MoonPhaseLabels {
-  const moonPhase = MoonPhase(date);
+  const moonPhaseAngle = MoonPhase(date);
+
+  // Check illumination for better UX at near-full/near-new phases
+  const astroTime = new AstroTime(date);
+  const moonIllumination = Illumination(Body.Moon, astroTime);
+  const illuminationPercent = moonIllumination.phase_fraction * 100;
+
+  // Show "Full Moon" when illumination >= 98% for better UX
+  if (illuminationPercent >= 98) return 'Full Moon';
+  // Show "New Moon" when illumination <= 2%
+  if (illuminationPercent <= 2) return 'New Moon';
 
   const getPhase = (phase: number): MoonPhaseLabels => {
     if (phase >= 0 && phase < 22.5) return 'New Moon';
@@ -72,7 +82,7 @@ export function getMoonPhase(date: Date): MoonPhaseLabels {
     return 'New Moon'; // for phase >= 337.5 to 360
   };
 
-  const moonPhaseString = getPhase(moonPhase);
+  const moonPhaseString = getPhase(moonPhaseAngle);
   return moonPhaseString;
 }
 

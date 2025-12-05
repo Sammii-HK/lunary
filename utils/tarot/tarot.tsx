@@ -1,20 +1,9 @@
 import { tarotCards } from './tarot-cards';
+import seedRandom from 'seed-random';
 
 type TarotSuit = 'cups' | 'swords' | 'wands' | 'pentacles';
 
 const tarotSuits = ['cups', 'swords', 'wands', 'pentacles'];
-
-/**
- * djb2 hash - excellent distribution, cross-browser consistent
- * Bitwise ops work on 32-bit integers consistently across all JS engines
- */
-const hashString = (str: string): number => {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
-  }
-  return hash >>> 0;
-};
 
 const sanitizeSeedComponent = (value?: string): string | undefined => {
   if (!value) return undefined;
@@ -80,8 +69,8 @@ export const getTarotCard = (
   userBirthday?: string,
 ): TarotCard => {
   const seedValue = buildSeedValue(date, userName, userBirthday);
-  const hash = hashString(seedValue);
-  const number = hash % allCardNames.length;
+  const rand = seedRandom(seedValue);
+  const number = Math.floor(rand() * allCardNames.length);
   const tarotCard = allCardNames[number];
   const majorArcanaCard =
     tarotCards.majorArcana[tarotCard as keyof typeof tarotCards.majorArcana];

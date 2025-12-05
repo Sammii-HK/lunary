@@ -206,25 +206,19 @@ const analyzeTrends = (
   const pastReadings: TarotCard[] = [];
   const today = dayjs();
 
-  // Collect past readings - ensure we always have data even if minimal
+  // Collect past readings - use same seed format as daily cards display
   for (let i = 1; i <= timeFrameDays; i++) {
     const date = today.subtract(i, 'day');
-    const card = getTarotCard(
-      date.toDate().toDateString(),
-      userName,
-      userBirthday,
-    );
+    const dateStr = date.format('YYYY-MM-DD');
+    const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
     pastReadings.push(card);
   }
 
   // Ensure we have at least some readings to analyze
   if (pastReadings.length === 0) {
     // Fallback: use today's card if no past readings
-    const todayCard = getTarotCard(
-      today.toDate().toDateString(),
-      userName,
-      userBirthday,
-    );
+    const todayStr = today.format('YYYY-MM-DD');
+    const todayCard = getTarotCard(`daily-${todayStr}`, userName, userBirthday);
     pastReadings.push(todayCard);
   }
 
