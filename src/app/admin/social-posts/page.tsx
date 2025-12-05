@@ -955,12 +955,22 @@ export default function SocialPostsPage() {
                             <CardTitle className='text-lg capitalize'>
                               {post.platform}
                             </CardTitle>
+                            {post.platform === 'reddit' && (
+                              <Badge className='bg-orange-500/20 text-orange-400 border-orange-500/30'>
+                                r/lunary_insights
+                              </Badge>
+                            )}
                             {getStatusBadge(post.status)}
                             <Badge className='bg-purple-500/20 text-purple-400 border-purple-500/30 capitalize'>
                               {post.postType}
                             </Badge>
                           </div>
                           <CardDescription className='text-zinc-400'>
+                            {post.platform === 'reddit' && (
+                              <span className='text-orange-400 font-medium'>
+                                r/lunary_insights •{' '}
+                              </span>
+                            )}
                             {post.topic && `Topic: ${post.topic} • `}
                             Created: {new Date(post.createdAt).toLocaleString()}
                             {post.scheduledDate &&

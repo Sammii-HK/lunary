@@ -82,8 +82,19 @@ export function decrypt(encryptedText: string): string {
 
     return decrypted;
   } catch (error) {
-    console.error('Decryption failed:', error);
-    // Return as-is if decryption fails (might be unencrypted legacy data)
+    console.error(
+      'Decryption failed - data may be encrypted with a different key:',
+      error,
+    );
+    // If decryption fails and data looks encrypted (has 3 colon-separated parts),
+    // return empty to force user to re-enter data rather than use corrupted text
+    if (parts.length === 3 && parts[0].length === 32) {
+      console.warn(
+        'Encrypted data cannot be decrypted - user needs to re-save profile',
+      );
+      return '';
+    }
+    // Otherwise return as-is (might be unencrypted legacy data)
     return encryptedText;
   }
 }

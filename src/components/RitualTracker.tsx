@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Flame, Sunrise, Sunset, CheckCircle2, Circle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStatus } from './AuthStatus';
@@ -17,30 +17,52 @@ export function RitualTracker() {
   const [status, setStatus] = useState<RitualStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchStatus = useCallback(async () => {
     if (!authState.isAuthenticated) {
       setIsLoading(false);
       return;
     }
 
-    const fetchStatus = async () => {
-      try {
-        const response = await fetch(
-          '/api/ritual/complete?date=' + new Date().toISOString().split('T')[0],
+    try {
+      const response = await fetch(
+        '/api/ritual/complete?date=' + new Date().toISOString().split('T')[0],
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setStatus(
+          data.status || {
+            morning: false,
+            evening: false,
+            ritualStreak: 0,
+            longestRitualStreak: 0,
+          },
         );
-        if (response.ok) {
-          const data = await response.json();
-          setStatus(data.status);
-        }
-      } catch (error) {
-        console.error('[RitualTracker] Error fetching status:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        // Set default status if API fails
+        setStatus({
+          morning: false,
+          evening: false,
+          ritualStreak: 0,
+          longestRitualStreak: 0,
+        });
       }
-    };
-
-    fetchStatus();
+    } catch (error) {
+      console.error('[RitualTracker] Error fetching status:', error);
+      // Set default status on error
+      setStatus({
+        morning: false,
+        evening: false,
+        ritualStreak: 0,
+        longestRitualStreak: 0,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, [authState.isAuthenticated]);
+
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
 
   if (!authState.isAuthenticated || isLoading || !status) {
     return null;
@@ -76,7 +98,7 @@ export function RitualTracker() {
           href={`/book-of-shadows?prompt=${encodeURIComponent('Set your intention for today')}`}
           onClick={async () => {
             try {
-              await fetch('/api/ritual/complete', {
+              const res = await fetch('/api/ritual/complete', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -84,6 +106,21 @@ export function RitualTracker() {
                   metadata: { prompt: 'Set your intention for today' },
                 }),
               });
+              if (res.ok) {
+                const data = await res.json();
+                if (data.ritualStreak !== undefined) {
+                  setStatus((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          morning: true,
+                          ritualStreak: data.ritualStreak,
+                          longestRitualStreak: data.longestRitualStreak,
+                        }
+                      : prev,
+                  );
+                }
+              }
             } catch (error) {
               console.error('[RitualTracker] Failed to track ritual:', error);
             }
@@ -105,7 +142,7 @@ export function RitualTracker() {
           href={`/book-of-shadows?prompt=${encodeURIComponent('Reflect on your day')}`}
           onClick={async () => {
             try {
-              await fetch('/api/ritual/complete', {
+              const res = await fetch('/api/ritual/complete', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -113,6 +150,21 @@ export function RitualTracker() {
                   metadata: { prompt: 'Reflect on your day' },
                 }),
               });
+              if (res.ok) {
+                const data = await res.json();
+                if (data.ritualStreak !== undefined) {
+                  setStatus((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          evening: true,
+                          ritualStreak: data.ritualStreak,
+                          longestRitualStreak: data.longestRitualStreak,
+                        }
+                      : prev,
+                  );
+                }
+              }
             } catch (error) {
               console.error('[RitualTracker] Failed to track ritual:', error);
             }

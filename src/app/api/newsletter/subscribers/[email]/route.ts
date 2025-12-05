@@ -59,65 +59,108 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const { isActive, preferences, isVerified } = body;
 
-    // Build SET clause parts
-    const setParts: string[] = [];
-    const values: any[] = [];
+    // Handle unsubscribe (most common case)
+    if (isActive === false) {
+      const result = await sql`
+        UPDATE newsletter_subscribers
+        SET 
+          is_active = false,
+          unsubscribed_at = NOW(),
+          updated_at = NOW()
+        WHERE email = ${decodedEmail}
+        RETURNING id, email, is_active, is_verified, preferences
+      `;
 
-    if (isActive !== undefined) {
-      setParts.push(`is_active = $${values.length + 1}`);
-      values.push(isActive);
-      if (!isActive) {
-        setParts.push(`unsubscribed_at = NOW()`);
+      if (result.rows.length === 0) {
+        return NextResponse.json(
+          { error: 'Subscriber not found' },
+          { status: 404 },
+        );
       }
+
+      return NextResponse.json({
+        success: true,
+        subscriber: result.rows[0],
+      });
     }
 
+    // Handle resubscribe
+    if (isActive === true) {
+      const result = await sql`
+        UPDATE newsletter_subscribers
+        SET 
+          is_active = true,
+          unsubscribed_at = NULL,
+          updated_at = NOW()
+        WHERE email = ${decodedEmail}
+        RETURNING id, email, is_active, is_verified, preferences
+      `;
+
+      if (result.rows.length === 0) {
+        return NextResponse.json(
+          { error: 'Subscriber not found' },
+          { status: 404 },
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        subscriber: result.rows[0],
+      });
+    }
+
+    // Handle preferences update
     if (preferences !== undefined) {
-      setParts.push(`preferences = $${values.length + 1}::jsonb`);
-      values.push(JSON.stringify(preferences));
-    }
+      const prefsJson = JSON.stringify(preferences);
+      const result = await sql`
+        UPDATE newsletter_subscribers
+        SET 
+          preferences = ${prefsJson}::jsonb,
+          updated_at = NOW()
+        WHERE email = ${decodedEmail}
+        RETURNING id, email, is_active, is_verified, preferences
+      `;
 
-    if (isVerified !== undefined) {
-      setParts.push(`is_verified = $${values.length + 1}`);
-      values.push(isVerified);
-      if (isVerified) {
-        setParts.push(`verified_at = NOW()`);
-        setParts.push(`verification_token = NULL`);
+      if (result.rows.length === 0) {
+        return NextResponse.json(
+          { error: 'Subscriber not found' },
+          { status: 404 },
+        );
       }
+
+      return NextResponse.json({
+        success: true,
+        subscriber: result.rows[0],
+      });
     }
 
-    setParts.push(`updated_at = NOW()`);
-    values.push(decodedEmail);
+    // Handle verification
+    if (isVerified === true) {
+      const result = await sql`
+        UPDATE newsletter_subscribers
+        SET 
+          is_verified = true,
+          verified_at = NOW(),
+          verification_token = NULL,
+          updated_at = NOW()
+        WHERE email = ${decodedEmail}
+        RETURNING id, email, is_active, is_verified, preferences
+      `;
 
-    if (setParts.length === 1) {
-      // Only updated_at, nothing to update
-      return NextResponse.json(
-        { error: 'No fields to update' },
-        { status: 400 },
-      );
+      if (result.rows.length === 0) {
+        return NextResponse.json(
+          { error: 'Subscriber not found' },
+          { status: 404 },
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        subscriber: result.rows[0],
+      });
     }
 
-    const setClause = setParts.join(', ');
-    const query = `
-      UPDATE newsletter_subscribers
-      SET ${setClause}
-      WHERE email = $${values.length}
-      RETURNING id, email, is_active, is_verified, preferences
-    `;
-
-    // Use sql.unsafe for dynamic queries with parameters
-    const result = await (sql as any).unsafe(query, values);
-
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Subscriber not found' },
-        { status: 404 },
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      subscriber: result.rows[0],
-    });
+    return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
   } catch (error) {
     console.error('Failed to update subscriber:', error);
     return NextResponse.json(

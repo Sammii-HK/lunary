@@ -450,7 +450,6 @@ export const getImprovedTarotReading = (
   const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
 
   // Get cards - daily uses todayString, weekly uses weeklySeed
-  // The seed strings are completely different so cards will be different
   const daily = getTarotCard(`daily-${todayString}`, userName, userBirthday);
   const weekly = getTarotCard(weeklySeed, userName, userBirthday);
 

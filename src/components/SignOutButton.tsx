@@ -47,8 +47,9 @@ export function SignOutButton() {
     // Step 5: Invalidate cache again after server signout
     invalidateAuthCache();
 
-    // Step 6: Navigate home (no refresh needed - cache is cleared)
+    // Step 6: Navigate home and force refresh to clear all state
     router.replace('/');
+    router.refresh();
 
     setLoading(false);
     setTimeout(() => {

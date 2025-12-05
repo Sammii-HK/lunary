@@ -103,7 +103,7 @@ export function UpgradePrompt({
     ? 'Continue enjoying premium cosmic insights after your trial'
     : planLabel
       ? `This feature requires ${planLabel}. Upgrade to unlock it.`
-      : 'Get personalized birth charts, daily horoscopes, and cosmic guidance tailored to you';
+      : 'Readings personalized to your name, birthday, birth chart, birth time and location';
 
   const promptTitle = title || defaultTitle;
   const promptDescription = description || defaultDescription;

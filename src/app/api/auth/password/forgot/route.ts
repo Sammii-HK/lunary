@@ -55,7 +55,7 @@ export async function POST(request: Request) {
         ? ensureTrailingPath(fallbackOrigin, '/auth/reset')
         : undefined);
 
-    const response = await auth.api.forgetPassword({
+    const response = await auth.api.requestPasswordReset({
       body: {
         email,
         ...(defaultRedirect ? { redirectTo: defaultRedirect } : {}),
@@ -77,6 +77,12 @@ export async function POST(request: Request) {
       { status: 200, headers: corsHeaders },
     );
   } catch (error) {
+    console.error('❌ Password reset request failed:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {

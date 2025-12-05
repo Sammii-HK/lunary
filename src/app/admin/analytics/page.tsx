@@ -182,43 +182,62 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/search-console?${queryParams}`),
       ]);
 
-      if (!activityRes.ok) {
-        throw new Error('Failed to load DAU/WAU/MAU metrics');
-      }
-      if (!aiRes.ok) {
-        throw new Error('Failed to load AI engagement metrics');
-      }
-      if (!conversionsRes.ok) {
-        throw new Error('Failed to load conversion metrics');
-      }
-      if (!notificationsRes.ok) {
-        throw new Error('Failed to load notification metrics');
-      }
-      if (!featureUsageRes.ok) {
-        throw new Error('Failed to load feature usage metrics');
-      }
-      if (!successMetricsRes.ok) {
-        throw new Error('Failed to load success metrics');
+      const errors: string[] = [];
+
+      if (activityRes.ok) {
+        setActivity(await activityRes.json());
+      } else {
+        errors.push('DAU/WAU/MAU');
       }
 
-      setActivity(await activityRes.json());
-      setAiMetrics(await aiRes.json());
-      setConversions(await conversionsRes.json());
-      setNotifications(await notificationsRes.json());
-      setFeatureUsage(await featureUsageRes.json());
-      setSuccessMetrics(await successMetricsRes.json());
+      if (aiRes.ok) {
+        setAiMetrics(await aiRes.json());
+      } else {
+        errors.push('AI engagement');
+      }
 
-      // Discord analytics is optional - don't fail if it doesn't exist
+      if (conversionsRes.ok) {
+        setConversions(await conversionsRes.json());
+      } else {
+        errors.push('Conversions');
+      }
+
+      if (notificationsRes.ok) {
+        setNotifications(await notificationsRes.json());
+      } else {
+        errors.push('Notifications');
+      }
+
+      if (featureUsageRes.ok) {
+        setFeatureUsage(await featureUsageRes.json());
+      } else {
+        const data = await featureUsageRes.json().catch(() => ({}));
+        if (data.error?.includes('PostHog')) {
+          setFeatureUsage({ features: [], heatmap: [] });
+        } else {
+          errors.push('Feature usage');
+        }
+      }
+
+      if (successMetricsRes.ok) {
+        setSuccessMetrics(await successMetricsRes.json());
+      } else {
+        errors.push('Success metrics');
+      }
+
       if (discordRes.ok) {
         setDiscordAnalytics(await discordRes.json());
       }
 
-      // Search Console is optional - don't fail if it doesn't exist
       if (searchConsoleRes.ok) {
         const searchData = await searchConsoleRes.json();
         if (searchData.success) {
           setSearchConsoleData(searchData.data);
         }
+      }
+
+      if (errors.length > 0) {
+        setError(`Some metrics unavailable: ${errors.join(', ')}`);
       }
     } catch (err) {
       setError(

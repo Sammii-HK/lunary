@@ -506,14 +506,20 @@ export const getTarotPatternAnalysis = async ({
       reversed: false,
     };
 
-    // Generate weekly card (using Monday of this week)
-    const weekStart = currentDate.startOf('week').add(1, 'day'); // Monday
-    const weekStartStr = weekStart.format('YYYY-MM-DD');
-    const weeklyCard = getTarotCard(
-      `weekly-${weekStartStr}`,
-      userName,
-      userBirthday,
+    // Generate weekly card - MUST match improvedTarot.tsx exactly
+    const jsDate = currentDate.toDate();
+    const weekStartDate = new Date(jsDate);
+    weekStartDate.setDate(jsDate.getDate() - jsDate.getDay()); // Sunday start
+    const weekStartYear = weekStartDate.getFullYear();
+    const weekStartMonth = weekStartDate.getMonth() + 1;
+    const weekStartDay = weekStartDate.getDate();
+    const dayOfYear = Math.floor(
+      (weekStartDate.getTime() - new Date(weekStartYear, 0, 0).getTime()) /
+        86400000,
     );
+    const weekNumber = Math.floor(dayOfYear / 7);
+    const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDay}`;
+    const weeklyCard = getTarotCard(weeklySeed, userName, userBirthday);
     const weekly: TarotCard = {
       name: weeklyCard.name,
       keywords: weeklyCard.keywords || [],

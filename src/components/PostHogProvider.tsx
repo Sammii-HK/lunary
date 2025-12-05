@@ -67,6 +67,13 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
             return;
           }
 
+          // Detect CI/test environments for PostHog filtering
+          const isPlaywright = navigator.userAgent.includes('Playwright');
+          const isCITest =
+            isPlaywright ||
+            (window.location.hostname === 'localhost' &&
+              navigator.userAgent.includes('HeadlessChrome'));
+
           posthog.init(posthogKey, {
             api_host:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ||
@@ -75,6 +82,14 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
               posthogRef.current = posthog;
               initializedRef.current = true;
               setPosthogAvailable(true);
+
+              // Set person properties for CI/test filtering
+              if (isCITest) {
+                posthog.register({
+                  is_ci_test: true,
+                  is_playwright: isPlaywright,
+                });
+              }
             },
             capture_pageview: false,
             capture_pageleave: true,

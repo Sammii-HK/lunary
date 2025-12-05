@@ -1,13 +1,11 @@
 import { FullConfig } from '@playwright/test';
 import { cleanupSharedContext } from './fixtures/optimized-context';
-import { cleanupAuthContext } from './fixtures/auth';
 
 async function globalTeardown(config: FullConfig) {
   const isCI = !!process.env.CI;
 
   // Cleanup shared contexts
   await cleanupSharedContext();
-  await cleanupAuthContext();
 
   if (!isCI) {
     console.log('\n🧹 Playwright Global Teardown');

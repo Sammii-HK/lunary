@@ -21,9 +21,6 @@ export async function POST(request: Request) {
         newPassword,
         token,
       },
-      query: {
-        token,
-      },
     });
 
     return NextResponse.json(

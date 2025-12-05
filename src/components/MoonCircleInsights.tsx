@@ -109,7 +109,7 @@ export function MoonCircleInsights({
   }, [sort]);
 
   const fetchInsights = useCallback(
-    async (overridePage = 0, overrideSort?: SortOrder) => {
+    async (overridePage = 0, overrideSort?: SortOrder, bustCache = false) => {
       const sortOrder = overrideSort ?? sortRef.current;
       try {
         setIsLoading(true);
@@ -119,6 +119,10 @@ export function MoonCircleInsights({
           offset: String(overridePage * pageSize),
           sort: sortOrder,
         });
+        // Add cache-busting param when refetching after submission
+        if (bustCache) {
+          params.set('_t', String(Date.now()));
+        }
         const response = await fetch(
           `/api/moon-circles/${moonCircleId}/insights?${params.toString()}`,
           { cache: 'no-store' },
@@ -171,9 +175,9 @@ export function MoonCircleInsights({
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<{ moonCircleId: number }>).detail;
       if (detail?.moonCircleId === moonCircleId) {
-        // Small delay to ensure database has updated
+        // Small delay to ensure database has updated, then bust cache
         setTimeout(() => {
-          fetchInsights(0, 'newest');
+          fetchInsights(0, 'newest', true);
         }, 500);
       }
     };

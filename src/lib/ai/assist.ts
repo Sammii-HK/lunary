@@ -11,6 +11,7 @@ export type AssistCommand =
   | { type: 'ritual_generation' }
   | { type: 'weekly_overview' }
   | { type: 'journal_entry' }
+  | { type: 'what_you_know' }
   | { type: 'none' };
 
 const weekPhrases = [
@@ -57,6 +58,14 @@ const journalPhrases = [
   'journal format',
   'format as journal',
 ];
+const whatYouKnowPhrases = [
+  'what do you know about me',
+  'what have you learned about me',
+  'what do you remember about me',
+  'tell me what you know',
+  'my profile',
+  'what you know',
+];
 
 const normalise = (value: string) => value.trim().toLowerCase();
 
@@ -81,6 +90,10 @@ export const detectAssistCommand = (userMessage: string): AssistCommand => {
 
   if (journalPhrases.some((phrase) => content.includes(phrase))) {
     return { type: 'journal_entry' };
+  }
+
+  if (whatYouKnowPhrases.some((phrase) => content.includes(phrase))) {
+    return { type: 'what_you_know' };
   }
 
   if (tarotPatternsPhrases.some((phrase) => content.includes(phrase))) {
@@ -230,6 +243,52 @@ const weeklyOverview = (_context: LunaryContext): string | null => {
 
 const journalEntry = (_context: LunaryContext): string | null => {
   return null;
+};
+
+const whatYouKnow = (context: LunaryContext): string => {
+  const parts: string[] = ["Here's what I know about you:"];
+
+  if (context.user.displayName) {
+    parts.push(`- Name: ${context.user.displayName}`);
+  }
+
+  if (context.birthChart?.placements) {
+    const placements = context.birthChart.placements;
+    const sun = placements.find((p) => p.planet === 'Sun');
+    const moon = placements.find((p) => p.planet === 'Moon');
+    const asc = placements.find((p) => p.planet === 'Ascendant');
+    if (sun) parts.push(`- Sun sign: ${sun.sign}`);
+    if (moon) parts.push(`- Moon sign: ${moon.sign}`);
+    if (asc) parts.push(`- Rising: ${asc.sign}`);
+  }
+
+  if (context.tarot?.daily) {
+    parts.push(`- Today's card: ${context.tarot.daily.name}`);
+  }
+
+  if (context.tarot?.weekly) {
+    parts.push(`- This week's card: ${context.tarot.weekly.name}`);
+  }
+
+  if (context.tarot?.patternAnalysis) {
+    const patterns = context.tarot.patternAnalysis;
+    if (patterns.dominantThemes && patterns.dominantThemes.length > 0) {
+      parts.push(
+        `- Recent tarot themes: ${patterns.dominantThemes.join(', ')}`,
+      );
+    }
+    if (patterns.frequentCards && patterns.frequentCards.length > 0) {
+      parts.push(
+        `- Cards appearing often: ${patterns.frequentCards.join(', ')}`,
+      );
+    }
+  }
+
+  parts.push(
+    '\n(Personal facts learned from our conversations are included in my context and help me give personalized guidance.)',
+  );
+
+  return parts.join('\n');
 };
 
 export const runAssistCommand = (

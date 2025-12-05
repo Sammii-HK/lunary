@@ -21,6 +21,8 @@ type GlobalCosmicData = {
     name: string;
     energy: string;
     illumination: number;
+    age: number;
+    isSignificant: boolean;
   };
   planetaryPositions: Record<
     string,
@@ -42,11 +44,12 @@ export const AstronomyContext = createContext<{
   currentDateTime: Date;
   setCurrentDateTime: (date: Date) => void;
   currentMoonPhase: MoonPhaseLabels;
+  moonIllumination: number;
+  moonAge: number;
   writtenDate: string;
   currentTarotCard: any;
   symbol: string;
   currentDate: string;
-  // horoscope: string,
 } | null>(null);
 
 export function useAstronomyContext() {
@@ -149,6 +152,14 @@ export const AstronomyContextProvider = ({
     }
     return 'Waxing Crescent' as MoonPhaseLabels;
   }, [cosmicData]);
+
+  const moonIllumination = useMemo(() => {
+    return cosmicData?.moonPhase?.illumination ?? 0;
+  }, [cosmicData]);
+
+  const moonAge = useMemo(() => {
+    return cosmicData?.moonPhase?.age ?? 0;
+  }, [cosmicData]);
   const writtenDate = useMemo(
     () => getWrittenDate(currentDateTime),
     [currentDateTime],
@@ -176,11 +187,12 @@ export const AstronomyContextProvider = ({
         currentDateTime,
         setCurrentDateTime,
         currentMoonPhase,
+        moonIllumination,
+        moonAge,
         writtenDate,
         currentTarotCard,
         symbol,
         currentDate,
-        // horoscope,
       }}
     >
       {children}

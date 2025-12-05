@@ -298,7 +298,35 @@ export function getAccurateMoonPhase(date: Date): {
   // 0° = New Moon, 90° = First Quarter, 180° = Full Moon, 270° = Third Quarter
   const moonAge = (moonPhaseAngle / 360) * 29.530588853;
 
-  // Determine moon phase based on angle with proper tolerances
+  // Named moons by month (used for full moon display)
+  const moonNames: { [key: number]: string } = {
+    1: 'Wolf Moon',
+    2: 'Snow Moon',
+    3: 'Worm Moon',
+    4: 'Pink Moon',
+    5: 'Flower Moon',
+    6: 'Strawberry Moon',
+    7: 'Buck Moon',
+    8: 'Sturgeon Moon',
+    9: 'Harvest Moon',
+    10: 'Hunter Moon',
+    11: 'Beaver Moon',
+    12: 'Cold Moon',
+  };
+
+  // Determine if this is the exact peak day (narrow window for cosmic posts)
+  const isExactNewMoon = moonPhaseAngle >= 358 || moonPhaseAngle <= 2;
+  const isExactFullMoon = moonPhaseAngle >= 178 && moonPhaseAngle <= 182;
+  const isExactFirstQuarter = moonPhaseAngle >= 88 && moonPhaseAngle <= 92;
+  const isExactThirdQuarter = moonPhaseAngle >= 268 && moonPhaseAngle <= 272;
+  const isSignificant =
+    isExactNewMoon ||
+    isExactFullMoon ||
+    isExactFirstQuarter ||
+    isExactThirdQuarter;
+
+  // Determine display phase based on illumination (wider window for user display)
+  // Show "Full Moon" for 97%+ illumination, "New Moon" for 3%- illumination
   let result: {
     name: string;
     energy: string;
@@ -309,65 +337,51 @@ export function getAccurateMoonPhase(date: Date): {
     isSignificant: boolean;
   };
 
-  if (moonPhaseAngle >= 355 || moonPhaseAngle <= 5) {
-    // New Moon: 355° - 5° (around 0°)
+  if (illuminationPercent <= 3) {
+    // New Moon display (illumination ≤3%)
     result = {
       name: 'New Moon',
       energy: 'New Beginnings',
-      priority: 10,
+      priority: isSignificant ? 10 : 8,
       emoji: '🌑',
       illumination: illuminationPercent,
       age: moonAge,
-      isSignificant: true,
+      isSignificant,
+    };
+  } else if (illuminationPercent >= 97) {
+    // Full Moon display (illumination ≥97%)
+    const month = date.getMonth() + 1;
+    const moonName = moonNames[month] || 'Full Moon';
+    result = {
+      name: moonName,
+      energy: 'Peak Power',
+      priority: isSignificant ? 10 : 8,
+      emoji: '🌕',
+      illumination: illuminationPercent,
+      age: moonAge,
+      isSignificant,
     };
   } else if (moonPhaseAngle >= 85 && moonPhaseAngle <= 95) {
     // First Quarter: 85° - 95° (around 90°)
     result = {
       name: 'First Quarter',
       energy: 'Action & Decision',
-      priority: 10,
+      priority: isSignificant ? 10 : 6,
       emoji: '🌓',
       illumination: illuminationPercent,
       age: moonAge,
-      isSignificant: true,
-    };
-  } else if (moonPhaseAngle >= 175 && moonPhaseAngle <= 185) {
-    // Full Moon: 175° - 185° (around 180°)
-    const month = date.getMonth() + 1;
-    const moonNames: { [key: number]: string } = {
-      1: 'Wolf Moon',
-      2: 'Snow Moon',
-      3: 'Worm Moon',
-      4: 'Pink Moon',
-      5: 'Flower Moon',
-      6: 'Strawberry Moon',
-      7: 'Buck Moon',
-      8: 'Sturgeon Moon',
-      9: 'Harvest Moon',
-      10: 'Hunter Moon',
-      11: 'Beaver Moon',
-      12: 'Cold Moon',
-    };
-    const moonName = moonNames[month] || 'Full Moon';
-    result = {
-      name: moonName,
-      energy: 'Peak Power',
-      priority: 10,
-      emoji: '🌕',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant: true,
+      isSignificant,
     };
   } else if (moonPhaseAngle >= 265 && moonPhaseAngle <= 275) {
     // Third Quarter: 265° - 275° (around 270°)
     result = {
       name: 'Third Quarter',
       energy: 'Release & Letting Go',
-      priority: 10,
+      priority: isSignificant ? 10 : 6,
       emoji: '🌗',
       illumination: illuminationPercent,
       age: moonAge,
-      isSignificant: true,
+      isSignificant,
     };
   } else {
     // Non-significant phases based on angle ranges
