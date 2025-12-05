@@ -15,6 +15,12 @@ import {
   incrementWeeklyRitualUsage,
   isRitualRequest,
 } from './weekly-ritual-usage';
+import {
+  extractPersonalFacts,
+  saveUserMemory,
+  loadUserMemory,
+  formatUserMemoryForContext,
+} from './user-memory';
 
 type StreamChatParams = {
   userId: string;
@@ -50,6 +56,10 @@ export const createStreamingChatResponse = async ({
   aiMode,
   now,
 }: StreamChatParams): Promise<Response> => {
+  // Load user's personal memory (encrypted facts)
+  const userMemoryFacts = await loadUserMemory(userId, 15).catch(() => []);
+  const userMemoryContext = formatUserMemoryForContext(userMemoryFacts);
+
   const promptSections = buildPromptSections({
     context,
     memorySnippets,
@@ -64,6 +74,7 @@ export const createStreamingChatResponse = async ({
   const systemPrompt = [
     promptSections.system,
     promptSections.memory ? promptSections.memory : '',
+    userMemoryContext, // Include personal facts the AI knows about the user
     promptSections.context,
   ]
     .filter(Boolean)
@@ -184,6 +195,19 @@ export const createStreamingChatResponse = async ({
           },
           snippetLimit: memorySnippetLimit,
         });
+
+        // Extract and save personal facts from this conversation (encrypted)
+        const userMessages = thread.messages
+          .filter((m) => m.role === 'user')
+          .map((m) => m.content);
+        const extractedFacts = extractPersonalFacts(userMessages);
+        if (extractedFacts.length > 0) {
+          await saveUserMemory(userId, extractedFacts, thread.id).catch(
+            (error) => {
+              console.error('[AI Stream] Failed to save user memory:', error);
+            },
+          );
+        }
 
         const updatedMemorySnippets =
           memorySnippetLimit > 0
