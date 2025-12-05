@@ -96,30 +96,29 @@ function ResetPasswordContent() {
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-5'>
-          <div>
-            <label
-              htmlFor='token'
-              className='block text-sm font-medium text-zinc-300 mb-2'
-            >
-              Reset token
-            </label>
-            <input
-              id='token'
-              name='token'
-              value={token}
-              onChange={(event) => setToken(event.target.value)}
-              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-              placeholder='Paste your reset token'
-              required
-            />
-            {!tokenFromQuery && (
+          {/* Only show token input if not provided in URL */}
+          {!tokenFromQuery && (
+            <div>
+              <label
+                htmlFor='token'
+                className='block text-sm font-medium text-zinc-300 mb-2'
+              >
+                Reset token
+              </label>
+              <input
+                id='token'
+                name='token'
+                value={token}
+                onChange={(event) => setToken(event.target.value)}
+                className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+                placeholder='Paste your reset token'
+                required
+              />
               <p className='mt-2 text-xs text-zinc-500'>
-                Tip: If you opened the link from your email, the token should
-                already be filled in. Otherwise, copy the token from the reset
-                URL.
+                Paste the token from your password reset email.
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
           <div>
             <label

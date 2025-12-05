@@ -1,10 +1,10 @@
 'use client';
 
 import { JazzReactProvider } from 'jazz-tools/react';
-import { AuthProvider } from 'jazz-tools/better-auth/auth/react';
 import { MyAppAccount, CustomProfile } from '../../schema';
-import { betterAuthClient } from '@/lib/auth-client';
 
+// Jazz is now READ-ONLY for data migration
+// Auth is handled by better-auth with Postgres (Jazz fallback server-side only)
 export function LunaryJazzProvider({
   children,
 }: {
@@ -15,9 +15,7 @@ export function LunaryJazzProvider({
       sync={{ peer: 'wss://cloud.jazz.tools/?key=sam@lunary.com' }}
       AccountSchema={MyAppAccount}
     >
-      <AuthProvider betterAuthClient={betterAuthClient}>
-        {children}
-      </AuthProvider>
+      {children}
     </JazzReactProvider>
   );
 }
