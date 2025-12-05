@@ -21,6 +21,10 @@ import {
   loadUserMemory,
   formatUserMemoryForContext,
 } from './user-memory';
+import {
+  extractMomentsFromMessages,
+  saveExtractedMoments,
+} from '@/lib/journal/extract-moments';
 
 type StreamChatParams = {
   userId: string;
@@ -207,6 +211,30 @@ export const createStreamingChatResponse = async ({
               console.error('[AI Stream] Failed to save user memory:', error);
             },
           );
+        }
+
+        // Extract journal-worthy moments and save to Book of Shadows
+        const messagesForJournal = thread.messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+          ts: m.ts,
+          id: `${thread.id}-${m.ts}`,
+        }));
+        const journalMoments = extractMomentsFromMessages(messagesForJournal);
+        if (journalMoments.length > 0) {
+          const cosmicContext = {
+            moonPhase: context.moon?.phase,
+            transitHighlight: context.currentTransits[0]
+              ? `${context.currentTransits[0].from} ${context.currentTransits[0].aspect} ${context.currentTransits[0].to}`
+              : undefined,
+          };
+          await saveExtractedMoments(
+            userId,
+            journalMoments,
+            cosmicContext,
+          ).catch((error) => {
+            console.error('[AI Stream] Failed to save journal moments:', error);
+          });
         }
 
         const updatedMemorySnippets =
