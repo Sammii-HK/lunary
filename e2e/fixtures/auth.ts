@@ -1,70 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { ensureTestUser, TEST_USERS } from './test-users';
-
-// Reusable browser context for authenticated tests (shared across tests)
-let authContext: any = null;
-
-// Cleanup function for auth context
-export async function cleanupAuthContext() {
-  if (authContext) {
-    await authContext.close();
-    authContext = null;
-  }
-}
-
-// Setup route blocking for faster tests
-async function setupRouteBlocking(page: Page) {
-  await page.route('**/*', (route) => {
-    const resourceType = route.request().resourceType();
-    const url = route.request().url();
-
-    // BLOCK slow auth session checks - return mock immediately (CRITICAL FOR SPEED)
-    if (url.includes('/api/auth/get-session')) {
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ session: null, user: null }),
-      });
-      return;
-    }
-
-    // Block images (unless needed for visual tests)
-    if (
-      resourceType === 'image' &&
-      !url.includes('og-image') &&
-      !url.includes('og/')
-    ) {
-      route.abort();
-      return;
-    }
-
-    // Block fonts (use system fonts)
-    if (resourceType === 'font') {
-      route.abort();
-      return;
-    }
-
-    // Block media files
-    if (resourceType === 'media') {
-      route.abort();
-      return;
-    }
-
-    // Block external stylesheets
-    if (
-      resourceType === 'stylesheet' &&
-      (url.includes('fonts.googleapis.com') ||
-        url.includes('cdn.jsdelivr.net') ||
-        url.includes('unpkg.com'))
-    ) {
-      route.abort();
-      return;
-    }
-
-    route.continue();
-  });
-}
+import { TEST_USERS } from './test-users';
 
 type AuthFixtures = {
   authenticatedPage: Page;
@@ -73,28 +9,7 @@ type AuthFixtures = {
 };
 
 export const test = base.extend<AuthFixtures>({
-  // Override browser to set up route interception at context level
-  browser: async ({ browser }, use) => {
-    // Set up route interception for ALL contexts created from this browser
-    const originalNewContext = browser.newContext.bind(browser);
-    browser.newContext = async (options?: any) => {
-      const context = await originalNewContext(options);
-      // Block auth session checks at context level - applies to all pages
-      await context.route('**/api/auth/get-session', (route) => {
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ session: null, user: null }),
-        });
-      });
-      return context;
-    };
-    await use(browser);
-  },
-
-  // Add route blocking to base page fixture for ALL tests (backup)
   page: async ({ page }, use) => {
-    // Block slow auth session checks - return mock immediately
     await page.route('**/api/auth/get-session', (route) => {
       route.fulfill({
         status: 200,
@@ -102,147 +17,223 @@ export const test = base.extend<AuthFixtures>({
         body: JSON.stringify({ session: null, user: null }),
       });
     });
-    await use(page);
-  },
 
-  testUser: async ({}, use) => {
-    // Access TEST_USERS.regular as a getter to ensure env vars are read at test time
-    const testUser = TEST_USERS.regular;
-    const email = testUser.email;
-    const password = testUser.password;
+    await page.route('**/*', (route) => {
+      const resourceType = route.request().resourceType();
+      const url = route.request().url();
 
-    // Log which email is being used
-    if (process.env.TEST_EMAIL || process.env.TEST_USER_EMAIL) {
-      console.log(`📧 Using TEST_EMAIL from environment: ${email}`);
-    } else {
-      console.log(
-        `⚠️  No TEST_EMAIL env var found, using test email: ${email}`,
-      );
-      console.log(
-        `   → Tests will bypass Better Auth (no authentication required)`,
-      );
-      console.log(
-        `   → Set TEST_EMAIL and TEST_PASSWORD in .env.local to use Better Auth`,
-      );
-    }
-
-    await use({
-      email,
-      password,
-    });
-  },
-
-  authenticatedPage: async ({ browser, baseURL, testUser }, use, testInfo) => {
-    const testBaseURL = baseURL || 'http://localhost:3000';
-
-    // Reuse authenticated context if available
-    if (!authContext) {
-      authContext = await browser.newContext({
-        viewport: { width: 1280, height: 720 },
-        ignoreHTTPSErrors: true,
-      });
-
-      // CRITICAL: Block auth session checks FIRST before any other routes
-      // This MUST be set up before any pages are created
-      await authContext.route(/.*\/api\/auth\/get-session.*/, (route) => {
+      if (url.includes('/api/auth/get-session')) {
         route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({ session: null, user: null }),
         });
-      });
+        return;
+      }
 
-      // Setup route blocking for faster tests
-      await authContext.route('**/*', (route) => {
-        const resourceType = route.request().resourceType();
-        const url = route.request().url();
+      if (
+        resourceType === 'image' &&
+        !url.includes('og-image') &&
+        !url.includes('og/')
+      ) {
+        route.abort();
+        return;
+      }
 
-        // BLOCK slow auth session checks - return mock immediately (backup check)
-        if (url.includes('/api/auth/get-session')) {
-          route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({ session: null, user: null }),
-          });
-          return;
-        }
+      if (resourceType === 'font') {
+        route.abort();
+        return;
+      }
 
-        if (
-          resourceType === 'image' &&
-          !url.includes('og-image') &&
-          !url.includes('og/')
-        ) {
-          route.abort();
-          return;
-        }
-        if (resourceType === 'font') {
-          route.abort();
-          return;
-        }
-        if (resourceType === 'media') {
-          route.abort();
-          return;
-        }
-        if (
-          resourceType === 'stylesheet' &&
-          (url.includes('fonts.googleapis.com') ||
-            url.includes('cdn.jsdelivr.net') ||
-            url.includes('unpkg.com'))
-        ) {
-          route.abort();
-          return;
-        }
-        route.continue();
-      });
-    }
+      if (resourceType === 'media') {
+        route.abort();
+        return;
+      }
 
-    const page = await authContext.newPage();
+      if (
+        resourceType === 'stylesheet' &&
+        (url.includes('fonts.googleapis.com') ||
+          url.includes('cdn.jsdelivr.net') ||
+          url.includes('unpkg.com'))
+      ) {
+        route.abort();
+        return;
+      }
 
-    console.log(`\n🔐 Authenticating user for test: ${testInfo.title}`);
-    console.log(`   Email: ${testUser.email}`);
-
-    // Authenticate user via UI (required for Jazz)
-    const authenticated = await ensureTestUser(page, {
-      email: testUser.email,
-      password: testUser.password,
-      name: 'Test User',
+      route.continue();
     });
 
-    if (authenticated) {
-      console.log(`✅ Authentication successful`);
-    } else {
-      console.warn('⚠️  Auth may have failed, continuing anyway');
-    }
+    await use(page);
+  },
 
-    // Navigate to home to verify state
-    console.log(`   Navigating to home page...`);
+  testUser: async ({}, use) => {
+    await use({
+      email: TEST_USERS.regular.email,
+      password: TEST_USERS.regular.password,
+    });
+  },
+
+  authenticatedPage: async ({ browser, baseURL }, use) => {
+    const testBaseURL = baseURL || 'http://localhost:3000';
+
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 720 },
+      ignoreHTTPSErrors: true,
+    });
+
+    await context.route('**/api/auth/get-session', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          session: {
+            id: 'test-session-id',
+            userId: 'test-user-id',
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          },
+          user: {
+            id: 'test-user-id',
+            email: TEST_USERS.regular.email,
+            name: TEST_USERS.regular.name,
+            emailVerified: true,
+          },
+        }),
+      });
+    });
+
+    await context.route('**/api/subscription', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            status: 'active',
+            plan: 'monthly',
+            planType: 'monthly',
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    await context.route('**/api/profile', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            profile: {
+              userId: 'test-user-id',
+              name: TEST_USERS.regular.name,
+              email: TEST_USERS.regular.email,
+              birthday: '1990-01-15',
+            },
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    await context.route('**/*', (route) => {
+      const resourceType = route.request().resourceType();
+      const url = route.request().url();
+
+      if (
+        resourceType === 'image' &&
+        !url.includes('og-image') &&
+        !url.includes('og/')
+      ) {
+        route.abort();
+        return;
+      }
+      if (resourceType === 'font') {
+        route.abort();
+        return;
+      }
+      if (resourceType === 'media') {
+        route.abort();
+        return;
+      }
+      if (
+        resourceType === 'stylesheet' &&
+        (url.includes('fonts.googleapis.com') ||
+          url.includes('cdn.jsdelivr.net') ||
+          url.includes('unpkg.com'))
+      ) {
+        route.abort();
+        return;
+      }
+      route.continue();
+    });
+
+    const page = await context.newPage();
     await page.goto(`${testBaseURL}/`, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1000);
 
     await use(page);
     await page.close();
+    await context.close();
   },
 
-  adminPage: async ({ page, baseURL }, use, testInfo) => {
+  adminPage: async ({ browser, baseURL }, use) => {
     const testBaseURL = baseURL || 'http://localhost:3000';
 
-    console.log(`\n🔐 Authenticating admin user for test: ${testInfo.title}`);
-    console.log(`   Email: ${TEST_USERS.admin.email}`);
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 720 },
+      ignoreHTTPSErrors: true,
+    });
 
-    // Authenticate admin user
-    const authenticated = await ensureTestUser(page, TEST_USERS.admin);
+    await context.route('**/api/auth/get-session', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          session: {
+            id: 'admin-session-id',
+            userId: 'admin-user-id',
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          },
+          user: {
+            id: 'admin-user-id',
+            email: TEST_USERS.admin.email,
+            name: TEST_USERS.admin.name,
+            emailVerified: true,
+            role: 'admin',
+          },
+        }),
+      });
+    });
 
-    if (authenticated) {
-      console.log(`✅ Admin authentication successful`);
-    } else {
-      console.warn('⚠️  Admin auth may have failed');
-    }
+    await context.route('**/*', (route) => {
+      const resourceType = route.request().resourceType();
+      const url = route.request().url();
 
-    console.log(`   Navigating to admin page...`);
+      if (
+        resourceType === 'image' &&
+        !url.includes('og-image') &&
+        !url.includes('og/')
+      ) {
+        route.abort();
+        return;
+      }
+      if (resourceType === 'font') {
+        route.abort();
+        return;
+      }
+      if (resourceType === 'media') {
+        route.abort();
+        return;
+      }
+      route.continue();
+    });
+
+    const page = await context.newPage();
     await page.goto(`${testBaseURL}/admin`, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1000);
 
     await use(page);
+    await page.close();
+    await context.close();
   },
 });
 

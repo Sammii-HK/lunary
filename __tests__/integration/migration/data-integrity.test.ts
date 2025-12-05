@@ -1,11 +1,8 @@
 /**
  * Data Integrity Tests
- * Tests to verify data consistency between Jazz and PostgreSQL during migration
+ * Tests to verify data consistency in PostgreSQL
  */
 
-import { NextRequest } from 'next/server';
-
-// Mock @vercel/postgres
 jest.mock('@vercel/postgres', () => ({
   sql: jest.fn(),
 }));
@@ -19,7 +16,6 @@ beforeEach(() => {
 describe('Data Integrity - User Profiles', () => {
   describe('Profile Data Structure', () => {
     it('should have correct PostgreSQL schema for user_profiles', async () => {
-      // Verify expected columns exist
       const expectedColumns = [
         'id',
         'user_id',
@@ -37,7 +33,6 @@ describe('Data Integrity - User Profiles', () => {
         rows: expectedColumns.map((col) => ({ column_name: col })),
       });
 
-      // Simulated schema check
       const result = await mockSql`
         SELECT column_name 
         FROM information_schema.columns 
@@ -51,7 +46,6 @@ describe('Data Integrity - User Profiles', () => {
     });
 
     it('should enforce unique user_id constraint', async () => {
-      // Attempt to insert duplicate user_id should fail
       mockSql
         .mockResolvedValueOnce({
           rows: [{ id: 'profile-1', user_id: 'user-123' }],
@@ -60,14 +54,12 @@ describe('Data Integrity - User Profiles', () => {
           new Error('duplicate key value violates unique constraint'),
         );
 
-      // First insert succeeds
       const result1 = await mockSql`
         INSERT INTO user_profiles (user_id, name) VALUES ('user-123', 'Test')
         RETURNING *
       `;
       expect(result1.rows[0].user_id).toBe('user-123');
 
-      // Second insert with same user_id should fail
       await expect(
         mockSql`INSERT INTO user_profiles (user_id, name) VALUES ('user-123', 'Duplicate')`,
       ).rejects.toThrow('duplicate key value violates unique constraint');
@@ -205,12 +197,10 @@ describe('Data Integrity - User Profiles', () => {
       const originalDate = new Date('2024-01-15T10:30:00Z');
       const updatedDate = new Date('2024-01-20T14:45:00Z');
 
-      // First query returns original timestamp
       mockSql.mockResolvedValueOnce({
         rows: [{ updated_at: originalDate }],
       });
 
-      // Update query
       mockSql.mockResolvedValueOnce({
         rows: [{ updated_at: updatedDate }],
       });
@@ -238,6 +228,7 @@ describe('Data Integrity - Subscriptions', () => {
         'cancelled',
         'expired',
         'past_due',
+        'free',
       ];
 
       mockSql.mockResolvedValueOnce({
@@ -361,7 +352,6 @@ describe('Data Integrity - Shop Data', () => {
     });
 
     it('should have valid foreign key relationship', async () => {
-      // Attempt to insert purchase with non-existent pack_id should fail
       mockSql.mockRejectedValueOnce(
         new Error(
           'violates foreign key constraint "shop_purchases_pack_id_fkey"',
@@ -399,7 +389,7 @@ describe('Data Integrity - User Notes', () => {
   });
 
   it('should handle long content properly', async () => {
-    const longContent = 'A'.repeat(10000); // 10K characters
+    const longContent = 'A'.repeat(10000);
 
     mockSql.mockResolvedValueOnce({
       rows: [
@@ -419,47 +409,10 @@ describe('Data Integrity - User Notes', () => {
   });
 });
 
-describe('Data Integrity - Migration Status', () => {
-  it('should track migration status per user', async () => {
-    const migrationData = {
-      user_id: 'user-123',
-      migrated_at: new Date('2024-01-20T12:00:00Z'),
-      migration_status: 'completed',
-      jazz_account_id: 'jazz_co_abc123',
-    };
-
-    mockSql.mockResolvedValueOnce({
-      rows: [migrationData],
-    });
-
-    const result = await mockSql`
-      SELECT * FROM jazz_migration_status WHERE user_id = 'user-123'
-    `;
-
-    expect(result.rows[0].migration_status).toBe('completed');
-    expect(result.rows[0].jazz_account_id).toBe('jazz_co_abc123');
-  });
-
-  it('should have valid migration status values', async () => {
-    const validStatuses = ['pending', 'in_progress', 'completed', 'failed'];
-
-    mockSql.mockResolvedValueOnce({
-      rows: [{ migration_status: 'completed' }],
-    });
-
-    const result = await mockSql`
-      SELECT migration_status FROM jazz_migration_status WHERE user_id = 'user-123'
-    `;
-
-    expect(validStatuses).toContain(result.rows[0].migration_status);
-  });
-});
-
 describe('Data Integrity - Orphan Records', () => {
   it('should not have user_profiles without corresponding user', async () => {
-    // Query to find orphaned profiles
     mockSql.mockResolvedValueOnce({
-      rows: [], // Empty result means no orphans
+      rows: [],
     });
 
     const result = await mockSql`
@@ -472,9 +425,8 @@ describe('Data Integrity - Orphan Records', () => {
   });
 
   it('should not have shop_purchases without corresponding pack', async () => {
-    // Query to find orphaned purchases
     mockSql.mockResolvedValueOnce({
-      rows: [], // Empty result means no orphans
+      rows: [],
     });
 
     const result = await mockSql`
@@ -492,9 +444,9 @@ describe('Data Consistency Checks', () => {
     const userId = 'user-123';
 
     mockSql
-      .mockResolvedValueOnce({ rows: [{ user_id: userId }] }) // user_profiles
-      .mockResolvedValueOnce({ rows: [{ user_id: userId }] }) // subscriptions
-      .mockResolvedValueOnce({ rows: [{ user_id: userId }] }); // user_notes
+      .mockResolvedValueOnce({ rows: [{ user_id: userId }] })
+      .mockResolvedValueOnce({ rows: [{ user_id: userId }] })
+      .mockResolvedValueOnce({ rows: [{ user_id: userId }] });
 
     const profileResult =
       await mockSql`SELECT user_id FROM user_profiles WHERE user_id = ${userId}`;
@@ -514,10 +466,10 @@ describe('Data Consistency Checks', () => {
     mockSql
       .mockResolvedValueOnce({
         rows: [{ stripe_customer_id: stripeCustomerId }],
-      }) // user_profiles
+      })
       .mockResolvedValueOnce({
         rows: [{ stripe_customer_id: stripeCustomerId }],
-      }); // subscriptions
+      });
 
     const profileResult =
       await mockSql`SELECT stripe_customer_id FROM user_profiles WHERE user_id = 'user-123'`;
