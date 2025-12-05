@@ -542,7 +542,7 @@ export function NotificationSettings() {
 
   if (isLoading) {
     return (
-      <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+      <div className='w-full p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
         <div className='flex items-center justify-center py-4'>
           <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400'></div>
         </div>
@@ -552,7 +552,7 @@ export function NotificationSettings() {
 
   if (!('Notification' in window)) {
     return (
-      <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+      <div className='w-full p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
         <h3 className='text-lg font-semibold text-white mb-3'>
           Push Notifications
         </h3>
@@ -569,7 +569,7 @@ export function NotificationSettings() {
   const hasPushManager = 'PushManager' in window;
 
   return (
-    <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+    <div className='w-full p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
       <h3 className='text-lg font-semibold text-white mb-3'>
         Push Notifications
       </h3>

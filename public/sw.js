@@ -26,47 +26,54 @@ const API_CACHE_ROUTES = [
 ];
 
 // Install event - cache static assets
-// CRITICAL: Cache start_url FIRST - iOS needs this immediately
+// Cache individually and don't fail install if some assets fail
 self.addEventListener('install', (event) => {
   console.log('Service worker installing...');
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Caching static assets, prioritizing start_url');
-        // Cache start_url FIRST - this is critical for iOS PWA
-        return cache
-          .add('/app')
-          .then(() => {
-            console.log('✅ Start URL cached');
-            // Then cache other assets
-            return cache.addAll(
-              STATIC_CACHE_URLS.filter((url) => url !== '/app'),
-            );
-          })
-          .catch((err) => {
-            console.error('Failed to cache assets:', err);
-            // If addAll fails, try caching individually
-            return Promise.all(
-              STATIC_CACHE_URLS.map((url) =>
-                cache
-                  .add(url)
-                  .catch((e) => console.warn('Failed to cache', url, e)),
-              ),
-            );
-          });
+      .then(async (cache) => {
+        console.log('Caching static assets...');
+        let startUrlCached = false;
+
+        // Try to cache start URL first
+        try {
+          await cache.add('/app');
+          startUrlCached = true;
+          console.log('✅ Start URL cached');
+        } catch (e) {
+          console.warn(
+            '⚠️ Could not cache start URL (will retry on fetch):',
+            e.message,
+          );
+        }
+
+        // Cache other assets individually - don't fail on errors
+        const otherUrls = STATIC_CACHE_URLS.filter((url) => url !== '/app');
+        const results = await Promise.allSettled(
+          otherUrls.map((url) => cache.add(url)),
+        );
+
+        const cached = results.filter((r) => r.status === 'fulfilled').length;
+        const failed = results.filter((r) => r.status === 'rejected').length;
+
+        if (failed > 0) {
+          console.log(
+            `ℹ️ Cached ${cached}/${otherUrls.length} assets (${failed} unavailable)`,
+          );
+        } else {
+          console.log(`✅ All ${cached} assets cached`);
+        }
+
+        return startUrlCached;
       })
       .then(() => {
-        console.log('✅ Service worker installed - all assets cached');
-        // Verify start_url is cached
-        return caches.match('/app').then((cached) => {
-          if (!cached) {
-            console.error('❌ CRITICAL: Start URL not cached after install!');
-            throw new Error('Start URL not cached');
-          }
-          console.log('✅ Verified: Start URL is cached');
-          return self.skipWaiting();
-        });
+        console.log('✅ Service worker installed');
+        return self.skipWaiting();
+      })
+      .catch((err) => {
+        console.error('Service worker install error:', err);
+        return self.skipWaiting();
       }),
   );
 });

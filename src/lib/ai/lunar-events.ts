@@ -51,12 +51,28 @@ export async function detectLunarEvent(
       };
     }
 
-    // Check for Full Moon
-    if (
-      phaseName.includes('full moon') ||
-      phaseName.includes('hunter moon') ||
-      phaseName.includes('blood moon')
-    ) {
+    // Check for Full Moon - includes all named full moons
+    const namedFullMoons = [
+      'full moon',
+      'wolf moon',
+      'snow moon',
+      'worm moon',
+      'pink moon',
+      'flower moon',
+      'strawberry moon',
+      'buck moon',
+      'sturgeon moon',
+      'harvest moon',
+      'hunter moon',
+      'beaver moon',
+      'cold moon',
+      'blood moon',
+      'blue moon',
+      'supermoon',
+    ];
+    const isFullMoon = namedFullMoons.some((name) => phaseName.includes(name));
+
+    if (isFullMoon) {
       const isEclipse = checkForEclipse(date, moonSign);
 
       return {
@@ -132,8 +148,16 @@ export function generateLunarEventPrompt(
 ): string {
   const parts: string[] = [];
 
+  const emojiByType: Record<LunarEventType, string> = {
+    new_moon: '🌑',
+    full_moon: '🌕',
+    eclipse: '🌑',
+    first_quarter: '🌓',
+    last_quarter: '🌗',
+  };
+
   parts.push(
-    `Hello${userName ? ` ${userName}` : ''}! ${event.moonPhase.includes('New') ? '🌑' : event.moonPhase.includes('Full') ? '🌕' : '🌓'}`,
+    `Hello${userName ? ` ${userName}` : ''}! ${emojiByType[event.type]}`,
   );
 
   parts.push(event.description);

@@ -125,6 +125,7 @@ async function queryPostHogAPI<T>(
 
   try {
     const url = `${POSTHOG_API_HOST}/api/projects/${projectId}${endpoint}`;
+    console.log(`[PostHog API] Querying: ${endpoint} (project: ${projectId})`);
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -135,8 +136,9 @@ async function queryPostHogAPI<T>(
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
       console.error(
-        `[PostHog API] Error ${response.status}: ${await response.text()}`,
+        `[PostHog API] Error ${response.status} for ${endpoint}: ${errorText}`,
       );
       return null;
     }
@@ -166,40 +168,35 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
   monthAgo.setDate(monthAgo.getDate() - 30);
   const monthAgoStr = monthAgo.toISOString().split('T')[0];
 
+  // Use HogQL Query API instead of Insights API (Personal API Keys don't support Insights)
   const [dauResult, wauResult, mauResult] = await Promise.all([
-    queryPostHogAPI<{ results: Array<{ aggregated_value: number }> }>(
-      '/insights/trend/',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          events: [{ id: '$pageview', math: 'dau' }],
-          date_from: todayStr,
-          date_to: todayStr,
-        }),
-      },
-    ),
-    queryPostHogAPI<{ results: Array<{ aggregated_value: number }> }>(
-      '/insights/trend/',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          events: [{ id: '$pageview', math: 'weekly_active' }],
-          date_from: weekAgoStr,
-          date_to: todayStr,
-        }),
-      },
-    ),
-    queryPostHogAPI<{ results: Array<{ aggregated_value: number }> }>(
-      '/insights/trend/',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          events: [{ id: '$pageview', math: 'monthly_active' }],
-          date_from: monthAgoStr,
-          date_to: todayStr,
-        }),
-      },
-    ),
+    queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= today()`,
+        },
+      }),
+    }),
+    queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 7 DAY`,
+        },
+      }),
+    }),
+    queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 30 DAY`,
+        },
+      }),
+    }),
   ]);
 
   if (!dauResult || !wauResult || !mauResult) {
@@ -207,9 +204,9 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
   }
 
   return {
-    dau: dauResult.results?.[0]?.aggregated_value || 0,
-    wau: wauResult.results?.[0]?.aggregated_value || 0,
-    mau: mauResult.results?.[0]?.aggregated_value || 0,
+    dau: dauResult.results?.[0]?.[0] || 0,
+    wau: wauResult.results?.[0]?.[0] || 0,
+    mau: mauResult.results?.[0]?.[0] || 0,
   };
 }
 
@@ -225,63 +222,43 @@ export interface PostHogAIMetrics {
 export async function getPostHogAIMetrics(
   daysBack: number = 30,
 ): Promise<PostHogAIMetrics | null> {
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - daysBack);
-  const startDateStr = startDate.toISOString().split('T')[0];
+  // Use HogQL Query API instead of Insights API
+  const result = await queryPostHogAPI<{ results: Array<Array<number>> }>(
+    '/query/',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `
+            SELECT 
+              count(*) as total_generations,
+              count(DISTINCT person_id) as unique_users,
+              sum(toFloat64OrNull(properties['$ai_input_tokens'])) as input_tokens,
+              sum(toFloat64OrNull(properties['$ai_output_tokens'])) as output_tokens,
+              sum(toFloat64OrNull(properties['$ai_total_cost_usd'])) as total_cost,
+              avg(toFloat64OrNull(properties['$ai_latency'])) as avg_latency
+            FROM events 
+            WHERE event = '$ai_generation' 
+              AND timestamp >= now() - INTERVAL ${daysBack} DAY
+          `,
+        },
+      }),
+    },
+  );
 
-  const result = await queryPostHogAPI<{
-    results: Array<{
-      count: number;
-      data: number[];
-    }>;
-  }>('/insights/trend/', {
-    method: 'POST',
-    body: JSON.stringify({
-      events: [
-        { id: '$ai_generation', math: 'total' },
-        { id: '$ai_generation', math: 'dau' },
-        {
-          id: '$ai_generation',
-          math: 'sum',
-          math_property: '$ai_input_tokens',
-        },
-        {
-          id: '$ai_generation',
-          math: 'sum',
-          math_property: '$ai_output_tokens',
-        },
-        {
-          id: '$ai_generation',
-          math: 'sum',
-          math_property: '$ai_total_cost_usd',
-        },
-        { id: '$ai_generation', math: 'avg', math_property: '$ai_latency' },
-      ],
-      date_from: startDateStr,
-      date_to: todayStr,
-    }),
-  });
-
-  if (!result?.results) {
+  if (!result?.results?.[0]) {
     return null;
   }
 
-  const sumData = (data: number[] | undefined) =>
-    data?.reduce((sum, val) => sum + (val || 0), 0) || 0;
-
+  const row = result.results[0];
   return {
-    totalGenerations: sumData(result.results[0]?.data),
-    uniqueUsers: sumData(result.results[1]?.data),
-    totalInputTokens: sumData(result.results[2]?.data),
-    totalOutputTokens: sumData(result.results[3]?.data),
-    totalCostUsd: sumData(result.results[4]?.data),
-    avgLatencySeconds:
-      result.results[5]?.data?.length > 0
-        ? result.results[5].data.reduce((a, b) => a + b, 0) /
-          result.results[5].data.filter((v) => v > 0).length
-        : 0,
+    totalGenerations: row[0] || 0,
+    uniqueUsers: row[1] || 0,
+    totalInputTokens: row[2] || 0,
+    totalOutputTokens: row[3] || 0,
+    totalCostUsd: row[4] || 0,
+    avgLatencySeconds: row[5] || 0,
   };
 }
 
@@ -292,65 +269,90 @@ export interface PostHogRetention {
 }
 
 export async function getPostHogRetention(): Promise<PostHogRetention | null> {
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  const thirtyDaysAgo = new Date(today);
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
-
-  const result = await queryPostHogAPI<{
-    result: Array<{
-      values: Array<{ count: number }>;
-    }>;
-  }>('/insights/retention/', {
-    method: 'POST',
-    body: JSON.stringify({
-      retention_type: 'retention_first_time',
-      target_entity: { id: '$pageview', type: 'events' },
-      returning_entity: { id: '$pageview', type: 'events' },
-      date_from: thirtyDaysAgoStr,
-      date_to: todayStr,
-      period: 'Day',
-      total_intervals: 31,
+  // Retention is complex to calculate with HogQL, use simplified version
+  // This calculates what % of users from N days ago returned today
+  const [day1Result, day7Result, day30Result] = await Promise.all([
+    queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `
+            WITH first_seen AS (
+              SELECT person_id, min(timestamp) as first_visit
+              FROM events WHERE event = '$pageview'
+              GROUP BY person_id
+              HAVING first_visit >= now() - INTERVAL 2 DAY AND first_visit < now() - INTERVAL 1 DAY
+            )
+            SELECT 
+              count(DISTINCT fs.person_id) as cohort_size,
+              count(DISTINCT e.person_id) as returned
+            FROM first_seen fs
+            LEFT JOIN events e ON fs.person_id = e.person_id 
+              AND e.event = '$pageview' 
+              AND e.timestamp >= now() - INTERVAL 1 DAY
+          `,
+        },
+      }),
     }),
-  });
+    queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `
+            WITH first_seen AS (
+              SELECT person_id, min(timestamp) as first_visit
+              FROM events WHERE event = '$pageview'
+              GROUP BY person_id
+              HAVING first_visit >= now() - INTERVAL 14 DAY AND first_visit < now() - INTERVAL 7 DAY
+            )
+            SELECT 
+              count(DISTINCT fs.person_id) as cohort_size,
+              count(DISTINCT e.person_id) as returned
+            FROM first_seen fs
+            LEFT JOIN events e ON fs.person_id = e.person_id 
+              AND e.event = '$pageview' 
+              AND e.timestamp >= now() - INTERVAL 7 DAY
+          `,
+        },
+      }),
+    }),
+    queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `
+            WITH first_seen AS (
+              SELECT person_id, min(timestamp) as first_visit
+              FROM events WHERE event = '$pageview'
+              GROUP BY person_id
+              HAVING first_visit >= now() - INTERVAL 60 DAY AND first_visit < now() - INTERVAL 30 DAY
+            )
+            SELECT 
+              count(DISTINCT fs.person_id) as cohort_size,
+              count(DISTINCT e.person_id) as returned
+            FROM first_seen fs
+            LEFT JOIN events e ON fs.person_id = e.person_id 
+              AND e.event = '$pageview' 
+              AND e.timestamp >= now() - INTERVAL 30 DAY
+          `,
+        },
+      }),
+    }),
+  ]);
 
-  if (!result?.result || result.result.length === 0) {
-    return null;
-  }
-
-  const cohorts = result.result;
-  let day1Total = 0,
-    day1Retained = 0;
-  let day7Total = 0,
-    day7Retained = 0;
-  let day30Total = 0,
-    day30Retained = 0;
-
-  for (const cohort of cohorts) {
-    const values = cohort.values || [];
-    const day0Count = values[0]?.count || 0;
-
-    if (day0Count > 0) {
-      if (values[1]) {
-        day1Total += day0Count;
-        day1Retained += values[1].count || 0;
-      }
-      if (values[7]) {
-        day7Total += day0Count;
-        day7Retained += values[7].count || 0;
-      }
-      if (values[30]) {
-        day30Total += day0Count;
-        day30Retained += values[30].count || 0;
-      }
-    }
-  }
+  const calcRetention = (result: { results: Array<Array<number>> } | null) => {
+    if (!result?.results?.[0]) return 0;
+    const [cohortSize, returned] = result.results[0];
+    return cohortSize > 0 ? (returned / cohortSize) * 100 : 0;
+  };
 
   return {
-    day1: day1Total > 0 ? (day1Retained / day1Total) * 100 : 0,
-    day7: day7Total > 0 ? (day7Retained / day7Total) * 100 : 0,
-    day30: day30Total > 0 ? (day30Retained / day30Total) * 100 : 0,
+    day1: calcRetention(day1Result),
+    day7: calcRetention(day7Result),
+    day30: calcRetention(day30Result),
   };
 }
 
@@ -366,30 +368,30 @@ export interface PostHogProductUsage {
 export async function getPostHogProductUsage(
   daysBack: number = 30,
 ): Promise<PostHogProductUsage | null> {
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - daysBack);
-  const startDateStr = startDate.toISOString().split('T')[0];
-
   const result = await queryPostHogAPI<{
-    results: Array<{
-      count: number;
-      data: number[];
-    }>;
-  }>('/insights/trend/', {
+    results: Array<Array<string | number>>;
+  }>('/query/', {
     method: 'POST',
     body: JSON.stringify({
-      events: [
-        { id: 'birth_chart_viewed', math: 'total' },
-        { id: 'tarot_viewed', math: 'total' },
-        { id: 'horoscope_viewed', math: 'total' },
-        { id: 'crystal_recommendations_viewed', math: 'total' },
-        { id: 'personalized_tarot_viewed', math: 'total' },
-        { id: 'personalized_horoscope_viewed', math: 'total' },
-      ],
-      date_from: startDateStr,
-      date_to: todayStr,
+      query: {
+        kind: 'HogQLQuery',
+        query: `
+          SELECT 
+            event,
+            count(*) as count
+          FROM events 
+          WHERE event IN (
+            'birth_chart_viewed',
+            'tarot_viewed', 
+            'horoscope_viewed',
+            'crystal_recommendations_viewed',
+            'personalized_tarot_viewed',
+            'personalized_horoscope_viewed'
+          )
+          AND timestamp >= now() - INTERVAL ${daysBack} DAY
+          GROUP BY event
+        `,
+      },
     }),
   });
 
@@ -397,16 +399,18 @@ export async function getPostHogProductUsage(
     return null;
   }
 
-  const sumData = (data: number[] | undefined) =>
-    data?.reduce((sum, val) => sum + (val || 0), 0) || 0;
+  const counts: Record<string, number> = {};
+  for (const row of result.results) {
+    counts[String(row[0])] = Number(row[1]) || 0;
+  }
 
   return {
-    birthChartViews: sumData(result.results[0]?.data),
-    tarotPulls: sumData(result.results[1]?.data),
-    horoscopeViews: sumData(result.results[2]?.data),
-    crystalSearches: sumData(result.results[3]?.data),
-    personalizedTarotViews: sumData(result.results[4]?.data),
-    personalizedHoroscopeViews: sumData(result.results[5]?.data),
+    birthChartViews: counts['birth_chart_viewed'] || 0,
+    tarotPulls: counts['tarot_viewed'] || 0,
+    horoscopeViews: counts['horoscope_viewed'] || 0,
+    crystalSearches: counts['crystal_recommendations_viewed'] || 0,
+    personalizedTarotViews: counts['personalized_tarot_viewed'] || 0,
+    personalizedHoroscopeViews: counts['personalized_horoscope_viewed'] || 0,
   };
 }
 
@@ -429,12 +433,6 @@ export interface PostHogFeatureUsage {
 export async function getPostHogFeatureUsage(
   daysBack: number = 7,
 ): Promise<PostHogFeatureUsage | null> {
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - daysBack);
-  const startDateStr = startDate.toISOString().split('T')[0];
-
   const featureEvents = [
     'birth_chart_viewed',
     'tarot_viewed',
@@ -444,92 +442,89 @@ export async function getPostHogFeatureUsage(
     'personalized_horoscope_viewed',
     'pricing_page_viewed',
     'upgrade_clicked',
+    '$pageview',
   ];
 
-  const [totalResult, uniqueResult] = await Promise.all([
-    queryPostHogAPI<{
-      results: Array<{
-        label: string;
-        count: number;
-        data: number[];
-        labels: string[];
-      }>;
-    }>('/insights/trend/', {
-      method: 'POST',
-      body: JSON.stringify({
-        events: featureEvents.map((id) => ({ id, math: 'total' })),
-        date_from: startDateStr,
-        date_to: todayStr,
-        interval: 'day',
-      }),
+  // Use HogQL to get feature usage stats
+  const result = await queryPostHogAPI<{
+    results: Array<Array<string | number>>;
+  }>('/query/', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: {
+        kind: 'HogQLQuery',
+        query: `
+          SELECT 
+            event,
+            count(*) as total_events,
+            count(DISTINCT person_id) as unique_users
+          FROM events 
+          WHERE event IN (${featureEvents.map((e) => `'${e}'`).join(', ')})
+            AND timestamp >= now() - INTERVAL ${daysBack} DAY
+          GROUP BY event
+          ORDER BY total_events DESC
+        `,
+      },
     }),
-    queryPostHogAPI<{
-      results: Array<{
-        label: string;
-        count: number;
-        data: number[];
-      }>;
-    }>('/insights/trend/', {
-      method: 'POST',
-      body: JSON.stringify({
-        events: featureEvents.map((id) => ({ id, math: 'dau' })),
-        date_from: startDateStr,
-        date_to: todayStr,
-        interval: 'day',
-      }),
-    }),
-  ]);
+  });
 
-  if (!totalResult?.results || !uniqueResult?.results) {
+  if (!result?.results) {
     return null;
   }
 
-  const features: PostHogFeatureUsageItem[] = featureEvents.map(
-    (feature, index) => {
-      const totalData = totalResult.results[index]?.data || [];
-      const uniqueData = uniqueResult.results[index]?.data || [];
+  const features: PostHogFeatureUsageItem[] = result.results.map((row) => {
+    const feature = String(row[0]);
+    const totalEvents = Number(row[1]) || 0;
+    const uniqueUsers = Number(row[2]) || 0;
+    const avgPerUser = uniqueUsers > 0 ? totalEvents / uniqueUsers : 0;
 
-      const totalEvents = totalData.reduce((sum, val) => sum + (val || 0), 0);
-      const uniqueUsers = uniqueData.reduce((sum, val) => sum + (val || 0), 0);
-      const avgPerUser = uniqueUsers > 0 ? totalEvents / uniqueUsers : 0;
+    return {
+      feature,
+      uniqueUsers,
+      totalEvents,
+      avgPerUser: Number(avgPerUser.toFixed(2)),
+      trend: 'stable' as const,
+    };
+  });
 
-      const recentHalf = totalData.slice(-Math.ceil(totalData.length / 2));
-      const olderHalf = totalData.slice(0, Math.floor(totalData.length / 2));
-      const recentAvg =
-        recentHalf.length > 0
-          ? recentHalf.reduce((a, b) => a + b, 0) / recentHalf.length
-          : 0;
-      const olderAvg =
-        olderHalf.length > 0
-          ? olderHalf.reduce((a, b) => a + b, 0) / olderHalf.length
-          : 0;
-
-      let trend: 'up' | 'down' | 'stable' = 'stable';
-      if (recentAvg > olderAvg * 1.1) trend = 'up';
-      else if (recentAvg < olderAvg * 0.9) trend = 'down';
-
-      return {
-        feature,
-        uniqueUsers,
-        totalEvents,
-        avgPerUser: Number(avgPerUser.toFixed(2)),
-        trend,
-      };
-    },
-  );
-
-  features.sort((a, b) => b.totalEvents - a.totalEvents);
+  // Get daily breakdown for heatmap
+  const heatmapResult = await queryPostHogAPI<{
+    results: Array<Array<string | number>>;
+  }>('/query/', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: {
+        kind: 'HogQLQuery',
+        query: `
+          SELECT 
+            toDate(timestamp) as date,
+            event,
+            count(*) as count
+          FROM events 
+          WHERE event IN (${featureEvents.map((e) => `'${e}'`).join(', ')})
+            AND timestamp >= now() - INTERVAL ${daysBack} DAY
+          GROUP BY date, event
+          ORDER BY date ASC
+        `,
+      },
+    }),
+  });
 
   const heatmap: Array<{ date: string; features: Record<string, number> }> = [];
-  const labels = totalResult.results[0]?.labels || [];
-
-  for (let i = 0; i < labels.length; i++) {
-    const dateStr = labels[i];
-    const featuresData: Record<string, number> = {};
-    featureEvents.forEach((feature, featureIndex) => {
-      featuresData[feature] = totalResult.results[featureIndex]?.data[i] || 0;
-    });
-    heatmap.push({ date: dateStr, features: featuresData });
+  if (heatmapResult?.results) {
+    const dateMap = new Map<string, Record<string, number>>();
+    for (const row of heatmapResult.results) {
+      const date = String(row[0]);
+      const event = String(row[1]);
+      const count = Number(row[2]) || 0;
+      if (!dateMap.has(date)) {
+        dateMap.set(date, {});
+      }
+      dateMap.get(date)![event] = count;
+    }
+    for (const [date, features] of dateMap) {
+      heatmap.push({ date, features });
+    }
   }
 
   return { features, heatmap };

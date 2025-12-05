@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAstronomyContext } from '@/context/AstronomyContext';
-import { getMoonPhase, MoonPhaseLabels } from '../../../utils/moon/moonPhases';
+import { MoonPhaseLabels } from '../../../utils/moon/moonPhases';
 import {
   zodiacSigns,
   bodiesSymbols,
@@ -150,10 +150,10 @@ const getZodiacInfo = (sign: string) => {
   };
 };
 
-const getDaysUntilNextPhase = (): { phase: string; days: number } => {
-  const now = new Date();
-  const currentPhase = getMoonPhase(now);
-
+const getDaysUntilNextPhase = (
+  currentPhase: MoonPhaseLabels,
+  moonAge: number,
+): { phase: string; days: number } => {
   const phaseOrder: MoonPhaseLabels[] = [
     'New Moon',
     'Waxing Crescent',
@@ -165,29 +165,65 @@ const getDaysUntilNextPhase = (): { phase: string; days: number } => {
     'Waning Crescent',
   ];
 
+  const phaseBoundaries = [0, 1.84, 7.38, 11.07, 14.76, 18.45, 22.14, 25.83];
+  const lunarCycle = 29.53;
+
   const currentIndex = phaseOrder.indexOf(currentPhase);
-  const nextPhase = phaseOrder[(currentIndex + 1) % 8];
+  const nextIndex = (currentIndex + 1) % 8;
+  const nextPhase = phaseOrder[nextIndex];
 
-  const avgDaysPerPhase = 3.69;
-  const estimatedDays = Math.ceil(avgDaysPerPhase);
+  const nextBoundary =
+    nextIndex === 0 ? lunarCycle : phaseBoundaries[nextIndex];
+  const daysUntil = Math.max(1, Math.ceil(nextBoundary - moonAge));
 
-  return { phase: nextPhase, days: estimatedDays };
+  return {
+    phase: nextPhase,
+    days: daysUntil > 7 ? Math.ceil(daysUntil % 7) || 1 : daysUntil,
+  };
 };
 
 export const MoonPreview = () => {
-  const { currentMoonPhase, currentMoonConstellationPosition, symbol } =
-    useAstronomyContext();
+  const {
+    currentMoonPhase,
+    currentMoonConstellationPosition,
+    symbol,
+    moonIllumination,
+    moonAge,
+  } = useAstronomyContext();
   const [spells, setSpells] = useState<Spell[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const nextPhaseInfo = getDaysUntilNextPhase();
+  const nextPhaseInfo = getDaysUntilNextPhase(currentMoonPhase, moonAge);
   const zodiacInfo = getZodiacInfo(currentMoonConstellationPosition || '');
+  const illuminationDisplay = Math.round(moonIllumination);
 
   useEffect(() => {
     if (!currentMoonPhase) return;
 
+    // Normalize named moons to base phase for spell lookup
+    const namedFullMoons = [
+      'wolf moon',
+      'snow moon',
+      'worm moon',
+      'pink moon',
+      'flower moon',
+      'strawberry moon',
+      'buck moon',
+      'sturgeon moon',
+      'harvest moon',
+      'hunter moon',
+      'beaver moon',
+      'cold moon',
+    ];
+    const phaseLower = currentMoonPhase.toLowerCase();
+    const normalizedPhase = namedFullMoons.some((name) =>
+      phaseLower.includes(name),
+    )
+      ? 'Full Moon'
+      : currentMoonPhase;
+
     fetch(
-      `/api/grimoire/spells?moonPhase=${encodeURIComponent(currentMoonPhase)}`,
+      `/api/grimoire/spells?moonPhase=${encodeURIComponent(normalizedPhase)}`,
     )
       .then((r) => r.json())
       .then((data) => {
@@ -215,12 +251,13 @@ export const MoonPreview = () => {
         title={currentMoonPhase}
         subtitle={
           currentMoonConstellationPosition
-            ? `in ${currentMoonConstellationPosition}`
-            : undefined
+            ? `in ${currentMoonConstellationPosition} · ${illuminationDisplay}%`
+            : `${illuminationDisplay}% illuminated`
         }
       />
       <p className='text-xs text-zinc-500 mt-1'>
-        {nextPhaseInfo.days} days until {nextPhaseInfo.phase}
+        {nextPhaseInfo.days} {nextPhaseInfo.days === 1 ? 'day' : 'days'} until{' '}
+        {nextPhaseInfo.phase}
       </p>
     </>
   );
