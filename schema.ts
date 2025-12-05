@@ -148,54 +148,65 @@ export const MyAppAccount = co
     shop: ShopRoot.optional(),
   })
   .withMigration(async (account, migrationInfo) => {
-    // Initialize root data structure if it doesn't exist
-    if (!account.$jazz.has('root')) {
-      console.log('🌟 Initializing new user account root');
-      account.$jazz.set('root', {
-        notes: [],
-      });
-    }
+    try {
+      if (!account?.$jazz) {
+        console.warn(
+          '[Jazz] Account not properly initialized, skipping migration',
+        );
+        return;
+      }
 
-    // Initialize profile if it doesn't exist (fallback for edge cases)
-    if (!account.$jazz.has('profile')) {
-      console.log('🌟 Initializing new user profile');
-      // Create a group for the profile with public read permissions
-      const profileGroup = Group.create();
-      profileGroup.addMember('everyone', 'reader');
+      if (!account.$jazz.has('root')) {
+        console.log('🌟 Initializing new user account root');
+        account.$jazz.set('root', {
+          notes: [],
+        });
+      }
 
-      account.$jazz.set(
-        'profile',
-        CustomProfile.create(
-          {
-            name: 'New User', // Default name - will be updated by Better Auth
-            birthday: '', // Will be set by user later
-          },
-          profileGroup,
-        ),
+      if (!account.$jazz.has('profile')) {
+        console.log('🌟 Initializing new user profile');
+        try {
+          const profileGroup = Group.create();
+          profileGroup.addMember('everyone', 'reader');
+
+          account.$jazz.set(
+            'profile',
+            CustomProfile.create(
+              {
+                name: 'New User',
+                birthday: '',
+              },
+              profileGroup,
+            ),
+          );
+        } catch (profileErr) {
+          console.warn('[Jazz] Could not create profile:', profileErr);
+        }
+      }
+
+      try {
+        const { root } = await account.$jazz.ensureLoaded({
+          resolve: { root: true },
+        });
+
+        if (root && !root.$jazz.has('notes')) {
+          console.log('🔄 Adding notes field to existing account');
+          root.$jazz.set('notes', []);
+        }
+
+        if (root && !root.$jazz.has('pushSubscriptions')) {
+          console.log('🔄 Adding pushSubscriptions field to existing account');
+          root.$jazz.set('pushSubscriptions', []);
+        }
+      } catch (loadErr) {
+        console.warn('[Jazz] Could not load root:', loadErr);
+      }
+
+      console.log(
+        '✅ Account migration completed for user:',
+        account.profile?.name || 'Unknown',
       );
+    } catch (err) {
+      console.warn('[Jazz] Migration failed (non-fatal):', err);
     }
-
-    // Load the root to check for missing fields
-    const { root } = await account.$jazz.ensureLoaded({
-      resolve: { root: true },
-    });
-
-    // Add new fields to existing accounts (schema evolution)
-    if (root && !root.$jazz.has('notes')) {
-      console.log('🔄 Adding notes field to existing account');
-      root.$jazz.set('notes', []);
-    }
-
-    if (root && !root.$jazz.has('pushSubscriptions')) {
-      console.log('🔄 Adding pushSubscriptions field to existing account');
-      root.$jazz.set('pushSubscriptions', []);
-    }
-
-    // Shop initialization will be handled separately when needed
-    // The shop field is optional and will be created when first accessed
-
-    console.log(
-      '✅ Account migration completed for user:',
-      account.profile?.name || 'Unknown',
-    );
   });

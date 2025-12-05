@@ -9,7 +9,6 @@ import {
   useCallback,
 } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
-import { useJazzMigration } from '@/hooks/useProfile';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -64,9 +63,6 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
   });
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-  // Trigger Jazz to PostgreSQL migration when user is authenticated
-  useJazzMigration();
 
   const refreshAuth = useCallback(() => {
     invalidateAuthCache();

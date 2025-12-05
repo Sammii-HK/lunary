@@ -130,7 +130,6 @@ export default function RootLayout({
     <html lang='en' suppressHydrationWarning>
       <head>
         {/* Preconnect to critical external services */}
-        <link rel='preconnect' href='https://cloud.jazz.tools' />
         <link rel='preconnect' href='https://eu.i.posthog.com' />
         <link rel='preconnect' href='https://api.stripe.com' />
         <link rel='preconnect' href='https://js.stripe.com' />
