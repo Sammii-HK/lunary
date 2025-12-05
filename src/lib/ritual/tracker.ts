@@ -179,6 +179,24 @@ export async function getRitualStatus(
   longestRitualStreak: number;
 }> {
   try {
+    // Ensure ritual columns exist in user_streaks table
+    try {
+      await sql`
+        ALTER TABLE user_streaks 
+        ADD COLUMN IF NOT EXISTS ritual_streak INTEGER DEFAULT 0
+      `;
+      await sql`
+        ALTER TABLE user_streaks 
+        ADD COLUMN IF NOT EXISTS longest_ritual_streak INTEGER DEFAULT 0
+      `;
+      await sql`
+        ALTER TABLE user_streaks 
+        ADD COLUMN IF NOT EXISTS last_ritual_date DATE
+      `;
+    } catch {
+      // Column might already exist, ignore error
+    }
+
     const result = await sql`
       SELECT ritual_type, completed
       FROM ritual_habits
