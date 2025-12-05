@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadUserMemory, deleteUserMemory } from '@/lib/ai/user-memory';
 import { sql } from '@vercel/postgres';
-import { getServerSession } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 
 async function getUser(request: NextRequest) {
-  const session = await getServerSession();
+  const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user?.id) {
     return null;
   }

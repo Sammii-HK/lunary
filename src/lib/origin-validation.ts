@@ -32,6 +32,9 @@ const getStaticOrigins = (): string[] => {
   const origins: string[] = [
     'http://localhost:3000',
     'http://localhost:3001',
+    'http://localhost:3002',
+    'http://192.168.68.107:3002',
+    'http://192.168.68.107:3003',
     'http://admin.localhost:3000',
     'https://lunary.app',
     'https://www.lunary.app',

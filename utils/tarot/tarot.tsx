@@ -1,9 +1,21 @@
 import { tarotCards } from './tarot-cards';
-import seed from 'seed-random';
 
 type TarotSuit = 'cups' | 'swords' | 'wands' | 'pentacles';
 
 const tarotSuits = ['cups', 'swords', 'wands', 'pentacles'];
+
+/**
+ * Ultra-simple cross-browser consistent hash function
+ * Only uses addition - no multiplication that could overflow differently
+ */
+const hashString = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = hash + str.charCodeAt(i) + i * 7;
+  }
+  return hash;
+};
+
 const sanitizeSeedComponent = (value?: string): string | undefined => {
   if (!value) return undefined;
   const trimmed = value.trim();
@@ -14,6 +26,12 @@ const sanitizeSeedComponent = (value?: string): string | undefined => {
 const normalizeSeedInput = (seedInput: string): string => {
   const trimmed = seedInput?.trim();
   if (!trimmed) return 'tarot-default';
+
+  // Don't try to parse strings with prefixes like "daily-" or "weekly-"
+  // Chrome's Date parser is more lenient and might parse these incorrectly
+  if (trimmed.includes('-') && /^[a-z]+-/i.test(trimmed)) {
+    return trimmed; // Keep prefix intact
+  }
 
   const parsed = new Date(trimmed);
   if (!Number.isNaN(parsed.getTime())) {
@@ -37,16 +55,17 @@ const buildSeedValue = (
   return parts.length > 0 ? parts.join('|') : 'tarot-default';
 };
 
-const majorArcana = Object.keys(tarotCards.majorArcana);
+const majorArcana = Object.keys(tarotCards.majorArcana).sort();
 const getAllCardNames = () => {
   const minorArcana = tarotSuits.flatMap((suit) =>
     Object.keys(
       tarotCards.minorArcana[suit as keyof typeof tarotCards.minorArcana],
-    ),
+    ).sort(),
   );
-  return [...majorArcana, ...minorArcana];
+  return [...majorArcana, ...minorArcana].sort();
 };
 
+// Sort to guarantee consistent ordering across all browsers
 const allCardNames = getAllCardNames();
 
 type TarotCard = {
@@ -61,8 +80,8 @@ export const getTarotCard = (
   userBirthday?: string,
 ): TarotCard => {
   const seedValue = buildSeedValue(date, userName, userBirthday);
-  const rand = seed(seedValue);
-  const number = Math.floor(rand() * allCardNames.length);
+  const hash = hashString(seedValue);
+  const number = hash % allCardNames.length;
   const tarotCard = allCardNames[number];
   const majorArcanaCard =
     tarotCards.majorArcana[tarotCard as keyof typeof tarotCards.majorArcana];

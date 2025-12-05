@@ -26,8 +26,8 @@ export const DailyCardPreview = () => {
   );
 
   const dailyCard = useMemo(() => {
-    const today = dayjs();
-    const dateStr = today.format('YYYY-MM-DD');
+    const todayUtc = dayjs().utc();
+    const dateStr = todayUtc.format('YYYY-MM-DD');
 
     if (hasChartAccess && userName && userBirthday) {
       const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
@@ -39,9 +39,8 @@ export const DailyCardPreview = () => {
       };
     }
 
-    const nowUtc = today.utc();
-    const dayOfYearUtc = nowUtc.dayOfYear();
-    const generalSeed = `cosmic-${nowUtc.format('YYYY-MM-DD')}-${dayOfYearUtc}-energy`;
+    const dayOfYearUtc = todayUtc.dayOfYear();
+    const generalSeed = `cosmic-${dateStr}-${dayOfYearUtc}-energy`;
     const card = getTarotCard(generalSeed);
     return {
       name: card.name,
