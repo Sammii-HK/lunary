@@ -143,9 +143,9 @@ export async function GET(request: NextRequest, context: any) {
       {
         headers: {
           'Cache-Control':
-            'public, s-maxage=300, stale-while-revalidate=150, max-age=300',
-          'CDN-Cache-Control': 'public, s-maxage=300',
-          'Vercel-CDN-Cache-Control': 'public, s-maxage=300',
+            'public, s-maxage=30, stale-while-revalidate=15, max-age=30',
+          'CDN-Cache-Control': 'public, s-maxage=30',
+          'Vercel-CDN-Cache-Control': 'public, s-maxage=30',
         },
       },
     );
