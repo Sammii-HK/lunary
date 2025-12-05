@@ -63,7 +63,7 @@ export const DailyInsightCard = () => {
             </p>
             <div className='flex items-center gap-1.5 mt-2 text-xs text-purple-400 group-hover:text-purple-300'>
               <Lock className='w-3 h-3' />
-              <span>Unlock personalized horoscopes</span>
+              <span>Unlock readings based on your full birth chart</span>
             </div>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1' />

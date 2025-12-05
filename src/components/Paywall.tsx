@@ -269,7 +269,7 @@ export function UpgradePrompt() {
               Unlock Personalised Features
             </p>
             <p className='text-gray-400 mb-3'>
-              Get personalized birth charts and daily cosmic guidance
+              Readings based on your name, birthday, birth time and location
             </p>
           </>
         )}
