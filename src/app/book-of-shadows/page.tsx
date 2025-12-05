@@ -1,769 +1,491 @@
 'use client';
 
-import React, {
-  FormEvent,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  Suspense,
-} from 'react';
-import { useSearchParams } from 'next/navigation';
-import { ArrowUp, ChevronDown, ChevronUp, Square } from 'lucide-react';
-
-import { useUser } from '@/context/UserContext';
-import { Button } from '@/components/ui/button';
-import { useAssistantChat } from '@/hooks/useAssistantChat';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import {
+  BookOpen,
+  Plus,
+  Sparkles,
+  Moon,
+  Star,
+  Brain,
+  Trash2,
+  ChevronRight,
+  Feather,
+} from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { AuthComponent } from '@/components/Auth';
-import { CopilotQuickActions } from '@/components/CopilotQuickActions';
-import { SaveToCollection } from '@/components/SaveToCollection';
-import { parseMessageContent } from '@/utils/messageParser';
-import { recordCheckIn } from '@/lib/streak/check-in';
-import { captureEvent } from '@/lib/posthog-client';
+import {
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
 
-interface CollectionFolder {
+interface JournalEntry {
   id: number;
-  name: string;
-  color?: string;
-  icon?: string;
-}
-
-interface SavedCollection {
-  title: string;
-  category: string;
-}
-
-const MessageBubble = ({
-  role,
-  content,
-  messageId,
-  onEntityClick,
-  savedCollections,
-  folders,
-  onSaved,
-}: {
-  role: 'user' | 'assistant';
   content: string;
-  messageId?: string;
-  onEntityClick?: (entity: {
-    type: 'tarot' | 'ritual' | 'spell';
-    name: string;
-    slug?: string;
-  }) => void;
-  savedCollections?: SavedCollection[];
-  folders?: CollectionFolder[];
-  onSaved?: () => void;
-}) => {
-  const isUser = role === 'user';
-  // Only parse assistant messages for entities (user messages don't need parsing)
-  // Use useMemo to re-parse when component re-renders (e.g., after cache initialization)
-  const parsed = React.useMemo(
-    () =>
-      !isUser ? parseMessageContent(content) : { text: content, entities: [] },
-    [content, isUser],
-  );
+  moodTags: string[];
+  cardReferences: string[];
+  moonPhase?: string;
+  source: string;
+  createdAt: string;
+}
 
-  const renderContent = () => {
-    if (parsed.entities.length === 0) {
-      const lines = content.split('\n');
-      return lines.map((line, index) => (
-        <span key={index}>
-          {line}
-          {index < lines.length - 1 && '\n'}
-        </span>
-      ));
-    }
+interface UserMemory {
+  id: number;
+  category: string;
+  fact: string;
+  confidence: number;
+  mentionedCount: number;
+  lastMentionedAt: string;
+}
 
-    const parts: Array<{
-      text: string;
-      isEntity: boolean;
-      entity?: { type: 'tarot' | 'ritual' | 'spell'; name: string };
-    }> = [];
-    let lastIndex = 0;
+interface JournalPattern {
+  title: string;
+  description: string;
+}
 
-    parsed.entities.forEach((entity) => {
-      if (entity.startIndex > lastIndex) {
-        parts.push({
-          text: content.slice(lastIndex, entity.startIndex),
-          isEntity: false,
-        });
-      }
-      parts.push({
-        text: content.slice(entity.startIndex, entity.endIndex),
-        isEntity: true,
-        entity: { type: entity.type, name: entity.name },
-      });
-      lastIndex = entity.endIndex;
-    });
+const CATEGORY_LABELS: Record<string, string> = {
+  relationship: 'Relationships',
+  work: 'Work & Career',
+  interest: 'Interests',
+  concern: 'Concerns',
+  preference: 'Preferences',
+  life_event: 'Life Events',
+  goal: 'Goals',
+};
 
-    if (lastIndex < content.length) {
-      parts.push({ text: content.slice(lastIndex), isEntity: false });
-    }
-
-    const result: React.ReactNode[] = [];
-    parts.forEach((part, partIndex) => {
-      const lines = part.text.split('\n');
-      lines.forEach((line, lineIndex) => {
-        if (lineIndex > 0) {
-          result.push('\n');
-        }
-        if (part.isEntity && part.entity && onEntityClick) {
-          result.push(
-            <button
-              key={`${partIndex}-${lineIndex}`}
-              onClick={() => onEntityClick(part.entity!)}
-              className='underline decoration-dotted decoration-purple-400/60 hover:decoration-purple-400 text-purple-300 hover:text-purple-200 transition-colors cursor-pointer'
-            >
-              {line}
-            </button>,
-          );
-        } else {
-          result.push(<span key={`${partIndex}-${lineIndex}`}>{line}</span>);
-        }
-      });
-    });
-    return result;
-  };
+function EntryCard({ entry }: { entry: JournalEntry }) {
+  const date = new Date(entry.createdAt);
+  const formattedDate = date.toLocaleDateString('en-GB', {
+    month: 'short',
+    day: 'numeric',
+  });
 
   return (
-    <div
-      className={`flex items-end gap-1.5 ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
-    >
-      <div
-        className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm ${
-          isUser
-            ? 'bg-purple-600/90 text-white'
-            : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
-        }`}
-      >
-        {renderContent()}
+    <div className='border-l-2 border-purple-500/30 pl-4 py-3'>
+      <div className='flex items-center gap-2 mb-1.5'>
+        <span className='text-sm text-zinc-400'>{formattedDate}</span>
+        {entry.moonPhase && (
+          <span className='text-xs text-zinc-500 flex items-center gap-1'>
+            <Moon className='w-3 h-3' />
+            {entry.moonPhase}
+          </span>
+        )}
+        {entry.source === 'chat' && (
+          <span className='text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded'>
+            from chat
+          </span>
+        )}
       </div>
-      {!isUser && (
-        <div className='opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mb-1'>
-          <SaveToCollection
-            item={{
-              title: `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}`,
-              description: content.substring(0, 200),
-              category: 'chat',
-              content: { messageId, content, role },
-              tags: ['ai-chat'],
-            }}
-            isSaved={savedCollections?.some(
-              (c) =>
-                c.title ===
-                  `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}` &&
-                c.category === 'chat',
-            )}
-            folders={folders}
-            onSaved={onSaved}
-          />
+      <p className='text-white text-sm leading-relaxed'>{entry.content}</p>
+      {(entry.moodTags.length > 0 || entry.cardReferences.length > 0) && (
+        <div className='flex flex-wrap gap-1.5 mt-2'>
+          {entry.moodTags.map((tag) => (
+            <span
+              key={tag}
+              className='text-xs bg-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded'
+            >
+              {tag}
+            </span>
+          ))}
+          {entry.cardReferences.map((card) => (
+            <span
+              key={card}
+              className='text-xs bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded flex items-center gap-1'
+            >
+              <Star className='w-3 h-3' />
+              {card}
+            </span>
+          ))}
         </div>
       )}
     </div>
   );
-};
+}
 
-function BookOfShadowsContent() {
-  const authState = useAuthStatus();
-  const searchParams = useSearchParams();
-  const { user } = useUser();
-  const userBirthday = user?.birthday;
-
-  const {
-    messages,
-    sendMessage,
-    isStreaming,
-    isLoadingHistory,
-    stop,
-    assistSnippet,
-    reflectionPrompt,
-    usage,
-    planId,
-    dailyHighlight,
-    error,
-    clearError,
-    addMessage,
-    threadId,
-  } = useAssistantChat({ birthday: userBirthday });
-
-  const [cacheInitialized, setCacheInitialized] = useState(false);
-  const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(
-    [],
-  );
-  const [collectionFolders, setCollectionFolders] = useState<
-    CollectionFolder[]
-  >([]);
-
-  useEffect(() => {
-    if (!authState.isAuthenticated || authState.loading) return;
-
-    const fetchCollections = async () => {
-      try {
-        const [collectionsRes, foldersRes] = await Promise.all([
-          fetch('/api/collections?category=chat&limit=100'),
-          fetch('/api/collections/folders'),
-        ]);
-
-        const [collectionsData, foldersData] = await Promise.all([
-          collectionsRes.json(),
-          foldersRes.json(),
-        ]);
-
-        if (collectionsData.success) {
-          setSavedCollections(
-            collectionsData.collections.map((c: any) => ({
-              title: c.title,
-              category: c.category,
-            })),
-          );
-        }
-
-        if (foldersData.success) {
-          setCollectionFolders(foldersData.folders);
-        }
-      } catch (error) {
-        console.error('Error fetching collections:', error);
-      }
-    };
-
-    fetchCollections();
-  }, [authState.isAuthenticated, authState.loading]);
-
-  const handleCollectionSaved = useCallback(() => {
-    fetch('/api/collections?category=chat&limit=100')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setSavedCollections(
-            data.collections.map((c: any) => ({
-              title: c.title,
-              category: c.category,
-            })),
-          );
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  // Initialize tarot card parser on mount (client-side only)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Pre-load tarot cards to populate parser cache
-      import('../../../utils/tarot/tarot-cards')
-        .then((module) => {
-          const tarotCards = module.tarotCards;
-          // Initialize the cache in messageParser
-          import('@/utils/messageParser').then((module) => {
-            module.initializeTarotCardCache(tarotCards);
-            setCacheInitialized(true);
-          });
-        })
-        .catch(() => {
-          // Ignore errors - parser will handle gracefully
-        });
-    }
-  }, []);
-
-  // Record check-in when user accesses Book of Shadows
-  useEffect(() => {
-    if (authState.isAuthenticated && !authState.loading) {
-      recordCheckIn();
-    }
-  }, [authState.isAuthenticated, authState.loading]);
-  const [input, setInput] = useState('');
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [promptHandled, setPromptHandled] = useState<string | null>(null);
-  const [isAssistExpanded, setIsAssistExpanded] = useState(false);
-  const lastSendTimeRef = useRef<number>(0);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const DEBOUNCE_MS = 500;
-  const lastContentLengthRef = useRef<number>(0);
-  const isScrollingRef = useRef<boolean>(false);
-  const promptSentRef = useRef(false);
-  const prevLoadingRef = useRef(true);
-
-  // Calculate total content length to detect content changes during streaming
-  const totalContentLength = messages.reduce(
-    (sum, msg) => sum + msg.content.length,
-    0,
-  );
-
-  // Auto-scroll to bottom when messages change or streaming
-  // Use useLayoutEffect for immediate DOM updates
-  useLayoutEffect(() => {
-    // Skip if we're already scrolling to avoid scroll conflicts
-    if (isScrollingRef.current) return;
-
-    const shouldScroll =
-      messages.length > 0 &&
-      // New message added (array length changed)
-      (messages.length !== lastContentLengthRef.current ||
-        // Content updated during streaming (content length changed)
-        totalContentLength !== lastContentLengthRef.current ||
-        // Streaming started
-        isStreaming);
-
-    if (
-      shouldScroll &&
-      messagesEndRef.current &&
-      messagesContainerRef.current
-    ) {
-      isScrollingRef.current = true;
-
-      // Use requestAnimationFrame to ensure DOM has updated
-      requestAnimationFrame(() => {
-        if (!messagesEndRef.current || !messagesContainerRef.current) {
-          isScrollingRef.current = false;
-          return;
-        }
-
-        const container = messagesContainerRef.current;
-        const endElement = messagesEndRef.current;
-
-        // During streaming, use instant scroll for responsiveness
-        // When streaming completes, use smooth scroll
-        if (isStreaming) {
-          // Instant scroll during streaming
-          container.scrollTop = container.scrollHeight;
-        } else {
-          // Smooth scroll when streaming completes
-          endElement.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Reset scrolling flag after a short delay
-        setTimeout(() => {
-          isScrollingRef.current = false;
-        }, 100);
-      });
-    }
-
-    // Update content length reference
-    lastContentLengthRef.current = totalContentLength;
-  }, [messages, isStreaming, totalContentLength]);
-
-  // Also scroll when streaming state changes (starts/stops)
-  useEffect(() => {
-    if (isStreaming && messagesEndRef.current && messagesContainerRef.current) {
-      requestAnimationFrame(() => {
-        if (messagesContainerRef.current) {
-          messagesContainerRef.current.scrollTop =
-            messagesContainerRef.current.scrollHeight;
-        }
-      });
-    }
-  }, [isStreaming]);
-
-  // DISABLED: Prompt auto-send was causing loading issues
-  // Users can manually type or use quick actions instead
-  // TODO: Re-enable after fixing race conditions
-  useEffect(() => {
-    // Just track the prompt for UI purposes, don't auto-send
-    const currentPrompt = searchParams.get('prompt');
-    if (currentPrompt) {
-      setPromptHandled(decodeURIComponent(currentPrompt.trim()));
-    }
-  }, [searchParams]);
-
-  const attemptSend = () => {
-    const now = Date.now();
-    const timeSinceLastSend = now - lastSendTimeRef.current;
-
-    if (timeSinceLastSend < DEBOUNCE_MS) {
-      return;
-    }
-
-    const trimmed = input.trim();
-    if (!trimmed || isStreaming) return;
-
-    lastSendTimeRef.current = now;
-    clearError?.();
-
-    captureEvent('chat_started', {
-      message_length: trimmed.length,
-      is_first_message: messages.length === 0,
-      plan_id: planId,
-    });
-
-    sendMessage(trimmed);
-    setInput('');
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    attemptSend();
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      attemptSend();
-    }
-  };
-
-  useEffect(() => {
-    if (!showAuthModal) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowAuthModal(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [showAuthModal]);
-
-  if (authState.loading) {
-    return (
-      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-        <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
-          <div className='text-zinc-400'>Loading...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!authState.isAuthenticated) {
-    return (
-      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-        <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
-          <header className='mb-6 space-y-2'>
-            <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
-              Book of Shadows
-            </h1>
-            {/* <p className='text-sm text-zinc-400 md:text-base'>
-              Your calm astro–tarot companion. Share what's stirring and Lunary
-              will gather the sky around you.
-            </p> */}
-          </header>
-
-          <main className='flex flex-1 flex-col items-center justify-center gap-6'>
-            <div className='rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-8 md:p-12 text-center max-w-lg'>
-              <h2 className='text-2xl font-light text-zinc-50 mb-4'>
-                Sign in to access your Book of Shadows
-              </h2>
-              <p className='text-sm text-zinc-400 mb-6 md:text-base'>
-                Your Book of Shadows is a personal space for your astro–tarot
-                journey. Sign in to begin your conversation with Lunary.
-              </p>
-              <Button
-                onClick={() => setShowAuthModal(true)}
-                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500'
-              >
-                Sign In
-              </Button>
-            </div>
-          </main>
-
-          {showAuthModal && (
-            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-              <div className='relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl'>
-                <button
-                  onClick={() => setShowAuthModal(false)}
-                  className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-200'
-                  aria-label='Close'
-                >
-                  <svg
-                    className='h-5 w-5'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M6 18L18 6M6 6l12 12'
-                    />
-                  </svg>
-                </button>
-                <AuthComponent
-                  onSuccess={() => {
-                    setShowAuthModal(false);
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+function MemoryCard({
+  memory,
+  onDelete,
+}: {
+  memory: UserMemory;
+  onDelete: (id: number) => void;
+}) {
+  const [showConfirm, setShowConfirm] = useState(false);
 
   return (
-    <div className='flex flex-col flex-1 min-h-0 w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-      <div className='mx-auto flex flex-1 min-h-0 w-full max-w-3xl flex-col p-4'>
-        <header className='mb-2 shrink-0 md:mb-4'>
-          <h1 className='text-xl font-light tracking-tight text-zinc-50 md:text-4xl'>
-            Book of Shadows
-          </h1>
-          <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-500'>
-            {planId ? (
-              <span className='rounded-full border border-purple-500/40 px-3 py-1 text-purple-300/90'>
-                Plan: {planId.replace(/_/g, ' ')}
-              </span>
-            ) : null}
-            {usage ? (
-              <span className='rounded-full border border-zinc-700/60 px-3 py-1'>
-                Usage: {usage.used}/{usage.limit}
-              </span>
-            ) : null}
-            {(dailyHighlight as { primaryEvent?: string })?.primaryEvent ? (
-              <span className='rounded-full border border-zinc-700/60 px-3 py-1'>
-                Today:{' '}
-                {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
-              </span>
-            ) : null}
-          </div>
-        </header>
-
-        <div className='flex min-h-0 flex-1 flex-col gap-2'>
-          <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800/60 bg-zinc-950/60'>
-            <div
-              ref={messagesContainerRef}
-              className='min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6'
-            >
-              <div className='mx-auto flex max-w-2xl flex-col gap-3 md:gap-6'>
-                {isLoadingHistory ? (
-                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
-                    Loading your conversation...
-                  </div>
-                ) : messages.length === 0 ? (
-                  <>
-                    <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
-                      Begin by sharing how you're feeling, what you're
-                      exploring, or what guidance you're seeking. I'll answer
-                      with gentle, grounded insight.
-                    </div>
-                    {/* AI Prompts temporarily disabled */}
-                    <CopilotQuickActions
-                      onActionClick={(prompt) => sendMessage(prompt)}
-                      disabled={isStreaming}
-                    />
-                  </>
-                ) : (
-                  <>
-                    {messages.map((message, index) => (
-                      <MessageBubble
-                        key={`${message.id}-${index}-${cacheInitialized}`}
-                        role={message.role}
-                        content={message.content}
-                        messageId={message.id}
-                        savedCollections={savedCollections}
-                        folders={collectionFolders}
-                        onSaved={handleCollectionSaved}
-                        onEntityClick={async (entity) => {
-                          try {
-                            // For spells/rituals, navigate to grimoire page
-                            if (
-                              entity.type === 'ritual' ||
-                              entity.type === 'spell'
-                            ) {
-                              const slug = (entity as any).slug;
-                              if (slug) {
-                                window.open(
-                                  `/grimoire/spells/${slug}`,
-                                  '_blank',
-                                );
-                                return;
-                              }
-                              // Fallback: try to find the spell and get its ID
-                              const { spellDatabase } = await import(
-                                '@/constants/grimoire/spells'
-                              );
-                              const spell = spellDatabase.find(
-                                (s) =>
-                                  s.title.toLowerCase() ===
-                                    entity.name.toLowerCase() ||
-                                  s.alternativeNames?.some(
-                                    (n) =>
-                                      n.toLowerCase() ===
-                                      entity.name.toLowerCase(),
-                                  ),
-                              );
-                              if (spell) {
-                                window.open(
-                                  `/grimoire/spells/${spell.id}`,
-                                  '_blank',
-                                );
-                                return;
-                              }
-                            }
-
-                            let content = '';
-
-                            if (entity.type === 'tarot') {
-                              // Fetch tarot card data directly from grimoire
-                              const { getTarotCardByName } = await import(
-                                '@/utils/tarot/getCardByName'
-                              );
-                              const cardData = getTarotCardByName(entity.name);
-
-                              if (cardData) {
-                                // Just show the description, no heading or keywords
-                                content = cardData.information;
-                              } else {
-                                content = `I couldn't find information about "${entity.name}" in the grimoire.`;
-                              }
-                            }
-
-                            if (content) {
-                              // Generate ID
-                              const messageId =
-                                typeof crypto !== 'undefined' &&
-                                crypto.randomUUID
-                                  ? crypto.randomUUID()
-                                  : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-                              // Add message to UI
-                              addMessage({
-                                id: messageId,
-                                role: 'assistant',
-                                content,
-                              });
-
-                              // Save to thread history
-                              if (threadId) {
-                                try {
-                                  await fetch('/api/ai/thread/append', {
-                                    method: 'POST',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    credentials: 'include',
-                                    body: JSON.stringify({
-                                      threadId,
-                                      assistantMessage: {
-                                        role: 'assistant',
-                                        content,
-                                        entityName: entity.name,
-                                        ts: new Date().toISOString(),
-                                        tokens: 0,
-                                      },
-                                    }),
-                                  });
-                                } catch (err) {
-                                  console.error(
-                                    '[EntityClick] Failed to save to thread:',
-                                    err,
-                                  );
-                                }
-                              }
-
-                              // Scroll to bottom
-                              setTimeout(() => {
-                                messagesEndRef.current?.scrollIntoView({
-                                  behavior: 'smooth',
-                                });
-                              }, 100);
-                            }
-                          } catch (error) {
-                            console.error(
-                              '[MessageBubble] Failed to fetch entity data:',
-                              error,
-                            );
-                          }
-                        }}
-                      />
-                    ))}
-                    {error && (
-                      <div className='rounded-2xl border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm text-red-200 md:px-6 md:py-4'>
-                        <p className='font-semibold text-red-300/90 mb-1'>
-                          Something went wrong
-                        </p>
-                        <p>{error}</p>
-                        <button
-                          onClick={clearError}
-                          className='mt-2 text-xs text-red-300/70 hover:text-red-300 underline'
-                        >
-                          Dismiss
-                        </button>
-                      </div>
-                    )}
-                    <div ref={messagesEndRef} />
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className='shrink-0 border-t border-zinc-800/70 bg-zinc-900/40'>
-              <button
-                onClick={() => setIsAssistExpanded(!isAssistExpanded)}
-                className='flex w-full items-center justify-between px-3 py-2 text-sm font-semibold text-purple-300/90 transition hover:bg-zinc-800/40 md:px-6 md:py-3'
-              >
-                <span>Assist</span>
-                {isAssistExpanded ? (
-                  <ChevronUp className='w-4 h-4' />
-                ) : (
-                  <ChevronDown className='w-4 h-4' />
-                )}
-              </button>
-              {isAssistExpanded && (
-                <div className='px-3 pb-2 text-sm text-zinc-300 md:px-6 md:pb-4'>
-                  <CopilotQuickActions
-                    onActionClick={(prompt) => sendMessage(prompt)}
-                    disabled={isStreaming}
-                  />
-                </div>
-              )}
-            </div>
-          </section>
-
-          <form
-            onSubmit={handleSubmit}
-            className='shrink-0 relative flex items-center'
-          >
-            <label htmlFor='book-of-shadows-message' className='sr-only'>
-              Share with Lunary
-            </label>
-            <textarea
-              id='book-of-shadows-message'
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={1}
-              placeholder="Write your heart's question…"
-              className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30'
-            />
-            {isStreaming ? (
-              <button
-                type='button'
-                onClick={stop}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-red-600 text-white transition hover:bg-red-500'
-              >
-                <Square className='w-4 h-4' />
-              </button>
-            ) : (
-              <button
-                type='submit'
-                disabled={input.trim().length === 0}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-purple-600 text-white transition hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed'
-              >
-                <ArrowUp className='w-4 h-4' />
-              </button>
-            )}
-          </form>
+    <>
+      <div className='flex items-start justify-between gap-3 py-2 border-b border-zinc-800 last:border-0'>
+        <div className='flex-1'>
+          <span className='text-xs text-purple-400 uppercase tracking-wide'>
+            {CATEGORY_LABELS[memory.category] || memory.category}
+          </span>
+          <p className='text-white text-sm mt-0.5'>{memory.fact}</p>
+          <span className='text-xs text-zinc-500'>
+            Mentioned {memory.mentionedCount}x
+          </span>
         </div>
+        <button
+          onClick={() => setShowConfirm(true)}
+          className='p-2 text-zinc-500 hover:text-red-400 transition-colors'
+          aria-label='Delete memory'
+        >
+          <Trash2 className='w-4 h-4' />
+        </button>
       </div>
+
+      <Modal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        size='sm'
+      >
+        <ModalHeader>Delete this memory?</ModalHeader>
+        <ModalBody>
+          <p className='text-zinc-400 text-sm'>
+            Lunary will forget: "{memory.fact}"
+          </p>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant='outline' onClick={() => setShowConfirm(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              onDelete(memory.id);
+              setShowConfirm(false);
+            }}
+            className='bg-red-600 hover:bg-red-700'
+          >
+            Delete
+          </Button>
+        </ModalFooter>
+      </Modal>
+    </>
+  );
+}
+
+function PatternCard({ pattern }: { pattern: JournalPattern }) {
+  return (
+    <div className='bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/20 rounded-lg p-4'>
+      <div className='flex items-center gap-2 mb-2'>
+        <Sparkles className='w-4 h-4 text-purple-400' />
+        <span className='text-sm font-medium text-purple-300'>Pattern</span>
+      </div>
+      <p className='text-white font-medium mb-1'>{pattern.title}</p>
+      <p className='text-sm text-zinc-400'>{pattern.description}</p>
     </div>
   );
 }
 
+type TabId = 'journal' | 'memories' | 'patterns';
+
 export default function BookOfShadowsPage() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuthStatus();
+  const [activeTab, setActiveTab] = useState<TabId>('journal');
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [memories, setMemories] = useState<UserMemory[]>([]);
+  const [patterns, setPatterns] = useState<JournalPattern[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newReflection, setNewReflection] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loadData = useCallback(async () => {
+    try {
+      const [entriesRes, memoriesRes, patternsRes] = await Promise.all([
+        fetch('/api/journal', { credentials: 'include' }),
+        fetch('/api/user-memory', { credentials: 'include' }),
+        fetch('/api/journal/patterns', { credentials: 'include' }).catch(
+          () => null,
+        ),
+      ]);
+
+      if (entriesRes.ok) {
+        const data = await entriesRes.json();
+        setEntries(data.entries || []);
+      }
+
+      if (memoriesRes.ok) {
+        const data = await memoriesRes.json();
+        setMemories(data.memories || []);
+      }
+
+      if (patternsRes?.ok) {
+        const data = await patternsRes.json();
+        setPatterns(data.patterns || []);
+      }
+    } catch (error) {
+      console.error('Failed to load data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      loadData();
+    } else if (!authLoading && !user) {
+      setIsLoading(false);
+    }
+  }, [authLoading, user, loadData]);
+
+  const handleSubmitReflection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReflection.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content: newReflection }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEntries((prev) => [data.entry, ...prev]);
+        setNewReflection('');
+        setShowAddForm(false);
+      }
+    } catch (error) {
+      console.error('Failed to save reflection:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteMemory = async (memoryId: number) => {
+    try {
+      const response = await fetch(`/api/user-memory?id=${memoryId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        setMemories((prev) => prev.filter((m) => m.id !== memoryId));
+      }
+    } catch (error) {
+      console.error('Failed to delete memory:', error);
+    }
+  };
+
+  if (authLoading || isLoading) {
+    return (
+      <div className='min-h-screen bg-zinc-950 flex items-center justify-center'>
+        <div className='animate-pulse text-zinc-400'>
+          Opening your Book of Shadows...
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className='min-h-screen bg-zinc-950 flex items-center justify-center p-4'>
+        <div className='text-center max-w-sm'>
+          <BookOpen className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+          <h1 className='text-xl font-bold text-white mb-2'>Book of Shadows</h1>
+          <p className='text-zinc-400 mb-6'>
+            Your personal journal of insights, reflections, and cosmic wisdom
+          </p>
+          <Link
+            href='/auth'
+            className='inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors'
+          >
+            Sign In to Begin
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const tabs: {
+    id: TabId;
+    label: string;
+    icon: React.ReactNode;
+    count?: number;
+  }[] = [
+    {
+      id: 'journal',
+      label: 'Journal',
+      icon: <Feather className='w-4 h-4' />,
+      count: entries.length,
+    },
+    {
+      id: 'memories',
+      label: 'What I Know',
+      icon: <Brain className='w-4 h-4' />,
+      count: memories.length,
+    },
+    {
+      id: 'patterns',
+      label: 'Patterns',
+      icon: <Sparkles className='w-4 h-4' />,
+      count: patterns.length,
+    },
+  ];
+
   return (
-    <Suspense
-      fallback={
-        <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-          <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
-            <div className='text-zinc-400'>Loading...</div>
+    <div className='min-h-screen bg-zinc-950 pb-24'>
+      <header className='sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800'>
+        <div className='px-4 py-4'>
+          <div className='flex items-center justify-between mb-4'>
+            <div>
+              <h1 className='text-lg font-bold text-white flex items-center gap-2'>
+                <BookOpen className='w-5 h-5 text-purple-400' />
+                Book of Shadows
+              </h1>
+              <p className='text-xs text-zinc-500'>Your living journal</p>
+            </div>
+            <Link
+              href='/guide'
+              className='text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1'
+            >
+              Chat <ChevronRight className='w-4 h-4' />
+            </Link>
+          </div>
+
+          <div className='flex gap-1'>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                }`}
+              >
+                {tab.icon}
+                <span className='hidden sm:inline'>{tab.label}</span>
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span className='text-xs bg-zinc-800 px-1.5 py-0.5 rounded'>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
         </div>
-      }
-    >
-      <BookOfShadowsContent />
-    </Suspense>
+      </header>
+
+      <main className='px-4 py-6'>
+        {activeTab === 'journal' && (
+          <div className='space-y-4'>
+            {showAddForm ? (
+              <form onSubmit={handleSubmitReflection} className='space-y-3'>
+                <textarea
+                  value={newReflection}
+                  onChange={(e) => setNewReflection(e.target.value)}
+                  placeholder="What's on your mind today?"
+                  className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-4 text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 resize-none'
+                  rows={4}
+                  autoFocus
+                />
+                <div className='flex gap-2'>
+                  <Button
+                    type='submit'
+                    disabled={isSubmitting || !newReflection.trim()}
+                    className='flex-1'
+                  >
+                    {isSubmitting ? 'Saving...' : 'Save Reflection'}
+                  </Button>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setNewReflection('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className='w-full flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-lg p-4 text-zinc-300 transition-colors'
+              >
+                <Plus className='w-5 h-5' />
+                Add Reflection
+              </button>
+            )}
+
+            {entries.length === 0 ? (
+              <div className='text-center py-12'>
+                <Moon className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
+                <p className='text-zinc-500'>No reflections yet</p>
+                <p className='text-xs text-zinc-600 mt-1'>
+                  Add a reflection or chat with your Astral Guide
+                </p>
+              </div>
+            ) : (
+              <div className='space-y-2'>
+                {entries.map((entry) => (
+                  <EntryCard key={entry.id} entry={entry} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'memories' && (
+          <div className='space-y-4'>
+            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+              <p className='text-sm text-zinc-400'>
+                These are personal details Lunary has learned about you from
+                your conversations. They help personalize your readings and
+                guidance.
+              </p>
+            </div>
+
+            {memories.length === 0 ? (
+              <div className='text-center py-12'>
+                <Brain className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
+                <p className='text-zinc-500'>No memories yet</p>
+                <p className='text-xs text-zinc-600 mt-1'>
+                  Chat with your Astral Guide to build your profile
+                </p>
+              </div>
+            ) : (
+              <div className='bg-zinc-900 border border-zinc-800 rounded-lg p-4'>
+                {memories.map((memory) => (
+                  <MemoryCard
+                    key={memory.id}
+                    memory={memory}
+                    onDelete={handleDeleteMemory}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'patterns' && (
+          <div className='space-y-4'>
+            {patterns.length === 0 ? (
+              <div className='text-center py-12'>
+                <Sparkles className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
+                <p className='text-zinc-500'>No patterns detected yet</p>
+                <p className='text-xs text-zinc-600 mt-1'>
+                  Keep journaling to reveal recurring themes
+                </p>
+              </div>
+            ) : (
+              <div className='space-y-3'>
+                {patterns.map((pattern, i) => (
+                  <PatternCard key={i} pattern={pattern} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
