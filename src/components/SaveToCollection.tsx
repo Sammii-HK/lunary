@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Bookmark, BookmarkCheck, Loader2 } from 'lucide-react';
+import {
+  Bookmark,
+  BookmarkCheck,
+  Loader2,
+  Plus,
+  FolderPlus,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
@@ -47,6 +53,9 @@ export function SaveToCollection({
   const [foldersInternal, setFoldersInternal] = useState<Folder[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
+  const [showNewFolderInput, setShowNewFolderInput] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
 
   const isSaved = isSavedProp ?? isSavedInternal;
   const folders = foldersProp ?? foldersInternal;
@@ -80,6 +89,32 @@ export function SaveToCollection({
       console.error('Error fetching collection data:', error);
     }
   }, [hasFetched, isSavedProp, item]);
+
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) return;
+
+    setIsCreatingFolder(true);
+    try {
+      const response = await fetch('/api/collections/folders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newFolderName.trim() }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.folder) {
+        const newFolder = data.folder;
+        setFoldersInternal((prev) => [...prev, newFolder]);
+        setSelectedFolderId(newFolder.id);
+        setNewFolderName('');
+        setShowNewFolderInput(false);
+      }
+    } catch (error) {
+      console.error('Error creating folder:', error);
+    } finally {
+      setIsCreatingFolder(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!authState.isAuthenticated) {
@@ -168,38 +203,93 @@ export function SaveToCollection({
                 <label className='block text-sm font-medium mb-2'>
                   Folder (optional)
                 </label>
-                <select
-                  value={selectedFolderId || ''}
-                  onChange={(e) =>
-                    setSelectedFolderId(
-                      e.target.value ? parseInt(e.target.value, 10) : null,
-                    )
-                  }
-                  className='w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm'
-                >
-                  <option value=''>No folder</option>
-                  {folders.map((folder) => (
-                    <option key={folder.id} value={folder.id}>
-                      {folder.name}
-                    </option>
-                  ))}
-                </select>
+                {showNewFolderInput ? (
+                  <div className='space-y-2'>
+                    <input
+                      type='text'
+                      value={newFolderName}
+                      onChange={(e) => setNewFolderName(e.target.value)}
+                      placeholder='Folder name'
+                      className='w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none'
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleCreateFolder();
+                        if (e.key === 'Escape') {
+                          setShowNewFolderInput(false);
+                          setNewFolderName('');
+                        }
+                      }}
+                    />
+                    <div className='flex gap-2'>
+                      <Button
+                        onClick={handleCreateFolder}
+                        size='sm'
+                        disabled={!newFolderName.trim() || isCreatingFolder}
+                        className='flex-1'
+                      >
+                        {isCreatingFolder ? (
+                          <Loader2 className='w-4 h-4 animate-spin' />
+                        ) : (
+                          'Create'
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setShowNewFolderInput(false);
+                          setNewFolderName('');
+                        }}
+                        size='sm'
+                        variant='outline'
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className='space-y-2'>
+                    <select
+                      value={selectedFolderId || ''}
+                      onChange={(e) =>
+                        setSelectedFolderId(
+                          e.target.value ? parseInt(e.target.value, 10) : null,
+                        )
+                      }
+                      className='w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm'
+                    >
+                      <option value=''>No folder</option>
+                      {folders.map((folder) => (
+                        <option key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => setShowNewFolderInput(true)}
+                      className='flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors'
+                    >
+                      <FolderPlus className='w-4 h-4' />
+                      <span>Create new folder</span>
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className='flex gap-2'>
-                <Button
-                  onClick={handleSave}
-                  className='flex-1'
-                  disabled={isSaving}
-                >
-                  {isSaving ? 'Saving...' : 'Save'}
-                </Button>
-                <Button
-                  onClick={() => setShowFolderDialog(false)}
-                  variant='outline'
-                >
-                  Cancel
-                </Button>
-              </div>
+              {!showNewFolderInput && (
+                <div className='flex gap-2'>
+                  <Button
+                    onClick={handleSave}
+                    className='flex-1'
+                    disabled={isSaving}
+                  >
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                  <Button
+                    onClick={() => setShowFolderDialog(false)}
+                    variant='outline'
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
