@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { X, Gem, ArrowRight, Sparkles, Lock } from 'lucide-react';
@@ -90,6 +90,17 @@ export const CrystalPreview = () => {
     ? crystalData?.guidance
     : generalCrystal?.reason;
 
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen, closeModal]);
+
   if (!crystalName) {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md animate-pulse'>
@@ -126,10 +137,16 @@ export const CrystalPreview = () => {
       </button>
 
       {isModalOpen && (
-        <div className='fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-          <div className='bg-zinc-900 border border-zinc-700 rounded-xl p-6 max-w-md w-full relative'>
+        <div
+          className='fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50'
+          onClick={closeModal}
+        >
+          <div
+            className='bg-zinc-900 border border-zinc-700 rounded-xl p-6 max-w-md w-full relative'
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
-              onClick={() => setIsModalOpen(false)}
+              onClick={closeModal}
               className='absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors'
             >
               <X className='w-5 h-5' />
