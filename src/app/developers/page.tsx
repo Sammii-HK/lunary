@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Code, Zap, Moon, Star, Sparkles, ArrowRight } from 'lucide-react';
+import { Code, Zap, Moon, Star, Sparkles, ArrowRight, Key } from 'lucide-react';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
@@ -273,11 +273,18 @@ export default function DevelopersPage() {
             <h1 className='text-4xl font-light text-zinc-100 mb-4'>
               Lunary Cosmic API
             </h1>
-            <p className='text-lg text-zinc-400'>
+            <p className='text-lg text-zinc-400 mb-6'>
               Access astronomical data, moon phases, and astrological
               calculations via our free API endpoints. Perfect for building
               cosmic-aware applications.
             </p>
+            <Link
+              href='/developers/dashboard'
+              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            >
+              <Key className='h-5 w-5' />
+              Get Your API Key
+            </Link>
           </div>
 
           {/* Features */}
