@@ -6,6 +6,7 @@ import {
   SOCIAL_PLATFORM_LABELS,
 } from '@/constants/socialHandles';
 import { Logo } from './Logo';
+import { CookieSettingsButton } from './CookieConsent';
 
 export function MarketingFooter() {
   const socialLinks = [
@@ -84,7 +85,7 @@ export function MarketingFooter() {
   return (
     <footer className='border-t border-zinc-800/50 bg-zinc-950/50'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
           {/* Brand */}
           <div className='space-y-4'>
             <Link
@@ -103,14 +104,14 @@ export function MarketingFooter() {
           {/* Links */}
           <div className='space-y-4'>
             <h3 className='text-sm font-medium text-zinc-300 uppercase tracking-wider'>
-              Links
+              Product
             </h3>
             <nav className='flex flex-col space-y-2'>
               <Link
-                href='/blog'
+                href='/welcome'
                 className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
               >
-                Blog
+                Features
               </Link>
               <Link
                 href='/pricing'
@@ -119,16 +120,10 @@ export function MarketingFooter() {
                 Pricing
               </Link>
               <Link
-                href='/welcome'
+                href='/blog'
                 className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
               >
-                Features
-              </Link>
-              <Link
-                href='/developers'
-                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-              >
-                Developers
+                Blog
               </Link>
               <Link
                 href='/help'
@@ -137,11 +132,51 @@ export function MarketingFooter() {
                 Help
               </Link>
               <Link
-                href='/profile'
+                href='/api-terms'
                 className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
               >
-                Start free trial
+                API
               </Link>
+            </nav>
+          </div>
+
+          {/* Legal */}
+          <div className='space-y-4'>
+            <h3 className='text-sm font-medium text-zinc-300 uppercase tracking-wider'>
+              Legal
+            </h3>
+            <nav className='flex flex-col space-y-2'>
+              <Link
+                href='/privacy'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href='/terms'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Terms of Service
+              </Link>
+              <Link
+                href='/cookies'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Cookie Policy
+              </Link>
+              <Link
+                href='/refund'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Refund Policy
+              </Link>
+              <Link
+                href='/privacy#ccpa'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Do Not Sell My Info
+              </Link>
+              <CookieSettingsButton />
             </nav>
           </div>
 
@@ -164,6 +199,26 @@ export function MarketingFooter() {
                   {social.icon}
                 </a>
               ))}
+            </div>
+            <div className='flex flex-col space-y-2 pt-2'>
+              <Link
+                href='/accessibility'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Accessibility
+              </Link>
+              <Link
+                href='/trademark'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Trademark
+              </Link>
+              <Link
+                href='/press-kit'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Press Kit
+              </Link>
             </div>
           </div>
         </div>

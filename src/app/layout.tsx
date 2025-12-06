@@ -28,6 +28,7 @@ import { AppChrome } from '@/components/AppChrome';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { AuthStatusProvider } from '@/components/AuthStatus';
 import { UserProvider } from '@/context/UserContext';
+import { CookieConsent } from '@/components/CookieConsent';
 
 export async function generateMetadata(): Promise<Metadata> {
   let moonSymbol = '🌙';
@@ -175,6 +176,7 @@ export default function RootLayout({
                     <Suspense fallback={null}>
                       <AppChrome />
                     </Suspense>
+                    <CookieConsent />
                   </UserProvider>
                 </AuthStatusProvider>
               </LunaryJazzProvider>

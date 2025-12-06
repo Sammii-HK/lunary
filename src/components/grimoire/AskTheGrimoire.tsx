@@ -21,6 +21,12 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
   crystal: '💎',
   ritual: '🌙',
   concept: '✨',
+  horoscope: '🔮',
+  'chinese-zodiac': '🐉',
+  season: '☀️',
+  numerology: '🔢',
+  birthday: '🎂',
+  compatibility: '💕',
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
@@ -30,6 +36,12 @@ const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
   crystal: 'bg-cyan-500/20 text-cyan-300',
   ritual: 'bg-indigo-500/20 text-indigo-300',
   concept: 'bg-emerald-500/20 text-emerald-300',
+  horoscope: 'bg-violet-500/20 text-violet-300',
+  'chinese-zodiac': 'bg-red-500/20 text-red-300',
+  season: 'bg-orange-500/20 text-orange-300',
+  numerology: 'bg-blue-500/20 text-blue-300',
+  birthday: 'bg-pink-500/20 text-pink-300',
+  compatibility: 'bg-fuchsia-500/20 text-fuchsia-300',
 };
 
 export function AskTheGrimoire({
