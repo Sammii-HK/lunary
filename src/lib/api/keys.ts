@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { prisma } from '@/lib/prisma';
+import { sql } from '@vercel/postgres';
 
 const API_KEY_PREFIX = 'lun_';
 const API_KEY_LENGTH = 32;
@@ -68,6 +68,24 @@ export const API_TIERS: Record<ApiTier, ApiTierConfig> = {
   },
 };
 
+export interface ApiKeyRecord {
+  id: string;
+  key_hash: string;
+  key_prefix: string;
+  user_id: string;
+  name: string;
+  tier: string;
+  is_active: boolean;
+  requests: number;
+  request_limit: number;
+  rate_limit: number;
+  expires_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
+  last_used_at: Date | null;
+  reset_at: Date;
+}
+
 export function generateApiKey(): {
   key: string;
   hash: string;
@@ -86,6 +104,15 @@ export function hashApiKey(key: string): string {
   return crypto.createHash('sha256').update(key).digest('hex');
 }
 
+function generateId(): string {
+  return crypto.randomBytes(12).toString('base64url');
+}
+
+function getNextResetDate(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 1);
+}
+
 export async function createApiKey(
   userId: string,
   tier: ApiTier = 'free',
@@ -93,21 +120,16 @@ export async function createApiKey(
 ) {
   const { key, hash, prefix } = generateApiKey();
   const tierConfig = API_TIERS[tier];
+  const id = generateId();
+  const resetAt = getNextResetDate().toISOString();
 
-  const apiKey = await prisma.apiKey.create({
-    data: {
-      keyHash: hash,
-      keyPrefix: prefix,
-      userId,
-      name,
-      tier,
-      requestLimit: tierConfig.requestLimit,
-      rateLimit: tierConfig.rateLimit,
-      resetAt: getNextResetDate(),
-    },
-  });
+  const result = await sql`
+    INSERT INTO api_keys (id, key_hash, key_prefix, user_id, name, tier, request_limit, rate_limit, reset_at)
+    VALUES (${id}, ${hash}, ${prefix}, ${userId}, ${name}, ${tier}, ${tierConfig.requestLimit}, ${tierConfig.rateLimit}, ${resetAt})
+    RETURNING *
+  `;
 
-  return { ...apiKey, key };
+  return { ...(result.rows[0] as ApiKeyRecord), key };
 }
 
 export async function validateApiKey(key: string) {
@@ -117,35 +139,35 @@ export async function validateApiKey(key: string) {
 
   const hash = hashApiKey(key);
 
-  const apiKey = await prisma.apiKey.findUnique({
-    where: { keyHash: hash },
-  });
+  const result = await sql`
+    SELECT * FROM api_keys WHERE key_hash = ${hash}
+  `;
+
+  const apiKey = result.rows[0] as ApiKeyRecord | undefined;
 
   if (!apiKey) {
     return { valid: false, error: 'API key not found' };
   }
 
-  if (!apiKey.isActive) {
+  if (!apiKey.is_active) {
     return { valid: false, error: 'API key is disabled' };
   }
 
-  if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
+  if (apiKey.expires_at && new Date(apiKey.expires_at) < new Date()) {
     return { valid: false, error: 'API key has expired' };
   }
 
   const now = new Date();
-  if (apiKey.resetAt < now) {
-    await prisma.apiKey.update({
-      where: { id: apiKey.id },
-      data: {
-        requests: 0,
-        resetAt: getNextResetDate(),
-      },
-    });
+  if (new Date(apiKey.reset_at) < now) {
+    await sql`
+      UPDATE api_keys 
+      SET requests = 0, reset_at = ${getNextResetDate().toISOString()}
+      WHERE id = ${apiKey.id}
+    `;
     apiKey.requests = 0;
   }
 
-  if (apiKey.requests >= apiKey.requestLimit) {
+  if (apiKey.requests >= apiKey.request_limit) {
     return { valid: false, error: 'Monthly request limit exceeded' };
   }
 
@@ -153,39 +175,29 @@ export async function validateApiKey(key: string) {
 }
 
 export async function incrementApiKeyUsage(keyHash: string) {
-  await prisma.apiKey.update({
-    where: { keyHash },
-    data: {
-      requests: { increment: 1 },
-      lastUsedAt: new Date(),
-    },
-  });
+  await sql`
+    UPDATE api_keys 
+    SET requests = requests + 1, last_used_at = NOW()
+    WHERE key_hash = ${keyHash}
+  `;
 }
 
 export async function getUserApiKeys(userId: string) {
-  return prisma.apiKey.findMany({
-    where: { userId },
-    select: {
-      id: true,
-      keyPrefix: true,
-      name: true,
-      tier: true,
-      requests: true,
-      requestLimit: true,
-      rateLimit: true,
-      isActive: true,
-      lastUsedAt: true,
-      resetAt: true,
-      createdAt: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  const result = await sql`
+    SELECT id, key_prefix, name, tier, requests, request_limit, rate_limit, is_active, last_used_at, reset_at, created_at
+    FROM api_keys
+    WHERE user_id = ${userId}
+    ORDER BY created_at DESC
+  `;
+
+  return result.rows;
 }
 
 export async function deleteApiKey(id: string, userId: string) {
-  return prisma.apiKey.deleteMany({
-    where: { id, userId },
-  });
+  const result = await sql`
+    DELETE FROM api_keys WHERE id = ${id} AND user_id = ${userId}
+  `;
+  return result.rowCount;
 }
 
 export async function updateApiKeyTier(
@@ -195,40 +207,31 @@ export async function updateApiKeyTier(
 ) {
   const tierConfig = API_TIERS[tier];
 
-  return prisma.apiKey.updateMany({
-    where: { id, userId },
-    data: {
-      tier,
-      requestLimit: tierConfig.requestLimit,
-      rateLimit: tierConfig.rateLimit,
-    },
-  });
+  const result = await sql`
+    UPDATE api_keys 
+    SET tier = ${tier}, request_limit = ${tierConfig.requestLimit}, rate_limit = ${tierConfig.rateLimit}
+    WHERE id = ${id} AND user_id = ${userId}
+  `;
+
+  return result.rowCount;
 }
 
 export async function regenerateApiKey(id: string, userId: string) {
-  const existing = await prisma.apiKey.findFirst({
-    where: { id, userId },
-  });
+  const existing = await sql`
+    SELECT * FROM api_keys WHERE id = ${id} AND user_id = ${userId}
+  `;
 
-  if (!existing) {
+  if (existing.rows.length === 0) {
     throw new Error('API key not found');
   }
 
   const { key, hash, prefix } = generateApiKey();
 
-  await prisma.apiKey.update({
-    where: { id },
-    data: {
-      keyHash: hash,
-      keyPrefix: prefix,
-    },
-  });
+  await sql`
+    UPDATE api_keys 
+    SET key_hash = ${hash}, key_prefix = ${prefix}
+    WHERE id = ${id}
+  `;
 
   return { key, prefix };
-}
-
-function getNextResetDate(): Date {
-  const now = new Date();
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  return nextMonth;
 }

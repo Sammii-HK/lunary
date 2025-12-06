@@ -67,7 +67,7 @@ export async function withApiKeyAuth(
     );
   }
 
-  const cacheKey = keyData.keyHash;
+  const cacheKey = keyData.key_hash;
   const now = Date.now();
   const windowMs = 60 * 1000;
 
@@ -81,16 +81,16 @@ export async function withApiKeyAuth(
   rateData.count++;
 
   const rateLimitInfo: RateLimitInfo = {
-    limit: keyData.rateLimit,
-    remaining: keyData.rateLimit - rateData.count,
+    limit: keyData.rate_limit,
+    remaining: keyData.rate_limit - rateData.count,
     reset: Math.ceil(rateData.resetAt / 1000),
   };
 
-  if (rateData.count > keyData.rateLimit) {
+  if (rateData.count > keyData.rate_limit) {
     const response = NextResponse.json(
       {
         error: 'Rate limit exceeded',
-        message: `You have exceeded your rate limit of ${keyData.rateLimit} requests per minute`,
+        message: `You have exceeded your rate limit of ${keyData.rate_limit} requests per minute`,
         retryAfter: Math.ceil((rateData.resetAt - now) / 1000),
       },
       { status: 429 },
@@ -105,11 +105,11 @@ export async function withApiKeyAuth(
     return response;
   }
 
-  await incrementApiKeyUsage(keyData.keyHash);
+  await incrementApiKeyUsage(keyData.key_hash);
 
   const response = await handler(request, {
     tier: keyData.tier as ApiTier,
-    userId: keyData.userId,
+    userId: keyData.user_id,
   });
 
   Object.entries(getRateLimitHeaders(rateLimitInfo)).forEach(([key, value]) => {
@@ -122,7 +122,7 @@ export async function withApiKeyAuth(
   );
   response.headers.set(
     'X-Monthly-Requests-Limit',
-    keyData.requestLimit.toString(),
+    keyData.request_limit.toString(),
   );
 
   return response;
