@@ -195,6 +195,15 @@ export const grimoire: {
     title: 'Astrological Events',
     contents: ['2025 Events', '2026 Events', 'Mercury Retrograde', 'Eclipses'],
   },
+  guides: {
+    title: 'Complete Guides',
+    contents: [
+      'Birth Chart Guide',
+      'Tarot Guide',
+      'Crystal Healing Guide',
+      'Moon Phases Guide',
+    ],
+  },
 };
 
 export const grimoireItems = Object.keys(grimoire);

@@ -266,6 +266,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     },
+    // Pillar pages - high priority guides
+    {
+      url: `${baseUrl}/grimoire/guides/birth-chart-complete-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/grimoire/guides/tarot-complete-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/grimoire/guides/crystal-healing-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/grimoire/guides/moon-phases-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
   ];
 
   // Generate all blog week posts (from start of 2025 to current week)
