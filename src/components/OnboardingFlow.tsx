@@ -19,9 +19,10 @@ import { useRouter } from 'next/navigation';
 import { generateBirthChart } from '../../utils/astrology/birthChart';
 import { conversionTracking } from '@/lib/analytics';
 import { OnboardingFeatureTour } from './OnboardingFeatureTour';
+import { BirthdayInput } from './ui/birthday-input';
 
 export function OnboardingFlow() {
-  const { user, updateProfile } = useUser();
+  const { user, updateProfile, refetch } = useUser();
   const authState = useAuthStatus();
   const subscription = useSubscription();
   const router = useRouter();
@@ -133,7 +134,9 @@ export function OnboardingFlow() {
         );
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Refresh user data in context so widgets update immediately
+      await refetch();
+
       setCurrentStep('intention');
     } catch (error) {
       console.error('Failed to save birthday:', error);
@@ -319,13 +322,7 @@ export function OnboardingFlow() {
                 <label className='block text-sm font-medium text-zinc-300 mb-2'>
                   Birthday *
                 </label>
-                <input
-                  type='date'
-                  value={birthday}
-                  onChange={(e) => setBirthday(e.target.value)}
-                  max={new Date().toISOString().split('T')[0]}
-                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500'
-                />
+                <BirthdayInput value={birthday} onChange={setBirthday} />
               </div>
 
               <div>

@@ -46,8 +46,10 @@ export async function GET(
             trial_end: subscription.trial_end,
             current_period_end:
               subscription.current_period_end || subscription.trial_end,
+            metadata: subscription.metadata || {},
           }
         : null,
+      metadata: session.metadata || {},
     };
 
     return NextResponse.json(formattedSession);
