@@ -18,6 +18,11 @@ export async function GET() {
     'sitemap-chinese-zodiac.xml',
     'sitemap-seasons.xml',
     'sitemap-numerology.xml',
+    'sitemap-aspects.xml',
+    'sitemap-houses.xml',
+    'sitemap-decans.xml',
+    'sitemap-cusps.xml',
+    'sitemap-yearly-transits.xml',
     'sitemap-images.xml',
   ];
 
