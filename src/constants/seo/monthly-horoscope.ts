@@ -206,7 +206,7 @@ export function generateAllHoroscopeParams(): {
   month: string;
 }[] {
   const params: { sign: string; year: string; month: string }[] = [];
-  const years = ['2025', '2026'];
+  const years = ['2025', '2026', '2027', '2028', '2029', '2030'];
 
   for (const year of years) {
     for (const sign of ZODIAC_SIGNS) {

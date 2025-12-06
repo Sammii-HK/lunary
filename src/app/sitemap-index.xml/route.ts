@@ -16,6 +16,8 @@ export async function GET() {
     'sitemap-birthday.xml',
     'sitemap-horoscopes.xml',
     'sitemap-chinese-zodiac.xml',
+    'sitemap-seasons.xml',
+    'sitemap-numerology.xml',
     'sitemap-images.xml',
   ];
 

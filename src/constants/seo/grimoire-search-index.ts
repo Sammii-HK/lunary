@@ -7,7 +7,19 @@
 export interface GrimoireEntry {
   slug: string;
   title: string;
-  category: 'zodiac' | 'planet' | 'tarot' | 'crystal' | 'ritual' | 'concept';
+  category:
+    | 'zodiac'
+    | 'planet'
+    | 'tarot'
+    | 'crystal'
+    | 'ritual'
+    | 'concept'
+    | 'horoscope'
+    | 'chinese-zodiac'
+    | 'season'
+    | 'numerology'
+    | 'birthday'
+    | 'compatibility';
   keywords: string[];
   summary: string;
   relatedSlugs: string[];
@@ -597,6 +609,196 @@ export const GRIMOIRE_SEARCH_INDEX: GrimoireEntry[] = [
       'crystals/rose-quartz',
       'crystals/clear-quartz',
     ],
+  },
+
+  // ============================================================================
+  // HOROSCOPES
+  // ============================================================================
+  {
+    slug: '/horoscope',
+    title: 'Monthly Horoscopes',
+    category: 'horoscope',
+    keywords: [
+      'horoscope',
+      'monthly horoscope',
+      'zodiac forecast',
+      'prediction',
+      'astrology forecast',
+      'monthly prediction',
+    ],
+    summary:
+      'Monthly horoscope predictions for all 12 zodiac signs. Get your love, career, and health forecast.',
+    relatedSlugs: ['zodiac/aries', 'zodiac/taurus', 'zodiac/gemini'],
+  },
+
+  // ============================================================================
+  // CHINESE ZODIAC
+  // ============================================================================
+  {
+    slug: 'chinese-zodiac',
+    title: 'Chinese Zodiac',
+    category: 'chinese-zodiac',
+    keywords: [
+      'chinese zodiac',
+      'chinese astrology',
+      'chinese horoscope',
+      'year of',
+      'lunar new year',
+      'chinese new year',
+      'animal zodiac',
+    ],
+    summary:
+      'The 12 animals of the Chinese zodiac. Find your Chinese zodiac sign by birth year and discover compatibility.',
+    relatedSlugs: [
+      'chinese-zodiac/rat',
+      'chinese-zodiac/dragon',
+      'chinese-zodiac/snake',
+    ],
+  },
+  {
+    slug: 'chinese-zodiac/rat',
+    title: 'Year of the Rat',
+    category: 'chinese-zodiac',
+    keywords: [
+      'rat',
+      'year of the rat',
+      'chinese zodiac rat',
+      '1984',
+      '1996',
+      '2008',
+      '2020',
+    ],
+    summary:
+      'Rat is the first animal in the Chinese zodiac, representing quick-wit, resourcefulness, and charm.',
+    relatedSlugs: ['chinese-zodiac/ox', 'chinese-zodiac/dragon'],
+  },
+  {
+    slug: 'chinese-zodiac/snake',
+    title: 'Year of the Snake',
+    category: 'chinese-zodiac',
+    keywords: [
+      'snake',
+      'year of the snake',
+      'chinese zodiac snake',
+      '2025',
+      '2013',
+      '2001',
+      '1989',
+      '1977',
+    ],
+    summary:
+      'Snake is the sixth animal in the Chinese zodiac, representing wisdom, intuition, and mystery. 2025 is the Year of the Snake.',
+    relatedSlugs: ['chinese-zodiac/dragon', 'chinese-zodiac/horse'],
+  },
+
+  // ============================================================================
+  // ZODIAC SEASONS
+  // ============================================================================
+  {
+    slug: 'seasons',
+    title: 'Zodiac Seasons',
+    category: 'season',
+    keywords: [
+      'zodiac season',
+      'astrological season',
+      'sun season',
+      'aries season',
+      'taurus season',
+      'gemini season',
+    ],
+    summary:
+      'Throughout the year, the Sun moves through each zodiac sign, creating seasons of cosmic energy that affect everyone.',
+    relatedSlugs: ['zodiac/aries', 'zodiac/leo', 'zodiac/sagittarius'],
+  },
+
+  // ============================================================================
+  // NUMEROLOGY
+  // ============================================================================
+  {
+    slug: 'numerology',
+    title: 'Numerology',
+    category: 'numerology',
+    keywords: [
+      'numerology',
+      'universal year',
+      'personal year',
+      'life path number',
+      'numerology meaning',
+      'numbers',
+    ],
+    summary:
+      'The mystical study of numbers and their influence on human life. Calculate your personal year and life path number.',
+    relatedSlugs: ['numerology/year/2025', 'numerology/year/2026'],
+  },
+  {
+    slug: 'numerology/year/2025',
+    title: '2025 Numerology',
+    category: 'numerology',
+    keywords: [
+      '2025 numerology',
+      'universal year 9',
+      '2025 meaning',
+      'numerology 2025',
+      'year nine',
+    ],
+    summary:
+      '2025 is a Universal Year 9 in numerology - a year of completion, release, and humanitarian focus.',
+    relatedSlugs: ['numerology/year/2024', 'numerology/year/2026'],
+  },
+  {
+    slug: 'numerology/year/2026',
+    title: '2026 Numerology',
+    category: 'numerology',
+    keywords: [
+      '2026 numerology',
+      'universal year 1',
+      '2026 meaning',
+      'numerology 2026',
+      'year one',
+      'new beginnings',
+    ],
+    summary:
+      '2026 is a Universal Year 1 in numerology - a year of new beginnings, fresh starts, and new cycles.',
+    relatedSlugs: ['numerology/year/2025', 'numerology/year/2027'],
+  },
+
+  // ============================================================================
+  // BIRTHDAY ZODIAC
+  // ============================================================================
+  {
+    slug: 'birthday',
+    title: 'Birthday Zodiac',
+    category: 'birthday',
+    keywords: [
+      'birthday zodiac',
+      'zodiac sign by date',
+      'what sign am i',
+      'birthday astrology',
+      'born on',
+    ],
+    summary:
+      'Find your zodiac sign by birthday. Discover your Sun sign, decan, numerology, and personality traits for any birth date.',
+    relatedSlugs: ['zodiac/aries', 'zodiac/taurus', 'zodiac/gemini'],
+  },
+
+  // ============================================================================
+  // COMPATIBILITY
+  // ============================================================================
+  {
+    slug: 'compatibility',
+    title: 'Zodiac Compatibility',
+    category: 'compatibility',
+    keywords: [
+      'compatibility',
+      'zodiac compatibility',
+      'love compatibility',
+      'relationship',
+      'match',
+      'compatible signs',
+    ],
+    summary:
+      'Explore romantic and friendship compatibility between zodiac signs. Find your perfect astrological match.',
+    relatedSlugs: ['zodiac/aries', 'zodiac/libra', 'zodiac/leo'],
   },
 ];
 
