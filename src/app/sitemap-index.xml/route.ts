@@ -11,6 +11,8 @@ export async function GET() {
     'sitemap-crystals.xml',
     'sitemap-rituals.xml',
     'sitemap-transits.xml',
+    'sitemap-placements.xml',
+    'sitemap-compatibility.xml',
   ];
 
   const sitemapEntries = sitemaps
