@@ -2,8 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Metadata } from 'next';
 import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
+import {
+  createArticleSchema,
+  createFAQPageSchema,
+  createImageObjectSchema,
+  renderJsonLd,
+} from '@/lib/schema';
 
 export interface FAQItem {
   question: string;
@@ -17,6 +22,13 @@ export interface SEOContentTemplateProps {
   description: string;
   keywords: string[];
   canonicalUrl: string;
+
+  // Article metadata
+  datePublished?: string;
+  dateModified?: string;
+  image?: string;
+  imageAlt?: string;
+  articleSection?: string;
 
   // Featured snippet optimization
   whatIs?: {
@@ -57,6 +69,10 @@ export interface SEOContentTemplateProps {
   ctaText?: string;
   ctaHref?: string;
 
+  // E-A-T Credibility
+  showEAT?: boolean;
+  sources?: Array<{ name: string; url?: string }>;
+
   // Children (for custom content)
   children?: React.ReactNode;
 }
@@ -67,6 +83,11 @@ export function SEOContentTemplate({
   description,
   keywords,
   canonicalUrl,
+  datePublished,
+  dateModified,
+  image,
+  imageAlt,
+  articleSection,
   whatIs,
   intro,
   tldr,
@@ -89,47 +110,37 @@ export function SEOContentTemplate({
   breadcrumbs,
   ctaText,
   ctaHref,
+  showEAT = true,
+  sources,
   children,
 }: SEOContentTemplateProps) {
-  // Generate JSON-LD schema for FAQ
-  const faqSchema = faqs
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: faqs.map((faq) => ({
-          '@type': 'Question',
-          name: faq.question,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: faq.answer,
-          },
-        })),
-      }
-    : null;
+  const faqSchema = faqs ? createFAQPageSchema(faqs) : null;
 
-  // Generate Article schema
-  const articleSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
+  const articleImage = image || `https://lunary.app/api/og/cosmic`;
+  const articleImageAlt = imageAlt || `${h1} - Lunary Grimoire`;
+
+  const articleSchema = createArticleSchema({
     headline: h1,
-    description: description,
-    keywords: keywords.join(', '),
+    description,
     url: canonicalUrl,
-  };
+    keywords,
+    datePublished,
+    dateModified,
+    image: articleImage,
+    section: articleSection,
+  });
+
+  const imageSchema = createImageObjectSchema({
+    url: articleImage,
+    caption: articleImageAlt,
+  });
 
   return (
     <article className='max-w-4xl mx-auto space-y-8 p-4'>
       {/* JSON-LD Schemas */}
-      {faqSchema && (
-        <script
-          type='application/ld+json'
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
-      )}
-      <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
+      {renderJsonLd(faqSchema)}
+      {renderJsonLd(articleSchema)}
+      {renderJsonLd(imageSchema)}
 
       {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
@@ -485,6 +496,71 @@ export function SEOContentTemplate({
 
       {/* Children (custom content) */}
       {children && <div className='mt-8'>{children}</div>}
+
+      {/* E-A-T Credibility Section */}
+      {showEAT && (
+        <footer className='mt-12 pt-8 border-t border-zinc-800/50'>
+          <div className='space-y-4 text-sm text-zinc-500'>
+            <div className='flex flex-wrap gap-x-6 gap-y-2'>
+              <span>
+                <strong className='text-zinc-400'>Written by:</strong> Sammii,
+                Founder of Lunary
+              </span>
+              <span>
+                <strong className='text-zinc-400'>Edited by:</strong> Lunary
+                Astrology Team
+              </span>
+              {(dateModified || datePublished) && (
+                <span>
+                  <strong className='text-zinc-400'>Last updated:</strong>{' '}
+                  {new Date(
+                    dateModified || datePublished || '',
+                  ).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              )}
+            </div>
+
+            {sources && sources.length > 0 && (
+              <div>
+                <strong className='text-zinc-400'>Sources:</strong>
+                <ul className='mt-2 space-y-1'>
+                  {sources.map((source, index) => (
+                    <li key={index}>
+                      {source.url ? (
+                        <a
+                          href={source.url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-purple-400 hover:text-purple-300 transition-colors'
+                        >
+                          {source.name}
+                        </a>
+                      ) : (
+                        <span>{source.name}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {!sources && (
+              <div>
+                <strong className='text-zinc-400'>Reference Sources:</strong>
+                <ul className='mt-2 space-y-1'>
+                  <li>NASA Ephemeris Data (astronomical calculations)</li>
+                  <li>Traditional astrological texts</li>
+                  <li>Historical tarot and occult references</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </footer>
+      )}
     </article>
   );
 }
