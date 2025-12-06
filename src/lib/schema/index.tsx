@@ -554,3 +554,416 @@ export function renderJsonLd(schema: object | null) {
     />
   );
 }
+
+// ============================================================================
+// COSMIC ENTITY SCHEMAS - For Knowledge Graph Entity SEO
+// ============================================================================
+
+interface CosmicEntitySchemaProps {
+  name: string;
+  description: string;
+  url: string;
+  image?: string;
+  sameAs?: string[];
+  relatedEntities?: { name: string; url: string; relationship: string }[];
+  additionalType?: string;
+  keywords?: string[];
+}
+
+export function createCosmicEntitySchema({
+  name,
+  description,
+  url,
+  image,
+  sameAs,
+  relatedEntities,
+  additionalType,
+  keywords,
+}: CosmicEntitySchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Thing',
+    '@id': `${BASE_URL}${url}#entity`,
+    name,
+    description,
+    url: `${BASE_URL}${url}`,
+    ...(additionalType && { additionalType }),
+    ...(image && { image: `${BASE_URL}${image}` }),
+    ...(sameAs && sameAs.length > 0 && { sameAs }),
+    ...(keywords && keywords.length > 0 && { keywords: keywords.join(', ') }),
+    ...(relatedEntities &&
+      relatedEntities.length > 0 && {
+        isRelatedTo: relatedEntities.map((entity) => ({
+          '@type': 'Thing',
+          name: entity.name,
+          url: entity.url.startsWith('http')
+            ? entity.url
+            : `${BASE_URL}${entity.url}`,
+          description: entity.relationship,
+        })),
+      }),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}${url}`,
+    },
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
+
+interface ZodiacSignSchemaProps {
+  sign: string;
+  element: string;
+  modality: string;
+  rulingPlanet: string;
+  dates: string;
+  description: string;
+  traits: string[];
+  compatibility: string[];
+  relatedCrystals?: string[];
+  relatedTarot?: string;
+}
+
+export function createZodiacSignSchema({
+  sign,
+  element,
+  modality,
+  rulingPlanet,
+  dates,
+  description,
+  traits,
+  compatibility,
+  relatedCrystals,
+  relatedTarot,
+}: ZodiacSignSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Thing',
+    '@id': `${BASE_URL}/grimoire/zodiac/${sign.toLowerCase()}#entity`,
+    name: `${sign} Zodiac Sign`,
+    alternateName: sign,
+    description,
+    url: `${BASE_URL}/grimoire/zodiac/${sign.toLowerCase()}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Zodiac',
+    identifier: {
+      '@type': 'PropertyValue',
+      name: 'Zodiac Sign',
+      value: sign,
+    },
+    isPartOf: {
+      '@type': 'Thing',
+      name: 'Western Zodiac',
+      url: `${BASE_URL}/grimoire/zodiac`,
+    },
+    isRelatedTo: [
+      {
+        '@type': 'Thing',
+        name: element,
+        description: `${sign} is a ${element} sign`,
+      },
+      {
+        '@type': 'Thing',
+        name: modality,
+        description: `${sign} is a ${modality} sign`,
+      },
+      {
+        '@type': 'Thing',
+        name: rulingPlanet,
+        url: `${BASE_URL}/grimoire/astronomy/planets/${rulingPlanet.toLowerCase()}`,
+        description: `${rulingPlanet} rules ${sign}`,
+      },
+      ...compatibility.map((compatSign) => ({
+        '@type': 'Thing',
+        name: compatSign,
+        url: `${BASE_URL}/grimoire/zodiac/${compatSign.toLowerCase()}`,
+        description: `Compatible with ${sign}`,
+      })),
+      ...(relatedCrystals?.map((crystal) => ({
+        '@type': 'Thing',
+        name: crystal,
+        url: `${BASE_URL}/grimoire/crystals/${crystal.toLowerCase().replace(/\s+/g, '-')}`,
+        description: `Crystal associated with ${sign}`,
+      })) || []),
+      ...(relatedTarot
+        ? [
+            {
+              '@type': 'CreativeWork',
+              name: relatedTarot,
+              url: `${BASE_URL}/grimoire/tarot/${relatedTarot.toLowerCase().replace(/\s+/g, '-')}`,
+              description: `Tarot card associated with ${sign}`,
+            },
+          ]
+        : []),
+    ],
+    keywords: [sign, element, modality, rulingPlanet, dates, ...traits].join(
+      ', ',
+    ),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/grimoire/zodiac/${sign.toLowerCase()}`,
+    },
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
+
+interface PlanetSchemaProps {
+  planet: string;
+  description: string;
+  rules: string[];
+  themes: string[];
+  element?: string;
+  tarotCard?: string;
+  tarotUrl?: string;
+  crystals?: string[];
+  day?: string;
+  chakra?: string;
+}
+
+export function createPlanetSchema({
+  planet,
+  description,
+  rules,
+  themes,
+  element,
+  tarotCard,
+  tarotUrl,
+  crystals,
+  day,
+  chakra,
+}: PlanetSchemaProps) {
+  const relatedEntities: {
+    '@type': string;
+    name: string;
+    url?: string;
+    description: string;
+  }[] = [
+    ...rules.map((sign) => ({
+      '@type': 'Thing' as const,
+      name: sign,
+      url: `${BASE_URL}/grimoire/zodiac/${sign.toLowerCase()}`,
+      description: `${planet} rules ${sign}`,
+    })),
+  ];
+
+  if (tarotCard && tarotUrl) {
+    relatedEntities.push({
+      '@type': 'CreativeWork',
+      name: tarotCard,
+      url: `${BASE_URL}${tarotUrl}`,
+      description: `Tarot card associated with ${planet}`,
+    });
+  }
+
+  if (crystals) {
+    crystals.forEach((crystal) => {
+      relatedEntities.push({
+        '@type': 'Thing',
+        name: crystal,
+        url: `${BASE_URL}/grimoire/crystals/${crystal.toLowerCase().replace(/\s+/g, '-')}`,
+        description: `Crystal associated with ${planet}`,
+      });
+    });
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Thing',
+    '@id': `${BASE_URL}/grimoire/astronomy/planets/${planet.toLowerCase()}#entity`,
+    name: `${planet} in Astrology`,
+    alternateName: planet,
+    description,
+    url: `${BASE_URL}/grimoire/astronomy/planets/${planet.toLowerCase()}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Planet',
+    isRelatedTo: relatedEntities,
+    keywords: [
+      planet,
+      ...rules,
+      ...themes,
+      ...(element ? [element] : []),
+      ...(day ? [day] : []),
+      ...(chakra ? [chakra] : []),
+    ].join(', '),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/grimoire/astronomy/planets/${planet.toLowerCase()}`,
+    },
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
+
+interface TarotCardSchemaProps {
+  name: string;
+  description: string;
+  uprightMeaning: string;
+  reversedMeaning: string;
+  keywords: string[];
+  element?: string;
+  planet?: string;
+  sign?: string;
+  number?: number;
+  arcana: 'major' | 'minor';
+  suit?: string;
+  imageUrl?: string;
+}
+
+export function createTarotCardSchema({
+  name,
+  description,
+  uprightMeaning,
+  reversedMeaning,
+  keywords,
+  element,
+  planet,
+  sign,
+  number,
+  arcana,
+  suit,
+  imageUrl,
+}: TarotCardSchemaProps) {
+  const slug = name.toLowerCase().replace(/\s+/g, '-');
+
+  const relatedEntities: {
+    '@type': string;
+    name: string;
+    url?: string;
+    description: string;
+  }[] = [];
+
+  if (planet) {
+    relatedEntities.push({
+      '@type': 'Thing',
+      name: planet,
+      url: `${BASE_URL}/grimoire/astronomy/planets/${planet.toLowerCase()}`,
+      description: `Planet associated with ${name}`,
+    });
+  }
+
+  if (sign) {
+    relatedEntities.push({
+      '@type': 'Thing',
+      name: sign,
+      url: `${BASE_URL}/grimoire/zodiac/${sign.toLowerCase()}`,
+      description: `Zodiac sign associated with ${name}`,
+    });
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    '@id': `${BASE_URL}/grimoire/tarot/${slug}#entity`,
+    name,
+    description,
+    url: `${BASE_URL}/grimoire/tarot/${slug}`,
+    ...(imageUrl && { image: imageUrl }),
+    genre: 'Tarot',
+    isPartOf: {
+      '@type': 'CreativeWork',
+      name: arcana === 'major' ? 'Major Arcana' : `Minor Arcana - ${suit}`,
+      url: `${BASE_URL}/grimoire/tarot`,
+    },
+    ...(number !== undefined && { position: number }),
+    isRelatedTo: relatedEntities,
+    keywords: [
+      name,
+      arcana === 'major' ? 'Major Arcana' : 'Minor Arcana',
+      ...(suit ? [suit] : []),
+      ...(element ? [element] : []),
+      ...keywords,
+    ].join(', '),
+    abstract: uprightMeaning,
+    text: `Upright: ${uprightMeaning}. Reversed: ${reversedMeaning}`,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/grimoire/tarot/${slug}`,
+    },
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
+
+interface CrystalSchemaProps {
+  name: string;
+  description: string;
+  properties: string[];
+  chakras: string[];
+  zodiacSigns?: string[];
+  planets?: string[];
+  element?: string;
+  imageUrl?: string;
+}
+
+export function createCrystalSchema({
+  name,
+  description,
+  properties,
+  chakras,
+  zodiacSigns,
+  planets,
+  element,
+  imageUrl,
+}: CrystalSchemaProps) {
+  const slug = name.toLowerCase().replace(/\s+/g, '-');
+
+  const relatedEntities: {
+    '@type': string;
+    name: string;
+    url?: string;
+    description: string;
+  }[] = [];
+
+  zodiacSigns?.forEach((sign) => {
+    relatedEntities.push({
+      '@type': 'Thing',
+      name: sign,
+      url: `${BASE_URL}/grimoire/zodiac/${sign.toLowerCase()}`,
+      description: `${name} is associated with ${sign}`,
+    });
+  });
+
+  planets?.forEach((planet) => {
+    relatedEntities.push({
+      '@type': 'Thing',
+      name: planet,
+      url: `${BASE_URL}/grimoire/astronomy/planets/${planet.toLowerCase()}`,
+      description: `${name} is associated with ${planet}`,
+    });
+  });
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Thing',
+    '@id': `${BASE_URL}/grimoire/crystals/${slug}#entity`,
+    name,
+    description,
+    url: `${BASE_URL}/grimoire/crystals/${slug}`,
+    ...(imageUrl && { image: imageUrl }),
+    additionalType: 'https://en.wikipedia.org/wiki/Crystal',
+    isPartOf: {
+      '@type': 'Thing',
+      name: 'Crystal Guide',
+      url: `${BASE_URL}/grimoire/crystals`,
+    },
+    isRelatedTo: relatedEntities,
+    keywords: [
+      name,
+      'crystal',
+      'gemstone',
+      ...(element ? [element] : []),
+      ...properties,
+      ...chakras,
+    ].join(', '),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/grimoire/crystals/${slug}`,
+    },
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
