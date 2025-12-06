@@ -2,16 +2,35 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, BookOpen, Sparkles, X, ArrowRight } from 'lucide-react';
+import {
+  Search,
+  BookOpen,
+  Sparkles,
+  X,
+  ArrowRight,
+  Zap,
+  Brain,
+} from 'lucide-react';
 import {
   searchGrimoireIndex,
   type GrimoireEntry,
 } from '@/constants/seo/grimoire-search-index';
 
+interface SemanticSearchResult {
+  slug: string;
+  title: string;
+  category: string;
+  keywords: string[];
+  summary: string;
+  relatedSlugs: string[];
+  similarity: number;
+}
+
 interface AskTheGrimoireProps {
   variant?: 'inline' | 'modal' | 'hero';
   placeholder?: string;
   onSearch?: (query: string) => void;
+  enableAI?: boolean; // Allow AI search to be enabled
 }
 
 const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
@@ -48,30 +67,102 @@ export function AskTheGrimoire({
   variant = 'inline',
   placeholder = 'Ask the Grimoire anything...',
   onSearch,
+  enableAI = true,
 }: AskTheGrimoireProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GrimoireEntry[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isAIMode, setIsAIMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSearch = useCallback(
-    (searchQuery: string) => {
-      setQuery(searchQuery);
-      if (searchQuery.trim().length > 1) {
+  // Semantic AI search function
+  const performAISearch = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim() || searchQuery.length < 2) {
+      setResults([]);
+      setIsOpen(false);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/grimoire/semantic-search?q=${encodeURIComponent(searchQuery)}&limit=8`,
+      );
+      if (response.ok) {
+        const data: SemanticSearchResult[] = await response.json();
+        // Convert semantic results to GrimoireEntry format
+        const convertedResults: GrimoireEntry[] = data.map((r) => ({
+          slug: r.slug,
+          title: r.title,
+          category: r.category as GrimoireEntry['category'],
+          keywords: r.keywords,
+          summary: r.summary,
+          relatedSlugs: r.relatedSlugs,
+        }));
+        setResults(convertedResults);
+        setIsOpen(true);
+        setSelectedIndex(0);
+      } else {
+        // Fall back to keyword search on error
         const searchResults = searchGrimoireIndex(searchQuery, 8);
         setResults(searchResults);
         setIsOpen(true);
         setSelectedIndex(0);
-        onSearch?.(searchQuery);
-      } else {
+      }
+    } catch {
+      // Fall back to keyword search on error
+      const searchResults = searchGrimoireIndex(searchQuery, 8);
+      setResults(searchResults);
+      setIsOpen(true);
+      setSelectedIndex(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleSearch = useCallback(
+    (searchQuery: string) => {
+      setQuery(searchQuery);
+      onSearch?.(searchQuery);
+
+      if (searchQuery.trim().length < 2) {
         setResults([]);
         setIsOpen(false);
+        return;
+      }
+
+      if (isAIMode && enableAI) {
+        // Debounce AI search to avoid too many API calls
+        if (debounceRef.current) {
+          clearTimeout(debounceRef.current);
+        }
+        setIsLoading(true);
+        debounceRef.current = setTimeout(() => {
+          performAISearch(searchQuery);
+        }, 300);
+      } else {
+        // Instant keyword search
+        const searchResults = searchGrimoireIndex(searchQuery, 8);
+        setResults(searchResults);
+        setIsOpen(true);
+        setSelectedIndex(0);
       }
     },
-    [onSearch],
+    [onSearch, isAIMode, enableAI, performAISearch],
   );
+
+  // Re-search when AI mode changes
+  useEffect(() => {
+    if (query.trim().length > 1) {
+      handleSearch(query);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAIMode]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -137,10 +228,47 @@ export function AskTheGrimoire({
 
   return (
     <div className={`relative ${baseClasses}`}>
+      {/* AI Mode Toggle */}
+      {enableAI && (
+        <div className='flex justify-end mb-2'>
+          <button
+            onClick={() => setIsAIMode(!isAIMode)}
+            className={`
+              flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium
+              transition-all duration-300
+              ${
+                isAIMode
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/25'
+                  : 'bg-zinc-800/60 text-zinc-400 hover:text-white hover:bg-zinc-700/60'
+              }
+            `}
+            title={
+              isAIMode ? 'AI semantic search enabled' : 'Quick keyword search'
+            }
+          >
+            {isAIMode ? (
+              <>
+                <Brain className='h-3.5 w-3.5' />
+                <span>AI Search</span>
+              </>
+            ) : (
+              <>
+                <Zap className='h-3.5 w-3.5' />
+                <span>Quick Search</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Search Input */}
       <div className='relative'>
         <div className='absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none'>
-          <Search className='h-5 w-5 text-purple-400/60' />
+          {isLoading ? (
+            <div className='h-5 w-5 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin' />
+          ) : (
+            <Search className='h-5 w-5 text-purple-400/60' />
+          )}
         </div>
         <input
           ref={inputRef}
@@ -149,14 +277,18 @@ export function AskTheGrimoire({
           onChange={(e) => handleSearch(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => query.trim().length > 1 && setIsOpen(true)}
-          placeholder={placeholder}
+          placeholder={
+            isAIMode
+              ? 'Ask anything about astrology, tarot, crystals...'
+              : placeholder
+          }
           className={`
             w-full pl-12 pr-12 py-4 
             bg-black/40 backdrop-blur-xl
-            border border-purple-500/30 
+            border ${isAIMode ? 'border-indigo-500/40' : 'border-purple-500/30'}
             rounded-2xl
             text-white placeholder:text-purple-300/50
-            focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400/50
+            focus:outline-none focus:ring-2 ${isAIMode ? 'focus:ring-indigo-500/50 focus:border-indigo-400/50' : 'focus:ring-purple-500/50 focus:border-purple-400/50'}
             transition-all duration-300
             ${variant === 'hero' ? 'text-lg' : 'text-base'}
           `}
@@ -200,12 +332,24 @@ export function AskTheGrimoire({
           '
         >
           <div className='p-2 border-b border-purple-500/20'>
-            <div className='flex items-center gap-2 px-3 py-1.5 text-xs text-purple-400/70'>
-              <Sparkles className='h-3 w-3' />
-              <span>
-                Found {results.length} cosmic{' '}
-                {results.length === 1 ? 'insight' : 'insights'}
-              </span>
+            <div className='flex items-center justify-between px-3 py-1.5 text-xs'>
+              <div className='flex items-center gap-2 text-purple-400/70'>
+                {isAIMode ? (
+                  <Brain className='h-3 w-3 text-indigo-400' />
+                ) : (
+                  <Sparkles className='h-3 w-3' />
+                )}
+                <span>
+                  Found {results.length} cosmic{' '}
+                  {results.length === 1 ? 'insight' : 'insights'}
+                </span>
+              </div>
+              {isAIMode && (
+                <span className='text-indigo-400/70 flex items-center gap-1'>
+                  <span className='h-1.5 w-1.5 bg-indigo-400 rounded-full animate-pulse' />
+                  AI Powered
+                </span>
+              )}
             </div>
           </div>
 

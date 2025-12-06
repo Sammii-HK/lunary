@@ -772,6 +772,50 @@ async function setupDatabase() {
 
     console.log('✅ API keys table created');
 
+    // Enable vector extension for semantic search
+    await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+
+    // Create grimoire_embeddings table for semantic search in Astral Guide
+    await sql`
+      CREATE TABLE IF NOT EXISTS grimoire_embeddings (
+        id TEXT PRIMARY KEY,
+        slug TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        content TEXT NOT NULL,
+        embedding vector(1536),
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_grimoire_embeddings_slug ON grimoire_embeddings(slug)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_grimoire_embeddings_category ON grimoire_embeddings(category)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_grimoire_embeddings_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_grimoire_embeddings_updated_at ON grimoire_embeddings
+    `;
+
+    await sql`
+      CREATE TRIGGER update_grimoire_embeddings_updated_at
+          BEFORE UPDATE ON grimoire_embeddings
+          FOR EACH ROW
+          EXECUTE FUNCTION update_grimoire_embeddings_updated_at()
+    `;
+
+    console.log('✅ Grimoire embeddings table created');
+
     console.log('✅ Database setup complete!');
     console.log(
       '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, and API keys',

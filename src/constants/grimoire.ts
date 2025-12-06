@@ -140,6 +140,61 @@ export const grimoire: {
   compatibilityChart: {
     title: 'Compatibility Chart',
   },
+  // New SEO-focused sections
+  compatibility: {
+    title: 'Zodiac Compatibility',
+    contents: [
+      'All Compatibility Matches',
+      'Best Matches by Sign',
+      'Love Compatibility',
+      'Friendship Compatibility',
+    ],
+  },
+  placements: {
+    title: 'Planet Placements',
+    contents: [
+      'Sun Placements',
+      'Moon Placements',
+      'Mercury Placements',
+      'Venus Placements',
+      'Mars Placements',
+    ],
+  },
+  aspects: {
+    title: 'Astrological Aspects',
+    contents: ['Conjunction', 'Opposition', 'Trine', 'Square', 'Sextile'],
+  },
+  houses: {
+    title: 'Astrological Houses',
+    contents: ['1st House', '7th House', '10th House', 'Planets in Houses'],
+  },
+  decans: {
+    title: 'Zodiac Decans',
+  },
+  cusps: {
+    title: 'Zodiac Cusps',
+  },
+  birthday: {
+    title: 'Birthday Zodiac',
+    contents: ['Find Your Sign', 'Birthday Calendar', 'Decan by Birthday'],
+  },
+  chineseZodiac: {
+    title: 'Chinese Zodiac',
+    contents: ['The 12 Animals', 'Year of the Snake 2025', 'Compatibility'],
+  },
+  seasons: {
+    title: 'Zodiac Seasons',
+  },
+  transits: {
+    title: 'Yearly Transits',
+  },
+  glossary: {
+    title: 'Astrology Glossary',
+  },
+  events: {
+    title: 'Astrological Events',
+    contents: ['2025 Events', '2026 Events', 'Mercury Retrograde', 'Eclipses'],
+  },
 };
 
 export const grimoireItems = Object.keys(grimoire);

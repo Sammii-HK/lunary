@@ -10,7 +10,17 @@ function getPostgresPool() {
 
   const connectionString = process.env.POSTGRES_URL;
   if (!connectionString) {
-    if (process.env.NEXT_PHASE) return null;
+    // Skip in build phase, CI/test mode, or when SKIP_AUTH is set
+    if (
+      process.env.NEXT_PHASE ||
+      process.env.CI ||
+      process.env.NODE_ENV === 'test' ||
+      process.env.SKIP_AUTH === 'true' ||
+      process.env.BYPASS_AUTH === 'true'
+    ) {
+      console.warn('⚠️ POSTGRES_URL not set - running without database');
+      return null;
+    }
     throw new Error('POSTGRES_URL required');
   }
 
@@ -266,6 +276,25 @@ async function initializeAuth() {
 
     advanced: { database: { generateId: () => crypto.randomUUID() } },
   };
+
+  // Skip auth initialization if no database (CI/test mode)
+  if (!pool) {
+    console.warn('⚠️ Auth running in mock mode (no database)');
+    // Return a minimal mock auth that allows the app to start
+    authInstance = {
+      handler: async () =>
+        new Response('Auth disabled in test mode', { status: 503 }),
+      api: new Proxy(
+        {},
+        {
+          get() {
+            return async () => ({ user: null, session: null });
+          },
+        },
+      ),
+    } as any;
+    return authInstance;
+  }
 
   // PRIMARY: Postgres
   authInstance = betterAuth({

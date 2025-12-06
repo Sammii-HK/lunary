@@ -691,12 +691,54 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ API keys table created');
 
+    // Enable vector extension for semantic search
+    await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+
+    // Create grimoire_embeddings table for semantic search in Astral Guide
+    await sql`
+      CREATE TABLE IF NOT EXISTS grimoire_embeddings (
+        id TEXT PRIMARY KEY,
+        slug TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        content TEXT NOT NULL,
+        embedding vector(1536),
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_grimoire_embeddings_slug ON grimoire_embeddings(slug)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_grimoire_embeddings_category ON grimoire_embeddings(category)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_grimoire_embeddings_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`DROP TRIGGER IF EXISTS update_grimoire_embeddings_updated_at ON grimoire_embeddings`;
+
+    await sql`
+      CREATE TRIGGER update_grimoire_embeddings_updated_at
+          BEFORE UPDATE ON grimoire_embeddings
+          FOR EACH ROW
+          EXECUTE FUNCTION update_grimoire_embeddings_updated_at()
+    `;
+
+    console.log('✅ Grimoire embeddings table created');
+
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status, ritual_message_events, user_streaks, email_events, api_keys)',
+        'Database setup complete (push subscriptions, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status, ritual_message_events, user_streaks, email_events, api_keys, grimoire_embeddings)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

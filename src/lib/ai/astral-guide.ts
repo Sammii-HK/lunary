@@ -8,6 +8,7 @@ import {
 } from './types';
 import { buildLunaryContext } from './context';
 import { getBirthChart } from './providers';
+import { searchSimilar, type EmbeddingResult } from '@/lib/embeddings';
 
 export interface AstralContext {
   user: {
@@ -300,6 +301,46 @@ async function fetchJournalSummaries(
 }
 
 /**
+ * Retrieves relevant grimoire content using semantic search
+ * Returns formatted context for the AI to reference with citations
+ */
+export async function retrieveGrimoireContext(
+  query: string,
+  limit: number = 3,
+): Promise<{ context: string; sources: EmbeddingResult[] }> {
+  try {
+    const results = await searchSimilar(query, limit);
+
+    if (results.length === 0) {
+      return { context: '', sources: [] };
+    }
+
+    const contextParts = results.map(
+      (r, i) =>
+        `[${i + 1}] ${r.title} (${r.category}): ${r.content.substring(0, 300)}...`,
+    );
+
+    const context = `\n\nGRIMOIRE KNOWLEDGE:\n${contextParts.join('\n\n')}`;
+
+    return { context, sources: results };
+  } catch (error) {
+    console.error('[Astral Guide] Grimoire retrieval failed:', error);
+    return { context: '', sources: [] };
+  }
+}
+
+/**
+ * Formats grimoire sources as citations for the response
+ */
+export function formatGrimoireCitations(sources: EmbeddingResult[]): string {
+  if (sources.length === 0) return '';
+
+  return sources
+    .map((s, i) => `[${i + 1}] [${s.title}](/grimoire/${s.slug})`)
+    .join(' | ');
+}
+
+/**
  * Persona prompt for the Astral Guide
  * Defines the mystical, supportive, non-predictive guidance style
  */
@@ -322,11 +363,30 @@ CRITICAL RULES:
 7. Reference journal entries when relevant to show continuity in their journey
 8. Use mood tags to understand their current emotional landscape
 
+GRIMOIRE KNOWLEDGE:
+- When GRIMOIRE KNOWLEDGE is provided below, use it to enrich your responses with accurate, sourced information
+- Reference the grimoire when discussing zodiac meanings, planetary influences, tarot symbolism, crystal properties, or rituals
+- When using grimoire knowledge, naturally weave the reference numbers [1], [2], etc. into your response
+- This allows users to explore deeper in the Lunary Grimoire
+
+SYMBOLIC SYSTEMS INTEGRATION:
+- Connect astrology, tarot, crystals, and numerology holistically
+- Recognize correspondences: planets relate to tarot cards (Mercury → The Magician), zodiac signs relate to crystals (Aries → Carnelian), elements connect across systems
+- When one system is relevant, consider what complementary insights other systems might offer
+
+EMOTIONAL INTELLIGENCE:
+- Lead with empathy and validation before offering cosmic insights
+- Acknowledge difficult emotions without spiritual bypassing
+- Recognize when someone needs comfort vs. when they want analysis
+- Be gentle with sensitive topics - never dismissive or preachy
+- If someone seems in distress, prioritize human connection over cosmic information
+
 Your responses should:
 - Feel like a wise, supportive guide who understands both the mystical and practical
 - Weave together natal chart patterns, current transits, tarot symbolism, and moon phase
 - Provide gentle, reflective insights that help users understand themselves better
 - Suggest practical actions or reflections based on cosmic patterns
 - Never claim certainty about future events
+- Include grimoire citations when using retrieved knowledge
 
 Remember: You are interpreting cosmic patterns, not predicting outcomes. Your guidance helps users find their own wisdom within the cosmic context.`;

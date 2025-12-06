@@ -14,7 +14,52 @@ import {
   X,
   Sparkles,
   Search,
+  Moon as MoonIcon,
+  Sun,
+  Star,
+  Layers,
+  Gem,
+  BookOpen,
+  Compass,
+  Heart,
+  Flame,
+  Eye,
+  Hash,
+  Users,
+  Wand2,
+  Circle,
 } from 'lucide-react';
+
+const SECTION_ICONS: Record<string, React.ReactNode> = {
+  moon: <MoonIcon size={18} />,
+  wheelOfTheYear: <Sun size={18} />,
+  astronomy: <Star size={18} />,
+  tarot: <Layers size={18} />,
+  runes: <Hash size={18} />,
+  chakras: <Circle size={18} />,
+  numerology: <Hash size={18} />,
+  crystals: <Gem size={18} />,
+  correspondences: <BookOpen size={18} />,
+  practices: <Wand2 size={18} />,
+  birthChart: <Compass size={18} />,
+  candleMagic: <Flame size={18} />,
+  divination: <Eye size={18} />,
+  modernWitchcraft: <Sparkles size={18} />,
+  meditation: <Heart size={18} />,
+  compatibilityChart: <Users size={18} />,
+  compatibility: <Heart size={18} />,
+  placements: <Star size={18} />,
+  aspects: <Circle size={18} />,
+  houses: <Compass size={18} />,
+  decans: <Star size={18} />,
+  cusps: <Star size={18} />,
+  birthday: <Sun size={18} />,
+  chineseZodiac: <MoonIcon size={18} />,
+  seasons: <Sun size={18} />,
+  transits: <Star size={18} />,
+  glossary: <BookOpen size={18} />,
+  events: <Sparkles size={18} />,
+};
 import { GrimoireSearch } from './GrimoireSearch';
 import { captureEvent } from '@/lib/posthog-client';
 
@@ -254,8 +299,8 @@ export default function GrimoireLayout({
         />
 
         {/* Navigation */}
-        <div className='flex-1 overflow-y-auto p-4 md:p-5 lg:p-6'>
-          <div className='space-y-2'>
+        <div className='flex-1 overflow-y-auto p-3 md:p-4 lg:p-5'>
+          <div className='space-y-1'>
             {grimoireItems.map((itemKey: string) => {
               const isExpanded = expandedSections.has(itemKey);
               const hasContents =
@@ -265,15 +310,16 @@ export default function GrimoireLayout({
 
               const slug = sectionToSlug(itemKey);
               const href = `/grimoire/${slug}`;
+              const icon = SECTION_ICONS[itemKey];
 
               return (
                 <div key={itemKey} className='w-full'>
                   {/* Main header */}
                   <div
-                    className={`flex items-center rounded transition-colors ${
+                    className={`flex items-center rounded-lg transition-all duration-200 group ${
                       isActive
-                        ? 'bg-zinc-800/50 border-l-2 border-purple-400'
-                        : ''
+                        ? 'bg-purple-500/10 border-l-2 border-purple-400'
+                        : 'hover:bg-zinc-800/50'
                     }`}
                   >
                     {hasContents ? (
@@ -283,7 +329,7 @@ export default function GrimoireLayout({
                           e.stopPropagation();
                           toggleSection(itemKey);
                         }}
-                        className='p-1 mr-1 hover:bg-zinc-700 rounded'
+                        className='p-2 hover:bg-zinc-700/50 rounded-lg transition-colors'
                         aria-label={
                           isExpanded
                             ? `Collapse ${grimoire[itemKey].title}`
@@ -291,22 +337,16 @@ export default function GrimoireLayout({
                         }
                         aria-expanded={isExpanded}
                       >
-                        {isExpanded ? (
-                          <ChevronDownIcon
-                            size={16}
-                            className='text-zinc-400'
-                            aria-hidden='true'
-                          />
-                        ) : (
-                          <ChevronRightIcon
-                            size={16}
-                            className='text-zinc-400'
-                            aria-hidden='true'
-                          />
-                        )}
+                        <ChevronRightIcon
+                          size={14}
+                          className={`text-zinc-500 transition-transform duration-200 ${
+                            isExpanded ? 'rotate-90' : ''
+                          }`}
+                          aria-hidden='true'
+                        />
                       </button>
                     ) : (
-                      <div className='w-6' />
+                      <div className='w-8' />
                     )}
 
                     <Link
@@ -317,10 +357,21 @@ export default function GrimoireLayout({
                           setSidebarOpen(false);
                         });
                       }}
-                      className={`flex-1 py-2 md:py-2.5 px-2 md:px-3 text-sm md:text-base lg:text-lg font-medium hover:text-purple-400 transition-colors block ${
-                        isActive ? 'text-purple-400' : 'text-white'
+                      className={`flex-1 flex items-center gap-3 py-2.5 px-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'text-purple-400'
+                          : 'text-zinc-300 group-hover:text-white'
                       }`}
                     >
+                      <span
+                        className={`transition-colors ${
+                          isActive
+                            ? 'text-purple-400'
+                            : 'text-zinc-500 group-hover:text-purple-400'
+                        }`}
+                      >
+                        {icon}
+                      </span>
                       {grimoire[itemKey].title}
                     </Link>
                   </div>
@@ -330,10 +381,10 @@ export default function GrimoireLayout({
                     <div
                       className={`
                           overflow-hidden transition-all duration-300 ease-in-out
-                          ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+                          ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}
                         `}
                     >
-                      <div className='ml-6 md:ml-8 mt-1 space-y-1'>
+                      <div className='ml-8 pl-3 mt-1 mb-2 border-l border-zinc-800 space-y-0.5'>
                         {grimoire[itemKey].contents!.map((content: string) => {
                           const slug = sectionToSlug(itemKey);
                           return (
@@ -346,7 +397,7 @@ export default function GrimoireLayout({
                                   setSidebarOpen(false);
                                 });
                               }}
-                              className='block py-1.5 md:py-2 px-2 md:px-3 text-xs md:text-sm text-zinc-300 hover:text-purple-300 hover:bg-zinc-800 rounded transition-colors'
+                              className='block py-1.5 px-3 text-sm text-zinc-400 hover:text-purple-300 hover:bg-purple-500/5 rounded-md transition-colors'
                             >
                               {content}
                             </Link>
