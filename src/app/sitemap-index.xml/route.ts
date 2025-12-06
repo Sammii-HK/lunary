@@ -15,6 +15,7 @@ export async function GET() {
     'sitemap-compatibility.xml',
     'sitemap-birthday.xml',
     'sitemap-horoscopes.xml',
+    'sitemap-chinese-zodiac.xml',
     'sitemap-images.xml',
   ];
 
