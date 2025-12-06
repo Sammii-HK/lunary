@@ -9,8 +9,12 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: 'Googlebot',
-        allow: '/',
+        allow: ['/', '/sitemap-*.xml'],
         disallow: ['/api/', '/admin/', '/auth/', '/profile', '/test-', '/pwa-'],
+      },
+      {
+        userAgent: 'Googlebot-Image',
+        allow: ['/', '/api/og/', '/sitemap-images.xml'],
       },
       {
         userAgent: 'Bingbot',
@@ -19,15 +23,19 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: 'GPTBot',
-        allow: '/',
-        disallow: ['/api/', '/admin/', '/auth/', '/profile'],
+        allow: ['/', '/api/gpt/'],
+        disallow: ['/api/admin/', '/admin/', '/auth/', '/profile'],
       },
       {
         userAgent: 'ChatGPT-User',
-        allow: '/',
-        disallow: ['/api/', '/admin/', '/auth/', '/profile'],
+        allow: ['/', '/api/gpt/'],
+        disallow: ['/api/admin/', '/admin/', '/auth/', '/profile'],
       },
     ],
-    sitemap: 'https://lunary.app/sitemap.xml',
+    sitemap: [
+      'https://lunary.app/sitemap-index.xml',
+      'https://lunary.app/sitemap.xml',
+      'https://lunary.app/sitemap-images.xml',
+    ],
   };
 }

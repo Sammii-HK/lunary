@@ -1,107 +1,119 @@
-export const revalidate = 86400;
-
 import { Metadata } from 'next';
-import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import Link from 'next/link';
+import {
+  YEARLY_TRANSITS,
+  getTransitsForYear,
+} from '@/constants/seo/yearly-transits';
 
 export const metadata: Metadata = {
-  title: 'Transits: Current Planetary Movements Guide - Lunary',
+  title:
+    'Yearly Astrological Transits 2025-2030: Major Planetary Movements | Lunary',
   description:
-    'Learn about planetary transits and how current planetary positions affect your birth chart. Understand major transits like Saturn Return and Jupiter Return, and how to work with daily transits for timing and personal growth.',
+    'Complete guide to major astrological transits from 2025-2030. Saturn Return, Jupiter transits, Uranus ingresses, and more. Plan ahead with cosmic awareness.',
   keywords: [
-    'planetary transits',
     'astrological transits',
-    'current transits',
     'saturn return',
-    'jupiter return',
-    'transit astrology',
-    'planetary movements',
-    'how transits affect birth chart',
+    'jupiter transit',
+    'yearly astrology',
+    '2025 transits',
+    '2026 transits',
   ],
-  openGraph: {
-    title: 'Transits: Current Planetary Movements Guide - Lunary',
-    description:
-      'Learn about planetary transits and how current planetary positions affect your birth chart. Understand major transits and daily influences.',
-    type: 'article',
-  },
-  twitter: {
-    card: 'summary',
-    title: 'Transits: Current Planetary Movements Guide - Lunary',
-    description:
-      'Learn about planetary transits and how current planetary positions affect your birth chart.',
-  },
-  alternates: {
-    canonical: 'https://lunary.app/grimoire/transits',
-  },
+  alternates: { canonical: 'https://lunary.app/grimoire/transits' },
 };
 
-export default function TransitsPage() {
+const years = [2025, 2026, 2027, 2028, 2029, 2030];
+
+export default function TransitsIndexPage() {
   return (
-    <SEOContentTemplate
-      title='Transits: Current Planetary Movements Guide - Lunary'
-      h1='Transits — Current Planetary Movements'
-      description='Learn about planetary transits and how current planetary positions affect your birth chart. Understand major transits like Saturn Return and Jupiter Return, and how to work with daily transits for timing and personal growth.'
-      keywords={[
-        'planetary transits',
-        'astrological transits',
-        'current transits',
-        'saturn return',
-        'jupiter return',
-        'transit astrology',
-        'planetary movements',
-      ]}
-      canonicalUrl='https://lunary.app/grimoire/transits'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Birth Chart', href: '/grimoire/birth-chart' },
-        { label: 'Transits', href: '/grimoire/transits' },
-      ]}
-      intro='Transits are current planetary positions in relation to your birth chart. They show current influences and timing for events and personal growth. Understanding transits helps you navigate life changes, recognize opportunities, and work with cosmic timing for optimal results.'
-      meaning={`Transits activate different parts of your chart at different times. Major transits (like Saturn Return, Jupiter Return) mark significant life periods. Daily transits show day-to-day influences and opportunities.
+    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <div className='max-w-6xl mx-auto px-4 py-12'>
+        <nav className='text-sm text-zinc-500 mb-8'>
+          <Link href='/grimoire' className='hover:text-zinc-300'>
+            Grimoire
+          </Link>
+          <span className='mx-2'>/</span>
+          <span className='text-zinc-300'>Transits</span>
+        </nav>
 
-**Understanding Transits:**
-Transits occur when a currently moving planet forms an aspect (conjunction, square, trine, etc.) to a planet or point in your birth chart. These aspects activate the natal planet's energy, bringing its themes to the forefront of your life.
+        <h1 className='text-4xl font-light mb-4'>
+          Yearly Astrological Transits
+        </h1>
+        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+          Major planetary transits shape the collective experience and personal
+          growth opportunities. Explore what the cosmos has in store from 2025
+          through 2030.
+        </p>
 
-**Major Transits:**
-- **Saturn Return (Age 27-30, 57-60):** A major life transition marking adulthood and responsibility. A time of restructuring, facing reality, and building lasting foundations. Often brings challenges that lead to maturity.
-- **Jupiter Return (Every 12 years):** A period of expansion, growth, and opportunity. New opportunities emerge, and you may feel more optimistic and adventurous. A good time to take risks and expand horizons.
-- **Uranus Opposition (Age 42-45):** A time of liberation and breaking free from restrictions. Often brings sudden changes and the desire for freedom and authenticity.
-- **Chiron Return (Age 50-51):** A period of deep healing and addressing core wounds. An opportunity to transform pain into wisdom.
+        <div className='flex flex-wrap gap-3 mb-8'>
+          {years.map((year) => (
+            <a
+              key={year}
+              href={`#year-${year}`}
+              className='px-4 py-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 transition-colors'
+            >
+              {year}
+            </a>
+          ))}
+        </div>
 
-**Daily Transits:**
-Daily transits show day-to-day influences. For example, when transiting Venus aspects your natal Sun, you may feel more confident and attractive. When transiting Mars squares your natal Moon, you may experience emotional intensity or conflict.`}
-      howToWorkWith={[
-        'Track current transits to your birth chart',
-        'Use major transits for life planning and preparation',
-        'Work with daily transits for optimal timing',
-        'Understand which transits activate which areas of your life',
-        'Use harmonious transits (trines, sextiles) for opportunities',
-        'Navigate challenging transits (squares, oppositions) consciously',
-        'Combine transits with moon phases for powerful timing',
-        'Keep a transit journal to track patterns and effects',
-      ]}
-      faqs={[
-        {
-          question: 'What is a Saturn Return?',
-          answer:
-            'Saturn Return occurs when transiting Saturn returns to its natal position in your birth chart, around ages 27-30 and 57-60. It marks major life transitions, bringing lessons about responsibility, structure, and maturity. It often involves restructuring your life, facing reality, and building lasting foundations.',
-        },
-        {
-          question: 'How do I know what transits are affecting me?',
-          answer:
-            'You need to know your birth chart and compare it with current planetary positions. Many astrology apps and websites calculate transits automatically. Look for aspects between transiting planets and your natal planets, especially conjunctions, squares, trines, and oppositions.',
-        },
-        {
-          question: 'Are challenging transits bad?',
-          answer:
-            'Challenging transits (squares, oppositions) bring tension and friction, but they also create growth opportunities. They force you to address issues and make necessary changes. Harmonious transits (trines, sextiles) feel easier but may not push you to grow. Both types are valuable.',
-        },
-      ]}
-      internalLinks={[
-        { text: 'Birth Chart', href: '/grimoire/birth-chart' },
-        { text: 'Rising Sign', href: '/grimoire/rising-sign' },
-        { text: 'Synastry', href: '/grimoire/synastry' },
-        { text: 'Astronomy & Astrology', href: '/grimoire/astronomy' },
-      ]}
-    />
+        {years.map((year) => {
+          const yearTransits = getTransitsForYear(year);
+          if (yearTransits.length === 0) return null;
+
+          return (
+            <div key={year} id={`year-${year}`} className='mb-12'>
+              <h2 className='text-2xl font-light mb-6 text-purple-300'>
+                {year} Transits
+              </h2>
+              <div className='grid md:grid-cols-2 gap-4'>
+                {yearTransits.map((transit) => (
+                  <Link
+                    key={transit.id}
+                    href={`/grimoire/transits/${transit.id}`}
+                    className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                  >
+                    <div className='text-sm text-zinc-500 mb-1'>
+                      {transit.dates}
+                    </div>
+                    <h3 className='text-lg font-medium mb-2 group-hover:text-purple-300 transition-colors'>
+                      {transit.title}
+                    </h3>
+                    <p className='text-sm text-zinc-400 line-clamp-2'>
+                      {transit.description}
+                    </p>
+                    <div className='flex flex-wrap gap-1 mt-3'>
+                      {transit.signs.map((sign) => (
+                        <span
+                          key={sign}
+                          className='text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-300'
+                        >
+                          {sign}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+            Personal Transit Readings
+          </h2>
+          <p className='text-zinc-300 mb-4'>
+            See how these transits affect your personal natal chart for deeper
+            insights.
+          </p>
+          <Link
+            href='/welcome'
+            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+          >
+            Get Personal Transit Report
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

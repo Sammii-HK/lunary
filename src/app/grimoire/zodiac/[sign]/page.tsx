@@ -7,6 +7,7 @@ import {
   zodiacUnicode,
 } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
+import { getEntityRelationships } from '@/constants/entity-relationships';
 
 const signSlugs = Object.keys(zodiacSigns);
 
@@ -219,6 +220,13 @@ Symbol: ${unicodeSymbol}
 Dates: ${signData.dates}
 Season: (varies by sign)`}
         relatedItems={[
+          ...getEntityRelationships('zodiac', signKey)
+            .slice(0, 5)
+            .map((rel) => ({
+              name: rel.name,
+              href: rel.url,
+              type: rel.type.charAt(0).toUpperCase() + rel.type.slice(1),
+            })),
           {
             name: 'Birth Chart',
             href: '/grimoire/birth-chart',
@@ -228,11 +236,6 @@ Season: (varies by sign)`}
             name: 'Horoscope',
             href: '/horoscope',
             type: 'Daily Reading',
-          },
-          {
-            name: 'Moon Phases',
-            href: '/grimoire/moon',
-            type: 'Guide',
           },
         ]}
         breadcrumbs={[

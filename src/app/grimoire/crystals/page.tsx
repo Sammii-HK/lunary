@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Crystals from '../components/Crystals';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { crystalDatabase } from '@/constants/grimoire/crystals';
 
 export const revalidate = 86400; // Revalidate every 24 hours
 
@@ -36,8 +38,21 @@ export const metadata: Metadata = {
 };
 
 export default function CrystalsPage() {
+  const crystalListSchema = createItemListSchema({
+    name: 'Complete Crystal Guide',
+    description:
+      'Comprehensive guide to crystals, their meanings, properties, and how to work with them for healing and magic.',
+    url: 'https://lunary.app/grimoire/crystals',
+    items: crystalDatabase.slice(0, 50).map((crystal) => ({
+      name: crystal.name,
+      url: `https://lunary.app/grimoire/crystals/${crystal.id}`,
+      description: crystal.description,
+    })),
+  });
+
   return (
     <>
+      {renderJsonLd(crystalListSchema)}
       <SEOContentTemplate
         title='Crystals: Complete Guide to Crystal Meanings & Uses - Lunary'
         h1='Crystals'

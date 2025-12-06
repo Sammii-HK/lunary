@@ -27,6 +27,7 @@ import { getPriceForCurrency } from '../../../utils/stripe-prices';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
 import { conversionTracking } from '@/lib/analytics';
 import { MarketingFooter } from '@/components/MarketingFooter';
+import { createProductSchema, renderJsonLd } from '@/lib/schema';
 
 export default function PricingPage() {
   const { user } = useUser();
@@ -181,9 +182,58 @@ export default function PricingPage() {
     },
   ];
 
+  const productSchemas = [
+    createProductSchema({
+      name: 'Lunary Free',
+      description:
+        'Get a feel for your cosmic rhythm with basic astrology features.',
+      price: 0,
+      priceCurrency: 'USD',
+      features: [
+        'Daily moon phases',
+        'General tarot card of the day',
+        'Basic grimoire access',
+      ],
+      sku: 'lunary_free',
+    }),
+    createProductSchema({
+      name: 'Lunary+',
+      description: 'Personalized astrology based on your exact birth chart.',
+      price: 4.99,
+      priceCurrency: 'USD',
+      interval: 'month',
+      features: [
+        'Complete birth chart analysis',
+        'Personalized daily horoscopes',
+        'Personal transit impacts',
+        'Moon circle rituals',
+        'Crystal recommendations',
+      ],
+      sku: 'lunary_plus',
+    }),
+    createProductSchema({
+      name: 'Lunary+ AI',
+      description: 'Unlimited AI guidance based on your birth chart.',
+      price: 7.99,
+      priceCurrency: 'USD',
+      interval: 'month',
+      features: [
+        'Everything in Lunary+',
+        'Unlimited AI chat',
+        'Weekly cosmic reports',
+        'Downloadable PDFs',
+        'Advanced pattern analysis',
+      ],
+      sku: 'lunary_plus_ai',
+    }),
+  ];
+
   return (
     <>
       <FAQStructuredData faqs={faqs} />
+      {productSchemas.map((schema, index) => (
+        <span key={index}>{renderJsonLd(schema)}</span>
+      ))}
       <div className='min-h-screen bg-[#0a0a0f] text-zinc-100 flex flex-col'>
         {/* Subtle gradient background */}
         <div className='fixed inset-0 bg-gradient-to-b from-purple-950/20 via-transparent to-transparent pointer-events-none' />

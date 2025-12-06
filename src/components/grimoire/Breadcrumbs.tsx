@@ -3,7 +3,7 @@ import { ChevronRight, Home } from 'lucide-react';
 
 export interface BreadcrumbItem {
   label: string;
-  href: string;
+  href?: string;
 }
 
 interface BreadcrumbsProps {
@@ -21,12 +21,14 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
         name: 'Home',
         item: 'https://lunary.app',
       },
-      ...items.map((item, index) => ({
-        '@type': 'ListItem',
-        position: index + 2,
-        name: item.label,
-        item: `https://lunary.app${item.href}`,
-      })),
+      ...items
+        .filter((item) => item.href)
+        .map((item, index) => ({
+          '@type': 'ListItem',
+          position: index + 2,
+          name: item.label,
+          item: `https://lunary.app${item.href}`,
+        })),
     ],
   };
 
@@ -44,9 +46,12 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
           <span className='sr-only'>Home</span>
         </Link>
         {items.map((item, index) => (
-          <span key={item.href} className='flex items-center gap-2'>
+          <span
+            key={item.href || item.label}
+            className='flex items-center gap-2'
+          >
             <ChevronRight className='w-4 h-4 text-zinc-600' />
-            {index === items.length - 1 ? (
+            {index === items.length - 1 || !item.href ? (
               <span className='text-zinc-300 font-medium'>{item.label}</span>
             ) : (
               <Link

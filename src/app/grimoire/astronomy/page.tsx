@@ -3,6 +3,8 @@ export const revalidate = 86400;
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Astronomy from '../components/Astronomy';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { ZODIAC_SIGNS } from '../../../../utils/zodiac/zodiac';
 
 export const metadata: Metadata = {
   title: 'Astronomy & Astrology: Planets & Zodiac Signs - Lunary',
@@ -37,8 +39,82 @@ export const metadata: Metadata = {
 };
 
 export default function AstronomyPage() {
+  const zodiacListSchema = createItemListSchema({
+    name: 'Complete Zodiac Signs Guide',
+    description:
+      'Learn about all 12 zodiac signs, their meanings, traits, and astrological correspondences.',
+    url: 'https://lunary.app/grimoire/astronomy',
+    items: ZODIAC_SIGNS.map((sign) => ({
+      name: `${sign} Zodiac Sign`,
+      url: `https://lunary.app/grimoire/zodiac/${sign.toLowerCase()}`,
+      description: `Complete guide to ${sign} zodiac sign traits, meaning, and correspondences.`,
+    })),
+  });
+
+  const planetsListSchema = createItemListSchema({
+    name: 'Planets in Astrology',
+    description:
+      'Explore the astrological meanings and influences of all planets.',
+    url: 'https://lunary.app/grimoire/astronomy',
+    items: [
+      {
+        name: 'Sun',
+        url: 'https://lunary.app/grimoire/astronomy/planets/sun',
+        description: 'The Sun represents ego, identity, and vitality.',
+      },
+      {
+        name: 'Moon',
+        url: 'https://lunary.app/grimoire/astronomy/planets/moon',
+        description:
+          'The Moon governs emotions, intuition, and the subconscious.',
+      },
+      {
+        name: 'Mercury',
+        url: 'https://lunary.app/grimoire/astronomy/planets/mercury',
+        description: 'Mercury rules communication, intellect, and travel.',
+      },
+      {
+        name: 'Venus',
+        url: 'https://lunary.app/grimoire/astronomy/planets/venus',
+        description: 'Venus governs love, beauty, and relationships.',
+      },
+      {
+        name: 'Mars',
+        url: 'https://lunary.app/grimoire/astronomy/planets/mars',
+        description: 'Mars represents action, passion, and drive.',
+      },
+      {
+        name: 'Jupiter',
+        url: 'https://lunary.app/grimoire/astronomy/planets/jupiter',
+        description: 'Jupiter brings expansion, luck, and wisdom.',
+      },
+      {
+        name: 'Saturn',
+        url: 'https://lunary.app/grimoire/astronomy/planets/saturn',
+        description: 'Saturn represents discipline, structure, and karma.',
+      },
+      {
+        name: 'Uranus',
+        url: 'https://lunary.app/grimoire/astronomy/planets/uranus',
+        description: 'Uranus brings innovation, rebellion, and sudden change.',
+      },
+      {
+        name: 'Neptune',
+        url: 'https://lunary.app/grimoire/astronomy/planets/neptune',
+        description: 'Neptune governs dreams, spirituality, and illusion.',
+      },
+      {
+        name: 'Pluto',
+        url: 'https://lunary.app/grimoire/astronomy/planets/pluto',
+        description: 'Pluto represents transformation, power, and rebirth.',
+      },
+    ],
+  });
+
   return (
     <>
+      {renderJsonLd(zodiacListSchema)}
+      {renderJsonLd(planetsListSchema)}
       <SEOContentTemplate
         title='Astronomy & Astrology: Planets & Zodiac Signs - Lunary'
         h1='Astronomy & Astrology'

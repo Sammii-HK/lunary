@@ -1,0 +1,88 @@
+import { Metadata } from 'next';
+import Link from 'next/link';
+import {
+  ZODIAC_SIGNS,
+  SIGN_DISPLAY,
+  SIGN_SYMBOLS,
+  getDecanData,
+} from '@/constants/seo/decans';
+
+export const metadata: Metadata = {
+  title: 'Zodiac Decans: All 36 Decans Explained | Lunary',
+  description:
+    'Complete guide to the 36 zodiac decans. Each sign is divided into three 10-degree sections with unique sub-rulers and traits. Find your decan.',
+  keywords: [
+    'zodiac decans',
+    'decan astrology',
+    'first decan',
+    'second decan',
+    'third decan',
+    'sub-ruler',
+  ],
+  alternates: { canonical: 'https://lunary.app/grimoire/decans' },
+};
+
+export default function DecansIndexPage() {
+  return (
+    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <div className='max-w-6xl mx-auto px-4 py-12'>
+        <nav className='text-sm text-zinc-500 mb-8'>
+          <Link href='/grimoire' className='hover:text-zinc-300'>
+            Grimoire
+          </Link>
+          <span className='mx-2'>/</span>
+          <span className='text-zinc-300'>Decans</span>
+        </nav>
+
+        <h1 className='text-4xl font-light mb-4'>Zodiac Decans</h1>
+        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+          Each zodiac sign is divided into three 10-degree sections called
+          decans. Each decan has a sub-ruler that adds unique qualities to your
+          Sun sign placement.
+        </p>
+
+        <div className='space-y-8'>
+          {ZODIAC_SIGNS.map((sign) => {
+            const signName = SIGN_DISPLAY[sign];
+            const symbol = SIGN_SYMBOLS[sign];
+            return (
+              <div
+                key={sign}
+                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
+              >
+                <div className='flex items-center gap-3 mb-4'>
+                  <span className='text-3xl'>{symbol}</span>
+                  <h2 className='text-xl font-medium'>{signName} Decans</h2>
+                </div>
+                <div className='grid md:grid-cols-3 gap-4'>
+                  {[1, 2, 3].map((d) => {
+                    const decan = d as 1 | 2 | 3;
+                    const data = getDecanData(sign, decan);
+                    return (
+                      <Link
+                        key={d}
+                        href={`/grimoire/decans/${sign}/${d}`}
+                        className='p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors group'
+                      >
+                        <div className='text-sm text-purple-400 mb-1'>
+                          {d === 1 ? 'First' : d === 2 ? 'Second' : 'Third'}{' '}
+                          Decan
+                        </div>
+                        <div className='font-medium group-hover:text-purple-300 transition-colors'>
+                          {data.dateRange}
+                        </div>
+                        <div className='text-sm text-zinc-500'>
+                          Sub-ruler: {data.subruler}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

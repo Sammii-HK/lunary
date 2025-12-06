@@ -3,6 +3,11 @@ export const revalidate = 86400;
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import BirthChart from '../components/BirthChart';
+import { createQAPageSchema, renderJsonLd } from '@/lib/schema';
+import {
+  PeopleAlsoAsk,
+  BIRTH_CHART_PAA,
+} from '@/components/grimoire/PeopleAlsoAsk';
 
 export const metadata: Metadata = {
   title: 'Birth Chart: Planets, Houses & Astrology Guide - Lunary',
@@ -36,8 +41,16 @@ export const metadata: Metadata = {
 };
 
 export default function BirthChartPage() {
+  const qaSchema = createQAPageSchema({
+    question: 'What is a birth chart?',
+    answer:
+      'A birth chart (also called a natal chart) is a map of the sky at the exact moment you were born. It shows the positions of all planets, the zodiac signs they were in, and the houses they occupied. Your birth chart reveals your personality, strengths, challenges, and life path. The most important elements are your Sun sign (core identity), Moon sign (emotional nature), and Rising sign (outer personality). To create an accurate birth chart, you need your exact birth time, date, and location.',
+    url: 'https://lunary.app/grimoire/birth-chart',
+  });
+
   return (
     <>
+      {renderJsonLd(qaSchema)}
       <SEOContentTemplate
         title='Birth Chart: Planets, Houses & Astrology Guide - Lunary'
         h1='Birth Chart'
@@ -94,7 +107,9 @@ Understanding your birth chart helps you recognize your natural talents, work wi
           { text: 'Moon Phases', href: '/grimoire/moon' },
           { text: 'Numerology', href: '/grimoire/numerology' },
         ]}
-      />
+      >
+        <PeopleAlsoAsk questions={BIRTH_CHART_PAA} />
+      </SEOContentTemplate>
       <div className='max-w-4xl mx-auto p-4'>
         <BirthChart />
       </div>

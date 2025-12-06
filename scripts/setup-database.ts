@@ -723,9 +723,58 @@ async function setupDatabase() {
 
     console.log('✅ Email events table created');
 
+    // Create api_keys table for developer API monetization
+    await sql`
+      CREATE TABLE IF NOT EXISTS api_keys (
+        id TEXT PRIMARY KEY,
+        key_hash TEXT NOT NULL UNIQUE,
+        key_prefix TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        tier TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        requests INTEGER DEFAULT 0,
+        request_limit INTEGER NOT NULL,
+        rate_limit INTEGER NOT NULL,
+        expires_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        last_used_at TIMESTAMP WITH TIME ZONE,
+        reset_at TIMESTAMP WITH TIME ZONE NOT NULL
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON api_keys(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_tier ON api_keys(tier)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_is_active ON api_keys(is_active) WHERE is_active = true`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_api_keys_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_api_keys_updated_at ON api_keys
+    `;
+
+    await sql`
+      CREATE TRIGGER update_api_keys_updated_at
+          BEFORE UPDATE ON api_keys
+          FOR EACH ROW
+          EXECUTE FUNCTION update_api_keys_updated_at()
+    `;
+
+    console.log('✅ API keys table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, and notes',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, and API keys',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);

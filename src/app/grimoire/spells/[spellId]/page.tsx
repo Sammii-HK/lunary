@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSpellById, spellCategories } from '@/constants/spells';
 import { ArrowLeft, Clock, Star, Moon, Sun, Leaf } from 'lucide-react';
+import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 
 export default function SpellPage() {
   const params = useParams();
@@ -36,8 +37,28 @@ export default function SpellPage() {
     advanced: 'text-red-400',
   };
 
+  const howToSchema = createHowToSchema({
+    name: spell.title,
+    description: spell.description,
+    url: `https://lunary.app/grimoire/spells/${spellId}`,
+    totalTime: spell.duration,
+    tools: spell.tools,
+    supplies: spell.ingredients.map((i) => i.name),
+    steps: [
+      ...spell.preparation.map((step, idx) => ({
+        name: `Preparation Step ${idx + 1}`,
+        text: step,
+      })),
+      ...spell.steps.map((step, idx) => ({
+        name: `Ritual Step ${idx + 1}`,
+        text: step,
+      })),
+    ],
+  });
+
   return (
     <div className='min-h-screen p-4 max-w-md mx-auto'>
+      {renderJsonLd(howToSchema)}
       {/* Header */}
       <div className='mb-6'>
         <Link
