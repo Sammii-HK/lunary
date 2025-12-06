@@ -3,6 +3,10 @@ export const revalidate = 86400;
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createQAPageSchema, renderJsonLd } from '@/lib/schema';
+import {
+  PeopleAlsoAsk,
+  RISING_SIGN_PAA,
+} from '@/components/grimoire/PeopleAlsoAsk';
 
 export const metadata: Metadata = {
   title: 'Rising Sign (Ascendant): Complete Guide - Lunary',
@@ -121,7 +125,9 @@ Think of it this way: Your Sun sign is your true self, while your Rising sign is
           { text: 'Synastry', href: '/grimoire/synastry' },
           { text: 'Astronomy & Astrology', href: '/grimoire/astronomy' },
         ]}
-      />
+      >
+        <PeopleAlsoAsk questions={RISING_SIGN_PAA} />
+      </SEOContentTemplate>
     </>
   );
 }

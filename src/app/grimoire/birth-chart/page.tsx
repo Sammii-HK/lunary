@@ -4,6 +4,10 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import BirthChart from '../components/BirthChart';
 import { createQAPageSchema, renderJsonLd } from '@/lib/schema';
+import {
+  PeopleAlsoAsk,
+  BIRTH_CHART_PAA,
+} from '@/components/grimoire/PeopleAlsoAsk';
 
 export const metadata: Metadata = {
   title: 'Birth Chart: Planets, Houses & Astrology Guide - Lunary',
@@ -103,7 +107,9 @@ Understanding your birth chart helps you recognize your natural talents, work wi
           { text: 'Moon Phases', href: '/grimoire/moon' },
           { text: 'Numerology', href: '/grimoire/numerology' },
         ]}
-      />
+      >
+        <PeopleAlsoAsk questions={BIRTH_CHART_PAA} />
+      </SEOContentTemplate>
       <div className='max-w-4xl mx-auto p-4'>
         <BirthChart />
       </div>
