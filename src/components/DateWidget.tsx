@@ -1,13 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { Calendar } from '@/components/ui/calendar';
+import { RotateCcw, Calendar as CalendarIcon } from 'lucide-react';
+import dayjs from 'dayjs';
 
 export const DateWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const { writtenDate, setCurrentDateTime } = useAstronomyContext();
+  const { writtenDate, setCurrentDateTime, currentDate } =
+    useAstronomyContext();
+
+  const isViewingDifferentDate = useMemo(() => {
+    const today = dayjs().format('YYYY-MM-DD');
+    return currentDate && currentDate !== today;
+  }, [currentDate]);
 
   const handleSelect = (newDate: Date | undefined) => {
     if (newDate) {
@@ -17,14 +25,33 @@ export const DateWidget = () => {
     setIsOpen(false);
   };
 
+  const handleBackToToday = () => {
+    const today = new Date();
+    setDate(today);
+    setCurrentDateTime(today);
+    setIsOpen(false);
+  };
+
   return (
     <>
-      <button
-        className='w-full flex justify-center cursor-pointer hover:text-purple-400 transition-colors text-zinc-300'
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {writtenDate}
-      </button>
+      <div className='flex flex-col items-center gap-1'>
+        <button
+          className='flex items-center gap-2 cursor-pointer hover:text-purple-400 transition-colors text-zinc-300'
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <CalendarIcon className='w-4 h-4' />
+          <span>{writtenDate}</span>
+        </button>
+        {isViewingDifferentDate && (
+          <button
+            onClick={handleBackToToday}
+            className='flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/30'
+          >
+            <RotateCcw className='w-3 h-3' />
+            <span>Back to today</span>
+          </button>
+        )}
+      </div>
       {isOpen && (
         <div className='mt-2 flex justify-center'>
           <div className='rounded-lg border border-purple-500/30 bg-zinc-900/95 shadow-xl backdrop-blur-sm'>

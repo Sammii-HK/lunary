@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { ArrowRight, Lock, Layers } from 'lucide-react';
 import { getTarotCard } from '../../../utils/tarot/tarot';
@@ -17,6 +18,7 @@ dayjs.extend(dayOfYear);
 export const DailyCardPreview = () => {
   const { user } = useUser();
   const subscription = useSubscription();
+  const { currentDate } = useAstronomyContext();
   const userName = user?.name;
   const userBirthday = user?.birthday;
 
@@ -26,8 +28,8 @@ export const DailyCardPreview = () => {
   );
 
   const dailyCard = useMemo(() => {
-    const todayUtc = dayjs().utc();
-    const dateStr = todayUtc.format('YYYY-MM-DD');
+    const dateStr = currentDate || dayjs().utc().format('YYYY-MM-DD');
+    const selectedDay = dayjs(dateStr);
 
     if (hasChartAccess && userName && userBirthday) {
       const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
@@ -39,8 +41,8 @@ export const DailyCardPreview = () => {
       };
     }
 
-    const dayOfYearUtc = todayUtc.dayOfYear();
-    const generalSeed = `cosmic-${dateStr}-${dayOfYearUtc}-energy`;
+    const dayOfYearNum = selectedDay.dayOfYear();
+    const generalSeed = `cosmic-${dateStr}-${dayOfYearNum}-energy`;
     const card = getTarotCard(generalSeed);
     return {
       name: card.name,
@@ -48,7 +50,7 @@ export const DailyCardPreview = () => {
       information: card.information || '',
       isPersonalized: false,
     };
-  }, [hasChartAccess, userName, userBirthday]);
+  }, [hasChartAccess, userName, userBirthday, currentDate]);
 
   if (!dailyCard.isPersonalized) {
     return (
