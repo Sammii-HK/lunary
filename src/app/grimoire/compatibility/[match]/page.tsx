@@ -1,0 +1,320 @@
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowRight, Heart, Users, Briefcase, Star } from 'lucide-react';
+import { signDescriptions } from '@/constants/seo/planet-sign-content';
+import {
+  generateCompatibilityContent,
+  getAllCompatibilitySlugs,
+} from '@/constants/seo/compatibility-content';
+import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+
+interface PageProps {
+  params: Promise<{ match: string }>;
+}
+
+export async function generateStaticParams() {
+  const slugs = getAllCompatibilitySlugs();
+  return slugs.map((match) => ({ match }));
+}
+
+function parseMatch(slug: string): { sign1: string; sign2: string } | null {
+  const match = slug.match(/^([a-z]+)-and-([a-z]+)$/);
+  if (!match) return null;
+
+  const [, sign1, sign2] = match;
+  if (!signDescriptions[sign1] || !signDescriptions[sign2]) {
+    return null;
+  }
+  return { sign1, sign2 };
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { match } = await params;
+  const parsed = parseMatch(match);
+
+  if (!parsed) {
+    return { title: 'Not Found' };
+  }
+
+  const content = generateCompatibilityContent(parsed.sign1, parsed.sign2);
+
+  return {
+    title: `${content.title} - Lunary`,
+    description: content.description,
+    keywords: content.keywords,
+    openGraph: {
+      title: `${content.title} - Lunary`,
+      description: content.description,
+      type: 'article',
+      url: `https://lunary.app/grimoire/compatibility/${match}`,
+    },
+    alternates: {
+      canonical: `https://lunary.app/grimoire/compatibility/${content.slug}`,
+    },
+  };
+}
+
+function ScoreBar({ score, label }: { score: number; label: string }) {
+  return (
+    <div className='space-y-1'>
+      <div className='flex justify-between text-sm'>
+        <span className='text-zinc-400'>{label}</span>
+        <span className='text-zinc-300'>{score}/10</span>
+      </div>
+      <div className='h-2 bg-zinc-800 rounded-full overflow-hidden'>
+        <div
+          className={`h-full rounded-full ${
+            score >= 8
+              ? 'bg-green-500'
+              : score >= 6
+                ? 'bg-amber-500'
+                : 'bg-red-500'
+          }`}
+          style={{ width: `${score * 10}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default async function CompatibilityPage({ params }: PageProps) {
+  const { match } = await params;
+  const parsed = parseMatch(match);
+
+  if (!parsed) {
+    notFound();
+  }
+
+  const content = generateCompatibilityContent(parsed.sign1, parsed.sign2);
+  const sign1Info = signDescriptions[parsed.sign1];
+  const sign2Info = signDescriptions[parsed.sign2];
+
+  const articleSchema = createArticleSchema({
+    headline: content.title,
+    description: content.description,
+    keywords: content.keywords,
+    url: `https://lunary.app/grimoire/compatibility/${content.slug}`,
+    datePublished: '2024-01-01',
+    dateModified: new Date().toISOString().split('T')[0],
+  });
+
+  // Get other compatibility matches for sign1
+  const sign1Matches = Object.keys(signDescriptions)
+    .filter((s) => s !== parsed.sign1 && s !== parsed.sign2)
+    .slice(0, 4);
+
+  return (
+    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(articleSchema)}
+
+      <div className='max-w-4xl mx-auto px-4 py-12'>
+        {/* Breadcrumbs */}
+        <nav className='flex items-center gap-2 text-sm text-zinc-500 mb-8'>
+          <Link href='/grimoire' className='hover:text-zinc-300'>
+            Grimoire
+          </Link>
+          <span>/</span>
+          <Link href='/grimoire/compatibility' className='hover:text-zinc-300'>
+            Compatibility
+          </Link>
+          <span>/</span>
+          <span className='text-zinc-400'>
+            {content.sign1} & {content.sign2}
+          </span>
+        </nav>
+
+        {/* Header */}
+        <header className='mb-12 text-center'>
+          <div className='flex items-center justify-center gap-6 mb-6'>
+            <div className='text-center'>
+              <div className='text-5xl mb-2'>
+                {sign1Info.element === 'Fire'
+                  ? '🔥'
+                  : sign1Info.element === 'Earth'
+                    ? '🌍'
+                    : sign1Info.element === 'Air'
+                      ? '💨'
+                      : '💧'}
+              </div>
+              <div className='text-xl font-medium text-zinc-100'>
+                {content.sign1}
+              </div>
+              <div className='text-sm text-zinc-500'>{sign1Info.element}</div>
+            </div>
+            <Heart className='h-8 w-8 text-pink-500' />
+            <div className='text-center'>
+              <div className='text-5xl mb-2'>
+                {sign2Info.element === 'Fire'
+                  ? '🔥'
+                  : sign2Info.element === 'Earth'
+                    ? '🌍'
+                    : sign2Info.element === 'Air'
+                      ? '💨'
+                      : '💧'}
+              </div>
+              <div className='text-xl font-medium text-zinc-100'>
+                {content.sign2}
+              </div>
+              <div className='text-sm text-zinc-500'>{sign2Info.element}</div>
+            </div>
+          </div>
+          <h1 className='text-3xl font-light text-zinc-100 mb-4'>
+            {content.sign1} and {content.sign2} Compatibility
+          </h1>
+          <p className='text-zinc-400 max-w-xl mx-auto'>
+            {content.description}
+          </p>
+        </header>
+
+        {/* Scores */}
+        <section className='mb-12 p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+          <h2 className='text-xl font-medium text-zinc-100 mb-6 text-center'>
+            Compatibility Scores
+          </h2>
+          <div className='grid md:grid-cols-4 gap-6'>
+            <div className='text-center'>
+              <div
+                className={`text-4xl font-light mb-1 ${
+                  content.overallScore >= 8
+                    ? 'text-green-400'
+                    : content.overallScore >= 6
+                      ? 'text-amber-400'
+                      : 'text-red-400'
+                }`}
+              >
+                {content.overallScore}/10
+              </div>
+              <div className='text-sm text-zinc-500'>Overall</div>
+            </div>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 text-pink-400'>
+                <Heart className='h-4 w-4' />
+                <span className='text-sm'>Love</span>
+              </div>
+              <ScoreBar score={content.loveScore} label='' />
+            </div>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 text-blue-400'>
+                <Users className='h-4 w-4' />
+                <span className='text-sm'>Friendship</span>
+              </div>
+              <ScoreBar score={content.friendshipScore} label='' />
+            </div>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 text-amber-400'>
+                <Briefcase className='h-4 w-4' />
+                <span className='text-sm'>Work</span>
+              </div>
+              <ScoreBar score={content.workScore} label='' />
+            </div>
+          </div>
+        </section>
+
+        {/* Strengths */}
+        <section className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
+            <Star className='h-6 w-6 text-green-400' />
+            Relationship Strengths
+          </h2>
+          <div className='p-6 rounded-lg border border-green-500/30 bg-green-500/10'>
+            <ul className='space-y-3'>
+              {content.strengths.map((strength, i) => (
+                <li key={i} className='flex items-start gap-3 text-zinc-300'>
+                  <span className='text-green-400 mt-1'>✓</span>
+                  {strength}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Challenges */}
+        <section className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
+            Potential Challenges
+          </h2>
+          <div className='p-6 rounded-lg border border-amber-500/30 bg-amber-500/10'>
+            <ul className='space-y-3'>
+              {content.challenges.map((challenge, i) => (
+                <li key={i} className='flex items-start gap-3 text-zinc-300'>
+                  <span className='text-amber-400 mt-1'>!</span>
+                  {challenge}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Advice */}
+        <section className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
+            Advice for This Pairing
+          </h2>
+          <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+            <p className='text-zinc-300 leading-relaxed'>{content.advice}</p>
+          </div>
+        </section>
+
+        {/* Related Matches */}
+        <section className='mb-12 pt-8 border-t border-zinc-800'>
+          <h2 className='text-xl font-medium text-zinc-100 mb-6'>
+            Explore More {content.sign1} Compatibility
+          </h2>
+          <div className='flex flex-wrap gap-3'>
+            {sign1Matches.map((signKey) => {
+              const sign = signDescriptions[signKey];
+              const slug =
+                parsed.sign1 <= signKey
+                  ? `${parsed.sign1}-and-${signKey}`
+                  : `${signKey}-and-${parsed.sign1}`;
+              return (
+                <Link
+                  key={signKey}
+                  href={`/grimoire/compatibility/${slug}`}
+                  className='px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-purple-300 text-sm transition-colors'
+                >
+                  {content.sign1} & {sign.name}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className='text-center'>
+          <div className='p-8 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+            <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+              Check Your Full Compatibility
+            </h2>
+            <p className='text-zinc-400 mb-6'>
+              Sun signs are just the beginning. Get a complete synastry analysis
+              based on both birth charts.
+            </p>
+            <Link
+              href='/welcome'
+              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            >
+              Generate Synastry Chart
+              <ArrowRight className='h-5 w-5' />
+            </Link>
+          </div>
+        </section>
+
+        {/* E-A-T Footer */}
+        <footer className='mt-12 pt-8 border-t border-zinc-800 text-sm text-zinc-500'>
+          <p>
+            Written by Sammii, Founder of Lunary • Last updated:{' '}
+            {new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
+}
