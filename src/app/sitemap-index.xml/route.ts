@@ -13,6 +13,7 @@ export async function GET() {
     'sitemap-transits.xml',
     'sitemap-placements.xml',
     'sitemap-compatibility.xml',
+    'sitemap-birthday.xml',
     'sitemap-images.xml',
   ];
 
