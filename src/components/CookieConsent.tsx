@@ -95,7 +95,7 @@ export function CookieConsent() {
   if (!isVisible) return null;
 
   return (
-    <div className='fixed bottom-0 left-0 right-0 z-50 p-4'>
+    <div className='fixed bottom-20 left-0 right-0 z-50 p-4'>
       <div className='max-w-2xl mx-auto'>
         <div className='rounded-2xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-sm shadow-xl p-6'>
           {!showCustomize ? (
