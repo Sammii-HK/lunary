@@ -125,6 +125,12 @@ export function MarketingFooter() {
                 Features
               </Link>
               <Link
+                href='/developers'
+                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                Developers
+              </Link>
+              <Link
                 href='/help'
                 className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
               >
