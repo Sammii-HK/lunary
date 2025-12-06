@@ -967,3 +967,55 @@ export function createCrystalSchema({
     },
   };
 }
+
+interface SpeakableSchemaProps {
+  url: string;
+  headline: string;
+  cssSelectors?: string[];
+}
+
+export function createSpeakableSchema({
+  url,
+  headline,
+  cssSelectors = ['h1', 'h2', '.summary', '.intro'],
+}: SpeakableSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': url,
+    name: headline,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: cssSelectors,
+    },
+    url,
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
+
+export function createArticleWithSpeakableSchema({
+  headline,
+  description,
+  url,
+  keywords = [],
+  section,
+  speakableSections = ['h1', 'h2', 'header p', 'section > p:first-of-type'],
+}: ArticleSchemaProps & { speakableSections?: string[] }) {
+  const articleSchema = createArticleSchema({
+    headline,
+    description,
+    url,
+    keywords,
+    section,
+  });
+
+  return {
+    ...articleSchema,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: speakableSections,
+    },
+  };
+}

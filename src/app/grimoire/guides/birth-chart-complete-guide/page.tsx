@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ZODIAC_SIGNS } from '../../../../../utils/zodiac/zodiac';
 import {
-  createArticleSchema,
+  createArticleWithSpeakableSchema,
   createFAQPageSchema,
   renderJsonLd,
 } from '@/lib/schema';
@@ -83,7 +83,7 @@ const faqs = [
 ];
 
 export default function BirthChartCompleteGuidePage() {
-  const articleSchema = createArticleSchema({
+  const articleSchema = createArticleWithSpeakableSchema({
     headline: 'Birth Chart: The Complete Guide (2025 Edition)',
     description:
       'The definitive guide to birth charts and natal astrology. Learn how to read and interpret your cosmic blueprint.',
@@ -95,6 +95,13 @@ export default function BirthChartCompleteGuidePage() {
       'birth chart interpretation',
     ],
     section: 'Astrology Guides',
+    speakableSections: [
+      'h1',
+      'h2',
+      'header p',
+      '#what-is-birth-chart p',
+      '#big-three p',
+    ],
   });
 
   const faqSchema = createFAQPageSchema(faqs);
