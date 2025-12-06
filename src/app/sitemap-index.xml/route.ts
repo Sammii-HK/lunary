@@ -14,6 +14,7 @@ export async function GET() {
     'sitemap-placements.xml',
     'sitemap-compatibility.xml',
     'sitemap-birthday.xml',
+    'sitemap-horoscopes.xml',
     'sitemap-images.xml',
   ];
 

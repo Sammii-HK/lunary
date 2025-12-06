@@ -1,48 +1,195 @@
-'use client';
+import { Metadata } from 'next';
+import Link from 'next/link';
+import {
+  ZODIAC_SIGNS,
+  SIGN_DISPLAY_NAMES,
+  SIGN_SYMBOLS,
+  SIGN_ELEMENTS,
+} from '@/constants/seo/monthly-horoscope';
+import Script from 'next/script';
 
-import { useUser } from '@/context/UserContext';
-import { useSubscription } from '../../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
-import { FreeHoroscopeView } from './components/FreeHoroscopeView';
-import { PaidHoroscopeView } from './components/PaidHoroscopeView';
-import { conversionTracking } from '@/lib/analytics';
-import { useEffect } from 'react';
+export const metadata: Metadata = {
+  title: 'Monthly Horoscopes 2025 & 2026: All Zodiac Signs | Lunary',
+  description:
+    'Free monthly horoscopes for all 12 zodiac signs. Get your Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, and Pisces predictions for 2025 and 2026.',
+  keywords: [
+    'monthly horoscope',
+    'free horoscope',
+    '2025 horoscope',
+    '2026 horoscope',
+    'zodiac predictions',
+    'astrology forecast',
+    'aries horoscope',
+    'taurus horoscope',
+    'gemini horoscope',
+    'cancer horoscope',
+    'leo horoscope',
+    'virgo horoscope',
+    'libra horoscope',
+    'scorpio horoscope',
+    'sagittarius horoscope',
+    'capricorn horoscope',
+    'aquarius horoscope',
+    'pisces horoscope',
+  ],
+  openGraph: {
+    title: 'Monthly Horoscopes 2025 & 2026: All Zodiac Signs',
+    description:
+      'Free monthly horoscopes for all 12 zodiac signs. Get your predictions for 2025 and 2026.',
+    url: 'https://lunary.app/horoscope',
+  },
+  alternates: {
+    canonical: 'https://lunary.app/horoscope',
+  },
+};
 
-export default function HoroscopePage() {
-  const { user, loading } = useUser();
-  const subscription = useSubscription();
-  const hasChartAccess = hasBirthChartAccess(
-    subscription.status,
-    subscription.plan,
-  );
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Monthly Horoscopes',
+  description: 'Monthly horoscope predictions for all 12 zodiac signs',
+  numberOfItems: 12,
+  itemListElement: ZODIAC_SIGNS.map((sign, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: `${SIGN_DISPLAY_NAMES[sign]} Horoscope`,
+    url: `https://lunary.app/horoscope/${sign}`,
+  })),
+};
 
-  useEffect(() => {
-    if (hasChartAccess && user?.id) {
-      conversionTracking.horoscopeViewed(user.id);
-      conversionTracking.personalizedHoroscopeViewed(user.id);
-    }
-  }, [hasChartAccess, user?.id]);
+const currentDate = new Date();
+const currentYear = currentDate.getFullYear();
+const currentMonth = currentDate
+  .toLocaleString('en-US', { month: 'long' })
+  .toLowerCase();
 
-  if (loading) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Loading your horoscope...</p>
+export default function HoroscopeIndexPage() {
+  return (
+    <>
+      <Script
+        id='horoscope-structured-data'
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+        <div className='max-w-6xl mx-auto px-4 py-12'>
+          <nav className='text-sm text-zinc-500 mb-8'>
+            <Link href='/' className='hover:text-zinc-300'>
+              Home
+            </Link>
+            <span className='mx-2'>/</span>
+            <span className='text-zinc-300'>Horoscope</span>
+          </nav>
+
+          <h1 className='text-4xl font-light mb-4'>Monthly Horoscopes</h1>
+          <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+            Discover what the stars have in store for you. Select your zodiac
+            sign below to read your monthly horoscope predictions for love,
+            career, health, and more.
+          </p>
+
+          <div className='mb-12'>
+            <h2 className='text-2xl font-light mb-6'>
+              {currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)}{' '}
+              {currentYear} Horoscopes
+            </h2>
+            <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-4'>
+              {ZODIAC_SIGNS.map((sign) => (
+                <Link
+                  key={sign}
+                  href={`/horoscope/${sign}/${currentYear}/${currentMonth}`}
+                  className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 hover:bg-zinc-900 transition-all group'
+                >
+                  <div className='text-4xl mb-3'>{SIGN_SYMBOLS[sign]}</div>
+                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-purple-300 transition-colors'>
+                    {SIGN_DISPLAY_NAMES[sign]}
+                  </h3>
+                  <p className='text-sm text-zinc-500'>
+                    {SIGN_ELEMENTS[sign]} Sign
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className='grid md:grid-cols-2 gap-8 mb-12'>
+            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+              <h2 className='text-xl font-medium mb-4'>2025 Horoscopes</h2>
+              <div className='grid grid-cols-3 gap-2'>
+                {[
+                  'january',
+                  'february',
+                  'march',
+                  'april',
+                  'may',
+                  'june',
+                  'july',
+                  'august',
+                  'september',
+                  'october',
+                  'november',
+                  'december',
+                ].map((month) => (
+                  <Link
+                    key={month}
+                    href={`/horoscope/aries/2025/${month}`}
+                    className='px-3 py-2 rounded text-sm text-center bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors'
+                  >
+                    {month.charAt(0).toUpperCase() +
+                      month.slice(1).substring(0, 2)}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+              <h2 className='text-xl font-medium mb-4'>2026 Horoscopes</h2>
+              <div className='grid grid-cols-3 gap-2'>
+                {[
+                  'january',
+                  'february',
+                  'march',
+                  'april',
+                  'may',
+                  'june',
+                  'july',
+                  'august',
+                  'september',
+                  'october',
+                  'november',
+                  'december',
+                ].map((month) => (
+                  <Link
+                    key={month}
+                    href={`/horoscope/aries/2026/${month}`}
+                    className='px-3 py-2 rounded text-sm text-center bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors'
+                  >
+                    {month.charAt(0).toUpperCase() +
+                      month.slice(1).substring(0, 2)}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+            <h2 className='text-xl font-medium text-purple-300 mb-2'>
+              Personalized Daily Insights
+            </h2>
+            <p className='text-zinc-300 mb-4'>
+              Get horoscopes tailored to your complete birth chart, not just
+              your Sun sign. Discover how the Moon, Rising, and planetary
+              placements affect your daily life.
+            </p>
+            <Link
+              href='/welcome'
+              className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            >
+              Get Your Personalized Horoscope
+            </Link>
+          </div>
         </div>
       </div>
-    );
-  }
-
-  if (!hasChartAccess) {
-    return <FreeHoroscopeView />;
-  }
-
-  return (
-    <PaidHoroscopeView
-      userBirthday={user?.birthday}
-      userName={user?.name}
-      profile={{ birthday: user?.birthday, birthChart: user?.birthChart }}
-    />
+    </>
   );
 }
