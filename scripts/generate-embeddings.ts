@@ -94,11 +94,11 @@ async function generateAllEmbeddings() {
   Object.entries(planetData).forEach(([key, planet]) => {
     entries.push({
       id: `planet-${key}`,
-      slug: `astronomy/planets/${key}`,
-      title: planet.name,
+      slug: `astronomy/planets/${key.toLowerCase()}`,
+      title: key,
       category: 'planet',
-      content: `${planet.name} in astrology represents ${planet.meaning || 'various aspects of life'}. Symbol: ${planet.symbol}.`,
-      metadata: { symbol: planet.symbol },
+      content: `${key} in astrology. ${planet.information || ''} Keywords: ${planet.keywords?.join(', ') || 'cosmic influence'}. Symbol: ${planet.symbol}.`,
+      metadata: { symbol: planet.symbol, element: planet.element },
     });
   });
 
@@ -170,9 +170,9 @@ async function generateAllEmbeddings() {
     entries.push({
       id: `chinese-${key}`,
       slug: `chinese-zodiac/${key}`,
-      title: animal.name,
+      title: `Year of the ${animal.displayName}`,
       category: 'chinese-zodiac',
-      content: `${animal.name} (${animal.chineseCharacter}) is a Chinese zodiac animal. Element: ${animal.element}. Yin/Yang: ${animal.yinYang}. Traits: ${animal.traits?.join(', ') || 'various'}. Years: ${animal.years?.slice(0, 5).join(', ')}.`,
+      content: `${animal.displayName} ${animal.emoji} is a Chinese zodiac animal. Element: ${animal.element}. Yin/Yang: ${animal.yinYang}. Traits: ${animal.traits?.join(', ') || 'various'}. Years: ${animal.years?.slice(0, 5).join(', ')}.`,
       metadata: { element: animal.element, yinYang: animal.yinYang },
     });
   });
