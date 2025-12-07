@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuthStatus } from './AuthStatus';
+import { SignOutButton } from './SignOutButton';
 
 interface AuthButtonsProps {
   variant?: 'primary' | 'secondary' | 'navbar';
@@ -12,7 +13,7 @@ export function AuthButtons({
   variant = 'primary',
   className = '',
 }: AuthButtonsProps) {
-  const { isAuthenticated, user, loading, signOut } = useAuthStatus();
+  const { isAuthenticated, user, loading } = useAuthStatus();
 
   if (loading) {
     return (
@@ -60,12 +61,7 @@ export function AuthButtons({
           >
             View Profile
           </Link>
-          <button
-            onClick={signOut}
-            className='text-red-400 hover:text-red-300 px-4 py-2 font-medium transition-colors'
-          >
-            Sign Out
-          </button>
+          <SignOutButton variant='text' />
         </div>
       </div>
     );

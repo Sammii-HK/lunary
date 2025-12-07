@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
+import { SignOutButton } from './SignOutButton';
 import { conversionTracking } from '@/lib/analytics';
 
 interface AuthFormData {
@@ -36,11 +37,7 @@ export function AuthComponent({
     name: '',
   });
 
-  const {
-    refreshAuth,
-    signOut: contextSignOut,
-    ...authState
-  } = useAuthStatus();
+  const { refreshAuth, ...authState } = useAuthStatus();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,17 +211,6 @@ export function AuthComponent({
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      await betterAuthClient.signOut();
-      contextSignOut(); // Immediately update UI state
-      invalidateAuthCache();
-      console.log('✅ Signed out successfully');
-    } catch (err) {
-      console.error('Sign out error:', err);
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -253,12 +239,7 @@ export function AuthComponent({
           </p>
         </div>
 
-        <button
-          onClick={handleSignOut}
-          className='w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors'
-        >
-          Sign Out
-        </button>
+        <SignOutButton variant='full-width' redirect={false} />
       </div>
     );
   }

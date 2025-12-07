@@ -321,9 +321,27 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     try {
+      // Clear storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Clear cookies
+      document.cookie.split(';').forEach((c) => {
+        const name = c.split('=')[0].trim();
+        if (name) {
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        }
+      });
+
+      // Sign out from server
       await betterAuthClient.signOut();
+
+      // Hard reload to update UI
+      window.location.href = '/';
     } catch (error) {
       console.error('Sign out failed:', error);
+      // Still reload even if error
+      window.location.href = '/';
     }
   };
 
