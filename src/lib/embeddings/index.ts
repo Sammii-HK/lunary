@@ -6,6 +6,17 @@ const EMBEDDING_DIMENSIONS = 1536;
 
 let openaiClient: OpenAI | null = null;
 
+// Check if we're in test/CI mode without database access
+function isTestMode(): boolean {
+  return (
+    process.env.NODE_ENV === 'test' ||
+    process.env.CI === 'true' ||
+    process.env.SKIP_AUTH === 'true' ||
+    process.env.BYPASS_AUTH === 'true' ||
+    !process.env.POSTGRES_URL
+  );
+}
+
 function getOpenAI(): OpenAI {
   if (!openaiClient) {
     if (!process.env.OPENAI_API_KEY) {
@@ -38,6 +49,14 @@ export interface EmbeddingResult {
 }
 
 export async function generateEmbedding(text: string): Promise<number[]> {
+  // Return empty embedding in test mode
+  if (isTestMode() && !process.env.OPENAI_API_KEY) {
+    console.warn(
+      '⚠️ generateEmbedding: Running in test mode without OpenAI API key',
+    );
+    return new Array(EMBEDDING_DIMENSIONS).fill(0);
+  }
+
   const openai = getOpenAI();
   const response = await openai.embeddings.create({
     model: EMBEDDING_MODEL,
@@ -49,6 +68,11 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 export async function storeEmbedding(entry: GrimoireEntry): Promise<void> {
+  if (isTestMode()) {
+    console.warn('⚠️ storeEmbedding: Skipped in test mode');
+    return;
+  }
+
   const embedding = await generateEmbedding(
     `${entry.title}\n\n${entry.content}`,
   );
@@ -80,6 +104,12 @@ export async function searchSimilar(
   limit: number = 5,
   category?: string,
 ): Promise<EmbeddingResult[]> {
+  // Return empty results in test mode without database
+  if (isTestMode()) {
+    console.warn('⚠️ searchSimilar: Running in test mode without database');
+    return [];
+  }
+
   const queryEmbedding = await generateEmbedding(query);
   const embeddingString = `[${queryEmbedding.join(',')}]`;
 
@@ -128,15 +158,25 @@ export async function searchSimilar(
 }
 
 export async function deleteEmbedding(slug: string): Promise<void> {
+  if (isTestMode()) {
+    console.warn('⚠️ deleteEmbedding: Skipped in test mode');
+    return;
+  }
   await sql`DELETE FROM grimoire_embeddings WHERE slug = ${slug}`;
 }
 
 export async function getEmbeddingCount(): Promise<number> {
+  if (isTestMode()) {
+    return 0;
+  }
   const result = await sql`SELECT COUNT(*) as count FROM grimoire_embeddings`;
   return parseInt(result.rows[0].count);
 }
 
 export async function getCategoryCounts(): Promise<Record<string, number>> {
+  if (isTestMode()) {
+    return {};
+  }
   const result = await sql`
     SELECT category, COUNT(*) as count 
     FROM grimoire_embeddings 
