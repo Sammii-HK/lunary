@@ -10,18 +10,58 @@ import {
   type GrimoireEntry,
 } from '../src/lib/embeddings';
 import { zodiacSigns } from '../utils/zodiac/zodiac';
-import { allTarotCards } from '../utils/tarot/cards';
-import { allCrystals } from '../src/constants/grimoire/crystals';
-import { PLANET_SIGN_CONTENT } from '../src/constants/seo/planet-sign-content';
-import { COMPATIBILITY_CONTENT } from '../src/constants/seo/compatibility-content';
+import { tarotCards } from '../utils/tarot/tarot-cards';
+import { crystalDatabase } from '../src/constants/grimoire/crystals';
 import { CHINESE_ZODIAC_DATA } from '../src/constants/seo/chinese-zodiac';
 import { ZODIAC_CUSPS } from '../src/constants/seo/cusps';
 import { HOUSE_DATA } from '../src/constants/seo/houses';
 import { ASPECT_DATA } from '../src/constants/seo/aspects';
-import { DECAN_DATA } from '../src/constants/seo/decans';
 import { ASTROLOGY_GLOSSARY } from '../src/constants/grimoire/glossary';
-import { retrogradeInfo } from '../utils/retrogrades/retrogradeInfo';
-import { planets as planetData } from '../utils/planets/planets';
+import { retrogradeInfo } from '../src/constants/grimoire/seo-data';
+import { planets as planetData } from '../utils/planets';
+import {
+  planetDescriptions,
+  signDescriptions,
+} from '../src/constants/seo/planet-sign-content';
+import { getDecanData, ZODIAC_SIGNS } from '../src/constants/seo/decans';
+
+// Helper to flatten nested tarot card structure
+function flattenTarotCards() {
+  const cards: {
+    slug: string;
+    name: string;
+    keywords: string[];
+    information: string;
+  }[] = [];
+
+  // Major Arcana
+  Object.entries(tarotCards.majorArcana).forEach(([key, card]) => {
+    cards.push({
+      slug: key,
+      name: card.name,
+      keywords: card.keywords || [],
+      information: card.information || '',
+    });
+  });
+
+  // Minor Arcana suits
+  const suits = ['wands', 'cups', 'swords', 'pentacles'] as const;
+  suits.forEach((suit) => {
+    const suitCards = tarotCards[suit];
+    if (suitCards) {
+      Object.entries(suitCards).forEach(([key, card]) => {
+        cards.push({
+          slug: `${suit}-${key}`,
+          name: card.name,
+          keywords: card.keywords || [],
+          information: card.information || '',
+        });
+      });
+    }
+  });
+
+  return cards;
+}
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -64,53 +104,63 @@ async function generateAllEmbeddings() {
 
   // Tarot cards
   console.log('📌 Collecting tarot cards...');
+  const allTarotCards = flattenTarotCards();
   allTarotCards.forEach((card) => {
     entries.push({
       id: `tarot-${card.slug}`,
       slug: `tarot/${card.slug}`,
       title: card.name,
       category: 'tarot',
-      content: `${card.name}. Keywords: ${card.keywords?.join(', ') || 'wisdom, insight'}. ${card.meaning || ''}`,
-      metadata: { arcana: card.arcana, number: card.number },
+      content: `${card.name}. Keywords: ${card.keywords?.join(', ') || 'wisdom, insight'}. ${card.information || ''}`,
+      metadata: {},
     });
   });
 
   // Crystals
   console.log('📌 Collecting crystals...');
-  allCrystals.forEach((crystal) => {
+  crystalDatabase.forEach((crystal) => {
     entries.push({
       id: `crystal-${crystal.id}`,
       slug: `crystals/${crystal.id}`,
       title: crystal.name,
       category: 'crystal',
-      content: `${crystal.name} is a crystal with properties: ${crystal.properties?.join(', ') || 'healing, energy'}. Color: ${crystal.color || 'various'}. Chakra: ${crystal.chakra || 'multiple'}.`,
-      metadata: { color: crystal.color, chakra: crystal.chakra },
+      content: `${crystal.name} is a crystal with properties: ${crystal.properties?.join(', ') || 'healing, energy'}. Colors: ${crystal.colors?.join(', ') || 'various'}. Chakras: ${crystal.chakras?.join(', ') || 'multiple'}. ${crystal.description || ''}`,
+      metadata: { colors: crystal.colors, chakras: crystal.chakras },
     });
   });
 
-  // Planet placements
+  // Planet placements (generated from planetDescriptions × signDescriptions)
   console.log('📌 Collecting planet placements...');
-  Object.entries(PLANET_SIGN_CONTENT).forEach(([key, content]) => {
-    entries.push({
-      id: `placement-${key}`,
-      slug: `placements/${key}`,
-      title: content.title,
-      category: 'placement',
-      content: `${content.title}. ${content.description}`,
-      metadata: { planet: content.planet, sign: content.sign },
+  Object.entries(planetDescriptions).forEach(([planetKey, planet]) => {
+    Object.entries(signDescriptions).forEach(([signKey, sign]) => {
+      const key = `${planetKey}-in-${signKey}`;
+      entries.push({
+        id: `placement-${key}`,
+        slug: `placements/${key}`,
+        title: `${planet.name} in ${sign.name}`,
+        category: 'placement',
+        content: `${planet.name} in ${sign.name}. ${planet.name} governs ${planet.governs || 'various life areas'}. ${sign.name} is a ${sign.element} sign. When ${planet.name} is placed in ${sign.name}, it blends ${planet.name}'s energy with ${sign.name}'s qualities.`,
+        metadata: { planet: planet.name, sign: sign.name },
+      });
     });
   });
 
-  // Compatibility
+  // Compatibility (generated dynamically)
   console.log('📌 Collecting compatibility matches...');
-  Object.entries(COMPATIBILITY_CONTENT).forEach(([key, content]) => {
-    entries.push({
-      id: `compatibility-${key}`,
-      slug: `compatibility/${key}`,
-      title: content.title,
-      category: 'compatibility',
-      content: `${content.title}. ${content.description}. Overall: ${content.overallCompatibility || 'moderate'}`,
-      metadata: { sign1: content.sign1, sign2: content.sign2 },
+  const signKeys = Object.keys(signDescriptions);
+  signKeys.forEach((sign1Key) => {
+    signKeys.forEach((sign2Key) => {
+      const s1 = signDescriptions[sign1Key];
+      const s2 = signDescriptions[sign2Key];
+      const key = `${sign1Key}-${sign2Key}`;
+      entries.push({
+        id: `compatibility-${key}`,
+        slug: `compatibility/${key}`,
+        title: `${s1.name} and ${s2.name} Compatibility`,
+        category: 'compatibility',
+        content: `${s1.name} and ${s2.name} compatibility. ${s1.name} is a ${s1.element} ${s1.modality} sign ruled by ${s1.ruler}. ${s2.name} is a ${s2.element} ${s2.modality} sign ruled by ${s2.ruler}. This pairing combines ${s1.element} with ${s2.element} energy.`,
+        metadata: { sign1: s1.name, sign2: s2.name },
+      });
     });
   });
 
@@ -129,14 +179,14 @@ async function generateAllEmbeddings() {
 
   // Zodiac cusps
   console.log('📌 Collecting zodiac cusps...');
-  Object.entries(ZODIAC_CUSPS).forEach(([key, cusp]) => {
+  ZODIAC_CUSPS.forEach((cusp) => {
     entries.push({
-      id: `cusp-${key}`,
-      slug: `cusps/${key}`,
-      title: cusp.name,
+      id: `cusp-${cusp.id}`,
+      slug: `cusps/${cusp.id}`,
+      title: `${cusp.sign1}-${cusp.sign2} Cusp: ${cusp.name}`,
       category: 'cusp',
-      content: `${cusp.name} cusp (${cusp.dateRange}). Signs: ${cusp.signs.join(' and ')}. Traits: ${cusp.traits?.join(', ') || 'blend of both signs'}.`,
-      metadata: { signs: cusp.signs, dateRange: cusp.dateRange },
+      content: `${cusp.name} (${cusp.dates}). Born on the cusp between ${cusp.sign1} and ${cusp.sign2}. This cusp blends the qualities of both signs.`,
+      metadata: { sign1: cusp.sign1, sign2: cusp.sign2, dates: cusp.dates },
     });
   });
 
@@ -168,16 +218,17 @@ async function generateAllEmbeddings() {
 
   // Decans
   console.log('📌 Collecting decan meanings...');
-  Object.entries(DECAN_DATA).forEach(([sign, decans]) => {
-    decans.forEach((decan, index) => {
-      const key = `${sign}-decan-${index + 1}`;
+  ZODIAC_SIGNS.forEach((sign) => {
+    [1, 2, 3].forEach((decanNum) => {
+      const decan = getDecanData(sign, decanNum as 1 | 2 | 3);
+      const key = `${sign}-decan-${decanNum}`;
       entries.push({
         id: `decan-${key}`,
-        slug: `decans/${sign}/${index + 1}`,
-        title: `${sign} Decan ${index + 1}`,
+        slug: `decans/${sign}/${decanNum}`,
+        title: `${decan.signDisplay} ${decanNum === 1 ? 'First' : decanNum === 2 ? 'Second' : 'Third'} Decan`,
         category: 'decan',
-        content: `${sign} Decan ${index + 1}. Ruler: ${decan.ruler || 'varies'}. Dates: ${decan.dates || 'varies'}. Traits: ${decan.traits?.join(', ') || 'unique blend'}.`,
-        metadata: { sign, decanNumber: index + 1, ruler: decan.ruler },
+        content: `${decan.signDisplay} Decan ${decanNum}. Sub-ruler: ${decan.ruler}. Dates: ${decan.dates}. This decan adds unique qualities to ${decan.signDisplay} natives.`,
+        metadata: { sign, decanNumber: decanNum, ruler: decan.ruler },
       });
     });
   });
