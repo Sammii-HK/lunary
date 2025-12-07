@@ -600,6 +600,11 @@ export default function PrivacyPolicyPage() {
               <p className='text-zinc-300'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
+                131 Continental Dr, Suite 305
+                <br />
+                Newark, DE 19713, USA
+                <br />
+                <br />
                 Email:{' '}
                 <a
                   href='mailto:privacy@lunary.app'

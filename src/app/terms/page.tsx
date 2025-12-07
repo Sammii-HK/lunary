@@ -502,6 +502,11 @@ export default function TermsOfServicePage() {
               <p className='text-zinc-300'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
+                131 Continental Dr, Suite 305
+                <br />
+                Newark, DE 19713, USA
+                <br />
+                <br />
                 Email:{' '}
                 <a
                   href='mailto:legal@lunary.app'
