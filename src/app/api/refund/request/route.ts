@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
+import { sendEmail } from '@/lib/email';
+import { generateRefundRequestedEmailHTML } from '@/lib/email-components/ComplianceEmails';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
@@ -172,6 +174,33 @@ export async function POST(request: Request) {
       } catch (refundError) {
         console.error('Auto-refund failed:', refundError);
         // Fall through to manual review
+      }
+    }
+
+    // Send refund request confirmation email
+    if (userEmail) {
+      try {
+        const amount =
+          amountCents > 0 ? `$${(amountCents / 100).toFixed(2)}` : undefined;
+        const html = await generateRefundRequestedEmailHTML(
+          userEmail,
+          requestId,
+          amount,
+          'pending',
+        );
+
+        await sendEmail({
+          to: userEmail,
+          subject: 'Refund Request Received - Lunary',
+          html,
+          tracking: {
+            userId,
+            notificationType: 'refund_requested',
+            notificationId: requestId,
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to send refund email:', emailError);
       }
     }
 

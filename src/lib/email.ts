@@ -235,6 +235,19 @@ export {
   PasswordResetEmail,
 } from './email-components/AuthEmails';
 
+export {
+  generateDeletionScheduledEmailHTML,
+  generateDeletionScheduledEmailText,
+  generateDeletionCancelledEmailHTML,
+  generateRefundRequestedEmailHTML,
+  generateWelcomeEmailHTML,
+  generateWelcomeEmailText,
+  DeletionScheduledEmail,
+  DeletionCancelledEmail,
+  RefundRequestedEmail,
+  WelcomeEmail,
+} from './email-components/ComplianceEmails';
+
 function buildTrackingPixelUrl(tracking?: EmailTrackingOptions) {
   if (!tracking?.userId) {
     return null;

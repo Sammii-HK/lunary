@@ -163,6 +163,8 @@ export default function AdminDashboard() {
   const [authIssue, setAuthIssue] = useState<AdminAuthIssueState>({
     type: 'none',
   });
+  const [migrationStatus, setMigrationStatus] = useState<any>(null);
+  const [migrationLoading, setMigrationLoading] = useState(false);
 
   const handleAuthSuccess = () => {
     setAuthIssue({ type: 'none' });
@@ -1388,6 +1390,130 @@ export default function AdminDashboard() {
                   </div>
                 </Link>
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Auth Migration Progress */}
+        <Card className='mt-6 md:mt-8 lg:mt-10 bg-zinc-900 border-zinc-800'>
+          <CardHeader className='pb-4 md:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
+              <Users className='h-5 w-5 md:h-6 md:w-6' />
+              Auth Migration Progress
+            </CardTitle>
+            <CardDescription className='text-sm md:text-base text-zinc-400'>
+              Track user migration from legacy auth to Postgres
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-4'>
+              <Button
+                onClick={async () => {
+                  setMigrationLoading(true);
+                  try {
+                    const response = await fetch('/api/admin/migration-status');
+                    const data = await response.json();
+                    setMigrationStatus(data);
+                  } catch (error) {
+                    console.error('Migration status check failed:', error);
+                    setMigrationStatus({ error: 'Failed to check status' });
+                  } finally {
+                    setMigrationLoading(false);
+                  }
+                }}
+                disabled={migrationLoading}
+                variant='outline'
+                className='bg-purple-600/50 hover:bg-purple-700/50 border-purple-500/50 text-white'
+              >
+                {migrationLoading ? (
+                  <>
+                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2'></div>
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <Activity className='h-4 w-4 mr-2' />
+                    Check Migration Status
+                  </>
+                )}
+              </Button>
+
+              {migrationStatus && !migrationStatus.error && (
+                <div className='mt-4 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
+                    <div className='p-3 rounded-lg bg-blue-500/10 border border-blue-500/20'>
+                      <p className='text-xs text-blue-400 uppercase tracking-wider'>
+                        Postgres Users
+                      </p>
+                      <p className='text-2xl font-bold text-white'>
+                        {migrationStatus.postgres?.count ?? 'N/A'}
+                      </p>
+                    </div>
+                    <div className='p-3 rounded-lg bg-green-500/10 border border-green-500/20'>
+                      <p className='text-xs text-green-400 uppercase tracking-wider'>
+                        Recent Signups (30d)
+                      </p>
+                      <p className='text-2xl font-bold text-white'>
+                        {migrationStatus.postgres?.recentSignups ?? 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {migrationStatus.legacy?.note && (
+                    <div className='p-3 rounded-lg bg-purple-500/10 border border-purple-500/30 mb-4'>
+                      <p className='text-purple-400 text-sm'>
+                        {migrationStatus.legacy.note}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className='p-3 rounded-lg bg-zinc-900/50 border border-zinc-700/50'>
+                    <p className='text-sm text-zinc-400'>
+                      <span className='text-green-400 font-medium'>
+                        Migration method:
+                      </span>{' '}
+                      {migrationStatus.migration?.description}
+                    </p>
+                  </div>
+
+                  {migrationStatus.postgres?.emails?.length > 0 && (
+                    <div className='mt-4'>
+                      <p className='text-sm text-zinc-400 mb-2'>
+                        Recent users (first 20):
+                      </p>
+                      <div className='max-h-32 overflow-y-auto p-3 rounded-lg bg-zinc-900/50 border border-zinc-700/50 text-xs text-zinc-400 font-mono'>
+                        {migrationStatus.postgres.emails.map(
+                          (email: string, i: number) => (
+                            <div key={i}>{email}</div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <p className='text-xs text-zinc-500 mt-4'>
+                    Last checked:{' '}
+                    {migrationStatus.checkedAt
+                      ? new Date(migrationStatus.checkedAt).toLocaleString()
+                      : 'Unknown'}
+                  </p>
+                </div>
+              )}
+
+              {migrationStatus?.error && (
+                <div className='p-4 rounded-lg bg-red-500/10 border border-red-500/30'>
+                  <p className='text-red-400'>{migrationStatus.error}</p>
+                  {migrationStatus.details && (
+                    <p className='text-xs text-red-300 mt-1'>
+                      {migrationStatus.details}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <p className='text-xs text-zinc-500'>
+                Users migrate automatically on login. No batch migration needed.
+              </p>
             </div>
           </CardContent>
         </Card>

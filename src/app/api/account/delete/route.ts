@@ -2,10 +2,18 @@ import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { sendEmail } from '@/lib/email';
+import {
+  generateDeletionScheduledEmailHTML,
+  generateDeletionScheduledEmailText,
+  generateDeletionCancelledEmailHTML,
+} from '@/lib/email-components/ComplianceEmails';
 
 function generateId(): string {
   return `del_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
+
+const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
 export async function POST(request: Request) {
   try {
@@ -54,6 +62,44 @@ export async function POST(request: Request) {
       )
     `;
 
+    // Send deletion scheduled email
+    if (userEmail) {
+      try {
+        const scheduledDateStr = scheduledFor.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+        const cancelUrl = `${APP_BASE_URL}/profile?cancelDeletion=true`;
+
+        const html = await generateDeletionScheduledEmailHTML(
+          userEmail,
+          scheduledDateStr,
+          cancelUrl,
+        );
+        const text = generateDeletionScheduledEmailText(
+          userEmail,
+          scheduledDateStr,
+          cancelUrl,
+        );
+
+        await sendEmail({
+          to: userEmail,
+          subject: 'Account Deletion Scheduled - Lunary',
+          html,
+          text,
+          tracking: {
+            userId,
+            notificationType: 'account_deletion_scheduled',
+            notificationId: requestId,
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to send deletion email:', emailError);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message:
@@ -92,6 +138,26 @@ export async function DELETE() {
         { error: 'No pending deletion request found' },
         { status: 404 },
       );
+    }
+
+    // Send deletion cancelled email
+    const userEmail = session.user.email;
+    if (userEmail) {
+      try {
+        const html = await generateDeletionCancelledEmailHTML(userEmail);
+
+        await sendEmail({
+          to: userEmail,
+          subject: 'Account Deletion Cancelled - Lunary',
+          html,
+          tracking: {
+            userId: session.user.id,
+            notificationType: 'account_deletion_cancelled',
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to send cancellation email:', emailError);
+      }
     }
 
     return NextResponse.json({

@@ -341,6 +341,41 @@ async function initializeAuth() {
         create: {
           async after(user: any) {
             console.log('✨ New user created in Postgres:', user.id);
+
+            // Send welcome email (transactional - no opt-in required)
+            if (user.email) {
+              try {
+                const emailModule = await import('./email');
+                const html = await (
+                  emailModule as any
+                ).generateWelcomeEmailHTML(user.email, user.name);
+                const text = (emailModule as any).generateWelcomeEmailText(
+                  user.email,
+                  user.name,
+                );
+
+                await emailModule.sendEmail({
+                  to: user.email,
+                  subject: '✨ Welcome to Lunary',
+                  html,
+                  text,
+                  tracking: {
+                    userId: user.id,
+                    notificationType: 'welcome',
+                    notificationId: `welcome-${user.id}`,
+                    utm: {
+                      source: 'email',
+                      medium: 'transactional',
+                      campaign: 'welcome',
+                    },
+                  },
+                });
+                console.log(`✅ Welcome email sent to ${user.email}`);
+              } catch (emailError) {
+                console.error('Failed to send welcome email:', emailError);
+                // Don't throw - welcome email failure shouldn't block signup
+              }
+            }
           },
         },
       },
