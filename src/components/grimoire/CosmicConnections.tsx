@@ -166,7 +166,7 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
   if (house) {
     connections.push({
       name: house.name,
-      url: `/grimoire/houses/${house.number}`,
+      url: `/grimoire/houses/overview/${house.number}`,
       type: 'house',
       description: house.lifeDomain,
     });

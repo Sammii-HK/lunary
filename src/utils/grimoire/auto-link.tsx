@@ -33,18 +33,18 @@ const termMappings: Record<string, string> = {
   pluto: '/grimoire/planets/pluto',
 
   // Houses
-  'first house': '/grimoire/houses/first',
-  'second house': '/grimoire/houses/second',
-  'third house': '/grimoire/houses/third',
-  'fourth house': '/grimoire/houses/fourth',
-  'fifth house': '/grimoire/houses/fifth',
-  'sixth house': '/grimoire/houses/sixth',
-  'seventh house': '/grimoire/houses/seventh',
-  'eighth house': '/grimoire/houses/eighth',
-  'ninth house': '/grimoire/houses/ninth',
-  'tenth house': '/grimoire/houses/tenth',
-  'eleventh house': '/grimoire/houses/eleventh',
-  'twelfth house': '/grimoire/houses/twelfth',
+  'first house': '/grimoire/houses/overview/first',
+  'second house': '/grimoire/houses/overview/second',
+  'third house': '/grimoire/houses/overview/third',
+  'fourth house': '/grimoire/houses/overview/fourth',
+  'fifth house': '/grimoire/houses/overview/fifth',
+  'sixth house': '/grimoire/houses/overview/sixth',
+  'seventh house': '/grimoire/houses/overview/seventh',
+  'eighth house': '/grimoire/houses/overview/eighth',
+  'ninth house': '/grimoire/houses/overview/ninth',
+  'tenth house': '/grimoire/houses/overview/tenth',
+  'eleventh house': '/grimoire/houses/overview/eleventh',
+  'twelfth house': '/grimoire/houses/overview/twelfth',
 
   // Moon phases
   'new moon': '/grimoire/moon-phases/new-moon',
@@ -82,11 +82,11 @@ const termMappings: Record<string, string> = {
   eclipse: '/grimoire/eclipses',
 
   // Aspects
-  conjunction: '/grimoire/aspects/conjunction',
-  opposition: '/grimoire/aspects/opposition',
-  trine: '/grimoire/aspects/trine',
-  square: '/grimoire/aspects/square',
-  sextile: '/grimoire/aspects/sextile',
+  conjunction: '/grimoire/aspects/types/conjunction',
+  opposition: '/grimoire/aspects/types/opposition',
+  trine: '/grimoire/aspects/types/trine',
+  square: '/grimoire/aspects/types/square',
+  sextile: '/grimoire/aspects/types/sextile',
 };
 
 // Function to auto-link terms in text

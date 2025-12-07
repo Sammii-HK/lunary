@@ -395,6 +395,17 @@ const nextConfig = {
         destination: '/grimoire/modern-witchcraft/witch-types/:witch',
         permanent: true,
       },
+      // Aspects and Houses route restructure (SEO preservation)
+      {
+        source: '/grimoire/aspects/:aspect(conjunction|opposition|trine|square|sextile)',
+        destination: '/grimoire/aspects/types/:aspect',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/:house(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)',
+        destination: '/grimoire/houses/overview/:house',
+        permanent: true,
+      },
     ];
   },
 };
