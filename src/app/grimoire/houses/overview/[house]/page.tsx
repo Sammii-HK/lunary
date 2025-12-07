@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { astrologicalHouses } from '@/constants/grimoire/seo-data';
-import { stringToKebabCase } from '../../../../../utils/string';
+import { stringToKebabCase } from '../../../../../../utils/string';
 
 const houseKeys = Object.keys(astrologicalHouses);
 
@@ -46,7 +46,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `https://lunary.app/grimoire/houses/${house}`,
+      url: `https://lunary.app/grimoire/houses/overview/${house}`,
       siteName: 'Lunary',
       images: [
         {
@@ -66,7 +66,7 @@ export async function generateMetadata({
       images: ['/api/og/cosmic'],
     },
     alternates: {
-      canonical: `https://lunary.app/grimoire/houses/${house}`,
+      canonical: `https://lunary.app/grimoire/houses/overview/${house}`,
     },
     robots: {
       index: true,
@@ -134,7 +134,7 @@ export default async function HousePage({
           `house ${houseData.number}`,
           `${houseData.name} astrology`,
         ]}
-        canonicalUrl={`https://lunary.app/grimoire/houses/${house}`}
+        canonicalUrl={`https://lunary.app/grimoire/houses/overview/${house}`}
         intro={`The ${houseData.name}, represented by ${houseData.symbol}, is the ${houseData.number}${houseData.number === 1 ? 'st' : houseData.number === 2 ? 'nd' : houseData.number === 3 ? 'rd' : 'th'} house in astrology. It governs ${houseData.area.toLowerCase()} and is ruled by ${houseData.rulingSign} (${houseData.element} element).`}
         tldr={`The ${houseData.name} (${houseData.symbol}) governs ${houseData.area.toLowerCase()}.`}
         meaning={`The ${houseData.name} is one of the twelve astrological houses, each representing a different area of life. This house governs ${houseData.area.toLowerCase()}.
@@ -182,7 +182,7 @@ Area: ${houseData.area}`}
           { label: 'Birth Chart', href: '/grimoire/birth-chart' },
           {
             label: houseData.name,
-            href: `/grimoire/houses/${house}`,
+            href: `/grimoire/houses/overview/${house}`,
           },
         ]}
         internalLinks={[

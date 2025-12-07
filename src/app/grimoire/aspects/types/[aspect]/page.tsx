@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { astrologicalAspects } from '@/constants/grimoire/seo-data';
-import { stringToKebabCase } from '../../../../../utils/string';
+import { stringToKebabCase } from '../../../../../../utils/string';
 
 const aspectKeys = Object.keys(astrologicalAspects);
 
@@ -46,7 +46,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `https://lunary.app/grimoire/aspects/${aspect}`,
+      url: `https://lunary.app/grimoire/aspects/types/${aspect}`,
       siteName: 'Lunary',
       images: [
         {
@@ -66,7 +66,7 @@ export async function generateMetadata({
       images: ['/api/og/cosmic'],
     },
     alternates: {
-      canonical: `https://lunary.app/grimoire/aspects/${aspect}`,
+      canonical: `https://lunary.app/grimoire/aspects/types/${aspect}`,
     },
     robots: {
       index: true,
@@ -130,7 +130,7 @@ export default async function AspectPage({
           `${aspectData.name} astrology`,
           `${aspectData.nature} aspect`,
         ]}
-        canonicalUrl={`https://lunary.app/grimoire/aspects/${aspect}`}
+        canonicalUrl={`https://lunary.app/grimoire/aspects/types/${aspect}`}
         intro={`The ${aspectData.name} aspect occurs when two planets are ${aspectData.degrees} degrees apart. This is a ${aspectData.type} aspect with a ${aspectData.nature} nature. ${aspectData.description}`}
         tldr={`${aspectData.name} (${aspectData.degrees}°) is a ${aspectData.nature} aspect meaning ${aspectData.meaning.toLowerCase()}.`}
         meaning={`Aspects are angles between planets in your birth chart that show how planetary energies interact. The ${aspectData.name} aspect is formed when two planets are ${aspectData.degrees} degrees apart (with an orb of ${aspectData.orb} degrees).
@@ -185,7 +185,7 @@ Nature: ${aspectData.nature}`}
           { label: 'Birth Chart', href: '/grimoire/birth-chart' },
           {
             label: aspectData.name,
-            href: `/grimoire/aspects/${aspect}`,
+            href: `/grimoire/aspects/types/${aspect}`,
           },
         ]}
         internalLinks={[

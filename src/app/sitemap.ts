@@ -683,7 +683,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add all house pages
   const houseRoutes = Object.keys(astrologicalHouses).map((house) => ({
-    url: `${baseUrl}/grimoire/houses/${stringToKebabCase(house)}`,
+    url: `${baseUrl}/grimoire/houses/overview/${stringToKebabCase(house)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
@@ -715,7 +715,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add all aspect pages
   const aspectRoutes = Object.keys(astrologicalAspects).map((aspect) => ({
-    url: `${baseUrl}/grimoire/aspects/${stringToKebabCase(aspect)}`,
+    url: `${baseUrl}/grimoire/aspects/types/${stringToKebabCase(aspect)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
