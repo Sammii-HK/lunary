@@ -9,6 +9,7 @@ import {
   createImageObjectSchema,
   renderJsonLd,
 } from '@/lib/schema';
+import { ParsedMarkdown } from '@/utils/markdown';
 
 export interface FAQItem {
   question: string;
@@ -189,9 +190,7 @@ export function SEOContentTemplate({
         <section>
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>Meaning</h2>
           <div className='prose prose-invert max-w-none'>
-            <p className='text-zinc-300 leading-relaxed whitespace-pre-line'>
-              {meaning}
-            </p>
+            <ParsedMarkdown content={meaning} />
           </div>
         </section>
       )}

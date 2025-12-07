@@ -305,6 +305,9 @@ export default function ProfilePage() {
 
       setIsEditing(false);
 
+      // Refresh user data to update UI with saved changes
+      await refetchUser();
+
       if (birthday) {
         conversionTracking.birthdayEntered(authState.user?.id);
       }

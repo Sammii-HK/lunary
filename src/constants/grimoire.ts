@@ -204,6 +204,47 @@ export const grimoire: {
       'Moon Phases Guide',
     ],
   },
+  horoscopes: {
+    title: 'Monthly Horoscopes',
+    contents: [
+      'Aries',
+      'Taurus',
+      'Gemini',
+      'Cancer',
+      'Leo',
+      'Virgo',
+      'Libra',
+      'Scorpio',
+      'Sagittarius',
+      'Capricorn',
+      'Aquarius',
+      'Pisces',
+    ],
+  },
 };
 
 export const grimoireItems = Object.keys(grimoire);
+
+// Custom hrefs for sections that have their own subpages instead of anchors
+export const customContentHrefs: Record<string, Record<string, string>> = {
+  guides: {
+    'Birth Chart Guide': '/grimoire/guides/birth-chart-complete-guide',
+    'Tarot Guide': '/grimoire/guides/tarot-complete-guide',
+    'Crystal Healing Guide': '/grimoire/guides/crystal-healing-guide',
+    'Moon Phases Guide': '/grimoire/guides/moon-phases-guide',
+  },
+  horoscopes: {
+    Aries: '/horoscope',
+    Taurus: '/horoscope',
+    Gemini: '/horoscope',
+    Cancer: '/horoscope',
+    Leo: '/horoscope',
+    Virgo: '/horoscope',
+    Libra: '/horoscope',
+    Scorpio: '/horoscope',
+    Sagittarius: '/horoscope',
+    Capricorn: '/horoscope',
+    Aquarius: '/horoscope',
+    Pisces: '/horoscope',
+  },
+};

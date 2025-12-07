@@ -32,6 +32,23 @@ export function PWAHandler({
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  // Check if user dismissed the banner within the last 7 days
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const dismissedAt = localStorage.getItem('pwa_banner_dismissed');
+    if (dismissedAt) {
+      const dismissedTime = parseInt(dismissedAt, 10);
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      if (Date.now() - dismissedTime < sevenDays) {
+        setIsDismissed(true);
+      } else {
+        localStorage.removeItem('pwa_banner_dismissed');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Skip service worker registration in development to prevent caching issues
@@ -196,11 +213,15 @@ export function PWAHandler({
 
   const handleDismiss = () => {
     setShowInstallPrompt(false);
+    setIsDismissed(true);
+    // Remember dismissal for 7 days
+    localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
   };
 
   const shouldHideBanner =
     silent ||
     isInstalled ||
+    isDismissed ||
     !showInstallPrompt ||
     authState.loading ||
     !authState.isAuthenticated;

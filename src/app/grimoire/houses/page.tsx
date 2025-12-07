@@ -54,7 +54,7 @@ export default function HousesIndexPage() {
                     {house}
                   </span>
                   <span className='text-xs text-zinc-500'>
-                    {data.naturalSign}
+                    Natural Ruler: {data.naturalSign}
                   </span>
                 </div>
                 <h3 className='text-lg font-medium mb-1'>{data.name}</h3>

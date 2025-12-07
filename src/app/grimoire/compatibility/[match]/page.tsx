@@ -3,6 +3,21 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Heart, Users, Briefcase, Star } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
+
+const ZODIAC_SYMBOLS: Record<string, string> = {
+  aries: '♈',
+  taurus: '♉',
+  gemini: '♊',
+  cancer: '♋',
+  leo: '♌',
+  virgo: '♍',
+  libra: '♎',
+  scorpio: '♏',
+  sagittarius: '♐',
+  capricorn: '♑',
+  aquarius: '♒',
+  pisces: '♓',
+};
 import {
   generateCompatibilityContent,
   getAllCompatibilitySlugs,
@@ -131,13 +146,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
           <div className='flex items-center justify-center gap-6 mb-6'>
             <div className='text-center'>
               <div className='text-5xl mb-2'>
-                {sign1Info.element === 'Fire'
-                  ? '🔥'
-                  : sign1Info.element === 'Earth'
-                    ? '🌍'
-                    : sign1Info.element === 'Air'
-                      ? '💨'
-                      : '💧'}
+                {ZODIAC_SYMBOLS[parsed.sign1] || '⭐'}
               </div>
               <div className='text-xl font-medium text-zinc-100'>
                 {content.sign1}
@@ -147,13 +156,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
             <Heart className='h-8 w-8 text-pink-500' />
             <div className='text-center'>
               <div className='text-5xl mb-2'>
-                {sign2Info.element === 'Fire'
-                  ? '🔥'
-                  : sign2Info.element === 'Earth'
-                    ? '🌍'
-                    : sign2Info.element === 'Air'
-                      ? '💨'
-                      : '💧'}
+                {ZODIAC_SYMBOLS[parsed.sign2] || '⭐'}
               </div>
               <div className='text-xl font-medium text-zinc-100'>
                 {content.sign2}

@@ -3,6 +3,21 @@ import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
 
+const ZODIAC_SYMBOLS: Record<string, string> = {
+  aries: '♈',
+  taurus: '♉',
+  gemini: '♊',
+  cancer: '♋',
+  leo: '♌',
+  virgo: '♍',
+  libra: '♎',
+  scorpio: '♏',
+  sagittarius: '♐',
+  capricorn: '♑',
+  aquarius: '♒',
+  pisces: '♓',
+};
+
 export const metadata: Metadata = {
   title: 'Zodiac Compatibility Guide: Love & Relationship Matches - Lunary',
   description:
@@ -119,15 +134,7 @@ export default function CompatibilityIndexPage() {
               className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
             >
               <div className='flex items-center gap-3 mb-4'>
-                <span className='text-2xl'>
-                  {sign1.element === 'Fire'
-                    ? '🔥'
-                    : sign1.element === 'Earth'
-                      ? '🌍'
-                      : sign1.element === 'Air'
-                        ? '💨'
-                        : '💧'}
-                </span>
+                <span className='text-2xl'>{ZODIAC_SYMBOLS[key1] || '⭐'}</span>
                 <div>
                   <h3 className='text-xl font-medium text-zinc-100'>
                     {sign1.name} Compatibility

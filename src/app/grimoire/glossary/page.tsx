@@ -145,6 +145,48 @@ export default function GlossaryPage() {
         </div>
       </nav>
 
+      {/* Alphabetical Listing */}
+      <section className='mb-16'>
+        <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+          All Terms A-Z
+        </h2>
+        {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map((letter) => {
+          const letterTerms = GLOSSARY_TERMS.filter((t) =>
+            t.term.toUpperCase().startsWith(letter),
+          ).sort((a, b) => a.term.localeCompare(b.term));
+
+          if (letterTerms.length === 0) return null;
+
+          return (
+            <div
+              key={letter}
+              id={`letter-${letter}`}
+              className='mb-8 scroll-mt-24'
+            >
+              <h3 className='text-xl font-medium text-purple-400 mb-4 pb-2 border-b border-zinc-800'>
+                {letter}
+              </h3>
+              <div className='grid gap-2'>
+                {letterTerms.map((term) => (
+                  <Link
+                    key={term.slug}
+                    href={`/grimoire/glossary/${term.slug}`}
+                    className='p-3 rounded-lg bg-zinc-900/30 hover:bg-zinc-900/50 border border-zinc-800/50 hover:border-purple-500/30 transition-colors group'
+                  >
+                    <span className='font-medium text-zinc-100 group-hover:text-purple-300'>
+                      {term.term}
+                    </span>
+                    <span className='text-zinc-500 text-sm ml-2'>
+                      — {term.definition.slice(0, 80)}...
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
       {/* Terms by Category */}
       {CATEGORIES.map((category) => (
         <section
@@ -160,7 +202,7 @@ export default function GlossaryPage() {
               <article
                 key={term.slug}
                 id={term.slug}
-                className='bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-6'
+                className='bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-6 scroll-mt-24'
               >
                 <h3 className='text-xl font-medium text-zinc-100 mb-2'>
                   {term.term}

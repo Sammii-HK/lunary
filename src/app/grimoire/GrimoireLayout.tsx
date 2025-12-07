@@ -1,6 +1,10 @@
 'use client';
 
-import { grimoire, grimoireItems } from '@/constants/grimoire';
+import {
+  grimoire,
+  grimoireItems,
+  customContentHrefs,
+} from '@/constants/grimoire';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
@@ -387,10 +391,16 @@ export default function GrimoireLayout({
                       <div className='ml-8 pl-3 mt-1 mb-2 border-l border-zinc-800 space-y-0.5'>
                         {grimoire[itemKey].contents!.map((content: string) => {
                           const slug = sectionToSlug(itemKey);
+                          // Check if there's a custom href for this content
+                          const customHref =
+                            customContentHrefs[itemKey]?.[content];
+                          const href =
+                            customHref ||
+                            `/grimoire/${slug}#${stringToKebabCase(content)}`;
                           return (
                             <Link
                               key={content}
-                              href={`/grimoire/${slug}#${stringToKebabCase(content)}`}
+                              href={href}
                               prefetch={true}
                               onClick={() => {
                                 startTransition(() => {

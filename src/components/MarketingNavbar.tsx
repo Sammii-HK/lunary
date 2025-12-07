@@ -29,6 +29,12 @@ export function MarketingNavbar() {
           {/* Navigation Links */}
           <div className='hidden sm:flex items-center gap-6'>
             <Link
+              href='/grimoire'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Grimoire
+            </Link>
+            <Link
               href='/blog'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
             >
