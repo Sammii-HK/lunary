@@ -36,7 +36,11 @@ export function AuthComponent({
     name: '',
   });
 
-  const { refreshAuth, ...authState } = useAuthStatus();
+  const {
+    refreshAuth,
+    signOut: contextSignOut,
+    ...authState
+  } = useAuthStatus();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,8 +217,8 @@ export function AuthComponent({
   const handleSignOut = async () => {
     try {
       await betterAuthClient.signOut();
+      contextSignOut(); // Immediately update UI state
       invalidateAuthCache();
-      refreshAuth();
       console.log('✅ Signed out successfully');
     } catch (err) {
       console.error('Sign out error:', err);

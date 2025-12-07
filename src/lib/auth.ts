@@ -36,7 +36,12 @@ function getPostgresPool() {
 }
 
 // Migrate user from Jazz to Postgres after successful Jazz login
-async function migrateJazzUserToPostgres(jazzUser: any, jazzSession: any) {
+// Now also updates existing users' password hashes if they exist in Postgres with wrong hash
+async function migrateJazzUserToPostgres(
+  jazzUser: any,
+  jazzSession: any,
+  jazzPasswordHash?: string,
+) {
   const pool = getPostgresPool();
   if (!pool || !jazzUser) return;
 
@@ -49,12 +54,25 @@ async function migrateJazzUserToPostgres(jazzUser: any, jazzSession: any) {
 
     if (existing.rows.length > 0) {
       console.log(`✅ User ${jazzUser.email} already in Postgres`);
+
+      // Even if user exists, update their password hash if we have the correct one from Jazz
+      if (jazzPasswordHash) {
+        console.log(
+          `🔐 Updating password hash for ${jazzUser.email} from Jazz...`,
+        );
+        await pool.query(
+          `UPDATE account SET password = $1, "updatedAt" = NOW() 
+           WHERE "userId" = $2 AND "providerId" = 'credential'`,
+          [jazzPasswordHash, existing.rows[0].id],
+        );
+        console.log(`✅ Password hash updated for ${jazzUser.email}`);
+      }
       return;
     }
 
     // Migrate user to Postgres
     await pool.query(
-      `INSERT INTO "user" (id, name, email, email_verified, image, created_at, updated_at)
+      `INSERT INTO "user" (id, name, email, "emailVerified", image, "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, NOW())
        ON CONFLICT (id) DO NOTHING`,
       [
@@ -72,7 +90,7 @@ async function migrateJazzUserToPostgres(jazzUser: any, jazzSession: any) {
     // Also migrate the session if we have one
     if (jazzSession) {
       await pool.query(
-        `INSERT INTO session (id, user_id, token, expires_at, ip_address, user_agent, created_at, updated_at)
+        `INSERT INTO session (id, "userId", token, "expiresAt", "ipAddress", "userAgent", "createdAt", "updatedAt")
          VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
          ON CONFLICT (id) DO NOTHING`,
         [
@@ -87,26 +105,43 @@ async function migrateJazzUserToPostgres(jazzUser: any, jazzSession: any) {
       );
     }
 
-    // Migrate account (credentials) if present
-    if (jazzUser.accounts?.length > 0) {
-      for (const account of jazzUser.accounts) {
-        await pool.query(
-          `INSERT INTO account (id, user_id, account_id, provider_id, password, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-           ON CONFLICT (id) DO NOTHING`,
-          [
-            account.id || crypto.randomUUID(),
-            jazzUser.id,
-            account.accountId || jazzUser.id,
-            account.providerId || 'credential',
-            account.password || null,
-          ],
-        );
-      }
+    // Create account with correct password hash from Jazz
+    const accountId = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO account (id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+       ON CONFLICT ("userId", "providerId") DO UPDATE SET password = $5, "updatedAt" = NOW()`,
+      [
+        accountId,
+        jazzUser.email,
+        'credential',
+        jazzUser.id,
+        jazzPasswordHash || null,
+      ],
+    );
+
+    if (jazzPasswordHash) {
+      console.log(`✅ Account migrated with correct password hash`);
+    } else {
+      console.log(`⚠️ Account migrated but no password hash available`);
     }
   } catch (error) {
     console.error('❌ Failed to migrate user from Jazz to Postgres:', error);
-    // Don't throw - user can still use Jazz, migration will retry next login
+  }
+}
+
+// Hash password using Better Auth's method
+async function hashPasswordForMigration(
+  plainPassword: string,
+): Promise<string | null> {
+  try {
+    const { hashPassword } = await import('better-auth/crypto');
+    const hash = await hashPassword(plainPassword);
+    console.log(`🔐 Generated password hash for migration`);
+    return hash;
+  } catch (error) {
+    console.error('❌ Failed to hash password for migration:', error);
+    return null;
   }
 }
 
@@ -350,30 +385,47 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
 
               // Try Postgres first
               try {
-                return await (authInstance as any).api[apiProp](...args);
+                const result = await (authInstance as any).api[apiProp](
+                  ...args,
+                );
+                return result;
               } catch (postgresError: any) {
-                // If not found in Postgres, try Jazz
-                const isNotFound =
-                  postgresError?.message?.includes('not found') ||
-                  postgresError?.message?.includes('Invalid credentials') ||
+                // Fallback to Jazz for auth errors - user might have correct password in Jazz
+                // but wrong hash in Postgres from broken batch migration
+                const isAuthError =
                   postgresError?.message?.includes('User not found') ||
-                  postgresError?.code === 'USER_NOT_FOUND';
+                  postgresError?.message?.includes('user not found') ||
+                  postgresError?.message?.includes('No user found') ||
+                  postgresError?.message?.includes('Invalid password') ||
+                  postgresError?.message?.includes('Invalid credentials') ||
+                  postgresError?.message?.includes(
+                    'Invalid email or password',
+                  ) ||
+                  postgresError?.message?.includes('Incorrect password') ||
+                  postgresError?.code === 'USER_NOT_FOUND' ||
+                  postgresError?.code === 'INVALID_EMAIL_OR_PASSWORD';
 
-                if (jazzAuthInstance && isNotFound) {
-                  console.log(`🔄 Trying Jazz for ${String(apiProp)}...`);
+                if (jazzAuthInstance && isAuthError) {
                   try {
                     const jazzResult = await (jazzAuthInstance as any).api[
                       apiProp
                     ](...args);
 
-                    // If sign-in succeeded, migrate user to Postgres!
+                    // If sign-in succeeded, migrate user AND password hash to Postgres!
                     if (
                       (apiProp === 'signInEmail' || apiProp === 'signIn') &&
                       jazzResult?.user
                     ) {
+                      // Extract password from the request args and hash it properly
+                      const requestBody = args[0]?.body;
+                      const plainPassword = requestBody?.password;
+                      const passwordHash = plainPassword
+                        ? await hashPasswordForMigration(plainPassword)
+                        : null;
                       await migrateJazzUserToPostgres(
                         jazzResult.user,
                         jazzResult.session,
+                        passwordHash || undefined,
                       );
                     }
 
@@ -404,35 +456,79 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
         try {
           const response = await (authInstance as any).handler(request.clone());
 
-          // If auth failed and this is a sign-in, try Jazz
+          // Try Jazz fallback for any auth error during sign-in
+          // User might have correct password in Jazz but wrong hash in Postgres
           if (
             (response.status === 401 || response.status === 400) &&
-            jazzAuthInstance
+            jazzAuthInstance &&
+            isSignIn
           ) {
-            console.log('🔄 Trying Jazz handler...');
-            const jazzResponse = await (jazzAuthInstance as any).handler(
-              request.clone(),
-            );
+            // Clone and check error message
+            const clonedForCheck = response.clone();
+            let errorBody: any = null;
+            try {
+              errorBody = await clonedForCheck.json();
+            } catch {
+              // Not JSON, continue with response
+            }
 
-            if (jazzResponse.ok) {
-              // Parse response to get user for migration
+            // Fallback for any auth error (user not found OR password error)
+            const isAuthError =
+              errorBody?.message?.includes('User not found') ||
+              errorBody?.message?.includes('user not found') ||
+              errorBody?.message?.includes('No user found') ||
+              errorBody?.message?.includes('Invalid password') ||
+              errorBody?.message?.includes('Invalid credentials') ||
+              errorBody?.message?.includes('Invalid email or password') ||
+              errorBody?.message?.includes('Incorrect password') ||
+              errorBody?.code === 'USER_NOT_FOUND' ||
+              errorBody?.code === 'INVALID_EMAIL_OR_PASSWORD';
+
+            if (isAuthError) {
+              // Clone request to extract password before Jazz consumes it
+              let plainPassword: string | null = null;
               try {
-                const clonedResponse = jazzResponse.clone();
-                const data = await clonedResponse.json();
-                if (data?.user && isSignIn) {
-                  await migrateJazzUserToPostgres(data.user, data.session);
-                }
+                const clonedForPassword = request.clone();
+                const bodyText = await clonedForPassword.text();
+                const bodyJson = JSON.parse(bodyText);
+                plainPassword = bodyJson?.password || null;
               } catch {
-                // Response might not be JSON, that's fine
+                // Could not extract password
               }
-              return jazzResponse;
+
+              const jazzResponse = await (jazzAuthInstance as any).handler(
+                request.clone(),
+              );
+
+              if (jazzResponse.ok) {
+                // Parse response to get user for migration
+                try {
+                  const clonedResponse = jazzResponse.clone();
+                  const data = await clonedResponse.json();
+                  if (data?.user && isSignIn) {
+                    // Hash the plain password with Better Auth and store in Postgres
+                    const passwordHash = plainPassword
+                      ? await hashPasswordForMigration(plainPassword)
+                      : null;
+                    await migrateJazzUserToPostgres(
+                      data.user,
+                      data.session,
+                      passwordHash || undefined,
+                    );
+                  }
+                } catch {
+                  // Response might not be JSON, that's fine
+                }
+                return jazzResponse;
+              }
             }
           }
 
           return response;
         } catch (error) {
+          console.error('❌ Postgres handler threw error:', error);
           if (jazzAuthInstance) {
-            console.log('🔄 Postgres failed, trying Jazz...');
+            console.log('🔄 Postgres threw, trying Jazz...');
             return await (jazzAuthInstance as any).handler(request);
           }
           throw error;
