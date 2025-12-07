@@ -1,16 +1,49 @@
-import { Metadata } from 'next';
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { MarketingFooter } from '@/components/MarketingFooter';
-
-export const metadata: Metadata = {
-  title: 'Refund Policy | Lunary',
-  description:
-    "Learn about Lunary's refund policy for subscriptions and digital purchases.",
-  robots: 'index, follow',
-};
+import { useAuthStatus } from '@/components/AuthStatus';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function RefundPolicyPage() {
   const lastUpdated = 'December 6, 2025';
+  const { isAuthenticated, user } = useAuthStatus();
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRefundRequest = async () => {
+    if (!isAuthenticated) {
+      setError('Please sign in to request a refund');
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/refund/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ reason }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit refund request');
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
@@ -68,37 +101,88 @@ export default function RefundPolicyPage() {
             </p>
           </section>
 
-          <section>
+          {/* Refund Request Form */}
+          <section className='p-6 border border-purple-500/30 bg-purple-500/10 rounded-xl'>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              2. How to Request a Refund
+              Request a Refund
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
-              To request a refund, please contact our support team:
-            </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
-              <li>
-                Email:{' '}
-                <a
-                  href='mailto:support@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
-                >
-                  support@lunary.app
-                </a>
-              </li>
-              <li>Include &quot;Refund Request&quot; in the subject line</li>
-              <li>
-                Provide the email address associated with your Lunary account
-              </li>
-              <li>Briefly explain the reason for your refund request</li>
-            </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
-              We aim to process refund requests within 5-7 business days.
-            </p>
+
+            {submitted ? (
+              <div className='flex items-start gap-3 text-green-400'>
+                <CheckCircle className='h-6 w-6 mt-0.5 shrink-0' />
+                <div>
+                  <p className='font-medium'>Refund request submitted</p>
+                  <p className='text-sm text-zinc-400 mt-1'>
+                    We&apos;ll review your request and process eligible refunds
+                    within 5-7 business days. You&apos;ll receive an email
+                    confirmation.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {!isAuthenticated ? (
+                  <div className='text-center py-4'>
+                    <p className='text-zinc-400 mb-4'>
+                      Please sign in to request a refund
+                    </p>
+                    <Link
+                      href='/auth'
+                      className='inline-flex px-6 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors'
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                ) : (
+                  <div className='space-y-4'>
+                    <div>
+                      <label className='block text-sm text-zinc-400 mb-2'>
+                        Reason for refund (optional)
+                      </label>
+                      <textarea
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="Let us know why you're requesting a refund..."
+                        className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none'
+                        rows={3}
+                      />
+                    </div>
+
+                    {error && (
+                      <div className='flex items-center gap-2 text-red-400 text-sm'>
+                        <AlertCircle className='h-4 w-4' />
+                        {error}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleRefundRequest}
+                      disabled={submitting}
+                      className='w-full py-3 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-medium transition-colors flex items-center justify-center gap-2'
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className='h-5 w-5 animate-spin' />
+                          Submitting...
+                        </>
+                      ) : (
+                        'Submit Refund Request'
+                      )}
+                    </button>
+
+                    <p className='text-xs text-zinc-500 text-center'>
+                      We&apos;ll automatically check your eligibility based on
+                      your subscription date
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
           </section>
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              3. Refund Processing
+              2. Refund Processing
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               Approved refunds will be processed as follows:
@@ -124,7 +208,7 @@ export default function RefundPolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              4. Cancellation vs. Refund
+              3. Cancellation vs. Refund
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               Canceling your subscription and requesting a refund are different:
@@ -155,7 +239,7 @@ export default function RefundPolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              5. Digital Goods
+              4. Digital Goods
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
               Due to the nature of digital content, once you have accessed or
@@ -169,7 +253,7 @@ export default function RefundPolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              6. Exceptions
+              5. Exceptions
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               We may, at our discretion, provide refunds outside of the standard
@@ -190,20 +274,20 @@ export default function RefundPolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              7. Chargebacks
+              6. Chargebacks
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
               Before initiating a chargeback with your bank or credit card
-              company, please contact us first. We are committed to resolving
-              any billing issues quickly and fairly. Initiating a chargeback
-              without first attempting to resolve the issue with us may result
-              in the suspension of your account.
+              company, please use the refund request form above. We are
+              committed to resolving any billing issues quickly and fairly.
+              Initiating a chargeback without first attempting to resolve the
+              issue with us may result in the suspension of your account.
             </p>
           </section>
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              8. Changes to This Policy
+              7. Changes to This Policy
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
               We reserve the right to modify this Refund Policy at any time.
@@ -211,29 +295,6 @@ export default function RefundPolicyPage() {
               Your continued use of the Service after any changes indicates your
               acceptance of the new policy.
             </p>
-          </section>
-
-          <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
-              9. Contact Us
-            </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
-              If you have any questions about our Refund Policy, please contact
-              us:
-            </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
-                <strong>Lunar Computing, Inc.</strong>
-                <br />
-                Email:{' '}
-                <a
-                  href='mailto:support@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
-                >
-                  support@lunary.app
-                </a>
-              </p>
-            </div>
           </section>
 
           <section className='pt-8 border-t border-zinc-800'>
