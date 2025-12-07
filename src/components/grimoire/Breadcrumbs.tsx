@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
+import { useAuthStatus } from '@/components/AuthStatus';
 
 export interface BreadcrumbItem {
   label: string;
@@ -8,9 +11,23 @@ export interface BreadcrumbItem {
 
 interface BreadcrumbsProps {
   items: BreadcrumbItem[];
+  /** Override home href - if not provided, auto-detects based on auth status */
+  homeHref?: string;
+  /** Force marketing home (/) regardless of auth */
+  forceMarketingHome?: boolean;
 }
 
-export function Breadcrumbs({ items }: BreadcrumbsProps) {
+export function Breadcrumbs({
+  items,
+  homeHref,
+  forceMarketingHome = false,
+}: BreadcrumbsProps) {
+  const { isAuthenticated } = useAuthStatus();
+
+  // Determine home href: explicit > force marketing > auth-based
+  const resolvedHomeHref =
+    homeHref ?? (forceMarketingHome ? '/' : isAuthenticated ? '/app' : '/');
+
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -39,7 +56,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
         aria-label='Breadcrumb'
       >
         <Link
-          href='/'
+          href={resolvedHomeHref}
           className='hover:text-purple-400 transition-colors flex items-center gap-1'
         >
           <Home className='w-4 h-4' />

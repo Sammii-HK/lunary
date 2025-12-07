@@ -3,6 +3,8 @@ import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import {
   buildAstralContext,
   ASTRAL_GUIDE_PROMPT,
+  retrieveGrimoireContext,
+  formatGrimoireCitations,
   type AstralContext,
 } from '@/lib/ai/astral-guide';
 import { estimateTokenCount } from '@/lib/ai/tokenizer';
@@ -147,6 +149,26 @@ export async function POST(request: NextRequest) {
     // Format context for prompt
     const contextString = formatAstralContext(astralContext);
 
+    // Retrieve relevant grimoire context via semantic search (RAG)
+    let grimoireContext = '';
+    let grimoireSources: Array<{ title: string; slug: string }> = [];
+    try {
+      const { context: semanticContext, sources } =
+        await retrieveGrimoireContext(body.message, 3);
+      if (semanticContext && sources.length > 0) {
+        grimoireContext = semanticContext;
+        grimoireSources = sources.map((s) => ({
+          title: s.title,
+          slug: s.slug,
+        }));
+      }
+    } catch (error) {
+      console.error(
+        '[Astral Guide] Failed to retrieve grimoire context:',
+        error,
+      );
+    }
+
     // Check if OpenAI is configured
     const apiKey = process.env.OPENAI_API_KEY?.trim();
     if (!apiKey) {
@@ -173,7 +195,7 @@ export async function POST(request: NextRequest) {
       },
       {
         role: 'system',
-        content: `Astral Context:\n${contextString}`,
+        content: `Astral Context:\n${contextString}${grimoireContext ? `\n${grimoireContext}\n\nWhen referencing grimoire knowledge, cite sources like: [Title](/grimoire/slug)` : ''}`,
       },
       {
         role: 'user',
@@ -253,6 +275,7 @@ export async function POST(request: NextRequest) {
         tokensIn: usageResult.usage.tokensIn,
         tokensOut: usageResult.usage.tokensOut,
       },
+      grimoireSources: grimoireSources.length > 0 ? grimoireSources : undefined,
     });
   } catch (error) {
     if (error instanceof UnauthorizedError) {

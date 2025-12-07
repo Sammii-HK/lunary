@@ -7,6 +7,7 @@ import {
   SIGN_ELEMENTS,
 } from '@/constants/seo/monthly-horoscope';
 import Script from 'next/script';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Monthly Horoscopes 2025 & 2026: All Zodiac Signs | Lunary',
@@ -73,13 +74,7 @@ export default function HoroscopeIndexPage() {
       />
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
-          <nav className='text-sm text-zinc-500 mb-8'>
-            <Link href='/' className='hover:text-zinc-300'>
-              Home
-            </Link>
-            <span className='mx-2'>/</span>
-            <span className='text-zinc-300'>Horoscope</span>
-          </nav>
+          <Breadcrumbs items={[{ label: 'Horoscopes' }]} />
 
           <h1 className='text-4xl font-light mb-4'>Monthly Horoscopes</h1>
           <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
@@ -109,66 +104,6 @@ export default function HoroscopeIndexPage() {
                   </p>
                 </Link>
               ))}
-            </div>
-          </div>
-
-          <div className='grid md:grid-cols-2 gap-8 mb-12'>
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-              <h2 className='text-xl font-medium mb-4'>2025 Horoscopes</h2>
-              <div className='grid grid-cols-3 gap-2'>
-                {[
-                  'january',
-                  'february',
-                  'march',
-                  'april',
-                  'may',
-                  'june',
-                  'july',
-                  'august',
-                  'september',
-                  'october',
-                  'november',
-                  'december',
-                ].map((month) => (
-                  <Link
-                    key={month}
-                    href={`/horoscope/aries/2025/${month}`}
-                    className='px-3 py-2 rounded text-sm text-center bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors'
-                  >
-                    {month.charAt(0).toUpperCase() +
-                      month.slice(1).substring(0, 2)}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-              <h2 className='text-xl font-medium mb-4'>2026 Horoscopes</h2>
-              <div className='grid grid-cols-3 gap-2'>
-                {[
-                  'january',
-                  'february',
-                  'march',
-                  'april',
-                  'may',
-                  'june',
-                  'july',
-                  'august',
-                  'september',
-                  'october',
-                  'november',
-                  'december',
-                ].map((month) => (
-                  <Link
-                    key={month}
-                    href={`/horoscope/aries/2026/${month}`}
-                    className='px-3 py-2 rounded text-sm text-center bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors'
-                  >
-                    {month.charAt(0).toUpperCase() +
-                      month.slice(1).substring(0, 2)}
-                  </Link>
-                ))}
-              </div>
             </div>
           </div>
 
