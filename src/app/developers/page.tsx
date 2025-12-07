@@ -407,18 +407,69 @@ export default function DevelopersPage() {
             ))}
           </div>
 
-          {/* Rate Limits */}
-          <div className='mt-12 p-6 rounded-lg border border-amber-500/30 bg-amber-500/10'>
-            <h2 className='text-lg font-medium text-amber-300 mb-2'>
-              Rate Limits
+          {/* Pricing Tiers */}
+          <div className='mt-12'>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              API Pricing
             </h2>
-            <p className='text-zinc-300 text-sm'>
-              Free tier endpoints are rate-limited to 100 requests per minute
-              per IP. For higher limits and additional endpoints, please{' '}
-              <Link href='/contact' className='text-purple-400 hover:underline'>
-                contact us
+            <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-4'>
+              <div className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+                <h3 className='font-medium text-zinc-100 mb-1'>Free</h3>
+                <p className='text-2xl font-light text-zinc-100 mb-2'>$0</p>
+                <p className='text-sm text-zinc-400 mb-3'>100 requests/month</p>
+                <ul className='text-xs text-zinc-500 space-y-1'>
+                  <li>• Basic endpoints only</li>
+                  <li>• No API key required</li>
+                </ul>
+              </div>
+              <div className='p-5 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+                <h3 className='font-medium text-purple-300 mb-1'>Starter</h3>
+                <p className='text-2xl font-light text-zinc-100 mb-2'>
+                  $9<span className='text-sm text-zinc-400'>/mo</span>
+                </p>
+                <p className='text-sm text-zinc-400 mb-3'>
+                  5,000 requests/month
+                </p>
+                <ul className='text-xs text-zinc-500 space-y-1'>
+                  <li>• All endpoints</li>
+                  <li>• API key access</li>
+                </ul>
+              </div>
+              <div className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+                <h3 className='font-medium text-zinc-100 mb-1'>Developer</h3>
+                <p className='text-2xl font-light text-zinc-100 mb-2'>
+                  $29<span className='text-sm text-zinc-400'>/mo</span>
+                </p>
+                <p className='text-sm text-zinc-400 mb-3'>
+                  25,000 requests/month
+                </p>
+                <ul className='text-xs text-zinc-500 space-y-1'>
+                  <li>• Priority support</li>
+                  <li>• Higher rate limits</li>
+                </ul>
+              </div>
+              <div className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+                <h3 className='font-medium text-zinc-100 mb-1'>Business</h3>
+                <p className='text-2xl font-light text-zinc-100 mb-2'>
+                  $99<span className='text-sm text-zinc-400'>/mo</span>
+                </p>
+                <p className='text-sm text-zinc-400 mb-3'>
+                  100,000 requests/month
+                </p>
+                <ul className='text-xs text-zinc-500 space-y-1'>
+                  <li>• Webhooks</li>
+                  <li>• Dedicated support</li>
+                </ul>
+              </div>
+            </div>
+            <p className='mt-4 text-sm text-zinc-500 text-center'>
+              <Link
+                href='/developers/dashboard'
+                className='text-purple-400 hover:underline'
+              >
+                Get your API key
               </Link>{' '}
-              about API partnerships.
+              to upgrade your plan
             </p>
           </div>
 
@@ -468,14 +519,14 @@ export default function DevelopersPage() {
           {/* CTA */}
           <div className='mt-12 text-center'>
             <Link
-              href='/welcome'
-              className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium text-lg transition-colors'
+              href='/developers/dashboard'
+              className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium text-lg transition-colors'
             >
-              Try Lunary App
-              <ArrowRight className='h-5 w-5' />
+              <Key className='h-5 w-5' />
+              Get Started with the API
             </Link>
             <p className='mt-4 text-sm text-zinc-500'>
-              Questions? Reach out at{' '}
+              Need enterprise limits or custom features?{' '}
               <a
                 href='mailto:api@lunary.app'
                 className='text-purple-400 hover:underline'
