@@ -17,7 +17,6 @@ import {
   Menu,
   X,
   Sparkles,
-  Search,
   Moon as MoonIcon,
   Sun,
   Star,
@@ -64,7 +63,7 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
   glossary: <BookOpen size={18} />,
   events: <Sparkles size={18} />,
 };
-import { GrimoireSearch } from './GrimoireSearch';
+import { AskTheGrimoire } from './AskTheGrimoire';
 import { captureEvent } from '@/lib/posthog-client';
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
@@ -296,8 +295,8 @@ export default function GrimoireLayout({
           </button>
         </div>
 
-        {/* Search */}
-        <GrimoireSearch
+        {/* Search / Ask AI */}
+        <AskTheGrimoire
           onResultClick={handleSearchResultClick}
           onSidebarClose={() => setSidebarOpen(false)}
         />

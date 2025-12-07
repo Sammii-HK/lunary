@@ -630,6 +630,194 @@ export const GRIMOIRE_SEARCH_INDEX: GrimoireEntry[] = [
       'Monthly horoscope predictions for all 12 zodiac signs. Get your love, career, and health forecast.',
     relatedSlugs: ['zodiac/aries', 'zodiac/taurus', 'zodiac/gemini'],
   },
+  {
+    slug: 'horoscope/aries',
+    title: 'Aries Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'aries horoscope',
+      'aries forecast',
+      'aries prediction',
+      'aries monthly',
+      'ram horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Aries. Love, career, health, and lucky numbers for the fiery ram.',
+    relatedSlugs: ['zodiac/aries', '/horoscope', 'astronomy/planets/mars'],
+  },
+  {
+    slug: 'horoscope/taurus',
+    title: 'Taurus Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'taurus horoscope',
+      'taurus forecast',
+      'taurus prediction',
+      'taurus monthly',
+      'bull horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Taurus. Love, career, health, and lucky numbers for the steadfast bull.',
+    relatedSlugs: ['zodiac/taurus', '/horoscope', 'astronomy/planets/venus'],
+  },
+  {
+    slug: 'horoscope/gemini',
+    title: 'Gemini Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'gemini horoscope',
+      'gemini forecast',
+      'gemini prediction',
+      'gemini monthly',
+      'twins horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Gemini. Love, career, health, and lucky numbers for the curious twins.',
+    relatedSlugs: ['zodiac/gemini', '/horoscope', 'astronomy/planets/mercury'],
+  },
+  {
+    slug: 'horoscope/cancer',
+    title: 'Cancer Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'cancer horoscope',
+      'cancer forecast',
+      'cancer prediction',
+      'cancer monthly',
+      'crab horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Cancer. Love, career, health, and lucky numbers for the nurturing crab.',
+    relatedSlugs: ['zodiac/cancer', '/horoscope', 'astronomy/planets/moon'],
+  },
+  {
+    slug: 'horoscope/leo',
+    title: 'Leo Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'leo horoscope',
+      'leo forecast',
+      'leo prediction',
+      'leo monthly',
+      'lion horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Leo. Love, career, health, and lucky numbers for the radiant lion.',
+    relatedSlugs: ['zodiac/leo', '/horoscope', 'astronomy/planets/sun'],
+  },
+  {
+    slug: 'horoscope/virgo',
+    title: 'Virgo Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'virgo horoscope',
+      'virgo forecast',
+      'virgo prediction',
+      'virgo monthly',
+      'maiden horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Virgo. Love, career, health, and lucky numbers for the analytical maiden.',
+    relatedSlugs: ['zodiac/virgo', '/horoscope', 'astronomy/planets/mercury'],
+  },
+  {
+    slug: 'horoscope/libra',
+    title: 'Libra Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'libra horoscope',
+      'libra forecast',
+      'libra prediction',
+      'libra monthly',
+      'scales horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Libra. Love, career, health, and lucky numbers for the balanced scales.',
+    relatedSlugs: ['zodiac/libra', '/horoscope', 'astronomy/planets/venus'],
+  },
+  {
+    slug: 'horoscope/scorpio',
+    title: 'Scorpio Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'scorpio horoscope',
+      'scorpio forecast',
+      'scorpio prediction',
+      'scorpio monthly',
+      'scorpion horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Scorpio. Love, career, health, and lucky numbers for the intense scorpion.',
+    relatedSlugs: ['zodiac/scorpio', '/horoscope', 'astronomy/planets/pluto'],
+  },
+  {
+    slug: 'horoscope/sagittarius',
+    title: 'Sagittarius Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'sagittarius horoscope',
+      'sagittarius forecast',
+      'sagittarius prediction',
+      'sagittarius monthly',
+      'archer horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Sagittarius. Love, career, health, and lucky numbers for the adventurous archer.',
+    relatedSlugs: [
+      'zodiac/sagittarius',
+      '/horoscope',
+      'astronomy/planets/jupiter',
+    ],
+  },
+  {
+    slug: 'horoscope/capricorn',
+    title: 'Capricorn Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'capricorn horoscope',
+      'capricorn forecast',
+      'capricorn prediction',
+      'capricorn monthly',
+      'goat horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Capricorn. Love, career, health, and lucky numbers for the ambitious goat.',
+    relatedSlugs: [
+      'zodiac/capricorn',
+      '/horoscope',
+      'astronomy/planets/saturn',
+    ],
+  },
+  {
+    slug: 'horoscope/aquarius',
+    title: 'Aquarius Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'aquarius horoscope',
+      'aquarius forecast',
+      'aquarius prediction',
+      'aquarius monthly',
+      'water bearer horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Aquarius. Love, career, health, and lucky numbers for the innovative water bearer.',
+    relatedSlugs: ['zodiac/aquarius', '/horoscope', 'astronomy/planets/uranus'],
+  },
+  {
+    slug: 'horoscope/pisces',
+    title: 'Pisces Horoscope',
+    category: 'horoscope',
+    keywords: [
+      'pisces horoscope',
+      'pisces forecast',
+      'pisces prediction',
+      'pisces monthly',
+      'fish horoscope',
+    ],
+    summary:
+      'Monthly horoscope for Pisces. Love, career, health, and lucky numbers for the intuitive fish.',
+    relatedSlugs: ['zodiac/pisces', '/horoscope', 'astronomy/planets/neptune'],
+  },
 
   // ============================================================================
   // CHINESE ZODIAC
