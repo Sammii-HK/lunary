@@ -1,4 +1,18 @@
 {
   "buildCommand": "next build",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/process-deletions",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/trial-reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/reset-api-limits",
+      "schedule": "0 0 1 * *"
+    }
+  ]
 }

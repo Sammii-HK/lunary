@@ -816,9 +816,139 @@ async function setupDatabase() {
 
     console.log('✅ Grimoire embeddings table created');
 
+    // Create refund_requests table
+    await sql`
+      CREATE TABLE IF NOT EXISTS refund_requests (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        user_email TEXT,
+        stripe_subscription_id TEXT,
+        stripe_customer_id TEXT,
+        plan_type TEXT,
+        subscription_start TIMESTAMP WITH TIME ZONE,
+        amount_cents INTEGER,
+        reason TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        eligible BOOLEAN,
+        eligibility_reason TEXT,
+        processed_at TIMESTAMP WITH TIME ZONE,
+        refund_id TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_refund_requests_user_id ON refund_requests(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_refund_requests_status ON refund_requests(status)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_refund_requests_created_at ON refund_requests(created_at)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_refund_requests_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_refund_requests_updated_at ON refund_requests
+    `;
+
+    await sql`
+      CREATE TRIGGER update_refund_requests_updated_at
+          BEFORE UPDATE ON refund_requests
+          FOR EACH ROW
+          EXECUTE FUNCTION update_refund_requests_updated_at()
+    `;
+
+    console.log('✅ Refund requests table created');
+
+    // Create deletion_requests table for GDPR/account deletion
+    await sql`
+      CREATE TABLE IF NOT EXISTS deletion_requests (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL UNIQUE,
+        user_email TEXT,
+        reason TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        scheduled_for TIMESTAMP WITH TIME ZONE NOT NULL,
+        processed_at TIMESTAMP WITH TIME ZONE,
+        cancelled_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_deletion_requests_user_id ON deletion_requests(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_deletion_requests_status ON deletion_requests(status)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_deletion_requests_scheduled_for ON deletion_requests(scheduled_for)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_deletion_requests_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_deletion_requests_updated_at ON deletion_requests
+    `;
+
+    await sql`
+      CREATE TRIGGER update_deletion_requests_updated_at
+          BEFORE UPDATE ON deletion_requests
+          FOR EACH ROW
+          EXECUTE FUNCTION update_deletion_requests_updated_at()
+    `;
+
+    console.log('✅ Deletion requests table created');
+
+    // Create consent_log table for ToS/Privacy acceptance tracking
+    await sql`
+      CREATE TABLE IF NOT EXISTS consent_log (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        consent_type TEXT NOT NULL, -- 'tos', 'privacy', 'marketing', 'cookies'
+        version TEXT NOT NULL, -- Policy version accepted
+        accepted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        ip_address TEXT,
+        user_agent TEXT,
+        metadata JSONB DEFAULT '{}'::jsonb
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_consent_log_user_id ON consent_log(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_consent_log_type ON consent_log(consent_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_consent_log_accepted_at ON consent_log(accepted_at)`;
+
+    console.log('✅ Consent log table created');
+
+    // Create email_preferences table
+    await sql`
+      CREATE TABLE IF NOT EXISTS email_preferences (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL UNIQUE,
+        marketing_emails BOOLEAN DEFAULT true,
+        product_updates BOOLEAN DEFAULT true,
+        cosmic_insights BOOLEAN DEFAULT true,
+        trial_reminders BOOLEAN DEFAULT true,
+        weekly_digest BOOLEAN DEFAULT true,
+        unsubscribed_all BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_email_preferences_user_id ON email_preferences(user_id)`;
+
+    console.log('✅ Email preferences table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, and API keys',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, and email preferences',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);
