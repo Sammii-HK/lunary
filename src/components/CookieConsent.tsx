@@ -95,19 +95,14 @@ export function CookieConsent() {
   if (!isVisible) return null;
 
   return (
-    <div className='fixed bottom-0 left-0 right-0 z-50 p-4 pb-safe'>
-      <div className='max-w-2xl mx-auto'>
-        <div className='rounded-2xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-sm shadow-xl p-6'>
+    <div className='fixed bottom-20 right-4 z-50 max-w-sm'>
+      <div>
+        <div className='rounded-xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-sm shadow-xl p-4'>
           {!showCustomize ? (
             <>
-              <div className='mb-4'>
-                <h3 className='text-lg font-medium text-white mb-2'>
-                  Cookie Preferences
-                </h3>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  We use cookies to enhance your experience, analyze site usage,
-                  and assist in our marketing efforts. By clicking &quot;Accept
-                  All,&quot; you consent to our use of cookies.{' '}
+              <div className='mb-3'>
+                <p className='text-xs text-zinc-400 leading-relaxed'>
+                  We use cookies to enhance your experience.{' '}
                   <Link
                     href='/cookies'
                     className='text-purple-400 hover:text-purple-300 underline'
@@ -116,93 +111,67 @@ export function CookieConsent() {
                   </Link>
                 </p>
               </div>
-              <div className='flex flex-wrap gap-3'>
+              <div className='flex gap-2'>
                 <button
                   onClick={handleAcceptAll}
-                  className='flex-1 min-w-[120px] rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium py-2.5 px-4 transition-colors'
+                  className='flex-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium py-2 px-3 transition-colors'
                 >
-                  Accept All
+                  Accept
                 </button>
                 <button
                   onClick={handleRejectNonEssential}
-                  className='flex-1 min-w-[120px] rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium py-2.5 px-4 transition-colors'
+                  className='flex-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium py-2 px-3 transition-colors'
                 >
-                  Essential Only
+                  Decline
                 </button>
                 <button
                   onClick={() => setShowCustomize(true)}
-                  className='flex-1 min-w-[120px] rounded-xl border border-zinc-700 hover:border-zinc-600 text-zinc-300 text-sm font-medium py-2.5 px-4 transition-colors'
+                  className='rounded-lg border border-zinc-700 hover:border-zinc-600 text-zinc-400 text-xs py-2 px-2 transition-colors'
                 >
-                  Customize
+                  ⚙️
                 </button>
               </div>
             </>
           ) : (
             <>
-              <div className='mb-4'>
-                <h3 className='text-lg font-medium text-white mb-2'>
-                  Customize Cookie Preferences
-                </h3>
-                <p className='text-sm text-zinc-400'>
-                  Choose which cookies you want to allow.
-                </p>
-              </div>
-
-              <div className='space-y-4 mb-6'>
-                <div className='flex items-start justify-between gap-4 p-3 rounded-xl bg-zinc-800/50'>
-                  <div>
-                    <p className='text-sm font-medium text-white'>
-                      Essential Cookies
-                    </p>
-                    <p className='text-xs text-zinc-400 mt-1'>
-                      Required for the website to function. Cannot be disabled.
-                    </p>
-                  </div>
-                  <div className='shrink-0'>
-                    <div className='w-10 h-6 rounded-full bg-purple-600 flex items-center justify-end px-1'>
-                      <div className='w-4 h-4 rounded-full bg-white' />
-                    </div>
+              <div className='space-y-3 mb-3'>
+                <div className='flex items-center justify-between gap-3 p-2 rounded-lg bg-zinc-800/50'>
+                  <p className='text-xs text-white'>Essential</p>
+                  <div className='w-8 h-5 rounded-full bg-purple-600 flex items-center justify-end px-0.5'>
+                    <div className='w-3.5 h-3.5 rounded-full bg-white' />
                   </div>
                 </div>
 
-                <div className='flex items-start justify-between gap-4 p-3 rounded-xl bg-zinc-800/50'>
-                  <div>
-                    <p className='text-sm font-medium text-white'>
-                      Analytics Cookies
-                    </p>
-                    <p className='text-xs text-zinc-400 mt-1'>
-                      Help us understand how you use Lunary so we can improve.
-                    </p>
-                  </div>
+                <div className='flex items-center justify-between gap-3 p-2 rounded-lg bg-zinc-800/50'>
+                  <p className='text-xs text-white'>Analytics</p>
                   <button
                     onClick={() => setAnalyticsEnabled(!analyticsEnabled)}
-                    className='shrink-0'
                   >
                     <div
-                      className={`w-10 h-6 rounded-full flex items-center px-1 transition-colors ${
+                      className={`w-8 h-5 rounded-full flex items-center px-0.5 transition-colors ${
                         analyticsEnabled
                           ? 'bg-purple-600 justify-end'
                           : 'bg-zinc-600 justify-start'
                       }`}
                     >
-                      <div className='w-4 h-4 rounded-full bg-white' />
+                      <div className='w-3.5 h-3.5 rounded-full bg-white' />
                     </div>
                   </button>
                 </div>
               </div>
 
-              <div className='flex gap-3'>
+              <div className='flex gap-2'>
                 <button
                   onClick={() => setShowCustomize(false)}
-                  className='flex-1 rounded-xl border border-zinc-700 hover:border-zinc-600 text-zinc-300 text-sm font-medium py-2.5 px-4 transition-colors'
+                  className='flex-1 rounded-lg border border-zinc-700 text-zinc-300 text-xs py-2 px-3 transition-colors'
                 >
                   Back
                 </button>
                 <button
                   onClick={handleSavePreferences}
-                  className='flex-1 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium py-2.5 px-4 transition-colors'
+                  className='flex-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs py-2 px-3 transition-colors'
                 >
-                  Save Preferences
+                  Save
                 </button>
               </div>
             </>
