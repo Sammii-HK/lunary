@@ -1,12 +1,22 @@
 import OpenAI from 'openai';
 import { sql } from '@vercel/postgres';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 const EMBEDDING_MODEL = 'text-embedding-3-small';
 const EMBEDDING_DIMENSIONS = 1536;
+
+let openaiClient: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is not set');
+    }
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiClient;
+}
 
 export interface GrimoireEntry {
   id: string;
@@ -28,6 +38,7 @@ export interface EmbeddingResult {
 }
 
 export async function generateEmbedding(text: string): Promise<number[]> {
+  const openai = getOpenAI();
   const response = await openai.embeddings.create({
     model: EMBEDDING_MODEL,
     input: text,
