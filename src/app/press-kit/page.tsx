@@ -115,7 +115,7 @@ const pressQuotes = [
 
 export default function PressKitPage() {
   return (
-    <div className='w-full max-w-5xl space-y-10 px-4 py-10 text-white'>
+    <div className='w-full max-w-5xl mx-auto space-y-10 px-4 py-10 text-white'>
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/50 p-8'>
         <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
           Press Kit
