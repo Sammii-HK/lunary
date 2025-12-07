@@ -21,6 +21,14 @@ export const LUNARY_BRAND = {
   secondaryColor: '#c084fc',
   backgroundColor: '#09090b',
   foundingDate: '2024',
+  colors: {
+    violet: '#7358FF',
+    rose: '#FF7B9C',
+    blue: '#4F5BFF',
+    midnight: '#0A0A1A',
+    orchid: '#E066FF',
+    lavender: '#C77DFF',
+  },
 };
 
 export function createOrganizationSchema() {

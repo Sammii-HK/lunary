@@ -61,7 +61,7 @@ export function TrialReminder({
       <Link
         href='/pricing'
         onClick={handleUpgradeClick}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-medium hover:bg-purple-500/30 transition-colors ${className}`}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-rose/20 border border-lunary-rose/30 text-lunary-rose text-xs font-medium hover:bg-lunary-rose/30 transition-colors ${className}`}
       >
         <Zap className='w-3 h-3' />
         <span>{trialDaysRemaining} days left</span>
@@ -71,11 +71,11 @@ export function TrialReminder({
 
   return (
     <div
-      className={`bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-lg p-4 ${className}`}
+      className={`bg-gradient-to-r from-lunary-lavender/10 to-lunary-rose/10 border border-lunary-lavender/20 rounded-lg p-4 ${className}`}
     >
       <div className='flex items-center justify-between gap-4'>
         <div className='flex items-center gap-3'>
-          <Clock className='w-5 h-5 text-purple-400' />
+          <Clock className='w-5 h-5 text-lunary-lavender' />
           <div>
             <h3 className='text-sm font-medium text-white'>{getMessage()}</h3>
             <p className='text-xs text-gray-400'>

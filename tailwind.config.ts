@@ -7,6 +7,16 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        lunary: {
+          violet: '#7358FF',
+          rose: '#FF7B9C',
+          blue: '#4F5BFF',
+          midnight: '#0A0A1A',
+          orchid: '#E066FF',
+          lavender: '#C77DFF',
+        },
+      },
       fontFamily: {
         astro: ['var(--font-astro)'],
       },
