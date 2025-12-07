@@ -45,21 +45,6 @@ export function AuthComponent({
     setSuccess(null);
 
     try {
-      // Create a timeout promise for auth requests (30 seconds for login - some connections are slow)
-      const createTimeout = (ms: number) => {
-        return new Promise<never>((_, reject) => {
-          setTimeout(
-            () =>
-              reject(
-                new Error(
-                  'Request timed out. Please check your connection or try again later.',
-                ),
-              ),
-            ms,
-          );
-        });
-      };
-
       if (isForgot) {
         if (!formData.email) {
           throw new Error('Enter the email you use with Lunary.');
@@ -101,16 +86,12 @@ export function AuthComponent({
       }
 
       if (isSignUp) {
-        const signUpPromise = betterAuthClient.signUp.email({
+        // No timeout - let the request complete naturally
+        const result = await betterAuthClient.signUp.email({
           email: formData.email,
           password: formData.password,
           name: formData.name || 'User',
         });
-
-        const result = await Promise.race([
-          signUpPromise,
-          createTimeout(15000),
-        ]);
 
         console.log('✅ Sign up result:', result);
 
@@ -137,15 +118,11 @@ export function AuthComponent({
           setSuccess('Account created successfully! Welcome to Lunary.');
         }
       } else {
-        const signInPromise = betterAuthClient.signIn.email({
+        // No timeout - let the request complete naturally
+        const result = await betterAuthClient.signIn.email({
           email: formData.email,
           password: formData.password,
         });
-
-        const result = await Promise.race([
-          signInPromise,
-          createTimeout(30000),
-        ]);
 
         console.log('✅ Sign in result:', result);
 
@@ -206,47 +183,12 @@ export function AuthComponent({
     } catch (err: any) {
       console.error('Authentication error:', err);
 
-      // If timeout occurred, check if login actually succeeded
-      if (err.message?.includes('timed out') && !isSignUp && !isForgot) {
-        try {
-          // Wait a moment for the request to complete
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          // Check if we actually got logged in despite the timeout
-          const session = await betterAuthClient.getSession();
-          const user =
-            session && typeof session === 'object'
-              ? 'user' in session
-                ? (session as any).user
-                : (session as any)?.data?.user
-              : null;
-
-          if (user) {
-            console.log('✅ Login actually succeeded despite timeout');
-            setSuccess('Signed in successfully!');
-            setFormData({ email: '', password: '', name: '' });
-            invalidateAuthCache();
-            refreshAuth();
-
-            if (onSuccess) {
-              onSuccess();
-            }
-            return;
-          }
-        } catch {
-          // Session check failed, proceed with error handling
-        }
-      }
-
       // Better error messages
       let errorMessage = isForgot
         ? 'We could not send the reset email. Please try again.'
         : 'Authentication failed. Please try again.';
 
-      if (err.message?.includes('timed out')) {
-        errorMessage =
-          'Request timed out. The server may be slow. Please try again or refresh the page.';
-      } else if (
+      if (
         err.message?.includes('Invalid credentials') ||
         err.message?.includes('invalid')
       ) {

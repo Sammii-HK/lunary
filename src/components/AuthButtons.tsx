@@ -1,87 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { betterAuthClient } from '@/lib/auth-client';
-import { invalidateAuthCache } from './AuthStatus';
-
-interface AuthUser {
-  id: string;
-  email: string;
-  name?: string;
-}
+import { useAuthStatus } from './AuthStatus';
 
 interface AuthButtonsProps {
   variant?: 'primary' | 'secondary' | 'navbar';
   className?: string;
 }
 
-function isTestMode(): boolean {
-  if (typeof window === 'undefined') return false;
-
-  return (
-    window.navigator.userAgent.includes('HeadlessChrome') ||
-    (window as any).__PLAYWRIGHT_TEST__ === true ||
-    (window.location.hostname === 'localhost' &&
-      window.navigator.userAgent.includes('Playwright'))
-  );
-}
-
 export function AuthButtons({
   variant = 'primary',
   className = '',
 }: AuthButtonsProps) {
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(!isTestMode());
-
-  useEffect(() => {
-    if (isTestMode()) {
-      setLoading(false);
-      return;
-    }
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      const session = await betterAuthClient.getSession();
-      const user =
-        session && typeof session === 'object'
-          ? 'user' in session
-            ? (session as any).user
-            : (session as any)?.data?.user
-          : null;
-
-      if (user) {
-        setAuthUser({
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        });
-      } else {
-        setAuthUser(null);
-      }
-    } catch (error) {
-      console.error('Failed to check auth status:', error);
-      setAuthUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      setLoading(true);
-      await betterAuthClient.signOut();
-      invalidateAuthCache();
-      setAuthUser(null);
-    } catch (error) {
-      console.error('Sign out failed:', error);
-      setAuthUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { isAuthenticated, user, loading, signOut } = useAuthStatus();
 
   if (loading) {
     return (
@@ -92,8 +23,8 @@ export function AuthButtons({
     );
   }
 
-  if (authUser) {
-    const displayName = authUser.name || 'User';
+  if (isAuthenticated && user) {
+    const displayName = user.name || 'User';
 
     if (variant === 'navbar') {
       return (
@@ -130,7 +61,7 @@ export function AuthButtons({
             View Profile
           </Link>
           <button
-            onClick={handleSignOut}
+            onClick={signOut}
             className='text-red-400 hover:text-red-300 px-4 py-2 font-medium transition-colors'
           >
             Sign Out

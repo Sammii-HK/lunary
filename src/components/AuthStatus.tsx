@@ -112,14 +112,8 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
 
       authPromise = (async () => {
         try {
-          const timeoutPromise = new Promise<null>((_, reject) =>
-            setTimeout(() => reject(new Error('Auth timeout')), 10000),
-          );
-
-          const session = await Promise.race([
-            betterAuthClient.getSession(),
-            timeoutPromise,
-          ]);
+          // No timeout - let the request complete naturally
+          const session = await betterAuthClient.getSession();
 
           const user =
             session && typeof session === 'object'
@@ -136,7 +130,8 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
           };
           cachedAuthState = newState;
           return newState;
-        } catch {
+        } catch (error) {
+          console.error('Auth check failed:', error);
           const newState: AuthState = {
             isAuthenticated: false,
             user: null,
