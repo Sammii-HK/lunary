@@ -79,7 +79,7 @@ export function AuthButtons({
     return (
       <div className={`flex justify-center items-center ${className}`}>
         <Link
-          href='/profile'
+          href='/pricing'
           className={`${baseButtonClasses} bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 px-8 py-4 text-lg transition-all`}
         >
           Start Free Trial
@@ -92,7 +92,7 @@ export function AuthButtons({
     return (
       <div className={`flex justify-center ${className}`}>
         <Link
-          href='/profile'
+          href='/pricing'
           className={`${baseButtonClasses} bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 px-6 py-3`}
         >
           Start Free Trial
@@ -105,10 +105,10 @@ export function AuthButtons({
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         <Link
-          href='/profile'
+          href='/pricing'
           className='text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-full transition-colors'
         >
-          Profile
+          Pricing
         </Link>
       </div>
     );
