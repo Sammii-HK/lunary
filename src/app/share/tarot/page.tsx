@@ -445,31 +445,31 @@ export default async function ShareTarotPage({
   );
 
   return (
-    <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-indigo-950 to-purple-900 py-12 text-white sm:py-16'>
+    <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-indigo-950 to-lunary-primary-900 py-12 text-white sm:py-16'>
       <div className='mx-auto flex w-full max-w-4xl flex-col items-center px-4 text-center sm:px-6 lg:px-8'>
         <div className='w-full rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur'>
-          <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+          <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
             Shared from Lunary
           </p>
           <h1 className='mt-6 text-2xl font-light text-white sm:text-3xl'>
             {shareTitle}
           </h1>
-          <p className='mt-2 text-sm text-purple-200/80'>
+          <p className='mt-2 text-sm text-lunary-primary-200/80'>
             {variantLabel
               ? `${variantLabel} guidance`
               : 'Personal cosmic insight'}
             {shareDate ? ` · ${shareDate}` : null}
           </p>
 
-          <div className='mt-10 rounded-2xl border border-purple-500/30 bg-purple-500/10 p-8'>
-            <p className='text-sm uppercase tracking-[0.3em] text-purple-200/70'>
+          <div className='mt-10 rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/10 p-8'>
+            <p className='text-sm uppercase tracking-[0.3em] text-lunary-primary-200/70'>
               Featured Card
             </p>
             <p className='mt-4 text-3xl font-light text-white sm:text-4xl'>
               {card}
             </p>
             {keywords.length > 0 && (
-              <p className='mt-4 text-sm text-purple-100/80'>
+              <p className='mt-4 text-sm text-lunary-primary-100/80'>
                 {keywords.join(' • ')}
               </p>
             )}
@@ -502,7 +502,7 @@ export default async function ShareTarotPage({
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-6 space-y-6'>
                   {suitBlocks.length > 0 && (
                     <div>
-                      <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
                         Suit Patterns
                       </p>
                       <div className='mt-4 space-y-4'>
@@ -514,12 +514,12 @@ export default async function ShareTarotPage({
                             <p className='text-sm font-semibold text-white'>
                               {pattern.suit}
                               {timeframeDays ? (
-                                <span className='text-xs text-purple-200/80'>
+                                <span className='text-xs text-lunary-primary-200/80'>
                                   {' '}
                                   ({pattern.count}/{timeframeDays} days)
                                 </span>
                               ) : (
-                                <span className='text-xs text-purple-200/80'>
+                                <span className='text-xs text-lunary-primary-200/80'>
                                   {' '}
                                   · {pattern.count} pulls
                                 </span>
@@ -538,7 +538,7 @@ export default async function ShareTarotPage({
 
                   {numberBlocks.length > 0 && (
                     <div>
-                      <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
                         Number Patterns
                       </p>
                       <div className='mt-4 space-y-4'>
@@ -571,7 +571,7 @@ export default async function ShareTarotPage({
 
               {cardBlocks.length > 0 && (
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-6'>
-                  <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
                     Card Patterns
                   </p>
                   <div className='mt-4 space-y-4'>
@@ -598,15 +598,15 @@ export default async function ShareTarotPage({
               {(sharedMoonPhase || sharedMoonTip || sharedTransitImpact) && (
                 <div className='grid gap-4 md:grid-cols-2'>
                   {(sharedMoonPhase || sharedMoonTip) && (
-                    <div className='rounded-2xl border border-purple-500/30 bg-purple-500/10 p-6'>
-                      <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+                    <div className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
                         Moon Widget
                       </p>
                       <p className='mt-3 text-2xl font-light text-white'>
                         {sharedMoonPhase ?? 'Current lunar flow'}
                       </p>
                       {sharedMoonTip && (
-                        <p className='mt-2 text-sm leading-relaxed text-purple-100/80'>
+                        <p className='mt-2 text-sm leading-relaxed text-lunary-primary-100/80'>
                           {sharedMoonTip}
                         </p>
                       )}
@@ -653,11 +653,11 @@ export default async function ShareTarotPage({
 
           <div className='mt-12 rounded-2xl border border-white/10 bg-white/5 p-6 text-left'>
             <div className='flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between'>
-              <p className='text-xs uppercase tracking-[0.35em] text-purple-200/80'>
+              <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
                 Tag us when you post
               </p>
               {highlightedHandle && (
-                <p className='text-xs text-purple-100/80'>
+                <p className='text-xs text-lunary-primary-100/80'>
                   {highlightedPlatformLabel
                     ? `Posting to ${highlightedPlatformLabel}? Use ${highlightedHandle} so we can reshare.`
                     : `Use ${highlightedHandle} so we can reshare your spread.`}
@@ -684,13 +684,13 @@ export default async function ShareTarotPage({
           <div className='mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
             <Link
               href='/tarot'
-              className='inline-flex items-center rounded-full bg-purple-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/30 transition hover:bg-purple-400'
+              className='inline-flex items-center rounded-full bg-lunary-primary-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-lunary-primary-800 transition hover:bg-lunary-primary-400'
             >
               Get your personalized tarot reading
             </Link>
             <Link
               href='/'
-              className='text-sm font-medium text-purple-200/80 transition hover:text-purple-100'
+              className='text-sm font-medium text-lunary-primary-200/80 transition hover:text-lunary-primary-100'
             >
               Explore Lunary →
             </Link>

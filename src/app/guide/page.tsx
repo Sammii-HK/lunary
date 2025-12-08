@@ -122,7 +122,7 @@ const MessageBubble = ({
             <button
               key={`${partIndex}-${lineIndex}`}
               onClick={() => onEntityClick(part.entity!)}
-              className='underline decoration-dotted decoration-purple-400/60 hover:decoration-purple-400 text-purple-300 hover:text-purple-200 transition-colors cursor-pointer'
+              className='underline decoration-dotted decoration-lunary-primary-400/60 hover:decoration-lunary-primary-400 text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors cursor-pointer'
             >
               {line}
             </button>,
@@ -142,7 +142,7 @@ const MessageBubble = ({
       <div
         className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm ${
           isUser
-            ? 'bg-purple-600/90 text-white'
+            ? 'bg-lunary-primary-600/90 text-white'
             : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
         }`}
       >
@@ -551,7 +551,7 @@ function BookOfShadowsContent() {
               </p>
               <Button
                 onClick={() => setShowAuthModal(true)}
-                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500'
+                className='inline-flex items-center gap-2 rounded-xl bg-lunary-primary-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-lunary-primary-500'
               >
                 Sign In
               </Button>
@@ -602,7 +602,7 @@ function BookOfShadowsContent() {
           </h1>
           <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-500'>
             {planId ? (
-              <span className='rounded-full border border-purple-500/40 px-3 py-1 text-purple-300/90'>
+              <span className='rounded-full border border-lunary-primary-600 px-3 py-1 text-lunary-primary-300/90'>
                 Plan: {planId.replace(/_/g, ' ')}
               </span>
             ) : null}
@@ -770,7 +770,7 @@ function BookOfShadowsContent() {
                       />
                     ))}
                     {error && (
-                      <div className='rounded-2xl border border-lunary-error/40 bg-red-950/40 px-4 py-3 text-sm text-lunary-error-200 md:px-6 md:py-4'>
+                      <div className='rounded-2xl border border-lunary-error-700 bg-red-950/40 px-4 py-3 text-sm text-lunary-error-200 md:px-6 md:py-4'>
                         <p className='font-semibold text-lunary-error-300/90 mb-1'>
                           Something went wrong
                         </p>
@@ -792,7 +792,7 @@ function BookOfShadowsContent() {
             <div className='shrink-0 border-t border-zinc-800/70 bg-zinc-900/40'>
               <button
                 onClick={() => setIsAssistExpanded(!isAssistExpanded)}
-                className='flex w-full items-center justify-between px-3 py-2 text-sm font-semibold text-purple-300/90 transition hover:bg-zinc-800/40 md:px-6 md:py-3'
+                className='flex w-full items-center justify-between px-3 py-2 text-sm font-semibold text-lunary-primary-300/90 transition hover:bg-zinc-800/40 md:px-6 md:py-3'
               >
                 <span>Assist</span>
                 {isAssistExpanded ? (
@@ -826,7 +826,7 @@ function BookOfShadowsContent() {
               onKeyDown={handleKeyDown}
               rows={1}
               placeholder="Write your heart's question…"
-              className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30'
+              className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-lunary-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary-800'
             />
             {isStreaming ? (
               <button
@@ -840,7 +840,7 @@ function BookOfShadowsContent() {
               <button
                 type='submit'
                 disabled={input.trim().length === 0}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-purple-600 text-white transition hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed'
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-lunary-primary-600 text-white transition hover:bg-lunary-primary-500 disabled:opacity-40 disabled:cursor-not-allowed'
               >
                 <ArrowUp className='w-4 h-4' />
               </button>

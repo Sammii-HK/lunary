@@ -108,7 +108,7 @@ export default function PrivacyPolicyPage() {
               cookies, please see our{' '}
               <Link
                 href='/cookies'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Cookie Policy
               </Link>
@@ -220,7 +220,7 @@ export default function PrivacyPolicyPage() {
                 href='https://stripe.com/privacy'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Stripe&apos;s Privacy Policy
               </a>
@@ -299,7 +299,7 @@ export default function PrivacyPolicyPage() {
                 href='https://openai.com/privacy'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 OpenAI&apos;s Privacy Policy
               </a>
@@ -463,7 +463,7 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <div className='mt-6 p-4 border border-purple-500/30 bg-purple-950/20 rounded-xl'>
+            <div className='mt-6 p-4 border border-lunary-primary-700 bg-lunary-primary-950/20 rounded-xl'>
               <h4 className='text-lg font-medium text-white mb-2'>
                 Do Not Sell or Share My Personal Information
               </h4>
@@ -475,7 +475,7 @@ export default function PrivacyPolicyPage() {
                 please email{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   privacy@lunary.app
                 </a>{' '}
@@ -498,7 +498,7 @@ export default function PrivacyPolicyPage() {
                 Emailing{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   privacy@lunary.app
                 </a>
@@ -566,7 +566,7 @@ export default function PrivacyPolicyPage() {
               provided us with personal information, please contact us at{' '}
               <a
                 href='mailto:privacy@lunary.app'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 privacy@lunary.app
               </a>
@@ -608,7 +608,7 @@ export default function PrivacyPolicyPage() {
                 Email:{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   privacy@lunary.app
                 </a>
@@ -616,7 +616,7 @@ export default function PrivacyPolicyPage() {
                 General Support:{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   support@lunary.app
                 </a>
@@ -631,25 +631,25 @@ export default function PrivacyPolicyPage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/cookies'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Cookie Policy
               </Link>
               <Link
                 href='/acceptable-use'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Acceptable Use Policy
               </Link>
               <Link
                 href='/refund'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Refund Policy
               </Link>

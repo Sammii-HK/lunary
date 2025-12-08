@@ -944,7 +944,7 @@ const BirthChartPage = () => {
             <h1 className='text-3xl font-bold text-white mb-6'>
               🌟 Your Birth Chart Awaits
             </h1>
-            <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-6 border border-purple-500/30 mb-6'>
+            <div className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 rounded-lg p-6 border border-lunary-primary-700 mb-6'>
               <p className='text-zinc-300 mb-4'>
                 Unlock your complete cosmic blueprint with a detailed birth
                 chart analysis. Discover your planetary positions, aspects, and
@@ -1037,7 +1037,7 @@ const BirthChartPage = () => {
                 text: birthChartShare.text,
               })
             }
-            className='inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-xs font-medium text-purple-200 hover:text-purple-100 transition-colors'
+            className='inline-flex items-center gap-2 rounded-full border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-xs font-medium text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
           >
             <Share2 className='w-4 h-4' />
             Share your birth chart
@@ -1069,7 +1069,7 @@ const BirthChartPage = () => {
               if (sun || moon || rising) {
                 return (
                   <div className='mb-4 pb-4 border-b border-zinc-700'>
-                    <h4 className='text-xs font-medium text-purple-400 mb-3 uppercase tracking-wide'>
+                    <h4 className='text-xs font-medium text-lunary-primary-400 mb-3 uppercase tracking-wide'>
                       The Big Three
                     </h4>
                     <div className='grid grid-cols-1 gap-3'>
@@ -1208,7 +1208,7 @@ const BirthChartPage = () => {
 
             {/* Generational Planets */}
             <div>
-              <h4 className='text-xs font-medium text-purple-400 mb-2 uppercase tracking-wide'>
+              <h4 className='text-xs font-medium text-lunary-primary-400 mb-2 uppercase tracking-wide'>
                 Generational Planets
               </h4>
               <div className='space-y-2'>
@@ -1221,7 +1221,7 @@ const BirthChartPage = () => {
                     return (
                       <div
                         key={planet.body}
-                        className='border-l-2 border-purple-400 pl-3'
+                        className='border-l-2 border-lunary-primary-400 pl-3'
                       >
                         <h5 className='text-sm font-medium text-white flex items-center gap-2'>
                           <span className='font-astro text-lg'>

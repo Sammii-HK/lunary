@@ -341,7 +341,7 @@ export default function CosmicStatePage() {
               Your Cosmic State
             </h1>
           </div>
-          <div className='bg-lunary-error-900/20 border border-lunary-error/50 rounded-lg p-6'>
+          <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded-lg p-6'>
             <h2 className='text-xl font-semibold text-lunary-error mb-2'>
               Error Loading Cosmic State
             </h2>
@@ -393,7 +393,7 @@ export default function CosmicStatePage() {
                 };
                 fetchCosmicState();
               }}
-              className='px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
             >
               Retry
             </button>
@@ -423,9 +423,9 @@ export default function CosmicStatePage() {
         </div>
 
         {isFreeUser && (
-          <div className='bg-gradient-to-r from-purple-900/50 to-pink-900/50 border border-purple-500/30 rounded-lg p-6 mb-8'>
+          <div className='bg-gradient-to-r from-lunary-primary-900/50 to-lunary-rose-900/50 border border-lunary-primary-700 rounded-lg p-6 mb-8'>
             <div className='flex items-start gap-4'>
-              <Lock className='w-6 h-6 text-purple-400 flex-shrink-0 mt-1' />
+              <Lock className='w-6 h-6 text-lunary-primary-400 flex-shrink-0 mt-1' />
               <div className='flex-1'>
                 <h2 className='text-xl font-semibold mb-2'>
                   Unlock Your Full Cosmic Profile
@@ -447,11 +447,11 @@ export default function CosmicStatePage() {
           <div className='space-y-6'>
             {/* Moon Position - Most Prominent */}
             {cosmicData.moon && (
-              <div className='bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-xl p-6 border border-purple-500/20 shadow-lg'>
+              <div className='bg-gradient-to-br from-lunary-primary-900/30 to-indigo-900/30 rounded-xl p-6 border border-lunary-primary-700 shadow-lg'>
                 <div className='flex items-start justify-between mb-4'>
                   <div className='flex items-center gap-3'>
-                    <div className='p-2 bg-purple-500/20 rounded-lg'>
-                      <Moon className='w-6 h-6 text-purple-300' />
+                    <div className='p-2 bg-lunary-primary-900/20 rounded-lg'>
+                      <Moon className='w-6 h-6 text-lunary-primary-300' />
                     </div>
                     <div>
                       <h2 className='text-xl font-semibold text-white'>
@@ -475,7 +475,7 @@ export default function CosmicStatePage() {
                         illuminated
                       </div>
                       <div className='absolute inset-0 flex items-center justify-center'>
-                        <Lock className='w-6 h-6 text-purple-400' />
+                        <Lock className='w-6 h-6 text-lunary-primary-400' />
                       </div>
                     </div>
                   ) : (
@@ -485,11 +485,11 @@ export default function CosmicStatePage() {
                       </div>
                       <div className='flex items-center gap-4 text-sm'>
                         <span className='flex items-center gap-1.5'>
-                          <Calendar className='w-4 h-4 text-purple-400' />
+                          <Calendar className='w-4 h-4 text-lunary-primary-400' />
                           In {cosmicData.moon.sign}
                         </span>
                         <span className='flex items-center gap-1.5'>
-                          <Zap className='w-4 h-4 text-purple-400' />
+                          <Zap className='w-4 h-4 text-lunary-primary-400' />
                           {Math.round(cosmicData.moon.illumination * 100)}%
                           illuminated
                         </span>
@@ -530,7 +530,7 @@ export default function CosmicStatePage() {
                               {transit.from} {transit.aspect} {transit.to}
                             </div>
                             <div className='absolute inset-0 flex items-center justify-center'>
-                              <Lock className='w-5 h-5 text-purple-400' />
+                              <Lock className='w-5 h-5 text-lunary-primary-400' />
                             </div>
                           </div>
                         ))}
@@ -572,7 +572,7 @@ export default function CosmicStatePage() {
                         .length > 0 && (
                         <div>
                           <h3 className='text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2'>
-                            <TrendingUp className='w-4 h-4 text-purple-400' />
+                            <TrendingUp className='w-4 h-4 text-lunary-primary-400' />
                             Forming
                             <span
                               className='text-xs text-zinc-500 ml-1'
@@ -588,7 +588,7 @@ export default function CosmicStatePage() {
                               .map((transit: any, idx: number) => (
                                 <div
                                   key={idx}
-                                  className='bg-gradient-to-r from-purple-500/10 to-indigo-500/10 rounded-lg p-3 border border-purple-500/20'
+                                  className='bg-gradient-to-r from-lunary-primary-950 to-indigo-500/10 rounded-lg p-3 border border-lunary-primary-700'
                                 >
                                   <div className='text-sm text-zinc-200'>
                                     {transit.from} {transit.aspect} {transit.to}
@@ -608,8 +608,8 @@ export default function CosmicStatePage() {
               <div className='bg-zinc-900/80 rounded-xl p-6 border border-zinc-800/50 backdrop-blur-sm'>
                 <div className='flex items-center justify-between mb-4'>
                   <div className='flex items-center gap-3'>
-                    <div className='p-2 bg-purple-500/20 rounded-lg'>
-                      <Sparkles className='w-5 h-5 text-purple-400' />
+                    <div className='p-2 bg-lunary-primary-900/20 rounded-lg'>
+                      <Sparkles className='w-5 h-5 text-lunary-primary-400' />
                     </div>
                     <div>
                       <h2 className='text-xl font-semibold text-white'>
@@ -629,7 +629,7 @@ export default function CosmicStatePage() {
                         </div>
                       </div>
                       <div className='absolute inset-0 flex items-center justify-center'>
-                        <Lock className='w-4 h-4 text-purple-400' />
+                        <Lock className='w-4 h-4 text-lunary-primary-400' />
                       </div>
                     </div>
                   )}
@@ -644,7 +644,7 @@ export default function CosmicStatePage() {
                           className='bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/30'
                         >
                           <div className='text-sm'>
-                            <span className='font-medium text-purple-300'>
+                            <span className='font-medium text-lunary-primary-300'>
                               {placement.planet}
                             </span>
                             <span className='text-zinc-400 mx-2'>in</span>
@@ -688,7 +688,7 @@ export default function CosmicStatePage() {
                     <div className='blur-sm relative'>
                       <div>{cosmicData.tarot.daily?.name || 'Daily Card'}</div>
                       <div className='absolute inset-0 flex items-center justify-center'>
-                        <Lock className='w-4 h-4 text-purple-400' />
+                        <Lock className='w-4 h-4 text-lunary-primary-400' />
                       </div>
                     </div>
                   ) : (
@@ -722,7 +722,7 @@ export default function CosmicStatePage() {
               cosmicData.birthChart.placements.length > 0 && (
                 <div className='bg-zinc-900 rounded-lg p-6 border border-zinc-800'>
                   <h2 className='text-xl font-semibold mb-4 flex items-center gap-2'>
-                    <Sparkles className='w-5 h-5 text-purple-400' />
+                    <Sparkles className='w-5 h-5 text-lunary-primary-400' />
                     Key Placements
                   </h2>
                   {isFreeUser ? (
@@ -737,7 +737,7 @@ export default function CosmicStatePage() {
                           ))}
                       </div>
                       <div className='absolute inset-0 flex items-center justify-center'>
-                        <Lock className='w-4 h-4 text-purple-400' />
+                        <Lock className='w-4 h-4 text-lunary-primary-400' />
                       </div>
                     </div>
                   ) : (
@@ -763,7 +763,7 @@ export default function CosmicStatePage() {
               )}
 
             {isFreeUser && (
-              <div className='bg-gradient-to-r from-purple-900/50 to-pink-900/50 border border-purple-500/30 rounded-lg p-6 text-center'>
+              <div className='bg-gradient-to-r from-lunary-primary-900/50 to-lunary-rose-900/50 border border-lunary-primary-700 rounded-lg p-6 text-center'>
                 <h3 className='text-xl font-semibold mb-2'>
                   Ready to unlock your full cosmic profile?
                 </h3>
@@ -789,7 +789,7 @@ export default function CosmicStatePage() {
                 <span className='ml-1'>
                   <Link
                     href='/profile'
-                    className='text-purple-400 hover:text-purple-300 underline'
+                    className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
                   >
                     Update profile →
                   </Link>

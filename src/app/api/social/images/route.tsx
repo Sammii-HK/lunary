@@ -4,14 +4,14 @@ import { NextRequest } from 'next/server';
 export const runtime = 'nodejs';
 
 const BRAND_COLORS = {
-  purple600: '#9333ea',
-  purple500: '#a855f7',
-  purple400: '#c084fc',
-  purple300: '#d8b4fe',
-  pink600: '#db2777',
-  pink500: '#ec4899',
-  zinc900: '#18181b',
-  zinc800: '#27272a',
+  purple600: '#5227a5', // lunary-primary-600
+  purple500: '#6730cf', // lunary-primary-500
+  purple400: '#855ad8', // lunary-primary-400
+  purple300: '#b094e6', // lunary-primary-300
+  pink600: '#921cb0', // lunary-highlight-600
+  pink500: '#b723dc', // lunary-highlight-500
+  zinc900: '#0A0A1A', // lunary-bg
+  zinc800: '#050510', // lunary-bg-deep
   zinc700: '#3f3f46',
   zinc400: '#a1a1aa',
   zinc300: '#d4d4d8',

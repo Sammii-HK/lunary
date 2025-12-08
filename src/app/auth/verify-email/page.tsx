@@ -134,7 +134,7 @@ export default function VerifyEmailPage() {
               <div className='space-y-3'>
                 <a
                   href='/auth'
-                  className='inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors'
+                  className='inline-block bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors'
                 >
                   Try Again
                 </a>

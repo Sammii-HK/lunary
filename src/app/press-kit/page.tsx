@@ -122,11 +122,11 @@ export default function PressKitPage() {
   return (
     <div className='w-full max-w-5xl mx-auto space-y-10 px-4 py-10 text-white'>
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/50 p-8'>
-        <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+        <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
           Press Kit
         </p>
         <h1 className='text-4xl font-semibold'>Lunary Press Kit</h1>
-        <p className='text-lg font-semibold text-purple-200'>
+        <p className='text-lg font-semibold text-lunary-primary-200'>
           The AI-powered Spiritual Intelligence Platform
         </p>
         <p className='text-lg text-zinc-200'>
@@ -145,7 +145,7 @@ export default function PressKitPage() {
 
       <section className='space-y-6 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Brand Assets
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Brand Assets</h2>
@@ -199,7 +199,7 @@ export default function PressKitPage() {
           <div>
             <Link
               href='/press-kit/lunary-press-kit.zip'
-              className='inline-flex rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-purple-400'
+              className='inline-flex rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-lunary-primary-400'
             >
               Download full brand pack: /assets/brand-kit.zip
             </Link>
@@ -209,7 +209,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Product Overview
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Product Overview</h2>
@@ -237,7 +237,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Product Screenshots
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Product Screenshots</h2>
@@ -280,7 +280,7 @@ export default function PressKitPage() {
         <div>
           <Link
             href='/press-kit/lunary-press-kit.zip'
-            className='inline-flex text-sm text-purple-200 underline'
+            className='inline-flex text-sm text-lunary-primary-200 underline'
           >
             Download full screenshot pack: /assets/product-screens.zip
           </Link>
@@ -289,7 +289,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Positioning
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Positioning Statement</h2>
@@ -321,7 +321,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Differentiators
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Differentiators</h2>
@@ -340,7 +340,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Traction
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Traction Highlights</h2>
@@ -363,7 +363,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Press Quotes
           </p>
           <h2 className='text-2xl font-semibold mb-4'>
@@ -374,7 +374,7 @@ export default function PressKitPage() {
           {pressQuotes.map((quote, index) => (
             <blockquote
               key={index}
-              className='border-l-4 border-purple-400 pl-4 italic text-zinc-300'
+              className='border-l-4 border-lunary-primary-400 pl-4 italic text-zinc-300'
             >
               <p className='text-lg'>&ldquo;{quote.quote}&rdquo;</p>
               <p className='text-sm text-zinc-400 mt-2'>
@@ -388,7 +388,7 @@ export default function PressKitPage() {
       <section className='grid gap-6 rounded-3xl border border-white/10 bg-black/40 p-6 md:grid-cols-2'>
         <div>
           <div>
-            <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+            <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
               Founder
             </p>
             <h2 className='text-2xl font-semibold mb-4'>Founder</h2>
@@ -420,14 +420,14 @@ export default function PressKitPage() {
           </div>
           <Link
             href='/press-kit/founder-bio.pdf'
-            className='inline-flex rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-purple-400'
+            className='inline-flex rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-lunary-primary-400'
           >
             Headshot pack: /assets/founder-photos.zip
           </Link>
         </div>
         <div className='space-y-4'>
           <div>
-            <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+            <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
               Contact
             </p>
             <h2 className='text-2xl font-semibold mb-4'>Contact</h2>
@@ -437,7 +437,7 @@ export default function PressKitPage() {
               Press enquiries:{' '}
               <a
                 href='mailto:press@lunary.app'
-                className='text-purple-200 underline hover:text-purple-100'
+                className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
               >
                 press@lunary.app
               </a>
@@ -446,7 +446,7 @@ export default function PressKitPage() {
               Founder:{' '}
               <a
                 href='mailto:sammi@lunary.app'
-                className='text-purple-200 underline hover:text-purple-100'
+                className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
               >
                 sammi@lunary.app
               </a>
@@ -455,7 +455,7 @@ export default function PressKitPage() {
               Website:{' '}
               <a
                 href='https://www.lunary.app'
-                className='text-purple-200 underline hover:text-purple-100'
+                className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
                 target='_blank'
                 rel='noopener noreferrer'
               >
@@ -466,7 +466,7 @@ export default function PressKitPage() {
               For investor materials, visit:{' '}
               <a
                 href='https://www.lunary.app/fundraise'
-                className='text-purple-200 underline hover:text-purple-100'
+                className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
                 target='_blank'
                 rel='noopener noreferrer'
               >
@@ -479,7 +479,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Fact Sheet
           </p>
           <h2 className='text-2xl font-semibold mb-4'>
@@ -534,7 +534,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Additional Assets
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Additional Assets</h2>
@@ -552,7 +552,7 @@ export default function PressKitPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200 mb-2'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Media Pack Downloads
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Media Pack Downloads</h2>
@@ -568,8 +568,8 @@ export default function PressKitPage() {
         </ul>
       </section>
 
-      <section className='rounded-3xl border border-purple-400/20 bg-purple-500/10 p-6'>
-        <p className='text-sm text-purple-100'>
+      <section className='rounded-3xl border border-lunary-primary-400/20 bg-lunary-primary-900/10 p-6'>
+        <p className='text-sm text-lunary-primary-100'>
           <em>
             For anything not listed here, please reach out. We respond quickly
             to press & investors.

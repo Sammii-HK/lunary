@@ -13,10 +13,12 @@ interface PatternCardProps {
 
 function PatternCard({ pattern }: PatternCardProps) {
   return (
-    <div className='bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border border-purple-500/20 rounded-lg p-4'>
+    <div className='bg-gradient-to-br from-lunary-primary-900/30 to-indigo-900/30 border border-lunary-primary-700 rounded-lg p-4'>
       <div className='flex items-center gap-2 mb-2'>
-        <Sparkles className='w-4 h-4 text-purple-400' />
-        <span className='text-sm font-medium text-purple-300'>Pattern</span>
+        <Sparkles className='w-4 h-4 text-lunary-primary-400' />
+        <span className='text-sm font-medium text-lunary-primary-300'>
+          Pattern
+        </span>
       </div>
       <p className='text-white font-medium mb-1'>{pattern.title}</p>
       <p className='text-sm text-zinc-400'>{pattern.description}</p>
@@ -65,7 +67,7 @@ function EntryCard({ entry }: EntryCardProps) {
           {entry.cardReferences.map((card) => (
             <span
               key={card}
-              className='text-xs bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded flex items-center gap-1'
+              className='text-xs bg-lunary-primary-900/50 text-lunary-primary-300 px-2 py-0.5 rounded flex items-center gap-1'
             >
               <Star className='w-3 h-3' />
               {card}
@@ -160,7 +162,7 @@ export default function JournalPage() {
     return (
       <div className='min-h-screen bg-zinc-950 flex items-center justify-center p-4'>
         <div className='text-center'>
-          <BookOpen className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+          <BookOpen className='w-12 h-12 text-lunary-primary-400 mx-auto mb-4' />
           <h1 className='text-xl font-bold text-white mb-2'>
             Living Book of Shadows
           </h1>
@@ -169,7 +171,7 @@ export default function JournalPage() {
           </p>
           <button
             onClick={() => router.push('/auth')}
-            className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors'
+            className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white px-6 py-2 rounded-lg transition-colors'
           >
             Sign In
           </button>
@@ -190,7 +192,7 @@ export default function JournalPage() {
           </button>
           <div>
             <h1 className='text-lg font-bold text-white flex items-center gap-2'>
-              <BookOpen className='w-5 h-5 text-purple-400' />
+              <BookOpen className='w-5 h-5 text-lunary-primary-400' />
               Living Book of Shadows
             </h1>
             <p className='text-xs text-zinc-500'>
@@ -207,7 +209,7 @@ export default function JournalPage() {
               value={newReflection}
               onChange={(e) => setNewReflection(e.target.value)}
               placeholder="What's on your mind today?"
-              className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-4 text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 resize-none'
+              className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-4 text-white placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
               rows={4}
               autoFocus
             />
@@ -215,7 +217,7 @@ export default function JournalPage() {
               <button
                 type='submit'
                 disabled={isSubmitting || !newReflection.trim()}
-                className='flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 disabled:cursor-not-allowed text-white py-2 rounded-lg transition-colors'
+                className='flex-1 bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-lunary-primary-600/50 disabled:cursor-not-allowed text-white py-2 rounded-lg transition-colors'
               >
                 {isSubmitting ? 'Saving...' : 'Save Reflection'}
               </button>

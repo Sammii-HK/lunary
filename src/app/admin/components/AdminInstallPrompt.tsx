@@ -103,17 +103,17 @@ export function AdminInstallPrompt() {
       case 'installed':
         return {
           label: 'Installed',
-          color: 'bg-lunary-success/20 text-lunary-success-300',
+          color: 'bg-lunary-success-900 text-lunary-success-300',
         };
       case 'prompting':
         return {
           label: 'Prompting…',
-          color: 'bg-lunary-secondary/20 text-lunary-secondary-300',
+          color: 'bg-lunary-secondary-900 text-lunary-secondary-300',
         };
       case 'error':
         return {
           label: 'Needs Attention',
-          color: 'bg-lunary-error/20 text-lunary-error-300',
+          color: 'bg-lunary-error-900 text-lunary-error-300',
         };
       default:
         return { label: 'Ready', color: 'bg-white/10 text-white/80' };

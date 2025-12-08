@@ -68,7 +68,7 @@ export default function AIConversionPage() {
           <Card className='bg-zinc-900 border-zinc-800'>
             <CardHeader>
               <div className='flex items-center gap-2'>
-                <Zap className='w-5 h-5 text-purple-400' />
+                <Zap className='w-5 h-5 text-lunary-primary-400' />
                 <CardTitle>Generate CTAs</CardTitle>
               </div>
             </CardHeader>
@@ -84,7 +84,7 @@ export default function AIConversionPage() {
                   })
                 }
                 disabled={loading === 'generate-cta'}
-                className='w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                className='w-full px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
               >
                 {loading === 'generate-cta' ? (
                   <>
@@ -149,7 +149,7 @@ export default function AIConversionPage() {
               {results['analyze-funnel']?.analysis && (
                 <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700'>
                   {!results['analyze-funnel']?.dataAvailable && (
-                    <div className='mb-3 p-2 bg-lunary-accent/10 border border-lunary-accent/20 rounded text-xs text-lunary-accent'>
+                    <div className='mb-3 p-2 bg-lunary-accent-950 border border-lunary-accent-900 rounded text-xs text-lunary-accent'>
                       ⚠️ No data available - analysis is based on general
                       recommendations only
                     </div>
@@ -293,13 +293,15 @@ export default function AIConversionPage() {
                   <div className='text-sm text-zinc-300 space-y-2'>
                     {results['optimize-email'].optimized.subject && (
                       <div>
-                        <span className='text-purple-400'>Subject:</span>{' '}
+                        <span className='text-lunary-primary-400'>
+                          Subject:
+                        </span>{' '}
                         {results['optimize-email'].optimized.subject}
                       </div>
                     )}
                     {results['optimize-email'].optimized.body && (
                       <div>
-                        <span className='text-purple-400'>Body:</span>
+                        <span className='text-lunary-primary-400'>Body:</span>
                         <div
                           className='mt-1 text-zinc-400'
                           dangerouslySetInnerHTML={{

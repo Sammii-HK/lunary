@@ -10,7 +10,7 @@ interface LuckyElementsProps {
 export function LuckyElements({ elements }: LuckyElementsProps) {
   const colors = [
     'border-lunary-primary-700 bg-lunary-primary-950',
-    'border-purple-500/30 bg-purple-500/10',
+    'border-lunary-primary-700 bg-lunary-primary-900/10',
     'border-lunary-highlight-700 bg-lunary-highlight-950',
     'border-lunary-secondary-700 bg-lunary-secondary-950',
   ];

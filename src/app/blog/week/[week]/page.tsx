@@ -68,7 +68,7 @@ function getPlanetColor(planet: string): string {
     Mercury: 'text-gray-400',
     Venus: 'text-lunary-rose',
     Mars: 'text-lunary-error',
-    Jupiter: 'text-purple-400',
+    Jupiter: 'text-lunary-highlight',
     Saturn: 'text-lunary-primary',
     Uranus: 'text-lunary-secondary',
     Neptune: 'text-lunary-secondary',
@@ -79,32 +79,32 @@ function getPlanetColor(planet: string): string {
 
 function getPlanetBorderColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'border-lunary-accent/30',
-    Moon: 'border-lunary-secondary/30',
+    Sun: 'border-lunary-accent-800',
+    Moon: 'border-lunary-secondary-800',
     Mercury: 'border-gray-400/30',
-    Venus: 'border-lunary-rose/30',
-    Mars: 'border-red-400/30',
-    Jupiter: 'border-purple-400/30',
-    Saturn: 'border-lunary-primary/30',
-    Uranus: 'border-lunary-secondary/30',
-    Neptune: 'border-lunary-secondary/30',
-    Pluto: 'border-lunary-highlight/30',
+    Venus: 'border-lunary-rose-800',
+    Mars: 'border-lunary-error-700/30',
+    Jupiter: 'border-lunary-highlight-700/30',
+    Saturn: 'border-lunary-primary-800',
+    Uranus: 'border-lunary-secondary-800',
+    Neptune: 'border-lunary-secondary-800',
+    Pluto: 'border-lunary-highlight-800',
   };
   return colors[planet] || 'border-zinc-700';
 }
 
 function getPlanetBgColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'bg-lunary-accent/10',
-    Moon: 'bg-lunary-secondary/10',
+    Sun: 'bg-lunary-accent-950',
+    Moon: 'bg-lunary-secondary-950',
     Mercury: 'bg-gray-400/10',
-    Venus: 'bg-lunary-rose/10',
-    Mars: 'bg-red-400/10',
-    Jupiter: 'bg-purple-400/10',
-    Saturn: 'bg-lunary-primary/10',
-    Uranus: 'bg-lunary-secondary/10',
-    Neptune: 'bg-lunary-secondary/10',
-    Pluto: 'bg-lunary-highlight/10',
+    Venus: 'bg-lunary-rose-950',
+    Mars: 'bg-lunary-error-900/10',
+    Jupiter: 'bg-lunary-highlight-900/10',
+    Saturn: 'bg-lunary-primary-950',
+    Uranus: 'bg-lunary-secondary-950',
+    Neptune: 'bg-lunary-secondary-950',
+    Pluto: 'bg-lunary-highlight-950',
   };
   return colors[planet] || 'bg-zinc-800/50';
 }
@@ -603,9 +603,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                       ? crystal.date
                       : new Date(crystal.date);
                   return (
-                    <Card key={index} className='border border-purple-500/20'>
+                    <Card
+                      key={index}
+                      className='border border-lunary-primary-700'
+                    >
                       <CardHeader>
-                        <CardTitle className='text-lg text-purple-200'>
+                        <CardTitle className='text-lg text-lunary-primary-200'>
                           {crystal.crystal}
                         </CardTitle>
                         <p className='text-sm text-zinc-400'>
@@ -782,7 +785,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   <Link
                     key={weekSlug}
                     href={`/blog/week/${weekSlug}`}
-                    className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+                    className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
                   >
                     <div className='flex items-center gap-2 mb-2'>
                       <Badge variant='outline' className='text-xs'>
@@ -792,7 +795,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                         {related.year}
                       </span>
                     </div>
-                    <h3 className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-1'>
+                    <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
                       {related.label}
                     </h3>
                     <p className='text-sm text-zinc-400'>
@@ -810,7 +813,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className='mt-6'>
             <Link
               href='/blog'
-              className='inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors text-sm font-medium'
+              className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors text-sm font-medium'
             >
               View All Weekly Forecasts
               <ArrowRight className='h-4 w-4' />

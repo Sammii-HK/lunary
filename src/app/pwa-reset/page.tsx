@@ -211,7 +211,7 @@ export default function PWAResetPage() {
 
         <button
           onClick={hardReload}
-          className='px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium'
+          className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium'
         >
           🔄 Hard Reload
         </button>

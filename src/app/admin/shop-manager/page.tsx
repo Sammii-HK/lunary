@@ -321,7 +321,7 @@ export default function ShopManagerPage() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <DollarSign className='h-5 w-5 text-purple-500' />
+              <DollarSign className='h-5 w-5 text-lunary-primary-500' />
               <div>
                 <p className='text-2xl font-bold'>
                   {formatPrice(getTotalValue())}

@@ -13,7 +13,7 @@ export default function NotFound() {
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center px-4'>
       <div className='max-w-lg text-center'>
         <div className='mb-8 relative'>
-          <div className='text-[12rem] font-light text-purple-500/20 leading-none select-none'>
+          <div className='text-[12rem] font-light text-lunary-primary-900 leading-none select-none'>
             404
           </div>
           <div className='absolute inset-0 flex items-center justify-center'>
@@ -38,7 +38,7 @@ export default function NotFound() {
         <div className='space-y-4'>
           <Link
             href='/'
-            className='inline-flex items-center justify-center w-full px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            className='inline-flex items-center justify-center w-full px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Return to Earth
           </Link>
@@ -65,7 +65,7 @@ export default function NotFound() {
           <br />
           <a
             href='mailto:hello@lunary.app'
-            className='text-purple-400/60 hover:text-purple-400'
+            className='text-lunary-primary-400/60 hover:text-lunary-primary-400'
           >
             hello@lunary.app
           </a>

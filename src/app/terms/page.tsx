@@ -150,7 +150,7 @@ export default function TermsOfServicePage() {
               For information about our refund policies, please see our{' '}
               <Link
                 href='/refund'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Refund Policy
               </Link>
@@ -198,7 +198,7 @@ export default function TermsOfServicePage() {
               For complete details, please see our{' '}
               <Link
                 href='/acceptable-use'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Acceptable Use Policy
               </Link>
@@ -224,7 +224,7 @@ export default function TermsOfServicePage() {
               service without our prior written consent. See our{' '}
               <Link
                 href='/trademark'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Trademark Guidelines
               </Link>{' '}
@@ -510,7 +510,7 @@ export default function TermsOfServicePage() {
                 Email:{' '}
                 <a
                   href='mailto:legal@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   legal@lunary.app
                 </a>
@@ -518,7 +518,7 @@ export default function TermsOfServicePage() {
                 General Support:{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   support@lunary.app
                 </a>
@@ -533,25 +533,25 @@ export default function TermsOfServicePage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/cookies'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Cookie Policy
               </Link>
               <Link
                 href='/acceptable-use'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Acceptable Use Policy
               </Link>
               <Link
                 href='/refund'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Refund Policy
               </Link>

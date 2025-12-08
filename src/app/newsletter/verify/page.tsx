@@ -14,7 +14,7 @@ export default function NewsletterVerifyPage() {
     <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4'>
       <div className='max-w-md w-full bg-zinc-800 rounded-lg p-8 border border-zinc-700'>
         <div className='text-center mb-6'>
-          <Mail className='h-12 w-12 mx-auto mb-4 text-purple-400' />
+          <Mail className='h-12 w-12 mx-auto mb-4 text-lunary-primary-400' />
           <h1 className='text-2xl font-bold mb-2'>Email Verification</h1>
         </div>
 
@@ -33,7 +33,7 @@ export default function NewsletterVerifyPage() {
             </p>
             <Link
               href='/profile'
-              className='inline-block bg-purple-600 hover:bg-purple-700 text-white py-2 px-6 rounded-md transition-colors'
+              className='inline-block bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white py-2 px-6 rounded-md transition-colors'
             >
               Go to Profile
             </Link>
@@ -56,7 +56,7 @@ export default function NewsletterVerifyPage() {
             </p>
             <Link
               href='/profile'
-              className='inline-block bg-purple-600 hover:bg-purple-700 text-white py-2 px-6 rounded-md transition-colors'
+              className='inline-block bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white py-2 px-6 rounded-md transition-colors'
             >
               Go to Profile
             </Link>

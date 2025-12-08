@@ -356,8 +356,8 @@ export default function SubstackManagerPage() {
             <div
               className={`mt-4 p-3 rounded-lg border ${
                 verificationStatus.authenticated
-                  ? 'bg-lunary-success/10 border-lunary-success/20 text-lunary-success'
-                  : 'bg-lunary-error/10 border-lunary-error/20 text-lunary-error'
+                  ? 'bg-lunary-success-950 border-lunary-success-900 text-lunary-success'
+                  : 'bg-lunary-error-950 border-lunary-error-900 text-lunary-error'
               }`}
             >
               <p className='text-sm font-medium'>
@@ -560,7 +560,7 @@ export default function SubstackManagerPage() {
           </CardHeader>
           <CardContent>
             <div className='space-y-4'>
-              <div className='flex items-center gap-2 p-3 bg-lunary-accent/10 border border-lunary-accent/20 rounded-lg'>
+              <div className='flex items-center gap-2 p-3 bg-lunary-accent-950 border border-lunary-accent-900 rounded-lg'>
                 <AlertCircle className='h-5 w-5 text-lunary-accent flex-shrink-0' />
                 <p className='text-sm text-lunary-accent-200'>
                   Backfill publishes multiple weeks at once. Start with a small
@@ -748,7 +748,7 @@ export default function SubstackManagerPage() {
                               <a
                                 href={url}
                                 download={`lunary-${format}.png`}
-                                className='text-purple-400 hover:text-purple-300'
+                                className='text-lunary-primary-400 hover:text-lunary-primary-300'
                               >
                                 <Download className='h-4 w-4' />
                               </a>
@@ -771,7 +771,7 @@ export default function SubstackManagerPage() {
                               </span>
                               <button
                                 onClick={() => copyToClipboard(caption)}
-                                className='text-purple-400 hover:text-purple-300'
+                                className='text-lunary-primary-400 hover:text-lunary-primary-300'
                               >
                                 <Copy className='h-4 w-4' />
                               </button>
@@ -789,7 +789,7 @@ export default function SubstackManagerPage() {
                       {socialContent.hashtags.map((tag) => (
                         <span
                           key={tag}
-                          className='text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded'
+                          className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-2 py-1 rounded'
                         >
                           {tag}
                         </span>
@@ -799,7 +799,7 @@ export default function SubstackManagerPage() {
                       onClick={() =>
                         copyToClipboard(socialContent.hashtags.join(' '))
                       }
-                      className='text-xs text-purple-400 hover:text-purple-300 mt-2'
+                      className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300 mt-2'
                     >
                       Copy all hashtags
                     </button>
@@ -829,7 +829,7 @@ export default function SubstackManagerPage() {
                                   </span>
                                   <button
                                     onClick={() => copyToClipboard(text)}
-                                    className='text-purple-400 hover:text-purple-300'
+                                    className='text-lunary-primary-400 hover:text-lunary-primary-300'
                                   >
                                     <Copy className='h-3 w-3' />
                                   </button>

@@ -157,7 +157,7 @@ export function GeneratorClient() {
         <section className='grid gap-6 rounded-3xl border border-white/10 bg-black/40 p-6 md:grid-cols-2'>
           <div className='space-y-4'>
             <div>
-              <p className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+              <p className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                 Report type
               </p>
               <div className='mt-3 flex flex-wrap gap-3'>
@@ -168,7 +168,7 @@ export function GeneratorClient() {
                     onClick={() => setReportType(type as typeof reportType)}
                     className={`rounded-full border px-4 py-2 text-sm capitalize ${
                       reportType === type
-                        ? 'border-purple-400 bg-purple-400/20'
+                        ? 'border-lunary-primary-400 bg-lunary-primary-400/20'
                         : 'border-white/10'
                     }`}
                   >
@@ -179,7 +179,7 @@ export function GeneratorClient() {
             </div>
             <div className='grid gap-3 sm:grid-cols-2'>
               <div>
-                <label className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+                <label className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                   Start date
                 </label>
                 <input
@@ -191,11 +191,11 @@ export function GeneratorClient() {
                       start: event.target.value,
                     }))
                   }
-                  className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white focus:border-purple-400 focus:outline-none'
+                  className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white focus:border-lunary-primary-400 focus:outline-none'
                 />
               </div>
               <div>
-                <label className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+                <label className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                   End date
                 </label>
                 <input
@@ -207,12 +207,12 @@ export function GeneratorClient() {
                       end: event.target.value,
                     }))
                   }
-                  className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white focus:border-purple-400 focus:outline-none'
+                  className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white focus:border-lunary-primary-400 focus:outline-none'
                 />
               </div>
             </div>
             <div>
-              <label className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+              <label className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                 Sections
               </label>
               <div className='mt-3 grid gap-2 sm:grid-cols-2'>
@@ -225,7 +225,7 @@ export function GeneratorClient() {
                       type='checkbox'
                       checked={selectedSections.includes(option.key)}
                       onChange={() => handleToggleSection(option.key)}
-                      className='accent-purple-400'
+                      className='accent-lunary-primary-400'
                     />
                     {option.label}
                   </label>
@@ -239,12 +239,12 @@ export function GeneratorClient() {
                   type='checkbox'
                   checked={makePublic}
                   onChange={(event) => setMakePublic(event.target.checked)}
-                  className='accent-purple-400'
+                  className='accent-lunary-primary-400'
                 />
               </label>
             </div>
             <div>
-              <label className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+              <label className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                 Email (optional)
               </label>
               <input
@@ -252,7 +252,7 @@ export function GeneratorClient() {
                 placeholder='Send report to email when generating'
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-purple-400 focus:outline-none'
+                className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-lunary-primary-400 focus:outline-none'
               />
             </div>
             <button
@@ -263,7 +263,9 @@ export function GeneratorClient() {
             >
               {isGenerating ? 'Generating…' : 'Generate report'}
             </button>
-            {status && <p className='text-sm text-purple-200'>{status}</p>}
+            {status && (
+              <p className='text-sm text-lunary-primary-200'>{status}</p>
+            )}
           </div>
           <div>
             <CosmicReportPreview

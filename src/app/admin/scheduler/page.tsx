@@ -184,7 +184,7 @@ export default function SchedulerAdminPage() {
   return (
     <div className='min-h-screen bg-black text-white p-8'>
       <div className='max-w-4xl mx-auto'>
-        <h1 className='text-3xl font-bold mb-8 text-purple-400'>
+        <h1 className='text-3xl font-bold mb-8 text-lunary-primary-400'>
           🌟 Cosmic Social Media Scheduler
         </h1>
 
@@ -235,7 +235,7 @@ export default function SchedulerAdminPage() {
           <button
             onClick={scheduleMonth}
             disabled={loading}
-            className='bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:opacity-50 px-6 py-3 rounded font-medium text-white transition-colors'
+            className='bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-lunary-primary-800 disabled:opacity-50 px-6 py-3 rounded font-medium text-white transition-colors'
           >
             {loading ? '⏳ Scheduling Posts...' : '🚀 Schedule Month'}
           </button>
@@ -387,7 +387,7 @@ export default function SchedulerAdminPage() {
             {result.summary && (
               <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
                 <div className='bg-zinc-800 rounded p-3'>
-                  <div className='text-2xl font-bold text-purple-400'>
+                  <div className='text-2xl font-bold text-lunary-primary-400'>
                     {result.summary.totalPosts}
                   </div>
                   <div className='text-sm text-zinc-400'>Total Posts</div>
@@ -515,7 +515,7 @@ export default function SchedulerAdminPage() {
                         onClick={() =>
                           socialPrefillUrls.instagram(currentPostData)
                         }
-                        className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-gradient-to-r from-lunary-primary-600 to-lunary-rose-600 hover:from-lunary-primary-700 hover:to-lunary-rose-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📸 Instagram
                       </button>
@@ -616,7 +616,7 @@ export default function SchedulerAdminPage() {
                             );
                           }
                         }}
-                        className='bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary-600 hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📋 Copy Text
                       </button>
@@ -634,7 +634,7 @@ export default function SchedulerAdminPage() {
                             );
                           }
                         }}
-                        className='bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary-600 hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📋 Copy All
                       </button>

@@ -66,7 +66,7 @@ export default function TrademarkPage() {
               For official brand assets, please visit our{' '}
               <Link
                 href='/press-kit'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Press Kit
               </Link>
@@ -106,7 +106,7 @@ export default function TrademarkPage() {
               our{' '}
               <Link
                 href='/api-terms'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 API Terms of Service
               </Link>
@@ -121,7 +121,7 @@ export default function TrademarkPage() {
               Lunary name to promote your referral link, subject to our{' '}
               <Link
                 href='/referral-terms'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Referral Program Terms
               </Link>
@@ -252,7 +252,7 @@ export default function TrademarkPage() {
               and approved screenshots, are available in our{' '}
               <Link
                 href='/press-kit'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Press Kit
               </Link>
@@ -275,7 +275,7 @@ export default function TrademarkPage() {
                 <strong>Brand Inquiries:</strong>{' '}
                 <a
                   href='mailto:brand@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   brand@lunary.app
                 </a>
@@ -283,7 +283,7 @@ export default function TrademarkPage() {
                 <strong>Partnership Inquiries:</strong>{' '}
                 <a
                   href='mailto:partnerships@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   partnerships@lunary.app
                 </a>
@@ -307,7 +307,7 @@ export default function TrademarkPage() {
               use of the Lunary Marks, please report it to{' '}
               <a
                 href='mailto:legal@lunary.app'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 legal@lunary.app
               </a>
@@ -334,25 +334,25 @@ export default function TrademarkPage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/press-kit'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Press Kit
               </Link>
               <Link
                 href='/api-terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 API Terms
               </Link>
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/dmca'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 DMCA Policy
               </Link>

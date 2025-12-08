@@ -205,7 +205,7 @@ export default function BlogPage() {
         {/* Header */}
         <div className='mb-8 md:mb-12'>
           <h1 className='text-3xl md:text-4xl font-light text-zinc-100 mb-2 flex items-center gap-3'>
-            <BookOpen className='h-8 w-8 md:h-10 md:w-10 text-purple-400' />
+            <BookOpen className='h-8 w-8 md:h-10 md:w-10 text-lunary-primary-400' />
             Cosmic Blog
           </h1>
           <p className='text-lg md:text-xl text-zinc-400'>
@@ -215,11 +215,11 @@ export default function BlogPage() {
 
         {/* Current Week Highlight */}
         {currentWeekData && (
-          <div className='mb-8 rounded-lg border border-purple-500/20 bg-gradient-to-br from-purple-900/20 to-zinc-900/50 p-6 md:p-8 hover:border-purple-500/40 transition-colors'>
+          <div className='mb-8 rounded-lg border border-lunary-primary-700 bg-gradient-to-br from-lunary-primary-900/20 to-zinc-900/50 p-6 md:p-8 hover:border-lunary-primary-600 transition-colors'>
             <div className='flex items-start justify-between mb-4'>
               <div className='flex-1'>
                 <div className='flex items-center gap-2 mb-2'>
-                  <span className='px-3 py-1 text-xs font-medium rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30'>
+                  <span className='px-3 py-1 text-xs font-medium rounded-full bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'>
                     This Week
                   </span>
                   <span className='text-sm text-zinc-500'>
@@ -239,27 +239,27 @@ export default function BlogPage() {
             </p>
             <div className='flex flex-wrap gap-4 text-sm text-zinc-400 mb-6'>
               <span className='flex items-center gap-1.5'>
-                <Star className='h-4 w-4 text-purple-400' />
+                <Star className='h-4 w-4 text-lunary-primary-400' />
                 {currentWeekData.planetaryHighlights?.length || 0} planetary
                 events
               </span>
               <span className='flex items-center gap-1.5'>
-                <TrendingUp className='h-4 w-4 text-purple-400' />
+                <TrendingUp className='h-4 w-4 text-lunary-primary-400' />
                 {currentWeekData.retrogradeChanges?.length || 0} retrograde
                 changes
               </span>
               <span className='flex items-center gap-1.5'>
-                <Moon className='h-4 w-4 text-purple-400' />
+                <Moon className='h-4 w-4 text-lunary-primary-400' />
                 {currentWeekData.moonPhases?.length || 0} moon phases
               </span>
               <span className='flex items-center gap-1.5'>
-                <Sparkles className='h-4 w-4 text-purple-400' />
+                <Sparkles className='h-4 w-4 text-lunary-primary-400' />
                 {currentWeekData.majorAspects?.length || 0} major aspects
               </span>
             </div>
             <Link
               href={`/blog/week/week-${currentWeekData.weekNumber}-${currentWeekData.year}`}
-              className='inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors text-sm font-medium'
+              className='inline-flex items-center gap-2 px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-md transition-colors text-sm font-medium'
             >
               Read Full Forecast
               <ArrowRight className='h-4 w-4' />
@@ -292,7 +292,7 @@ export default function BlogPage() {
                 <Link
                   key={post.id}
                   href={`/blog/week/week-${post.weekNumber}-${post.year}`}
-                  className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+                  className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
                 >
                   <div className='flex items-start justify-between mb-3'>
                     <div className='flex-1'>
@@ -304,7 +304,7 @@ export default function BlogPage() {
                           {post.year}
                         </span>
                       </div>
-                      <h3 className='text-xl md:text-2xl font-medium text-zinc-100 mb-2 group-hover:text-purple-300 transition-colors'>
+                      <h3 className='text-xl md:text-2xl font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-300 transition-colors'>
                         {post.title}
                       </h3>
                       <p className='text-base text-zinc-300 italic mb-3'>
@@ -332,7 +332,7 @@ export default function BlogPage() {
                     </span>
                   </div>
 
-                  <div className='flex items-center gap-2 text-sm text-purple-400 group-hover:text-purple-300 transition-colors'>
+                  <div className='flex items-center gap-2 text-sm text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
                     Read more
                     <ArrowRight className='h-4 w-4' />
                   </div>

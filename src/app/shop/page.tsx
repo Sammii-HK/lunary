@@ -152,7 +152,7 @@ export default function ShopPage() {
     return (
       <div className='min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center'>
         <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4'></div>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary-400 mx-auto mb-4'></div>
           <p className='text-slate-300'>Loading digital packs...</p>
         </div>
       </div>
@@ -181,7 +181,7 @@ export default function ShopPage() {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-lunary-primary-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
@@ -196,7 +196,7 @@ export default function ShopPage() {
           {filteredPacks.map((pack) => (
             <div
               key={pack.id}
-              className='bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden hover:border-purple-500/50 transition-all duration-300'
+              className='bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden hover:border-lunary-primary-600 transition-all duration-300'
             >
               {/* Pack Image */}
               {pack.imageUrl && (
@@ -217,7 +217,7 @@ export default function ShopPage() {
                   <h3 className='text-xl font-medium text-white'>
                     {pack.name}
                   </h3>
-                  <span className='text-2xl font-bold text-purple-400'>
+                  <span className='text-2xl font-bold text-lunary-primary-400'>
                     {formatPrice(pack.price)}
                   </span>
                 </div>
@@ -251,7 +251,7 @@ export default function ShopPage() {
                 <button
                   onClick={() => handlePurchase(pack)}
                   disabled={purchaseLoading === pack.id || !pack.isActive}
-                  className='w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors'
+                  className='w-full py-3 px-4 bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors'
                 >
                   {purchaseLoading === pack.id ? (
                     <span className='flex items-center justify-center'>

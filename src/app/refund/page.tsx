@@ -102,7 +102,7 @@ export default function RefundPolicyPage() {
           </section>
 
           {/* Refund Request Form */}
-          <section className='p-6 border border-purple-500/30 bg-purple-500/10 rounded-xl'>
+          <section className='p-6 border border-lunary-primary-700 bg-lunary-primary-900/10 rounded-xl'>
             <h2 className='text-2xl font-semibold text-white mb-4'>
               Request a Refund
             </h2>
@@ -128,7 +128,7 @@ export default function RefundPolicyPage() {
                     </p>
                     <Link
                       href='/auth'
-                      className='inline-flex px-6 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors'
+                      className='inline-flex px-6 py-2 rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white font-medium transition-colors'
                     >
                       Sign In
                     </Link>
@@ -143,7 +143,7 @@ export default function RefundPolicyPage() {
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
                         placeholder="Let us know why you're requesting a refund..."
-                        className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none'
+                        className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary resize-none'
                         rows={3}
                       />
                     </div>
@@ -158,7 +158,7 @@ export default function RefundPolicyPage() {
                     <button
                       onClick={handleRefundRequest}
                       disabled={submitting}
-                      className='w-full py-3 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-medium transition-colors flex items-center justify-center gap-2'
+                      className='w-full py-3 rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-lunary-primary-600/50 text-white font-medium transition-colors flex items-center justify-center gap-2'
                     >
                       {submitting ? (
                         <>
@@ -229,7 +229,7 @@ export default function RefundPolicyPage() {
               You can cancel your subscription anytime from your{' '}
               <Link
                 href='/profile'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Profile Settings
               </Link>
@@ -304,13 +304,13 @@ export default function RefundPolicyPage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Privacy Policy
               </Link>

@@ -32,7 +32,7 @@ interface ApiKeyData {
 const tierColors: Record<string, string> = {
   free: 'bg-zinc-500/20 text-zinc-300',
   starter: 'bg-lunary-secondary-900 text-lunary-secondary-300',
-  developer: 'bg-purple-500/20 text-purple-300',
+  developer: 'bg-lunary-primary-900/20 text-lunary-primary-300',
   business: 'bg-lunary-accent-900 text-lunary-accent-300',
 };
 
@@ -147,7 +147,7 @@ export default function DeveloperDashboard() {
           </div>
           <button
             onClick={createNewKey}
-            className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             <Plus className='h-4 w-4' />
             Create API Key
@@ -155,7 +155,7 @@ export default function DeveloperDashboard() {
         </div>
 
         {error && (
-          <div className='mb-6 p-4 rounded-lg bg-lunary-error/10 border border-lunary-error-700 text-lunary-error-300'>
+          <div className='mb-6 p-4 rounded-lg bg-lunary-error-950 border border-lunary-error-700 text-lunary-error-300'>
             {error}
             <Link href='/sign-in' className='ml-2 underline'>
               Sign in
@@ -164,7 +164,7 @@ export default function DeveloperDashboard() {
         )}
 
         {newKey && (
-          <div className='mb-6 p-4 rounded-lg bg-lunary-success/10 border border-lunary-success-700'>
+          <div className='mb-6 p-4 rounded-lg bg-lunary-success-950 border border-lunary-success-700'>
             <div className='flex items-center gap-2 mb-2'>
               <Shield className='h-5 w-5 text-lunary-success' />
               <span className='font-medium text-lunary-success-300'>
@@ -204,7 +204,7 @@ export default function DeveloperDashboard() {
               </p>
               <button
                 onClick={createNewKey}
-                className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+                className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
               >
                 <Plus className='h-4 w-4' />
                 Create API Key
@@ -265,7 +265,7 @@ export default function DeveloperDashboard() {
                     </div>
                     <div className='mt-2 h-1.5 bg-zinc-700 rounded-full overflow-hidden'>
                       <div
-                        className='h-full bg-purple-500 rounded-full transition-all'
+                        className='h-full bg-lunary-primary-500 rounded-full transition-all'
                         style={{
                           width: `${Math.min(100, (key.requests / key.requestLimit) * 100)}%`,
                         }}
@@ -322,7 +322,7 @@ export default function DeveloperDashboard() {
                 return (
                   <div
                     key={tier}
-                    className='p-4 rounded-lg border border-zinc-700 hover:border-purple-500/50 transition-colors'
+                    className='p-4 rounded-lg border border-zinc-700 hover:border-lunary-primary-600 transition-colors'
                   >
                     <div
                       className={`inline-block px-2 py-0.5 rounded text-xs mb-2 ${tierColors[tier]}`}

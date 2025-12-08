@@ -32,7 +32,7 @@ export default function CookiePolicyPage() {
               alongside our{' '}
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Privacy Policy
               </Link>
@@ -171,7 +171,7 @@ export default function CookiePolicyPage() {
                 href='https://posthog.com/privacy'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 PostHog&apos;s Privacy Policy
               </a>
@@ -315,7 +315,7 @@ export default function CookiePolicyPage() {
                   href='https://tools.google.com/dlpage/gaoptout'
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   Google Analytics Opt-out
                 </a>
@@ -355,7 +355,7 @@ export default function CookiePolicyPage() {
                 Email:{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   privacy@lunary.app
                 </a>
@@ -370,13 +370,13 @@ export default function CookiePolicyPage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Terms of Service
               </Link>

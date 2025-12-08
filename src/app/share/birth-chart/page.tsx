@@ -177,8 +177,8 @@ export default async function ShareBirthChartPage({
               </p>
               <p className='mt-2 text-xl font-light text-white'>{sun ?? '—'}</p>
             </div>
-            <div className='rounded-2xl border border-purple-500/30 bg-purple-500/10 p-4'>
-              <p className='text-[0.7rem] uppercase tracking-[0.3em] text-purple-100/70'>
+            <div className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/10 p-4'>
+              <p className='text-[0.7rem] uppercase tracking-[0.3em] text-lunary-primary-100/70'>
                 Moon
               </p>
               <p className='mt-2 text-xl font-light text-white'>
@@ -254,7 +254,7 @@ export default async function ShareBirthChartPage({
           <div className='mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
             <Link
               href='/birth-chart'
-              className='inline-flex items-center rounded-full bg-lunary-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-lunary-primary/30 transition hover:bg-lunary-primary-400'
+              className='inline-flex items-center rounded-full bg-lunary-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-lunary-primary-800 transition hover:bg-lunary-primary-400'
             >
               Explore your birth chart on Lunary
             </Link>

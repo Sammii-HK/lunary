@@ -32,7 +32,7 @@ export default function AcceptableUsePolicyPage() {
               &quot;our&quot;). This AUP is part of and incorporated into our{' '}
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Terms of Service
               </Link>
@@ -272,7 +272,7 @@ export default function AcceptableUsePolicyPage() {
                 <strong>Report Abuse:</strong>{' '}
                 <a
                   href='mailto:abuse@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   abuse@lunary.app
                 </a>
@@ -280,7 +280,7 @@ export default function AcceptableUsePolicyPage() {
                 <strong>General Support:</strong>{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   support@lunary.app
                 </a>
@@ -303,7 +303,7 @@ export default function AcceptableUsePolicyPage() {
                 Email:{' '}
                 <a
                   href='mailto:legal@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   legal@lunary.app
                 </a>
@@ -318,19 +318,19 @@ export default function AcceptableUsePolicyPage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/dmca'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 DMCA Policy
               </Link>

@@ -152,18 +152,18 @@ function ExploreLink({ item }: { item: ExploreItem }) {
   return (
     <Link
       href={item.href}
-      className='flex items-center gap-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/40 hover:bg-zinc-900 transition-colors group'
+      className='flex items-center gap-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-colors group'
     >
-      <div className='p-2 rounded-lg bg-purple-500/10 text-purple-400'>
+      <div className='p-2 rounded-lg bg-lunary-primary-900/10 text-lunary-primary-400'>
         <Icon className='w-5 h-5' />
       </div>
       <div className='flex-1 min-w-0'>
-        <h3 className='text-sm font-medium text-zinc-100 group-hover:text-purple-300 transition-colors'>
+        <h3 className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
           {item.label}
         </h3>
         <p className='text-xs text-zinc-500'>{item.description}</p>
       </div>
-      <ChevronRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors' />
+      <ChevronRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-400 transition-colors' />
     </Link>
   );
 }
@@ -175,7 +175,7 @@ function ExploreLinkCompact({ item }: { item: ExploreItem }) {
       href={item.href}
       className='flex items-center gap-3 p-3 rounded-lg border border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50 transition-colors group'
     >
-      <Icon className='w-4 h-4 text-zinc-500 group-hover:text-purple-400 transition-colors' />
+      <Icon className='w-4 h-4 text-zinc-500 group-hover:text-lunary-primary-400 transition-colors' />
       <span className='text-sm text-zinc-300 group-hover:text-zinc-100 transition-colors truncate'>
         {item.label}
       </span>

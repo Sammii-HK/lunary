@@ -330,7 +330,7 @@ export default function PricingPage() {
                       key={plan.id}
                       className={`relative rounded-2xl p-6 flex flex-col transition-all duration-300 border-2 ${
                         isPopular
-                          ? 'bg-gradient-to-b from-lunary-primary-950/40 to-zinc-900/60 border-lunary-primary-700 shadow-xl shadow-lunary-primary/5'
+                          ? 'bg-gradient-to-b from-lunary-primary-950/40 to-zinc-900/60 border-lunary-primary-700 shadow-xl shadow-lunary-primary-950'
                           : 'bg-zinc-900/40 border-zinc-800/60 hover:border-zinc-700/60'
                       }`}
                     >

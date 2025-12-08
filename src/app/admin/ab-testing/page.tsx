@@ -165,7 +165,7 @@ export default function ABTestingPage() {
             </p>
           </div>
           {autoSuggestions.length > 0 && (
-            <Badge className='bg-purple-500/20 text-purple-300 border-purple-500/30'>
+            <Badge className='bg-lunary-primary-900/20 text-lunary-primary-300 border-lunary-primary-700'>
               {autoSuggestions.length} Auto-Suggestions Available
             </Badge>
           )}
@@ -182,7 +182,7 @@ export default function ABTestingPage() {
 
         {loading ? (
           <div className='flex items-center justify-center py-20'>
-            <Loader2 className='w-8 h-8 animate-spin text-purple-400' />
+            <Loader2 className='w-8 h-8 animate-spin text-lunary-primary-400' />
           </div>
         ) : tests.length === 0 ? (
           <Card className='bg-zinc-900 border-zinc-800'>
@@ -197,10 +197,10 @@ export default function ABTestingPage() {
           <div className='grid gap-6'>
             {/* Auto-Apply Suggestions */}
             {autoSuggestions.length > 0 && (
-              <Card className='bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-500/30'>
+              <Card className='bg-gradient-to-r from-lunary-primary-900/40 to-pink-900/40 border-lunary-primary-700'>
                 <CardHeader>
                   <div className='flex items-center gap-2'>
-                    <Zap className='w-5 h-5 text-purple-300' />
+                    <Zap className='w-5 h-5 text-lunary-primary-300' />
                     <CardTitle className='text-xl'>
                       Automated Recommendations
                     </CardTitle>
@@ -221,7 +221,7 @@ export default function ABTestingPage() {
                             {suggestion.reason}
                           </p>
                         </div>
-                        <Badge className='bg-lunary-success/20 text-lunary-success border-lunary-success/30'>
+                        <Badge className='bg-lunary-success-900 text-lunary-success border-lunary-success-800'>
                           {suggestion.confidence.toFixed(1)}% confidence
                         </Badge>
                       </div>
@@ -237,7 +237,7 @@ export default function ABTestingPage() {
                                 key={cIdx}
                                 className='text-xs text-zinc-300 mb-2'
                               >
-                                <span className='text-purple-400'>
+                                <span className='text-lunary-primary-400'>
                                   {change.file}
                                 </span>
                                 <p className='text-zinc-400 mt-1'>
@@ -282,8 +282,8 @@ export default function ABTestingPage() {
                     <Badge
                       className={
                         test.isSignificant
-                          ? 'bg-lunary-success/20 text-lunary-success border-lunary-success/30'
-                          : 'bg-lunary-accent/20 text-lunary-accent border-lunary-accent-700'
+                          ? 'bg-lunary-success-900 text-lunary-success border-lunary-success-800'
+                          : 'bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700'
                       }
                     >
                       {test.confidence.toFixed(1)}% confidence
@@ -322,7 +322,7 @@ export default function ABTestingPage() {
                           <span className='text-zinc-400'>
                             Conversion Rate:
                           </span>
-                          <span className='text-purple-400 font-bold'>
+                          <span className='text-lunary-primary-400 font-bold'>
                             {test.variantA.conversionRate.toFixed(2)}%
                           </span>
                         </div>
@@ -359,7 +359,7 @@ export default function ABTestingPage() {
                           <span className='text-zinc-400'>
                             Conversion Rate:
                           </span>
-                          <span className='text-purple-400 font-bold'>
+                          <span className='text-lunary-primary-400 font-bold'>
                             {test.variantB.conversionRate.toFixed(2)}%
                           </span>
                         </div>
@@ -368,10 +368,10 @@ export default function ABTestingPage() {
                   </div>
 
                   {/* Improvement */}
-                  <div className='p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg'>
+                  <div className='p-4 bg-lunary-primary-900/10 border border-lunary-primary-700 rounded-lg'>
                     <div className='flex items-center gap-2 mb-2'>
-                      <Sparkles className='w-5 h-5 text-purple-400' />
-                      <span className='font-semibold text-purple-300'>
+                      <Sparkles className='w-5 h-5 text-lunary-primary-400' />
+                      <span className='font-semibold text-lunary-primary-300'>
                         Improvement: {test.improvement > 0 ? '+' : ''}
                         {test.improvement.toFixed(2)}%
                       </span>
@@ -386,7 +386,7 @@ export default function ABTestingPage() {
                     <button
                       onClick={() => loadAIInsights(test)}
                       disabled={loadingInsights}
-                      className='w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                      className='w-full px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
                     >
                       {loadingInsights && selectedTest === test.testName ? (
                         <>
@@ -403,7 +403,7 @@ export default function ABTestingPage() {
 
                     {selectedTest === test.testName && aiInsights && (
                       <div className='mt-4 p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg'>
-                        <h4 className='font-semibold text-purple-300 mb-2'>
+                        <h4 className='font-semibold text-lunary-primary-300 mb-2'>
                           AI Analysis
                         </h4>
                         <div className='text-sm text-zinc-300 whitespace-pre-wrap'>

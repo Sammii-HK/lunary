@@ -156,7 +156,7 @@ export default function TarotGalleryPage() {
                   return (
                     <div
                       key={card.name}
-                      className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden hover:border-purple-500 transition-colors'
+                      className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden hover:border-lunary-primary transition-colors'
                     >
                       {/* Card Header */}
                       <div className='p-4 border-b border-zinc-700'>
@@ -208,7 +208,7 @@ export default function TarotGalleryPage() {
         <div className='mt-8 flex gap-4 justify-center'>
           <a
             href='/admin/daily-posts-preview'
-            className='px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-md text-white font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
           >
             ← Daily Posts Preview
           </a>

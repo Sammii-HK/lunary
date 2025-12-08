@@ -44,7 +44,7 @@ export default function ClearCachePage() {
       <p className='text-zinc-300'>{status}</p>
       <a
         href='/'
-        className='block mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-center'
+        className='block mt-4 px-4 py-2 bg-lunary-primary-600 text-white rounded-lg text-center'
       >
         Go to Home
       </a>

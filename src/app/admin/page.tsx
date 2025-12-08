@@ -87,7 +87,7 @@ function LockedAdminBackdrop() {
       metric: '12.4k subs',
       status: 'Queued',
       icon: Bell,
-      accent: 'text-purple-300',
+      accent: 'text-lunary-primary-300',
     },
     {
       title: 'Shop Manager',
@@ -114,7 +114,7 @@ function LockedAdminBackdrop() {
 
   return (
     <div className='absolute inset-0 overflow-hidden pointer-events-none select-none'>
-      <div className='absolute inset-0 bg-gradient-to-br from-purple-900/40 via-black to-black opacity-80' />
+      <div className='absolute inset-0 bg-gradient-to-br from-lunary-primary-900/40 via-black to-black opacity-80' />
       <div className='absolute inset-0'>
         <div className='h-full w-full bg-[radial-gradient(circle_at_top,_rgba(147,51,234,0.35),_transparent_60%)] opacity-50 blur-3xl' />
       </div>
@@ -413,7 +413,7 @@ export default function AdminDashboard() {
     return (
       <div className='min-h-screen bg-black text-white flex items-center justify-center'>
         <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4'></div>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary-400 mx-auto mb-4'></div>
           <p className='text-zinc-400'>Checking authorization...</p>
         </div>
       </div>
@@ -701,7 +701,7 @@ export default function AdminDashboard() {
       tools: contentTools,
       color: 'from-blue-600/20 to-blue-600/5',
       iconColor: 'text-lunary-secondary',
-      borderColor: 'border-lunary-secondary/30',
+      borderColor: 'border-lunary-secondary-800',
     },
     {
       title: 'Shop & Assets',
@@ -709,15 +709,15 @@ export default function AdminDashboard() {
       tools: shopTools,
       color: 'from-green-600/20 to-green-600/5',
       iconColor: 'text-lunary-success',
-      borderColor: 'border-lunary-success/30',
+      borderColor: 'border-lunary-success-800',
     },
     {
       title: 'Engagement',
       icon: <Bell className='h-5 w-5 md:h-6 md:w-6' />,
       tools: engagementTools,
-      color: 'from-purple-600/20 to-purple-600/5',
-      iconColor: 'text-purple-400',
-      borderColor: 'border-purple-500/30',
+      color: 'from-lunary-primary-600/20 to-lunary-primary-600/5',
+      iconColor: 'text-lunary-primary-400',
+      borderColor: 'border-lunary-primary-700',
     },
   ];
 
@@ -725,19 +725,19 @@ export default function AdminDashboard() {
     switch (status) {
       case 'new':
         return (
-          <Badge className='bg-lunary-success/20 text-lunary-success border-lunary-success/30'>
+          <Badge className='bg-lunary-success-900 text-lunary-success border-lunary-success-800'>
             New
           </Badge>
         );
       case 'beta':
         return (
-          <Badge className='bg-lunary-accent/20 text-lunary-accent border-lunary-accent-700'>
+          <Badge className='bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700'>
             Beta
           </Badge>
         );
       case 'active':
         return (
-          <Badge className='bg-lunary-secondary/20 text-lunary-secondary border-lunary-secondary/30'>
+          <Badge className='bg-lunary-secondary-900 text-lunary-secondary border-lunary-secondary-800'>
             Active
           </Badge>
         );
@@ -895,7 +895,7 @@ export default function AdminDashboard() {
                         onClick={testSubstackPreview}
                         disabled={substackLoading}
                         variant='outline'
-                        className='h-auto px-6 py-2 bg-purple-600/50 hover:bg-purple-700/50 border-purple-500/50 text-white transition-all disabled:opacity-50 mt-6 sm:mt-0 text-sm'
+                        className='h-auto px-6 py-2 bg-lunary-primary-600/50 hover:bg-lunary-primary-700/50 border-lunary-primary-600 text-white transition-all disabled:opacity-50 mt-6 sm:mt-0 text-sm'
                       >
                         <Eye className='h-4 w-4 mr-2' />
                         {substackLoading ? 'Generating...' : 'Preview Posts'}
@@ -966,7 +966,9 @@ export default function AdminDashboard() {
                           {/* Paid Post */}
                           <div>
                             <div className='flex items-center gap-2 mb-3'>
-                              <Badge className='bg-purple-600'>Paid Tier</Badge>
+                              <Badge className='bg-lunary-primary-600'>
+                                Paid Tier
+                              </Badge>
                               <span className='text-sm text-zinc-400'>
                                 {substackPreview.paid?.title || 'No title'}
                               </span>
@@ -1004,7 +1006,7 @@ export default function AdminDashboard() {
                             onClick={() => testSubstackPublish('paid')}
                             disabled={substackPublishing || !substackPreview}
                             variant='outline'
-                            className='flex-1 bg-purple-600 hover:bg-purple-700 border-purple-500 text-white disabled:opacity-50'
+                            className='flex-1 bg-lunary-primary-600 hover:bg-lunary-primary-700 border-lunary-primary text-white disabled:opacity-50'
                           >
                             <Play className='h-4 w-4 mr-2' />
                             {substackPublishing
@@ -1073,10 +1075,10 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-purple-500/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-primary-600 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
-                  <Sparkles className='h-8 w-8 text-purple-400' />
+                  <Sparkles className='h-8 w-8 text-lunary-primary-400' />
                   <div className='text-center'>
                     <div className='font-semibold text-base mb-1'>
                       Moon Circle
@@ -1128,7 +1130,7 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-secondary/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-secondary-700 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
                   <Calendar className='h-8 w-8 text-lunary-secondary' />
@@ -1178,7 +1180,7 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-success/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-success-700 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
                   <Package className='h-8 w-8 text-lunary-success' />
@@ -1222,7 +1224,7 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-accent/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-accent-700 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
                   <Package className='h-8 w-8 text-lunary-accent' />
@@ -1302,10 +1304,10 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-purple-500/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-primary-600 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
-                  <Calendar className='h-8 w-8 text-purple-400' />
+                  <Calendar className='h-8 w-8 text-lunary-primary-400' />
                   <div className='text-center'>
                     <div className='font-semibold text-base mb-1'>
                       This Month
@@ -1359,7 +1361,7 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-secondary/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-secondary-700 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
                   <Calendar className='h-8 w-8 text-lunary-secondary' />
@@ -1377,7 +1379,7 @@ export default function AdminDashboard() {
               <Button
                 asChild
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-success/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-success-700 text-white transition-all'
               >
                 <Link
                   href='/admin/shop-manager'
@@ -1427,7 +1429,7 @@ export default function AdminDashboard() {
                 }}
                 disabled={migrationLoading}
                 variant='outline'
-                className='bg-purple-600/50 hover:bg-purple-700/50 border-purple-500/50 text-white'
+                className='bg-lunary-primary-600/50 hover:bg-lunary-primary-700/50 border-lunary-primary-600 text-white'
               >
                 {migrationLoading ? (
                   <>
@@ -1445,7 +1447,7 @@ export default function AdminDashboard() {
               {migrationStatus && !migrationStatus.error && (
                 <div className='mt-4 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
-                    <div className='p-3 rounded-lg bg-lunary-secondary/10 border border-lunary-secondary/20'>
+                    <div className='p-3 rounded-lg bg-lunary-secondary-950 border border-lunary-secondary-900'>
                       <p className='text-xs text-lunary-secondary uppercase tracking-wider'>
                         Postgres Users
                       </p>
@@ -1453,7 +1455,7 @@ export default function AdminDashboard() {
                         {migrationStatus.postgres?.count ?? 'N/A'}
                       </p>
                     </div>
-                    <div className='p-3 rounded-lg bg-lunary-success/10 border border-lunary-success/20'>
+                    <div className='p-3 rounded-lg bg-lunary-success-950 border border-lunary-success-900'>
                       <p className='text-xs text-lunary-success uppercase tracking-wider'>
                         Recent Signups (30d)
                       </p>
@@ -1464,8 +1466,8 @@ export default function AdminDashboard() {
                   </div>
 
                   {migrationStatus.legacy?.note && (
-                    <div className='p-3 rounded-lg bg-purple-500/10 border border-purple-500/30 mb-4'>
-                      <p className='text-purple-400 text-sm'>
+                    <div className='p-3 rounded-lg bg-lunary-primary-900/10 border border-lunary-primary-700 mb-4'>
+                      <p className='text-lunary-primary-400 text-sm'>
                         {migrationStatus.legacy.note}
                       </p>
                     </div>
@@ -1505,7 +1507,7 @@ export default function AdminDashboard() {
               )}
 
               {migrationStatus?.error && (
-                <div className='p-4 rounded-lg bg-lunary-error/10 border border-lunary-error/30'>
+                <div className='p-4 rounded-lg bg-lunary-error-950 border border-lunary-error-800'>
                   <p className='text-lunary-error'>{migrationStatus.error}</p>
                   {migrationStatus.details && (
                     <p className='text-xs text-lunary-error-300 mt-1'>
@@ -1545,7 +1547,7 @@ export default function AdminDashboard() {
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <div className='w-2 h-2 md:w-3 md:h-3 bg-purple-500 rounded-full'></div>
+                <div className='w-2 h-2 md:w-3 md:h-3 bg-lunary-primary-500 rounded-full'></div>
                 <span className='text-sm md:text-base'>
                   Stripe Integration: Configured
                 </span>
@@ -1568,7 +1570,7 @@ export default function AdminDashboard() {
           <CardContent>
             {activityLoading ? (
               <div className='text-center py-6 md:py-8 lg:py-10 text-zinc-400'>
-                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-4'></div>
+                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary-400 mx-auto mb-4'></div>
                 <p className='text-sm md:text-base'>Loading activity...</p>
               </div>
             ) : recentActivity.length === 0 ? (
@@ -1592,11 +1594,11 @@ export default function AdminDashboard() {
                           : 'text-zinc-400';
                   const statusBg =
                     activity.status === 'success'
-                      ? 'bg-lunary-success/10 border-lunary-success/20'
+                      ? 'bg-lunary-success-950 border-lunary-success-900'
                       : activity.status === 'failed'
-                        ? 'bg-lunary-error/10 border-lunary-error/20'
+                        ? 'bg-lunary-error-950 border-lunary-error-900'
                         : activity.status === 'pending'
-                          ? 'bg-lunary-accent/10 border-lunary-accent/20'
+                          ? 'bg-lunary-accent-950 border-lunary-accent-900'
                           : 'bg-zinc-500/10 border-zinc-500/20';
 
                   const activityTypeLabels: Record<string, string> = {

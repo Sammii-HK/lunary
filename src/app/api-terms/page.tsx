@@ -32,14 +32,14 @@ export default function APITermsPage() {
               &quot;our&quot;). These API Terms are in addition to our general{' '}
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Terms of Service
               </Link>{' '}
               and{' '}
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Privacy Policy
               </Link>
@@ -234,7 +234,7 @@ export default function APITermsPage() {
                 Include a link to{' '}
                 <a
                   href='https://lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   lunary.app
                 </a>{' '}
@@ -247,7 +247,7 @@ export default function APITermsPage() {
               requirements. See our{' '}
               <Link
                 href='/trademark'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Trademark Guidelines
               </Link>{' '}
@@ -415,7 +415,7 @@ export default function APITermsPage() {
                 <strong>API Support:</strong>{' '}
                 <a
                   href='mailto:api@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   api@lunary.app
                 </a>
@@ -423,7 +423,7 @@ export default function APITermsPage() {
                 <strong>Enterprise Inquiries:</strong>{' '}
                 <a
                   href='mailto:enterprise@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   enterprise@lunary.app
                 </a>
@@ -438,25 +438,25 @@ export default function APITermsPage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/trademark'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Trademark Guidelines
               </Link>
               <Link
                 href='/acceptable-use'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Acceptable Use Policy
               </Link>

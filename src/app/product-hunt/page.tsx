@@ -114,7 +114,7 @@ export default function ProductHuntPage() {
 
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
             Screenshots
           </p>
           <h2 className='text-3xl font-semibold'>Peek inside Lunary</h2>

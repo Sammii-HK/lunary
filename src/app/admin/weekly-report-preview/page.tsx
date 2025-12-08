@@ -156,7 +156,7 @@ function WeeklyReportPreviewContent() {
           <button
             onClick={generatePreview}
             disabled={loading}
-            className='px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 disabled:cursor-not-allowed rounded-md text-white font-medium transition-colors flex items-center gap-2'
+            className='px-6 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-700 disabled:cursor-not-allowed rounded-md text-white font-medium transition-colors flex items-center gap-2'
           >
             {loading ? (
               <>
@@ -198,7 +198,7 @@ function WeeklyReportPreviewContent() {
                     onClick={() => setViewMode('report')}
                     className={`px-4 py-2 rounded-md transition-colors ${
                       viewMode === 'report'
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-lunary-primary-600 text-white'
                         : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                     }`}
                   >
@@ -208,7 +208,7 @@ function WeeklyReportPreviewContent() {
                     onClick={() => setViewMode('email')}
                     className={`px-4 py-2 rounded-md transition-colors ${
                       viewMode === 'email'
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-lunary-primary-600 text-white'
                         : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                     }`}
                   >

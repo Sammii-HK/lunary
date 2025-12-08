@@ -462,7 +462,7 @@ export default function BlogManagerPage() {
 
             <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'>
               <div className='text-center'>
-                <div className='text-2xl font-bold text-purple-600'>
+                <div className='text-2xl font-bold text-lunary-primary-600'>
                   {currentWeek.planetaryHighlights?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>

@@ -134,7 +134,7 @@ export default function TestOGPage() {
 
       {/* Post Content */}
       <div className='bg-zinc-800 rounded-lg p-6 max-w-2xl w-full'>
-        <h2 className='text-xl font-semibold text-purple-400 mb-4'>
+        <h2 className='text-xl font-semibold text-lunary-primary-400 mb-4'>
           Post Content
         </h2>
         {loading ? (
@@ -153,7 +153,7 @@ export default function TestOGPage() {
             </div> */}
 
             {/* <div>
-              <h4 className='text-purple-300 font-medium mb-2'>🌟 Cosmic Highlights</h4>
+              <h4 className='text-lunary-primary-300 font-medium mb-2'>🌟 Cosmic Highlights</h4>
               <ul className='space-y-1'>
                 {postContent.highlights?.map((highlight, index) => (
                   <li key={index} className='text-zinc-300 text-sm'>
@@ -164,19 +164,19 @@ export default function TestOGPage() {
             </div>
 
             <div>
-              <h4 className='text-purple-300 font-medium mb-2'>✨ Today's Guidance</h4>
+              <h4 className='text-lunary-primary-300 font-medium mb-2'>✨ Today's Guidance</h4>
               <p className='text-zinc-300 text-sm leading-relaxed'>
                 {postContent.horoscopeSnippet}
               </p>
             </div>
 
             <div className='pt-2 border-t border-zinc-700'>
-              <p className='text-purple-400 text-sm font-medium'>
+              <p className='text-lunary-primary-400 text-sm font-medium'>
                 {postContent.callToAction}
               </p>
             </div> */}
             <div className='pt-2 border-t border-zinc-700'>
-              <p className='text-purple-400 text-sm font-medium whitespace-pre-line leading-relaxed'>
+              <p className='text-lunary-primary-400 text-sm font-medium whitespace-pre-line leading-relaxed'>
                 {postContent.snippet}
               </p>
             </div>
@@ -197,7 +197,7 @@ export default function TestOGPage() {
               key={index}
               className={`bg-zinc-800 rounded-lg p-2 text-center cursor-pointer transition-all hover:bg-zinc-700 ${
                 formatDateForUrl(date) === formatDateForUrl(selectedDate)
-                  ? 'ring-2 ring-purple-500'
+                  ? 'ring-2 ring-lunary-primary'
                   : ''
               }`}
               onClick={() => setSelectedDate(date)}

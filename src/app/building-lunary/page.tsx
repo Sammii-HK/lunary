@@ -51,7 +51,7 @@ export default function BuildingLunaryPage() {
   return (
     <div className='w-full max-w-4xl space-y-10 px-4 py-10 text-white'>
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/50 p-8'>
-        <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+        <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
           TikTok Series
         </p>
         <h1 className='text-4xl font-semibold'>Building Lunary</h1>
@@ -59,7 +59,7 @@ export default function BuildingLunaryPage() {
           A weekly TikTok series documenting how we build the Product Hunt
           launch, cosmic report generator, and community rituals — in public.
         </p>
-        <div className='flex gap-4 text-sm text-purple-100'>
+        <div className='flex gap-4 text-sm text-lunary-primary-100'>
           <Link
             href='https://www.tiktok.com/@lunary'
             target='_blank'
@@ -92,7 +92,7 @@ export default function BuildingLunaryPage() {
               className='rounded-2xl border border-white/10 bg-white/5 p-4 sm:flex sm:items-center sm:justify-between'
             >
               <div>
-                <p className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+                <p className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                   Episode {index + 1}
                 </p>
                 <h3 className='text-xl font-semibold text-white'>
@@ -103,7 +103,7 @@ export default function BuildingLunaryPage() {
               <Link
                 href={episode.link}
                 target='_blank'
-                className='mt-3 inline-flex rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-purple-400'
+                className='mt-3 inline-flex rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-lunary-primary-400'
               >
                 Watch
               </Link>
@@ -115,7 +115,7 @@ export default function BuildingLunaryPage() {
       <section className='grid gap-6 md:grid-cols-2'>
         <LaunchSignupForm source='tiktok' />
         <div className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
             Behind the scenes
           </p>
           <h2 className='text-2xl font-semibold'>What we share</h2>

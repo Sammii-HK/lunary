@@ -297,7 +297,7 @@ export default function GrimoirePacksAdmin() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <Gem className='h-5 w-5 text-purple-500' />
+              <Gem className='h-5 w-5 text-lunary-primary-500' />
               <div>
                 <p className='text-2xl font-bold'>
                   {grimoireData?.crystals.length || 0}

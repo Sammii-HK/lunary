@@ -94,7 +94,7 @@ function CollectionsPageContent() {
   });
 
   const categoryColors: Record<string, string> = {
-    chat: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    chat: 'bg-lunary-primary-900/20 text-lunary-primary-300 border-lunary-primary-700',
     ritual: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
     insight:
       'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
@@ -119,7 +119,7 @@ function CollectionsPageContent() {
       <div className='min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
         <div className='max-w-4xl mx-auto p-4'>
           <div className='text-center py-12'>
-            <BookOpen className='w-16 h-16 mx-auto mb-4 text-purple-400' />
+            <BookOpen className='w-16 h-16 mx-auto mb-4 text-lunary-primary-400' />
             <h1 className='text-3xl font-bold mb-4'>Your Lunary Journal</h1>
             <p className='text-zinc-400 mb-6'>
               Save your favorite insights, rituals, and cosmic guidance in one
@@ -156,7 +156,7 @@ function CollectionsPageContent() {
       <div className='max-w-6xl mx-auto p-4'>
         <header className='mb-8'>
           <h1 className='text-3xl font-bold mb-2 flex items-center gap-3'>
-            <BookOpen className='w-8 h-8 text-purple-400' />
+            <BookOpen className='w-8 h-8 text-lunary-primary-400' />
             Your Lunary Journal
           </h1>
           <p className='text-zinc-400'>
@@ -171,7 +171,7 @@ function CollectionsPageContent() {
               onClick={() => setSelectedCategory(null)}
               className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                 selectedCategory === null
-                  ? 'bg-purple-600 text-white border-purple-500'
+                  ? 'bg-lunary-primary-600 text-white border-lunary-primary'
                   : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
               }`}
             >
@@ -190,7 +190,7 @@ function CollectionsPageContent() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors capitalize ${
                   selectedCategory === cat
-                    ? 'bg-purple-600 text-white border-purple-500'
+                    ? 'bg-lunary-primary-600 text-white border-lunary-primary'
                     : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
                 }`}
               >
@@ -205,7 +205,7 @@ function CollectionsPageContent() {
                 onClick={() => setSelectedFolder(null)}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors flex items-center gap-2 ${
                   selectedFolder === null
-                    ? 'bg-purple-600 text-white border-purple-500'
+                    ? 'bg-lunary-primary-600 text-white border-lunary-primary'
                     : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
                 }`}
               >
@@ -218,7 +218,7 @@ function CollectionsPageContent() {
                   onClick={() => setSelectedFolder(folder.id)}
                   className={`px-3 py-1.5 rounded-lg text-sm border transition-colors flex items-center gap-2 ${
                     selectedFolder === folder.id
-                      ? 'bg-purple-600 text-white border-purple-500'
+                      ? 'bg-lunary-primary-600 text-white border-lunary-primary'
                       : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
                   }`}
                   style={{
@@ -240,7 +240,7 @@ function CollectionsPageContent() {
               placeholder='Search collections...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500'
+              className='w-full pl-10 pr-4 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary'
             />
           </div>
         </div>
@@ -269,7 +269,7 @@ function CollectionsPageContent() {
             {!searchQuery && (
               <Link
                 href='/book-of-shadows'
-                className='inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors'
+                className='inline-flex items-center gap-2 px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
               >
                 <Plus className='w-4 h-4' />
                 Start Chatting with Lunary
@@ -282,7 +282,7 @@ function CollectionsPageContent() {
               <Link
                 key={collection.id}
                 href={`/collections/${collection.id}`}
-                className='block rounded-lg border border-zinc-800 bg-zinc-900/30 p-6 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+                className='block rounded-lg border border-zinc-800 bg-zinc-900/30 p-6 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
               >
                 <div className='flex items-start justify-between mb-3'>
                   <span
@@ -300,7 +300,7 @@ function CollectionsPageContent() {
                     </span>
                   )}
                 </div>
-                <h3 className='text-lg font-semibold mb-2 group-hover:text-purple-300 transition-colors'>
+                <h3 className='text-lg font-semibold mb-2 group-hover:text-lunary-primary-300 transition-colors'>
                   {collection.title}
                 </h3>
                 {collection.description && (

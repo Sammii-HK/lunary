@@ -65,7 +65,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   });
 
   return (
-    <div className='border-l-2 border-purple-500/30 pl-4 py-3'>
+    <div className='border-l-2 border-lunary-primary-700 pl-4 py-3'>
       <div className='flex items-center gap-2 mb-1.5'>
         <span className='text-sm text-zinc-400'>{formattedDate}</span>
         {entry.moonPhase && (
@@ -75,7 +75,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           </span>
         )}
         {entry.source === 'chat' && (
-          <span className='text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded'>
+          <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-2 py-0.5 rounded'>
             from chat
           </span>
         )}
@@ -94,7 +94,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           {entry.cardReferences.map((card) => (
             <span
               key={card}
-              className='text-xs bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded flex items-center gap-1'
+              className='text-xs bg-lunary-primary-900/50 text-lunary-primary-300 px-2 py-0.5 rounded flex items-center gap-1'
             >
               <Star className='w-3 h-3' />
               {card}
@@ -119,7 +119,7 @@ function MemoryCard({
     <>
       <div className='flex items-start justify-between gap-3 py-2 border-b border-zinc-800 last:border-0'>
         <div className='flex-1'>
-          <span className='text-xs text-purple-400 uppercase tracking-wide'>
+          <span className='text-xs text-lunary-primary-400 uppercase tracking-wide'>
             {CATEGORY_LABELS[memory.category] || memory.category}
           </span>
           <p className='text-white text-sm mt-0.5'>{memory.fact}</p>
@@ -168,10 +168,12 @@ function MemoryCard({
 
 function PatternCard({ pattern }: { pattern: JournalPattern }) {
   return (
-    <div className='bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/20 rounded-lg p-4'>
+    <div className='bg-gradient-to-br from-lunary-primary-900/20 to-indigo-900/20 border border-lunary-primary-700 rounded-lg p-4'>
       <div className='flex items-center gap-2 mb-2'>
-        <Sparkles className='w-4 h-4 text-purple-400' />
-        <span className='text-sm font-medium text-purple-300'>Pattern</span>
+        <Sparkles className='w-4 h-4 text-lunary-primary-400' />
+        <span className='text-sm font-medium text-lunary-primary-300'>
+          Pattern
+        </span>
       </div>
       <p className='text-white font-medium mb-1'>{pattern.title}</p>
       <p className='text-sm text-zinc-400'>{pattern.description}</p>
@@ -287,14 +289,14 @@ export default function BookOfShadowsPage() {
     return (
       <div className='min-h-screen bg-zinc-950 flex items-center justify-center p-4'>
         <div className='text-center max-w-sm'>
-          <BookOpen className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+          <BookOpen className='w-12 h-12 text-lunary-primary-400 mx-auto mb-4' />
           <h1 className='text-xl font-bold text-white mb-2'>Book of Shadows</h1>
           <p className='text-zinc-400 mb-6'>
             Your personal journal of insights, reflections, and cosmic wisdom
           </p>
           <Link
             href='/auth'
-            className='inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors'
+            className='inline-block bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white px-6 py-3 rounded-lg transition-colors'
           >
             Sign In to Begin
           </Link>
@@ -336,14 +338,14 @@ export default function BookOfShadowsPage() {
           <div className='flex items-center justify-between mb-4'>
             <div>
               <h1 className='text-lg font-bold text-white flex items-center gap-2'>
-                <BookOpen className='w-5 h-5 text-purple-400' />
+                <BookOpen className='w-5 h-5 text-lunary-primary-400' />
                 Book of Shadows
               </h1>
               <p className='text-xs text-zinc-500'>Your living journal</p>
             </div>
             <Link
               href='/guide'
-              className='text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1'
+              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 flex items-center gap-1'
             >
               Chat <ChevronRight className='w-4 h-4' />
             </Link>
@@ -356,7 +358,7 @@ export default function BookOfShadowsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
+                    ? 'bg-lunary-primary-600/20 text-lunary-primary-300 border border-lunary-primary-700'
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
                 }`}
               >
@@ -382,7 +384,7 @@ export default function BookOfShadowsPage() {
                   value={newReflection}
                   onChange={(e) => setNewReflection(e.target.value)}
                   placeholder="What's on your mind today?"
-                  className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-4 text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 resize-none'
+                  className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-4 text-white placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
                   rows={4}
                   autoFocus
                 />

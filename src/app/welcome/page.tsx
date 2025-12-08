@@ -84,7 +84,7 @@ export default function WelcomePage() {
           <h2 className='text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100 leading-tight'>
             Most astrology apps entertain you.
             <br />
-            <span className='text-purple-300/80'>
+            <span className='text-lunary-primary-300/80'>
               Lunary helps you understand yourself.
             </span>
           </h2>
@@ -102,7 +102,7 @@ export default function WelcomePage() {
           <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
             <div className='text-center space-y-3'>
               <Telescope
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-400 mx-auto'
                 strokeWidth={1.5}
               />
               <h3 className='text-lg font-medium text-zinc-100'>
@@ -115,7 +115,7 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <Sparkles
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-400 mx-auto'
                 strokeWidth={1.5}
               />
               <h3 className='text-lg font-medium text-zinc-100'>
@@ -128,7 +128,7 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <NotebookPen
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-400 mx-auto'
                 strokeWidth={1.5}
               />
               <h3 className='text-lg font-medium text-zinc-100'>
@@ -150,7 +150,7 @@ export default function WelcomePage() {
           <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
             <div className='space-y-3'>
               <LayoutDashboard
-                className='w-7 h-7 text-purple-400'
+                className='w-7 h-7 text-lunary-primary-400'
                 strokeWidth={1.5}
               />
               <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
@@ -179,26 +179,26 @@ export default function WelcomePage() {
               </div>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <Layers className='w-4 h-4 text-purple-400' />
+                  <Layers className='w-4 h-4 text-lunary-primary-400' />
                   <span className='text-sm font-medium text-zinc-200'>
                     Daily Card
                   </span>
-                  <span className='text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded'>
+                  <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-1.5 py-0.5 rounded'>
                     Personal
                   </span>
                 </div>
-                <p className='text-sm text-purple-300'>The Star</p>
+                <p className='text-sm text-lunary-primary-300'>The Star</p>
                 <p className='text-xs text-zinc-500'>
                   Hope • Renewal • Serenity
                 </p>
               </div>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <Gem className='w-4 h-4 text-purple-400' />
+                  <Gem className='w-4 h-4 text-lunary-primary-400' />
                   <span className='text-sm font-medium text-zinc-200'>
                     Amethyst
                   </span>
-                  <span className='text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded'>
+                  <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-1.5 py-0.5 rounded'>
                     For you
                   </span>
                 </div>
@@ -215,7 +215,7 @@ export default function WelcomePage() {
               <div className='space-y-3'>
                 <div className='flex justify-end'>
                   <div className='max-w-[80%]'>
-                    <div className='rounded-2xl bg-purple-600/80 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
+                    <div className='rounded-2xl bg-lunary-primary-600/80 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
                       Why am I feeling so restless today?
                     </div>
                   </div>
@@ -233,7 +233,7 @@ export default function WelcomePage() {
             </div>
             <div className='order-1 md:order-2 space-y-3'>
               <MessageCircle
-                className='w-7 h-7 text-purple-400'
+                className='w-7 h-7 text-lunary-primary-400'
                 strokeWidth={1.5}
               />
               <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
@@ -253,7 +253,10 @@ export default function WelcomePage() {
           {/* Feature 3: Living Book of Shadows */}
           <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
             <div className='space-y-3'>
-              <BookOpen className='w-7 h-7 text-purple-400' strokeWidth={1.5} />
+              <BookOpen
+                className='w-7 h-7 text-lunary-primary-400'
+                strokeWidth={1.5}
+              />
               <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
                 Living Book of Shadows
               </h3>
@@ -279,7 +282,7 @@ export default function WelcomePage() {
                     New Moon intention: trust the process.
                   </p>
                 </div>
-                <div className='text-xs text-purple-400/80 pl-1'>
+                <div className='text-xs text-lunary-primary-400/80 pl-1'>
                   Pattern: Hope themes recurring during Sagittarius season
                 </div>
               </div>
@@ -298,35 +301,38 @@ export default function WelcomePage() {
                 </div>
                 <div className='space-y-2'>
                   <div className='flex items-center gap-3'>
-                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
                     <span className='text-sm text-zinc-300'>
                       Transformation
                     </span>
                     <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                      <div className='w-3/4 h-full bg-purple-500/60 rounded-full'></div>
+                      <div className='w-3/4 h-full bg-lunary-primary-500/60 rounded-full'></div>
                     </div>
                   </div>
                   <div className='flex items-center gap-3'>
-                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
                     <span className='text-sm text-zinc-300'>
                       New beginnings
                     </span>
                     <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                      <div className='w-1/2 h-full bg-purple-500/60 rounded-full'></div>
+                      <div className='w-1/2 h-full bg-lunary-primary-500/60 rounded-full'></div>
                     </div>
                   </div>
                   <div className='flex items-center gap-3'>
-                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
                     <span className='text-sm text-zinc-300'>Inner wisdom</span>
                     <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                      <div className='w-2/5 h-full bg-purple-500/60 rounded-full'></div>
+                      <div className='w-2/5 h-full bg-lunary-primary-500/60 rounded-full'></div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div className='order-1 md:order-2 space-y-3'>
-              <Layers className='w-7 h-7 text-purple-400' strokeWidth={1.5} />
+              <Layers
+                className='w-7 h-7 text-lunary-primary-400'
+                strokeWidth={1.5}
+              />
               <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
                 Tarot and Transit Patterns
               </h3>
@@ -353,10 +359,12 @@ export default function WelcomePage() {
           <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
             <div className='text-center space-y-3'>
               <Calendar
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-400 mx-auto'
                 strokeWidth={1.5}
               />
-              <div className='text-sm text-purple-400 font-medium'>1</div>
+              <div className='text-sm text-lunary-primary-400 font-medium'>
+                1
+              </div>
               <h3 className='text-base font-medium text-zinc-100'>
                 Enter your birth details
               </h3>
@@ -369,10 +377,12 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <Map
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-400 mx-auto'
                 strokeWidth={1.5}
               />
-              <div className='text-sm text-purple-400 font-medium'>2</div>
+              <div className='text-sm text-lunary-primary-400 font-medium'>
+                2
+              </div>
               <h3 className='text-base font-medium text-zinc-100'>
                 Explore your cosmic map
               </h3>
@@ -385,10 +395,12 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <MessagesSquare
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-400 mx-auto'
                 strokeWidth={1.5}
               />
-              <div className='text-sm text-purple-400 font-medium'>3</div>
+              <div className='text-sm text-lunary-primary-400 font-medium'>
+                3
+              </div>
               <h3 className='text-base font-medium text-zinc-100'>
                 Talk to your astral guide
               </h3>
@@ -452,14 +464,14 @@ export default function WelcomePage() {
             </div>
 
             {/* Lunary */}
-            <div className='rounded-2xl border border-purple-500/30 bg-zinc-900/50 p-5 md:p-6'>
-              <h3 className='text-sm font-medium text-purple-400 uppercase tracking-wider mb-5'>
+            <div className='rounded-2xl border border-lunary-primary-700 bg-zinc-900/50 p-5 md:p-6'>
+              <h3 className='text-sm font-medium text-lunary-primary-400 uppercase tracking-wider mb-5'>
                 Lunary
               </h3>
               <ul className='space-y-3'>
                 <li className='flex items-start gap-3'>
                   <Check
-                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
                   <span className='text-sm text-zinc-200'>
@@ -468,7 +480,7 @@ export default function WelcomePage() {
                 </li>
                 <li className='flex items-start gap-3'>
                   <Check
-                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
                   <span className='text-sm text-zinc-200'>
@@ -477,7 +489,7 @@ export default function WelcomePage() {
                 </li>
                 <li className='flex items-start gap-3'>
                   <Check
-                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
                   <span className='text-sm text-zinc-200'>
@@ -486,7 +498,7 @@ export default function WelcomePage() {
                 </li>
                 <li className='flex items-start gap-3'>
                   <Check
-                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
                   <span className='text-sm text-zinc-200'>
