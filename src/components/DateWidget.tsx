@@ -36,7 +36,7 @@ export const DateWidget = () => {
     <>
       <div className='flex flex-col items-center gap-1'>
         <button
-          className='flex items-center gap-2 cursor-pointer hover:text-purple-400 transition-colors text-zinc-300'
+          className='flex items-center gap-2 cursor-pointer hover:text-lunary-accent transition-colors text-zinc-300'
           onClick={() => setIsOpen(!isOpen)}
         >
           <CalendarIcon className='w-4 h-4' />
@@ -45,7 +45,7 @@ export const DateWidget = () => {
         {isViewingDifferentDate && (
           <button
             onClick={handleBackToToday}
-            className='flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/30'
+            className='flex items-center gap-1.5 text-xs text-lunary-accent hover:text-lunary-accent-300 transition-colors bg-lunary-primary-950 px-2 py-1 rounded-full border border-lunary-primary-700'
           >
             <RotateCcw className='w-3 h-3' />
             <span>Back to today</span>
@@ -54,7 +54,7 @@ export const DateWidget = () => {
       </div>
       {isOpen && (
         <div className='mt-2 flex justify-center'>
-          <div className='rounded-lg border border-purple-500/30 bg-zinc-900/95 shadow-xl backdrop-blur-sm'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/95 shadow-xl backdrop-blur-sm'>
             <Calendar
               mode='single'
               selected={date}
@@ -68,7 +68,7 @@ export const DateWidget = () => {
                 caption_label: 'text-sm font-medium',
                 nav: 'space-x-1 flex items-center',
                 nav_button:
-                  'h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100 text-zinc-400 hover:text-purple-400 transition-colors',
+                  'h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100 text-zinc-400 hover:text-lunary-accent transition-colors',
                 nav_button_previous: 'absolute left-1',
                 nav_button_next: 'absolute right-1',
                 table: 'w-full border-collapse space-y-1',
@@ -76,11 +76,11 @@ export const DateWidget = () => {
                 head_cell:
                   'text-zinc-500 rounded-md w-8 font-normal text-[0.8rem]',
                 row: 'flex w-full mt-2',
-                cell: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-purple-500/20 [&:has([aria-selected])]:rounded-md',
-                day: 'h-8 w-8 p-0 font-normal text-zinc-300 hover:bg-zinc-800 hover:text-purple-300 rounded-md transition-colors aria-selected:opacity-100',
+                cell: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-lunary-primary-900 [&:has([aria-selected])]:rounded-md',
+                day: 'h-8 w-8 p-0 font-normal text-zinc-300 hover:bg-zinc-800 hover:text-lunary-accent-300 rounded-md transition-colors aria-selected:opacity-100',
                 day_selected:
-                  'bg-purple-600 text-white hover:bg-purple-600 hover:text-white focus:bg-purple-600 focus:text-white',
-                day_today: 'bg-zinc-800 text-purple-400 font-medium',
+                  'bg-lunary-primary text-white hover:bg-lunary-primary hover:text-white focus:bg-lunary-primary focus:text-white',
+                day_today: 'bg-zinc-800 text-lunary-accent font-medium',
                 day_outside: 'text-zinc-600 opacity-50',
                 day_disabled: 'text-zinc-600 opacity-30',
                 day_hidden: 'invisible',

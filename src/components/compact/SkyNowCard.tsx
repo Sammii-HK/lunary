@@ -220,7 +220,7 @@ export const SkyNowCard = () => {
           >
             <div className='flex items-baseline gap-2'>
               <span
-                className={`font-astro text-lg ${planet.retrograde ? 'text-red-400' : 'text-purple-400'}`}
+                className={`font-astro text-lg ${planet.retrograde ? 'text-red-400' : 'text-lunary-accent'}`}
               >
                 {getPlanetSymbol(planet.body)}
               </span>

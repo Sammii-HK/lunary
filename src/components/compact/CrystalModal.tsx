@@ -113,17 +113,17 @@ export const CrystalPreview = () => {
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className='w-full h-full py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group text-left'
+        className='w-full h-full py-3 px-4 border border-stone-800 rounded-md hover:border-lunary-primary-600 transition-colors group text-left'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
             <div className='flex items-center gap-2 mb-1'>
-              <Gem className='w-4 h-4 text-purple-400' />
+              <Gem className='w-4 h-4 text-lunary-accent' />
               <span className='text-sm font-medium text-zinc-200'>
                 {crystalName}
               </span>
               {hasChartAccess && (
-                <span className='text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded'>
+                <span className='text-xs bg-lunary-primary-900 text-lunary-accent-300 px-1.5 py-0.5 rounded'>
                   For you
                 </span>
               )}
@@ -132,13 +132,13 @@ export const CrystalPreview = () => {
               {crystalReason}
             </p>
             {!hasChartAccess && (
-              <div className='flex items-center gap-1.5 mt-2 text-xs text-purple-400 group-hover:text-purple-300'>
+              <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-accent group-hover:text-lunary-accent-300'>
                 <Lock className='w-3 h-3' />
                 <span>Unlock personalized crystal</span>
               </div>
             )}
           </div>
-          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1' />
+          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors flex-shrink-0 mt-1' />
         </div>
       </button>
 
@@ -159,14 +159,14 @@ export const CrystalPreview = () => {
             </button>
 
             <div className='text-center mb-6'>
-              <div className='w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4'>
-                <Gem className='w-8 h-8 text-purple-400' />
+              <div className='w-16 h-16 bg-lunary-primary-900 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <Gem className='w-8 h-8 text-lunary-accent' />
               </div>
               <h2 className='text-xl font-semibold text-white mb-1'>
                 {crystalName}
               </h2>
               {hasChartAccess && (
-                <p className='text-xs text-purple-400'>
+                <p className='text-xs text-lunary-accent'>
                   Personalized for your chart
                 </p>
               )}
@@ -184,7 +184,7 @@ export const CrystalPreview = () => {
                         key={idx}
                         className='text-sm text-zinc-300 flex items-center gap-2'
                       >
-                        <span className='w-1.5 h-1.5 bg-purple-400 rounded-full flex-shrink-0' />
+                        <span className='w-1.5 h-1.5 bg-lunary-accent rounded-full flex-shrink-0' />
                         {reason}
                       </li>
                     ))}
@@ -219,7 +219,7 @@ export const CrystalPreview = () => {
               {!hasChartAccess && (
                 <Link
                   href='/pricing'
-                  className='flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg text-white font-medium hover:from-purple-500 hover:to-pink-500 transition-all'
+                  className='flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-lunary-primary to-lunary-highlight rounded-lg text-white font-medium hover:from-lunary-primary-400 hover:to-lunary-highlight-400 transition-all'
                   onClick={() => setIsModalOpen(false)}
                 >
                   <Sparkles className='w-4 h-4' />
@@ -229,7 +229,7 @@ export const CrystalPreview = () => {
 
               <Link
                 href='/grimoire/crystals'
-                className='block w-full py-2 text-center text-sm text-purple-400 hover:text-purple-300 transition-colors'
+                className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors'
                 onClick={() => setIsModalOpen(false)}
               >
                 Explore all crystals →
