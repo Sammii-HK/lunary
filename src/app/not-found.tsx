@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -16,7 +17,13 @@ export default function NotFound() {
             404
           </div>
           <div className='absolute inset-0 flex items-center justify-center'>
-            <span className='text-6xl'>🌙</span>
+            <Image
+              src='/icons/dotty/moon-phases/new-moon.svg'
+              alt='New Moon'
+              width={80}
+              height={80}
+              className='opacity-90'
+            />
           </div>
         </div>
 

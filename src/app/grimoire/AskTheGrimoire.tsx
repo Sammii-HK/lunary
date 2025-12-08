@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useTransition, useRef } from 'react';
 import Link from 'next/link';
-import { Search, Sparkles, Loader2, Send } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
 import { grimoire, grimoireItems } from '@/constants/grimoire';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug } from '@/utils/grimoire';
@@ -49,11 +49,6 @@ export function AskTheGrimoire({
   const [searchData, setSearchData] = useState<SearchDataType>(null);
   const [searchDataLoading, setSearchDataLoading] = useState(false);
   const loadingStarted = useRef(false);
-
-  const [aiMode, setAiMode] = useState(false);
-  const [aiResponse, setAiResponse] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
     if (loadingStarted.current || searchData) return;
@@ -123,92 +118,86 @@ export function AskTheGrimoire({
     }
   }, [searchData]);
 
-  const handleAskAI = async () => {
-    if (!searchQuery.trim() || aiLoading) return;
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim() || !searchData) return [];
 
-    setAiLoading(true);
-    setAiError(null);
-    setAiResponse('');
-    setShowSearchResults(true);
+    // Split query into words for multi-word matching
+    const queryWords = searchQuery
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length >= 2);
+    if (queryWords.length === 0) return [];
 
-    try {
-      const response = await fetch('/api/ai/astral-guide', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: searchQuery }),
-      });
+    // Helper: check if two words share a common stem (for clean/cleaning/cleansing)
+    const sharesStem = (word1: string, word2: string): boolean => {
+      const minLen = Math.min(word1.length, word2.length);
+      if (minLen < 4) return word1 === word2;
+      // Check if they share at least 4 characters at the start
+      const prefixLen = Math.min(4, minLen);
+      return word1.slice(0, prefixLen) === word2.slice(0, prefixLen);
+    };
 
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('No reader available');
-
-      const decoder = new TextDecoder();
-      let fullText = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.text) {
-                fullText += parsed.text;
-                setAiResponse(fullText);
-              }
-            } catch {
-              // Non-JSON data, ignore
-            }
+    // Helper: check if text matches any query word (partial match or stem match)
+    const matchesQuery = (text: string): number => {
+      const lowerText = text.toLowerCase();
+      const textWords = lowerText.split(/[\s\-_]+/);
+      let score = 0;
+      for (const queryWord of queryWords) {
+        // Direct substring match
+        if (lowerText.includes(queryWord)) {
+          score++;
+          continue;
+        }
+        // Stem match: check if any word in text shares a stem with query word
+        for (const textWord of textWords) {
+          if (sharesStem(queryWord, textWord)) {
+            score++;
+            break;
           }
         }
       }
-    } catch (error) {
-      console.error('AI error:', error);
-      setAiError('Something went wrong. Please try again.');
-    } finally {
-      setAiLoading(false);
-    }
-  };
+      return score;
+    };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (aiMode && e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleAskAI();
-    }
-  };
+    // Helper: check if any of multiple texts match
+    const matchesAny = (...texts: (string | undefined)[]): number => {
+      let maxScore = 0;
+      for (const text of texts) {
+        if (text) {
+          const score = matchesQuery(text);
+          if (score > maxScore) maxScore = score;
+        }
+      }
+      return maxScore;
+    };
 
-  const searchResults = useMemo(() => {
-    if (aiMode || !searchQuery.trim() || !searchData) return [];
+    const scoredResults: Array<SearchResult & { score: number }> = [];
 
-    const query = searchQuery.toLowerCase();
-    const results: SearchResult[] = [];
-
+    // Search grimoire sections and contents
     grimoireItems.forEach((itemKey) => {
       const item = grimoire[itemKey];
-      if (item.title.toLowerCase().includes(query)) {
-        results.push({
+      const titleScore = matchesQuery(item.title);
+      if (titleScore > 0) {
+        scoredResults.push({
           type: 'section',
           title: item.title,
           section: itemKey,
           href: `/grimoire/${sectionToSlug(itemKey)}`,
+          score: titleScore,
         });
       }
       item.contents?.forEach((content) => {
-        if (content.toLowerCase().includes(query)) {
-          results.push({
+        const contentScore = matchesAny(content, item.title);
+        // Also match combined: "crystal cleansing" should match "Crystals" section + "Cleansing" content
+        const combinedScore = matchesQuery(`${item.title} ${content}`);
+        const bestScore = Math.max(contentScore, combinedScore);
+        if (bestScore > 0) {
+          scoredResults.push({
             type: 'section',
             title: `${item.title} - ${content}`,
             section: itemKey,
             href: `/grimoire/${sectionToSlug(itemKey)}#${stringToKebabCase(content)}`,
+            score: bestScore,
           });
         }
       });
@@ -216,16 +205,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.runesList || {}).forEach(
       ([key, rune]: [string, any]) => {
-        if (
-          rune.name.toLowerCase().includes(query) ||
-          rune.meaning.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(rune.name, rune.meaning);
+        if (score > 0) {
+          scoredResults.push({
             type: 'rune',
             title: `${rune.symbol} ${rune.name}`,
             section: 'runes',
             href: `/grimoire/runes/${stringToKebabCase(key)}`,
             match: `Meaning: ${rune.meaning}`,
+            score,
           });
         }
       },
@@ -233,15 +221,17 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.tarotCards?.majorArcana || {}).forEach(
       ([, card]: [string, any]) => {
-        if (
-          card.name.toLowerCase().includes(query) ||
-          card.keywords.some((kw: string) => kw.toLowerCase().includes(query))
-        ) {
-          results.push({
+        const keywordMatch = card.keywords?.some(
+          (kw: string) => matchesQuery(kw) > 0,
+        );
+        const score = matchesAny(card.name) || (keywordMatch ? 1 : 0);
+        if (score > 0) {
+          scoredResults.push({
             type: 'tarot',
             title: `Tarot Card - ${card.name}`,
             section: 'tarot',
             href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
+            score,
           });
         }
       },
@@ -249,15 +239,14 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.chakras || {}).forEach(
       ([key, chakra]: [string, any]) => {
-        if (
-          chakra.name.toLowerCase().includes(query) ||
-          chakra.color.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(chakra.name, chakra.color);
+        if (score > 0) {
+          scoredResults.push({
             type: 'chakra',
             title: `${chakra.symbol} ${chakra.name} Chakra`,
             section: 'chakras',
             href: `/grimoire/chakras/${stringToKebabCase(key)}`,
+            score,
           });
         }
       },
@@ -265,12 +254,14 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.zodiacSigns || {}).forEach(
       ([key, sign]: [string, any]) => {
-        if (sign.name.toLowerCase().includes(query)) {
-          results.push({
+        const score = matchesQuery(sign.name);
+        if (score > 0) {
+          scoredResults.push({
             type: 'zodiac',
             title: `Zodiac Sign - ${sign.name}`,
             section: 'astronomy',
             href: `/grimoire/zodiac/${stringToKebabCase(key)}`,
+            score,
           });
         }
       },
@@ -278,41 +269,47 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.planetaryBodies || {}).forEach(
       ([key, planet]: [string, any]) => {
-        if (planet.name.toLowerCase().includes(query)) {
-          results.push({
+        const score = matchesQuery(planet.name);
+        if (score > 0) {
+          scoredResults.push({
             type: 'planet',
             title: `Planet - ${planet.name}`,
             section: 'astronomy',
             href: `/grimoire/planets/${stringToKebabCase(key)}`,
+            score,
           });
         }
       },
     );
 
     (searchData.wheelOfTheYearSabbats || []).forEach((sabbat: any) => {
-      if (sabbat.name.toLowerCase().includes(query)) {
-        results.push({
+      const score = matchesQuery(sabbat.name);
+      if (score > 0) {
+        scoredResults.push({
           type: 'sabbat',
           title: `Sabbat - ${sabbat.name}`,
           section: 'wheel-of-the-year',
           href: `/grimoire/sabbats/${stringToKebabCase(sabbat.name)}`,
+          score,
         });
       }
     });
 
     (searchData.spells || []).forEach((spell: any) => {
-      if (
-        spell.title.toLowerCase().includes(query) ||
-        spell.category.toLowerCase().includes(query) ||
-        spell.purpose.toLowerCase().includes(query) ||
-        spell.type.toLowerCase().includes(query)
-      ) {
-        results.push({
+      const score = matchesAny(
+        spell.title,
+        spell.category,
+        spell.purpose,
+        spell.type,
+      );
+      if (score > 0) {
+        scoredResults.push({
           type: 'spell',
           title: `${spell.type === 'ritual' ? 'Ritual' : 'Spell'} - ${spell.title}`,
           section: 'practices',
           href: `/grimoire/spells/${spell.id}`,
           match: spell.purpose,
+          score,
         });
       }
     });
@@ -320,66 +317,83 @@ export function AskTheGrimoire({
     Object.entries(searchData.tarotCards?.minorArcana || {}).forEach(
       ([, suitCards]: [string, any]) => {
         Object.entries(suitCards || {}).forEach(([, card]: [string, any]) => {
-          if (
-            card.name.toLowerCase().includes(query) ||
-            card.keywords?.some((kw: string) =>
-              kw.toLowerCase().includes(query),
-            )
-          ) {
-            results.push({
+          const keywordMatch = card.keywords?.some(
+            (kw: string) => matchesQuery(kw) > 0,
+          );
+          const score = matchesAny(card.name) || (keywordMatch ? 1 : 0);
+          if (score > 0) {
+            scoredResults.push({
               type: 'tarot',
               title: `Tarot Card - ${card.name}`,
               section: 'tarot',
               href: `/grimoire/tarot/${stringToKebabCase(card.name)}`,
+              score,
             });
           }
         });
       },
     );
 
+    // Crystal search - also search care instructions for cleansing methods
     searchData.crystalDatabase?.forEach((crystal: any) => {
-      if (
-        crystal.name.toLowerCase().includes(query) ||
-        crystal.chakras?.some((c: string) => c.toLowerCase().includes(query)) ||
-        crystal.properties?.healing?.toLowerCase().includes(query)
-      ) {
-        results.push({
+      const nameScore = matchesQuery(crystal.name);
+      const chakraMatch = crystal.chakras?.some(
+        (c: string) => matchesQuery(c) > 0,
+      );
+      const propertyMatch = crystal.properties?.some(
+        (p: string) => matchesQuery(p) > 0,
+      );
+      const cleansingMatch = crystal.careInstructions?.cleansing?.some(
+        (c: string) => matchesQuery(c) > 0,
+      );
+      const score =
+        nameScore ||
+        (chakraMatch ? 1 : 0) ||
+        (propertyMatch ? 1 : 0) ||
+        (cleansingMatch ? 1 : 0);
+      if (score > 0) {
+        scoredResults.push({
           type: 'crystal',
           title: `Crystal - ${crystal.name}`,
           section: 'crystals',
           href: `/grimoire/crystals/${crystal.id}`,
-          match: crystal.properties?.healing?.slice(0, 80),
+          match: crystal.description?.slice(0, 80),
+          score,
         });
       }
     });
 
     searchData.TAROT_SPREADS?.forEach((spread: any) => {
-      if (
-        spread.name.toLowerCase().includes(query) ||
-        spread.description?.toLowerCase().includes(query) ||
-        spread.category?.toLowerCase().includes(query)
-      ) {
-        results.push({
+      const score = matchesAny(
+        spread.name,
+        spread.description,
+        spread.category,
+      );
+      if (score > 0) {
+        scoredResults.push({
           type: 'spread',
           title: `Tarot Spread - ${spread.name}`,
           section: 'tarot',
           href: `/grimoire/tarot-spreads/${spread.slug}`,
           match: spread.description?.slice(0, 80),
+          score,
         });
       }
     });
 
     Object.entries(searchData.monthlyMoonPhases || {}).forEach(
       ([key, phase]: [string, any]) => {
-        if (
-          key.toLowerCase().includes(query) ||
-          phase.keywords?.some((kw: string) => kw.toLowerCase().includes(query))
-        ) {
-          results.push({
+        const keywordMatch = phase.keywords?.some(
+          (kw: string) => matchesQuery(kw) > 0,
+        );
+        const score = matchesQuery(key) || (keywordMatch ? 1 : 0);
+        if (score > 0) {
+          scoredResults.push({
             type: 'moon',
             title: `Moon Phase - ${key}`,
             section: 'moon',
             href: `/grimoire/moon/phases/${stringToKebabCase(key)}`,
+            score,
           });
         }
       },
@@ -387,15 +401,14 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.annualFullMoons || {}).forEach(
       ([month, moon]: [string, any]) => {
-        if (
-          month.toLowerCase().includes(query) ||
-          moon.name?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(month, moon.name);
+        if (score > 0) {
+          scoredResults.push({
             type: 'moon',
             title: `Full Moon - ${moon.name || month}`,
             section: 'moon',
             href: `/grimoire/moon/full-moons/${month.toLowerCase()}`,
+            score,
           });
         }
       },
@@ -403,13 +416,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.correspondencesData?.colors || {}).forEach(
       ([color, data]: [string, any]) => {
-        if (color.toLowerCase().includes(query)) {
-          results.push({
+        const score = matchesQuery(color);
+        if (score > 0) {
+          scoredResults.push({
             type: 'correspondence',
             title: `Color - ${color}`,
             section: 'correspondences',
             href: `/grimoire/correspondences/colors/${color.toLowerCase()}`,
             match: data.meaning?.slice(0, 60),
+            score,
           });
         }
       },
@@ -417,12 +432,14 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.correspondencesData?.elements || {}).forEach(
       ([element]: [string, any]) => {
-        if (element.toLowerCase().includes(query)) {
-          results.push({
+        const score = matchesQuery(element);
+        if (score > 0) {
+          scoredResults.push({
             type: 'correspondence',
             title: `Element - ${element}`,
             section: 'correspondences',
             href: `/grimoire/correspondences/elements/${element.toLowerCase()}`,
+            score,
           });
         }
       },
@@ -430,16 +447,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.correspondencesData?.herbs || {}).forEach(
       ([herb, data]: [string, any]) => {
-        if (
-          herb.toLowerCase().includes(query) ||
-          data.magicalUses?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(herb, data.magicalUses);
+        if (score > 0) {
+          scoredResults.push({
             type: 'correspondence',
             title: `Herb - ${herb}`,
             section: 'correspondences',
             href: `/grimoire/correspondences/herbs/${herb.toLowerCase()}`,
             match: data.magicalUses?.slice(0, 60),
+            score,
           });
         }
       },
@@ -447,16 +463,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.angelNumbers || {}).forEach(
       ([number, data]: [string, any]) => {
-        if (
-          number.includes(query) ||
-          data.meaning?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(number, data.meaning);
+        if (score > 0) {
+          scoredResults.push({
             type: 'numerology',
             title: `Angel Number ${number}`,
             section: 'numerology',
             href: `/grimoire/angel-numbers/${number}`,
             match: data.meaning?.slice(0, 60),
+            score,
           });
         }
       },
@@ -464,15 +479,14 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.lifePathNumbers || {}).forEach(
       ([number, data]: [string, any]) => {
-        if (
-          number.includes(query) ||
-          data.title?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(number, data.title);
+        if (score > 0) {
+          scoredResults.push({
             type: 'numerology',
             title: `Life Path ${number} - ${data.title}`,
             section: 'numerology',
             href: `/grimoire/life-path/${number}`,
+            score,
           });
         }
       },
@@ -480,16 +494,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.correspondencesData?.days || {}).forEach(
       ([day, data]: [string, any]) => {
-        if (
-          day.toLowerCase().includes(query) ||
-          data.planet?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(day, data.planet);
+        if (score > 0) {
+          scoredResults.push({
             type: 'correspondence',
             title: `Day - ${day}`,
             section: 'correspondences',
             href: `/grimoire/correspondences/days/${day.toLowerCase()}`,
             match: `Ruled by ${data.planet}`,
+            score,
           });
         }
       },
@@ -497,16 +510,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.correspondencesData?.flowers || {}).forEach(
       ([flower, data]: [string, any]) => {
-        if (
-          flower.toLowerCase().includes(query) ||
-          data.meaning?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(flower, data.meaning);
+        if (score > 0) {
+          scoredResults.push({
             type: 'correspondence',
             title: `Flower - ${flower}`,
             section: 'correspondences',
             href: `/grimoire/correspondences/flowers/${flower.toLowerCase()}`,
             match: data.meaning?.slice(0, 60),
+            score,
           });
         }
       },
@@ -514,16 +526,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.correspondencesData?.animals || {}).forEach(
       ([animal, data]: [string, any]) => {
-        if (
-          animal.toLowerCase().includes(query) ||
-          data.symbolism?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(animal, data.symbolism);
+        if (score > 0) {
+          scoredResults.push({
             type: 'correspondence',
             title: `Animal - ${animal}`,
             section: 'correspondences',
             href: `/grimoire/correspondences/animals/${animal.toLowerCase()}`,
             match: data.symbolism?.slice(0, 60),
+            score,
           });
         }
       },
@@ -531,16 +542,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.correspondencesData?.wood || {}).forEach(
       ([wood, data]: [string, any]) => {
-        if (
-          wood.toLowerCase().includes(query) ||
-          data.magicalUses?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(wood, data.magicalUses);
+        if (score > 0) {
+          scoredResults.push({
             type: 'correspondence',
             title: `Wood - ${wood}`,
             section: 'correspondences',
             href: `/grimoire/correspondences/wood/${wood.toLowerCase()}`,
             match: data.magicalUses?.slice(0, 60),
+            score,
           });
         }
       },
@@ -548,16 +558,15 @@ export function AskTheGrimoire({
 
     Object.entries(searchData.correspondencesData?.numbers || {}).forEach(
       ([num, data]: [string, any]) => {
-        if (
-          num.includes(query) ||
-          data.meaning?.toLowerCase().includes(query)
-        ) {
-          results.push({
+        const score = matchesAny(num, data.meaning);
+        if (score > 0) {
+          scoredResults.push({
             type: 'correspondence',
             title: `Number ${num}`,
             section: 'correspondences',
             href: `/grimoire/correspondences/numbers/${num}`,
             match: data.meaning?.slice(0, 60),
+            score,
           });
         }
       },
@@ -567,20 +576,18 @@ export function AskTheGrimoire({
       ([pantheon, gods]: [string, any]) => {
         Object.entries(gods || {}).forEach(([deity, data]: [string, any]) => {
           const domainArray = Array.isArray(data.domain) ? data.domain : [];
-          const domainMatch = domainArray.some((d: string) =>
-            d.toLowerCase().includes(query),
+          const domainMatch = domainArray.some(
+            (d: string) => matchesQuery(d) > 0,
           );
-          if (
-            deity.toLowerCase().includes(query) ||
-            pantheon.toLowerCase().includes(query) ||
-            domainMatch
-          ) {
-            results.push({
+          const score = matchesAny(deity, pantheon) || (domainMatch ? 1 : 0);
+          if (score > 0) {
+            scoredResults.push({
               type: 'correspondence',
               title: `${deity} (${pantheon})`,
               section: 'correspondences',
               href: `/grimoire/correspondences/deities/${pantheon.toLowerCase()}/${deity.toLowerCase()}`,
               match: domainArray.join(', '),
+              score,
             });
           }
         });
@@ -602,53 +609,54 @@ export function AskTheGrimoire({
       'silver',
     ];
     candleColors.forEach((color) => {
-      if (color.includes(query)) {
-        results.push({
+      const score = matchesQuery(color);
+      if (score > 0) {
+        scoredResults.push({
           type: 'candle',
           title: `Candle Magic - ${color.charAt(0).toUpperCase() + color.slice(1)}`,
           section: 'candle-magic',
           href: `/grimoire/candle-magic/colors/${color}`,
+          score,
         });
       }
     });
 
     for (let i = 1; i <= 9; i++) {
-      if (String(i).includes(query)) {
-        results.push({
+      const score = matchesQuery(String(i));
+      if (score > 0) {
+        scoredResults.push({
           type: 'numerology',
           title: `Core Number ${i}`,
           section: 'numerology',
           href: `/grimoire/numerology/core-numbers/${i}`,
+          score,
         });
       }
     }
 
     [11, 22, 33].forEach((num) => {
-      if (String(num).includes(query)) {
-        results.push({
+      const score = matchesQuery(String(num));
+      if (score > 0) {
+        scoredResults.push({
           type: 'numerology',
           title: `Master Number ${num}`,
           section: 'numerology',
           href: `/grimoire/numerology/master-numbers/${num}`,
+          score,
         });
       }
     });
 
     for (let i = 1; i <= 12; i++) {
-      if (
-        String(i).includes(query) ||
-        `${i}st house`.includes(query) ||
-        `${i}nd house`.includes(query) ||
-        `${i}rd house`.includes(query) ||
-        `${i}th house`.includes(query) ||
-        'house'.includes(query)
-      ) {
-        const suffix = i === 1 ? 'st' : i === 2 ? 'nd' : i === 3 ? 'rd' : 'th';
-        results.push({
+      const suffix = i === 1 ? 'st' : i === 2 ? 'nd' : i === 3 ? 'rd' : 'th';
+      const score = matchesAny(`${i}${suffix} house`, 'house', String(i));
+      if (score > 0) {
+        scoredResults.push({
           type: 'house',
           title: `${i}${suffix} House`,
           section: 'birth-chart',
           href: `/grimoire/birth-chart/houses/${i}`,
+          score,
         });
       }
     }
@@ -662,24 +670,28 @@ export function AskTheGrimoire({
       { slug: 'eclectic-witch', name: 'Eclectic Witch' },
     ];
     witchTypes.forEach((witch) => {
-      if (witch.name.toLowerCase().includes(query)) {
-        results.push({
+      const score = matchesQuery(witch.name);
+      if (score > 0) {
+        scoredResults.push({
           type: 'witch',
           title: witch.name,
           section: 'modern-witchcraft',
           href: `/grimoire/modern-witchcraft/witch-types/${witch.slug}`,
+          score,
         });
       }
     });
 
     const tools = ['athame', 'wand', 'cauldron', 'chalice', 'pentacle'];
     tools.forEach((tool) => {
-      if (tool.includes(query)) {
-        results.push({
+      const score = matchesQuery(tool);
+      if (score > 0) {
+        scoredResults.push({
           type: 'tool',
           title: `Witchcraft Tool - ${tool.charAt(0).toUpperCase() + tool.slice(1)}`,
           section: 'modern-witchcraft',
           href: `/grimoire/modern-witchcraft/tools/${tool}`,
+          score,
         });
       }
     });
@@ -692,12 +704,14 @@ export function AskTheGrimoire({
       { slug: 'mantra-meditation', name: 'Mantra Meditation' },
     ];
     meditations.forEach((med) => {
-      if (med.name.toLowerCase().includes(query)) {
-        results.push({
+      const score = matchesQuery(med.name);
+      if (score > 0) {
+        scoredResults.push({
           type: 'meditation',
           title: med.name,
           section: 'meditation',
           href: `/grimoire/meditation/techniques/${med.slug}`,
+          score,
         });
       }
     });
@@ -709,33 +723,33 @@ export function AskTheGrimoire({
       { slug: 'fire-scrying', name: 'Fire Scrying' },
     ];
     scryingMethods.forEach((method) => {
-      if (
-        method.name.toLowerCase().includes(query) ||
-        'scrying'.includes(query)
-      ) {
-        results.push({
+      const score = matchesAny(method.name, 'scrying');
+      if (score > 0) {
+        scoredResults.push({
           type: 'divination',
           title: method.name,
           section: 'divination',
           href: `/grimoire/divination/scrying/${method.slug}`,
+          score,
         });
       }
     });
 
-    if ('north node'.includes(query) || 'lunar node'.includes(query)) {
-      results.push({
+    const nodeScore = matchesAny('north node', 'lunar node', 'node');
+    if (nodeScore > 0) {
+      scoredResults.push({
         type: 'astrology',
         title: 'North Node',
         section: 'lunar-nodes',
         href: '/grimoire/lunar-nodes/north-node',
+        score: nodeScore,
       });
-    }
-    if ('south node'.includes(query) || 'lunar node'.includes(query)) {
-      results.push({
+      scoredResults.push({
         type: 'astrology',
         title: 'South Node',
         section: 'lunar-nodes',
         href: '/grimoire/lunar-nodes/south-node',
+        score: nodeScore,
       });
     }
 
@@ -750,150 +764,72 @@ export function AskTheGrimoire({
       'pluto',
     ];
     retrogradePlanets.forEach((planet) => {
-      if (
-        planet.includes(query) ||
-        'retrograde'.includes(query) ||
-        `${planet} retrograde`.includes(query)
-      ) {
-        results.push({
+      const score = matchesAny(planet, 'retrograde', `${planet} retrograde`);
+      if (score > 0) {
+        scoredResults.push({
           type: 'astrology',
           title: `${planet.charAt(0).toUpperCase() + planet.slice(1)} Retrograde`,
           section: 'retrogrades',
           href: `/grimoire/retrogrades/${planet}`,
+          score,
         });
       }
     });
 
+    // Sort by score (highest first) and deduplicate by href
+    const seen = new Set<string>();
+    const results: SearchResult[] = [];
+    scoredResults
+      .sort((a, b) => b.score - a.score)
+      .forEach((item) => {
+        if (!seen.has(item.href)) {
+          seen.add(item.href);
+          const { score: _, ...result } = item;
+          results.push(result);
+        }
+      });
+
     return results.slice(0, 25);
-  }, [searchQuery, searchData, aiMode]);
+  }, [searchQuery, searchData]);
 
   return (
     <div className='p-4 md:p-5 lg:p-6 border-b border-zinc-700 relative search-container'>
-      <div className='flex items-center gap-2 mb-3'>
-        <button
-          onClick={() => {
-            setAiMode(false);
-            setAiResponse('');
-            setAiError(null);
-          }}
-          className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all ${
-            !aiMode
-              ? 'bg-zinc-700 text-white'
-              : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-300'
-          }`}
-        >
-          <Search className='w-3 h-3 inline mr-1.5' />
-          Search
-        </button>
-        <button
-          onClick={() => {
-            setAiMode(true);
-            setShowSearchResults(false);
-          }}
-          className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all ${
-            aiMode
-              ? 'bg-purple-600 text-white'
-              : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-300'
-          }`}
-        >
-          <Sparkles className='w-3 h-3 inline mr-1.5' />
-          Ask AI
-        </button>
-      </div>
-
       <div className='relative'>
-        {aiMode ? (
-          <Sparkles
-            className='absolute left-3 md:left-4 top-3 w-4 h-4 md:w-5 md:h-5 text-purple-400'
-            aria-hidden='true'
-          />
-        ) : (
-          <Search
-            className='absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-zinc-400'
-            aria-hidden='true'
-          />
-        )}
+        <Search
+          className='absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-zinc-400'
+          aria-hidden='true'
+        />
         <input
           type='text'
           placeholder={
-            aiMode
-              ? 'Ask about astrology, tarot, crystals...'
-              : searchDataLoading
-                ? 'Loading search...'
-                : 'Search grimoire...'
+            searchDataLoading ? 'Loading...' : 'Search the grimoire...'
           }
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
-            if (!aiMode) {
-              setShowSearchResults(e.target.value.length > 0);
-            }
+            setShowSearchResults(e.target.value.length > 0);
           }}
           onFocus={() => {
-            if (!aiMode && searchQuery.length > 0) setShowSearchResults(true);
+            if (searchQuery.length > 0) setShowSearchResults(true);
           }}
-          onKeyDown={handleKeyDown}
-          aria-label={
-            aiMode ? 'Ask the grimoire AI' : 'Search grimoire content'
-          }
-          className={`w-full pl-10 md:pl-12 pr-12 py-2 md:py-2.5 bg-zinc-800 border rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:border-transparent text-sm md:text-base ${
-            aiMode
-              ? 'border-purple-500/50 focus:ring-purple-500'
-              : 'border-zinc-700 focus:ring-purple-500'
-          }`}
+          aria-label='Search grimoire'
+          className='w-full pl-10 md:pl-12 pr-4 py-2 md:py-2.5 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base'
         />
-        {aiMode && (
-          <button
-            onClick={handleAskAI}
-            disabled={aiLoading || !searchQuery.trim()}
-            className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-            aria-label='Send question'
-          >
-            {aiLoading ? (
-              <Loader2 className='w-4 h-4 animate-spin' />
-            ) : (
-              <Send className='w-4 h-4' />
-            )}
-          </button>
-        )}
       </div>
 
-      {/* AI Response */}
-      {aiMode && (aiResponse || aiLoading || aiError) && showSearchResults && (
-        <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-purple-500/30 rounded-md shadow-lg max-h-80 overflow-y-auto z-50'>
-          <div className='p-4'>
-            {aiLoading && !aiResponse && (
-              <div className='flex items-center gap-2 text-purple-400'>
-                <Loader2 className='w-4 h-4 animate-spin' />
-                <span className='text-sm'>Consulting the grimoire...</span>
-              </div>
-            )}
-            {aiError && <p className='text-red-400 text-sm'>{aiError}</p>}
-            {aiResponse && (
-              <div className='text-zinc-200 text-sm leading-relaxed whitespace-pre-wrap'>
-                {aiResponse}
-              </div>
-            )}
+      {/* Search Results */}
+      {showSearchResults && searchDataLoading && searchQuery.trim() && (
+        <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg p-4 z-50'>
+          <div className='flex items-center gap-2 text-zinc-400'>
+            <div className='w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin' />
+            <span className='text-sm'>Loading...</span>
           </div>
         </div>
       )}
 
-      {/* Keyword Search Results */}
-      {!aiMode &&
-        showSearchResults &&
-        searchDataLoading &&
-        searchQuery.trim() && (
-          <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg p-4 z-50'>
-            <div className='flex items-center gap-2 text-zinc-400'>
-              <div className='w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin' />
-              <span className='text-sm'>Loading search data...</span>
-            </div>
-          </div>
-        )}
-
-      {!aiMode &&
-        showSearchResults &&
+      {showSearchResults &&
         !searchDataLoading &&
+        searchQuery.trim() &&
         searchResults.length > 0 && (
           <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg max-h-96 overflow-y-auto z-50'>
             <div className='p-2 md:p-3 space-y-1'>
@@ -929,6 +865,25 @@ export function AskTheGrimoire({
                 </Link>
               ))}
             </div>
+          </div>
+        )}
+
+      {/* No Results - suggest Astral Guide */}
+      {showSearchResults &&
+        !searchDataLoading &&
+        searchQuery.trim() &&
+        searchResults.length === 0 && (
+          <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg p-4 z-50'>
+            <p className='text-zinc-400 text-sm mb-3'>
+              No grimoire pages found for "{searchQuery}"
+            </p>
+            <Link
+              href='/guide'
+              className='inline-flex items-center gap-1.5 text-sm text-purple-400 hover:text-purple-300 transition-colors'
+            >
+              <Sparkles className='w-4 h-4' />
+              Ask the Astral Guide for a personalized answer
+            </Link>
           </div>
         )}
     </div>
