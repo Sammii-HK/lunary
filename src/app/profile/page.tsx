@@ -411,7 +411,7 @@ export default function ProfilePage() {
   if (authState.loading || isLoading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400'></div>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary'></div>
         <p className='text-zinc-400'>Loading your profile...</p>
       </div>
     );
@@ -435,7 +435,7 @@ export default function ProfilePage() {
                     <div className='space-y-2'>
                       <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
                         Name
-                        <span className='ml-2 text-[10px] font-normal text-purple-400'>
+                        <span className='ml-2 text-[10px] font-normal text-lunary-accent'>
                           ✨ Personalised Feature
                         </span>
                       </label>
@@ -450,7 +450,7 @@ export default function ProfilePage() {
                     <div className='space-y-2'>
                       <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
                         Birthday *
-                        <span className='ml-2 text-[10px] font-normal text-purple-400'>
+                        <span className='ml-2 text-[10px] font-normal text-lunary-accent'>
                           ✨ Personalised Feature
                         </span>
                       </label>
@@ -590,7 +590,7 @@ export default function ProfilePage() {
             )}
 
             {authState.isAuthenticated && !canCollectBirthdayData && (
-              <div className='rounded-lg border border-purple-500/30 bg-gradient-to-r from-purple-900/40 to-pink-900/40 p-4'>
+              <div className='rounded-lg border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/40 to-lunary-highlight-900/40 p-4'>
                 <h4 className='mb-2 font-medium text-white'>
                   🌍 Birthday Collection
                 </h4>
@@ -610,13 +610,13 @@ export default function ProfilePage() {
                 </p>
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className='rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700'
+                  className='rounded-md bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
                 >
                   Sign In or Create Account
                 </button>
               </div>
             ) : !canCollectBirthdayData ? (
-              <div className='space-y-3 rounded-md border-2 border-dashed border-purple-500/30 bg-gradient-to-r from-purple-900/20 to-pink-900/20 py-4 text-center'>
+              <div className='space-y-3 rounded-md border-2 border-dashed border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 py-4 text-center'>
                 <p className='text-sm text-zinc-300'>
                   👋 Welcome{' '}
                   {authState.user?.name || authState.profile?.name || 'User'}!
@@ -625,7 +625,7 @@ export default function ProfilePage() {
                 <div className='flex justify-center'>
                   <a
                     href='/pricing'
-                    className='rounded-md bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:from-purple-700 hover:to-pink-700'
+                    className='rounded-md bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:from-lunary-primary-400 hover:to-lunary-highlight-400'
                   >
                     Upgrade to Premium
                   </a>
@@ -654,7 +654,7 @@ export default function ProfilePage() {
                       .getElementById('monthly-insights')
                       ?.scrollIntoView({ behavior: 'smooth' })
                   }
-                  className='text-sm text-purple-400 hover:text-purple-300 transition-colors'
+                  className='text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors'
                 >
                   View Monthly Insights →
                 </button>
@@ -681,18 +681,18 @@ export default function ProfilePage() {
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                 <Link
                   href='/birth-chart'
-                  className='group rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-950/60 to-zinc-900 p-4 shadow-lg hover:border-purple-500/50 transition-colors'
+                  className='group rounded-xl border border-lunary-primary-700 bg-gradient-to-br from-lunary-primary-950/60 to-zinc-900 p-4 shadow-lg hover:border-lunary-primary-600 transition-colors'
                 >
                   <div className='flex items-center justify-between'>
                     <div>
-                      <h3 className='text-lg font-medium text-white group-hover:text-purple-300 transition-colors'>
+                      <h3 className='text-lg font-medium text-white group-hover:text-lunary-accent-300 transition-colors'>
                         Birth Chart
                       </h3>
-                      <p className='text-xs text-purple-200/70'>
+                      <p className='text-xs text-lunary-accent-200/70'>
                         View your cosmic fingerprint
                       </p>
                     </div>
-                    <Stars className='w-6 h-6 text-purple-400' />
+                    <Stars className='w-6 h-6 text-lunary-accent' />
                   </div>
                 </Link>
 
@@ -701,11 +701,11 @@ export default function ProfilePage() {
                   return (
                     <button
                       onClick={() => setShowPersonalCardModal(true)}
-                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-purple-500/30 transition-colors text-left w-full'
+                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-lunary-primary-700 transition-colors text-left w-full'
                     >
                       <div className='flex items-center justify-between'>
                         <div>
-                          <h3 className='text-lg font-medium text-white group-hover:text-purple-300 transition-colors'>
+                          <h3 className='text-lg font-medium text-white group-hover:text-lunary-accent-300 transition-colors'>
                             Personal Card
                           </h3>
                           <p className='text-xs text-zinc-400'>
@@ -714,7 +714,7 @@ export default function ProfilePage() {
                               : 'Your tarot signature'}
                           </p>
                         </div>
-                        <Layers className='w-6 h-6 text-purple-400' />
+                        <Layers className='w-6 h-6 text-lunary-accent' />
                       </div>
                     </button>
                   );
@@ -745,7 +745,7 @@ export default function ProfilePage() {
                       </p>
                     )}
                   </div>
-                  <span className='text-lg font-semibold text-purple-200'>
+                  <span className='text-lg font-semibold text-lunary-accent-200'>
                     {open ? '-' : '+'}
                   </span>
                 </button>
@@ -784,13 +784,13 @@ export default function ProfilePage() {
           <div className='flex flex-wrap justify-center gap-3'>
             <a
               href='/shop'
-              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-purple-500/60 hover:text-purple-200'
+              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
             >
               Browse Shop
             </a>
             <a
               href='/blog'
-              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-purple-500/60 hover:text-purple-200'
+              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
             >
               Read the Blog
             </a>
@@ -814,11 +814,11 @@ export default function ProfilePage() {
                 {personalCard ? (
                   <>
                     <div className='text-center mb-4'>
-                      <Layers className='w-12 h-12 text-purple-400 mx-auto mb-3' />
+                      <Layers className='w-12 h-12 text-lunary-accent mx-auto mb-3' />
                       <h3 className='text-xl font-bold text-white'>
                         {personalCard.name}
                       </h3>
-                      <p className='text-sm text-purple-300'>
+                      <p className='text-sm text-lunary-accent-300'>
                         Your Personal Card
                       </p>
                     </div>
@@ -830,7 +830,7 @@ export default function ProfilePage() {
                               (keyword: string, i: number) => (
                                 <span
                                   key={i}
-                                  className='px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs'
+                                  className='px-2 py-1 bg-lunary-primary-900 text-lunary-accent-300 rounded text-xs'
                                 >
                                   {keyword}
                                 </span>
@@ -923,7 +923,7 @@ export default function ProfilePage() {
                 <a
                   href='/api/account/export'
                   download
-                  className='px-4 py-2 text-sm font-medium text-purple-400 hover:text-purple-300 border border-purple-500/30 rounded-lg hover:bg-purple-500/10 transition-colors'
+                  className='px-4 py-2 text-sm font-medium text-lunary-accent hover:text-lunary-accent-300 border border-lunary-primary-700 rounded-lg hover:bg-lunary-primary-950 transition-colors'
                 >
                   Download
                 </a>

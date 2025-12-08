@@ -39,7 +39,7 @@ export function FreeHoroscopeView() {
           description='Get insights specifically tailored to your birth chart and cosmic profile'
           icon={
             <Sparkles
-              className='w-8 h-8 text-purple-400/80 mx-auto'
+              className='w-8 h-8 text-lunary-accent/80 mx-auto'
               strokeWidth={1.5}
             />
           }
@@ -109,7 +109,7 @@ export function FreeHoroscopeView() {
                           ●●● ●● • ●●●●●●● ●●●●●●
                         </p>
                       </div>
-                      <span className='bg-purple-500/20 text-purple-300/90 px-2 py-1 rounded text-xs font-medium border border-purple-500/30'>
+                      <span className='bg-lunary-primary-900 text-lunary-accent-300 px-2 py-1 rounded text-xs font-medium border border-lunary-primary-700'>
                         ●●●●●●●●
                       </span>
                     </div>

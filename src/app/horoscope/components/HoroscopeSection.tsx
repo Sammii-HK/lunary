@@ -5,7 +5,7 @@ interface HoroscopeSectionProps {
 }
 
 const colorClasses = {
-  purple: 'border-purple-500/30 bg-purple-500/10',
+  purple: 'border-lunary-primary-700 bg-lunary-primary-950',
   blue: 'border-blue-500/20 bg-blue-500/10',
   emerald: 'border-emerald-500/20 bg-emerald-500/10',
   amber: 'border-amber-500/30 bg-amber-500/10',

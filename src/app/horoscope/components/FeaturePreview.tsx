@@ -20,8 +20,8 @@ export function FeaturePreview({
     <div>
       <div className='flex justify-between items-center mb-4'>
         <h2 className='text-lg font-medium text-zinc-100'>{title}</h2>
-        <div className='px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10'>
-          <span className='text-xs font-medium text-purple-300/90'>
+        <div className='px-3 py-1 rounded-full border border-lunary-primary-700 bg-lunary-primary-950'>
+          <span className='text-xs font-medium text-lunary-accent-300'>
             Personalised Feature
           </span>
         </div>
