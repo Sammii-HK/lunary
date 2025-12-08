@@ -465,7 +465,7 @@ export function TarotSpreadExperience({
           'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
           isLocked
             ? 'bg-zinc-800/80 text-zinc-300'
-            : 'bg-purple-500/10 text-purple-200',
+            : 'bg-lunary-primary-950 text-lunary-accent-200',
         )}
       >
         {isLocked && <Lock className='h-3 w-3' />}
@@ -498,7 +498,7 @@ export function TarotSpreadExperience({
           </p>
         </div>
         {usage && usage.monthlyLimit !== null && (
-          <div className='rounded-full border border-purple-500/20 bg-purple-500/10 px-3 py-1 text-xs text-purple-200'>
+          <div className='rounded-full border border-lunary-primary-800 bg-lunary-primary-950 px-3 py-1 text-xs text-lunary-accent-200'>
             {usage.monthlyLimit - usage.monthlyUsed} of {usage.monthlyLimit}{' '}
             complimentary saves remaining
           </div>
@@ -540,10 +540,10 @@ export function TarotSpreadExperience({
                           isSelected
                             ? isLocked
                               ? 'border-zinc-700/50 bg-zinc-900/50'
-                              : 'border-purple-500/40 bg-purple-500/10'
+                              : 'border-lunary-primary-600 bg-lunary-primary-950'
                             : isLocked
                               ? 'border-zinc-800/30 bg-zinc-900/30 hover:border-zinc-700/50 cursor-not-allowed'
-                              : 'border-zinc-800/30 bg-zinc-900/30 hover:border-purple-500/30',
+                              : 'border-zinc-800/30 bg-zinc-900/30 hover:border-lunary-primary-700',
                         )}
                         disabled={isLocked && !isSelected}
                         title={
@@ -589,7 +589,7 @@ export function TarotSpreadExperience({
 
         {!selectedSpread && (
           <div className='flex flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 bg-zinc-900/20 p-12 text-center'>
-            <Sparkles className='mb-3 h-8 w-8 text-purple-300/50' />
+            <Sparkles className='mb-3 h-8 w-8 text-lunary-accent-300/50' />
             <p className='text-sm text-zinc-400'>
               Select a spread from above to begin your reading
             </p>
@@ -599,15 +599,15 @@ export function TarotSpreadExperience({
         {selectedSpread && (
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3'>
             {!unlockedSpreads.has(selectedSpread.slug) && (
-              <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 mb-3'>
+              <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4 mb-3'>
                 <div className='flex items-start gap-3'>
-                  <Lock className='h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0' />
+                  <Lock className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
                   <div className='flex-1'>
-                    <h4 className='text-sm font-medium text-purple-200 mb-1'>
+                    <h4 className='text-sm font-medium text-lunary-accent-200 mb-1'>
                       This spread requires{' '}
                       {PLAN_LABEL[selectedSpread.minimumPlan]}
                     </h4>
-                    <p className='text-xs text-purple-300/80 mb-3'>
+                    <p className='text-xs text-lunary-accent-300/80 mb-3'>
                       Upgrade to unlock {selectedSpread.name} and access all
                       premium tarot spreads.
                     </p>
@@ -641,9 +641,9 @@ export function TarotSpreadExperience({
                 className={clsx(
                   'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors',
                   isGenerating
-                    ? 'bg-purple-500/10 text-purple-200'
+                    ? 'bg-lunary-primary-950 text-lunary-accent-200'
                     : unlockedSpreads.has(selectedSpread.slug)
-                      ? 'bg-purple-500/80 text-white hover:bg-purple-500'
+                      ? 'bg-lunary-primary text-white hover:bg-lunary-primary-400'
                       : 'bg-zinc-800/80 text-zinc-400 cursor-not-allowed',
                 )}
               >
@@ -699,17 +699,17 @@ export function TarotSpreadExperience({
 
           {!isLoading && !currentReading && (
             <div className='flex h-48 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 bg-zinc-900/20 text-center text-sm text-zinc-400'>
-              <Sparkles className='mb-2 h-5 w-5 text-purple-300' />
+              <Sparkles className='mb-2 h-5 w-5 text-lunary-accent-300' />
               Pull a spread to start building your tarot archive.
             </div>
           )}
 
           {currentReading && (
             <div className='space-y-4'>
-              <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
+              <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
                 <div className='flex items-center justify-between gap-2'>
                   <div>
-                    <p className='text-xs uppercase tracking-wider text-purple-300/80'>
+                    <p className='text-xs uppercase tracking-wider text-lunary-accent-300/80'>
                       {currentReading?.spreadName}
                     </p>
                     <h3 className='text-lg font-medium text-zinc-100'>
@@ -791,7 +791,7 @@ export function TarotSpreadExperience({
                   onChange={(event) => setNotesDraft(event.target.value)}
                   rows={4}
                   placeholder='Capture rituals, emotions, and how the message landed today.'
-                  className='w-full rounded-lg border border-zinc-800/60 bg-zinc-950/70 p-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-purple-500/60 focus:outline-none focus:ring-1 focus:ring-purple-500/60'
+                  className='w-full rounded-lg border border-zinc-800/60 bg-zinc-950/70 p-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-lunary-primary-600 focus:outline-none focus:ring-1 focus:ring-lunary-primary-600'
                 />
               </div>
             </div>
@@ -803,7 +803,7 @@ export function TarotSpreadExperience({
             <div className='flex items-center justify-between'>
               <p className='text-sm font-medium text-zinc-100'>Saved Spreads</p>
               {usage && usage.plan !== 'free' && (
-                <span className='text-xs text-purple-200'>
+                <span className='text-xs text-lunary-accent-200'>
                   History: {usage?.historyWindowDays ?? 0} days
                 </span>
               )}
@@ -820,8 +820,8 @@ export function TarotSpreadExperience({
                   className={clsx(
                     'group flex items-start justify-between gap-3 rounded-md border px-3 py-2',
                     currentReading?.id === reading.id
-                      ? 'border-purple-500/40 bg-purple-500/10'
-                      : 'border-zinc-800/40 bg-zinc-900/40 hover:border-purple-500/30',
+                      ? 'border-lunary-primary-600 bg-lunary-primary-950'
+                      : 'border-zinc-800/40 bg-zinc-900/40 hover:border-lunary-primary-700',
                   )}
                 >
                   <button

@@ -336,9 +336,9 @@ export function AdvancedPatterns({
                         key={theme}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
                           index === 0
-                            ? 'bg-purple-500/20 text-purple-300/90 border border-purple-500/30'
+                            ? 'bg-lunary-primary-900 text-lunary-accent-300 border border-lunary-primary-700'
                             : index === 1
-                              ? 'bg-purple-500/15 text-purple-300/80 border border-purple-500/20'
+                              ? 'bg-lunary-primary-900 text-lunary-accent-300 border border-lunary-primary-800'
                               : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50'
                         }`}
                       >
@@ -394,7 +394,7 @@ export function AdvancedPatterns({
                         return (
                           <div
                             key={index}
-                            className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'
+                            className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'
                           >
                             <div className='flex items-center justify-between mb-2'>
                               <span className='font-medium text-zinc-100'>
@@ -407,13 +407,13 @@ export function AdvancedPatterns({
                             <div className='flex items-center gap-3 mb-2'>
                               <div className='flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden'>
                                 <div
-                                  className='h-full bg-purple-500/70 rounded-full transition-all duration-300'
+                                  className='h-full bg-lunary-primary rounded-full transition-all duration-300'
                                   style={{
                                     width: `${Math.min(percentage, 100)}%`,
                                   }}
                                 />
                               </div>
-                              <span className='text-xs text-purple-300 font-medium w-10 text-right'>
+                              <span className='text-xs text-lunary-accent-300 font-medium w-10 text-right'>
                                 {percentage}%
                               </span>
                             </div>
@@ -457,7 +457,7 @@ export function AdvancedPatterns({
                             </span>
                           </div>
                           <div className='text-right'>
-                            <p className='text-xs font-medium text-zinc-100 hover:text-purple-300 transition-colors'>
+                            <p className='text-xs font-medium text-zinc-100 hover:text-lunary-accent-300 transition-colors'>
                               {reading.card.name}
                             </p>
                             {reading.card.keywords[0] && (
@@ -486,7 +486,7 @@ export function AdvancedPatterns({
           {loading && (
             <div className='flex items-center justify-center py-12'>
               <div className='flex flex-col items-center gap-3'>
-                <div className='w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin' />
+                <div className='w-8 h-8 border-2 border-lunary-primary-700 border-t-lunary-primary rounded-full animate-spin' />
                 <p className='text-sm text-zinc-400'>
                   Loading year-over-year analysis...
                 </p>
@@ -494,14 +494,14 @@ export function AdvancedPatterns({
             </div>
           )}
           {error && !analysis && !loading && (
-            <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 mb-4'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4 mb-4'>
               <div className='flex items-start gap-3'>
-                <Lock className='h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0' />
+                <Lock className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
                 <div className='flex-1'>
-                  <h4 className='text-sm font-medium text-purple-200 mb-1'>
+                  <h4 className='text-sm font-medium text-lunary-accent-200 mb-1'>
                     Advanced Pattern Analysis
                   </h4>
-                  <p className='text-xs text-purple-300/80 mb-3'>
+                  <p className='text-xs text-lunary-accent-300 mb-3'>
                     Upgrade to Lunary+ AI to unlock year-over-year comparisons,
                     multi-dimensional analysis, and extended timeline insights.
                   </p>
@@ -526,8 +526,8 @@ export function AdvancedPatterns({
                     This Year vs Last Year
                   </h4>
                   <div className='grid gap-4 md:grid-cols-2'>
-                    <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-purple-300/90 mb-2'>
+                    <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
+                      <h5 className='text-xs font-medium text-lunary-accent-300 mb-2'>
                         This Year
                       </h5>
                       {analysis.yearOverYear.thisYear.dominantThemes.length >
@@ -537,7 +537,7 @@ export function AdvancedPatterns({
                             (theme) => (
                               <span
                                 key={theme}
-                                className='px-2 py-0.5 text-xs rounded bg-purple-500/20 text-purple-200'
+                                className='px-2 py-0.5 text-xs rounded bg-lunary-primary-900 text-lunary-accent-200'
                               >
                                 {theme}
                               </span>
@@ -737,7 +737,7 @@ export function AdvancedPatterns({
           {loading && (
             <div className='flex items-center justify-center py-12'>
               <div className='flex flex-col items-center gap-3'>
-                <div className='w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin' />
+                <div className='w-8 h-8 border-2 border-lunary-primary-700 border-t-lunary-primary rounded-full animate-spin' />
                 <p className='text-sm text-zinc-400'>
                   Loading multidimensional analysis...
                 </p>
@@ -745,14 +745,14 @@ export function AdvancedPatterns({
             </div>
           )}
           {error && !analysis && !loading && (
-            <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 mb-4'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4 mb-4'>
               <div className='flex items-start gap-3'>
-                <Lock className='h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0' />
+                <Lock className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
                 <div className='flex-1'>
-                  <h4 className='text-sm font-medium text-purple-200 mb-1'>
+                  <h4 className='text-sm font-medium text-lunary-accent-200 mb-1'>
                     Advanced Pattern Analysis
                   </h4>
-                  <p className='text-xs text-purple-300/80 mb-3'>
+                  <p className='text-xs text-lunary-accent-300 mb-3'>
                     Upgrade to Lunary+ AI to unlock year-over-year comparisons,
                     multi-dimensional analysis, and extended timeline insights.
                   </p>
@@ -782,8 +782,8 @@ export function AdvancedPatterns({
                     )}
                   </h4>
                   <div className='grid gap-4 md:grid-cols-2'>
-                    <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-purple-300/90 mb-3'>
+                    <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
+                      <h5 className='text-xs font-medium text-lunary-accent-300 mb-3'>
                         Suit Distribution
                       </h5>
                       <div className='space-y-2.5'>
@@ -801,13 +801,13 @@ export function AdvancedPatterns({
                               <div className='flex items-center gap-2'>
                                 <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
                                   <div
-                                    className='h-full bg-purple-500/60 rounded-full transition-all duration-300'
+                                    className='h-full bg-lunary-primary rounded-full transition-all duration-300'
                                     style={{
                                       width: `${Math.min(suit.percentage, 100)}%`,
                                     }}
                                   />
                                 </div>
-                                <span className='text-[10px] text-purple-300/80 font-medium w-8 text-right'>
+                                <span className='text-[10px] text-lunary-accent-300 font-medium w-8 text-right'>
                                   {suit.percentage}%
                                 </span>
                               </div>
@@ -1007,7 +1007,7 @@ function getCardSuitColor(cardName: string): string {
       'World',
     ].some((name) => cardName.includes(name))
   ) {
-    return 'bg-purple-500/30 border-purple-500/50';
+    return 'bg-lunary-primary-800 border-lunary-primary-600';
   }
   if (cardName.includes('Wands')) return 'bg-red-500/30 border-red-500/50';
   if (cardName.includes('Cups')) return 'bg-blue-500/30 border-blue-500/50';
