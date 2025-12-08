@@ -512,7 +512,7 @@ export function TarotSpreadExperience({
       )}
 
       {limitWarning && (
-        <div className='rounded-lg border border-amber-400/30 bg-amber-500/10 p-3 text-sm text-amber-200'>
+        <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-3 text-sm text-lunary-accent-200'>
           {limitWarning}
         </div>
       )}

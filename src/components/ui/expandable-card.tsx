@@ -113,7 +113,7 @@ export const ExpandableCardHeader = ({
   const badgeClasses = {
     default: 'bg-zinc-700/50 text-zinc-300',
     highlight: 'bg-lunary-primary-900 text-lunary-accent-300',
-    warning: 'bg-amber-500/20 text-amber-300',
+    warning: 'bg-lunary-accent-900 text-lunary-accent-300',
     danger: 'bg-red-500/20 text-red-300',
   };
 

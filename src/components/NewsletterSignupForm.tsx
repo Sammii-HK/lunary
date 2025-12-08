@@ -227,7 +227,9 @@ export function NewsletterSignupForm({
             className={cn(
               'flex items-start gap-2 text-sm',
               align === 'center' && 'justify-center text-center',
-              status === 'error' ? 'text-rose-300' : 'text-emerald-300',
+              status === 'error'
+                ? 'text-lunary-error-300'
+                : 'text-lunary-success-300',
             )}
           >
             {status === 'error' ? (

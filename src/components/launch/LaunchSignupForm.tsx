@@ -109,7 +109,7 @@ export function LaunchSignupForm({
       {message && (
         <p
           className={clsx('text-sm', {
-            'text-green-300': status === 'success',
+            'text-lunary-success-300': status === 'success',
             'text-red-300': status === 'error',
             'text-zinc-400': status === 'idle',
           })}

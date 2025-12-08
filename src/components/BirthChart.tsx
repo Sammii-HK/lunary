@@ -203,7 +203,7 @@ export const BirthChart = ({
 
       {/* Planet details */}
       <div className='w-full max-w-md'>
-        <h3 className='text-lg font-semibold text-blue-400 mb-3'>
+        <h3 className='text-lg font-semibold text-lunary-secondary mb-3'>
           Planetary Positions
         </h3>
         <div className='space-y-2'>

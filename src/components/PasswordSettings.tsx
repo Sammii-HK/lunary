@@ -165,7 +165,7 @@ export function PasswordSettings() {
       )}
 
       {success && (
-        <div className='bg-green-900/30 border border-green-700 text-green-300 px-3 py-2 rounded-lg text-sm'>
+        <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-3 py-2 rounded-lg text-sm'>
           {success}
         </div>
       )}
