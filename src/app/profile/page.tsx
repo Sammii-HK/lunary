@@ -930,9 +930,9 @@ export default function ProfilePage() {
               </div>
 
               {/* Delete Account */}
-              <div className='flex items-center justify-between p-4 rounded-lg bg-red-900/10 border border-red-500/20'>
+              <div className='flex items-center justify-between p-4 rounded-lg bg-lunary-error-900/10 border border-lunary-error-700'>
                 <div>
-                  <h4 className='text-sm font-medium text-red-300'>
+                  <h4 className='text-sm font-medium text-lunary-error-300'>
                     Delete Account
                   </h4>
                   <p className='text-xs text-zinc-500'>
@@ -974,7 +974,7 @@ export default function ProfilePage() {
                       alert('Failed to request account deletion');
                     }
                   }}
-                  className='px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors'
+                  className='px-4 py-2 text-sm font-medium text-lunary-error hover:text-lunary-error-300 border border-lunary-error-700 rounded-lg hover:bg-lunary-error-900 transition-colors'
                 >
                   Delete
                 </button>

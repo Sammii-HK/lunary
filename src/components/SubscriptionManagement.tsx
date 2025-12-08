@@ -217,9 +217,9 @@ export default function SubscriptionManagement({
           <div
             className={`px-2 py-1 rounded-full text-xs font-medium ${
               displaySubscription.status === 'active'
-                ? 'bg-green-900 text-green-300'
+                ? 'bg-lunary-success-900 text-lunary-success-300'
                 : displaySubscription.status === 'trialing'
-                  ? 'bg-blue-900 text-blue-300'
+                  ? 'bg-lunary-secondary-900 text-lunary-secondary-300'
                   : displaySubscription.status === 'canceled'
                     ? 'bg-yellow-900 text-yellow-300'
                     : 'bg-zinc-700 text-zinc-300'
@@ -262,7 +262,7 @@ export default function SubscriptionManagement({
             (stripeSubscription as any)?.trial_end) && (
             <div className='flex justify-between'>
               <span className='text-zinc-400 text-sm'>Trial ends:</span>
-              <span className='text-blue-300 text-sm'>
+              <span className='text-lunary-secondary-300 text-sm'>
                 {new Date(
                   ((stripeSubscription as any)?.trial_end ||
                     parseInt(stripeSubscription?.trialEnd || '0')) * 1000,
@@ -309,7 +309,7 @@ export default function SubscriptionManagement({
         <button
           onClick={handleBillingPortal}
           disabled={loading === 'portal'}
-          className='w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
+          className='w-full flex items-center justify-center gap-2 bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
         >
           <Settings size={14} />
           {loading === 'portal' ? 'Opening...' : 'Manage Subscription'}

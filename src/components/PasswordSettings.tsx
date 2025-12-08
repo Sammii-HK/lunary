@@ -81,7 +81,7 @@ export function PasswordSettings() {
         <div className='flex flex-col gap-2'>
           <button
             onClick={() => setMode('set')}
-            className='w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm'
+            className='w-full bg-lunary-primary hover:bg-lunary-primary-400 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm'
           >
             Set a Password
           </button>
@@ -122,7 +122,7 @@ export function PasswordSettings() {
             type='password'
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500'
+            className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
             required
           />
         </div>
@@ -136,7 +136,7 @@ export function PasswordSettings() {
           type='password'
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500'
+          className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
           placeholder='At least 8 characters'
           minLength={8}
           required
@@ -151,7 +151,7 @@ export function PasswordSettings() {
           type='password'
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500'
+          className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
           placeholder='Type password again'
           minLength={8}
           required
@@ -188,7 +188,7 @@ export function PasswordSettings() {
         <button
           type='submit'
           disabled={loading}
-          className='flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm'
+          className='flex-1 bg-lunary-primary hover:bg-lunary-primary-400 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm'
         >
           {loading
             ? 'Saving...'

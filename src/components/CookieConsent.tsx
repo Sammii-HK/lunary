@@ -105,7 +105,7 @@ export function CookieConsent() {
                   We use cookies to enhance your experience.{' '}
                   <Link
                     href='/cookies'
-                    className='text-purple-400 hover:text-purple-300 underline'
+                    className='text-lunary-accent hover:text-lunary-accent-300 underline'
                   >
                     Learn more
                   </Link>
@@ -114,7 +114,7 @@ export function CookieConsent() {
               <div className='flex gap-2'>
                 <button
                   onClick={handleAcceptAll}
-                  className='flex-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium py-2 px-3 transition-colors'
+                  className='flex-1 rounded-lg bg-lunary-primary hover:bg-lunary-primary-400 text-white text-xs font-medium py-2 px-3 transition-colors'
                 >
                   Accept
                 </button>
@@ -137,7 +137,7 @@ export function CookieConsent() {
               <div className='space-y-3 mb-3'>
                 <div className='flex items-center justify-between gap-3 p-2 rounded-lg bg-zinc-800/50'>
                   <p className='text-xs text-white'>Essential</p>
-                  <div className='w-8 h-5 rounded-full bg-purple-600 flex items-center justify-end px-0.5'>
+                  <div className='w-8 h-5 rounded-full bg-lunary-primary flex items-center justify-end px-0.5'>
                     <div className='w-3.5 h-3.5 rounded-full bg-white' />
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export function CookieConsent() {
                     <div
                       className={`w-8 h-5 rounded-full flex items-center px-0.5 transition-colors ${
                         analyticsEnabled
-                          ? 'bg-purple-600 justify-end'
+                          ? 'bg-lunary-primary justify-end'
                           : 'bg-zinc-600 justify-start'
                       }`}
                     >
@@ -169,7 +169,7 @@ export function CookieConsent() {
                 </button>
                 <button
                   onClick={handleSavePreferences}
-                  className='flex-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs py-2 px-3 transition-colors'
+                  className='flex-1 rounded-lg bg-lunary-primary hover:bg-lunary-primary-400 text-white text-xs py-2 px-3 transition-colors'
                 >
                   Save
                 </button>
