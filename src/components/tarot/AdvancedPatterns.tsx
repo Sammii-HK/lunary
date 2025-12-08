@@ -360,7 +360,7 @@ export function AdvancedPatterns({
                       .map((card, index) => (
                         <div
                           key={index}
-                          className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'
+                          className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950 p-4'
                         >
                           <p className='font-medium text-zinc-100 mb-2'>
                             {card.name} ({card.count}x)
@@ -573,7 +573,7 @@ export function AdvancedPatterns({
                                         className={cn(
                                           'flex items-center gap-0.5 text-[10px]',
                                           cardTrend.direction === 'up'
-                                            ? 'text-emerald-400'
+                                            ? 'text-lunary-success'
                                             : cardTrend.direction === 'down'
                                               ? 'text-red-400'
                                               : 'text-zinc-500',
@@ -600,8 +600,8 @@ export function AdvancedPatterns({
                         </div>
                       )}
                     </div>
-                    <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-indigo-300/90 mb-2'>
+                    <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950 p-4'>
+                      <h5 className='text-xs font-medium text-lunary-secondary-300 mb-2'>
                         Last Year
                       </h5>
                       {loading ? (
@@ -620,7 +620,7 @@ export function AdvancedPatterns({
                                 (theme) => (
                                   <span
                                     key={theme}
-                                    className='px-2 py-0.5 text-xs rounded bg-indigo-500/20 text-indigo-200'
+                                    className='px-2 py-0.5 text-xs rounded bg-lunary-secondary-900 text-lunary-secondary-200'
                                   >
                                     {theme}
                                   </span>
@@ -663,8 +663,8 @@ export function AdvancedPatterns({
                     </div>
                   </div>
                   {analysis.yearOverYear.comparison.trends.length > 0 && (
-                    <div className='mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-emerald-300/90 mb-2'>
+                    <div className='mt-4 rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
+                      <h5 className='text-xs font-medium text-lunary-success-300 mb-2'>
                         Year-over-Year Trends
                       </h5>
                       <div className='space-y-2'>
@@ -679,7 +679,7 @@ export function AdvancedPatterns({
                                   : '→';
                             const colorClass =
                               trend.direction === 'up'
-                                ? 'text-emerald-400'
+                                ? 'text-lunary-success'
                                 : trend.direction === 'down'
                                   ? 'text-red-400'
                                   : 'text-zinc-400';
@@ -816,8 +816,8 @@ export function AdvancedPatterns({
                         )}
                       </div>
                     </div>
-                    <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-indigo-300/90 mb-3'>
+                    <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950 p-4'>
+                      <h5 className='text-xs font-medium text-lunary-secondary-300 mb-3'>
                         Arcana Balance
                       </h5>
                       <div className='space-y-2.5 text-xs'>
@@ -863,11 +863,11 @@ export function AdvancedPatterns({
                                 <div className='flex items-center gap-2'>
                                   <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
                                     <div
-                                      className='h-full bg-indigo-500/60 rounded-full transition-all duration-300'
+                                      className='h-full bg-lunary-secondary rounded-full transition-all duration-300'
                                       style={{ width: `${majorPercentage}%` }}
                                     />
                                   </div>
-                                  <span className='text-[10px] text-indigo-300/80 font-medium w-8 text-right'>
+                                  <span className='text-[10px] text-lunary-secondary-300 font-medium w-8 text-right'>
                                     {majorPercentage}%
                                   </span>
                                 </div>
@@ -888,11 +888,11 @@ export function AdvancedPatterns({
                                 <div className='flex items-center gap-2'>
                                   <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
                                     <div
-                                      className='h-full bg-indigo-500/60 rounded-full transition-all duration-300'
+                                      className='h-full bg-lunary-secondary rounded-full transition-all duration-300'
                                       style={{ width: `${minorPercentage}%` }}
                                     />
                                   </div>
-                                  <span className='text-[10px] text-indigo-300/80 font-medium w-8 text-right'>
+                                  <span className='text-[10px] text-lunary-secondary-300 font-medium w-8 text-right'>
                                     {minorPercentage}%
                                   </span>
                                 </div>
@@ -905,8 +905,8 @@ export function AdvancedPatterns({
                   </div>
                   {analysis.enhancedTarot.multiDimensional.numberPatterns
                     .length > 0 && (
-                    <div className='mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-emerald-300/90 mb-3'>
+                    <div className='mt-4 rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
+                      <h5 className='text-xs font-medium text-lunary-success-300 mb-3'>
                         Number Patterns
                       </h5>
                       <div className='space-y-3'>
@@ -924,13 +924,13 @@ export function AdvancedPatterns({
                               <div className='flex items-center gap-2 mb-1.5'>
                                 <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
                                   <div
-                                    className='h-full bg-emerald-500/60 rounded-full transition-all duration-300'
+                                    className='h-full bg-lunary-success rounded-full transition-all duration-300'
                                     style={{
                                       width: `${Math.min(pattern.percentage, 100)}%`,
                                     }}
                                   />
                                 </div>
-                                <span className='text-[10px] text-emerald-300/80 font-medium w-8 text-right'>
+                                <span className='text-[10px] text-lunary-success-300 font-medium w-8 text-right'>
                                   {pattern.percentage}%
                                 </span>
                               </div>
@@ -943,8 +943,8 @@ export function AdvancedPatterns({
                   )}
                   {analysis.enhancedTarot.multiDimensional.correlations.length >
                     0 && (
-                    <div className='mt-4 rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-4'>
-                      <h5 className='text-xs font-medium text-cyan-300/90 mb-2'>
+                    <div className='mt-4 rounded-lg border border-lunary-accent-800 bg-lunary-accent-950 p-4'>
+                      <h5 className='text-xs font-medium text-lunary-accent-300 mb-2'>
                         Dimension Correlations
                       </h5>
                       <div className='space-y-2'>
@@ -952,11 +952,11 @@ export function AdvancedPatterns({
                           (correlation, idx) => (
                             <div key={idx} className='text-xs'>
                               <div className='flex items-center gap-2 mb-1'>
-                                <span className='text-cyan-300 font-medium'>
+                                <span className='text-lunary-accent-300 font-medium'>
                                   {correlation.dimension1}
                                 </span>
                                 <span className='text-zinc-500'>×</span>
-                                <span className='text-cyan-300 font-medium'>
+                                <span className='text-lunary-accent-300 font-medium'>
                                   {correlation.dimension2}
                                 </span>
                               </div>
@@ -1010,10 +1010,11 @@ function getCardSuitColor(cardName: string): string {
     return 'bg-lunary-primary-800 border-lunary-primary-600';
   }
   if (cardName.includes('Wands')) return 'bg-red-500/30 border-red-500/50';
-  if (cardName.includes('Cups')) return 'bg-blue-500/30 border-blue-500/50';
+  if (cardName.includes('Cups'))
+    return 'bg-lunary-secondary-800 border-lunary-secondary-600';
   if (cardName.includes('Swords'))
-    return 'bg-yellow-500/30 border-yellow-500/50';
+    return 'bg-lunary-accent-800 border-lunary-accent-600';
   if (cardName.includes('Pentacles'))
-    return 'bg-green-500/30 border-green-500/50';
+    return 'bg-lunary-success-800 border-lunary-success-600';
   return 'bg-zinc-500/30 border-zinc-500/50';
 }
