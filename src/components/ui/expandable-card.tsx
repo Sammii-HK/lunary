@@ -55,7 +55,7 @@ export const ExpandableCard = ({
     <div
       className={cn(
         'border border-stone-800 rounded-md w-full overflow-hidden transition-all relative',
-        isExpanded && 'border-purple-500/30',
+        isExpanded && 'border-lunary-primary-700',
         className,
       )}
     >
@@ -69,9 +69,9 @@ export const ExpandableCard = ({
         <div className='w-full'>{preview}</div>
         <div className='absolute top-1 right-2'>
           {isExpanded ? (
-            <ChevronUp className='w-4 h-4 text-purple-400' />
+            <ChevronUp className='w-4 h-4 text-lunary-accent' />
           ) : (
-            <ChevronDown className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors' />
+            <ChevronDown className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors' />
           )}
         </div>
       </button>
@@ -112,14 +112,14 @@ export const ExpandableCardHeader = ({
 }: ExpandableCardHeaderProps) => {
   const badgeClasses = {
     default: 'bg-zinc-700/50 text-zinc-300',
-    highlight: 'bg-purple-500/20 text-purple-300',
+    highlight: 'bg-lunary-primary-900 text-lunary-accent-300',
     warning: 'bg-amber-500/20 text-amber-300',
     danger: 'bg-red-500/20 text-red-300',
   };
 
   return (
     <div className='flex items-center gap-2'>
-      {icon && <span className='text-purple-400'>{icon}</span>}
+      {icon && <span className='text-lunary-accent'>{icon}</span>}
       <span className='text-sm font-medium text-zinc-200'>{title}</span>
       {subtitle && <span className='text-xs text-zinc-500'>{subtitle}</span>}
       {badge && (

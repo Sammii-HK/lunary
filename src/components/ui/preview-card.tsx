@@ -24,7 +24,7 @@ export const PreviewCard = ({
 }: PreviewCardProps) => {
   const cardClasses = cn(
     'block py-3 px-4 border border-stone-800 rounded-md w-full',
-    'hover:border-purple-500/50 transition-colors group',
+    'hover:border-lunary-primary-600 transition-colors group',
     className,
   );
 
@@ -34,7 +34,7 @@ export const PreviewCard = ({
       {showArrow && (
         <ArrowRight
           className={cn(
-            'w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1',
+            'w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors flex-shrink-0 mt-1',
             arrowClassName,
           )}
         />
@@ -78,13 +78,13 @@ export const PreviewCardHeader = ({
 }: PreviewCardHeaderProps) => {
   const badgeClasses = {
     default: 'bg-zinc-700/50 text-zinc-300',
-    highlight: 'bg-purple-500/20 text-purple-300',
+    highlight: 'bg-lunary-primary-900 text-lunary-accent-300',
     warning: 'bg-amber-500/20 text-amber-300',
   };
 
   return (
     <div className='flex items-center gap-2 mb-1'>
-      {icon && <span className='text-purple-400'>{icon}</span>}
+      {icon && <span className='text-lunary-accent'>{icon}</span>}
       <span className='text-sm font-medium text-zinc-200'>{title}</span>
       {subtitle && (
         <span className='text-xs text-zinc-500 uppercase tracking-wide'>
