@@ -17,13 +17,13 @@ import {
 const getAspectColor = (aspect: string): string => {
   const aspectLower = aspect.toLowerCase();
   if (aspectLower.includes('conjunction')) {
-    return 'text-blue-300';
+    return 'text-lunary-secondary-300';
   } else if (aspectLower.includes('trine')) {
-    return 'text-green-300';
+    return 'text-lunary-success-300';
   } else if (aspectLower.includes('opposition')) {
     return 'text-red-300';
   } else if (aspectLower.includes('square')) {
-    return 'text-orange-300';
+    return 'text-lunary-rose-300';
   } else if (aspectLower.includes('sextile')) {
     return 'text-purple-300';
   }

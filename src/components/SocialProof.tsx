@@ -90,7 +90,7 @@ export function SocialProof() {
                 {Array.from({ length: testimonial.rating }).map((_, i) => (
                   <Star
                     key={i}
-                    className='w-4 h-4 text-yellow-400'
+                    className='w-4 h-4 text-lunary-accent'
                     fill='currentColor'
                   />
                 ))}

@@ -58,10 +58,10 @@ export function CrossPlatformCTA({
   if (variant === 'substack') {
     return (
       <div
-        className={`rounded-lg border border-blue-500/20 bg-gradient-to-br from-blue-900/20 to-zinc-900/50 p-6 ${className}`}
+        className={`rounded-lg border border-lunary-secondary-800 bg-gradient-to-br from-lunary-secondary-900/20 to-zinc-900/50 p-6 ${className}`}
       >
         <div className='flex items-start gap-4'>
-          <Mail className='w-6 h-6 text-blue-400 flex-shrink-0 mt-1' />
+          <Mail className='w-6 h-6 text-lunary-secondary flex-shrink-0 mt-1' />
           <div className='flex-1'>
             <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
               Get Weekly Cosmic Insights via Email
@@ -75,7 +75,7 @@ export function CrossPlatformCTA({
               onClick={() => handleClick('substack')}
               target='_blank'
               rel='noopener noreferrer'
-              className='inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm font-medium'
+              className='inline-flex items-center gap-2 px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 text-white rounded-md transition-colors text-sm font-medium'
             >
               Subscribe on Substack
               <ArrowRight className='w-4 h-4' />

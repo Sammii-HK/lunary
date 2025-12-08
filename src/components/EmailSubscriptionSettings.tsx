@@ -207,7 +207,7 @@ export function EmailSubscriptionSettings() {
           <div>
             <p className='text-sm text-white font-medium'>
               {isSubscribed ? (
-                <span className='flex items-center gap-2 text-green-400'>
+                <span className='flex items-center gap-2 text-lunary-success'>
                   <CheckCircle className='h-4 w-4' />
                   Subscribed
                 </span>
