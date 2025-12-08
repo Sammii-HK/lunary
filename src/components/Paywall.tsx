@@ -124,7 +124,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
 
         {isTrialActive ? (
           <div className='mb-6'>
-            <p className='text-sm text-blue-400 mb-2'>
+            <p className='text-sm text-lunary-accent mb-2'>
               🌟 Trial Active: {trialDaysRemaining} days remaining
             </p>
             <p className='text-xs text-gray-400'>

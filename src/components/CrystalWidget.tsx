@@ -160,7 +160,10 @@ export const CrystalWidget = () => {
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday for personalized crystal guidance
           </p>
-          <Link href='/profile' className='text-blue-400 text-xs underline'>
+          <Link
+            href='/profile'
+            className='text-lunary-accent text-xs underline'
+          >
             Complete Profile
           </Link>
         </div>

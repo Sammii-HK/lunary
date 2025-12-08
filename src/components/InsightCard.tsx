@@ -143,8 +143,8 @@ export const InsightCard = memo(function InsightCard({
                 className={cn(
                   'h-2 w-2 rounded-full',
                   moonCircle.moon_phase === 'Full Moon'
-                    ? 'bg-amber-300'
-                    : 'bg-indigo-300',
+                    ? 'bg-lunary-accent-300'
+                    : 'bg-lunary-secondary-300',
                 )}
               />
               {moonCircle.moon_phase}
