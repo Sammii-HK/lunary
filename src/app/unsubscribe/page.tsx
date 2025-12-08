@@ -108,7 +108,7 @@ function UnsubscribeContent() {
 
         {status === 'success' && (
           <div className='text-center py-8'>
-            <CheckCircle className='h-12 w-12 mx-auto mb-4 text-green-400' />
+            <CheckCircle className='h-12 w-12 mx-auto mb-4 text-lunary-success' />
             <p className='text-white mb-4'>{message}</p>
             <p className='text-sm text-zinc-400 mb-6'>
               You will no longer receive emails from Lunary. You can resubscribe
@@ -125,7 +125,7 @@ function UnsubscribeContent() {
 
         {status === 'error' && (
           <div className='text-center py-8'>
-            <XCircle className='h-12 w-12 mx-auto mb-4 text-red-400' />
+            <XCircle className='h-12 w-12 mx-auto mb-4 text-lunary-error' />
             <p className='text-white mb-4'>{message}</p>
             <div className='space-y-3'>
               <button

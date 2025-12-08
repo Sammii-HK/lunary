@@ -119,7 +119,7 @@ export default function AIConversionPage() {
           <Card className='bg-zinc-900 border-zinc-800'>
             <CardHeader>
               <div className='flex items-center gap-2'>
-                <TrendingUp className='w-5 h-5 text-blue-400' />
+                <TrendingUp className='w-5 h-5 text-lunary-secondary' />
                 <CardTitle>Analyze Funnel</CardTitle>
               </div>
             </CardHeader>
@@ -132,7 +132,7 @@ export default function AIConversionPage() {
                   handleAction('analyze-funnel', { timeRange: '30d' })
                 }
                 disabled={loading === 'analyze-funnel'}
-                className='w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                className='w-full px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
               >
                 {loading === 'analyze-funnel' ? (
                   <>
@@ -149,7 +149,7 @@ export default function AIConversionPage() {
               {results['analyze-funnel']?.analysis && (
                 <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700'>
                   {!results['analyze-funnel']?.dataAvailable && (
-                    <div className='mb-3 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-xs text-yellow-400'>
+                    <div className='mb-3 p-2 bg-lunary-accent/10 border border-lunary-accent/20 rounded text-xs text-lunary-accent'>
                       ⚠️ No data available - analysis is based on general
                       recommendations only
                     </div>
@@ -167,7 +167,7 @@ export default function AIConversionPage() {
           <Card className='bg-zinc-900 border-zinc-800'>
             <CardHeader>
               <div className='flex items-center gap-2'>
-                <Target className='w-5 h-5 text-green-400' />
+                <Target className='w-5 h-5 text-lunary-success' />
                 <CardTitle>Suggest A/B Tests</CardTitle>
               </div>
             </CardHeader>
@@ -182,7 +182,7 @@ export default function AIConversionPage() {
                   })
                 }
                 disabled={loading === 'suggest-tests'}
-                className='w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                className='w-full px-4 py-2 bg-lunary-success-600 hover:bg-lunary-success-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
               >
                 {loading === 'suggest-tests' ? (
                   <>
@@ -237,7 +237,7 @@ export default function AIConversionPage() {
                               {test.hypothesis || test.description}
                             </p>
                             {test.expectedImpact && (
-                              <p className='text-yellow-400 text-xs mt-1'>
+                              <p className='text-lunary-accent text-xs mt-1'>
                                 ⚠️ Note: Impact estimates are AI-generated
                                 suggestions, not real predictions
                               </p>
@@ -255,7 +255,7 @@ export default function AIConversionPage() {
           <Card className='bg-zinc-900 border-zinc-800'>
             <CardHeader>
               <div className='flex items-center gap-2'>
-                <Mail className='w-5 h-5 text-yellow-400' />
+                <Mail className='w-5 h-5 text-lunary-accent' />
                 <CardTitle>Optimize Email</CardTitle>
               </div>
             </CardHeader>
@@ -273,7 +273,7 @@ export default function AIConversionPage() {
                   })
                 }
                 disabled={loading === 'optimize-email'}
-                className='w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                className='w-full px-4 py-2 bg-lunary-accent-600 hover:bg-lunary-accent-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
               >
                 {loading === 'optimize-email' ? (
                   <>
@@ -318,7 +318,7 @@ export default function AIConversionPage() {
           <Card className='bg-zinc-900 border-zinc-800'>
             <CardHeader>
               <div className='flex items-center gap-2'>
-                <Users className='w-5 h-5 text-red-400' />
+                <Users className='w-5 h-5 text-lunary-error' />
                 <CardTitle>Predict Churn</CardTitle>
               </div>
             </CardHeader>
@@ -329,7 +329,7 @@ export default function AIConversionPage() {
               <button
                 onClick={() => handleAction('predict-churn', {})}
                 disabled={loading === 'predict-churn'}
-                className='w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                className='w-full px-4 py-2 bg-lunary-error-600 hover:bg-lunary-error-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
               >
                 {loading === 'predict-churn' ? (
                   <>
@@ -366,7 +366,7 @@ export default function AIConversionPage() {
           <Card className='bg-zinc-900 border-zinc-800'>
             <CardHeader>
               <div className='flex items-center gap-2'>
-                <Wand2 className='w-5 h-5 text-pink-400' />
+                <Wand2 className='w-5 h-5 text-lunary-rose' />
                 <CardTitle>Personalize Experience</CardTitle>
               </div>
             </CardHeader>
@@ -393,7 +393,7 @@ export default function AIConversionPage() {
                   });
                 }}
                 disabled={loading === 'personalize-experience'}
-                className='w-full px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                className='w-full px-4 py-2 bg-lunary-rose-600 hover:bg-lunary-rose-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
               >
                 {loading === 'personalize-experience' ? (
                   <>

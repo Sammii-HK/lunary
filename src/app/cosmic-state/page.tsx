@@ -341,11 +341,11 @@ export default function CosmicStatePage() {
               Your Cosmic State
             </h1>
           </div>
-          <div className='bg-red-900/20 border border-red-500/50 rounded-lg p-6'>
-            <h2 className='text-xl font-semibold text-red-400 mb-2'>
+          <div className='bg-lunary-error-900/20 border border-lunary-error/50 rounded-lg p-6'>
+            <h2 className='text-xl font-semibold text-lunary-error mb-2'>
               Error Loading Cosmic State
             </h2>
-            <p className='text-red-300 mb-4'>{error}</p>
+            <p className='text-lunary-error-300 mb-4'>{error}</p>
             <button
               onClick={() => {
                 setError(null);
@@ -704,7 +704,7 @@ export default function CosmicStatePage() {
                               .map((keyword: string) => (
                                 <span
                                   key={keyword}
-                                  className='text-xs px-3 py-1.5 rounded-full bg-lunary-primary-900 text-indigo-200 border border-indigo-500/30'
+                                  className='text-xs px-3 py-1.5 rounded-full bg-lunary-primary-900 text-lunary-primary-200 border border-lunary-primary-700'
                                 >
                                   {keyword}
                                 </span>

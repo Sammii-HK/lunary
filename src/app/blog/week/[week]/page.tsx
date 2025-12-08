@@ -63,48 +63,48 @@ function parseWeekParam(weekParam: string): WeekInfo {
 
 function getPlanetColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'text-yellow-400',
-    Moon: 'text-blue-400',
+    Sun: 'text-lunary-accent',
+    Moon: 'text-lunary-secondary',
     Mercury: 'text-gray-400',
-    Venus: 'text-pink-400',
-    Mars: 'text-red-400',
+    Venus: 'text-lunary-rose',
+    Mars: 'text-lunary-error',
     Jupiter: 'text-purple-400',
-    Saturn: 'text-indigo-400',
-    Uranus: 'text-cyan-400',
-    Neptune: 'text-blue-500',
-    Pluto: 'text-violet-600',
+    Saturn: 'text-lunary-primary',
+    Uranus: 'text-lunary-secondary',
+    Neptune: 'text-lunary-secondary',
+    Pluto: 'text-lunary-highlight',
   };
   return colors[planet] || 'text-zinc-300';
 }
 
 function getPlanetBorderColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'border-yellow-400/30',
-    Moon: 'border-blue-400/30',
+    Sun: 'border-lunary-accent/30',
+    Moon: 'border-lunary-secondary/30',
     Mercury: 'border-gray-400/30',
-    Venus: 'border-pink-400/30',
+    Venus: 'border-lunary-rose/30',
     Mars: 'border-red-400/30',
     Jupiter: 'border-purple-400/30',
-    Saturn: 'border-indigo-400/30',
-    Uranus: 'border-cyan-400/30',
-    Neptune: 'border-blue-500/30',
-    Pluto: 'border-violet-600/30',
+    Saturn: 'border-lunary-primary/30',
+    Uranus: 'border-lunary-secondary/30',
+    Neptune: 'border-lunary-secondary/30',
+    Pluto: 'border-lunary-highlight/30',
   };
   return colors[planet] || 'border-zinc-700';
 }
 
 function getPlanetBgColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'bg-yellow-400/10',
-    Moon: 'bg-blue-400/10',
+    Sun: 'bg-lunary-accent/10',
+    Moon: 'bg-lunary-secondary/10',
     Mercury: 'bg-gray-400/10',
-    Venus: 'bg-pink-400/10',
+    Venus: 'bg-lunary-rose/10',
     Mars: 'bg-red-400/10',
     Jupiter: 'bg-purple-400/10',
-    Saturn: 'bg-indigo-400/10',
-    Uranus: 'bg-cyan-400/10',
-    Neptune: 'bg-blue-500/10',
-    Pluto: 'bg-violet-600/10',
+    Saturn: 'bg-lunary-primary/10',
+    Uranus: 'bg-lunary-secondary/10',
+    Neptune: 'bg-lunary-secondary/10',
+    Pluto: 'bg-lunary-highlight/10',
   };
   return colors[planet] || 'bg-zinc-800/50';
 }

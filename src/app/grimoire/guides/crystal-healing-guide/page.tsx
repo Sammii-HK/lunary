@@ -70,7 +70,7 @@ const ESSENTIAL_CRYSTALS = [
     ],
     chakra: 'Heart',
     zodiac: ['Taurus', 'Libra'],
-    color: 'bg-pink-300',
+    color: 'bg-lunary-rose-300',
   },
   {
     name: 'Black Tourmaline',
@@ -91,7 +91,7 @@ const ESSENTIAL_CRYSTALS = [
     properties: ['abundance', 'joy', 'manifestation', 'confidence'],
     chakra: 'Solar Plexus',
     zodiac: ['Aries', 'Gemini', 'Leo', 'Libra'],
-    color: 'bg-yellow-400',
+    color: 'bg-lunary-accent',
   },
   {
     name: 'Selenite',
@@ -107,7 +107,7 @@ const ESSENTIAL_CRYSTALS = [
     properties: ['transformation', 'psychic abilities', 'protection', 'magic'],
     chakra: 'Third Eye, Throat',
     zodiac: ['Leo', 'Scorpio', 'Sagittarius'],
-    color: 'bg-blue-500',
+    color: 'bg-lunary-secondary',
   },
   {
     name: 'Carnelian',
@@ -115,7 +115,7 @@ const ESSENTIAL_CRYSTALS = [
     properties: ['creativity', 'courage', 'motivation', 'vitality'],
     chakra: 'Sacral',
     zodiac: ['Aries', 'Leo', 'Virgo'],
-    color: 'bg-orange-500',
+    color: 'bg-lunary-rose',
   },
 ];
 
@@ -388,7 +388,7 @@ export default function CrystalHealingGuidePage() {
 
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-cyan-400 mb-2'>
+            <h4 className='text-lg font-medium text-lunary-secondary mb-2'>
               Piezoelectricity
             </h4>
             <p className='text-sm text-zinc-400'>
@@ -397,7 +397,7 @@ export default function CrystalHealingGuidePage() {
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-cyan-400 mb-2'>
+            <h4 className='text-lg font-medium text-lunary-secondary mb-2'>
               Entrainment
             </h4>
             <p className='text-sm text-zinc-400'>
@@ -407,7 +407,7 @@ export default function CrystalHealingGuidePage() {
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-cyan-400 mb-2'>
+            <h4 className='text-lg font-medium text-lunary-secondary mb-2'>
               Intention Amplification
             </h4>
             <p className='text-sm text-zinc-400'>
@@ -518,8 +518,8 @@ export default function CrystalHealingGuidePage() {
           </div>
         </div>
 
-        <div className='bg-amber-900/20 border border-amber-500/30 rounded-lg p-6 mt-6'>
-          <h4 className='text-lg font-medium text-amber-300 mb-2'>
+        <div className='bg-lunary-accent-900/20 border border-lunary-accent-700 rounded-lg p-6 mt-6'>
+          <h4 className='text-lg font-medium text-lunary-accent-300 mb-2'>
             ⚠️ Water-Sensitive Crystals
           </h4>
           <p className='text-zinc-300'>

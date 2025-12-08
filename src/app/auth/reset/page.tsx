@@ -161,19 +161,19 @@ function ResetPasswordContent() {
           </div>
 
           {password && confirmPassword && password !== confirmPassword && (
-            <p className='text-xs text-red-400'>
+            <p className='text-xs text-lunary-error'>
               Passwords must match before you can reset.
             </p>
           )}
 
           {error && (
-            <div className='bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm'>
+            <div className='bg-lunary-error-900/30 border border-lunary-error-700 text-lunary-error-300 px-4 py-3 rounded-lg text-sm'>
               {error}
             </div>
           )}
 
           {success && (
-            <div className='bg-green-900/30 border border-green-700 text-green-300 px-4 py-3 rounded-lg text-sm'>
+            <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm'>
               {success}
             </div>
           )}

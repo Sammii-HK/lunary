@@ -83,7 +83,7 @@ export default function LunaryVsLunarGuidePage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       Real Astronomical Data
                     </span>
                   </td>
@@ -102,10 +102,10 @@ export default function LunaryVsLunarGuidePage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/50'>
@@ -119,7 +119,7 @@ export default function LunaryVsLunarGuidePage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       Chart-Based
                     </span>
                   </td>
@@ -136,7 +136,7 @@ export default function LunaryVsLunarGuidePage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -151,7 +151,7 @@ export default function LunaryVsLunarGuidePage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <span className='text-zinc-500 text-sm'>Limited</span>
@@ -168,7 +168,7 @@ export default function LunaryVsLunarGuidePage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <span className='text-zinc-500 text-sm'>
@@ -185,7 +185,9 @@ export default function LunaryVsLunarGuidePage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium'>7 days</span>
+                    <span className='text-lunary-success font-medium'>
+                      7 days
+                    </span>
                     <br />
                     <span className='text-xs text-zinc-400'>
                       No payment during trial

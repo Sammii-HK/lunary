@@ -81,7 +81,7 @@ export default function LunaryVsNebulaPage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       Real Astronomical Data
                     </span>
                   </td>
@@ -115,7 +115,7 @@ export default function LunaryVsNebulaPage() {
                     <strong className='text-zinc-100'>Grimoire Included</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -126,10 +126,10 @@ export default function LunaryVsNebulaPage() {
                     <strong className='text-zinc-100'>Tarot Readings</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/50'>
@@ -137,7 +137,7 @@ export default function LunaryVsNebulaPage() {
                     <strong className='text-zinc-100'>Pricing Model</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       Flat Subscription
                     </span>
                   </td>

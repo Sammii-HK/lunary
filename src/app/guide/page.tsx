@@ -770,14 +770,14 @@ function BookOfShadowsContent() {
                       />
                     ))}
                     {error && (
-                      <div className='rounded-2xl border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm text-red-200 md:px-6 md:py-4'>
-                        <p className='font-semibold text-red-300/90 mb-1'>
+                      <div className='rounded-2xl border border-lunary-error/40 bg-red-950/40 px-4 py-3 text-sm text-lunary-error-200 md:px-6 md:py-4'>
+                        <p className='font-semibold text-lunary-error-300/90 mb-1'>
                           Something went wrong
                         </p>
                         <p>{error}</p>
                         <button
                           onClick={clearError}
-                          className='mt-2 text-xs text-red-300/70 hover:text-red-300 underline'
+                          className='mt-2 text-xs text-lunary-error-300/70 hover:text-lunary-error-300 underline'
                         >
                           Dismiss
                         </button>
@@ -832,7 +832,7 @@ function BookOfShadowsContent() {
               <button
                 type='button'
                 onClick={stop}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-red-600 text-white transition hover:bg-red-500'
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-lunary-error-600 text-white transition hover:bg-lunary-error'
               >
                 <Square className='w-4 h-4' />
               </button>

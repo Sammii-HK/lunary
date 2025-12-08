@@ -108,7 +108,7 @@ export default function RefundPolicyPage() {
             </h2>
 
             {submitted ? (
-              <div className='flex items-start gap-3 text-green-400'>
+              <div className='flex items-start gap-3 text-lunary-success'>
                 <CheckCircle className='h-6 w-6 mt-0.5 shrink-0' />
                 <div>
                   <p className='font-medium'>Refund request submitted</p>
@@ -149,7 +149,7 @@ export default function RefundPolicyPage() {
                     </div>
 
                     {error && (
-                      <div className='flex items-center gap-2 text-red-400 text-sm'>
+                      <div className='flex items-center gap-2 text-lunary-error text-sm'>
                         <AlertCircle className='h-4 w-4' />
                         {error}
                       </div>

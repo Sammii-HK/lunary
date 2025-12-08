@@ -31,9 +31,9 @@ interface ApiKeyData {
 
 const tierColors: Record<string, string> = {
   free: 'bg-zinc-500/20 text-zinc-300',
-  starter: 'bg-blue-500/20 text-blue-300',
+  starter: 'bg-lunary-secondary-900 text-lunary-secondary-300',
   developer: 'bg-purple-500/20 text-purple-300',
-  business: 'bg-amber-500/20 text-amber-300',
+  business: 'bg-lunary-accent-900 text-lunary-accent-300',
 };
 
 export default function DeveloperDashboard() {
@@ -155,7 +155,7 @@ export default function DeveloperDashboard() {
         </div>
 
         {error && (
-          <div className='mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300'>
+          <div className='mb-6 p-4 rounded-lg bg-lunary-error/10 border border-lunary-error-700 text-lunary-error-300'>
             {error}
             <Link href='/sign-in' className='ml-2 underline'>
               Sign in
@@ -164,10 +164,10 @@ export default function DeveloperDashboard() {
         )}
 
         {newKey && (
-          <div className='mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/30'>
+          <div className='mb-6 p-4 rounded-lg bg-lunary-success/10 border border-lunary-success-700'>
             <div className='flex items-center gap-2 mb-2'>
-              <Shield className='h-5 w-5 text-green-400' />
-              <span className='font-medium text-green-300'>
+              <Shield className='h-5 w-5 text-lunary-success' />
+              <span className='font-medium text-lunary-success-300'>
                 New API Key Created
               </span>
             </div>
@@ -183,7 +183,7 @@ export default function DeveloperDashboard() {
                 className='p-2 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors'
               >
                 {copied ? (
-                  <Check className='h-4 w-4 text-green-400' />
+                  <Check className='h-4 w-4 text-lunary-success' />
                 ) : (
                   <Copy className='h-4 w-4' />
                 )}
@@ -245,7 +245,7 @@ export default function DeveloperDashboard() {
                     </button>
                     <button
                       onClick={() => deleteKey(key.id)}
-                      className='p-2 rounded hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors'
+                      className='p-2 rounded hover:bg-zinc-800 text-zinc-400 hover:text-lunary-error transition-colors'
                       title='Delete key'
                     >
                       <Trash2 className='h-4 w-4' />

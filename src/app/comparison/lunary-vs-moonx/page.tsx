@@ -75,10 +75,10 @@ export default function LunaryVsMoonXPage() {
                     <strong className='text-zinc-100'>Moon Phases</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
@@ -86,7 +86,7 @@ export default function LunaryVsMoonXPage() {
                     <strong className='text-zinc-100'>Full Astrology</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -97,7 +97,7 @@ export default function LunaryVsMoonXPage() {
                     <strong className='text-zinc-100'>Birth Chart</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -110,7 +110,7 @@ export default function LunaryVsMoonXPage() {
                     </strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -121,7 +121,7 @@ export default function LunaryVsMoonXPage() {
                     <strong className='text-zinc-100'>Tarot Integration</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />

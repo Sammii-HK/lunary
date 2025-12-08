@@ -306,8 +306,8 @@ export default function BirthChartCompleteGuidePage() {
           </div>
         </div>
 
-        <div className='bg-amber-900/20 border border-amber-500/30 rounded-lg p-6 mb-6'>
-          <h4 className='text-lg font-medium text-amber-300 mb-2'>
+        <div className='bg-lunary-accent-900/20 border border-lunary-accent-700 rounded-lg p-6 mb-6'>
+          <h4 className='text-lg font-medium text-lunary-accent-300 mb-2'>
             Why Birth Time Matters
           </h4>
           <p className='text-zinc-300'>
@@ -341,7 +341,7 @@ export default function BirthChartCompleteGuidePage() {
 
         <div className='space-y-6'>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-yellow-400 mb-3'>
+            <h3 className='text-xl font-medium text-lunary-accent mb-3'>
               ☉ Sun Sign: Your Core Identity
             </h3>
             <p className='text-zinc-300 mb-4'>
@@ -358,7 +358,7 @@ export default function BirthChartCompleteGuidePage() {
           </div>
 
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-blue-400 mb-3'>
+            <h3 className='text-xl font-medium text-lunary-secondary mb-3'>
               ☽ Moon Sign: Your Emotional Nature
             </h3>
             <p className='text-zinc-300 mb-4'>

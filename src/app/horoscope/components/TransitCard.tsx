@@ -19,7 +19,7 @@ export function TransitCard({ transit }: TransitCardProps) {
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
             transit.significance === 'high'
-              ? 'bg-red-500/20 text-red-300/90 border border-red-500/30'
+              ? 'bg-lunary-error-900 text-lunary-error-300/90 border border-lunary-error-700'
               : transit.significance === 'medium'
                 ? 'bg-lunary-accent-900 text-lunary-accent-300 border border-lunary-accent-700'
                 : 'bg-lunary-secondary-900 text-lunary-secondary-300 border border-lunary-secondary-700'

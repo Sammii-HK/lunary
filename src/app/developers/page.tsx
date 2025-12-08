@@ -290,7 +290,7 @@ export default function DevelopersPage() {
           {/* Features */}
           <div className='grid md:grid-cols-3 gap-4 mb-12'>
             <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-              <Zap className='h-6 w-6 text-amber-400 mb-3' />
+              <Zap className='h-6 w-6 text-lunary-accent mb-3' />
               <h3 className='font-medium text-zinc-100 mb-1'>
                 Fast & Reliable
               </h3>
@@ -299,7 +299,7 @@ export default function DevelopersPage() {
               </p>
             </div>
             <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-              <Moon className='h-6 w-6 text-blue-400 mb-3' />
+              <Moon className='h-6 w-6 text-lunary-secondary mb-3' />
               <h3 className='font-medium text-zinc-100 mb-1'>Real Astronomy</h3>
               <p className='text-sm text-zinc-400'>
                 Based on actual astronomical calculations
@@ -335,8 +335,8 @@ export default function DevelopersPage() {
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
                       endpoint.method === 'GET'
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-blue-500/20 text-blue-400'
+                        ? 'bg-lunary-success-900 text-lunary-success'
+                        : 'bg-lunary-secondary-900 text-lunary-secondary'
                     }`}
                   >
                     {endpoint.method}
@@ -371,7 +371,7 @@ export default function DevelopersPage() {
                           </code>
                           <span className='text-zinc-500'>{param.type}</span>
                           {param.required && (
-                            <span className='text-red-400 text-xs'>
+                            <span className='text-lunary-error text-xs'>
                               required
                             </span>
                           )}
@@ -489,14 +489,14 @@ export default function DevelopersPage() {
                 </p>
               </div>
               <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <Moon className='h-5 w-5 text-blue-400 mb-2' />
+                <Moon className='h-5 w-5 text-lunary-secondary mb-2' />
                 <h3 className='font-medium text-zinc-100 mb-1'>Moon Widgets</h3>
                 <p className='text-sm text-zinc-400'>
                   Display current moon phase on your website or app
                 </p>
               </div>
               <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <Sparkles className='h-5 w-5 text-amber-400 mb-2' />
+                <Sparkles className='h-5 w-5 text-lunary-accent mb-2' />
                 <h3 className='font-medium text-zinc-100 mb-1'>
                   Daily Horoscopes
                 </h3>
@@ -505,7 +505,7 @@ export default function DevelopersPage() {
                 </p>
               </div>
               <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <Code className='h-5 w-5 text-green-400 mb-2' />
+                <Code className='h-5 w-5 text-lunary-success mb-2' />
                 <h3 className='font-medium text-zinc-100 mb-1'>
                   Productivity Apps
                 </h3>

@@ -83,10 +83,10 @@ function ScoreBar({ score, label }: { score: number; label: string }) {
         <div
           className={`h-full rounded-full ${
             score >= 8
-              ? 'bg-green-500'
+              ? 'bg-lunary-success'
               : score >= 6
-                ? 'bg-amber-500'
-                : 'bg-red-500'
+                ? 'bg-lunary-accent'
+                : 'bg-lunary-error'
           }`}
           style={{ width: `${score * 10}%` }}
         />
@@ -153,7 +153,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
               </div>
               <div className='text-sm text-zinc-500'>{sign1Info.element}</div>
             </div>
-            <Heart className='h-8 w-8 text-pink-500' />
+            <Heart className='h-8 w-8 text-lunary-rose' />
             <div className='text-center'>
               <div className='text-5xl mb-2'>
                 {ZODIAC_SYMBOLS[parsed.sign2] || '⭐'}
@@ -182,10 +182,10 @@ export default async function CompatibilityPage({ params }: PageProps) {
               <div
                 className={`text-4xl font-light mb-1 ${
                   content.overallScore >= 8
-                    ? 'text-green-400'
+                    ? 'text-lunary-success'
                     : content.overallScore >= 6
-                      ? 'text-amber-400'
-                      : 'text-red-400'
+                      ? 'text-lunary-accent'
+                      : 'text-lunary-error'
                 }`}
               >
                 {content.overallScore}/10
@@ -193,21 +193,21 @@ export default async function CompatibilityPage({ params }: PageProps) {
               <div className='text-sm text-zinc-500'>Overall</div>
             </div>
             <div className='space-y-4'>
-              <div className='flex items-center gap-2 text-pink-400'>
+              <div className='flex items-center gap-2 text-lunary-rose'>
                 <Heart className='h-4 w-4' />
                 <span className='text-sm'>Love</span>
               </div>
               <ScoreBar score={content.loveScore} label='' />
             </div>
             <div className='space-y-4'>
-              <div className='flex items-center gap-2 text-blue-400'>
+              <div className='flex items-center gap-2 text-lunary-secondary'>
                 <Users className='h-4 w-4' />
                 <span className='text-sm'>Friendship</span>
               </div>
               <ScoreBar score={content.friendshipScore} label='' />
             </div>
             <div className='space-y-4'>
-              <div className='flex items-center gap-2 text-amber-400'>
+              <div className='flex items-center gap-2 text-lunary-accent'>
                 <Briefcase className='h-4 w-4' />
                 <span className='text-sm'>Work</span>
               </div>
@@ -219,14 +219,14 @@ export default async function CompatibilityPage({ params }: PageProps) {
         {/* Strengths */}
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-            <Star className='h-6 w-6 text-green-400' />
+            <Star className='h-6 w-6 text-lunary-success' />
             Relationship Strengths
           </h2>
-          <div className='p-6 rounded-lg border border-green-500/30 bg-green-500/10'>
+          <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success/10'>
             <ul className='space-y-3'>
               {content.strengths.map((strength, i) => (
                 <li key={i} className='flex items-start gap-3 text-zinc-300'>
-                  <span className='text-green-400 mt-1'>✓</span>
+                  <span className='text-lunary-success mt-1'>✓</span>
                   {strength}
                 </li>
               ))}
@@ -239,11 +239,11 @@ export default async function CompatibilityPage({ params }: PageProps) {
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
             Potential Challenges
           </h2>
-          <div className='p-6 rounded-lg border border-amber-500/30 bg-amber-500/10'>
+          <div className='p-6 rounded-lg border border-lunary-accent-700 bg-lunary-accent/10'>
             <ul className='space-y-3'>
               {content.challenges.map((challenge, i) => (
                 <li key={i} className='flex items-start gap-3 text-zinc-300'>
-                  <span className='text-amber-400 mt-1'>!</span>
+                  <span className='text-lunary-accent mt-1'>!</span>
                   {challenge}
                 </li>
               ))}

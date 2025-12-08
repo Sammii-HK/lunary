@@ -284,7 +284,7 @@ export default function APITermsPage() {
             <h2 className='text-2xl font-semibold text-white mb-4'>
               7. Data Accuracy Disclaimer
             </h2>
-            <div className='p-4 border border-amber-500/30 bg-amber-950/20 rounded-xl'>
+            <div className='p-4 border border-lunary-accent-700 bg-lunary-accent-950/20 rounded-xl'>
               <p className='text-zinc-300 leading-relaxed'>
                 <strong>Important:</strong> The Lunary API provides astrological
                 and cosmic data for entertainment and informational purposes

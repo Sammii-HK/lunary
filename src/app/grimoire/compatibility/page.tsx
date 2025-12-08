@@ -60,15 +60,15 @@ export default function CompatibilityIndexPage() {
         {/* Stats */}
         <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-pink-400'>12</div>
+            <div className='text-3xl font-light text-lunary-rose'>12</div>
             <div className='text-sm text-zinc-500'>Signs</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-pink-400'>78</div>
+            <div className='text-3xl font-light text-lunary-rose'>78</div>
             <div className='text-sm text-zinc-500'>Unique Pairs</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-pink-400'>3</div>
+            <div className='text-3xl font-light text-lunary-rose'>3</div>
             <div className='text-sm text-zinc-500'>Categories</div>
           </div>
         </div>
@@ -111,9 +111,9 @@ export default function CompatibilityIndexPage() {
                         <td key={key2} className='p-1'>
                           <Link
                             href={`/grimoire/compatibility/${slug}`}
-                            className='block w-8 h-8 rounded bg-zinc-800 hover:bg-pink-500/30 hover:border-pink-500/50 border border-transparent transition-colors flex items-center justify-center'
+                            className='block w-8 h-8 rounded bg-zinc-800 hover:bg-lunary-rose/30 hover:border-lunary-rose-600 border border-transparent transition-colors flex items-center justify-center'
                           >
-                            <Heart className='h-3 w-3 text-zinc-600 hover:text-pink-400' />
+                            <Heart className='h-3 w-3 text-zinc-600 hover:text-lunary-rose' />
                           </Link>
                         </td>
                       );
@@ -154,7 +154,7 @@ export default function CompatibilityIndexPage() {
                     <Link
                       key={key2}
                       href={`/grimoire/compatibility/${slug}`}
-                      className='px-3 py-1.5 rounded-lg bg-zinc-800/50 hover:bg-pink-500/20 border border-zinc-700/50 hover:border-pink-500/50 text-zinc-300 hover:text-pink-300 text-sm transition-colors'
+                      className='px-3 py-1.5 rounded-lg bg-zinc-800/50 hover:bg-lunary-rose-900 border border-zinc-700/50 hover:border-lunary-rose-600 text-zinc-300 hover:text-lunary-rose-300 text-sm transition-colors'
                     >
                       {sign1.name} & {sign2.name}
                     </Link>
@@ -169,7 +169,7 @@ export default function CompatibilityIndexPage() {
         <section className='mt-12 text-center'>
           <Link
             href='/welcome'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/30 text-pink-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-rose-900 hover:bg-lunary-rose/30 border border-lunary-rose-700 text-lunary-rose-300 font-medium text-lg transition-colors'
           >
             <Heart className='h-5 w-5' />
             Get Your Synastry Reading

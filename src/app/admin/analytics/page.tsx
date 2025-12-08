@@ -526,7 +526,7 @@ export default function AnalyticsPage() {
       </header>
 
       {error && (
-        <div className='rounded-lg border border-rose-800/30 bg-rose-950/20 px-4 py-3 text-sm text-rose-300'>
+        <div className='rounded-lg border border-lunary-error-800/30 bg-lunary-error-950/20 px-4 py-3 text-sm text-lunary-error-300'>
           {error}
         </div>
       )}
@@ -579,14 +579,14 @@ export default function AnalyticsPage() {
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <div className='h-2 w-2 rounded-full bg-indigo-400/90' />
+                <div className='h-2 w-2 rounded-full bg-lunary-primary/90' />
                 <span className='text-xs text-zinc-400'>
                   <span className='font-medium text-zinc-300'>WAU</span> -
                   Weekly Active Users
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <div className='h-2 w-2 rounded-full bg-sky-400/90' />
+                <div className='h-2 w-2 rounded-full bg-lunary-secondary/90' />
                 <span className='text-xs text-zinc-400'>
                   <span className='font-medium text-zinc-300'>MAU</span> -
                   Monthly Active Users
@@ -785,21 +785,21 @@ export default function AnalyticsPage() {
               <MiniStat
                 label='Unique Users'
                 value={aiMetrics?.unique_users ?? 0}
-                icon={<Activity className='h-5 w-5 text-emerald-300' />}
+                icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
               />
               <MiniStat
                 label='Tokens / User'
                 value={
                   aiMetrics ? aiMetrics.avg_tokens_per_user.toFixed(0) : '—'
                 }
-                icon={<Target className='h-5 w-5 text-sky-300' />}
+                icon={<Target className='h-5 w-5 text-lunary-secondary-300' />}
               />
               <MiniStat
                 label='Completion Rate'
                 value={
                   aiMetrics ? `${aiMetrics.completion_rate.toFixed(1)}%` : '—'
                 }
-                icon={<Sparkles className='h-5 w-5 text-amber-300' />}
+                icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
               />
             </div>
           </CardContent>
@@ -843,7 +843,7 @@ export default function AnalyticsPage() {
                 <MiniStat
                   label='Button Clicks'
                   value={discordAnalytics.stats?.funnel?.buttonClicks ?? 0}
-                  icon={<Target className='h-5 w-5 text-emerald-300' />}
+                  icon={<Target className='h-5 w-5 text-lunary-success-300' />}
                 />
                 <MiniStat
                   label='Click-Through Rate'
@@ -852,12 +852,14 @@ export default function AnalyticsPage() {
                       ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
                       : '—'
                   }
-                  icon={<Sparkles className='h-5 w-5 text-sky-300' />}
+                  icon={
+                    <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                  }
                 />
                 <MiniStat
                   label='Accounts Linked'
                   value={discordAnalytics.stats?.funnel?.accountsLinked ?? 0}
-                  icon={<Bell className='h-5 w-5 text-amber-300' />}
+                  icon={<Bell className='h-5 w-5 text-lunary-accent-300' />}
                 />
               </div>
             </CardContent>
@@ -1014,8 +1016,8 @@ function RetentionCard({
 }) {
   const color =
     variant === 'negative'
-      ? 'text-rose-300 border-rose-800/20 bg-rose-900/5'
-      : 'text-emerald-300 border-emerald-800/20 bg-emerald-900/5';
+      ? 'text-lunary-error-300 border-lunary-error-800/20 bg-lunary-error-900/5'
+      : 'text-lunary-success-300 border-lunary-success-800/20 bg-lunary-success-900/5';
 
   return (
     <div className={`rounded-xl border px-3 py-2.5 ${color}`}>

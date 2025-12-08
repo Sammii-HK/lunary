@@ -99,7 +99,7 @@ export default function Moon2026Page() {
 
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-white mb-6 flex items-center gap-2'>
-            <Sparkles className='h-6 w-6 text-amber-400' />
+            <Sparkles className='h-6 w-6 text-lunary-accent' />
             Full Moons 2026
           </h2>
           <div className='grid gap-4'>

@@ -57,7 +57,7 @@ export default function AspectsIndexPage() {
                 <div className='flex items-center gap-3 mb-3'>
                   <span className='text-3xl'>{data.symbol}</span>
                   <span
-                    className={`text-xs px-2 py-1 rounded ${data.nature === 'harmonious' ? 'bg-green-500/20 text-green-300' : data.nature === 'challenging' ? 'bg-red-500/20 text-red-300' : 'bg-blue-500/20 text-blue-300'}`}
+                    className={`text-xs px-2 py-1 rounded ${data.nature === 'harmonious' ? 'bg-lunary-success-900 text-lunary-success-300' : data.nature === 'challenging' ? 'bg-lunary-error-900 text-lunary-error-300' : 'bg-lunary-secondary-900 text-lunary-secondary-300'}`}
                   >
                     {data.nature}
                   </span>

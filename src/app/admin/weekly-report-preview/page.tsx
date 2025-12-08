@@ -173,8 +173,8 @@ function WeeklyReportPreviewContent() {
         </div>
 
         {error && (
-          <div className='bg-red-900/50 border border-red-700 rounded-lg p-4 mb-8'>
-            <p className='text-red-300'>{error}</p>
+          <div className='bg-lunary-error-900/50 border border-lunary-error-700 rounded-lg p-4 mb-8'>
+            <p className='text-lunary-error-300'>{error}</p>
           </div>
         )}
 
@@ -314,7 +314,7 @@ function WeeklyReportPreviewContent() {
                       const url = URL.createObjectURL(blob);
                       window.open(url, '_blank');
                     }}
-                    className='px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm'
+                    className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 rounded-md text-white text-sm'
                   >
                     Open in New Tab
                   </button>

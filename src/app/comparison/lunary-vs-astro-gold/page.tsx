@@ -75,7 +75,7 @@ export default function LunaryVsAstroGoldPage() {
                     <strong className='text-zinc-100'>Target Audience</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       Everyone
                     </span>
                   </td>
@@ -90,7 +90,7 @@ export default function LunaryVsAstroGoldPage() {
                     </strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -101,7 +101,7 @@ export default function LunaryVsAstroGoldPage() {
                     <strong className='text-zinc-100'>Tarot Integration</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -117,7 +117,7 @@ export default function LunaryVsAstroGoldPage() {
                     <span className='text-zinc-500 text-sm'>Basic</span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/50'>
@@ -125,7 +125,7 @@ export default function LunaryVsAstroGoldPage() {
                     <strong className='text-zinc-100'>AI Interpretation</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />

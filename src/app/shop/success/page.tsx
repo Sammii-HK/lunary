@@ -75,7 +75,7 @@ export default function ShopSuccessPage() {
     return (
       <div className='min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center'>
         <div className='text-center max-w-md mx-auto px-4'>
-          <div className='text-red-400 text-6xl mb-6'>⚠️</div>
+          <div className='text-lunary-error text-6xl mb-6'>⚠️</div>
           <h1 className='text-2xl font-semibold text-white mb-4'>
             Something went wrong
           </h1>
@@ -96,7 +96,7 @@ export default function ShopSuccessPage() {
       <div className='container mx-auto px-4 py-16'>
         <div className='max-w-2xl mx-auto text-center'>
           {/* Success Icon */}
-          <div className='text-green-400 text-8xl mb-8'>✅</div>
+          <div className='text-lunary-success text-8xl mb-8'>✅</div>
 
           {/* Success Message */}
           <h1 className='text-4xl font-light text-white mb-4'>

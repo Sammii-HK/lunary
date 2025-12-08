@@ -83,9 +83,9 @@ const Practices = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     const colorMap: { [key: string]: string } = {
-      beginner: 'text-green-400 bg-green-900/30',
-      intermediate: 'text-yellow-400 bg-yellow-900/30',
-      advanced: 'text-red-400 bg-red-900/30',
+      beginner: 'text-lunary-success bg-lunary-success-900/30',
+      intermediate: 'text-lunary-accent bg-lunary-accent-900/30',
+      advanced: 'text-lunary-error bg-lunary-error-900/30',
     };
     return colorMap[difficulty] || 'text-zinc-400 bg-zinc-800';
   };
@@ -114,14 +114,14 @@ const Practices = () => {
         </p>
       </div>
 
-      <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-4'>
+      <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4'>
         <div className='flex items-center gap-2 mb-2'>
-          <Moon className='w-5 h-5 text-indigo-300' />
-          <h3 className='font-medium text-indigo-300'>
+          <Moon className='w-5 h-5 text-lunary-primary-300' />
+          <h3 className='font-medium text-lunary-primary-300'>
             Current Moon Phase: {currentMoonPhase}
           </h3>
         </div>
-        <p className='text-sm text-indigo-200'>
+        <p className='text-sm text-lunary-primary-200'>
           Certain spells work best during specific moon phases. Look for the
           moon phase indicators on each spell.
         </p>
@@ -218,7 +218,7 @@ const Practices = () => {
 
                   {spell.timing.moonPhase && (
                     <div className='flex items-center gap-1'>
-                      <Moon className='w-3 h-3 text-indigo-400' />
+                      <Moon className='w-3 h-3 text-lunary-primary' />
                       <div className='flex gap-1'>
                         {spell.timing.moonPhase
                           .slice(0, 2)
@@ -227,15 +227,15 @@ const Practices = () => {
                               key={index}
                               className={`text-xs px-1 py-0.5 rounded ${
                                 phase === currentMoonPhase
-                                  ? 'bg-indigo-600 text-white'
-                                  : 'bg-indigo-900/40 text-indigo-300'
+                                  ? 'bg-lunary-primary text-white'
+                                  : 'bg-lunary-primary-900/40 text-lunary-primary-300'
                               }`}
                             >
                               {phase.split(' ')[0]}
                             </span>
                           ))}
                         {spell.timing.moonPhase.length > 2 && (
-                          <span className='text-xs text-indigo-400'>
+                          <span className='text-xs text-lunary-primary'>
                             +{spell.timing.moonPhase.length - 2}
                           </span>
                         )}

@@ -75,7 +75,7 @@ export default function LunaryVsLabyrinthosPage() {
                     <strong className='text-zinc-100'>Astrology</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -86,10 +86,10 @@ export default function LunaryVsLabyrinthosPage() {
                     <strong className='text-zinc-100'>Tarot Readings</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/50'>
@@ -100,7 +100,7 @@ export default function LunaryVsLabyrinthosPage() {
                     <span className='text-zinc-500 text-sm'>Grimoire</span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       Comprehensive
                     </span>
                   </td>
@@ -112,7 +112,7 @@ export default function LunaryVsLabyrinthosPage() {
                     </strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -123,7 +123,7 @@ export default function LunaryVsLabyrinthosPage() {
                     <strong className='text-zinc-100'>Birth Chart</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -136,7 +136,7 @@ export default function LunaryVsLabyrinthosPage() {
                     </strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />

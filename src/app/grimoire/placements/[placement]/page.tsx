@@ -189,14 +189,14 @@ export default async function PlacementPage({ params }: PageProps) {
           {/* Strengths */}
           <section>
             <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-              <Star className='h-6 w-6 text-amber-400' />
+              <Star className='h-6 w-6 text-lunary-accent' />
               Strengths of This Placement
             </h2>
-            <div className='p-6 rounded-lg border border-green-500/30 bg-green-500/10'>
+            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success/10'>
               <ul className='space-y-3'>
                 {content.strengths.map((strength, i) => (
                   <li key={i} className='flex items-start gap-3 text-zinc-300'>
-                    <span className='text-green-400 mt-1'>✓</span>
+                    <span className='text-lunary-success mt-1'>✓</span>
                     {strength}
                   </li>
                 ))}
@@ -207,14 +207,14 @@ export default async function PlacementPage({ params }: PageProps) {
           {/* Challenges */}
           <section>
             <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-              <AlertTriangle className='h-6 w-6 text-amber-400' />
+              <AlertTriangle className='h-6 w-6 text-lunary-accent' />
               Potential Challenges
             </h2>
-            <div className='p-6 rounded-lg border border-amber-500/30 bg-amber-500/10'>
+            <div className='p-6 rounded-lg border border-lunary-accent-700 bg-lunary-accent/10'>
               <ul className='space-y-3'>
                 {content.challenges.map((challenge, i) => (
                   <li key={i} className='flex items-start gap-3 text-zinc-300'>
-                    <span className='text-amber-400 mt-1'>!</span>
+                    <span className='text-lunary-accent mt-1'>!</span>
                     {challenge}
                   </li>
                 ))}

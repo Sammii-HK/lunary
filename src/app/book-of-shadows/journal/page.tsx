@@ -57,7 +57,7 @@ function EntryCard({ entry }: EntryCardProps) {
           {entry.moodTags.map((tag) => (
             <span
               key={tag}
-              className='text-xs bg-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded'
+              className='text-xs bg-lunary-primary-900/50 text-lunary-primary-300 px-2 py-0.5 rounded'
             >
               {tag}
             </span>

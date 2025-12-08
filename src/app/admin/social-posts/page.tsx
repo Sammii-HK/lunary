@@ -463,25 +463,25 @@ export default function SocialPostsPage() {
     switch (status) {
       case 'pending':
         return (
-          <Badge className='bg-yellow-500/20 text-yellow-400 border-yellow-500/30'>
+          <Badge className='bg-lunary-accent/20 text-lunary-accent border-lunary-accent-700'>
             Pending
           </Badge>
         );
       case 'approved':
         return (
-          <Badge className='bg-green-500/20 text-green-400 border-green-500/30'>
+          <Badge className='bg-lunary-success/20 text-lunary-success border-lunary-success/30'>
             Approved
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge className='bg-red-500/20 text-red-400 border-red-500/30'>
+          <Badge className='bg-lunary-error/20 text-lunary-error border-lunary-error/30'>
             Rejected
           </Badge>
         );
       case 'sent':
         return (
-          <Badge className='bg-blue-500/20 text-blue-400 border-blue-500/30'>
+          <Badge className='bg-lunary-secondary/20 text-lunary-secondary border-lunary-secondary/30'>
             Sent
           </Badge>
         );
@@ -531,7 +531,7 @@ export default function SocialPostsPage() {
           >
             Approval Queue
             {pendingCount > 0 && (
-              <Badge className='ml-2 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs'>
+              <Badge className='ml-2 bg-lunary-accent/20 text-lunary-accent border-lunary-accent-700 text-xs'>
                 {pendingCount}
               </Badge>
             )}
@@ -728,7 +728,7 @@ export default function SocialPostsPage() {
                       }}
                       disabled={loading}
                       variant='outline'
-                      className='border-green-500/50 text-green-400 hover:bg-green-500/10'
+                      className='border-lunary-success/50 text-lunary-success hover:bg-lunary-success/10'
                     >
                       <Calendar className='h-4 w-4 mr-2' />
                       Current Week
@@ -832,13 +832,13 @@ export default function SocialPostsPage() {
             <div className='flex items-center justify-between'>
               <div className='flex gap-4 items-center'>
                 <div className='text-center px-4 py-2 bg-zinc-900 rounded-lg border border-zinc-800'>
-                  <div className='text-2xl font-bold text-yellow-400'>
+                  <div className='text-2xl font-bold text-lunary-accent'>
                     {pendingCount}
                   </div>
                   <div className='text-xs text-zinc-400'>Pending</div>
                 </div>
                 <div className='text-center px-4 py-2 bg-zinc-900 rounded-lg border border-zinc-800'>
-                  <div className='text-2xl font-bold text-green-400'>
+                  <div className='text-2xl font-bold text-lunary-success'>
                     {approvedCount}
                   </div>
                   <div className='text-xs text-zinc-400'>Approved</div>
@@ -851,7 +851,7 @@ export default function SocialPostsPage() {
                       onClick={() => handleBulkAction('approve_all')}
                       disabled={bulkActionLoading !== null}
                       variant='outline'
-                      className='border-green-600 text-green-400 hover:bg-green-600/20'
+                      className='border-lunary-success-600 text-lunary-success hover:bg-lunary-success-400/20'
                     >
                       {bulkActionLoading === 'approve_all' ? (
                         <Loader2 className='h-4 w-4 mr-2 animate-spin' />
@@ -864,7 +864,7 @@ export default function SocialPostsPage() {
                       onClick={() => handleBulkAction('clear_all')}
                       disabled={bulkActionLoading !== null}
                       variant='outline'
-                      className='border-red-600 text-red-400 hover:bg-red-600/20'
+                      className='border-lunary-error-600 text-lunary-error hover:bg-lunary-error-400/20'
                     >
                       {bulkActionLoading === 'clear_all' ? (
                         <Loader2 className='h-4 w-4 mr-2 animate-spin' />
@@ -956,7 +956,7 @@ export default function SocialPostsPage() {
                               {post.platform}
                             </CardTitle>
                             {post.platform === 'reddit' && (
-                              <Badge className='bg-orange-500/20 text-orange-400 border-orange-500/30'>
+                              <Badge className='bg-lunary-rose-900 text-lunary-rose border-lunary-rose-700'>
                                 r/lunary_insights
                               </Badge>
                             )}
@@ -967,7 +967,7 @@ export default function SocialPostsPage() {
                           </div>
                           <CardDescription className='text-zinc-400'>
                             {post.platform === 'reddit' && (
-                              <span className='text-orange-400 font-medium'>
+                              <span className='text-lunary-rose font-medium'>
                                 r/lunary_insights •{' '}
                               </span>
                             )}
@@ -1022,7 +1022,7 @@ export default function SocialPostsPage() {
                                     [post.id]: e.target.value,
                                   })
                                 }
-                                className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-3 border border-zinc-600 focus:border-blue-500 focus:outline-none resize-y min-h-[120px]'
+                                className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-3 border border-zinc-600 focus:border-lunary-secondary focus:outline-none resize-y min-h-[120px]'
                               />
                               <div className='flex gap-2'>
                                 <Button
@@ -1040,7 +1040,7 @@ export default function SocialPostsPage() {
                                 </Button>
                                 <Button
                                   onClick={() => handleApprove(post.id)}
-                                  className='flex-1 bg-green-600 hover:bg-green-700 text-white'
+                                  className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
                                 >
                                   <Check className='h-4 w-4 mr-2' />
                                   Approve Edits
@@ -1059,7 +1059,7 @@ export default function SocialPostsPage() {
                             <div className='flex gap-3'>
                               <Button
                                 onClick={() => handleApprove(post.id)}
-                                className='flex-1 bg-green-600 hover:bg-green-700 text-white'
+                                className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
                               >
                                 <Check className='h-4 w-4 mr-2' />
                                 Approve
@@ -1067,7 +1067,7 @@ export default function SocialPostsPage() {
                               <Button
                                 onClick={() => handleEditPost(post)}
                                 variant='outline'
-                                className='border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10'
+                                className='border-lunary-accent/50 text-lunary-accent hover:bg-lunary-accent/10'
                               >
                                 <Edit2 className='h-4 w-4 mr-2' />
                                 Edit
@@ -1075,7 +1075,7 @@ export default function SocialPostsPage() {
                               <Button
                                 onClick={() => handleOpenInApp(post)}
                                 variant='outline'
-                                className='border-blue-500/50 text-blue-400 hover:bg-blue-500/10'
+                                className='border-lunary-secondary/50 text-lunary-secondary hover:bg-lunary-secondary/10'
                               >
                                 <ExternalLink className='h-4 w-4 mr-2' />
                                 Preview
@@ -1084,7 +1084,7 @@ export default function SocialPostsPage() {
                                 onClick={() => handleReject(post.id)}
                                 disabled={rejectingPostId === post.id}
                                 variant='outline'
-                                className='flex-1 border-red-500/50 text-red-400 hover:bg-red-500/10'
+                                className='flex-1 border-lunary-error/50 text-lunary-error hover:bg-lunary-error/10'
                               >
                                 {rejectingPostId === post.id ? (
                                   <Loader2 className='h-4 w-4 mr-2 animate-spin' />
@@ -1113,7 +1113,7 @@ export default function SocialPostsPage() {
                             <Button
                               onClick={() => handleOpenInApp(post)}
                               variant='outline'
-                              className='border-blue-500/50 text-blue-400 hover:bg-blue-500/10'
+                              className='border-lunary-secondary/50 text-lunary-secondary hover:bg-lunary-secondary/10'
                             >
                               <ExternalLink className='h-4 w-4 mr-2' />
                               Open in App
@@ -1122,14 +1122,14 @@ export default function SocialPostsPage() {
                         )}
 
                         {post.status === 'sent' && (
-                          <div className='flex items-center gap-2 text-green-400'>
+                          <div className='flex items-center gap-2 text-lunary-success'>
                             <CheckCircle className='h-5 w-5' />
                             <span>Sent to Succulent</span>
                           </div>
                         )}
 
                         {post.status === 'rejected' && (
-                          <div className='flex items-center gap-2 text-red-400'>
+                          <div className='flex items-center gap-2 text-lunary-error'>
                             <XCircle className='h-5 w-5' />
                             <span>Rejected</span>
                           </div>

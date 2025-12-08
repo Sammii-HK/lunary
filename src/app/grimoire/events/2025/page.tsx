@@ -70,24 +70,24 @@ const colorClasses: Record<
   { border: string; bg: string; text: string }
 > = {
   orange: {
-    border: 'border-orange-500/30',
-    bg: 'bg-orange-500/10',
-    text: 'text-orange-400',
+    border: 'border-lunary-rose-700',
+    bg: 'bg-lunary-rose/10',
+    text: 'text-lunary-rose',
   },
   pink: {
-    border: 'border-pink-500/30',
-    bg: 'bg-pink-500/10',
-    text: 'text-pink-400',
+    border: 'border-lunary-rose-700',
+    bg: 'bg-lunary-rose/10',
+    text: 'text-lunary-rose',
   },
   amber: {
-    border: 'border-amber-500/30',
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-400',
+    border: 'border-lunary-accent-700',
+    bg: 'bg-lunary-accent/10',
+    text: 'text-lunary-accent',
   },
   blue: {
-    border: 'border-blue-500/30',
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
+    border: 'border-lunary-secondary-700',
+    bg: 'bg-lunary-secondary/10',
+    text: 'text-lunary-secondary',
   },
 };
 

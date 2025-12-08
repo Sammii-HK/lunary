@@ -455,7 +455,7 @@ export default function TarotCompleteGuidePage() {
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-amber-400 mb-3'>
+            <h3 className='text-xl font-medium text-lunary-accent mb-3'>
               Major Arcana (22 cards)
             </h3>
             <p className='text-zinc-300 mb-4'>
@@ -470,7 +470,7 @@ export default function TarotCompleteGuidePage() {
           </div>
 
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-cyan-400 mb-3'>
+            <h3 className='text-xl font-medium text-lunary-secondary mb-3'>
               Minor Arcana (56 cards)
             </h3>
             <p className='text-zinc-300 mb-4'>

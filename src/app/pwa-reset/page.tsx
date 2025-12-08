@@ -186,8 +186,8 @@ export default function PWAResetPage() {
     <div className='p-4 space-y-4 max-w-2xl mx-auto'>
       <h1 className='text-2xl font-bold'>🔧 PWA Reset & Debug Tool</h1>
 
-      <div className='bg-yellow-900/20 border border-yellow-700 rounded p-4'>
-        <p className='text-sm text-yellow-200'>
+      <div className='bg-lunary-accent-900/20 border border-lunary-accent-700 rounded p-4'>
+        <p className='text-sm text-lunary-accent-200'>
           ⚠️ This will clear ALL service workers, caches, and storage for this
           site. Use this when debugging PWA issues.
         </p>
@@ -197,14 +197,14 @@ export default function PWAResetPage() {
         <button
           onClick={clearAll}
           disabled={status === 'clearing'}
-          className='px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white rounded-lg font-medium'
+          className='px-6 py-3 bg-lunary-error-600 hover:bg-lunary-error-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white rounded-lg font-medium'
         >
           {status === 'clearing' ? 'Clearing...' : '🧹 Clear Everything'}
         </button>
 
         <button
           onClick={checkStatus}
-          className='px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium'
+          className='px-6 py-3 bg-lunary-primary hover:bg-lunary-primary-400 text-white rounded-lg font-medium'
         >
           📊 Check Status
         </button>
@@ -234,11 +234,11 @@ export default function PWAResetPage() {
                 key={i}
                 className={
                   log.includes('✅')
-                    ? 'text-green-400'
+                    ? 'text-lunary-success'
                     : log.includes('⚠️') || log.includes('❌')
-                      ? 'text-red-400'
+                      ? 'text-lunary-error'
                       : log.includes('📋')
-                        ? 'text-yellow-400'
+                        ? 'text-lunary-accent'
                         : 'text-zinc-300'
                 }
               >
@@ -254,19 +254,19 @@ export default function PWAResetPage() {
         <div className='space-y-2 text-sm font-mono'>
           <div>
             <span className='text-zinc-400'>Check service worker:</span>
-            <code className='ml-2 text-green-400'>
+            <code className='ml-2 text-lunary-success'>
               navigator.serviceWorker.getRegistrations()
             </code>
           </div>
           <div>
             <span className='text-zinc-400'>Check display mode:</span>
-            <code className='ml-2 text-green-400'>
+            <code className='ml-2 text-lunary-success'>
               window.matchMedia('(display-mode: minimal-ui)').matches
             </code>
           </div>
           <div>
             <span className='text-zinc-400'>Check caches:</span>
-            <code className='ml-2 text-green-400'>caches.keys()</code>
+            <code className='ml-2 text-lunary-success'>caches.keys()</code>
           </div>
         </div>
       </div>

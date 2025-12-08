@@ -101,7 +101,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                   </h3>
                   <div className='space-y-2 text-sm text-zinc-300'>
                     <div className='flex items-start gap-2'>
-                      <span className='text-green-400'>✓</span>
+                      <span className='text-lunary-success'>✓</span>
                       <span>
                         <strong>Personalized:</strong> Uses your exact birth
                         time, date, and location to calculate planetary
@@ -129,7 +129,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                   </h3>
                   <div className='space-y-2 text-sm text-zinc-300'>
                     <div className='flex items-start gap-2'>
-                      <span className='text-green-400'>✓</span>
+                      <span className='text-lunary-success'>✓</span>
                       <span>
                         <strong>Personalized:</strong> Accounts for all planets,
                         aspects, houses, and transits specific to your chart
@@ -156,7 +156,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                   </h3>
                   <div className='space-y-2 text-sm text-zinc-300'>
                     <div className='flex items-start gap-2'>
-                      <span className='text-green-400'>✓</span>
+                      <span className='text-lunary-success'>✓</span>
                       <span>
                         <strong>Personalized:</strong> Insights tailored to YOUR
                         unique astrological profile and current transits
@@ -183,7 +183,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                   </h3>
                   <div className='space-y-2 text-sm text-zinc-300'>
                     <div className='flex items-start gap-2'>
-                      <span className='text-green-400'>✓</span>
+                      <span className='text-lunary-success'>✓</span>
                       <span>
                         <strong>Personalized:</strong> Uses real astronomical
                         calculations based on actual planetary positions
@@ -211,7 +211,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
           <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
             <div className='space-y-4'>
               <div className='flex items-start gap-3'>
-                <Check className='h-5 w-5 text-green-400 flex-shrink-0 mt-0.5' />
+                <Check className='h-5 w-5 text-lunary-success flex-shrink-0 mt-0.5' />
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                     More Accurate Insights
@@ -226,7 +226,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                 </div>
               </div>
               <div className='flex items-start gap-3'>
-                <Check className='h-5 w-5 text-green-400 flex-shrink-0 mt-0.5' />
+                <Check className='h-5 w-5 text-lunary-success flex-shrink-0 mt-0.5' />
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                     Real Astronomical Data
@@ -240,7 +240,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                 </div>
               </div>
               <div className='flex items-start gap-3'>
-                <Check className='h-5 w-5 text-green-400 flex-shrink-0 mt-0.5' />
+                <Check className='h-5 w-5 text-lunary-success flex-shrink-0 mt-0.5' />
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                     Relevant Guidance
@@ -254,7 +254,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                 </div>
               </div>
               <div className='flex items-start gap-3'>
-                <Check className='h-5 w-5 text-green-400 flex-shrink-0 mt-0.5' />
+                <Check className='h-5 w-5 text-lunary-success flex-shrink-0 mt-0.5' />
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                     Complete Picture
@@ -285,31 +285,31 @@ export default function PersonalizedVsGenericAstrologyPage() {
             </p>
             <div className='space-y-3'>
               <div className='flex items-center gap-2'>
-                <Check className='h-4 w-4 text-green-400' />
+                <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
                   Real astronomical calculations from your exact birth data
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <Check className='h-4 w-4 text-green-400' />
+                <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
                   Personalized horoscopes based on YOUR birth chart
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <Check className='h-4 w-4 text-green-400' />
+                <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
                   Tarot readings personalized to your chart
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <Check className='h-4 w-4 text-green-400' />
+                <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
                   Insights based on current transits affecting your chart
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <Check className='h-4 w-4 text-green-400' />
+                <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
                   Complete grimoire with spells and rituals
                 </span>

@@ -171,7 +171,7 @@ export default function AcceptableUsePolicyPage() {
               </li>
             </ul>
 
-            <div className='mt-6 p-4 border border-amber-500/30 bg-amber-950/20 rounded-xl'>
+            <div className='mt-6 p-4 border border-lunary-accent-700 bg-lunary-accent-950/20 rounded-xl'>
               <p className='text-zinc-300 text-sm'>
                 <strong>Note:</strong> AI-generated content may occasionally
                 produce inaccurate or unexpected results. You are responsible

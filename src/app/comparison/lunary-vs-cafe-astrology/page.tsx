@@ -75,7 +75,7 @@ export default function LunaryVsCafeAstrologyPage() {
                     <strong className='text-zinc-100'>Platform</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       Modern App (Web + Mobile)
                     </span>
                   </td>
@@ -88,7 +88,7 @@ export default function LunaryVsCafeAstrologyPage() {
                     <strong className='text-zinc-100'>Personalization</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       AI-Powered
                     </span>
                   </td>
@@ -103,10 +103,10 @@ export default function LunaryVsCafeAstrologyPage() {
                     <strong className='text-zinc-100'>Birth Chart</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
@@ -116,7 +116,7 @@ export default function LunaryVsCafeAstrologyPage() {
                     </strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -127,7 +127,7 @@ export default function LunaryVsCafeAstrologyPage() {
                     <strong className='text-zinc-100'>Tarot Integration</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -140,10 +140,10 @@ export default function LunaryVsCafeAstrologyPage() {
                     </strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/50'>
@@ -151,7 +151,7 @@ export default function LunaryVsCafeAstrologyPage() {
                     <strong className='text-zinc-100'>Ad-Free</strong>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-green-400 mx-auto' />
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <X className='h-5 w-5 text-zinc-500 mx-auto' />
@@ -165,7 +165,7 @@ export default function LunaryVsCafeAstrologyPage() {
                     <span className='text-zinc-100 font-medium'>$4.99/mo</span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-green-400 font-medium text-sm'>
+                    <span className='text-lunary-success font-medium text-sm'>
                       Free (with ads)
                     </span>
                   </td>

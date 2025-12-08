@@ -1155,7 +1155,7 @@ const BirthChartPage = () => {
                           </span>
                           {planet.body} in {planet.sign}
                           {planet.retrograde && (
-                            <span className='text-red-400 text-xs'>℞</span>
+                            <span className='text-lunary-error text-xs'>℞</span>
                           )}
                         </h5>
                         <p className='text-xs text-zinc-300 mt-1'>
@@ -1194,7 +1194,7 @@ const BirthChartPage = () => {
                           </span>
                           {planet.body} in {planet.sign}
                           {planet.retrograde && (
-                            <span className='text-red-400 text-xs'>℞</span>
+                            <span className='text-lunary-error text-xs'>℞</span>
                           )}
                         </h5>
                         <p className='text-xs text-zinc-300 mt-1'>
@@ -1233,7 +1233,7 @@ const BirthChartPage = () => {
                           </span>
                           {planet.body} in {planet.sign}
                           {planet.retrograde && (
-                            <span className='text-red-400 text-xs'>℞</span>
+                            <span className='text-lunary-error text-xs'>℞</span>
                           )}
                         </h5>
                         <p className='text-xs text-zinc-300 mt-1'>

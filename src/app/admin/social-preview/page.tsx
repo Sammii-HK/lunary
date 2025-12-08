@@ -69,7 +69,7 @@ export default function SocialPreviewPage() {
       </div>
 
       {error && (
-        <div className='bg-red-900/50 text-red-200 p-4 rounded mb-6'>
+        <div className='bg-lunary-error-900/50 text-lunary-error-200 p-4 rounded mb-6'>
           {error}
         </div>
       )}

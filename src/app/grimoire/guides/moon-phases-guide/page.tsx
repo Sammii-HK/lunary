@@ -486,7 +486,7 @@ export default function MoonPhasesGuidePage() {
 
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div>
-                  <h4 className='text-sm font-medium text-green-400 mb-2'>
+                  <h4 className='text-sm font-medium text-lunary-success mb-2'>
                     ✓ Best Activities
                   </h4>
                   <ul className='text-sm text-zinc-400 space-y-1'>
@@ -496,7 +496,7 @@ export default function MoonPhasesGuidePage() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className='text-sm font-medium text-red-400 mb-2'>
+                  <h4 className='text-sm font-medium text-lunary-error mb-2'>
                     ✗ Avoid
                   </h4>
                   <ul className='text-sm text-zinc-400 space-y-1'>

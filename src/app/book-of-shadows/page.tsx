@@ -86,7 +86,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           {entry.moodTags.map((tag) => (
             <span
               key={tag}
-              className='text-xs bg-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded'
+              className='text-xs bg-lunary-primary-900/50 text-lunary-primary-300 px-2 py-0.5 rounded'
             >
               {tag}
             </span>
@@ -129,7 +129,7 @@ function MemoryCard({
         </div>
         <button
           onClick={() => setShowConfirm(true)}
-          className='p-2 text-zinc-500 hover:text-red-400 transition-colors'
+          className='p-2 text-zinc-500 hover:text-lunary-error transition-colors'
           aria-label='Delete memory'
         >
           <Trash2 className='w-4 h-4' />
@@ -156,7 +156,7 @@ function MemoryCard({
               onDelete(memory.id);
               setShowConfirm(false);
             }}
-            className='bg-red-600 hover:bg-red-700'
+            className='bg-lunary-error-600 hover:bg-lunary-error-700'
           >
             Delete
           </Button>

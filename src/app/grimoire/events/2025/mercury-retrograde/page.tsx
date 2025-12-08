@@ -119,14 +119,14 @@ Mercury's effects actually extend beyond the retrograde itself:
                 className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
               >
                 <div className='flex items-start gap-4'>
-                  <div className='p-2 rounded-lg bg-orange-500/20'>
-                    <Calendar className='h-6 w-6 text-orange-400' />
+                  <div className='p-2 rounded-lg bg-lunary-rose-900'>
+                    <Calendar className='h-6 w-6 text-lunary-rose' />
                   </div>
                   <div>
                     <h3 className='text-lg font-medium text-zinc-100'>
                       {period.period}
                     </h3>
-                    <p className='text-sm text-orange-300 mb-2'>
+                    <p className='text-sm text-lunary-rose-300 mb-2'>
                       {period.signs}
                     </p>
                     <p className='text-zinc-400'>{period.theme}</p>
@@ -142,8 +142,8 @@ Mercury's effects actually extend beyond the retrograde itself:
             Mercury Retrograde Survival Tips
           </h2>
           <div className='grid md:grid-cols-2 gap-4'>
-            <div className='p-6 rounded-lg border border-green-500/30 bg-green-500/10'>
-              <h3 className='text-lg font-medium text-green-400 mb-4 flex items-center gap-2'>
+            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success/10'>
+              <h3 className='text-lg font-medium text-lunary-success mb-4 flex items-center gap-2'>
                 <Check className='h-5 w-5' />
                 Do During Retrograde
               </h3>
@@ -157,8 +157,8 @@ Mercury's effects actually extend beyond the retrograde itself:
                 <li>• Practice patience and flexibility</li>
               </ul>
             </div>
-            <div className='p-6 rounded-lg border border-red-500/30 bg-red-500/10'>
-              <h3 className='text-lg font-medium text-red-400 mb-4 flex items-center gap-2'>
+            <div className='p-6 rounded-lg border border-lunary-error-700 bg-lunary-error/10'>
+              <h3 className='text-lg font-medium text-lunary-error mb-4 flex items-center gap-2'>
                 <AlertTriangle className='h-5 w-5' />
                 Avoid If Possible
               </h3>

@@ -420,10 +420,10 @@ export default function BlogManagerPage() {
                                   )}
 
                                   {dayCrystal && (
-                                    <div className='mt-3 p-3 bg-pink-950/20 border border-pink-800/30 rounded-lg'>
+                                    <div className='mt-3 p-3 bg-lunary-rose-950/20 border border-lunary-rose-800/30 rounded-lg'>
                                       <div className='flex items-center gap-2 mb-2'>
-                                        <Gem className='h-4 w-4 text-pink-300' />
-                                        <p className='text-sm font-semibold text-pink-300'>
+                                        <Gem className='h-4 w-4 text-lunary-rose-300' />
+                                        <p className='text-sm font-semibold text-lunary-rose-300'>
                                           Crystal: {dayCrystal.crystal}
                                         </p>
                                       </div>
@@ -433,7 +433,7 @@ export default function BlogManagerPage() {
                                         </p>
                                       )}
                                       {dayCrystal.intention && (
-                                        <p className='text-xs text-pink-200/80 mb-1'>
+                                        <p className='text-xs text-lunary-rose-200/80 mb-1'>
                                           Intention: {dayCrystal.intention}
                                         </p>
                                       )}
@@ -470,7 +470,7 @@ export default function BlogManagerPage() {
                 </div>
               </div>
               <div className='text-center'>
-                <div className='text-2xl font-bold text-blue-600'>
+                <div className='text-2xl font-bold text-lunary-secondary'>
                   {currentWeek.retrogradeChanges?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>
@@ -478,7 +478,7 @@ export default function BlogManagerPage() {
                 </div>
               </div>
               <div className='text-center'>
-                <div className='text-2xl font-bold text-indigo-600'>
+                <div className='text-2xl font-bold text-lunary-primary'>
                   {currentWeek.signIngresses?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>
@@ -486,7 +486,7 @@ export default function BlogManagerPage() {
                 </div>
               </div>
               <div className='text-center'>
-                <div className='text-2xl font-bold text-green-600'>
+                <div className='text-2xl font-bold text-lunary-success'>
                   {currentWeek.majorAspects?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>
@@ -494,13 +494,13 @@ export default function BlogManagerPage() {
                 </div>
               </div>
               <div className='text-center'>
-                <div className='text-2xl font-bold text-yellow-600'>
+                <div className='text-2xl font-bold text-lunary-accent'>
                   {currentWeek.moonPhases?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>Moon Phases</div>
               </div>
               <div className='text-center'>
-                <div className='text-2xl font-bold text-orange-600'>
+                <div className='text-2xl font-bold text-lunary-rose'>
                   {currentWeek.seasonalEvents?.length || 0}
                 </div>
                 <div className='text-sm text-muted-foreground'>
@@ -514,7 +514,7 @@ export default function BlogManagerPage() {
               <div className='mt-6 pt-6 border-t grid grid-cols-1 md:grid-cols-3 gap-4'>
                 {currentWeek.dailyForecasts && (
                   <div className='text-center'>
-                    <div className='text-xl font-bold text-cyan-600'>
+                    <div className='text-xl font-bold text-lunary-secondary'>
                       {currentWeek.dailyForecasts.length}
                     </div>
                     <div className='text-sm text-muted-foreground'>
@@ -524,7 +524,7 @@ export default function BlogManagerPage() {
                 )}
                 {currentWeek.crystalRecommendations && (
                   <div className='text-center'>
-                    <div className='text-xl font-bold text-pink-600'>
+                    <div className='text-xl font-bold text-lunary-rose'>
                       {currentWeek.crystalRecommendations.length}
                     </div>
                     <div className='text-sm text-muted-foreground'>
@@ -534,7 +534,7 @@ export default function BlogManagerPage() {
                 )}
                 {currentWeek.bestDaysFor && (
                   <div className='text-center'>
-                    <div className='text-xl font-bold text-emerald-600'>
+                    <div className='text-xl font-bold text-lunary-success'>
                       {
                         Object.values(currentWeek.bestDaysFor).filter(
                           (item: any) => item.dates?.length > 0,
@@ -809,10 +809,10 @@ export default function BlogManagerPage() {
                                     )}
 
                                     {dayCrystal && (
-                                      <div className='mt-3 p-3 bg-pink-950/20 border border-pink-800/30 rounded-lg'>
+                                      <div className='mt-3 p-3 bg-lunary-rose-950/20 border border-lunary-rose-800/30 rounded-lg'>
                                         <div className='flex items-center gap-2 mb-2'>
-                                          <Gem className='h-4 w-4 text-pink-300' />
-                                          <p className='text-sm font-semibold text-pink-300'>
+                                          <Gem className='h-4 w-4 text-lunary-rose-300' />
+                                          <p className='text-sm font-semibold text-lunary-rose-300'>
                                             Crystal: {dayCrystal.crystal}
                                           </p>
                                         </div>
@@ -822,7 +822,7 @@ export default function BlogManagerPage() {
                                           </p>
                                         )}
                                         {dayCrystal.intention && (
-                                          <p className='text-xs text-pink-200/80 mb-1'>
+                                          <p className='text-xs text-lunary-rose-200/80 mb-1'>
                                             Intention: {dayCrystal.intention}
                                           </p>
                                         )}

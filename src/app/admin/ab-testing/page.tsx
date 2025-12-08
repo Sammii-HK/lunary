@@ -221,7 +221,7 @@ export default function ABTestingPage() {
                             {suggestion.reason}
                           </p>
                         </div>
-                        <Badge className='bg-green-500/20 text-green-400 border-green-500/30'>
+                        <Badge className='bg-lunary-success/20 text-lunary-success border-lunary-success/30'>
                           {suggestion.confidence.toFixed(1)}% confidence
                         </Badge>
                       </div>
@@ -252,7 +252,7 @@ export default function ABTestingPage() {
                       <button
                         onClick={() => applyChanges(suggestion)}
                         disabled={applyingChanges === suggestion.testName}
-                        className='w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                        className='w-full px-4 py-2 bg-lunary-success-600 hover:bg-lunary-success-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
                       >
                         {applyingChanges === suggestion.testName ? (
                           <>
@@ -282,8 +282,8 @@ export default function ABTestingPage() {
                     <Badge
                       className={
                         test.isSignificant
-                          ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                          : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                          ? 'bg-lunary-success/20 text-lunary-success border-lunary-success/30'
+                          : 'bg-lunary-accent/20 text-lunary-accent border-lunary-accent-700'
                       }
                     >
                       {test.confidence.toFixed(1)}% confidence
@@ -300,9 +300,9 @@ export default function ABTestingPage() {
                         </h3>
                         {test.variantA.conversionRate >
                         test.variantB.conversionRate ? (
-                          <TrendingUp className='w-5 h-5 text-green-400' />
+                          <TrendingUp className='w-5 h-5 text-lunary-success' />
                         ) : (
-                          <TrendingDown className='w-5 h-5 text-red-400' />
+                          <TrendingDown className='w-5 h-5 text-lunary-error' />
                         )}
                       </div>
                       <div className='space-y-2'>
@@ -337,9 +337,9 @@ export default function ABTestingPage() {
                         </h3>
                         {test.variantB.conversionRate >
                         test.variantA.conversionRate ? (
-                          <TrendingUp className='w-5 h-5 text-green-400' />
+                          <TrendingUp className='w-5 h-5 text-lunary-success' />
                         ) : (
-                          <TrendingDown className='w-5 h-5 text-red-400' />
+                          <TrendingDown className='w-5 h-5 text-lunary-error' />
                         )}
                       </div>
                       <div className='space-y-2'>

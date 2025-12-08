@@ -295,7 +295,7 @@ export default function ShopManagerPage() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <Package className='h-5 w-5 text-blue-500' />
+              <Package className='h-5 w-5 text-lunary-secondary' />
               <div>
                 <p className='text-2xl font-bold'>{packs.length}</p>
                 <p className='text-sm text-muted-foreground'>Total Packs</p>
@@ -307,7 +307,7 @@ export default function ShopManagerPage() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <CheckCircle className='h-5 w-5 text-green-500' />
+              <CheckCircle className='h-5 w-5 text-lunary-success' />
               <div>
                 <p className='text-2xl font-bold'>
                   {packs.filter((p) => p.isPublished).length}
@@ -335,7 +335,7 @@ export default function ShopManagerPage() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <Tag className='h-5 w-5 text-orange-500' />
+              <Tag className='h-5 w-5 text-lunary-rose' />
               <div>
                 <p className='text-2xl font-bold'>
                   {new Set(packs.map((p) => p.series)).size}
@@ -526,7 +526,7 @@ export default function ShopManagerPage() {
                             <Badge variant='outline'>{pack.series}</Badge>
                             <Badge variant='secondary'>{pack.volume}</Badge>
                             {pack.isPublished ? (
-                              <Badge className='bg-green-100 text-green-800'>
+                              <Badge className='bg-lunary-success-100 text-lunary-success-800'>
                                 Published
                               </Badge>
                             ) : (

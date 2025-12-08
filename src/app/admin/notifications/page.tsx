@@ -562,7 +562,7 @@ export default function NotificationAdminPage() {
             onClick={() => setActiveTab('preview')}
             className={`pb-3 px-1 text-sm font-medium transition-colors ${
               activeTab === 'preview'
-                ? 'border-b-2 border-blue-500 text-blue-400'
+                ? 'border-b-2 border-lunary-secondary text-lunary-secondary'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -572,7 +572,7 @@ export default function NotificationAdminPage() {
             onClick={() => setActiveTab('history')}
             className={`pb-3 px-1 text-sm font-medium transition-colors ${
               activeTab === 'history'
-                ? 'border-b-2 border-blue-500 text-blue-400'
+                ? 'border-b-2 border-lunary-secondary text-lunary-secondary'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -627,7 +627,7 @@ export default function NotificationAdminPage() {
                         key={index}
                         className={`border rounded-lg p-4 md:p-6 ${
                           notification.wouldSend
-                            ? 'border-green-600 bg-green-950/20'
+                            ? 'border-lunary-success-600 bg-lunary-success-950/20'
                             : 'border-zinc-700 bg-zinc-800/50'
                         }`}
                       >
@@ -645,8 +645,8 @@ export default function NotificationAdminPage() {
                               <span
                                 className={
                                   notification.wouldSend
-                                    ? 'text-green-400'
-                                    : 'text-red-400'
+                                    ? 'text-lunary-success'
+                                    : 'text-lunary-error'
                                 }
                               >
                                 {notification.wouldSend
@@ -657,7 +657,7 @@ export default function NotificationAdminPage() {
                           </div>
                           <button
                             onClick={() => sendTestNotification(notification)}
-                            className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors whitespace-nowrap'
+                            className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 text-white text-sm rounded transition-colors whitespace-nowrap'
                           >
                             Test Send
                           </button>
@@ -750,9 +750,9 @@ export default function NotificationAdminPage() {
                           <span
                             className={`${
                               notification.priority >= 9
-                                ? 'text-red-400'
+                                ? 'text-lunary-error'
                                 : notification.priority >= 7
-                                  ? 'text-yellow-400'
+                                  ? 'text-lunary-accent'
                                   : 'text-zinc-400'
                             }`}
                           >

@@ -29,7 +29,7 @@ const events2026 = [
     icon: Star,
     description: 'Mercury retrograde dates, survival tips, and what to expect',
     dates: '3-4 times per year',
-    color: 'text-amber-400',
+    color: 'text-lunary-accent',
   },
   {
     title: 'Venus Retrograde 2026',
@@ -37,7 +37,7 @@ const events2026 = [
     icon: Sparkles,
     description: 'Love and relationships during Venus retrograde',
     dates: 'March 1 - April 12',
-    color: 'text-pink-400',
+    color: 'text-lunary-rose',
   },
   {
     title: '2026 Eclipses',

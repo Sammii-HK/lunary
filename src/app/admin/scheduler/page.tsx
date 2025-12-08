@@ -251,7 +251,7 @@ export default function SchedulerAdminPage() {
               <button
                 onClick={scheduleToday}
                 disabled={loading}
-                className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
+                className='bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-lunary-secondary-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
               >
                 {loading ? '⏳ Creating Post...' : "⚡ Test Today's Post"}
               </button>
@@ -291,7 +291,7 @@ export default function SchedulerAdminPage() {
                   }
                 }}
                 disabled={loading}
-                className='bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
+                className='bg-lunary-success-600 hover:bg-lunary-success-700 disabled:bg-lunary-success-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
               >
                 {loading ? '⏳ Testing...' : '🔍 Test Cosmic API'}
               </button>
@@ -303,8 +303,8 @@ export default function SchedulerAdminPage() {
           <div
             className={`rounded-lg p-6 mb-8 ${
               result.success
-                ? 'bg-green-900/30 border border-green-700'
-                : 'bg-red-900/30 border border-red-700'
+                ? 'bg-lunary-success-900/30 border border-lunary-success-700'
+                : 'bg-lunary-error-900/30 border border-lunary-error-700'
             }`}
           >
             <h3 className='text-lg font-semibold mb-4 flex items-center'>
@@ -393,19 +393,19 @@ export default function SchedulerAdminPage() {
                   <div className='text-sm text-zinc-400'>Total Posts</div>
                 </div>
                 <div className='bg-zinc-800 rounded p-3'>
-                  <div className='text-2xl font-bold text-green-400'>
+                  <div className='text-2xl font-bold text-lunary-success'>
                     {result.summary.successful}
                   </div>
                   <div className='text-sm text-zinc-400'>Successful</div>
                 </div>
                 <div className='bg-zinc-800 rounded p-3'>
-                  <div className='text-2xl font-bold text-red-400'>
+                  <div className='text-2xl font-bold text-lunary-error'>
                     {result.summary.failed}
                   </div>
                   <div className='text-sm text-zinc-400'>Failed</div>
                 </div>
                 <div className='bg-zinc-800 rounded p-3'>
-                  <div className='text-lg font-bold text-blue-400'>
+                  <div className='text-lg font-bold text-lunary-secondary'>
                     {result.summary.month}
                   </div>
                   <div className='text-sm text-zinc-400'>Target Month</div>
@@ -424,8 +424,8 @@ export default function SchedulerAdminPage() {
                       key={index}
                       className={`flex justify-between items-center p-2 rounded text-sm ${
                         item.status === 'success'
-                          ? 'bg-green-900/30 text-green-300'
-                          : 'bg-red-900/30 text-red-300'
+                          ? 'bg-lunary-success-900/30 text-lunary-success-300'
+                          : 'bg-lunary-error-900/30 text-lunary-error-300'
                       }`}
                     >
                       <span>{item.date}</span>
@@ -485,7 +485,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary hover:bg-lunary-primary-400 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         𝕏 Twitter
                       </button>
@@ -496,7 +496,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-blue-800 hover:bg-blue-900 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-secondary-800 hover:bg-lunary-secondary-900 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📘 Facebook
                       </button>
@@ -507,7 +507,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-blue-700 hover:bg-blue-800 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-secondary-700 hover:bg-lunary-secondary-800 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         💼 LinkedIn
                       </button>
@@ -526,7 +526,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-red-600 hover:bg-red-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-error-600 hover:bg-lunary-error-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📌 Pinterest
                       </button>
@@ -537,7 +537,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-rose-600 hover:bg-lunary-rose-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         🤖 Reddit
                       </button>
@@ -548,7 +548,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         🌀 Tumblr
                       </button>
@@ -568,7 +568,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-success-600 hover:bg-lunary-success-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         💬 WhatsApp
                       </button>
@@ -579,7 +579,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-secondary hover:bg-lunary-primary px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         ✈️ Telegram
                       </button>
@@ -646,7 +646,7 @@ export default function SchedulerAdminPage() {
                             `cosmic-post-${today}.txt`,
                           );
                         }}
-                        className='bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-success-600 hover:bg-lunary-success-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📥 Download
                       </button>

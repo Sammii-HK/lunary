@@ -259,7 +259,7 @@ export default function DailyPostsPreviewPage() {
                   </div>
 
                   {/* Hashtags */}
-                  {/* <div className='text-xs text-blue-400'>{post.hashtags}</div> */}
+                  {/* <div className='text-xs text-lunary-secondary'>{post.hashtags}</div> */}
                 </div>
 
                 {/* Image Preview */}
@@ -327,25 +327,25 @@ export default function DailyPostsPreviewPage() {
             </button>
             <button
               onClick={() => window.open('/admin/scheduler', '_blank')}
-              className='px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 rounded-md text-white font-medium transition-colors'
             >
               Manual Scheduler
             </button>
             <a
               href='/admin/tarot-gallery'
-              className='px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
             >
               Tarot Gallery
             </a>
             <a
               href='/admin/crystal-gallery'
-              className='px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-success-600 hover:bg-lunary-success-700 rounded-md text-white font-medium transition-colors'
             >
               Crystal Gallery
             </a>
             <button
               onClick={() => setCacheBuster(Date.now())}
-              className='px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-error-600 hover:bg-lunary-error-700 rounded-md text-white font-medium transition-colors'
             >
               🔄 Refresh Images
             </button>

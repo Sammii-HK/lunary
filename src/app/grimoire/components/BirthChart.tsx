@@ -330,7 +330,7 @@ const BirthChart = () => {
             href='/grimoire/aspects/types/conjunction'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
-            <h3 className='text-lg font-medium text-green-400 mb-2 group-hover:text-green-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-success mb-2 group-hover:text-lunary-success-300 transition-colors'>
               Conjunction (0°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -342,7 +342,7 @@ const BirthChart = () => {
             href='/grimoire/aspects/types/opposition'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
-            <h3 className='text-lg font-medium text-red-400 mb-2 group-hover:text-red-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-error mb-2 group-hover:text-lunary-error-300 transition-colors'>
               Opposition (180°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -355,7 +355,7 @@ const BirthChart = () => {
             href='/grimoire/aspects/types/trine'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
-            <h3 className='text-lg font-medium text-blue-400 mb-2 group-hover:text-blue-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-secondary mb-2 group-hover:text-lunary-secondary-300 transition-colors'>
               Trine (120°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -367,7 +367,7 @@ const BirthChart = () => {
             href='/grimoire/aspects/types/square'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
-            <h3 className='text-lg font-medium text-yellow-400 mb-2 group-hover:text-yellow-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2 group-hover:text-lunary-accent-300 transition-colors'>
               Square (90°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -490,7 +490,7 @@ const BirthChart = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Jupiter Return (Every 12 years)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>

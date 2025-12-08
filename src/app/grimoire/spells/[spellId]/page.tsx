@@ -32,9 +32,9 @@ export default function SpellPage() {
 
   const categoryInfo = spellCategories[spell.category];
   const difficultyColors = {
-    beginner: 'text-green-400',
-    intermediate: 'text-yellow-400',
-    advanced: 'text-red-400',
+    beginner: 'text-lunary-success',
+    intermediate: 'text-lunary-accent',
+    advanced: 'text-lunary-error',
   };
 
   const howToSchema = createHowToSchema({
@@ -79,7 +79,7 @@ export default function SpellPage() {
           <span className='bg-purple-900/40 text-purple-300 px-3 py-1 rounded-full'>
             {categoryInfo.name}
           </span>
-          <span className='bg-blue-900/40 text-blue-300 px-3 py-1 rounded-full'>
+          <span className='bg-lunary-secondary-900/40 text-lunary-secondary-300 px-3 py-1 rounded-full'>
             {spell.type.replace('_', ' ')}
           </span>
           <span
@@ -106,7 +106,7 @@ export default function SpellPage() {
 
         {/* Timing */}
         <div className='bg-zinc-800 rounded-lg p-4'>
-          <h2 className='text-xl font-semibold text-blue-400 mb-3 flex items-center gap-2'>
+          <h2 className='text-xl font-semibold text-lunary-secondary mb-3 flex items-center gap-2'>
             <Moon className='w-5 h-5' />
             Optimal Timing
           </h2>
@@ -146,15 +146,18 @@ export default function SpellPage() {
 
         {/* Ingredients */}
         <div className='bg-zinc-800 rounded-lg p-4'>
-          <h2 className='text-xl font-semibold text-green-400 mb-3 flex items-center gap-2'>
+          <h2 className='text-xl font-semibold text-lunary-success mb-3 flex items-center gap-2'>
             <Leaf className='w-5 h-5' />
             Ingredients
           </h2>
           <div className='space-y-3'>
             {spell.ingredients.map((ingredient, index) => (
-              <div key={index} className='border-l-4 border-green-600 pl-4'>
+              <div
+                key={index}
+                className='border-l-4 border-lunary-success-600 pl-4'
+              >
                 <div className='flex justify-between items-start mb-1'>
-                  <span className='font-medium text-green-300'>
+                  <span className='font-medium text-lunary-success-300'>
                     {ingredient.name}
                   </span>
                   {ingredient.amount && (
@@ -179,7 +182,7 @@ export default function SpellPage() {
         {/* Tools */}
         {spell.tools.length > 0 && (
           <div className='bg-zinc-800 rounded-lg p-4'>
-            <h2 className='text-xl font-semibold text-orange-400 mb-3'>
+            <h2 className='text-xl font-semibold text-lunary-rose mb-3'>
               Tools Needed
             </h2>
             <ul className='space-y-1'>
@@ -188,7 +191,7 @@ export default function SpellPage() {
                   key={index}
                   className='text-zinc-200 flex items-center gap-2'
                 >
-                  <span className='w-2 h-2 bg-orange-400 rounded-full'></span>
+                  <span className='w-2 h-2 bg-lunary-rose rounded-full'></span>
                   {tool}
                 </li>
               ))}
@@ -198,13 +201,13 @@ export default function SpellPage() {
 
         {/* Preparation */}
         <div className='bg-zinc-800 rounded-lg p-4'>
-          <h2 className='text-xl font-semibold text-indigo-400 mb-3'>
+          <h2 className='text-xl font-semibold text-lunary-primary mb-3'>
             Preparation
           </h2>
           <ol className='space-y-2'>
             {spell.preparation.map((step, index) => (
               <li key={index} className='text-zinc-200 flex gap-3'>
-                <span className='flex-shrink-0 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-medium'>
+                <span className='flex-shrink-0 w-6 h-6 bg-lunary-primary text-white rounded-full flex items-center justify-center text-sm font-medium'>
                   {index + 1}
                 </span>
                 <span>{step}</span>
@@ -232,7 +235,7 @@ export default function SpellPage() {
       </div>
       {/* Correspondences */}
       <div className='bg-zinc-800 rounded-lg p-4'>
-        <h2 className='text-xl font-semibold text-yellow-400 mb-3'>
+        <h2 className='text-xl font-semibold text-lunary-accent mb-3'>
           Correspondences
         </h2>
         <div className='space-y-3 text-sm'>
@@ -243,7 +246,7 @@ export default function SpellPage() {
                 {spell.correspondences.elements.map((element, index) => (
                   <span
                     key={index}
-                    className='bg-yellow-900/40 text-yellow-300 px-2 py-1 rounded text-xs'
+                    className='bg-lunary-accent-900/40 text-lunary-accent-300 px-2 py-1 rounded text-xs'
                   >
                     {element}
                   </span>
@@ -288,7 +291,7 @@ export default function SpellPage() {
                 {spell.correspondences.planets.map((planet, index) => (
                   <span
                     key={index}
-                    className='bg-blue-900/40 text-blue-300 px-2 py-1 rounded text-xs'
+                    className='bg-lunary-secondary-900/40 text-lunary-secondary-300 px-2 py-1 rounded text-xs'
                   >
                     {planet}
                   </span>
@@ -300,14 +303,17 @@ export default function SpellPage() {
       </div>
 
       {/* Safety */}
-      <div className='bg-red-900/20 border border-red-800 rounded-lg p-4'>
-        <h2 className='text-xl font-semibold text-red-400 mb-3'>
+      <div className='bg-lunary-error-900/20 border border-red-800 rounded-lg p-4'>
+        <h2 className='text-xl font-semibold text-lunary-error mb-3'>
           Safety & Ethics
         </h2>
         <ul className='space-y-2 text-sm'>
           {spell.safety.map((safety, index) => (
-            <li key={index} className='text-red-200 flex items-start gap-2'>
-              <span className='text-red-400 mt-1'>•</span>
+            <li
+              key={index}
+              className='text-lunary-error-200 flex items-start gap-2'
+            >
+              <span className='text-lunary-error mt-1'>•</span>
               <span>{safety}</span>
             </li>
           ))}
@@ -317,13 +323,13 @@ export default function SpellPage() {
       {/* Variations */}
       {spell.variations && (
         <div className='bg-zinc-800 rounded-lg p-4'>
-          <h2 className='text-xl font-semibold text-cyan-400 mb-3'>
+          <h2 className='text-xl font-semibold text-lunary-secondary mb-3'>
             Variations
           </h2>
           <ul className='space-y-2 text-sm'>
             {spell.variations.map((variation, index) => (
               <li key={index} className='text-zinc-200 flex items-start gap-2'>
-                <span className='text-cyan-400 mt-1'>•</span>
+                <span className='text-lunary-secondary mt-1'>•</span>
                 <span>{variation}</span>
               </li>
             ))}
@@ -334,7 +340,7 @@ export default function SpellPage() {
       {/* History */}
       {spell.history && (
         <div className='bg-zinc-800 rounded-lg p-4'>
-          <h2 className='text-xl font-semibold text-amber-400 mb-3'>
+          <h2 className='text-xl font-semibold text-lunary-accent mb-3'>
             Historical Context
           </h2>
           <p className='text-zinc-200 text-sm'>{spell.history}</p>

@@ -214,7 +214,7 @@ export default function TarotGalleryPage() {
           </a>
           <a
             href='/admin/crystal-gallery'
-            className='px-6 py-3 bg-green-600 hover:bg-green-700 rounded-md text-white font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-success-600 hover:bg-lunary-success-700 rounded-md text-white font-medium transition-colors'
           >
             View Crystal Gallery →
           </a>

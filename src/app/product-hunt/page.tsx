@@ -62,7 +62,7 @@ export default function ProductHuntPage() {
   return (
     <div className='w-full max-w-5xl space-y-12 px-4 py-10 text-white'>
       <section className='space-y-6 rounded-3xl border border-white/10 bg-black/50 p-8 shadow-2xl'>
-        <p className='text-xs uppercase tracking-[0.4em] text-orange-200'>
+        <p className='text-xs uppercase tracking-[0.4em] text-lunary-rose-200'>
           Product Hunt · Coming Soon
         </p>
         <h1 className='text-4xl font-semibold'>
@@ -74,11 +74,11 @@ export default function ProductHuntPage() {
           intelligence so you can plan launches, rituals, and creative sprints
           with confidence.
         </p>
-        <div className='flex flex-wrap gap-3 text-sm text-orange-100'>
+        <div className='flex flex-wrap gap-3 text-sm text-lunary-rose-100'>
           {features.map((feature) => (
             <span
               key={feature}
-              className='rounded-full border border-orange-300/40 px-4 py-2 text-xs uppercase tracking-[0.3em]'
+              className='rounded-full border border-lunary-rose-300/40 px-4 py-2 text-xs uppercase tracking-[0.3em]'
             >
               {feature}
             </span>
@@ -153,7 +153,7 @@ export default function ProductHuntPage() {
         <Link
           href='https://www.producthunt.com/'
           target='_blank'
-          className='inline-flex items-center gap-2 text-sm text-orange-200 underline'
+          className='inline-flex items-center gap-2 text-sm text-lunary-rose-200 underline'
         >
           Visit the Product Hunt preview →
         </Link>

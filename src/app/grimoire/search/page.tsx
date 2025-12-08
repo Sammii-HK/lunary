@@ -38,17 +38,25 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
   zodiac: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-  planet: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  tarot: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-  crystal: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  ritual: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-  concept: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  horoscope: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
-  'chinese-zodiac': 'bg-red-500/20 text-red-300 border-red-500/30',
-  season: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  numerology: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  birthday: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
-  compatibility: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30',
+  planet:
+    'bg-lunary-accent-900 text-lunary-accent-300 border-lunary-accent-700',
+  tarot: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+  crystal:
+    'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
+  ritual:
+    'bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700',
+  concept:
+    'bg-lunary-success-900 text-lunary-success-300 border-lunary-success-700',
+  horoscope:
+    'bg-lunary-highlight-900 text-lunary-highlight-300 border-lunary-highlight-700',
+  'chinese-zodiac':
+    'bg-lunary-error-900 text-lunary-error-300 border-lunary-error-700',
+  season: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+  numerology:
+    'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
+  birthday: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+  compatibility:
+    'bg-lunary-highlight-900 text-lunary-highlight-300 border-lunary-highlight-700',
 };
 
 interface SearchResultCardProps {

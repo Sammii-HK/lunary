@@ -66,9 +66,9 @@ export default function EventsIndexPage() {
           <div className='grid md:grid-cols-2 gap-4'>
             <Link
               href='/grimoire/events/2025/mercury-retrograde'
-              className='group p-4 rounded-lg border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 transition-colors'
+              className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose/10 hover:bg-lunary-rose-900 transition-colors'
             >
-              <h3 className='font-medium text-zinc-100 group-hover:text-orange-300 mb-1'>
+              <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 mb-1'>
                 Mercury Retrograde 2025
               </h3>
               <p className='text-sm text-zinc-400'>
@@ -78,9 +78,9 @@ export default function EventsIndexPage() {
 
             <Link
               href='/grimoire/events/2025/venus-retrograde'
-              className='group p-4 rounded-lg border border-pink-500/30 bg-pink-500/10 hover:bg-pink-500/20 transition-colors'
+              className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose/10 hover:bg-lunary-rose-900 transition-colors'
             >
-              <h3 className='font-medium text-zinc-100 group-hover:text-pink-300 mb-1'>
+              <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 mb-1'>
                 Venus Retrograde 2025
               </h3>
               <p className='text-sm text-zinc-400'>
@@ -90,9 +90,9 @@ export default function EventsIndexPage() {
 
             <Link
               href='/grimoire/events/2025/eclipses'
-              className='group p-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 transition-colors'
+              className='group p-4 rounded-lg border border-lunary-accent-700 bg-lunary-accent/10 hover:bg-lunary-accent-900 transition-colors'
             >
-              <h3 className='font-medium text-zinc-100 group-hover:text-amber-300 mb-1'>
+              <h3 className='font-medium text-zinc-100 group-hover:text-lunary-accent-300 mb-1'>
                 2025 Eclipses
               </h3>
               <p className='text-sm text-zinc-400'>
@@ -102,9 +102,9 @@ export default function EventsIndexPage() {
 
             <Link
               href='/grimoire/moon-rituals'
-              className='group p-4 rounded-lg border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 transition-colors'
+              className='group p-4 rounded-lg border border-lunary-secondary-700 bg-lunary-secondary/10 hover:bg-lunary-secondary-900 transition-colors'
             >
-              <h3 className='font-medium text-zinc-100 group-hover:text-blue-300 mb-1'>
+              <h3 className='font-medium text-zinc-100 group-hover:text-lunary-secondary-300 mb-1'>
                 Moon Rituals
               </h3>
               <p className='text-sm text-zinc-400'>

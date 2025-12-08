@@ -20,7 +20,7 @@ export default function NewsletterVerifyPage() {
 
         {success && !error && (
           <div className='text-center py-8'>
-            <CheckCircle className='h-12 w-12 mx-auto mb-4 text-green-400' />
+            <CheckCircle className='h-12 w-12 mx-auto mb-4 text-lunary-success' />
             <p className='text-white mb-4 text-lg font-medium'>
               {alreadyVerified
                 ? 'Email Already Verified'
@@ -42,7 +42,7 @@ export default function NewsletterVerifyPage() {
 
         {error && (
           <div className='text-center py-8'>
-            <XCircle className='h-12 w-12 mx-auto mb-4 text-red-400' />
+            <XCircle className='h-12 w-12 mx-auto mb-4 text-lunary-error' />
             <p className='text-white mb-4 text-lg font-medium'>
               Verification Failed
             </p>

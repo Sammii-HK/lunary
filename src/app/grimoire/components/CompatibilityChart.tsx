@@ -985,17 +985,17 @@ export default function CompatibilityChart() {
   };
 
   const getScoreColor = (score: number): string => {
-    if (score >= 85) return 'text-green-400';
-    if (score >= 70) return 'text-yellow-400';
-    if (score >= 55) return 'text-orange-400';
-    return 'text-red-400';
+    if (score >= 85) return 'text-lunary-success';
+    if (score >= 70) return 'text-lunary-accent';
+    if (score >= 55) return 'text-lunary-rose';
+    return 'text-lunary-error';
   };
 
   const getScoreBgColor = (score: number): string => {
-    if (score >= 85) return 'bg-green-500/20 border-green-500/50';
-    if (score >= 70) return 'bg-yellow-500/20 border-yellow-500/50';
-    if (score >= 55) return 'bg-orange-500/20 border-orange-500/50';
-    return 'bg-red-500/20 border-red-500/50';
+    if (score >= 85) return 'bg-lunary-success-900 border-lunary-success-600';
+    if (score >= 70) return 'bg-lunary-accent-900 border-lunary-accent-600';
+    if (score >= 55) return 'bg-lunary-rose-900 border-lunary-rose-600';
+    return 'bg-lunary-error-900 border-lunary-error/50';
   };
 
   const result = getCompatibilityResult();
@@ -1132,7 +1132,7 @@ export default function CompatibilityChart() {
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'>
               <div>
-                <h3 className='text-sm font-medium text-green-400 mb-2'>
+                <h3 className='text-sm font-medium text-lunary-success mb-2'>
                   Strengths
                 </h3>
                 <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
@@ -1143,7 +1143,7 @@ export default function CompatibilityChart() {
               </div>
 
               <div>
-                <h3 className='text-sm font-medium text-orange-400 mb-2'>
+                <h3 className='text-sm font-medium text-lunary-rose mb-2'>
                   Challenges
                 </h3>
                 <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
@@ -1193,19 +1193,19 @@ export default function CompatibilityChart() {
                 </h3>
                 <ul className='list-disc list-inside space-y-2 ml-2'>
                   <li>
-                    <strong className='text-green-400'>85-100%:</strong>{' '}
+                    <strong className='text-lunary-success'>85-100%:</strong>{' '}
                     Excellent compatibility with strong shared strengths
                   </li>
                   <li>
-                    <strong className='text-yellow-400'>70-84%:</strong> Good
+                    <strong className='text-lunary-accent'>70-84%:</strong> Good
                     compatibility with some challenges to navigate
                   </li>
                   <li>
-                    <strong className='text-orange-400'>55-69%:</strong>{' '}
+                    <strong className='text-lunary-rose'>55-69%:</strong>{' '}
                     Moderate compatibility requiring understanding and effort
                   </li>
                   <li>
-                    <strong className='text-red-400'>Below 55%:</strong>{' '}
+                    <strong className='text-lunary-error'>Below 55%:</strong>{' '}
                     Challenging compatibility that may require significant work
                   </li>
                 </ul>

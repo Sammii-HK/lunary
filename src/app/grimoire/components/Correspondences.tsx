@@ -379,8 +379,10 @@ const Correspondences = () => {
                 content is not intended as medical advice, diagnosis, or
                 treatment.
               </p>
-              <div className='p-3 bg-red-500/10 border border-red-500/30 rounded'>
-                <strong className='text-red-300'>Important Disclaimer:</strong>
+              <div className='p-3 bg-lunary-error/10 border border-lunary-error-700 rounded'>
+                <strong className='text-lunary-error-300'>
+                  Important Disclaimer:
+                </strong>
                 <ul className='list-disc list-inside mt-2 space-y-1'>
                   <li>Always research herbs thoroughly before any use</li>
                   <li>
@@ -432,7 +434,9 @@ const Correspondences = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Sage</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Sage
+            </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Purification, wisdom, protection,
@@ -458,7 +462,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Rosemary
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -485,7 +489,9 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Basil</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Basil
+            </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Protection, prosperity, love,
@@ -537,7 +543,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-orange-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-rose mb-2'>
               Cinnamon
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -565,7 +571,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-pink-400 mb-2'>Rose</h3>
+            <h3 className='text-lg font-medium text-lunary-rose mb-2'>Rose</h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Love, beauty, healing, protection,
@@ -590,7 +596,9 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Mint</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Mint
+            </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Prosperity, protection, healing,
@@ -615,7 +623,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Chamomile
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -671,7 +679,9 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Thyme</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Thyme
+            </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Courage, purification, health,
@@ -696,7 +706,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-blue-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-secondary mb-2'>
               Eucalyptus
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>

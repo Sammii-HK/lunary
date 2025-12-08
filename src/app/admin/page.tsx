@@ -73,14 +73,14 @@ function LockedAdminBackdrop() {
       metric: 'Next run · 3h',
       status: 'Stable',
       icon: Activity,
-      accent: 'text-green-300',
+      accent: 'text-lunary-success-300',
     },
     {
       title: 'Content Pipeline',
       metric: '8 drafts',
       status: 'Awaiting review',
       icon: BookOpen,
-      accent: 'text-blue-300',
+      accent: 'text-lunary-secondary-300',
     },
     {
       title: 'Notifications',
@@ -94,21 +94,21 @@ function LockedAdminBackdrop() {
       metric: '24 products',
       status: 'Synced',
       icon: Store,
-      accent: 'text-emerald-300',
+      accent: 'text-lunary-success-300',
     },
     {
       title: 'Scheduler',
       metric: '5 campaigns',
       status: 'Auto',
       icon: Calendar,
-      accent: 'text-pink-300',
+      accent: 'text-lunary-rose-300',
     },
     {
       title: 'Newsletter',
       metric: 'Weekly drop',
       status: 'In progress',
       icon: Mail,
-      accent: 'text-orange-300',
+      accent: 'text-lunary-rose-300',
     },
   ];
 
@@ -450,7 +450,9 @@ export default function AdminDashboard() {
     return (
       <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
         <div className='text-center max-w-md space-y-4'>
-          <h1 className='text-2xl font-bold text-red-400'>Access Denied</h1>
+          <h1 className='text-2xl font-bold text-lunary-error'>
+            Access Denied
+          </h1>
           <p className='text-zinc-400'>
             {authIssue.details ||
               "You don't have permission to access the admin dashboard."}
@@ -690,24 +692,24 @@ export default function AdminDashboard() {
       icon: <Activity className='h-5 w-5 md:h-6 md:w-6' />,
       tools: analyticsTools,
       color: 'from-orange-600/20 to-orange-600/5',
-      iconColor: 'text-orange-400',
-      borderColor: 'border-orange-500/30',
+      iconColor: 'text-lunary-rose',
+      borderColor: 'border-lunary-rose-700',
     },
     {
       title: 'Content',
       icon: <FileText className='h-5 w-5 md:h-6 md:w-6' />,
       tools: contentTools,
       color: 'from-blue-600/20 to-blue-600/5',
-      iconColor: 'text-blue-400',
-      borderColor: 'border-blue-500/30',
+      iconColor: 'text-lunary-secondary',
+      borderColor: 'border-lunary-secondary/30',
     },
     {
       title: 'Shop & Assets',
       icon: <Store className='h-5 w-5 md:h-6 md:w-6' />,
       tools: shopTools,
       color: 'from-green-600/20 to-green-600/5',
-      iconColor: 'text-green-400',
-      borderColor: 'border-green-500/30',
+      iconColor: 'text-lunary-success',
+      borderColor: 'border-lunary-success/30',
     },
     {
       title: 'Engagement',
@@ -723,19 +725,19 @@ export default function AdminDashboard() {
     switch (status) {
       case 'new':
         return (
-          <Badge className='bg-green-500/20 text-green-400 border-green-500/30'>
+          <Badge className='bg-lunary-success/20 text-lunary-success border-lunary-success/30'>
             New
           </Badge>
         );
       case 'beta':
         return (
-          <Badge className='bg-yellow-500/20 text-yellow-400 border-yellow-500/30'>
+          <Badge className='bg-lunary-accent/20 text-lunary-accent border-lunary-accent-700'>
             Beta
           </Badge>
         );
       case 'active':
         return (
-          <Badge className='bg-blue-500/20 text-blue-400 border-blue-500/30'>
+          <Badge className='bg-lunary-secondary/20 text-lunary-secondary border-lunary-secondary/30'>
             Active
           </Badge>
         );
@@ -939,7 +941,9 @@ export default function AdminDashboard() {
                           {/* Free Post */}
                           <div className='mb-6'>
                             <div className='flex items-center gap-2 mb-3'>
-                              <Badge className='bg-green-600'>Free Tier</Badge>
+                              <Badge className='bg-lunary-success-600'>
+                                Free Tier
+                              </Badge>
                               <span className='text-sm text-zinc-400'>
                                 {substackPreview.free?.title || 'No title'}
                               </span>
@@ -989,7 +993,7 @@ export default function AdminDashboard() {
                             onClick={() => testSubstackPublish('free')}
                             disabled={substackPublishing || !substackPreview}
                             variant='outline'
-                            className='flex-1 bg-green-600 hover:bg-green-700 border-green-500 text-white disabled:opacity-50'
+                            className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 border-lunary-success text-white disabled:opacity-50'
                           >
                             <Play className='h-4 w-4 mr-2' />
                             {substackPublishing
@@ -1124,10 +1128,10 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-secondary/50 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
-                  <Calendar className='h-8 w-8 text-blue-400' />
+                  <Calendar className='h-8 w-8 text-lunary-secondary' />
                   <div className='text-center'>
                     <div className='font-semibold text-base mb-1'>Calendar</div>
                     <div className='text-xs text-zinc-400'>Generate year</div>
@@ -1174,10 +1178,10 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-green-500/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-success/50 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
-                  <Package className='h-8 w-8 text-green-400' />
+                  <Package className='h-8 w-8 text-lunary-success' />
                   <div className='text-center'>
                     <div className='font-semibold text-base mb-1'>
                       Monthly Packs
@@ -1218,10 +1222,10 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-accent/50 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
-                  <Package className='h-8 w-8 text-yellow-400' />
+                  <Package className='h-8 w-8 text-lunary-accent' />
                   <div className='text-center'>
                     <div className='font-semibold text-base mb-1'>
                       Yearly Pack
@@ -1355,10 +1359,10 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-secondary/50 text-white transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
-                  <Calendar className='h-8 w-8 text-blue-400' />
+                  <Calendar className='h-8 w-8 text-lunary-secondary' />
                   <div className='text-center'>
                     <div className='font-semibold text-base mb-1'>
                       This Year
@@ -1373,13 +1377,13 @@ export default function AdminDashboard() {
               <Button
                 asChild
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-green-500/50 text-white transition-all'
+                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-success/50 text-white transition-all'
               >
                 <Link
                   href='/admin/shop-manager'
                   className='flex flex-col items-center gap-3 w-full'
                 >
-                  <Store className='h-8 w-8 text-green-400' />
+                  <Store className='h-8 w-8 text-lunary-success' />
                   <div className='text-center'>
                     <div className='font-semibold text-base mb-1'>
                       Custom Pack
@@ -1441,16 +1445,16 @@ export default function AdminDashboard() {
               {migrationStatus && !migrationStatus.error && (
                 <div className='mt-4 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
-                    <div className='p-3 rounded-lg bg-blue-500/10 border border-blue-500/20'>
-                      <p className='text-xs text-blue-400 uppercase tracking-wider'>
+                    <div className='p-3 rounded-lg bg-lunary-secondary/10 border border-lunary-secondary/20'>
+                      <p className='text-xs text-lunary-secondary uppercase tracking-wider'>
                         Postgres Users
                       </p>
                       <p className='text-2xl font-bold text-white'>
                         {migrationStatus.postgres?.count ?? 'N/A'}
                       </p>
                     </div>
-                    <div className='p-3 rounded-lg bg-green-500/10 border border-green-500/20'>
-                      <p className='text-xs text-green-400 uppercase tracking-wider'>
+                    <div className='p-3 rounded-lg bg-lunary-success/10 border border-lunary-success/20'>
+                      <p className='text-xs text-lunary-success uppercase tracking-wider'>
                         Recent Signups (30d)
                       </p>
                       <p className='text-2xl font-bold text-white'>
@@ -1469,7 +1473,7 @@ export default function AdminDashboard() {
 
                   <div className='p-3 rounded-lg bg-zinc-900/50 border border-zinc-700/50'>
                     <p className='text-sm text-zinc-400'>
-                      <span className='text-green-400 font-medium'>
+                      <span className='text-lunary-success font-medium'>
                         Migration method:
                       </span>{' '}
                       {migrationStatus.migration?.description}
@@ -1501,10 +1505,10 @@ export default function AdminDashboard() {
               )}
 
               {migrationStatus?.error && (
-                <div className='p-4 rounded-lg bg-red-500/10 border border-red-500/30'>
-                  <p className='text-red-400'>{migrationStatus.error}</p>
+                <div className='p-4 rounded-lg bg-lunary-error/10 border border-lunary-error/30'>
+                  <p className='text-lunary-error'>{migrationStatus.error}</p>
                   {migrationStatus.details && (
-                    <p className='text-xs text-red-300 mt-1'>
+                    <p className='text-xs text-lunary-error-300 mt-1'>
                       {migrationStatus.details}
                     </p>
                   )}
@@ -1529,13 +1533,13 @@ export default function AdminDashboard() {
           <CardContent>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 lg:gap-6'>
               <div className='flex items-center gap-2'>
-                <div className='w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full animate-pulse'></div>
+                <div className='w-2 h-2 md:w-3 md:h-3 bg-lunary-success rounded-full animate-pulse'></div>
                 <span className='text-sm md:text-base'>
                   Master Cron: Active (1 PM UTC daily)
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <div className='w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full'></div>
+                <div className='w-2 h-2 md:w-3 md:h-3 bg-lunary-secondary rounded-full'></div>
                 <span className='text-sm md:text-base'>
                   Grimoire API: Ready
                 </span>
@@ -1580,19 +1584,19 @@ export default function AdminDashboard() {
                 {recentActivity.map((activity: any) => {
                   const statusColor =
                     activity.status === 'success'
-                      ? 'text-green-400'
+                      ? 'text-lunary-success'
                       : activity.status === 'failed'
-                        ? 'text-red-400'
+                        ? 'text-lunary-error'
                         : activity.status === 'pending'
-                          ? 'text-yellow-400'
+                          ? 'text-lunary-accent'
                           : 'text-zinc-400';
                   const statusBg =
                     activity.status === 'success'
-                      ? 'bg-green-500/10 border-green-500/20'
+                      ? 'bg-lunary-success/10 border-lunary-success/20'
                       : activity.status === 'failed'
-                        ? 'bg-red-500/10 border-red-500/20'
+                        ? 'bg-lunary-error/10 border-lunary-error/20'
                         : activity.status === 'pending'
-                          ? 'bg-yellow-500/10 border-yellow-500/20'
+                          ? 'bg-lunary-accent/10 border-lunary-accent/20'
                           : 'bg-zinc-500/10 border-zinc-500/20';
 
                   const activityTypeLabels: Record<string, string> = {
@@ -1654,7 +1658,7 @@ export default function AdminDashboard() {
                           {activity.message || 'No message'}
                         </p>
                         {activity.error_message && (
-                          <p className='text-xs text-red-400 mt-1 line-clamp-1'>
+                          <p className='text-xs text-lunary-error mt-1 line-clamp-1'>
                             Error: {activity.error_message}
                           </p>
                         )}
