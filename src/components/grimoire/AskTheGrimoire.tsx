@@ -50,17 +50,17 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
   zodiac: 'bg-lunary-primary-900 text-lunary-accent-300',
-  planet: 'bg-amber-500/20 text-amber-300',
-  tarot: 'bg-rose-500/20 text-rose-300',
-  crystal: 'bg-cyan-500/20 text-cyan-300',
-  ritual: 'bg-indigo-500/20 text-indigo-300',
-  concept: 'bg-emerald-500/20 text-emerald-300',
-  horoscope: 'bg-violet-500/20 text-violet-300',
+  planet: 'bg-lunary-accent-900 text-lunary-accent-300',
+  tarot: 'bg-lunary-rose-900 text-lunary-rose-300',
+  crystal: 'bg-lunary-secondary-900 text-lunary-secondary-300',
+  ritual: 'bg-lunary-primary-900 text-lunary-primary-300',
+  concept: 'bg-lunary-success-900 text-lunary-success-300',
+  horoscope: 'bg-lunary-primary-900 text-lunary-primary-300',
   'chinese-zodiac': 'bg-red-500/20 text-red-300',
-  season: 'bg-orange-500/20 text-orange-300',
-  numerology: 'bg-blue-500/20 text-blue-300',
-  birthday: 'bg-pink-500/20 text-pink-300',
-  compatibility: 'bg-fuchsia-500/20 text-fuchsia-300',
+  season: 'bg-lunary-rose-900 text-lunary-rose-300',
+  numerology: 'bg-lunary-secondary-900 text-lunary-secondary-300',
+  birthday: 'bg-lunary-highlight-900 text-lunary-highlight-300',
+  compatibility: 'bg-lunary-highlight-900 text-lunary-highlight-300',
 };
 
 export function AskTheGrimoire({
@@ -285,10 +285,10 @@ export function AskTheGrimoire({
           className={`
             w-full pl-12 pr-12 py-4 
             bg-black/40 backdrop-blur-xl
-            border ${isAIMode ? 'border-indigo-500/40' : 'border-lunary-primary-700'}
+            border ${isAIMode ? 'border-lunary-secondary-600' : 'border-lunary-primary-700'}
             rounded-2xl
             text-white placeholder:text-lunary-accent-300/50
-            focus:outline-none focus:ring-2 ${isAIMode ? 'focus:ring-indigo-500/50 focus:border-indigo-400/50' : 'focus:ring-lunary-primary/50 focus:border-lunary-primary/50'}
+            focus:outline-none focus:ring-2 ${isAIMode ? 'focus:ring-lunary-secondary/50 focus:border-lunary-secondary/50' : 'focus:ring-lunary-primary/50 focus:border-lunary-primary/50'}
             transition-all duration-300
             ${variant === 'hero' ? 'text-lg' : 'text-base'}
           `}
@@ -335,7 +335,7 @@ export function AskTheGrimoire({
             <div className='flex items-center justify-between px-3 py-1.5 text-xs'>
               <div className='flex items-center gap-2 text-lunary-accent/70'>
                 {isAIMode ? (
-                  <Brain className='h-3 w-3 text-indigo-400' />
+                  <Brain className='h-3 w-3 text-lunary-secondary' />
                 ) : (
                   <Sparkles className='h-3 w-3' />
                 )}
@@ -345,8 +345,8 @@ export function AskTheGrimoire({
                 </span>
               </div>
               {isAIMode && (
-                <span className='text-indigo-400/70 flex items-center gap-1'>
-                  <span className='h-1.5 w-1.5 bg-indigo-400 rounded-full animate-pulse' />
+                <span className='text-lunary-secondary/70 flex items-center gap-1'>
+                  <span className='h-1.5 w-1.5 bg-lunary-secondary rounded-full animate-pulse' />
                   AI Powered
                 </span>
               )}
