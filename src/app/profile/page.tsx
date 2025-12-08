@@ -14,6 +14,7 @@ import {
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
+import { BirthdayInput } from '@/components/ui/birthday-input';
 
 const SkeletonCard = () => (
   <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
@@ -303,6 +304,9 @@ export default function ProfilePage() {
         }
       }
 
+      // Refresh user data in context so widgets update immediately
+      await refetchUser();
+
       setIsEditing(false);
 
       // Refresh user data to update UI with saved changes
@@ -450,12 +454,10 @@ export default function ProfilePage() {
                           ✨ Personalised Feature
                         </span>
                       </label>
-                      <input
-                        type='text'
+                      <BirthdayInput
                         value={birthday}
-                        onChange={(e) => setBirthday(e.target.value)}
-                        placeholder='YYYY-MM-DD (e.g., 1990-05-15)'
-                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        onChange={setBirthday}
+                        className='rounded-md border-zinc-600 bg-zinc-700 px-3 py-2 text-sm'
                       />
                     </div>
                   </div>

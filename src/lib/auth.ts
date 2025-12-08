@@ -145,20 +145,22 @@ async function hashPasswordForMigration(
   }
 }
 
-// Jazz fallback adapter (READ then MIGRATE)
+// Jazz fallback adapter (READ-ONLY for existing users, disabled for new signups)
 async function createJazzFallbackAdapter() {
   try {
-    const { JazzBetterAuthDatabaseAdapter } = await import(
-      'jazz-tools/better-auth/database-adapter'
-    );
-
     const accountID = process.env.JAZZ_WORKER_ACCOUNT;
     const accountSecret = process.env.JAZZ_WORKER_SECRET;
 
     if (!accountID || !accountSecret) {
-      console.warn('⚠️ Jazz credentials not set - fallback disabled');
+      console.log(
+        '[Jazz] Credentials not set - fallback disabled (expected for new signups)',
+      );
       return null;
     }
+
+    const { JazzBetterAuthDatabaseAdapter } = await import(
+      'jazz-tools/better-auth/database-adapter'
+    );
 
     return JazzBetterAuthDatabaseAdapter({
       syncServer:
@@ -167,8 +169,15 @@ async function createJazzFallbackAdapter() {
       accountID,
       accountSecret,
     });
-  } catch (error) {
-    console.warn('⚠️ Failed to initialize Jazz fallback:', error);
+  } catch (error: any) {
+    const msg = error?.message || '';
+    if (msg.includes('secret') || msg.includes('seed')) {
+      console.log(
+        '[Jazz] Adapter init skipped - no Jazz account for this user',
+      );
+    } else {
+      console.warn('[Jazz] Failed to initialize fallback:', error);
+    }
     return null;
   }
 }

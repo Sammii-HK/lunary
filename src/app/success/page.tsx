@@ -15,6 +15,14 @@ interface CheckoutSession {
     status: string;
     trial_end: number | null;
     current_period_end: number;
+    metadata?: {
+      planType?: string;
+      plan_id?: string;
+    };
+  };
+  metadata?: {
+    planType?: string;
+    plan_id?: string;
   };
 }
 
@@ -42,7 +50,9 @@ export default function SuccessPage() {
         }
 
         const planType =
-          (session.subscription as any)?.metadata?.planType || 'monthly';
+          session.subscription?.metadata?.planType ||
+          session.metadata?.planType ||
+          'monthly';
         const isTrial =
           session.subscription?.trial_end &&
           session.subscription.trial_end > Date.now() / 1000;

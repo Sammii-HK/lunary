@@ -957,8 +957,9 @@ export const getEnhancedPersonalizedHoroscope = (
   userBirthday?: string,
   userName?: string,
   profile?: any,
+  selectedDate?: Date,
 ): EnhancedHoroscopeReading => {
-  const today = dayjs();
+  const today = selectedDate ? dayjs(selectedDate) : dayjs();
   const birthDate = userBirthday ? dayjs(userBirthday) : null;
 
   // Default observer

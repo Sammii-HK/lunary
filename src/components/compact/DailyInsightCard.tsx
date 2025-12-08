@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { Sparkles, ArrowRight, Lock } from 'lucide-react';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
@@ -12,6 +13,7 @@ import { hasBirthChartAccess } from '../../../utils/pricing';
 export const DailyInsightCard = () => {
   const { user } = useUser();
   const subscription = useSubscription();
+  const { currentDate } = useAstronomyContext();
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;
@@ -22,13 +24,14 @@ export const DailyInsightCard = () => {
   );
 
   const insight = useMemo(() => {
-    const today = new Date();
+    const selectedDate = currentDate ? new Date(currentDate) : new Date();
 
     if (hasChartAccess && userBirthday && birthChart) {
       const horoscope = getEnhancedPersonalizedHoroscope(
         userBirthday,
         userName || undefined,
         { birthday: userBirthday, birthChart },
+        selectedDate,
       );
       return {
         text: horoscope.personalInsight,
@@ -36,13 +39,13 @@ export const DailyInsightCard = () => {
       };
     }
 
-    const general = getGeneralHoroscope(today);
+    const general = getGeneralHoroscope(selectedDate);
     const firstSentence = general.reading.split('.')[0] + '.';
     return {
       text: firstSentence,
       isPersonalized: false,
     };
-  }, [hasChartAccess, userBirthday, userName, birthChart]);
+  }, [hasChartAccess, userBirthday, userName, birthChart, currentDate]);
 
   if (!insight.isPersonalized) {
     return (
