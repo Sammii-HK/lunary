@@ -6,6 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
+        disallow: ['/api/', '/admin/', '/auth/', '/profile', '/test-', '/pwa-'],
       },
       {
         userAgent: 'Googlebot',
@@ -15,6 +16,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: 'Googlebot-Image',
         allow: ['/', '/api/og/', '/sitemap-images.xml'],
+        disallow: ['/api/cron/', '/api/admin/', '/api/ai/', '/api/stripe/'],
       },
       {
         userAgent: 'Bingbot',
@@ -23,13 +25,19 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: 'GPTBot',
-        allow: ['/', '/api/gpt/'],
-        disallow: ['/api/admin/', '/admin/', '/auth/', '/profile'],
+        disallow: '/',
       },
       {
         userAgent: 'ChatGPT-User',
-        allow: ['/', '/api/gpt/'],
-        disallow: ['/api/admin/', '/admin/', '/auth/', '/profile'],
+        disallow: '/',
+      },
+      {
+        userAgent: 'CCBot',
+        disallow: '/',
+      },
+      {
+        userAgent: 'anthropic-ai',
+        disallow: '/',
       },
     ],
     sitemap: [
