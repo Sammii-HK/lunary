@@ -7,9 +7,10 @@ import {
   sendUnifiedNotification,
   NotificationEvent,
 } from '@/lib/notifications/unified-service';
+import { processAccountDeletions, sendTrialReminders } from '@/lib/cron';
 
-// This is the SINGLE cron job for Vercel free tier
-// It runs every hour and dispatches to other tasks based on timing
+// This is the SINGLE cron job for Vercel Pro tier
+// It runs every hour and handles all scheduled tasks directly (no fetch calls)
 export async function GET(request: NextRequest) {
   try {
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';
@@ -26,60 +27,30 @@ export async function GET(request: NextRequest) {
 
     const now = new Date();
     const hour = now.getUTCHours();
-    const dayOfMonth = now.getUTCDate();
     const today = now.toISOString().split('T')[0];
     const checkTime = now.toISOString();
 
     const scheduledTasks: string[] = [];
 
-    // Run process-deletions at 2am UTC
+    // Run process-deletions at 2am UTC (direct call, no fetch)
     if (hour === 2) {
       try {
-        const baseUrl = process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
-          : 'http://localhost:3000';
-        await fetch(`${baseUrl}/api/cron/process-deletions`, {
-          headers: {
-            Authorization: `Bearer ${process.env.CRON_SECRET}`,
-          },
-        });
-        scheduledTasks.push('process-deletions');
+        const result = await processAccountDeletions();
+        scheduledTasks.push(
+          `process-deletions (${result.processed} processed)`,
+        );
       } catch (e) {
         console.error('Failed to run process-deletions:', e);
       }
     }
 
-    // Run trial-reminders at 9am UTC
+    // Run trial-reminders at 9am UTC (direct call, no fetch)
     if (hour === 9) {
       try {
-        const baseUrl = process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
-          : 'http://localhost:3000';
-        await fetch(`${baseUrl}/api/cron/trial-reminders`, {
-          headers: {
-            Authorization: `Bearer ${process.env.CRON_SECRET}`,
-          },
-        });
-        scheduledTasks.push('trial-reminders');
+        const result = await sendTrialReminders();
+        scheduledTasks.push(`trial-reminders (${result.sent.total} sent)`);
       } catch (e) {
         console.error('Failed to run trial-reminders:', e);
-      }
-    }
-
-    // Run reset-api-limits on 1st of month at midnight UTC
-    if (dayOfMonth === 1 && hour === 0) {
-      try {
-        const baseUrl = process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
-          : 'http://localhost:3000';
-        await fetch(`${baseUrl}/api/cron/reset-api-limits`, {
-          headers: {
-            Authorization: `Bearer ${process.env.CRON_SECRET}`,
-          },
-        });
-        scheduledTasks.push('reset-api-limits');
-      } catch (e) {
-        console.error('Failed to run reset-api-limits:', e);
       }
     }
 
