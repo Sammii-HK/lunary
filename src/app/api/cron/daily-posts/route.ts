@@ -17,12 +17,28 @@ import {
   generateTrialExpiredEmailHTML,
   generateTrialExpiredEmailText,
 } from '@/lib/email-templates/trial-expired';
-// Subreddit rotation available via: import { getNextSubreddit } from '@/config/reddit-subreddits';
-// Daily cosmic posts always go to r/LunaryApp
 import {
   generateCatchyQuote,
   getQuoteImageUrl,
 } from '@/lib/social/quote-generator';
+import { sendDailyInsightNotification } from '@/lib/notifications/tiered-service';
+import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
+import { generateMoonCircle } from '@/lib/moon-circles/generator';
+import { generateWeeklyReport } from '@/lib/cosmic-snapshot/reports';
+import {
+  generateWeeklyReportEmailHTML,
+  generateWeeklyReportEmailText,
+} from '@/lib/weekly-report/email-template';
+import webpush from 'web-push';
+import {
+  getRealPlanetaryPositions,
+  getAccurateMoonPhase,
+  checkSeasonalEvents,
+  calculateRealAspects,
+  checkSignIngress,
+  checkRetrogradeEvents,
+  checkRetrogradeIngress,
+} from '../../../../../utils/astrology/cosmic-og';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -306,6 +322,22 @@ export async function GET(request: NextRequest) {
       cronResults.notifications = {
         success: false,
         error: errorMessage,
+      };
+    }
+
+    // CONSOLIDATED DAILY NOTIFICATIONS (previously separate crons)
+    console.log('🔔 Running consolidated daily notifications...');
+    try {
+      const consolidatedResult = await runConsolidatedNotifications(
+        dateStr,
+        dayOfWeek,
+      );
+      cronResults.consolidatedNotifications = consolidatedResult;
+    } catch (error) {
+      console.error('❌ Consolidated notifications failed:', error);
+      cronResults.consolidatedNotifications = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
 
@@ -2556,6 +2588,369 @@ function createNotificationFromEvent(event: any, cosmicData?: any) {
 function getBaseUrl(request: NextRequest): string {
   // Use production URL on any Vercel deployment
   return process.env.VERCEL ? 'https://lunary.app' : request.nextUrl.origin;
+}
+
+// CONSOLIDATED NOTIFICATIONS - replaces 5+ separate cron routes
+async function runConsolidatedNotifications(
+  dateStr: string,
+  dayOfWeek: number,
+) {
+  const results: Record<string, any> = {};
+  const now = new Date();
+
+  // 1. Daily Insight Notification (was daily-insight-notification cron)
+  try {
+    console.log('📨 Sending daily insight notifications...');
+    let cosmicData = null;
+    try {
+      cosmicData = await getGlobalCosmicData(now);
+    } catch (error) {
+      console.error('Failed to fetch cosmic data for insights:', error);
+    }
+    const insightResult = await sendDailyInsightNotification(cosmicData);
+    results.dailyInsight = {
+      success: insightResult.success,
+      sent: insightResult.successful,
+      failed: insightResult.failed,
+    };
+    console.log(`✅ Daily insight: ${insightResult.successful} sent`);
+  } catch (error) {
+    console.error('❌ Daily insight notification failed:', error);
+    results.dailyInsight = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown',
+    };
+  }
+
+  // 2. Daily Cosmic Event Notification (was daily-cosmic-event cron)
+  try {
+    console.log('🌌 Checking for cosmic event notifications...');
+    const dateStr2 = now.toISOString().split('T')[0];
+    const eventKey = `daily-cosmic-event-${dateStr2}`;
+
+    const alreadySentEvent = await sql`
+      SELECT id FROM notification_sent_events 
+      WHERE date = ${dateStr2}::date 
+      AND event_key = ${eventKey}
+    `;
+
+    if (alreadySentEvent.rows.length === 0) {
+      const positions = getRealPlanetaryPositions(now);
+      const moonPhase = getAccurateMoonPhase(now);
+      const seasonalEvents = checkSeasonalEvents(positions);
+      const aspects = calculateRealAspects(positions);
+      const retrogradeEvents = checkRetrogradeEvents(positions);
+
+      const allCosmicEvents: Array<{
+        name: string;
+        description: string;
+        priority: number;
+        type: string;
+        emoji: string;
+      }> = [];
+
+      // Check for significant moon phases
+      if (moonPhase.isSignificant) {
+        const significantPhases = [
+          'New Moon',
+          'Full Moon',
+          'First Quarter',
+          'Last Quarter',
+        ];
+        if (significantPhases.some((phase) => moonPhase.name.includes(phase))) {
+          allCosmicEvents.push({
+            name: `${moonPhase.name} in ${positions.Moon.sign}`,
+            description:
+              'A powerful lunar moment for reflection and intention setting.',
+            priority: 10,
+            type: 'moon',
+            emoji: moonPhase.emoji || '🌙',
+          });
+        }
+      }
+
+      // Check for extraordinary aspects (priority >= 8)
+      const extraordinaryAspects = aspects.filter(
+        (a: { priority: number }) => a.priority >= 8,
+      );
+      for (const aspect of extraordinaryAspects) {
+        const planetA = aspect.planetA?.name || aspect.planetA;
+        const planetB = aspect.planetB?.name || aspect.planetB;
+        allCosmicEvents.push({
+          name: `${planetA}-${planetB} ${aspect.aspect}`,
+          description: 'Powerful cosmic alignment creating new opportunities.',
+          priority: aspect.priority,
+          type: 'aspect',
+          emoji: '✨',
+        });
+      }
+
+      // Check for retrograde events
+      for (const event of retrogradeEvents) {
+        if (event.type === 'retrograde_start') {
+          allCosmicEvents.push({
+            name: `${event.planet} Retrograde Begins`,
+            description: `${event.planet} stations retrograde. Time for reflection.`,
+            priority: 9,
+            type: 'retrograde_start',
+            emoji: '🔄',
+          });
+        }
+      }
+
+      // Check for seasonal events
+      for (const event of seasonalEvents) {
+        allCosmicEvents.push({
+          name: event.name,
+          description: 'Seasonal energy shift brings new themes.',
+          priority: event.priority || 8,
+          type: 'seasonal',
+          emoji: '🌿',
+        });
+      }
+
+      allCosmicEvents.sort((a, b) => b.priority - a.priority);
+
+      if (allCosmicEvents.length > 0) {
+        const primaryEvent = allCosmicEvents[0];
+
+        // Configure VAPID if not already done
+        const publicKey = process.env.VAPID_PUBLIC_KEY;
+        const privateKey = process.env.VAPID_PRIVATE_KEY;
+        if (publicKey && privateKey) {
+          webpush.setVapidDetails(
+            'mailto:info@lunary.app',
+            publicKey,
+            privateKey,
+          );
+        }
+
+        // Get subscribers
+        const subscriptions = await sql`
+          SELECT endpoint, p256dh, auth, user_id
+          FROM push_subscriptions 
+          WHERE is_active = true 
+          AND (preferences->>'cosmicEvents' = 'true' OR preferences->>'cosmicEvents' IS NULL)
+        `;
+
+        let pushSent = 0;
+        let pushFailed = 0;
+        const baseUrl =
+          process.env.NODE_ENV === 'production'
+            ? 'https://lunary.app'
+            : 'http://localhost:3000';
+
+        const pushNotification = {
+          title: `${primaryEvent.emoji} ${primaryEvent.name}`,
+          body: primaryEvent.description,
+          icon: '/icons/icon-192x192.png',
+          badge: '/icons/icon-72x72.png',
+          vibrate: [200, 100, 200],
+          tag: 'lunary-daily-cosmic-event',
+          data: { url: baseUrl, type: 'daily_cosmic_event', date: dateStr2 },
+        };
+
+        for (const sub of subscriptions.rows) {
+          try {
+            await webpush.sendNotification(
+              {
+                endpoint: sub.endpoint,
+                keys: { p256dh: sub.p256dh, auth: sub.auth },
+              },
+              JSON.stringify(pushNotification),
+            );
+            pushSent++;
+          } catch (pushError) {
+            if (
+              pushError instanceof Error &&
+              (pushError.message.includes('410') ||
+                pushError.message.includes('expired'))
+            ) {
+              await sql`UPDATE push_subscriptions SET is_active = false WHERE endpoint = ${sub.endpoint}`;
+            }
+            pushFailed++;
+          }
+        }
+
+        if (pushSent > 0) {
+          await sql`
+            INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+            VALUES (${dateStr2}::date, ${eventKey}, 'daily_cosmic_event', ${primaryEvent.name}, ${primaryEvent.priority}, 'daily')
+            ON CONFLICT (date, event_key) DO NOTHING
+          `;
+        }
+
+        results.dailyCosmicEvent = {
+          sent: pushSent,
+          failed: pushFailed,
+          event: primaryEvent.name,
+        };
+        console.log(
+          `✅ Cosmic event notification: ${pushSent} sent for ${primaryEvent.name}`,
+        );
+      } else {
+        results.dailyCosmicEvent = { skipped: 'no significant events today' };
+      }
+    } else {
+      results.dailyCosmicEvent = { skipped: 'already sent today' };
+    }
+  } catch (error) {
+    console.error('❌ Daily cosmic event notification failed:', error);
+    results.dailyCosmicEvent = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown',
+    };
+  }
+
+  // 3. Moon Circles (was moon-circles cron) - only creates on new/full moons
+  try {
+    console.log('🌙 Checking for moon circle creation...');
+    const moonCircle = await generateMoonCircle(now);
+    if (moonCircle) {
+      // Check if already exists
+      const existingCircle = await sql`
+        SELECT id FROM moon_circles WHERE event_date = ${dateStr}::date
+      `;
+      if (existingCircle.rows.length === 0) {
+        // Create the moon circle
+        const insertResult = await sql`
+          INSERT INTO moon_circles (
+            moon_phase,
+            event_date,
+            title,
+            theme,
+            description
+          ) VALUES (
+            ${moonCircle.moonPhase},
+            ${dateStr}::date,
+            ${`Moon Circle: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`},
+            ${moonCircle.moonPhase},
+            ${moonCircle.moonSignInfo}
+          )
+          RETURNING id
+        `;
+        const moonCircleId = insertResult.rows[0]?.id;
+        results.moonCircle = {
+          created: true,
+          phase: moonCircle.moonPhase,
+          sign: moonCircle.moonSign,
+          id: moonCircleId,
+        };
+        console.log(
+          `✅ Moon circle created: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
+        );
+      } else {
+        results.moonCircle = { created: false, reason: 'already exists' };
+      }
+    } else {
+      results.moonCircle = { created: false, reason: 'not a new/full moon' };
+    }
+  } catch (error) {
+    console.error('❌ Moon circle creation failed:', error);
+    results.moonCircle = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown',
+    };
+  }
+
+  // 4. Weekly Cosmic Report (was weekly-cosmic-report cron) - Sundays only
+  if (dayOfWeek === 0) {
+    try {
+      console.log('📊 Sending weekly cosmic reports...');
+      const eventKey = `weekly-report-${dateStr}`;
+
+      const alreadySent = await sql`
+        SELECT id FROM notification_sent_events 
+        WHERE date = ${dateStr}::date 
+        AND event_key = ${eventKey}
+      `;
+
+      if (alreadySent.rows.length === 0) {
+        const weekStart = new Date(now);
+        weekStart.setDate(weekStart.getDate() - 6);
+        weekStart.setHours(0, 0, 0, 0);
+
+        const subscriptions = await sql`
+          SELECT DISTINCT user_id, user_email, preferences
+          FROM push_subscriptions
+          WHERE is_active = true
+          AND (preferences->>'weeklyReport' = 'true' OR preferences->>'weeklyReport' IS NULL)
+          AND (preferences->>'birthday' IS NOT NULL AND preferences->>'birthday' != '')
+        `;
+
+        let emailsSent = 0;
+        const baseUrl =
+          process.env.NODE_ENV === 'production'
+            ? 'https://lunary.app'
+            : 'http://localhost:3000';
+
+        for (const sub of subscriptions.rows) {
+          try {
+            const userId = sub.user_id;
+            const userEmail = sub.user_email;
+            const preferences = sub.preferences || {};
+            const userName = (preferences.name as string) || undefined;
+
+            if (!userEmail || !userId) continue;
+
+            const report = await generateWeeklyReport(userId, weekStart);
+            if (!report) continue;
+
+            const emailHtml = await generateWeeklyReportEmailHTML(
+              report,
+              baseUrl,
+              userName,
+              userEmail,
+            );
+            const emailText = await generateWeeklyReportEmailText(
+              report,
+              baseUrl,
+              userName,
+              userEmail,
+            );
+
+            await sendEmail({
+              to: userEmail,
+              subject: '🌙 Your Weekly Cosmic Report',
+              html: emailHtml,
+              text: emailText,
+            });
+
+            emailsSent++;
+          } catch (error) {
+            console.error(
+              `Failed to send weekly report to ${sub.user_email}:`,
+              error,
+            );
+          }
+        }
+
+        if (emailsSent > 0) {
+          await sql`
+            INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+            VALUES (${dateStr}::date, ${eventKey}, 'weekly_report', 'Weekly Cosmic Report', 5, 'weekly')
+            ON CONFLICT (date, event_key) DO NOTHING
+          `;
+        }
+
+        results.weeklyReport = { sent: emailsSent };
+        console.log(`✅ Weekly reports: ${emailsSent} sent`);
+      } else {
+        results.weeklyReport = { skipped: 'already sent today' };
+      }
+    } catch (error) {
+      console.error('❌ Weekly report failed:', error);
+      results.weeklyReport = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown',
+      };
+    }
+  }
+
+  return {
+    success: true,
+    results,
+  };
 }
 
 // Dynamic content generators
