@@ -221,7 +221,7 @@ export default function SubscriptionManagement({
                 : displaySubscription.status === 'trialing'
                   ? 'bg-lunary-secondary-900 text-lunary-secondary-300'
                   : displaySubscription.status === 'canceled'
-                    ? 'bg-yellow-900 text-yellow-300'
+                    ? 'bg-lunary-accent-900 text-lunary-accent-300'
                     : 'bg-zinc-700 text-zinc-300'
             }`}
           >
@@ -289,7 +289,7 @@ export default function SubscriptionManagement({
         {stripeSubscription?.cancelAtPeriodEnd && (
           <div className='flex justify-between'>
             <span className='text-zinc-400 text-sm'>Ends:</span>
-            <span className='text-yellow-300 text-sm'>
+            <span className='text-lunary-accent-300 text-sm'>
               {new Date(
                 ((stripeSubscription as any)?.current_period_end ||
                   parseInt(stripeSubscription?.currentPeriodEnd || '0')) * 1000,
