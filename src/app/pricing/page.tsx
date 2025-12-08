@@ -260,9 +260,9 @@ export default function PricingPage() {
             </p>
 
             {subscriptionStatus === 'trial' && trialDaysRemaining && (
-              <div className='mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20'>
-                <Sparkles className='w-4 h-4 text-amber-400' />
-                <span className='text-sm text-amber-300'>
+              <div className='mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lunary-accent-950 border border-lunary-accent-700'>
+                <Sparkles className='w-4 h-4 text-lunary-accent' />
+                <span className='text-sm text-lunary-accent-300'>
                   {trialDaysRemaining} days left in trial
                 </span>
               </div>
@@ -293,7 +293,7 @@ export default function PricingPage() {
                 }`}
               >
                 Annual
-                <span className='text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30'>
+                <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-success-900 text-lunary-success border border-lunary-success-700'>
                   Save 25%
                 </span>
               </button>

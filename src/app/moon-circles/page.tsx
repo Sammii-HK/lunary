@@ -185,8 +185,8 @@ export default async function MoonCirclesPage({
                       className={cn(
                         'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
                         circle.moon_phase === 'Full Moon'
-                          ? 'bg-amber-400/20 text-amber-100'
-                          : 'bg-indigo-400/20 text-indigo-100',
+                          ? 'bg-lunary-accent-900 text-lunary-accent-100'
+                          : 'bg-lunary-primary-900 text-lunary-primary-100',
                       )}
                     >
                       {circle.moon_phase}

@@ -95,11 +95,15 @@ function CollectionsPageContent() {
 
   const categoryColors: Record<string, string> = {
     chat: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-    ritual: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
-    insight: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    moon_circle: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-    tarot: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    journal: 'bg-green-500/20 text-green-300 border-green-500/30',
+    ritual: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+    insight:
+      'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
+    moon_circle:
+      'bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700',
+    tarot:
+      'bg-lunary-accent-900 text-lunary-accent-300 border-lunary-accent-700',
+    journal:
+      'bg-lunary-success-900 text-lunary-success-300 border-lunary-success-700',
   };
 
   if (authState.loading) {

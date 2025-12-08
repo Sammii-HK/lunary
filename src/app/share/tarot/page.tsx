@@ -483,14 +483,14 @@ export default async function ShareTarotPage({
           {isPattern && (
             <div className='mt-10 space-y-8 text-left'>
               {orderedSignalHighlights.length > 0 && (
-                <div className='rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-6'>
-                  <p className='text-xs uppercase tracking-[0.35em] text-indigo-200/80'>
+                <div className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-950 p-6'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200'>
                     Signal Highlights
                   </p>
                   <ul className='mt-4 space-y-2 text-base leading-relaxed text-zinc-100/90'>
                     {orderedSignalHighlights.map((highlight, index) => (
                       <li key={`${highlight}-${index}`} className='flex gap-2'>
-                        <span className='text-indigo-200/80'>•</span>
+                        <span className='text-lunary-primary-200'>•</span>
                         <span>{highlight}</span>
                       </li>
                     ))}
@@ -613,11 +613,11 @@ export default async function ShareTarotPage({
                     </div>
                   )}
                   {sharedTransitImpact && (
-                    <div className='rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6'>
-                      <p className='text-xs uppercase tracking-[0.35em] text-amber-200/80'>
+                    <div className='rounded-2xl border border-lunary-accent-700 bg-lunary-accent-950 p-6'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-lunary-accent-200'>
                         Personal Transit Impact
                       </p>
-                      <p className='mt-3 text-sm leading-relaxed text-amber-100/90'>
+                      <p className='mt-3 text-sm leading-relaxed text-lunary-accent-100'>
                         {sharedTransitImpact}
                       </p>
                     </div>
@@ -626,11 +626,11 @@ export default async function ShareTarotPage({
               )}
 
               {sharedActionPrompt && (
-                <div className='rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6'>
-                  <p className='text-xs uppercase tracking-[0.35em] text-emerald-200/80'>
+                <div className='rounded-2xl border border-lunary-success-700 bg-lunary-success-950 p-6'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-lunary-success-200'>
                     Action Prompt
                   </p>
-                  <p className='mt-3 text-base leading-relaxed text-emerald-50/90'>
+                  <p className='mt-3 text-base leading-relaxed text-lunary-success-50'>
                     {sharedActionPrompt}
                   </p>
                 </div>

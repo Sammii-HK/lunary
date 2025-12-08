@@ -156,7 +156,7 @@ export default async function ShareBirthChartPage({
     <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-blue-950 to-indigo-900 text-white'>
       <div className='mx-auto flex min-h-screen max-w-4xl flex-col items-center px-4 py-16 text-center sm:px-6 lg:px-8'>
         <div className='w-full rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur'>
-          <p className='text-xs uppercase tracking-[0.35em] text-blue-200/80'>
+          <p className='text-xs uppercase tracking-[0.35em] text-lunary-secondary-200'>
             Shared from Lunary
           </p>
           <h1 className='mt-6 text-2xl font-light text-white sm:text-3xl'>
@@ -164,15 +164,15 @@ export default async function ShareBirthChartPage({
               ? `${name}'s Birth Chart Highlights`
               : 'Birth Chart Highlights'}
           </h1>
-          <p className='mt-2 text-sm text-blue-200/80'>
+          <p className='mt-2 text-sm text-lunary-secondary-200'>
             {date
               ? `Generated for ${new Date(date).toLocaleDateString('en-US')}`
               : 'Personalized cosmic profile'}
           </p>
 
           <div className='mt-10 grid gap-4 sm:grid-cols-3'>
-            <div className='rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4'>
-              <p className='text-[0.7rem] uppercase tracking-[0.3em] text-blue-100/70'>
+            <div className='rounded-2xl border border-lunary-secondary-700 bg-lunary-secondary-950 p-4'>
+              <p className='text-[0.7rem] uppercase tracking-[0.3em] text-lunary-secondary-100'>
                 Sun
               </p>
               <p className='mt-2 text-xl font-light text-white'>{sun ?? '—'}</p>
@@ -185,8 +185,8 @@ export default async function ShareBirthChartPage({
                 {moon ?? '—'}
               </p>
             </div>
-            <div className='rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4'>
-              <p className='text-[0.7rem] uppercase tracking-[0.3em] text-indigo-100/70'>
+            <div className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-950 p-4'>
+              <p className='text-[0.7rem] uppercase tracking-[0.3em] text-lunary-primary-100'>
                 Rising
               </p>
               <p className='mt-2 text-xl font-light text-white'>
@@ -196,16 +196,16 @@ export default async function ShareBirthChartPage({
           </div>
 
           <div className='mt-8 grid gap-4 sm:grid-cols-2'>
-            <div className='rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4'>
-              <p className='text-[0.65rem] uppercase tracking-[0.3em] text-emerald-100/70'>
+            <div className='rounded-2xl border border-lunary-success-700 bg-lunary-success-950 p-4'>
+              <p className='text-[0.65rem] uppercase tracking-[0.3em] text-lunary-success-100'>
                 Dominant Element
               </p>
               <p className='mt-2 text-lg font-light text-white'>
                 {element ?? 'Balanced'}
               </p>
             </div>
-            <div className='rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4'>
-              <p className='text-[0.65rem] uppercase tracking-[0.3em] text-amber-100/70'>
+            <div className='rounded-2xl border border-lunary-accent-700 bg-lunary-accent-950 p-4'>
+              <p className='text-[0.65rem] uppercase tracking-[0.3em] text-lunary-accent-100'>
                 Core Modality
               </p>
               <p className='mt-2 text-lg font-light text-white'>
@@ -215,11 +215,11 @@ export default async function ShareBirthChartPage({
           </div>
 
           {keywords.length > 0 && (
-            <div className='mt-6 flex flex-wrap justify-center gap-2 text-xs text-blue-100/80'>
+            <div className='mt-6 flex flex-wrap justify-center gap-2 text-xs text-lunary-secondary-100'>
               {keywords.map((keyword) => (
                 <span
                   key={keyword}
-                  className='rounded-full border border-blue-500/40 px-3 py-1'
+                  className='rounded-full border border-lunary-secondary-600 px-3 py-1'
                 >
                   {keyword}
                 </span>
@@ -229,7 +229,7 @@ export default async function ShareBirthChartPage({
 
           {insight && (
             <div className='mt-8 rounded-2xl border border-white/10 bg-white/5 p-6 text-left'>
-              <p className='text-sm font-semibold text-blue-100 uppercase tracking-[0.3em] mb-2'>
+              <p className='text-sm font-semibold text-lunary-secondary-100 uppercase tracking-[0.3em] mb-2'>
                 Signature Insight
               </p>
               <p className='text-sm leading-relaxed text-zinc-100/90'>
@@ -254,13 +254,13 @@ export default async function ShareBirthChartPage({
           <div className='mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
             <Link
               href='/birth-chart'
-              className='inline-flex items-center rounded-full bg-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:bg-blue-400'
+              className='inline-flex items-center rounded-full bg-lunary-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-lunary-primary/30 transition hover:bg-lunary-primary-400'
             >
               Explore your birth chart on Lunary
             </Link>
             <Link
               href='/'
-              className='text-sm font-medium text-blue-200/80 transition hover:text-blue-100'
+              className='text-sm font-medium text-lunary-secondary-200 transition hover:text-lunary-secondary-100'
             >
               Discover more cosmic tools →
             </Link>

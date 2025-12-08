@@ -984,7 +984,7 @@ const BirthChartPage = () => {
           </p>
           <Link
             href='/profile'
-            className='inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors'
+            className='inline-block bg-lunary-primary hover:bg-lunary-primary-400 text-white py-2 px-6 rounded-md transition-colors'
           >
             Complete Profile
           </Link>
@@ -1008,7 +1008,7 @@ const BirthChartPage = () => {
           </p>
           <button
             onClick={() => window.location.reload()}
-            className='inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors'
+            className='inline-block bg-lunary-primary hover:bg-lunary-primary-400 text-white py-2 px-6 rounded-md transition-colors'
           >
             Refresh Page
           </button>
@@ -1056,7 +1056,7 @@ const BirthChartPage = () => {
       {/* Planetary Interpretations */}
       {birthChartData && (
         <div className='bg-zinc-800 rounded-lg p-4 max-w-md mx-auto'>
-          <h3 className='text-lg font-semibold text-green-400 mb-3'>
+          <h3 className='text-lg font-semibold text-lunary-success mb-3'>
             Your Cosmic Blueprint
           </h3>
           <div className='space-y-4'>
@@ -1128,7 +1128,7 @@ const BirthChartPage = () => {
 
             {/* Personal Planets */}
             <div>
-              <h4 className='text-xs font-medium text-blue-400 mb-2 uppercase tracking-wide'>
+              <h4 className='text-xs font-medium text-lunary-secondary mb-2 uppercase tracking-wide'>
                 Personal Planets
               </h4>
               <div className='space-y-2'>
@@ -1143,7 +1143,7 @@ const BirthChartPage = () => {
                     return (
                       <div
                         key={planet.body}
-                        className='border-l-2 border-blue-400 pl-3'
+                        className='border-l-2 border-lunary-secondary pl-3'
                       >
                         <h5 className='text-sm font-medium text-white flex items-center gap-2'>
                           <span className='font-astro text-lg'>
@@ -1169,7 +1169,7 @@ const BirthChartPage = () => {
 
             {/* Social Planets */}
             <div>
-              <h4 className='text-xs font-medium text-yellow-400 mb-2 uppercase tracking-wide'>
+              <h4 className='text-xs font-medium text-lunary-accent mb-2 uppercase tracking-wide'>
                 Social Planets
               </h4>
               <div className='space-y-2'>
@@ -1182,7 +1182,7 @@ const BirthChartPage = () => {
                     return (
                       <div
                         key={planet.body}
-                        className='border-l-2 border-yellow-400 pl-3'
+                        className='border-l-2 border-lunary-accent pl-3'
                       >
                         <h5 className='text-sm font-medium text-white flex items-center gap-2'>
                           <span className='font-astro text-lg'>
@@ -1248,13 +1248,13 @@ const BirthChartPage = () => {
 
           {/* Chart Patterns & Analysis */}
           <div className='mt-6 pt-4 border-t border-zinc-700'>
-            <h4 className='text-sm font-medium text-cyan-400 mb-3'>
+            <h4 className='text-sm font-medium text-lunary-secondary mb-3'>
               Chart Analysis
             </h4>
             <div className='space-y-3'>
               {getChartAnalysis(birthChartData).map((analysis, index) => (
                 <div key={index} className='bg-zinc-700 rounded p-3'>
-                  <h5 className='text-xs font-medium text-cyan-300 mb-1'>
+                  <h5 className='text-xs font-medium text-lunary-secondary-300 mb-1'>
                     {analysis.category}
                   </h5>
                   <p className='text-xs text-zinc-300'>{analysis.insight}</p>
@@ -1265,13 +1265,13 @@ const BirthChartPage = () => {
 
           {/* Element & Modality Breakdown */}
           <div className='mt-4'>
-            <h4 className='text-sm font-medium text-orange-400 mb-3'>
+            <h4 className='text-sm font-medium text-lunary-rose mb-3'>
               Elemental & Modal Balance
             </h4>
             <div className='grid grid-cols-2 gap-3'>
               {/* Elements */}
               <div>
-                <h5 className='text-xs font-medium text-orange-300 mb-2'>
+                <h5 className='text-xs font-medium text-lunary-rose-300 mb-2'>
                   Elements
                 </h5>
                 <div className='space-y-1'>
@@ -1288,7 +1288,7 @@ const BirthChartPage = () => {
                               {element.name}
                             </span>
                           </div>
-                          <span className='text-xs text-orange-300'>
+                          <span className='text-xs text-lunary-rose-300'>
                             {element.count}
                           </span>
                         </div>
@@ -1318,7 +1318,7 @@ const BirthChartPage = () => {
 
               {/* Modalities */}
               <div>
-                <h5 className='text-xs font-medium text-orange-300 mb-2'>
+                <h5 className='text-xs font-medium text-lunary-rose-300 mb-2'>
                   Modalities
                 </h5>
                 <div className='space-y-1'>
@@ -1337,7 +1337,7 @@ const BirthChartPage = () => {
                               {modality.name}
                             </span>
                           </div>
-                          <span className='text-xs text-orange-300'>
+                          <span className='text-xs text-lunary-rose-300'>
                             {modality.count}
                           </span>
                         </div>
@@ -1377,13 +1377,16 @@ const BirthChartPage = () => {
 
           {/* Planetary Aspects */}
           <div className='mt-4'>
-            <h4 className='text-sm font-medium text-indigo-400 mb-3'>
+            <h4 className='text-sm font-medium text-lunary-primary mb-3'>
               Major Aspects
             </h4>
             <div className='space-y-2'>
               {getPlanetaryAspects(birthChartData).map((aspect, index) => (
-                <div key={index} className='border-l-2 border-indigo-400 pl-3'>
-                  <h5 className='text-xs font-medium text-indigo-300'>
+                <div
+                  key={index}
+                  className='border-l-2 border-lunary-primary pl-3'
+                >
+                  <h5 className='text-xs font-medium text-lunary-primary-300'>
                     {aspect.planet1} {aspect.aspectSymbol} {aspect.planet2}
                   </h5>
                   <p className='text-xs text-zinc-300'>{aspect.meaning}</p>
@@ -1394,17 +1397,17 @@ const BirthChartPage = () => {
 
           {/* Chart Patterns */}
           <div className='mt-4'>
-            <h4 className='text-sm font-medium text-emerald-400 mb-3'>
+            <h4 className='text-sm font-medium text-lunary-success mb-3'>
               Chart Patterns
             </h4>
             <div className='space-y-2'>
               {getChartPatterns(birthChartData).map((pattern, index) => (
                 <div key={index} className='bg-zinc-700 rounded p-3'>
-                  <h5 className='text-xs font-medium text-emerald-300 mb-1'>
+                  <h5 className='text-xs font-medium text-lunary-success-300 mb-1'>
                     {pattern.name}
                   </h5>
                   <p className='text-xs text-zinc-300'>{pattern.description}</p>
-                  <p className='text-xs text-emerald-200 mt-1'>
+                  <p className='text-xs text-lunary-success-200 mt-1'>
                     {pattern.meaning}
                   </p>
                 </div>
@@ -1414,13 +1417,16 @@ const BirthChartPage = () => {
 
           {/* Stelliums */}
           <div className='mt-4'>
-            <h4 className='text-sm font-medium text-violet-400 mb-3'>
+            <h4 className='text-sm font-medium text-lunary-highlight mb-3'>
               Stelliums & Concentrations
             </h4>
             <div className='space-y-2'>
               {getStelliums(birthChartData).map((stellium, index) => (
-                <div key={index} className='border-l-2 border-violet-400 pl-3'>
-                  <h5 className='text-xs font-medium text-violet-300'>
+                <div
+                  key={index}
+                  className='border-l-2 border-lunary-highlight pl-3'
+                >
+                  <h5 className='text-xs font-medium text-lunary-highlight-300'>
                     {stellium.sign} Stellium ({stellium.planets.length} planets)
                   </h5>
                   <p className='text-xs text-zinc-400 mb-1'>
@@ -1436,13 +1442,13 @@ const BirthChartPage = () => {
 
           {/* Planetary Dignities */}
           <div className='mt-4'>
-            <h4 className='text-sm font-medium text-pink-400 mb-3'>
+            <h4 className='text-sm font-medium text-lunary-rose mb-3'>
               Special Placements
             </h4>
             <div className='space-y-2'>
               {getPlanetaryDignities(birthChartData).map((dignity, index) => (
-                <div key={index} className='border-l-2 border-pink-400 pl-3'>
-                  <h5 className='text-xs font-medium text-pink-300'>
+                <div key={index} className='border-l-2 border-lunary-rose pl-3'>
+                  <h5 className='text-xs font-medium text-lunary-rose-300'>
                     {dignity.planet} {dignity.type}
                   </h5>
                   <p className='text-xs text-zinc-300'>{dignity.meaning}</p>

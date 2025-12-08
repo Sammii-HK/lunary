@@ -170,7 +170,7 @@ export default function SuccessPage() {
     <div className='min-h-screen bg-black text-white'>
       <div className='max-w-4xl mx-auto px-6 py-16'>
         <div className='text-center mb-12'>
-          <div className='w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6'>
+          <div className='w-16 h-16 bg-lunary-success rounded-full flex items-center justify-center mx-auto mb-6'>
             <svg
               className='w-8 h-8 text-white'
               fill='none'
@@ -204,8 +204,8 @@ export default function SuccessPage() {
             {synced && (
               <div className='mb-4 p-3 rounded-lg bg-gray-800 border border-gray-700'>
                 <div className='flex items-center gap-3'>
-                  <div className='w-4 h-4 bg-green-500 rounded-full'></div>
-                  <span className='text-sm text-green-400'>
+                  <div className='w-4 h-4 bg-lunary-success rounded-full'></div>
+                  <span className='text-sm text-lunary-success'>
                     Subscription synced to your profile
                   </span>
                 </div>

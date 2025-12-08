@@ -414,8 +414,8 @@ export default function CosmicStatePage() {
             A snapshot of your personalized astrological profile
           </p>
           {error && cosmicData && (
-            <div className='mt-4 bg-yellow-900/20 border border-yellow-500/50 rounded-lg p-3'>
-              <p className='text-yellow-300 text-sm'>
+            <div className='mt-4 bg-lunary-accent-900/20 border border-lunary-accent-600 rounded-lg p-3'>
+              <p className='text-lunary-accent-300 text-sm'>
                 Warning: {error} (showing cached data)
               </p>
             </div>
@@ -505,8 +505,8 @@ export default function CosmicStatePage() {
               cosmicData.currentTransits.length > 0 && (
                 <div className='bg-zinc-900/80 rounded-xl p-6 border border-zinc-800/50 backdrop-blur-sm'>
                   <div className='flex items-center gap-3 mb-6'>
-                    <div className='p-2 bg-indigo-500/20 rounded-lg'>
-                      <TrendingUp className='w-5 h-5 text-indigo-400' />
+                    <div className='p-2 bg-lunary-primary-900 rounded-lg'>
+                      <TrendingUp className='w-5 h-5 text-lunary-primary' />
                     </div>
                     <div>
                       <h2 className='text-xl font-semibold text-white'>
@@ -546,7 +546,7 @@ export default function CosmicStatePage() {
                       ).length > 0 && (
                         <div>
                           <h3 className='text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2'>
-                            <Zap className='w-4 h-4 text-yellow-400' />
+                            <Zap className='w-4 h-4 text-lunary-accent' />
                             Exact Now
                           </h3>
                           <div className='space-y-2'>
@@ -556,7 +556,7 @@ export default function CosmicStatePage() {
                               .map((transit: any, idx: number) => (
                                 <div
                                   key={idx}
-                                  className='bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg p-3 border border-yellow-500/20'
+                                  className='bg-gradient-to-r from-lunary-accent-900 to-lunary-rose-900 rounded-lg p-3 border border-lunary-accent-700'
                                 >
                                   <div className='text-sm text-zinc-100 font-medium'>
                                     {transit.from} {transit.aspect} {transit.to}
@@ -669,10 +669,10 @@ export default function CosmicStatePage() {
 
             {/* Daily Tarot */}
             {cosmicData.tarot && (
-              <div className='bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-500/20'>
+              <div className='bg-gradient-to-br from-lunary-primary-900/30 to-lunary-highlight-900/30 rounded-xl p-6 border border-lunary-primary-800'>
                 <div className='flex items-center gap-3 mb-4'>
-                  <div className='p-2 bg-indigo-500/20 rounded-lg'>
-                    <Sparkles className='w-5 h-5 text-indigo-400' />
+                  <div className='p-2 bg-lunary-primary-900 rounded-lg'>
+                    <Sparkles className='w-5 h-5 text-lunary-primary' />
                   </div>
                   <div>
                     <h2 className='text-xl font-semibold text-white'>
@@ -704,7 +704,7 @@ export default function CosmicStatePage() {
                               .map((keyword: string) => (
                                 <span
                                   key={keyword}
-                                  className='text-xs px-3 py-1.5 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-500/30'
+                                  className='text-xs px-3 py-1.5 rounded-full bg-lunary-primary-900 text-indigo-200 border border-indigo-500/30'
                                 >
                                   {keyword}
                                 </span>
