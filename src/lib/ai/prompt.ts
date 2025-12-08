@@ -130,6 +130,12 @@ const describeContext = (
 ): string => {
   const parts: string[] = [];
 
+  // Current date - critical for the AI to know when "today" is
+  const today = new Date();
+  parts.push(
+    `TODAY: ${today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`,
+  );
+
   // SAVED SPREAD - always include if user has one (for spread interpretation)
   if (
     context.tarot.lastReading?.cards &&

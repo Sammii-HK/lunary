@@ -4,7 +4,7 @@ import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { HelpCircle, Stars, Layers, X } from 'lucide-react';
+import { HelpCircle, Stars, Layers, X, Hash } from 'lucide-react';
 import { generateBirthChart } from '../../../utils/astrology/birthChart';
 import { useSubscription } from '../../hooks/useSubscription';
 import {
@@ -15,6 +15,7 @@ import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
+import { calculateLifePathNumber } from '../../../utils/personalization';
 
 const SkeletonCard = () => (
   <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
@@ -717,6 +718,34 @@ export default function ProfilePage() {
                         <Layers className='w-6 h-6 text-lunary-accent' />
                       </div>
                     </button>
+                  );
+                })()}
+
+                {(() => {
+                  const lifePathNumber = calculateLifePathNumber(birthday);
+                  const isMasterNumber = [11, 22, 33].includes(lifePathNumber);
+                  return (
+                    <Link
+                      href={`/grimoire/life-path/${lifePathNumber}`}
+                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-lunary-secondary-600 transition-colors'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div>
+                          <h3 className='text-lg font-medium text-white group-hover:text-lunary-secondary-300 transition-colors'>
+                            Life Path {lifePathNumber}
+                            {isMasterNumber && (
+                              <span className='ml-2 text-xs text-lunary-accent-400'>
+                                Master
+                              </span>
+                            )}
+                          </h3>
+                          <p className='text-xs text-zinc-400'>
+                            Your numerology destiny
+                          </p>
+                        </div>
+                        <Hash className='w-6 h-6 text-lunary-secondary' />
+                      </div>
+                    </Link>
                   );
                 })()}
               </div>

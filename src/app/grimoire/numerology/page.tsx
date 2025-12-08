@@ -9,6 +9,15 @@ import {
   angelNumbers,
   lifePathNumbers,
 } from '@/constants/grimoire/numerology-data';
+import {
+  mirrorHours,
+  doubleHours,
+} from '@/constants/grimoire/clock-numbers-data';
+import {
+  karmicDebtNumbers,
+  expressionNumbers,
+  soulUrgeNumbers,
+} from '@/constants/grimoire/numerology-extended-data';
 
 export const metadata: Metadata = {
   title:
@@ -130,6 +139,119 @@ export default function NumerologyIndexPage() {
               </p>
             </Link>
           ))}
+        </div>
+
+        <h2 className='text-2xl font-light mb-6'>Core Numbers</h2>
+        <div className='grid md:grid-cols-3 gap-6 mb-12'>
+          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <h3 className='text-xl font-medium text-lunary-secondary-400 mb-3'>
+              Expression Numbers
+            </h3>
+            <p className='text-zinc-400 mb-4 text-sm'>
+              Also called Destiny Number, reveals your natural talents and
+              abilities.
+            </p>
+            <div className='flex flex-wrap gap-2'>
+              {Object.keys(expressionNumbers)
+                .slice(0, 9)
+                .map((num) => (
+                  <Link
+                    key={num}
+                    href={`/grimoire/numerology/expression/${num}`}
+                    className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-secondary-600 text-sm transition-colors'
+                  >
+                    {num}
+                  </Link>
+                ))}
+            </div>
+          </div>
+          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <h3 className='text-xl font-medium text-lunary-accent-400 mb-3'>
+              Soul Urge Numbers
+            </h3>
+            <p className='text-zinc-400 mb-4 text-sm'>
+              Also called Heart&apos;s Desire, reveals your innermost
+              motivations.
+            </p>
+            <div className='flex flex-wrap gap-2'>
+              {Object.keys(soulUrgeNumbers)
+                .slice(0, 9)
+                .map((num) => (
+                  <Link
+                    key={num}
+                    href={`/grimoire/numerology/soul-urge/${num}`}
+                    className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-accent-600 text-sm transition-colors'
+                  >
+                    {num}
+                  </Link>
+                ))}
+            </div>
+          </div>
+          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <h3 className='text-xl font-medium text-lunary-error-400 mb-3'>
+              Karmic Debt Numbers
+            </h3>
+            <p className='text-zinc-400 mb-4 text-sm'>
+              Reveal lessons carried over from past lives.
+            </p>
+            <div className='flex flex-wrap gap-2'>
+              {Object.keys(karmicDebtNumbers).map((num) => (
+                <Link
+                  key={num}
+                  href={`/grimoire/numerology/karmic-debt/${num}`}
+                  className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-error-600 text-sm transition-colors'
+                >
+                  {num}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <h2 className='text-2xl font-light mb-6'>Clock Numbers</h2>
+        <p className='text-zinc-400 mb-6'>
+          When you repeatedly notice certain times on the clock, the universe
+          may be sending you a message through mirror hours and double hours.
+        </p>
+        <div className='grid md:grid-cols-2 gap-6 mb-12'>
+          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <h3 className='text-xl font-medium text-lunary-highlight-400 mb-3'>
+              Mirror Hours
+            </h3>
+            <p className='text-zinc-400 mb-4 text-sm'>
+              Times where digits mirror each other (01:10, 12:21, etc.)
+            </p>
+            <div className='flex flex-wrap gap-2'>
+              {Object.keys(mirrorHours).map((time) => (
+                <Link
+                  key={time}
+                  href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}
+                  className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-highlight-600 text-sm transition-colors'
+                >
+                  {time}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <h3 className='text-xl font-medium text-lunary-primary-400 mb-3'>
+              Double Hours
+            </h3>
+            <p className='text-zinc-400 mb-4 text-sm'>
+              Times where hour and minute are the same (11:11, 22:22, etc.)
+            </p>
+            <div className='flex flex-wrap gap-2'>
+              {Object.keys(doubleHours).map((time) => (
+                <Link
+                  key={time}
+                  href={`/grimoire/double-hours/${time.replace(':', '-')}`}
+                  className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-primary-600 text-sm transition-colors'
+                >
+                  {time}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
         <h2 className='text-2xl font-light mb-6'>Universal Year Meanings</h2>

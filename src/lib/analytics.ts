@@ -114,16 +114,22 @@ function normalizeEmail(email?: string | null): string | undefined {
 
 function sanitizeEventPayload(
   payload: ConversionEventData,
-): Record<string, any> {
-  return Object.entries(payload).reduce<Record<string, any>>(
-    (acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = value;
-      }
-      return acc;
-    },
-    {},
-  );
+): Record<string, string | number | boolean | null> {
+  return Object.entries(payload).reduce<
+    Record<string, string | number | boolean | null>
+  >((acc, [key, value]) => {
+    // Vercel Analytics only accepts primitives: strings, numbers, booleans, null
+    if (
+      value === null ||
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      acc[key] = value;
+    }
+    // Skip objects, arrays, undefined, and functions
+    return acc;
+  }, {});
 }
 
 function extractUTMParams(): Record<string, string> {

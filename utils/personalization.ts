@@ -32,7 +32,7 @@ function createScopedRng(
   return () => rng();
 }
 
-function reduceToLifePathNumber(dateIso?: string): number {
+export function calculateLifePathNumber(dateIso?: string): number {
   if (!dateIso) return 7; // fallback
   const digits = dateIso
     .replace(/-/g, '')
@@ -48,6 +48,9 @@ function reduceToLifePathNumber(dateIso?: string): number {
   }
   return sum;
 }
+
+// Alias for internal use
+const reduceToLifePathNumber = calculateLifePathNumber;
 
 function personalDayNumber(
   birthdayIso?: string,

@@ -140,9 +140,9 @@ const MessageBubble = ({
       className={`flex items-end gap-1.5 ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
     >
       <div
-        className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm ${
+        className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm transition-colors ${
           isUser
-            ? 'bg-lunary-primary-900 text-white border border-lunary-primary-700'
+            ? 'bg-lunary-primary-900 text-white border border-lunary-primary-700 hover:bg-lunary-primary-800 hover:border-lunary-primary-600'
             : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
         }`}
       >
@@ -832,7 +832,7 @@ function BookOfShadowsContent() {
               <button
                 type='button'
                 onClick={stop}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-lunary-error-600 text-white transition hover:bg-lunary-error'
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-lunary-error-900 text-lunary-error-300 border border-lunary-error-700 transition hover:bg-lunary-error-800'
               >
                 <Square className='w-4 h-4' />
               </button>
