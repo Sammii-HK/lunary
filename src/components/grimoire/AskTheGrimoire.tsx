@@ -49,7 +49,7 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
-  zodiac: 'bg-purple-500/20 text-purple-300',
+  zodiac: 'bg-lunary-primary-900 text-lunary-accent-300',
   planet: 'bg-amber-500/20 text-amber-300',
   tarot: 'bg-rose-500/20 text-rose-300',
   crystal: 'bg-cyan-500/20 text-cyan-300',
@@ -238,7 +238,7 @@ export function AskTheGrimoire({
               transition-all duration-300
               ${
                 isAIMode
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/25'
+                  ? 'bg-gradient-to-r from-lunary-primary to-lunary-secondary text-white shadow-lg shadow-lunary-primary/25'
                   : 'bg-zinc-800/60 text-zinc-400 hover:text-white hover:bg-zinc-700/60'
               }
             `}
@@ -265,9 +265,9 @@ export function AskTheGrimoire({
       <div className='relative'>
         <div className='absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none'>
           {isLoading ? (
-            <div className='h-5 w-5 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin' />
+            <div className='h-5 w-5 border-2 border-lunary-primary-700 border-t-lunary-accent rounded-full animate-spin' />
           ) : (
-            <Search className='h-5 w-5 text-purple-400/60' />
+            <Search className='h-5 w-5 text-lunary-accent/60' />
           )}
         </div>
         <input
@@ -285,10 +285,10 @@ export function AskTheGrimoire({
           className={`
             w-full pl-12 pr-12 py-4 
             bg-black/40 backdrop-blur-xl
-            border ${isAIMode ? 'border-indigo-500/40' : 'border-purple-500/30'}
+            border ${isAIMode ? 'border-indigo-500/40' : 'border-lunary-primary-700'}
             rounded-2xl
-            text-white placeholder:text-purple-300/50
-            focus:outline-none focus:ring-2 ${isAIMode ? 'focus:ring-indigo-500/50 focus:border-indigo-400/50' : 'focus:ring-purple-500/50 focus:border-purple-400/50'}
+            text-white placeholder:text-lunary-accent-300/50
+            focus:outline-none focus:ring-2 ${isAIMode ? 'focus:ring-indigo-500/50 focus:border-indigo-400/50' : 'focus:ring-lunary-primary/50 focus:border-lunary-primary/50'}
             transition-all duration-300
             ${variant === 'hero' ? 'text-lg' : 'text-base'}
           `}
@@ -306,7 +306,7 @@ export function AskTheGrimoire({
               setIsOpen(false);
               inputRef.current?.focus();
             }}
-            className='absolute inset-y-0 right-0 flex items-center pr-4 text-purple-400/60 hover:text-purple-300 transition-colors'
+            className='absolute inset-y-0 right-0 flex items-center pr-4 text-lunary-accent/60 hover:text-lunary-accent-300 transition-colors'
             aria-label='Clear search'
           >
             <X className='h-5 w-5' />
@@ -323,17 +323,17 @@ export function AskTheGrimoire({
           className='
             absolute top-full left-0 right-0 mt-2 
             bg-black/90 backdrop-blur-xl
-            border border-purple-500/30 
+            border border-lunary-primary-700 
             rounded-2xl
-            shadow-2xl shadow-purple-500/10
+            shadow-2xl shadow-lunary-primary/10
             overflow-hidden
             z-50
             animate-in fade-in slide-in-from-top-2 duration-200
           '
         >
-          <div className='p-2 border-b border-purple-500/20'>
+          <div className='p-2 border-b border-lunary-primary-800'>
             <div className='flex items-center justify-between px-3 py-1.5 text-xs'>
-              <div className='flex items-center gap-2 text-purple-400/70'>
+              <div className='flex items-center gap-2 text-lunary-accent/70'>
                 {isAIMode ? (
                   <Brain className='h-3 w-3 text-indigo-400' />
                 ) : (
@@ -366,8 +366,8 @@ export function AskTheGrimoire({
                   transition-colors duration-150
                   ${
                     index === selectedIndex
-                      ? 'bg-purple-500/20'
-                      : 'hover:bg-purple-500/10'
+                      ? 'bg-lunary-primary-900'
+                      : 'hover:bg-lunary-primary-950'
                   }
                 `}
                 onClick={() => setIsOpen(false)}
@@ -396,23 +396,23 @@ export function AskTheGrimoire({
                       {result.category}
                     </span>
                   </div>
-                  <p className='text-sm text-purple-300/70 line-clamp-2 mt-0.5'>
+                  <p className='text-sm text-lunary-accent-300/70 line-clamp-2 mt-0.5'>
                     {result.summary}
                   </p>
                 </div>
 
-                <ArrowRight className='h-4 w-4 text-purple-400/40 flex-shrink-0 mt-1' />
+                <ArrowRight className='h-4 w-4 text-lunary-accent/40 flex-shrink-0 mt-1' />
               </Link>
             ))}
           </div>
 
           {/* Footer */}
-          <div className='p-3 border-t border-purple-500/20 bg-purple-500/5'>
+          <div className='p-3 border-t border-lunary-primary-800 bg-lunary-primary-950'>
             <Link
               href={`/grimoire/search?q=${encodeURIComponent(query)}`}
               className='
                 flex items-center justify-center gap-2
-                text-sm text-purple-300 hover:text-white
+                text-sm text-lunary-accent-300 hover:text-white
                 transition-colors
               '
               onClick={() => setIsOpen(false)}
@@ -430,18 +430,18 @@ export function AskTheGrimoire({
           className='
             absolute top-full left-0 right-0 mt-2 
             bg-black/90 backdrop-blur-xl
-            border border-purple-500/30 
+            border border-lunary-primary-700 
             rounded-2xl
             p-6
             text-center
             z-50
           '
         >
-          <Sparkles className='h-8 w-8 text-purple-400/50 mx-auto mb-3' />
-          <p className='text-purple-300/70'>
+          <Sparkles className='h-8 w-8 text-lunary-accent/50 mx-auto mb-3' />
+          <p className='text-lunary-accent-300/70'>
             No cosmic insights found for &quot;{query}&quot;
           </p>
-          <p className='text-sm text-purple-400/50 mt-1'>
+          <p className='text-sm text-lunary-accent/50 mt-1'>
             Try searching for a zodiac sign, planet, tarot card, or crystal
           </p>
         </div>
