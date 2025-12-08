@@ -239,7 +239,7 @@ export function MonthlyInsights() {
                         <span
                           className={
                             insight.trends.tarot.changePercent > 0
-                              ? 'text-green-400 ml-1'
+                              ? 'text-lunary-success ml-1'
                               : 'text-red-400 ml-1'
                           }
                         >
@@ -263,7 +263,7 @@ export function MonthlyInsights() {
                         <span
                           className={
                             insight.trends.journal.changePercent > 0
-                              ? 'text-green-400 ml-1'
+                              ? 'text-lunary-success ml-1'
                               : 'text-red-400 ml-1'
                           }
                         >
@@ -287,7 +287,7 @@ export function MonthlyInsights() {
                         <span
                           className={
                             insight.trends.rituals.changePercent > 0
-                              ? 'text-green-400 ml-1'
+                              ? 'text-lunary-success ml-1'
                               : 'text-red-400 ml-1'
                           }
                         >

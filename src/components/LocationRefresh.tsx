@@ -68,8 +68,8 @@ export default function LocationRefresh({
 
   const successClasses =
     variant === 'card'
-      ? `${feedbackClasses} border-green-500 bg-green-900/50 text-green-300`
-      : `${feedbackClasses} border-green-500/40 bg-green-500/10 text-green-200`;
+      ? `${feedbackClasses} border-lunary-success bg-lunary-success-900/50 text-lunary-success-300`
+      : `${feedbackClasses} border-lunary-success-600 bg-lunary-success-950 text-lunary-success-200`;
 
   const errorClasses =
     variant === 'card'

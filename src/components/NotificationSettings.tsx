@@ -581,7 +581,7 @@ export function NotificationSettings() {
       {/* Diagnostic info (only show if there's an issue) */}
       {(!hasVapidKey || !hasServiceWorker || !hasPushManager) && (
         <div className='mb-4 p-3 bg-zinc-900 rounded border border-zinc-700'>
-          <p className='text-xs font-medium text-yellow-400 mb-2'>
+          <p className='text-xs font-medium text-lunary-accent mb-2'>
             ⚠️ Setup Status
           </p>
           <div className='text-xs space-y-1 text-zinc-400'>
@@ -591,19 +591,19 @@ export function NotificationSettings() {
               </p>
             )}
             {hasVapidKey && (
-              <p className='text-green-400'>✅ VAPID key configured</p>
+              <p className='text-lunary-success'>✅ VAPID key configured</p>
             )}
             {!hasServiceWorker && (
               <p className='text-red-400'>❌ Service Worker not supported</p>
             )}
             {hasServiceWorker && (
-              <p className='text-green-400'>✅ Service Worker supported</p>
+              <p className='text-lunary-success'>✅ Service Worker supported</p>
             )}
             {!hasPushManager && (
               <p className='text-red-400'>❌ Push Manager not supported</p>
             )}
             {hasPushManager && (
-              <p className='text-green-400'>✅ Push Manager supported</p>
+              <p className='text-lunary-success'>✅ Push Manager supported</p>
             )}
           </div>
         </div>
@@ -620,7 +620,7 @@ export function NotificationSettings() {
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>
             <div>
-              <p className='text-sm text-green-400 font-medium'>
+              <p className='text-sm text-lunary-success font-medium'>
                 🔔 Notifications Enabled
               </p>
               <p className='text-xs text-zinc-400 mt-1'>
