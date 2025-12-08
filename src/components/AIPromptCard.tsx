@@ -47,7 +47,7 @@ export function AIPromptCard({
       case 'daily':
         return 'border-purple-500/40 bg-purple-950/20';
       case 'weekly':
-        return 'border-blue-500/40 bg-blue-950/20';
+        return 'border-lunary-secondary-600 bg-lunary-secondary-950';
       default:
         return 'border-zinc-700/60 bg-zinc-900/40';
     }
@@ -70,7 +70,7 @@ export function AIPromptCard({
             className={`text-xs font-medium px-2 py-1 rounded-full ${
               prompt.promptType === 'daily'
                 ? 'bg-purple-500/20 text-purple-300'
-                : 'bg-blue-500/20 text-blue-300'
+                : 'bg-lunary-secondary-900 text-lunary-secondary-300'
             }`}
           >
             {getPromptTypeLabel()}

@@ -60,7 +60,10 @@ export const BirthChartWidget = () => {
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday to see your natal placements
           </p>
-          <Link href='/profile' className='text-blue-400 text-xs underline'>
+          <Link
+            href='/profile'
+            className='text-lunary-accent text-xs underline'
+          >
             Complete Profile
           </Link>
         </div>
@@ -120,7 +123,10 @@ export const BirthChartWidget = () => {
       </div>
 
       <div className='text-center mt-3'>
-        <Link href='/birth-chart' className='text-blue-400 text-xs underline'>
+        <Link
+          href='/birth-chart'
+          className='text-lunary-accent text-xs underline'
+        >
           View Full Chart
         </Link>
       </div>

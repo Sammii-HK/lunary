@@ -561,8 +561,8 @@ export function OnboardingFlow() {
 
         {currentStep === 'complete' && (
           <div className='space-y-6 text-center'>
-            <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4'>
-              <Star className='w-8 h-8 text-green-300' />
+            <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-lunary-success-900 mb-4'>
+              <Star className='w-8 h-8 text-lunary-success-300' />
             </div>
             <h2 className='text-2xl font-bold text-white mb-2'>
               You&apos;re All Set!
