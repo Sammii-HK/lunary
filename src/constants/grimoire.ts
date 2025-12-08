@@ -43,10 +43,12 @@ export const grimoire: {
   numerology: {
     title: 'Numerology',
     contents: [
-      'Core Numbers',
+      'Angel Numbers',
+      'Life Path Numbers',
+      'Universal Years',
       'Master Numbers',
+      'Core Numbers',
       'Planetary Days',
-      'Calculations',
     ],
   },
   crystals: {
