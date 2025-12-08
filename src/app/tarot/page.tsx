@@ -669,8 +669,8 @@ const TarotReadings = () => {
                 </p>
               </div>
 
-              <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                <h3 className='text-sm font-medium text-indigo-300/90 mb-2'>
+              <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
+                <h3 className='text-sm font-medium text-lunary-primary-300 mb-2'>
                   Weekly Energy
                 </h3>
                 <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -678,15 +678,15 @@ const TarotReadings = () => {
                 </p>
               </div>
 
-              <div className='rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-                <h3 className='text-sm font-medium text-emerald-300/90 mb-2'>
+              <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
+                <h3 className='text-sm font-medium text-lunary-success-300 mb-2'>
                   Key Guidance
                 </h3>
                 <ul className='text-sm text-zinc-300 space-y-2'>
                   {generalTarot.guidance.actionPoints.map((point, index) => (
                     <li key={index} className='flex items-start gap-2'>
                       <Check
-                        className='w-4 h-4 text-emerald-400/80 mt-0.5 flex-shrink-0'
+                        className='w-4 h-4 text-lunary-success mt-0.5 flex-shrink-0'
                         strokeWidth={2}
                       />
                       <span>{point}</span>
@@ -943,8 +943,8 @@ const TarotReadings = () => {
               </p>
             </div>
 
-            <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-              <h3 className='text-sm font-medium text-indigo-300/90 mb-2'>
+            <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
+              <h3 className='text-sm font-medium text-lunary-primary-300 mb-2'>
                 Weekly Energy
               </h3>
               <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -952,8 +952,8 @@ const TarotReadings = () => {
               </p>
             </div>
 
-            <div className='rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-              <h3 className='text-sm font-medium text-emerald-300/90 mb-2'>
+            <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
+              <h3 className='text-sm font-medium text-lunary-success-300 mb-2'>
                 Key Guidance
               </h3>
               <ul className='text-sm text-zinc-300 space-y-2'>
@@ -961,7 +961,7 @@ const TarotReadings = () => {
                   (point, index) => (
                     <li key={index} className='flex items-start gap-2'>
                       <Check
-                        className='w-4 h-4 text-emerald-400/80 mt-0.5 flex-shrink-0'
+                        className='w-4 h-4 text-lunary-success mt-0.5 flex-shrink-0'
                         strokeWidth={2}
                       />
                       <span>{point}</span>
@@ -1052,7 +1052,7 @@ const TarotReadings = () => {
                   !subscription.hasAccess('advanced_patterns')
                     ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
                     : selectedView === 'year-over-year'
-                      ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                      ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
                       : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
                 )}
                 title={
