@@ -100,7 +100,7 @@ export const CrystalWidget = () => {
         <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
           <div className='text-center'>
             <h3 className='font-bold mb-2'>Personal Crystal</h3>
-            <span className='text-xs text-purple-400'>Personalised</span>
+            <span className='text-xs text-lunary-accent'>Personalised</span>
             <p className='text-zinc-400 text-xs mt-2'>
               Access to historical and future dates requires a subscription.
             </p>
@@ -127,7 +127,7 @@ export const CrystalWidget = () => {
         <div className='space-y-2'>
           <div className='space-y-2'>
             <div className='text-center'>
-              <h4 className='font-semibold text-purple-300'>
+              <h4 className='font-semibold text-lunary-accent-300'>
                 {generalCrystal.name}
               </h4>
               <p className='text-xs text-zinc-400'>
@@ -138,7 +138,7 @@ export const CrystalWidget = () => {
             <p className='text-xs text-zinc-300'>{generalCrystal.reason}</p>
           </div>
 
-          <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20'>
+          <div className='bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
             <p className='text-xs text-zinc-400 mb-2'>
               Get crystals chosen specifically for YOUR birth chart. See what
               the universe has selected for you!
@@ -155,7 +155,7 @@ export const CrystalWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>💎</div>
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday for personalized crystal guidance
@@ -173,7 +173,7 @@ export const CrystalWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>🔮</div>
           <p className='text-zinc-400 text-xs'>
             Calculating your crystal alignment...
@@ -188,7 +188,7 @@ export const CrystalWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>🔮</div>
           <p className='text-zinc-400 text-xs'>
             Calculating your crystal alignment...
@@ -243,7 +243,7 @@ export const CrystalWidget = () => {
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
           <h3 className='font-bold'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
         </div>
 
         <div className='text-center mb-3'>
