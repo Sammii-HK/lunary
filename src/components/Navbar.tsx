@@ -140,7 +140,7 @@ const NavLink = ({
     <Link
       href={href}
       className={`relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
-        active ? 'text-purple-400' : 'text-zinc-500 hover:text-zinc-300'
+        active ? 'text-lunary-secondary' : 'text-zinc-500 hover:text-zinc-300'
       }`}
     >
       <div className='relative'>
@@ -149,7 +149,7 @@ const NavLink = ({
           strokeWidth={active ? 2 : 1.5}
         />
         {showBadge && (
-          <span className='absolute -top-1 -right-1 h-2 w-2 rounded-full bg-purple-500' />
+          <span className='absolute -top-1 -right-1 h-2 w-2 rounded-full bg-lunary-primary' />
         )}
       </div>
       <span className='text-[10px] uppercase tracking-wide'>{label}</span>

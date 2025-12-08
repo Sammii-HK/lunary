@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStatus } from './AuthStatus';
 import { Logo } from './Logo';
+import { Button } from './ui/button';
 
 export function MarketingNavbar() {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export function MarketingNavbar() {
           {/* Logo */}
           <Link
             href='/'
-            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
+            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-lunary-primary transition-colors'
           >
             <Logo size={28} />
             Lunary
@@ -54,7 +55,7 @@ export function MarketingNavbar() {
             </Link>
             <Link
               href='/app'
-              className='text-sm text-purple-400 hover:text-purple-300 transition-colors font-medium'
+              className='text-sm text-lunary-secondary hover:text-white transition-colors font-medium'
             >
               App
             </Link>
@@ -63,12 +64,14 @@ export function MarketingNavbar() {
           {/* Auth Buttons */}
           <div className='flex items-center gap-3'>
             {authState.isAuthenticated ? (
-              <Link
-                href='/app'
-                className='text-sm bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full transition-colors'
+              <Button
+                variant='lunary-solid'
+                size='sm'
+                className='rounded-full'
+                asChild
               >
-                Open App
-              </Link>
+                <Link href='/app'>Open App</Link>
+              </Button>
             ) : (
               <>
                 <Link
@@ -77,12 +80,14 @@ export function MarketingNavbar() {
                 >
                   Sign In
                 </Link>
-                <Link
-                  href='/profile'
-                  className='text-sm bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full transition-colors'
+                <Button
+                  variant='lunary-solid'
+                  size='sm'
+                  className='rounded-full'
+                  asChild
                 >
-                  Start free trial
-                </Link>
+                  <Link href='/profile'>Start free trial</Link>
+                </Button>
               </>
             )}
           </div>

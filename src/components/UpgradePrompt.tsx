@@ -1,12 +1,13 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
 import { conversionTracking } from '@/lib/analytics';
 import { Sparkles, Zap, Star, X } from 'lucide-react';
+import { Button } from './ui/button';
 
 export type UpgradePromptVariant =
   | 'banner'
@@ -127,7 +128,7 @@ export function UpgradePrompt({
     case 'banner':
       return (
         <div
-          className={`bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-lg p-4 relative ${className}`}
+          className={`bg-gradient-to-r from-lunary-primary-900 to-lunary-secondary-900 border border-lunary-primary-700 rounded-lg p-4 relative ${className}`}
         >
           {isTrialActive && (
             <button
@@ -140,7 +141,7 @@ export function UpgradePrompt({
           )}
           <div className='flex items-center justify-between gap-4'>
             <div className='flex items-center gap-3'>
-              <Zap className='w-5 h-5 text-purple-400' />
+              <Zap className='w-5 h-5 text-lunary-primary' />
               <div>
                 <h3 className='text-sm font-medium text-white'>
                   {promptTitle}
@@ -148,17 +149,21 @@ export function UpgradePrompt({
                 <p className='text-xs text-gray-400'>{promptDescription}</p>
               </div>
             </div>
-            <Link
-              href={authState.isAuthenticated ? '/pricing' : '/auth'}
+            <Button
+              variant='lunary-white'
+              size='sm'
+              className='rounded-full'
               onClick={handleUpgradeClick}
-              className='bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors whitespace-nowrap'
+              asChild
             >
-              {authState.isAuthenticated
-                ? isTrialActive
-                  ? 'Continue'
-                  : 'Upgrade'
-                : 'Sign In'}
-            </Link>
+              <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+                {authState.isAuthenticated
+                  ? isTrialActive
+                    ? 'Continue'
+                    : 'Upgrade'
+                  : 'Sign In'}
+              </Link>
+            </Button>
           </div>
         </div>
       );
@@ -168,7 +173,7 @@ export function UpgradePrompt({
         <div
           className={`bg-zinc-900 border border-zinc-800 rounded-lg p-6 text-center ${className}`}
         >
-          <div className='w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4'>
+          <div className='w-12 h-12 bg-gradient-to-br from-lunary-primary to-lunary-secondary rounded-full flex items-center justify-center mx-auto mb-4'>
             <Star className='w-6 h-6 text-white' />
           </div>
           <h3 className='text-xl font-medium text-white mb-2'>{promptTitle}</h3>
@@ -200,23 +205,27 @@ export function UpgradePrompt({
             </button>
           )}
           <div className='flex items-start gap-3'>
-            <Sparkles className='w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0' />
+            <Sparkles className='w-5 h-5 text-lunary-primary mt-0.5 flex-shrink-0' />
             <div className='flex-1'>
               <h3 className='text-sm font-medium text-white mb-1'>
                 {promptTitle}
               </h3>
               <p className='text-xs text-gray-400 mb-3'>{promptDescription}</p>
-              <Link
-                href={authState.isAuthenticated ? '/pricing' : '/auth'}
+              <Button
+                variant='lunary-white'
+                size='sm'
+                className='rounded-full w-full'
                 onClick={handleUpgradeClick}
-                className='block w-full bg-white text-black text-center py-2 px-4 rounded-full text-xs font-medium hover:bg-gray-100 transition-colors'
+                asChild
               >
-                {authState.isAuthenticated
-                  ? isTrialActive
-                    ? 'Continue Trial'
-                    : 'Upgrade now'
-                  : 'Sign In'}
-              </Link>
+                <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+                  {authState.isAuthenticated
+                    ? isTrialActive
+                      ? 'Continue Trial'
+                      : 'Upgrade now'
+                    : 'Sign In'}
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

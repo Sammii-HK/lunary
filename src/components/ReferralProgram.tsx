@@ -187,8 +187,8 @@ export function ReferralProgram() {
   return (
     <div className='rounded-lg border border-purple-500/30 bg-gradient-to-r from-purple-900/40 to-pink-900/40 p-6'>
       <div className='flex items-start gap-4'>
-        <div className='flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-purple-500/20'>
-          <Gift className='h-6 w-6 text-purple-300' />
+        <div className='flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-lunary-primary-900'>
+          <Gift className='h-6 w-6 text-lunary-accent' />
         </div>
         <div className='flex-1 space-y-4'>
           <div>
@@ -210,17 +210,17 @@ export function ReferralProgram() {
           {referralCode ? (
             <div className='space-y-4'>
               <div>
-                <span className='text-xs uppercase tracking-[0.2em] text-purple-200/80'>
+                <span className='text-xs uppercase tracking-[0.2em] text-lunary-accent-300'>
                   Your referral link
                 </span>
                 <div className='mt-2 flex flex-col gap-2 sm:flex-row'>
-                  <div className='flex flex-1 items-center gap-2 rounded-lg border border-purple-400/30 bg-zinc-900/60 px-3 py-2 text-sm text-white'>
+                  <div className='flex flex-1 items-center gap-2 rounded-lg border border-lunary-primary-700 bg-zinc-900/60 px-3 py-2 text-sm text-white'>
                     <span className='truncate'>{referralUrl}</span>
                   </div>
                   <div className='flex gap-2'>
                     <button
                       onClick={handleCopy}
-                      className='flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500'
+                      className='flex items-center gap-2 rounded-lg bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
                     >
                       {copied ? (
                         <>
@@ -236,7 +236,7 @@ export function ReferralProgram() {
                     </button>
                     <button
                       onClick={canShare ? handleShare : handleCopy}
-                      className='flex items-center gap-2 rounded-lg border border-purple-400/40 px-4 py-2 text-sm font-medium text-purple-100 transition-colors hover:bg-purple-500/10'
+                      className='flex items-center gap-2 rounded-lg border border-lunary-primary-600 px-4 py-2 text-sm font-medium text-lunary-accent transition-colors hover:bg-lunary-primary-950'
                     >
                       <Share2 className='h-4 w-4' />
                       Share

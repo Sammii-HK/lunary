@@ -89,7 +89,7 @@ export function MarketingFooter() {
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8'>
           <Link
             href='/'
-            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
+            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-lunary-primary transition-colors'
           >
             <Logo size={24} />
             Lunary
@@ -101,7 +101,7 @@ export function MarketingFooter() {
                 href={social.url}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='inline-flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-purple-400 transition-colors'
+                className='inline-flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-lunary-primary transition-colors'
                 aria-label={social.label}
                 title={social.label}
               >

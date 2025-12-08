@@ -76,7 +76,7 @@ export function AIPromptCard({
             {getPromptTypeLabel()}
           </span>
           {prompt.isNew && (
-            <span className='text-xs font-semibold text-lunary-accent-highlight animate-pulse'>
+            <span className='text-xs font-semibold text-lunary-highlight animate-pulse'>
               New
             </span>
           )}

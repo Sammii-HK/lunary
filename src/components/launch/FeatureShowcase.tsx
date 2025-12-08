@@ -108,14 +108,14 @@ export function FeatureShowcase({
           return (
             <div
               key={feature.title}
-              className='group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black p-6 transition hover:border-lunary-primary/40'
+              className='group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black p-6 transition hover:border-lunary-primary-600'
             >
               <div className='absolute inset-0 opacity-0 transition group-hover:opacity-20'>
                 <div className='h-full w-full bg-[radial-gradient(circle,_rgba(147,51,234,0.4)_0%,_transparent_60%)]' />
               </div>
               <div className='relative flex items-start gap-4'>
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-3'>
-                  <Icon className='h-6 w-6 text-lunary-accent-soft/80' />
+                  <Icon className='h-6 w-6 text-lunary-accent-300' />
                 </div>
                 <div className='space-y-2'>
                   <div className='flex items-center gap-3'>
@@ -123,7 +123,7 @@ export function FeatureShowcase({
                       {feature.title}
                     </h3>
                     {feature.tag && (
-                      <span className='rounded-full bg-lunary-accent-highlight/20 px-3 py-1 text-xs uppercase tracking-wider text-lunary-accent-highlight'>
+                      <span className='rounded-full bg-lunary-highlight-900 px-3 py-1 text-xs uppercase tracking-wider text-lunary-highlight'>
                         {feature.tag}
                       </span>
                     )}

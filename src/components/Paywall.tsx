@@ -8,6 +8,7 @@ import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
 import { X } from 'lucide-react';
 import { captureEvent } from '@/lib/posthog-client';
+import { Button } from './ui/button';
 
 type FeatureName =
   | 'moon_phases'
@@ -94,14 +95,14 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
     <div className='bg-gray-900 rounded-lg p-8 text-center'>
       <div className='max-w-md mx-auto'>
         {/* Teaser Text */}
-        <div className='mb-6 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/30'>
-          <p className='text-purple-200 text-sm font-medium italic'>
+        <div className='mb-6 p-4 bg-gradient-to-r from-lunary-primary-900 to-lunary-highlight-900 rounded-lg border border-lunary-primary-700'>
+          <p className='text-lunary-accent text-sm font-medium italic'>
             &ldquo;This is the personalised interpretation for YOUR
             chart.&rdquo;
           </p>
         </div>
 
-        <div className='w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6'>
+        <div className='w-16 h-16 bg-gradient-to-br from-lunary-primary to-lunary-secondary rounded-full flex items-center justify-center mx-auto mb-6'>
           <svg
             className='w-8 h-8 text-white'
             fill='none'
@@ -274,16 +275,20 @@ export function UpgradePrompt() {
           </>
         )}
 
-        <Link
-          href={authState.isAuthenticated ? '/pricing' : '/auth'}
-          className='block w-full bg-white text-black text-center py-2 px-4 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors'
+        <Button
+          variant='lunary-white'
+          size='sm'
+          className='rounded-full w-full'
+          asChild
         >
-          {authState.isAuthenticated
-            ? isTrialActive
-              ? 'Continue Trial'
-              : 'Upgrade now'
-            : 'Sign In to Continue'}
-        </Link>
+          <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+            {authState.isAuthenticated
+              ? isTrialActive
+                ? 'Continue Trial'
+                : 'Upgrade now'
+              : 'Sign In to Continue'}
+          </Link>
+        </Button>
       </div>
     </div>
   );

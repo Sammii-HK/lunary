@@ -5,6 +5,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface ConversionCTAProps {
   featureName?: string;
@@ -54,7 +55,7 @@ export function ConversionCTA({
       <Link
         href={authState.isAuthenticated ? '/pricing' : '/auth'}
         onClick={handleClick}
-        className={`inline-flex items-center gap-1.5 text-purple-400 hover:text-purple-300 transition-colors ${sizeClasses[size]} ${className}`}
+        className={`inline-flex items-center gap-1.5 text-lunary-secondary hover:text-white transition-colors ${sizeClasses[size]} ${className}`}
       >
         <span>{getLinkText()}</span>
         {showIcon && <ArrowRight className='w-3 h-3' />}
@@ -67,7 +68,7 @@ export function ConversionCTA({
       <Link
         href={authState.isAuthenticated ? '/pricing' : '/auth'}
         onClick={handleClick}
-        className={`inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors ${className}`}
+        className={`inline-flex items-center gap-2 text-lunary-secondary hover:text-white transition-colors ${className}`}
       >
         {showIcon && <Sparkles className='w-4 h-4' />}
         <span>{getLinkText()}</span>
@@ -75,14 +76,20 @@ export function ConversionCTA({
     );
   }
 
+  const buttonSize = size === 'lg' ? 'lg' : size === 'sm' ? 'sm' : 'default';
+
   return (
-    <Link
-      href={authState.isAuthenticated ? '/pricing' : '/auth'}
+    <Button
+      variant='lunary-white'
+      size={buttonSize}
+      className={`rounded-full ${className}`}
       onClick={handleClick}
-      className={`inline-flex items-center justify-center gap-2 bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors ${sizeClasses[size]} ${className}`}
+      asChild
     >
-      {showIcon && <Sparkles className='w-4 h-4' />}
-      <span>{getButtonText()}</span>
-    </Link>
+      <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+        {showIcon && <Sparkles className='w-4 h-4' />}
+        <span>{getButtonText()}</span>
+      </Link>
+    </Button>
   );
 }

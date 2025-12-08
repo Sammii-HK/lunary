@@ -16,21 +16,20 @@ html {
   /* --background-end-rgb: 255, 255, 255; */
 
   /* Lunary Brand Colors */
-  /* Backgrounds */
-  --color-bg: #0a0a1a;
-  --color-bg-deep: #050510;
-  /* Primary/Secondary */
-  --color-primary: #8458d8;
-  --color-secondary: #7b7be8;
-  /* Accents */
-  --color-accent-soft: #c77dff;
-  --color-accent-highlight: #d070e8;
-  /* Text */
-  --color-text: #ffffff;
-  /* Semantic */
-  --color-warning-soft: #ee789e;
-  --color-error: #d06060;
-  --color-success: #6b9b7a;
+  --color-bg: #0a0a1a; /* Event Horizon */
+  --color-bg-deep: #050510; /* Singularity */
+  --color-primary: #8458d8; /* Nebula Violet */
+  --color-secondary: #7b7be8; /* Comet Trail */
+  --color-accent: #c77dff; /* Galaxy Haze */
+  --color-highlight: #d070e8; /* Supernova */
+  --color-rose: #ee789e; /* Cosmic Rose */
+  --color-error: #d06060; /* Solar Flare */
+  --color-success: #6b9b7a; /* Aurora Green */
+  --color-text: #ffffff; /* Stardust */
+
+  /* Glow Effects - uses Comet Trail (secondary) */
+  --glow-primary:
+    0 0 20px rgba(123, 123, 232, 0.5), 0 0 40px rgba(123, 123, 232, 0.25);
 }
 
 @media (prefers-color-scheme: dark) {

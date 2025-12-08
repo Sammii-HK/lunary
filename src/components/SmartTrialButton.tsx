@@ -70,8 +70,8 @@ export function SmartTrialButton({
   // Variant styles
   const variantClasses = {
     button:
-      'bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 rounded-lg font-medium',
-    link: 'text-xs underline font-medium bg-transparent hover:bg-purple-600/20 px-2 py-1 border-0',
+      'bg-lunary-primary-950 hover:bg-lunary-primary-900 text-lunary-primary border border-lunary-primary-800 hover:border-lunary-primary-700 rounded-lg font-medium',
+    link: 'text-xs underline font-medium bg-transparent hover:bg-lunary-primary-900 px-2 py-1 border-0',
   };
 
   // Base classes

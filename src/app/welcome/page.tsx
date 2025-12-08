@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 
 export default function WelcomePage() {
   return (
@@ -36,12 +37,9 @@ export default function WelcomePage() {
             move through your day with clarity.
           </p>
           <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
-            <Link
-              href='/profile'
-              className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
-            >
-              Start free trial
-            </Link>
+            <Button variant='lunary-solid' className='rounded-full' asChild>
+              <Link href='/profile'>Start free trial</Link>
+            </Button>
             <a
               href='#how-it-works'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
@@ -547,12 +545,9 @@ export default function WelcomePage() {
             and personal meaning.
           </p>
           <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
-            <Link
-              href='/profile'
-              className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
-            >
-              Start free trial
-            </Link>
+            <Button variant='lunary-solid' className='rounded-full' asChild>
+              <Link href='/profile'>Start free trial</Link>
+            </Button>
             <Link
               href='/app'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
