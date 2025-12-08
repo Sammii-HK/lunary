@@ -129,7 +129,7 @@ function UrgencyBadge({
 }) {
   const dayLabel = daysRemaining === 1 ? 'Day' : 'Days';
   const backgrounds = {
-    purple: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    purple: 'linear-gradient(135deg, #8458D8, #7B7BE8)',
     green: 'linear-gradient(135deg, #10b981, #059669)',
     red: 'linear-gradient(135deg, #ef4444, #dc2626)',
   };

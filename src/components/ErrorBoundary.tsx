@@ -70,7 +70,7 @@ class ErrorBoundary extends React.Component<
                 </button>
                 <Link
                   href='/'
-                  className='px-5 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors text-sm'
+                  className='px-5 py-2.5 bg-lunary-primary-600 hover:bg-lunary-primary-500 rounded-lg transition-colors text-sm'
                 >
                   Return Home
                 </Link>

@@ -172,7 +172,7 @@ export function RitualTracker() {
           className='flex items-center justify-between p-3 rounded-lg border border-zinc-800/40 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
         >
           <div className='flex items-center gap-3'>
-            <Sunset className='w-4 h-4 text-purple-500' />
+            <Sunset className='w-4 h-4 text-lunary-primary-500' />
             <span className='text-sm text-zinc-300'>Evening Ritual</span>
           </div>
           {status.evening ? (

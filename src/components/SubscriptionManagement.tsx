@@ -184,7 +184,7 @@ export default function SubscriptionManagement({
           </p>
           <a
             href='/pricing'
-            className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2 rounded-md text-sm font-medium transition-all duration-300'
+            className='inline-block bg-gradient-to-r from-lunary-primary-600 to-lunary-rose-600 hover:from-lunary-primary-700 hover:to-lunary-rose-700 text-white px-5 py-2 rounded-md text-sm font-medium transition-all duration-300'
           >
             View Plans
           </a>
@@ -300,7 +300,7 @@ export default function SubscriptionManagement({
       </div>
 
       {error && (
-        <div className='bg-red-900/50 border border-red-500 text-red-300 px-3 py-2 rounded text-sm mb-3'>
+        <div className='bg-lunary-error-900/50 border border-lunary-error text-lunary-error-300 px-3 py-2 rounded text-sm mb-3'>
           {error}
         </div>
       )}
@@ -309,7 +309,7 @@ export default function SubscriptionManagement({
         <button
           onClick={handleBillingPortal}
           disabled={loading === 'portal'}
-          className='w-full flex items-center justify-center gap-2 bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
+          className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
         >
           <Settings size={14} />
           {loading === 'portal' ? 'Opening...' : 'Manage Subscription'}

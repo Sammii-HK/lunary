@@ -8,6 +8,27 @@ import {
   HOUSES,
 } from '@/constants/seo/cosmic-ontology';
 
+// Helper to convert string to kebab-case
+function toSlug(str: string): string {
+  return str.toLowerCase().replace(/['']/g, '').replace(/\s+/g, '-');
+}
+
+// Convert house number to slug
+const HOUSE_NUMBER_TO_SLUG: Record<number, string> = {
+  1: 'first',
+  2: 'second',
+  3: 'third',
+  4: 'fourth',
+  5: 'fifth',
+  6: 'sixth',
+  7: 'seventh',
+  8: 'eighth',
+  9: 'ninth',
+  10: 'tenth',
+  11: 'eleventh',
+  12: 'twelfth',
+};
+
 interface ConnectionItem {
   name: string;
   url: string;
@@ -40,7 +61,8 @@ const TYPE_ICONS: Record<ConnectionItem['type'], React.ReactNode> = {
 };
 
 const TYPE_COLORS: Record<ConnectionItem['type'], string> = {
-  zodiac: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  zodiac:
+    'bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700',
   planet:
     'bg-lunary-accent-900 text-lunary-accent-300 border-lunary-accent-700',
   tarot: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
@@ -49,8 +71,8 @@ const TYPE_COLORS: Record<ConnectionItem['type'], string> = {
   element:
     'bg-lunary-success-900 text-lunary-success-300 border-lunary-success-700',
   house:
-    'bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700',
-  other: 'bg-zinc-500/20 text-zinc-300 border-zinc-500/30',
+    'bg-lunary-highlight-900 text-lunary-highlight-300 border-lunary-highlight-700',
+  other: 'bg-zinc-800 text-zinc-300 border-zinc-700',
 };
 
 function getConnectionsForPlanet(planetKey: string): ConnectionItem[] {
@@ -78,7 +100,7 @@ function getConnectionsForPlanet(planetKey: string): ConnectionItem[] {
   planet.crystals.slice(0, 2).forEach((crystal) => {
     connections.push({
       name: crystal,
-      url: `/grimoire/crystals/${crystal.toLowerCase().replace(/\s+/g, '-')}`,
+      url: `/grimoire/crystals/${toSlug(crystal)}`,
       type: 'crystal',
       description: 'Associated crystal',
     });
@@ -90,7 +112,7 @@ function getConnectionsForPlanet(planetKey: string): ConnectionItem[] {
   if (elementDef) {
     connections.push({
       name: `${planet.element} Element`,
-      url: `/grimoire/elements/${planet.element.toLowerCase()}`,
+      url: `/grimoire/correspondences/elements/${planet.element.toLowerCase()}`,
       type: 'element',
       description: `${planet.element} energy`,
     });
@@ -107,7 +129,7 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
     if (planet.rulesZodiac.map((s) => s.toLowerCase()).includes(signLower)) {
       connections.push({
         name: planetKey.charAt(0).toUpperCase() + planetKey.slice(1),
-        url: `/grimoire/astronomy/planets/${planetKey}`,
+        url: `/grimoire/planets/${planetKey}`,
         type: 'planet',
         description: 'Ruling planet',
       });
@@ -132,7 +154,7 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
   if (element) {
     connections.push({
       name: `${element.name} Element`,
-      url: `/grimoire/elements/${element.name.toLowerCase()}`,
+      url: `/grimoire/correspondences/elements/${element.name.toLowerCase()}`,
       type: 'element',
       description: element.description.slice(0, 50) + '...',
     });
@@ -140,7 +162,7 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
     element.crystals.slice(0, 2).forEach((crystal) => {
       connections.push({
         name: crystal,
-        url: `/grimoire/crystals/${crystal.toLowerCase().replace(/\s+/g, '-')}`,
+        url: `/grimoire/crystals/${toSlug(crystal)}`,
         type: 'crystal',
         description: `${element.name} element crystal`,
       });
@@ -167,10 +189,10 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
   const house = Object.values(HOUSES).find(
     (h) => h.naturalSign.toLowerCase() === signLower,
   );
-  if (house) {
+  if (house && HOUSE_NUMBER_TO_SLUG[house.number]) {
     connections.push({
       name: house.name,
-      url: `/grimoire/houses/overview/${house.number}`,
+      url: `/grimoire/houses/overview/${HOUSE_NUMBER_TO_SLUG[house.number]}`,
       type: 'house',
       description: house.lifeDomain,
     });
@@ -191,7 +213,7 @@ function getConnectionsForTarot(cardKey: string): ConnectionItem[] {
     if (tarotCorr.planet) {
       connections.push({
         name: tarotCorr.planet,
-        url: `/grimoire/astronomy/planets/${tarotCorr.planet.toLowerCase()}`,
+        url: `/grimoire/planets/${tarotCorr.planet.toLowerCase()}`,
         type: 'planet',
         description: 'Associated planet',
       });
@@ -209,7 +231,7 @@ function getConnectionsForTarot(cardKey: string): ConnectionItem[] {
     if (tarotCorr.element) {
       connections.push({
         name: `${tarotCorr.element} Element`,
-        url: `/grimoire/elements/${tarotCorr.element.toLowerCase()}`,
+        url: `/grimoire/correspondences/elements/${tarotCorr.element.toLowerCase()}`,
         type: 'element',
         description: `${tarotCorr.element} energy`,
       });
@@ -227,7 +249,7 @@ function getConnectionsForCrystal(crystalKey: string): ConnectionItem[] {
     if (planet.crystals.map((c) => c.toLowerCase()).includes(crystalLower)) {
       connections.push({
         name: planetKey.charAt(0).toUpperCase() + planetKey.slice(1),
-        url: `/grimoire/astronomy/planets/${planetKey}`,
+        url: `/grimoire/planets/${planetKey}`,
         type: 'planet',
         description: 'Associated planet',
       });
@@ -247,7 +269,7 @@ function getConnectionsForCrystal(crystalKey: string): ConnectionItem[] {
     if (element.crystals.map((c) => c.toLowerCase()).includes(crystalLower)) {
       connections.push({
         name: `${element.name} Element`,
-        url: `/grimoire/elements/${element.name.toLowerCase()}`,
+        url: `/grimoire/correspondences/elements/${element.name.toLowerCase()}`,
         type: 'element',
         description: element.description.slice(0, 50) + '...',
       });
@@ -287,7 +309,7 @@ export function CosmicConnections({
   return (
     <section className='mt-8'>
       <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-        <Sparkles className='h-5 w-5 text-purple-400' />
+        <Sparkles className='h-5 w-5 text-lunary-primary-400' />
         {title}
       </h2>
       <p className='text-zinc-400 text-sm mb-4'>

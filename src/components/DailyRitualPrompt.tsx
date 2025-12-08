@@ -95,20 +95,20 @@ export function DailyRitualPrompt() {
     <Link
       href={`/book-of-shadows?prompt=${encodeURIComponent(ritualPrompt.prompt)}`}
       onClick={handleRitualClick}
-      className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6 hover:border-purple-500/40 transition-colors'
+      className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6 hover:border-lunary-primary/40 transition-colors'
     >
       <div className='flex items-center gap-3 mb-2'>
         {ritualPrompt.time === 'morning' ? (
           <Sunrise className='w-5 h-5 text-lunary-accent' />
         ) : (
-          <Sunset className='w-5 h-5 text-purple-500' />
+          <Sunset className='w-5 h-5 text-lunary-primary-500' />
         )}
         <h3 className='text-lg font-semibold text-zinc-100'>
           {ritualPrompt.time === 'morning' ? 'Morning' : 'Evening'} Ritual
         </h3>
       </div>
       <p className='text-sm text-zinc-300 mb-3'>{ritualPrompt.prompt}</p>
-      <div className='flex items-center gap-2 text-xs text-purple-400'>
+      <div className='flex items-center gap-2 text-xs text-lunary-primary-400'>
         <Sparkles className='w-4 h-4' />
         <span>Explore in Book of Shadows</span>
       </div>

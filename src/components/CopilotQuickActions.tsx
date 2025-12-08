@@ -78,7 +78,7 @@ export function CopilotQuickActions({
           key={action.id}
           onClick={() => onActionClick(action.prompt)}
           disabled={disabled}
-          className='inline-flex items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-purple-500/40 disabled:opacity-50 disabled:cursor-not-allowed'
+          className='inline-flex items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary/40 disabled:opacity-50 disabled:cursor-not-allowed'
         >
           {action.icon}
           <span>{action.label}</span>

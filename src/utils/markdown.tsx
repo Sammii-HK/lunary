@@ -22,7 +22,7 @@ export function ParsedMarkdown({
         <ul key={`list-${listKey++}`} className='space-y-2 my-4'>
           {currentList.map((item, i) => (
             <li key={i} className='flex items-start gap-3 text-zinc-300'>
-              <span className='text-purple-400 mt-1'>•</span>
+              <span className='text-lunary-primary-400 mt-1'>•</span>
               <span>{item}</span>
             </li>
           ))}

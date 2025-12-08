@@ -30,7 +30,7 @@ export function UpgradeNudge({
     return (
       <Link
         href='/pricing'
-        className={`flex items-center gap-2 text-sm text-lunary-accent/80 hover:text-lunary-accent-300 transition-colors ${className}`}
+        className={`flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors ${className}`}
       >
         <Sparkles className='w-3.5 h-3.5' />
         <span>{message}</span>
@@ -42,7 +42,7 @@ export function UpgradeNudge({
     <div
       className={`relative flex items-center gap-3 px-4 py-3 bg-lunary-primary-950 border border-lunary-primary-800 rounded-lg ${className}`}
     >
-      <Sparkles className='w-4 h-4 text-lunary-accent/60 flex-shrink-0' />
+      <Sparkles className='w-4 h-4 text-lunary-accent-600 flex-shrink-0' />
       <Link
         href='/pricing'
         className='flex-1 text-sm text-zinc-400 hover:text-zinc-300 transition-colors'
@@ -80,7 +80,7 @@ export function UpgradeNudgeBanner({
       className={`flex items-center justify-between gap-4 px-4 py-3 bg-gradient-to-r from-lunary-primary-950 to-transparent border border-lunary-primary-800 rounded-lg ${className}`}
     >
       <div className='flex items-center gap-3'>
-        <Sparkles className='w-4 h-4 text-lunary-accent/80' />
+        <Sparkles className='w-4 h-4 text-lunary-accent-400' />
         <span className='text-sm text-zinc-300'>
           {feature} available with{' '}
           <Link
@@ -114,7 +114,7 @@ export function UpgradeNudgeInline({
   return (
     <Link
       href='/pricing'
-      className={`inline-flex items-center gap-1.5 text-xs text-lunary-accent/70 hover:text-lunary-accent-300 transition-colors ${className}`}
+      className={`inline-flex items-center gap-1.5 text-xs text-lunary-accent-500 hover:text-lunary-accent-300 transition-colors ${className}`}
     >
       <Sparkles className='w-3 h-3' />
       <span>{message}</span>
@@ -137,7 +137,7 @@ export function UpgradeNudgeOverlay({
     <div
       className={`absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm rounded-lg ${className}`}
     >
-      <Sparkles className='w-6 h-6 text-lunary-accent/80 mb-3' />
+      <Sparkles className='w-6 h-6 text-lunary-accent-400 mb-3' />
       <p className='text-sm text-zinc-300 text-center mb-1'>{feature}</p>
       {description && (
         <p className='text-xs text-zinc-500 text-center mb-3'>{description}</p>

@@ -274,7 +274,7 @@ export const ELEMENTS: Record<string, ElementDefinition> = {
     signs: ['Aries', 'Leo', 'Sagittarius'],
     quality: 'Hot and Dry',
     keywords: ['passion', 'energy', 'enthusiasm', 'inspiration'],
-    crystals: ['Carnelian', 'Citrine', 'Fire Opal', 'Sunstone'],
+    crystals: ['Carnelian', 'Citrine', 'Fire Agate', 'Sunstone'],
     tarotSuit: 'Wands',
     description:
       'Fire signs are passionate, dynamic, and temperamental. They are spontaneous, intuitive, and driven by inspiration.',
@@ -284,12 +284,7 @@ export const ELEMENTS: Record<string, ElementDefinition> = {
     signs: ['Taurus', 'Virgo', 'Capricorn'],
     quality: 'Cold and Dry',
     keywords: ['practical', 'grounded', 'reliable', 'sensual'],
-    crystals: [
-      'Green Jade',
-      'Moss Agate',
-      'Petrified Wood',
-      'Black Tourmaline',
-    ],
+    crystals: ['Jade', 'Moss Agate', 'Petrified Wood', 'Black Tourmaline'],
     tarotSuit: 'Pentacles',
     description:
       'Earth signs are grounded, practical, and reliable. They value stability, material security, and tangible results.',
@@ -309,7 +304,7 @@ export const ELEMENTS: Record<string, ElementDefinition> = {
     signs: ['Cancer', 'Scorpio', 'Pisces'],
     quality: 'Cold and Wet',
     keywords: ['emotion', 'intuition', 'sensitivity', 'depth'],
-    crystals: ['Moonstone', 'Aquamarine', 'Pearl', 'Blue Calcite'],
+    crystals: ['Moonstone', 'Aquamarine', 'Pearl', 'Blue Lace Agate'],
     tarotSuit: 'Cups',
     description:
       'Water signs are emotional, intuitive, and deeply sensitive. They navigate life through feelings and psychic impressions.',

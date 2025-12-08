@@ -70,7 +70,7 @@ export function SearchConsoleMetrics({
       <Card className='border-zinc-800/30 bg-zinc-900/10'>
         <CardHeader>
           <div className='flex items-center gap-2'>
-            <Search className='h-4 w-4 text-purple-400/70' />
+            <Search className='h-4 w-4 text-lunary-primary-400/70' />
             <CardTitle className='text-base font-medium'>
               Search Performance
             </CardTitle>
@@ -112,7 +112,7 @@ export function SearchConsoleMetrics({
       <Card className='border-zinc-800/30 bg-zinc-900/10'>
         <CardHeader>
           <div className='flex items-center gap-2'>
-            <TrendingUp className='h-4 w-4 text-purple-400/70' />
+            <TrendingUp className='h-4 w-4 text-lunary-primary-400/70' />
             <CardTitle className='text-base font-medium'>Top Queries</CardTitle>
           </div>
           <CardDescription className='text-xs text-zinc-500'>
@@ -139,7 +139,7 @@ export function SearchConsoleMetrics({
                   </div>
                 </div>
                 <div className='ml-3 text-right'>
-                  <div className='text-xs font-medium text-purple-400'>
+                  <div className='text-xs font-medium text-lunary-primary-400'>
                     {(query.ctr * 100).toFixed(1)}%
                   </div>
                   <div className='text-xs text-zinc-600'>CTR</div>
@@ -158,7 +158,7 @@ export function SearchConsoleMetrics({
       <Card className='border-zinc-800/30 bg-zinc-900/10 lg:col-span-2'>
         <CardHeader>
           <div className='flex items-center gap-2'>
-            <ExternalLink className='h-4 w-4 text-purple-400/70' />
+            <ExternalLink className='h-4 w-4 text-lunary-primary-400/70' />
             <CardTitle className='text-base font-medium'>Top Pages</CardTitle>
           </div>
           <CardDescription className='text-xs text-zinc-500'>
@@ -188,7 +188,7 @@ export function SearchConsoleMetrics({
                 </div>
                 <div className='ml-4 flex items-center gap-4'>
                   <div className='text-right'>
-                    <div className='text-xs font-medium text-purple-400'>
+                    <div className='text-xs font-medium text-lunary-primary-400'>
                       {(page.ctr * 100).toFixed(1)}%
                     </div>
                     <div className='text-xs text-zinc-600'>CTR</div>

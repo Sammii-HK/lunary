@@ -25,7 +25,7 @@ const getAspectColor = (aspect: string): string => {
   } else if (aspectLower.includes('square')) {
     return 'text-lunary-rose-300';
   } else if (aspectLower.includes('sextile')) {
-    return 'text-purple-300';
+    return 'text-lunary-primary-300';
   }
   return 'text-zinc-100';
 };
@@ -269,7 +269,7 @@ export function YearlyForecast() {
         {forecast && !loading && (
           <div className='space-y-6'>
             {forecast.summary && (
-              <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
+              <div className='rounded-lg border border-lunary-primary/20 bg-lunary-primary-500/10 p-4'>
                 <p className='text-sm text-zinc-300 leading-relaxed'>
                   {forecast.summary}
                 </p>

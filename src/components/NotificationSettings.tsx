@@ -544,7 +544,7 @@ export function NotificationSettings() {
     return (
       <div className='w-full p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
         <div className='flex items-center justify-center py-4'>
-          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400'></div>
+          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-lunary-primary-400'></div>
         </div>
       </div>
     );
@@ -646,7 +646,7 @@ export function NotificationSettings() {
                   onClick={toggleTarotNotifications}
                   disabled={tarotLoading}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    tarotEnabled ? 'bg-purple-600' : 'bg-zinc-600'
+                    tarotEnabled ? 'bg-lunary-primary-600' : 'bg-zinc-600'
                   } disabled:opacity-50`}
                 >
                   <span
@@ -678,7 +678,9 @@ export function NotificationSettings() {
                   onClick={toggleWeeklyReport}
                   disabled={weeklyReportLoading}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    weeklyReportEnabled ? 'bg-purple-600' : 'bg-zinc-600'
+                    weeklyReportEnabled
+                      ? 'bg-lunary-primary-600'
+                      : 'bg-zinc-600'
                   } disabled:opacity-50`}
                 >
                   <span
@@ -712,7 +714,7 @@ export function NotificationSettings() {
           <button
             onClick={requestPermission}
             disabled={!hasVapidKey || !hasServiceWorker || !hasPushManager}
-            className='w-full bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white py-2 px-4 rounded-md transition-colors text-sm font-medium'
+            className='w-full bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white py-2 px-4 rounded-md transition-colors text-sm font-medium'
           >
             Enable Notifications
           </button>

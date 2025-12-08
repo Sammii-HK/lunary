@@ -238,7 +238,7 @@ export function AskTheGrimoire({
               transition-all duration-300
               ${
                 isAIMode
-                  ? 'bg-gradient-to-r from-lunary-primary to-lunary-secondary text-white shadow-lg shadow-lunary-primary/25'
+                  ? 'bg-gradient-to-r from-lunary-primary to-lunary-secondary text-white shadow-lg shadow-lunary-primary-700'
                   : 'bg-zinc-800/60 text-zinc-400 hover:text-white hover:bg-zinc-700/60'
               }
             `}
@@ -267,7 +267,7 @@ export function AskTheGrimoire({
           {isLoading ? (
             <div className='h-5 w-5 border-2 border-lunary-primary-700 border-t-lunary-accent rounded-full animate-spin' />
           ) : (
-            <Search className='h-5 w-5 text-lunary-accent/60' />
+            <Search className='h-5 w-5 text-lunary-accent-600' />
           )}
         </div>
         <input
@@ -288,7 +288,7 @@ export function AskTheGrimoire({
             border ${isAIMode ? 'border-lunary-secondary-600' : 'border-lunary-primary-700'}
             rounded-2xl
             text-white placeholder:text-lunary-accent-300/50
-            focus:outline-none focus:ring-2 ${isAIMode ? 'focus:ring-lunary-secondary/50 focus:border-lunary-secondary/50' : 'focus:ring-lunary-primary/50 focus:border-lunary-primary/50'}
+            focus:outline-none focus:ring-2 ${isAIMode ? 'focus:ring-lunary-secondary-700 focus:border-lunary-secondary-700' : 'focus:ring-lunary-primary-9500 focus:border-lunary-primary-9500'}
             transition-all duration-300
             ${variant === 'hero' ? 'text-lg' : 'text-base'}
           `}
@@ -306,7 +306,7 @@ export function AskTheGrimoire({
               setIsOpen(false);
               inputRef.current?.focus();
             }}
-            className='absolute inset-y-0 right-0 flex items-center pr-4 text-lunary-accent/60 hover:text-lunary-accent-300 transition-colors'
+            className='absolute inset-y-0 right-0 flex items-center pr-4 text-lunary-accent-600 hover:text-lunary-accent-300 transition-colors'
             aria-label='Clear search'
           >
             <X className='h-5 w-5' />
@@ -325,7 +325,7 @@ export function AskTheGrimoire({
             bg-black/90 backdrop-blur-xl
             border border-lunary-primary-700 
             rounded-2xl
-            shadow-2xl shadow-lunary-primary/10
+            shadow-2xl shadow-lunary-primary-950
             overflow-hidden
             z-50
             animate-in fade-in slide-in-from-top-2 duration-200
@@ -333,7 +333,7 @@ export function AskTheGrimoire({
         >
           <div className='p-2 border-b border-lunary-primary-800'>
             <div className='flex items-center justify-between px-3 py-1.5 text-xs'>
-              <div className='flex items-center gap-2 text-lunary-accent/70'>
+              <div className='flex items-center gap-2 text-lunary-accent-500'>
                 {isAIMode ? (
                   <Brain className='h-3 w-3 text-lunary-secondary' />
                 ) : (
@@ -345,7 +345,7 @@ export function AskTheGrimoire({
                 </span>
               </div>
               {isAIMode && (
-                <span className='text-lunary-secondary/70 flex items-center gap-1'>
+                <span className='text-lunary-secondary-500 flex items-center gap-1'>
                   <span className='h-1.5 w-1.5 bg-lunary-secondary rounded-full animate-pulse' />
                   AI Powered
                 </span>
@@ -401,7 +401,7 @@ export function AskTheGrimoire({
                   </p>
                 </div>
 
-                <ArrowRight className='h-4 w-4 text-lunary-accent/40 flex-shrink-0 mt-1' />
+                <ArrowRight className='h-4 w-4 text-lunary-accent-700 flex-shrink-0 mt-1' />
               </Link>
             ))}
           </div>
@@ -437,11 +437,11 @@ export function AskTheGrimoire({
             z-50
           '
         >
-          <Sparkles className='h-8 w-8 text-lunary-accent/50 mx-auto mb-3' />
+          <Sparkles className='h-8 w-8 text-lunary-accent-700 mx-auto mb-3' />
           <p className='text-lunary-accent-300/70'>
             No cosmic insights found for &quot;{query}&quot;
           </p>
-          <p className='text-sm text-lunary-accent/50 mt-1'>
+          <p className='text-sm text-lunary-accent-700 mt-1'>
             Try searching for a zodiac sign, planet, tarot card, or crystal
           </p>
         </div>

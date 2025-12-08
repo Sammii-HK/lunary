@@ -128,7 +128,7 @@ export const InsightCard = memo(function InsightCard({
   return (
     <article
       className={cn(
-        'rounded-2xl border border-lunary-primary-800 bg-gradient-to-br from-lunary-primary-950 via-lunary-primary-950/50 to-transparent p-4 shadow-lg shadow-lunary-primary/10 backdrop-blur',
+        'rounded-2xl border border-lunary-primary-800 bg-gradient-to-br from-lunary-primary-950 via-lunary-primary-950/50 to-transparent p-4 shadow-lg shadow-lunary-primary-950 backdrop-blur',
         className,
       )}
     >

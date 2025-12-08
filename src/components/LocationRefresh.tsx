@@ -79,7 +79,7 @@ export default function LocationRefresh({
   return (
     <div className={containerClasses}>
       <div className={headingClasses}>
-        <MapPin size={16} className='text-purple-400' />
+        <MapPin size={16} className='text-lunary-primary-400' />
         <h3 className={titleClasses}>Location</h3>
       </div>
 
@@ -115,7 +115,7 @@ export default function LocationRefresh({
         <button
           onClick={handleRefreshLocation}
           disabled={loading}
-          className='flex w-full items-center justify-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm text-white transition-colors hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-zinc-600'
+          className='flex w-full items-center justify-center gap-2 rounded-md bg-lunary-primary-600 px-4 py-2 text-sm text-white transition-colors hover:bg-lunary-primary-700 disabled:cursor-not-allowed disabled:bg-zinc-600'
         >
           <RotateCcw size={14} className={loading ? 'animate-spin' : ''} />
           {loading ? 'Updating Location...' : 'Refresh Location'}

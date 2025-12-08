@@ -60,6 +60,9 @@ export interface SEOContentTemplateProps {
   // FAQs
   faqs?: FAQItem[];
 
+  // Cosmic Connections (custom component slot)
+  cosmicConnections?: React.ReactNode;
+
   // Internal links
   internalLinks?: Array<{ text: string; href: string }>;
 
@@ -107,6 +110,7 @@ export function SEOContentTemplate({
   glyphs,
   examplePlacements,
   faqs,
+  cosmicConnections,
   internalLinks,
   breadcrumbs,
   ctaText,
@@ -470,6 +474,9 @@ export function SEOContentTemplate({
           </Link>
         </section>
       )}
+
+      {/* Cosmic Connections */}
+      {cosmicConnections}
 
       {/* FAQs */}
       {faqs && faqs.length > 0 && (

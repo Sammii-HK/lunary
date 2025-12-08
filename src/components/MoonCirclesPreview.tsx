@@ -39,7 +39,7 @@ export function MoonCirclesPreview({
       {previewCircles.map((circle) => (
         <section
           key={circle.id}
-          className='rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary/20 backdrop-blur relative overflow-hidden'
+          className='rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary-900 backdrop-blur relative overflow-hidden'
         >
           <div className='relative'>
             <div className='opacity-50 pointer-events-none'>

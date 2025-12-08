@@ -242,7 +242,7 @@ export function MoonCircleInsights({
   return (
     <section
       className={cn(
-        'rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary/15 backdrop-blur',
+        'rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary-800 backdrop-blur',
         className,
       )}
     >

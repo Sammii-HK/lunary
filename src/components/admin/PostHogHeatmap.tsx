@@ -44,7 +44,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
               href='https://posthog.com'
               target='_blank'
               rel='noopener noreferrer'
-              className='text-purple-400 hover:underline'
+              className='text-lunary-primary-400 hover:underline'
             >
               posthog.com
             </a>
@@ -73,7 +73,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
   if (loading) {
     return (
       <div className='flex h-64 items-center justify-center'>
-        <Loader2 className='h-6 w-6 animate-spin text-purple-400' />
+        <Loader2 className='h-6 w-6 animate-spin text-lunary-primary-400' />
       </div>
     );
   }
@@ -134,7 +134,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
             {pagePath && (
               <div className='flex items-center justify-between'>
                 <span>Current Page:</span>
-                <span className='text-purple-400'>{pagePath}</span>
+                <span className='text-lunary-primary-400'>{pagePath}</span>
               </div>
             )}
           </div>

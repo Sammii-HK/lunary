@@ -28,10 +28,10 @@ export function CrossPlatformCTA({
   if (variant === 'app') {
     return (
       <div
-        className={`rounded-lg border border-purple-500/20 bg-gradient-to-br from-purple-900/20 to-zinc-900/50 p-6 ${className}`}
+        className={`rounded-lg border border-lunary-primary/20 bg-gradient-to-br from-lunary-primary-900/20 to-zinc-900/50 p-6 ${className}`}
       >
         <div className='flex items-start gap-4'>
-          <Sparkles className='w-6 h-6 text-purple-400 flex-shrink-0 mt-1' />
+          <Sparkles className='w-6 h-6 text-lunary-primary-400 flex-shrink-0 mt-1' />
           <div className='flex-1'>
             <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
               Get Your Personalized Cosmic Profile
@@ -44,7 +44,7 @@ export function CrossPlatformCTA({
             <Link
               href={`${baseUrl}/pricing?utm_source=${source || 'blog'}&utm_medium=cta&utm_campaign=cross_platform`}
               onClick={() => handleClick('app')}
-              className='inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors text-sm font-medium'
+              className='inline-flex items-center gap-2 px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-md transition-colors text-sm font-medium'
             >
               Open Lunary App
               <ArrowRight className='w-4 h-4' />

@@ -144,7 +144,7 @@ export function ShareInsightForm({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        'space-y-4 rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary/20 backdrop-blur',
+        'space-y-4 rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary-900 backdrop-blur',
         className,
       )}
     >
@@ -170,7 +170,7 @@ export function ShareInsightForm({
           onChange={(event) =>
             setInsightText(event.target.value.slice(0, MAX_LENGTH))
           }
-          className='min-h-[140px] resize-none border-lunary-primary-700 bg-black/40 text-sm text-white placeholder:text-lunary-accent-200/40 focus-visible:border-lunary-accent-300 focus-visible:ring-lunary-accent/40'
+          className='min-h-[140px] resize-none border-lunary-primary-700 bg-black/40 text-sm text-white placeholder:text-lunary-accent-200/40 focus-visible:border-lunary-accent-300 focus-visible:ring-lunary-accent-700'
           maxLength={MAX_LENGTH + 10}
         />
         <div className='flex items-center justify-between text-xs text-lunary-accent-100/70'>
@@ -212,7 +212,7 @@ export function ShareInsightForm({
       <Button
         type='submit'
         disabled={isSubmitDisabled}
-        className='w-full rounded-2xl bg-lunary-primary py-3 text-base font-semibold text-white shadow-lg shadow-lunary-primary/40 transition hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:opacity-50'
+        className='w-full rounded-2xl bg-lunary-primary py-3 text-base font-semibold text-white shadow-lg shadow-lunary-primary-700 transition hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:opacity-50'
       >
         {status === 'loading' ? (
           <span className='flex items-center justify-center gap-2'>

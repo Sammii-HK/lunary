@@ -28,11 +28,11 @@ export const BirthChartWidget = () => {
             <span className='text-lg'>⭐</span>
           </div>
 
-          <div className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-4 border border-purple-500/30'>
+          <div className='bg-gradient-to-r from-lunary-primary-900/30 to-pink-900/30 rounded-lg p-4 border border-lunary-primary/30'>
             <h4 className='text-white font-medium mb-2'>
               🌟 Your Cosmic Blueprint
             </h4>
-            <p className='text-purple-200 text-sm mb-2 font-medium'>
+            <p className='text-lunary-primary-200 text-sm mb-2 font-medium'>
               ✨ Your birth chart has been calculated
             </p>
             <p className='text-zinc-300 text-sm mb-3'>
@@ -76,7 +76,7 @@ export const BirthChartWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Birth Chart</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-primary-400'>Personalised</span>
           <p className='text-zinc-400 text-xs'>Generating chart...</p>
         </div>
       </div>

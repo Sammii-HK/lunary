@@ -148,7 +148,7 @@ export function NewsletterSignupForm({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-lunary-primary-800 bg-lunary-primary-950 p-6 sm:p-8 shadow-lg shadow-lunary-primary/10 backdrop-blur-lg',
+        'rounded-2xl border border-lunary-primary-800 bg-lunary-primary-950 p-6 sm:p-8 shadow-lg shadow-lunary-primary-950 backdrop-blur-lg',
         className,
       )}
     >
@@ -201,7 +201,7 @@ export function NewsletterSignupForm({
                 }
               }}
               placeholder={inputPlaceholder}
-              className='w-full rounded-full border border-lunary-primary-600 bg-black/40 px-5 py-3 text-sm text-white placeholder:text-lunary-accent-200/40 focus:border-lunary-accent-300 focus:outline-none focus:ring-2 focus:ring-lunary-accent/40'
+              className='w-full rounded-full border border-lunary-primary-600 bg-black/40 px-5 py-3 text-sm text-white placeholder:text-lunary-accent-200/40 focus:border-lunary-accent-300 focus:outline-none focus:ring-2 focus:ring-lunary-accent-700'
               autoComplete='email'
               inputMode='email'
             />
@@ -209,7 +209,7 @@ export function NewsletterSignupForm({
           <button
             type='submit'
             disabled={status === 'loading'}
-            className='inline-flex items-center justify-center rounded-full bg-lunary-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-lunary-primary/30 transition-all hover:bg-lunary-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-accent-300 disabled:cursor-not-allowed disabled:opacity-60'
+            className='inline-flex items-center justify-center rounded-full bg-lunary-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-lunary-primary-800 transition-all hover:bg-lunary-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-accent-300 disabled:cursor-not-allowed disabled:opacity-60'
           >
             {status === 'loading' ? (
               <>

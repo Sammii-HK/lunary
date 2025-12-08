@@ -198,7 +198,7 @@ export function SaveToCollection({
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   placeholder='Folder name'
-                  className='w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none'
+                  className='w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm focus:border-lunary-primary focus:outline-none'
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleCreateFolder();
@@ -254,7 +254,7 @@ export function SaveToCollection({
                 </select>
                 <button
                   onClick={() => setShowNewFolderInput(true)}
-                  className='flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors'
+                  className='flex items-center gap-2 text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
                 >
                   <FolderPlus className='w-4 h-4' />
                   <span>Create new folder</span>

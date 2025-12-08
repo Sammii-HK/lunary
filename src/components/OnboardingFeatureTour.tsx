@@ -60,8 +60,8 @@ export function OnboardingFeatureTour({
   return (
     <div className='space-y-6'>
       <div className='text-center'>
-        <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-500/20 mb-4'>
-          <Icon className='w-8 h-8 text-purple-300' />
+        <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-lunary-primary-500/20 mb-4'>
+          <Icon className='w-8 h-8 text-lunary-primary-300' />
         </div>
         <h2 className='text-2xl font-bold text-white mb-2'>{Feature.title}</h2>
         <p className='text-zinc-400'>{Feature.description}</p>
@@ -72,7 +72,9 @@ export function OnboardingFeatureTour({
           <div
             key={idx}
             className={`h-2 rounded-full transition-all ${
-              idx === currentFeature ? 'w-8 bg-purple-500' : 'w-2 bg-zinc-700'
+              idx === currentFeature
+                ? 'w-8 bg-lunary-primary-500'
+                : 'w-2 bg-zinc-700'
             }`}
           />
         ))}
@@ -89,7 +91,7 @@ export function OnboardingFeatureTour({
           {currentFeature < features.length - 1 ? (
             <button
               onClick={handleNext}
-              className='inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700'
+              className='inline-flex items-center gap-2 rounded-lg bg-lunary-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-700'
             >
               Next
               <ChevronRight className='w-4 h-4' />
@@ -98,7 +100,7 @@ export function OnboardingFeatureTour({
             <Link
               href={Feature.link}
               onClick={onComplete}
-              className='inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700'
+              className='inline-flex items-center gap-2 rounded-lg bg-lunary-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-700'
             >
               Explore {Feature.title}
               <ChevronRight className='w-4 h-4' />

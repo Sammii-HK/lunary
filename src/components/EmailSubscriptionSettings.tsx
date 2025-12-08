@@ -170,7 +170,7 @@ export function EmailSubscriptionSettings() {
     return (
       <div className='w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
         <div className='flex items-center justify-center py-4'>
-          <div className='h-6 w-6 animate-spin rounded-full border-b-2 border-purple-400'></div>
+          <div className='h-6 w-6 animate-spin rounded-full border-b-2 border-lunary-primary-400'></div>
         </div>
       </div>
     );
@@ -228,7 +228,7 @@ export function EmailSubscriptionSettings() {
             onClick={toggleSubscription}
             disabled={updating}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              isSubscribed ? 'bg-purple-600' : 'bg-zinc-600'
+              isSubscribed ? 'bg-lunary-primary-600' : 'bg-zinc-600'
             } disabled:opacity-50`}
           >
             <span

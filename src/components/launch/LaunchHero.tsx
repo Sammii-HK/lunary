@@ -37,7 +37,7 @@ export function LaunchHero({
 
       <div className='relative flex flex-col gap-8 lg:flex-row lg:items-center'>
         <div className='flex-1 space-y-6'>
-          <span className='inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm uppercase tracking-[0.2em] text-purple-200 backdrop-blur'>
+          <span className='inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm uppercase tracking-[0.2em] text-lunary-primary-200 backdrop-blur'>
             <Sparkles className='h-4 w-4' />
             Official Launch Sequence · 2025
           </span>
@@ -82,7 +82,7 @@ export function LaunchHero({
           <div className='relative ml-auto h-[360px] w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-black/50 p-6 shadow-2xl'>
             <div className='absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08),_transparent_55%)] animate-pulse' />
             <div className='relative z-10 space-y-4'>
-              <p className='text-sm uppercase tracking-[0.3em] text-purple-200'>
+              <p className='text-sm uppercase tracking-[0.3em] text-lunary-primary-200'>
                 Powered by Astronomy Engine
               </p>
               <h3 className='text-2xl font-semibold text-white'>

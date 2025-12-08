@@ -164,7 +164,7 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
     <Card className='border-zinc-800/30 bg-zinc-900/10'>
       <CardHeader>
         <div className='flex items-center gap-2'>
-          <Target className='h-4 w-4 text-purple-400/70' />
+          <Target className='h-4 w-4 text-lunary-primary-400/70' />
           <CardTitle className='text-base font-medium'>
             Success Metrics
           </CardTitle>

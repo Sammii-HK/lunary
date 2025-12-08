@@ -303,7 +303,7 @@ export function ShareDailyInsight() {
     <>
       <button
         onClick={handleOpen}
-        className='flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-purple-400 transition-colors rounded-md hover:bg-zinc-800/50'
+        className='flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-lunary-primary-400 transition-colors rounded-md hover:bg-zinc-800/50'
         aria-label='Share your daily cosmic insight'
       >
         <Share2 className='w-4 h-4' />
@@ -327,7 +327,7 @@ export function ShareDailyInsight() {
 
               {loading && (
                 <div className='flex flex-col items-center justify-center py-12'>
-                  <Loader2 className='w-8 h-8 text-purple-400 animate-spin mb-4' />
+                  <Loader2 className='w-8 h-8 text-lunary-primary-400 animate-spin mb-4' />
                   <p className='text-zinc-400 text-sm'>
                     Generating your cosmic card...
                   </p>
@@ -339,7 +339,7 @@ export function ShareDailyInsight() {
                   <p className='text-red-400 mb-4'>{error}</p>
                   <button
                     onClick={generateCard}
-                    className='px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors'
+                    className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
                   >
                     Try Again
                   </button>
@@ -363,7 +363,7 @@ export function ShareDailyInsight() {
                     {canNativeShare && (
                       <button
                         onClick={handleShare}
-                        className='w-full flex items-center justify-center gap-2 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium'
+                        className='w-full flex items-center justify-center gap-2 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors font-medium'
                       >
                         <Share2 className='w-4 h-4' />
                         Share Image

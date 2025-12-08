@@ -44,11 +44,11 @@ export function CountdownTimer({
 
   return (
     <section
-      className={`rounded-3xl border border-white/10 bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-transparent p-6 ${className}`}
+      className={`rounded-3xl border border-white/10 bg-gradient-to-r from-lunary-primary-900/40 via-indigo-900/40 to-transparent p-6 ${className}`}
     >
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
             {label}
           </p>
           <h3 className='text-2xl font-semibold text-white'>
@@ -75,7 +75,7 @@ export function CountdownTimer({
               <p className='text-2xl font-bold text-white tabular-nums'>
                 {segment.value.toString().padStart(2, '0')}
               </p>
-              <p className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+              <p className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                 {segment.label}
               </p>
             </div>

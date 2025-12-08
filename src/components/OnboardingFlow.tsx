@@ -513,7 +513,7 @@ export function OnboardingFlow() {
               </div>
             )}
 
-            <div className='p-4 bg-gradient-to-br from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded-lg border border-lunary-primary/30'>
+            <div className='p-4 bg-gradient-to-br from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded-lg border border-lunary-primary-800'>
               <h3 className='text-sm font-medium text-white mb-2 flex items-center gap-2'>
                 <Sparkles className='w-4 h-4 text-lunary-accent-300' />
                 What&apos;s Now Available to You
