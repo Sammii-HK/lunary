@@ -350,7 +350,7 @@ export function MoonCircleInsights({
           )}
 
           {error && (
-            <div className='rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100'>
+            <div className='rounded-2xl border border-lunary-error-600 bg-lunary-error-950 px-4 py-3 text-sm text-lunary-error-100'>
               {error}
             </div>
           )}
