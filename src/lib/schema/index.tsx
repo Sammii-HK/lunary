@@ -17,17 +17,21 @@ export const LUNARY_SOCIAL_LINKS = [
 
 export const LUNARY_BRAND = {
   name: 'Lunary',
-  primaryColor: '#a855f7',
-  secondaryColor: '#c084fc',
-  backgroundColor: '#09090b',
+  primaryColor: '#8458D8',
+  secondaryColor: '#7B7BE8',
+  backgroundColor: '#0A0A1A',
   foundingDate: '2024',
   colors: {
-    violet: '#7358FF',
-    rose: '#FF7B9C',
-    blue: '#4F5BFF',
-    midnight: '#0A0A1A',
-    orchid: '#E066FF',
-    lavender: '#C77DFF',
+    bg: '#0A0A1A',
+    bgDeep: '#050510',
+    primary: '#8458D8',
+    secondary: '#7B7BE8',
+    accentSoft: '#C77DFF',
+    accentHighlight: '#D070E8',
+    text: '#FFFFFF',
+    warningSoft: '#EE789E',
+    error: '#D06060',
+    success: '#6B9B7A',
   },
 };
 

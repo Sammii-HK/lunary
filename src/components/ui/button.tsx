@@ -19,10 +19,11 @@ const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         lunary:
-          'bg-lunary-violet/10 text-lunary-violet border border-lunary-violet/20 hover:bg-lunary-violet/20 hover:border-lunary-violet/40',
-        'lunary-solid': 'bg-lunary-violet text-white hover:bg-lunary-violet/90',
+          'bg-lunary-primary/10 text-lunary-primary border border-lunary-primary/20 hover:bg-lunary-primary/20 hover:border-lunary-primary/40',
+        'lunary-solid':
+          'bg-lunary-primary text-white hover:bg-lunary-primary/90',
         'lunary-soft':
-          'bg-lunary-lavender/10 text-lunary-lavender border border-lunary-lavender/20 hover:bg-lunary-lavender/15',
+          'bg-lunary-accent-soft/10 text-lunary-accent-soft border border-lunary-accent-soft/20 hover:bg-lunary-accent-soft/15',
       },
       size: {
         default: 'h-10 px-4 py-2',

@@ -14,7 +14,9 @@ export function BetaBanner() {
       <p className='text-center text-sm text-zinc-300'>
         <span className='text-zinc-500'>Beta launch: </span>
         use code{' '}
-        <span className='text-lunary-orchid font-medium'>STARGAZER</span>{' '}
+        <span className='text-lunary-accent-highlight font-medium'>
+          STARGAZER
+        </span>{' '}
         <span className='text-zinc-400'>for 12 months of Lunary+ free</span>
       </p>
     </div>

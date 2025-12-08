@@ -18,8 +18,8 @@ export function EmailHeader({
   variant = 'dark',
 }: EmailHeaderProps) {
   const isDark = variant === 'dark';
-  const titleColor = isDark ? '#a78bfa' : '#6366f1';
-  const subtitleColor = isDark ? '#d1c4ff' : '#6b7280';
+  const titleColor = isDark ? '#8458D8' : '#8458D8';
+  const subtitleColor = isDark ? '#C77DFF' : '#6b7280';
 
   return (
     <Section style={{ textAlign: 'center' as const, marginBottom: '32px' }}>

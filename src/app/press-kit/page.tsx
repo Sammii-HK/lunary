@@ -31,13 +31,16 @@ export const metadata: Metadata = {
 };
 
 const brandColors = [
-  { name: 'Midnight Sky', hex: '#0A0A1A' },
-  { name: 'Astral Violet', hex: '#7358FF' },
-  { name: 'Cosmic Rose', hex: '#FF7B9C' },
-  { name: 'Stardust White', hex: '#FFFFFF' },
-  { name: 'Nebula Blue', hex: '#4F5BFF' },
-  { name: 'Ethereal Orchid', hex: '#E066FF' },
-  { name: 'Twilight Lavender', hex: '#C77DFF' },
+  { name: 'Event Horizon', hex: '#0A0A1A' },
+  { name: 'Singularity', hex: '#050510' },
+  { name: 'Nebula Violet', hex: '#8458D8' },
+  { name: 'Comet Trail', hex: '#7B7BE8' },
+  { name: 'Galaxy Haze', hex: '#C77DFF' },
+  { name: 'Cosmic Rose', hex: '#EE789E' },
+  { name: 'Supernova', hex: '#D070E8' },
+  { name: 'Stardust', hex: '#FFFFFF' },
+  { name: 'Solar Flare', hex: '#D06060' },
+  { name: 'Aurora Green', hex: '#6B9B7A' },
 ];
 
 const coreFeatures = [

@@ -15,12 +15,22 @@ html {
   --background-start-rgb: 214, 219, 220;
   /* --background-end-rgb: 255, 255, 255; */
 
-  --lunary-violet: #7358ff;
-  --lunary-rose: #ff7b9c;
-  --lunary-blue: #4f5bff;
-  --lunary-midnight: #0a0a1a;
-  --lunary-orchid: #e066ff;
-  --lunary-lavender: #c77dff;
+  /* Lunary Brand Colors */
+  /* Backgrounds */
+  --color-bg: #0a0a1a;
+  --color-bg-deep: #050510;
+  /* Primary/Secondary */
+  --color-primary: #8458d8;
+  --color-secondary: #7b7be8;
+  /* Accents */
+  --color-accent-soft: #c77dff;
+  --color-accent-highlight: #d070e8;
+  /* Text */
+  --color-text: #ffffff;
+  /* Semantic */
+  --color-warning-soft: #ee789e;
+  --color-error: #d06060;
+  --color-success: #6b9b7a;
 }
 
 @media (prefers-color-scheme: dark) {
