@@ -114,24 +114,24 @@ export function ExitIntent() {
 
           <div className='space-y-3 pt-4'>
             <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center'>
-                <span className='text-purple-300 text-sm'>✓</span>
+              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                <span className='text-lunary-accent-300 text-sm'>✓</span>
               </div>
               <span className='text-zinc-300 text-sm'>
                 Personalized birth chart analysis
               </span>
             </div>
             <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center'>
-                <span className='text-purple-300 text-sm'>✓</span>
+              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                <span className='text-lunary-accent-300 text-sm'>✓</span>
               </div>
               <span className='text-zinc-300 text-sm'>
                 Daily horoscopes based on your chart
               </span>
             </div>
             <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center'>
-                <span className='text-purple-300 text-sm'>✓</span>
+              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                <span className='text-lunary-accent-300 text-sm'>✓</span>
               </div>
               <span className='text-zinc-300 text-sm'>
                 Personalized tarot readings
