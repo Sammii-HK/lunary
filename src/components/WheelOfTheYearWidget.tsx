@@ -86,9 +86,9 @@ export const WheelOfTheYearWidget = () => {
   const isApproaching = false;
 
   return (
-    <div className='bg-gradient-to-br from-orange-900/20 to-yellow-900/20 rounded-lg p-4 border border-orange-700/30'>
+    <div className='bg-gradient-to-br from-lunary-rose-900/20 to-lunary-accent-900/20 rounded-lg p-4 border border-lunary-rose-700'>
       <div className='flex items-center justify-between mb-3'>
-        <h3 className='text-lg font-semibold text-orange-300'>
+        <h3 className='text-lg font-semibold text-lunary-rose-300'>
           Wheel of the Year
         </h3>
       </div>
@@ -96,14 +96,16 @@ export const WheelOfTheYearWidget = () => {
       <div className='space-y-3'>
         <div>
           <div className='flex items-center gap-2 mb-1'>
-            <h4 className='font-medium text-orange-200'>Current Season</h4>
-            <span className='text-sm text-orange-400'>{displaySabbat}</span>
+            <h4 className='font-medium text-lunary-rose-200'>Current Season</h4>
+            <span className='text-sm text-lunary-rose'>{displaySabbat}</span>
           </div>
 
           {sabbatInfo && (
             <>
-              <p className='text-sm text-orange-100 mb-2'>{sabbatInfo.date}</p>
-              <p className='text-xs text-orange-200 leading-relaxed'>
+              <p className='text-sm text-lunary-rose-100 mb-2'>
+                {sabbatInfo.date}
+              </p>
+              <p className='text-xs text-lunary-rose-200 leading-relaxed'>
                 {sabbatInfo.description}
               </p>
             </>
