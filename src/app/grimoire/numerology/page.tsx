@@ -51,13 +51,13 @@ export default function NumerologyIndexPage() {
           year, and understand how numeric vibrations shape your destiny.
         </p>
 
-        <div className='mb-12 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+        <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
           <div className='flex items-center gap-4 mb-4'>
-            <span className='text-5xl font-light text-purple-300'>
+            <span className='text-5xl font-light text-lunary-primary-300'>
               {currentUniversalYear}
             </span>
             <div>
-              <h2 className='text-2xl font-medium text-purple-300'>
+              <h2 className='text-2xl font-medium text-lunary-primary-300'>
                 {currentYear}: Universal Year {currentUniversalYear}
               </h2>
               <p className='text-zinc-400'>
@@ -70,7 +70,7 @@ export default function NumerologyIndexPage() {
           </p>
           <Link
             href={`/grimoire/numerology/year/${currentYear}`}
-            className='inline-flex px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 text-sm transition-colors'
+            className='inline-flex px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 text-sm transition-colors'
           >
             Read {currentYear} Full Forecast
           </Link>
@@ -84,7 +84,7 @@ export default function NumerologyIndexPage() {
               className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
             >
               <div className='flex items-center gap-3 mb-3'>
-                <span className='text-3xl font-light text-purple-400'>
+                <span className='text-3xl font-light text-lunary-primary-400'>
                   {num}
                 </span>
               </div>
@@ -106,12 +106,12 @@ export default function NumerologyIndexPage() {
               <Link
                 key={year}
                 href={`/grimoire/numerology/year/${year}`}
-                className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 hover:bg-zinc-900 transition-all text-center group'
+                className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all text-center group'
               >
-                <div className='text-lg font-medium text-zinc-100 group-hover:text-purple-300 transition-colors'>
+                <div className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                   {year}
                 </div>
-                <div className='text-2xl font-light text-purple-400'>
+                <div className='text-2xl font-light text-lunary-primary-400'>
                   {uYear}
                 </div>
               </Link>

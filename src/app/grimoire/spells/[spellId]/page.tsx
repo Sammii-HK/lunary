@@ -21,7 +21,7 @@ export default function SpellPage() {
           </p>
           <Link
             href='/grimoire/practices'
-            className='text-purple-400 hover:text-purple-300 transition-colors'
+            className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
           >
             ← Return to Grimoire
           </Link>
@@ -63,7 +63,7 @@ export default function SpellPage() {
       <div className='mb-6'>
         <Link
           href='/grimoire/practices'
-          className='inline-flex items-center text-purple-400 hover:text-purple-300 transition-colors mb-4'
+          className='inline-flex items-center text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors mb-4'
         >
           <ArrowLeft className='w-4 h-4 mr-2' />
           Back to Grimoire
@@ -76,7 +76,7 @@ export default function SpellPage() {
         <p className='text-zinc-300 text-lg mb-4'>{spell.description}</p>
 
         <div className='flex flex-wrap gap-4 text-sm'>
-          <span className='bg-purple-900/40 text-purple-300 px-3 py-1 rounded-full'>
+          <span className='bg-lunary-primary-900/40 text-lunary-primary-300 px-3 py-1 rounded-full'>
             {categoryInfo.name}
           </span>
           <span className='bg-lunary-secondary-900/40 text-lunary-secondary-300 px-3 py-1 rounded-full'>
@@ -97,7 +97,7 @@ export default function SpellPage() {
       <div className='space-y-6'>
         {/* Purpose */}
         <div className='bg-zinc-800 rounded-lg p-4'>
-          <h2 className='text-xl font-semibold text-purple-400 mb-3 flex items-center gap-2'>
+          <h2 className='text-xl font-semibold text-lunary-primary-400 mb-3 flex items-center gap-2'>
             <Star className='w-5 h-5' />
             Purpose
           </h2>
@@ -218,13 +218,13 @@ export default function SpellPage() {
 
         {/* Steps */}
         <div className='bg-zinc-800 rounded-lg p-4'>
-          <h2 className='text-xl font-semibold text-purple-400 mb-3'>
+          <h2 className='text-xl font-semibold text-lunary-primary-400 mb-3'>
             Ritual Steps
           </h2>
           <ol className='space-y-3'>
             {spell.steps.map((step, index) => (
               <li key={index} className='text-zinc-200 flex gap-3'>
-                <span className='flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-medium'>
+                <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 text-white rounded-full flex items-center justify-center font-medium'>
                   {index + 1}
                 </span>
                 <span className='pt-1'>{step}</span>
@@ -276,7 +276,7 @@ export default function SpellPage() {
                 {spell.correspondences.crystals.map((crystal, index) => (
                   <span
                     key={index}
-                    className='bg-purple-900/40 text-purple-300 px-2 py-1 rounded text-xs'
+                    className='bg-lunary-primary-900/40 text-lunary-primary-300 px-2 py-1 rounded text-xs'
                   >
                     {crystal}
                   </span>
@@ -348,7 +348,7 @@ export default function SpellPage() {
       )}
 
       {/* Share Section */}
-      <div className='mt-8 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/30'>
+      <div className='mt-8 p-4 bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 rounded-lg border border-lunary-primary-700'>
         <h3 className='text-lg font-medium text-white mb-2'>
           Share This Spell
         </h3>

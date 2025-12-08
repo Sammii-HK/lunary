@@ -57,7 +57,7 @@ const ESSENTIAL_CRYSTALS = [
     properties: ['spiritual growth', 'intuition', 'calm', 'protection'],
     chakra: 'Third Eye, Crown',
     zodiac: ['Pisces', 'Virgo', 'Aquarius'],
-    color: 'bg-purple-400',
+    color: 'bg-lunary-primary-400',
   },
   {
     name: 'Rose Quartz',
@@ -232,11 +232,14 @@ export default function CrystalHealingGuidePage() {
 
       {/* Breadcrumbs */}
       <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-purple-400'>
+        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
         <span className='mx-2'>→</span>
-        <Link href='/grimoire/crystals' className='hover:text-purple-400'>
+        <Link
+          href='/grimoire/crystals'
+          className='hover:text-lunary-primary-400'
+        >
           Crystals
         </Link>
         <span className='mx-2'>→</span>
@@ -247,7 +250,7 @@ export default function CrystalHealingGuidePage() {
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
           Crystal Healing: The Complete Guide
-          <span className='block text-2xl text-purple-400 mt-2'>
+          <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Discover the Power of Crystals
           </span>
         </h1>
@@ -260,13 +263,13 @@ export default function CrystalHealingGuidePage() {
         <div className='flex flex-wrap gap-4'>
           <Link
             href='/grimoire/crystals'
-            className='px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Explore Crystal Library
           </Link>
           <Link
             href='#essential-crystals'
-            className='px-6 py-3 border border-zinc-700 hover:border-purple-500 text-zinc-300 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
           >
             Start Learning
           </Link>
@@ -282,53 +285,62 @@ export default function CrystalHealingGuidePage() {
           <li>
             <a
               href='#what-is-crystal-healing'
-              className='hover:text-purple-400'
+              className='hover:text-lunary-primary-400'
             >
               1. What is Crystal Healing?
             </a>
           </li>
           <li>
-            <a href='#how-crystals-work' className='hover:text-purple-400'>
+            <a
+              href='#how-crystals-work'
+              className='hover:text-lunary-primary-400'
+            >
               2. How Do Crystals Work?
             </a>
           </li>
           <li>
-            <a href='#essential-crystals' className='hover:text-purple-400'>
+            <a
+              href='#essential-crystals'
+              className='hover:text-lunary-primary-400'
+            >
               3. 8 Essential Crystals for Beginners
             </a>
           </li>
           <li>
-            <a href='#choosing-crystals' className='hover:text-purple-400'>
+            <a
+              href='#choosing-crystals'
+              className='hover:text-lunary-primary-400'
+            >
               4. How to Choose the Right Crystal
             </a>
           </li>
           <li>
-            <a href='#cleansing' className='hover:text-purple-400'>
+            <a href='#cleansing' className='hover:text-lunary-primary-400'>
               5. Cleansing Your Crystals
             </a>
           </li>
           <li>
-            <a href='#charging' className='hover:text-purple-400'>
+            <a href='#charging' className='hover:text-lunary-primary-400'>
               6. Charging and Programming Crystals
             </a>
           </li>
           <li>
-            <a href='#chakras' className='hover:text-purple-400'>
+            <a href='#chakras' className='hover:text-lunary-primary-400'>
               7. Crystals for Each Chakra
             </a>
           </li>
           <li>
-            <a href='#using-crystals' className='hover:text-purple-400'>
+            <a href='#using-crystals' className='hover:text-lunary-primary-400'>
               8. Ways to Use Crystals
             </a>
           </li>
           <li>
-            <a href='#zodiac' className='hover:text-purple-400'>
+            <a href='#zodiac' className='hover:text-lunary-primary-400'>
               9. Crystals by Zodiac Sign
             </a>
           </li>
           <li>
-            <a href='#faq' className='hover:text-purple-400'>
+            <a href='#faq' className='hover:text-lunary-primary-400'>
               10. Frequently Asked Questions
             </a>
           </li>
@@ -356,8 +368,8 @@ export default function CrystalHealingGuidePage() {
           connect with the earth&apos;s energy.
         </p>
 
-        <div className='bg-purple-900/20 border border-purple-500/30 rounded-lg p-6'>
-          <h3 className='text-lg font-medium text-purple-300 mb-3'>
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
             Common Uses for Crystals
           </h3>
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-2 text-zinc-300'>
@@ -435,7 +447,7 @@ export default function CrystalHealingGuidePage() {
             <Link
               key={crystal.name}
               href={`/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}`}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-purple-500 transition-colors'
+              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
             >
               <div className='flex items-start gap-4'>
                 <div
@@ -445,7 +457,7 @@ export default function CrystalHealingGuidePage() {
                   <h4 className='text-lg font-medium text-zinc-100'>
                     {crystal.name}
                   </h4>
-                  <p className='text-sm text-purple-400 mb-2'>
+                  <p className='text-sm text-lunary-primary-400 mb-2'>
                     {crystal.nickname}
                   </p>
                   <div className='flex flex-wrap gap-1'>
@@ -666,7 +678,7 @@ export default function CrystalHealingGuidePage() {
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-purple-900/30 to-cyan-900/30 border border-purple-500/30 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-cyan-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Ready to Start Your Crystal Journey?
         </h2>
@@ -678,13 +690,13 @@ export default function CrystalHealingGuidePage() {
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
             href='/grimoire/crystals'
-            className='px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Browse Crystal Library
           </Link>
           <Link
             href='/pricing'
-            className='px-8 py-3 border border-purple-500 text-purple-300 hover:bg-purple-500/10 rounded-lg font-medium transition-colors'
+            className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
           >
             Get Personalized Crystals
           </Link>

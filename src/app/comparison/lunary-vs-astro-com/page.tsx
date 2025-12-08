@@ -43,7 +43,7 @@ export default function LunaryVsAstroComPage() {
           </p>
         </div>
 
-        <div className='mb-8 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+        <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             <strong>Note:</strong> This comparison is based on publicly
             available information and focuses on factual differences.
@@ -61,7 +61,7 @@ export default function LunaryVsAstroComPage() {
                   <th className='border border-zinc-800 p-4 text-left text-zinc-200'>
                     Feature
                   </th>
-                  <th className='border border-zinc-800 p-4 text-center text-purple-300 font-medium'>
+                  <th className='border border-zinc-800 p-4 text-center text-lunary-primary-300 font-medium'>
                     Lunary
                   </th>
                   <th className='border border-zinc-800 p-4 text-center text-zinc-300'>
@@ -159,10 +159,10 @@ export default function LunaryVsAstroComPage() {
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Why Choose Lunary?
           </h2>
-          <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
             <div className='space-y-4'>
               <div className='flex items-start gap-3'>
-                <Star className='h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5' />
+                <Star className='h-5 w-5 text-lunary-primary-400 flex-shrink-0 mt-0.5' />
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                     Instant Understanding
@@ -174,7 +174,7 @@ export default function LunaryVsAstroComPage() {
                 </div>
               </div>
               <div className='flex items-start gap-3'>
-                <Star className='h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5' />
+                <Star className='h-5 w-5 text-lunary-primary-400 flex-shrink-0 mt-0.5' />
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                     Integrated Magical Practice
@@ -186,7 +186,7 @@ export default function LunaryVsAstroComPage() {
                 </div>
               </div>
               <div className='flex items-start gap-3'>
-                <Star className='h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5' />
+                <Star className='h-5 w-5 text-lunary-primary-400 flex-shrink-0 mt-0.5' />
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                     Beautiful Mobile Experience
@@ -219,7 +219,7 @@ export default function LunaryVsAstroComPage() {
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Conclusion
           </h2>
-          <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Lunary is perfect for users who want accessible, personalized
               astrology with magical tools. Astro.com serves professional
@@ -232,7 +232,7 @@ export default function LunaryVsAstroComPage() {
         <section className='text-center mb-12'>
           <Link
             href='/pricing'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
           >
             Start Your Free Trial
             <ArrowRight className='h-5 w-5' />

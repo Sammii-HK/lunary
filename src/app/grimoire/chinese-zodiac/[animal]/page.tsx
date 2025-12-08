@@ -182,14 +182,14 @@ Notable people born in ${data.displayName} years include ${data.famousPeople.joi
       <div className='mt-8 flex justify-between text-sm'>
         <Link
           href={`/grimoire/chinese-zodiac/${prevAnimal}`}
-          className='text-purple-400 hover:text-purple-300'
+          className='text-lunary-primary-400 hover:text-lunary-primary-300'
         >
           ← {CHINESE_ZODIAC_DATA[prevAnimal].emoji}{' '}
           {CHINESE_ZODIAC_DATA[prevAnimal].displayName}
         </Link>
         <Link
           href={`/grimoire/chinese-zodiac/${nextAnimal}`}
-          className='text-purple-400 hover:text-purple-300'
+          className='text-lunary-primary-400 hover:text-lunary-primary-300'
         >
           {CHINESE_ZODIAC_DATA[nextAnimal].displayName}{' '}
           {CHINESE_ZODIAC_DATA[nextAnimal].emoji} →
@@ -203,7 +203,7 @@ Notable people born in ${data.displayName} years include ${data.famousPeople.joi
             href={`/grimoire/chinese-zodiac/${a}`}
             className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
               a === animal
-                ? 'bg-purple-500/30 text-purple-200 border border-purple-500/50'
+                ? 'bg-lunary-primary-900/30 text-lunary-primary-200 border border-lunary-primary-600'
                 : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
             }`}
           >

@@ -48,19 +48,19 @@ export default function PlacementsIndexPage() {
         {/* Stats */}
         <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-purple-400'>
+            <div className='text-3xl font-light text-lunary-primary-400'>
               {planets.length}
             </div>
             <div className='text-sm text-zinc-500'>Planets</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-purple-400'>
+            <div className='text-3xl font-light text-lunary-primary-400'>
               {signs.length}
             </div>
             <div className='text-sm text-zinc-500'>Signs</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-purple-400'>
+            <div className='text-3xl font-light text-lunary-primary-400'>
               {planets.length * signs.length}
             </div>
             <div className='text-sm text-zinc-500'>Combinations</div>
@@ -87,7 +87,7 @@ export default function PlacementsIndexPage() {
                   <Link
                     key={signKey}
                     href={`/grimoire/placements/${planetKey}-in-${signKey}`}
-                    className='p-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 hover:border-purple-500/50 transition-colors text-center group'
+                    className='p-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 hover:border-lunary-primary-600 transition-colors text-center group'
                   >
                     <div className='text-lg mb-1'>
                       {sign.element === 'Fire'
@@ -98,7 +98,7 @@ export default function PlacementsIndexPage() {
                             ? '💨'
                             : '💧'}
                     </div>
-                    <div className='text-sm text-zinc-300 group-hover:text-purple-300 transition-colors'>
+                    <div className='text-sm text-zinc-300 group-hover:text-lunary-primary-300 transition-colors'>
                       {sign.name}
                     </div>
                   </Link>
@@ -109,7 +109,7 @@ export default function PlacementsIndexPage() {
         </div>
 
         {/* Sign Quick Links */}
-        <section className='mt-12 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+        <section className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Browse by Zodiac Sign
           </h2>
@@ -118,7 +118,7 @@ export default function PlacementsIndexPage() {
               <Link
                 key={signKey}
                 href={`/grimoire/zodiac/${signKey}`}
-                className='px-4 py-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-300 hover:text-purple-300 text-sm transition-colors'
+                className='px-4 py-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-300 hover:text-lunary-primary-300 text-sm transition-colors'
               >
                 {sign.name}
               </Link>
@@ -130,7 +130,7 @@ export default function PlacementsIndexPage() {
         <section className='mt-12 text-center'>
           <Link
             href='/welcome'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
           >
             Discover Your Placements
           </Link>

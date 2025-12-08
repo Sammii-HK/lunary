@@ -142,7 +142,7 @@ Mercury's effects actually extend beyond the retrograde itself:
             Mercury Retrograde Survival Tips
           </h2>
           <div className='grid md:grid-cols-2 gap-4'>
-            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success/10'>
+            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success-950'>
               <h3 className='text-lg font-medium text-lunary-success mb-4 flex items-center gap-2'>
                 <Check className='h-5 w-5' />
                 Do During Retrograde
@@ -157,7 +157,7 @@ Mercury's effects actually extend beyond the retrograde itself:
                 <li>• Practice patience and flexibility</li>
               </ul>
             </div>
-            <div className='p-6 rounded-lg border border-lunary-error-700 bg-lunary-error/10'>
+            <div className='p-6 rounded-lg border border-lunary-error-700 bg-lunary-error-950'>
               <h3 className='text-lg font-medium text-lunary-error mb-4 flex items-center gap-2'>
                 <AlertTriangle className='h-5 w-5' />
                 Avoid If Possible
@@ -178,30 +178,34 @@ Mercury's effects actually extend beyond the retrograde itself:
           <h2 className='text-2xl font-medium text-zinc-100'>
             Mercury Retrograde Rituals
           </h2>
-          <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+          <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
             <p className='text-zinc-300 mb-4'>
               Use these rituals to work with Mercury Retrograde energy:
             </p>
             <ul className='space-y-3 text-zinc-300'>
               <li>
-                <strong className='text-purple-300'>Journal Ritual:</strong>{' '}
+                <strong className='text-lunary-primary-300'>
+                  Journal Ritual:
+                </strong>{' '}
                 Write about unfinished business, past patterns, and what needs
                 revision in your life.
               </li>
               <li>
-                <strong className='text-purple-300'>Tech Cleanse:</strong> Use
-                this time to organize files, clean your inbox, and update
+                <strong className='text-lunary-primary-300'>
+                  Tech Cleanse:
+                </strong>{' '}
+                Use this time to organize files, clean your inbox, and update
                 software.
               </li>
               <li>
-                <strong className='text-purple-300'>
+                <strong className='text-lunary-primary-300'>
                   Mercury Protection Candle:
                 </strong>{' '}
                 Light an orange or yellow candle and ask for clear communication
                 and protection from mishaps.
               </li>
               <li>
-                <strong className='text-purple-300'>
+                <strong className='text-lunary-primary-300'>
                   Reconnection Practice:
                 </strong>{' '}
                 Reach out to someone you've lost touch with—retrograde favors

@@ -281,9 +281,9 @@ export default function GrimoireLayout({
           <Link
             href='/grimoire'
             onClick={() => setSidebarOpen(false)}
-            className='text-lg md:text-xl lg:text-2xl font-bold text-white hover:text-purple-400 transition-colors flex items-center gap-2'
+            className='text-lg md:text-xl lg:text-2xl font-bold text-white hover:text-lunary-primary-400 transition-colors flex items-center gap-2'
           >
-            <Sparkles className='w-5 h-5 md:w-6 md:h-6 text-purple-400' />
+            <Sparkles className='w-5 h-5 md:w-6 md:h-6 text-lunary-primary-400' />
             Grimoire
           </Link>
           <button
@@ -321,7 +321,7 @@ export default function GrimoireLayout({
                   <div
                     className={`flex items-center rounded-lg transition-all duration-200 group ${
                       isActive
-                        ? 'bg-purple-500/10 border-l-2 border-purple-400'
+                        ? 'bg-lunary-primary-900/10 border-l-2 border-lunary-primary-400'
                         : 'hover:bg-zinc-800/50'
                     }`}
                   >
@@ -362,15 +362,15 @@ export default function GrimoireLayout({
                       }}
                       className={`flex-1 flex items-center gap-3 py-2.5 px-2 text-sm font-medium transition-colors ${
                         isActive
-                          ? 'text-purple-400'
+                          ? 'text-lunary-primary-400'
                           : 'text-zinc-300 group-hover:text-white'
                       }`}
                     >
                       <span
                         className={`transition-colors ${
                           isActive
-                            ? 'text-purple-400'
-                            : 'text-zinc-500 group-hover:text-purple-400'
+                            ? 'text-lunary-primary-400'
+                            : 'text-zinc-500 group-hover:text-lunary-primary-400'
                         }`}
                       >
                         {icon}
@@ -406,7 +406,7 @@ export default function GrimoireLayout({
                                   setSidebarOpen(false);
                                 });
                               }}
-                              className='block py-1.5 px-3 text-sm text-zinc-400 hover:text-purple-300 hover:bg-purple-500/5 rounded-md transition-colors'
+                              className='block py-1.5 px-3 text-sm text-zinc-400 hover:text-lunary-primary-300 hover:bg-lunary-primary-900/5 rounded-md transition-colors'
                             >
                               {content}
                             </Link>
@@ -435,8 +435,8 @@ export default function GrimoireLayout({
 
         {/* Loading indicator */}
         {isPending && (
-          <div className='absolute top-0 left-0 right-0 h-1 bg-purple-500/20 z-50'>
-            <div className='h-full bg-purple-500 animate-pulse' />
+          <div className='absolute top-0 left-0 right-0 h-1 bg-lunary-primary-900/20 z-50'>
+            <div className='h-full bg-lunary-primary-500 animate-pulse' />
           </div>
         )}
 
@@ -450,7 +450,7 @@ export default function GrimoireLayout({
           <div className='flex items-center justify-center min-h-full text-center p-4 md:py-12 lg:py-16'>
             <div className='max-w-6xl w-full'>
               <div className='mb-8 md:mb-12'>
-                <Sparkles className='w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 text-purple-400 mx-auto mb-6 md:mb-8' />
+                <Sparkles className='w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 text-lunary-primary-400 mx-auto mb-6 md:mb-8' />
                 <h1 className='text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-zinc-100 mb-4 md:mb-6'>
                   Welcome to the Grimoire
                 </h1>
@@ -469,9 +469,9 @@ export default function GrimoireLayout({
                       key={itemKey}
                       href={`/grimoire/${slug}`}
                       prefetch={true}
-                      className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 md:p-6 lg:p-8 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all'
+                      className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 md:p-6 lg:p-8 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
                     >
-                      <h3 className='text-lg md:text-xl lg:text-2xl font-medium text-zinc-100 mb-2 md:mb-3 group-hover:text-purple-400 transition-colors'>
+                      <h3 className='text-lg md:text-xl lg:text-2xl font-medium text-zinc-100 mb-2 md:mb-3 group-hover:text-lunary-primary-400 transition-colors'>
                         {item.title}
                       </h3>
                       {item.contents && (

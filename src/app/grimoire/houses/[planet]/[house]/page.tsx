@@ -169,7 +169,7 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
               href={`/grimoire/houses/${planet}/${h}`}
               className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                 h === house
-                  ? 'bg-purple-500/30 text-purple-200 border border-purple-500/50'
+                  ? 'bg-lunary-primary-900/30 text-lunary-primary-200 border border-lunary-primary-600'
                   : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
               }`}
             >

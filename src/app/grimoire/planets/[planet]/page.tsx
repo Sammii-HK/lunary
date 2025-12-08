@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import {
   planetaryBodies,
   planetSymbols,
@@ -219,6 +220,13 @@ Mystical Properties: ${planetData.mysticalProperties}`}
         ctaText={`Want to see ${planetData.name} in your birth chart?`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='planet'
+            entityKey={planetKey}
+            title={`${planetData.name} Cosmic Web`}
+          />
+        }
       />
     </div>
   );

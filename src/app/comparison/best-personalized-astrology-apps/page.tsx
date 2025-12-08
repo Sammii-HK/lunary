@@ -89,7 +89,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
           </p>
         </div>
 
-        <div className='mb-8 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+        <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             <strong>Note:</strong> This comparison is based on publicly
             available information and focuses on factual differences. We aim to
@@ -109,7 +109,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   <th className='border border-zinc-800 p-4 text-left text-zinc-200'>
                     Feature
                   </th>
-                  <th className='border border-zinc-800 p-4 text-center text-purple-300 font-medium'>
+                  <th className='border border-zinc-800 p-4 text-center text-lunary-primary-300 font-medium'>
                     Lunary ⭐
                   </th>
                   <th className='border border-zinc-800 p-4 text-center text-zinc-300'>
@@ -329,9 +329,9 @@ export default function BestPersonalizedAstrologyAppsPage() {
           </h2>
 
           {/* Lunary */}
-          <div className='mb-8 rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
+          <div className='mb-8 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
             <div className='flex items-start gap-4 mb-4'>
-              <Star className='h-6 w-6 text-purple-400 flex-shrink-0 mt-1' />
+              <Star className='h-6 w-6 text-lunary-primary-400 flex-shrink-0 mt-1' />
               <div className='flex-1'>
                 <h3 className='text-2xl font-medium text-zinc-100 mb-2'>
                   Lunary ⭐ Our Top Pick
@@ -378,7 +378,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                 </div>
                 <Link
                   href='/pricing'
-                  className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors text-sm'
+                  className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors text-sm'
                 >
                   Try Lunary Free
                   <ArrowRight className='h-4 w-4' />
@@ -467,7 +467,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Why Lunary is Our Top Pick
           </h2>
-          <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
             <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
               Lunary wins because it combines three unique advantages:
             </p>
@@ -501,7 +501,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
         <section className='text-center'>
           <Link
             href='/pricing'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
           >
             Start Your Free Trial
             <ArrowRight className='h-5 w-5' />

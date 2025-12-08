@@ -32,7 +32,7 @@ export default function ComparisonHubPage() {
           </p>
         </div>
 
-        <div className='mb-8 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+        <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             <strong>Why Compare?</strong> Choosing the right astrology app
             matters. We believe in transparency and helping you make informed
@@ -50,11 +50,11 @@ export default function ComparisonHubPage() {
             {/* Complete Comparison */}
             <Link
               href='/comparison/best-personalized-astrology-apps'
-              className='block rounded-lg border border-purple-500/30 bg-purple-500/10 p-6 hover:border-purple-500/50 hover:bg-purple-500/15 transition-all group'
+              className='block rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6 hover:border-lunary-primary-600 hover:bg-lunary-primary-900/15 transition-all group'
             >
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
-                  <h3 className='text-xl font-medium text-zinc-100 mb-2 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-xl font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-300 transition-colors'>
                     Complete Comparison: Lunary vs Moonly vs Lunar Guide
                   </h3>
                   <p className='text-sm text-zinc-400 mb-3'>
@@ -62,18 +62,18 @@ export default function ComparisonHubPage() {
                     personalized astrology apps with detailed feature charts.
                   </p>
                 </div>
-                <ArrowRight className='h-5 w-5 text-purple-300 group-hover:text-purple-200 transition-colors ml-4 flex-shrink-0' />
+                <ArrowRight className='h-5 w-5 text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors ml-4 flex-shrink-0' />
               </div>
             </Link>
 
             {/* Individual Comparisons */}
             <Link
               href='/comparison/lunary-vs-moonly'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
             >
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-lunary-primary-300 transition-colors'>
                     Lunary vs Moonly
                   </h3>
                   <p className='text-sm text-zinc-400'>
@@ -81,17 +81,17 @@ export default function ComparisonHubPage() {
                     why Lunary's personalized charts and grimoire stand out.
                   </p>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
+                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-lunary-primary-300 transition-colors ml-4 flex-shrink-0' />
               </div>
             </Link>
 
             <Link
               href='/comparison/lunary-vs-lunar-guide'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
             >
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-lunary-primary-300 transition-colors'>
                     Lunary vs Lunar Guide
                   </h3>
                   <p className='text-sm text-zinc-400'>
@@ -99,17 +99,17 @@ export default function ComparisonHubPage() {
                     which approach provides more accurate birth charts.
                   </p>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
+                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-lunary-primary-300 transition-colors ml-4 flex-shrink-0' />
               </div>
             </Link>
 
             <Link
               href='/comparison/lunary-vs-arcarae'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
             >
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-lunary-primary-300 transition-colors'>
                     Lunary vs Arcarae
                   </h3>
                   <p className='text-sm text-zinc-400'>
@@ -117,17 +117,17 @@ export default function ComparisonHubPage() {
                     content. Compare magical tools ecosystem vs social features.
                   </p>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
+                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-lunary-primary-300 transition-colors ml-4 flex-shrink-0' />
               </div>
             </Link>
 
             <Link
               href='/comparison/lunary-vs-costar'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
             >
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-lunary-primary-300 transition-colors'>
                     Lunary vs Co-Star
                   </h3>
                   <p className='text-sm text-zinc-400'>
@@ -135,17 +135,17 @@ export default function ComparisonHubPage() {
                     Compare real astronomical data vs generic astrology.
                   </p>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
+                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-lunary-primary-300 transition-colors ml-4 flex-shrink-0' />
               </div>
             </Link>
 
             <Link
               href='/comparison/lunary-vs-pattern'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
             >
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-lunary-primary-300 transition-colors'>
                     Lunary vs Pattern
                   </h3>
                   <p className='text-sm text-zinc-400'>
@@ -153,17 +153,17 @@ export default function ComparisonHubPage() {
                     Compare astrological patterns vs behavioral insights.
                   </p>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
+                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-lunary-primary-300 transition-colors ml-4 flex-shrink-0' />
               </div>
             </Link>
 
             <Link
               href='/comparison/personalized-vs-generic-astrology'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-5 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
             >
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-lunary-primary-300 transition-colors'>
                     Personalized vs Generic Astrology
                   </h3>
                   <p className='text-sm text-zinc-400'>
@@ -171,7 +171,7 @@ export default function ComparisonHubPage() {
                     accurate than generic zodiac horoscopes. Educational guide.
                   </p>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-purple-300 transition-colors ml-4 flex-shrink-0' />
+                <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-lunary-primary-300 transition-colors ml-4 flex-shrink-0' />
               </div>
             </Link>
           </div>
@@ -183,8 +183,8 @@ export default function ComparisonHubPage() {
             Why Lunary Stands Out
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
-              <Star className='h-6 w-6 text-purple-400 mb-3' />
+            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+              <Star className='h-6 w-6 text-lunary-primary-400 mb-3' />
               <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                 Real Astronomical Data
               </h3>
@@ -193,8 +193,8 @@ export default function ComparisonHubPage() {
                 calculations from your exact birth time, date, and location.
               </p>
             </div>
-            <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
-              <Star className='h-6 w-6 text-purple-400 mb-3' />
+            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+              <Star className='h-6 w-6 text-lunary-primary-400 mb-3' />
               <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                 Truly Personalized
               </h3>
@@ -203,8 +203,8 @@ export default function ComparisonHubPage() {
                 not generic zodiac signs.
               </p>
             </div>
-            <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
-              <Star className='h-6 w-6 text-purple-400 mb-3' />
+            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+              <Star className='h-6 w-6 text-lunary-primary-400 mb-3' />
               <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                 Complete Grimoire
               </h3>
@@ -213,8 +213,8 @@ export default function ComparisonHubPage() {
                 - unique to Lunary.
               </p>
             </div>
-            <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
-              <Star className='h-6 w-6 text-purple-400 mb-3' />
+            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+              <Star className='h-6 w-6 text-lunary-primary-400 mb-3' />
               <h3 className='text-lg font-medium text-zinc-100 mb-2'>
                 Free Trial
               </h3>
@@ -230,7 +230,7 @@ export default function ComparisonHubPage() {
         <section className='text-center'>
           <Link
             href='/pricing'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
           >
             Start Your Free Trial
             <ArrowRight className='h-5 w-5' />

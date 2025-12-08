@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import {
   zodiacSigns,
   zodiacSymbol,
@@ -255,6 +256,13 @@ Season: (varies by sign)`}
         ctaText={`Want personalized insights for your ${signData.name} chart?`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='zodiac'
+            entityKey={signKey}
+            title={`${signData.name} Cosmic Web`}
+          />
+        }
       />
     </div>
   );

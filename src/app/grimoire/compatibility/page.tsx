@@ -111,7 +111,7 @@ export default function CompatibilityIndexPage() {
                         <td key={key2} className='p-1'>
                           <Link
                             href={`/grimoire/compatibility/${slug}`}
-                            className='block w-8 h-8 rounded bg-zinc-800 hover:bg-lunary-rose/30 hover:border-lunary-rose-600 border border-transparent transition-colors flex items-center justify-center'
+                            className='block w-8 h-8 rounded bg-zinc-800 hover:bg-lunary-rose-800 hover:border-lunary-rose-600 border border-transparent transition-colors flex items-center justify-center'
                           >
                             <Heart className='h-3 w-3 text-zinc-600 hover:text-lunary-rose' />
                           </Link>
@@ -169,7 +169,7 @@ export default function CompatibilityIndexPage() {
         <section className='mt-12 text-center'>
           <Link
             href='/welcome'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-rose-900 hover:bg-lunary-rose/30 border border-lunary-rose-700 text-lunary-rose-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-rose-900 hover:bg-lunary-rose-800 border border-lunary-rose-700 text-lunary-rose-300 font-medium text-lg transition-colors'
           >
             <Heart className='h-5 w-5' />
             Get Your Synastry Reading

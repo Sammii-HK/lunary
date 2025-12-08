@@ -82,7 +82,7 @@ export default function GlossaryPage() {
 
       {/* Breadcrumbs */}
       <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-purple-400'>
+        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
         <span className='mx-2'>→</span>
@@ -110,7 +110,7 @@ export default function GlossaryPage() {
             <a
               key={category}
               href={`#${category.toLowerCase().replace(/\s+/g, '-')}`}
-              className='px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-300 text-sm hover:bg-purple-900/30 hover:text-purple-300 transition-colors'
+              className='px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-300 text-sm hover:bg-lunary-primary-900/30 hover:text-lunary-primary-300 transition-colors'
             >
               {category}
             </a>
@@ -129,7 +129,7 @@ export default function GlossaryPage() {
               <a
                 key={letter}
                 href={`#letter-${letter}`}
-                className='w-8 h-8 flex items-center justify-center rounded bg-zinc-800 text-zinc-300 text-sm hover:bg-purple-900/30 hover:text-purple-300 transition-colors'
+                className='w-8 h-8 flex items-center justify-center rounded bg-zinc-800 text-zinc-300 text-sm hover:bg-lunary-primary-900/30 hover:text-lunary-primary-300 transition-colors'
               >
                 {letter}
               </a>
@@ -163,7 +163,7 @@ export default function GlossaryPage() {
               id={`letter-${letter}`}
               className='mb-8 scroll-mt-24'
             >
-              <h3 className='text-xl font-medium text-purple-400 mb-4 pb-2 border-b border-zinc-800'>
+              <h3 className='text-xl font-medium text-lunary-primary-400 mb-4 pb-2 border-b border-zinc-800'>
                 {letter}
               </h3>
               <div className='grid gap-2'>
@@ -171,9 +171,9 @@ export default function GlossaryPage() {
                   <Link
                     key={term.slug}
                     href={`/grimoire/glossary/${term.slug}`}
-                    className='p-3 rounded-lg bg-zinc-900/30 hover:bg-zinc-900/50 border border-zinc-800/50 hover:border-purple-500/30 transition-colors group'
+                    className='p-3 rounded-lg bg-zinc-900/30 hover:bg-zinc-900/50 border border-zinc-800/50 hover:border-lunary-primary-700 transition-colors group'
                   >
-                    <span className='font-medium text-zinc-100 group-hover:text-purple-300'>
+                    <span className='font-medium text-zinc-100 group-hover:text-lunary-primary-300'>
                       {term.term}
                     </span>
                     <span className='text-zinc-500 text-sm ml-2'>
@@ -221,7 +221,7 @@ export default function GlossaryPage() {
                         <a
                           key={related}
                           href={`#${relatedTerm.slug}`}
-                          className='text-sm text-purple-400 hover:text-purple-300 transition-colors'
+                          className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
                         >
                           {related}
                         </a>
@@ -240,7 +240,7 @@ export default function GlossaryPage() {
       ))}
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           See These Terms in Action
         </h2>
@@ -250,7 +250,7 @@ export default function GlossaryPage() {
         </p>
         <Link
           href='/birth-chart'
-          className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+          className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
         >
           Calculate Your Birth Chart Free
         </Link>

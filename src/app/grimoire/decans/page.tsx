@@ -64,11 +64,11 @@ export default function DecansIndexPage() {
                         href={`/grimoire/decans/${sign}/${d}`}
                         className='p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors group'
                       >
-                        <div className='text-sm text-purple-400 mb-1'>
+                        <div className='text-sm text-lunary-primary-400 mb-1'>
                           {d === 1 ? 'First' : d === 2 ? 'Second' : 'Third'}{' '}
                           Decan
                         </div>
-                        <div className='font-medium group-hover:text-purple-300 transition-colors'>
+                        <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
                           {data.dateRange}
                         </div>
                         <div className='text-sm text-zinc-500'>

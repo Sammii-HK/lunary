@@ -813,7 +813,7 @@ export function AskTheGrimoire({
             if (searchQuery.length > 0) setShowSearchResults(true);
           }}
           aria-label='Search grimoire'
-          className='w-full pl-10 md:pl-12 pr-4 py-2 md:py-2.5 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base'
+          className='w-full pl-10 md:pl-12 pr-4 py-2 md:py-2.5 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent text-sm md:text-base'
         />
       </div>
 
@@ -821,7 +821,7 @@ export function AskTheGrimoire({
       {showSearchResults && searchDataLoading && searchQuery.trim() && (
         <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg p-4 z-50'>
           <div className='flex items-center gap-2 text-zinc-400'>
-            <div className='w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin' />
+            <div className='w-4 h-4 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin' />
             <span className='text-sm'>Loading...</span>
           </div>
         </div>
@@ -879,7 +879,7 @@ export function AskTheGrimoire({
             </p>
             <Link
               href='/guide'
-              className='inline-flex items-center gap-1.5 text-sm text-purple-400 hover:text-purple-300 transition-colors'
+              className='inline-flex items-center gap-1.5 text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
             >
               <Sparkles className='w-4 h-4' />
               Ask the Astral Guide for a personalized answer

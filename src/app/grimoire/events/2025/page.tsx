@@ -71,22 +71,22 @@ const colorClasses: Record<
 > = {
   orange: {
     border: 'border-lunary-rose-700',
-    bg: 'bg-lunary-rose/10',
+    bg: 'bg-lunary-rose-950',
     text: 'text-lunary-rose',
   },
   pink: {
     border: 'border-lunary-rose-700',
-    bg: 'bg-lunary-rose/10',
+    bg: 'bg-lunary-rose-950',
     text: 'text-lunary-rose',
   },
   amber: {
     border: 'border-lunary-accent-700',
-    bg: 'bg-lunary-accent/10',
+    bg: 'bg-lunary-accent-950',
     text: 'text-lunary-accent',
   },
   blue: {
     border: 'border-lunary-secondary-700',
-    bg: 'bg-lunary-secondary/10',
+    bg: 'bg-lunary-secondary-950',
     text: 'text-lunary-secondary',
   },
 };
@@ -118,25 +118,33 @@ export default function Events2025Page() {
         </div>
 
         {/* Quick Summary */}
-        <div className='mb-12 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-lg font-medium text-purple-300 mb-4'>
+        <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-lg font-medium text-lunary-primary-300 mb-4'>
             2025 At a Glance
           </h2>
           <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-center'>
             <div>
-              <div className='text-3xl font-light text-purple-400'>3</div>
+              <div className='text-3xl font-light text-lunary-primary-400'>
+                3
+              </div>
               <div className='text-sm text-zinc-400'>Mercury Retrogrades</div>
             </div>
             <div>
-              <div className='text-3xl font-light text-purple-400'>1</div>
+              <div className='text-3xl font-light text-lunary-primary-400'>
+                1
+              </div>
               <div className='text-sm text-zinc-400'>Venus Retrograde</div>
             </div>
             <div>
-              <div className='text-3xl font-light text-purple-400'>4</div>
+              <div className='text-3xl font-light text-lunary-primary-400'>
+                4
+              </div>
               <div className='text-sm text-zinc-400'>Eclipses</div>
             </div>
             <div>
-              <div className='text-3xl font-light text-purple-400'>6</div>
+              <div className='text-3xl font-light text-lunary-primary-400'>
+                6
+              </div>
               <div className='text-sm text-zinc-400'>Outer Planet Rx</div>
             </div>
           </div>
@@ -190,7 +198,7 @@ export default function Events2025Page() {
         <div className='mt-12 text-center'>
           <Link
             href='/welcome'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
           >
             Get Your Personalized 2025 Forecast
             <ArrowRight className='h-5 w-5' />

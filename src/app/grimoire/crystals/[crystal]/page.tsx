@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { crystalDatabase } from '@/constants/grimoire/crystals';
 import { stringToKebabCase } from '../../../../../utils/string';
 
@@ -214,6 +215,13 @@ Rarity: ${crystalData.rarity}`}
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='crystal'
+            entityKey={crystal}
+            title={`${crystalData.name} Cosmic Web`}
+          />
+        }
       />
     </div>
   );

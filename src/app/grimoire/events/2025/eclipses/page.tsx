@@ -148,16 +148,16 @@ Eclipses come in pairs or clusters called "eclipse seasons." In 2025, we have tw
                   key={index}
                   className={`p-6 rounded-lg border ${
                     isSolar
-                      ? 'border-lunary-accent-700 bg-lunary-accent/10'
-                      : 'border-purple-500/30 bg-purple-500/10'
+                      ? 'border-lunary-accent-700 bg-lunary-accent-950'
+                      : 'border-lunary-primary-700 bg-lunary-primary-900/10'
                   }`}
                 >
                   <div className='flex items-start gap-4'>
                     <div
-                      className={`p-2 rounded-lg ${isSolar ? 'bg-lunary-accent-900' : 'bg-purple-500/20'}`}
+                      className={`p-2 rounded-lg ${isSolar ? 'bg-lunary-accent-900' : 'bg-lunary-primary-900/20'}`}
                     >
                       <Icon
-                        className={`h-6 w-6 ${isSolar ? 'text-lunary-accent' : 'text-purple-400'}`}
+                        className={`h-6 w-6 ${isSolar ? 'text-lunary-accent' : 'text-lunary-primary-400'}`}
                       />
                     </div>
                     <div className='flex-1'>
@@ -169,14 +169,14 @@ Eclipses come in pairs or clusters called "eclipse seasons." In 2025, we have tw
                           className={`px-2 py-1 rounded text-xs ${
                             isSolar
                               ? 'bg-lunary-accent-900 text-lunary-accent-300'
-                              : 'bg-purple-500/20 text-purple-300'
+                              : 'bg-lunary-primary-900/20 text-lunary-primary-300'
                           }`}
                         >
                           {eclipse.type}
                         </span>
                       </div>
                       <p
-                        className={`text-sm mb-2 ${isSolar ? 'text-lunary-accent-300' : 'text-purple-300'}`}
+                        className={`text-sm mb-2 ${isSolar ? 'text-lunary-accent-300' : 'text-lunary-primary-300'}`}
                       >
                         {eclipse.sign} — {eclipse.theme}
                       </p>

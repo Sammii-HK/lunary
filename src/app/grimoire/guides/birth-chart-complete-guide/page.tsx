@@ -113,11 +113,14 @@ export default function BirthChartCompleteGuidePage() {
 
       {/* Breadcrumbs */}
       <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-purple-400'>
+        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
         <span className='mx-2'>→</span>
-        <Link href='/grimoire/birth-chart' className='hover:text-purple-400'>
+        <Link
+          href='/grimoire/birth-chart'
+          className='hover:text-lunary-primary-400'
+        >
           Birth Chart
         </Link>
         <span className='mx-2'>→</span>
@@ -128,7 +131,7 @@ export default function BirthChartCompleteGuidePage() {
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
           Birth Chart: The Complete Guide
-          <span className='block text-2xl text-purple-400 mt-2'>
+          <span className='block text-2xl text-lunary-primary-400 mt-2'>
             2025 Edition
           </span>
         </h1>
@@ -141,13 +144,13 @@ export default function BirthChartCompleteGuidePage() {
         <div className='flex flex-wrap gap-4'>
           <Link
             href='/birth-chart'
-            className='px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Calculate Your Birth Chart Free
           </Link>
           <Link
             href='#what-is-birth-chart'
-            className='px-6 py-3 border border-zinc-700 hover:border-purple-500 text-zinc-300 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
           >
             Start Reading
           </Link>
@@ -161,52 +164,58 @@ export default function BirthChartCompleteGuidePage() {
         </h2>
         <ol className='space-y-2 text-zinc-400'>
           <li>
-            <a href='#what-is-birth-chart' className='hover:text-purple-400'>
+            <a
+              href='#what-is-birth-chart'
+              className='hover:text-lunary-primary-400'
+            >
               1. What is a Birth Chart?
             </a>
           </li>
           <li>
-            <a href='#calculating-chart' className='hover:text-purple-400'>
+            <a
+              href='#calculating-chart'
+              className='hover:text-lunary-primary-400'
+            >
               2. How to Calculate Your Birth Chart
             </a>
           </li>
           <li>
-            <a href='#big-three' className='hover:text-purple-400'>
+            <a href='#big-three' className='hover:text-lunary-primary-400'>
               3. The Big Three: Sun, Moon, and Rising
             </a>
           </li>
           <li>
-            <a href='#planets' className='hover:text-purple-400'>
+            <a href='#planets' className='hover:text-lunary-primary-400'>
               4. Understanding the Planets
             </a>
           </li>
           <li>
-            <a href='#zodiac-signs' className='hover:text-purple-400'>
+            <a href='#zodiac-signs' className='hover:text-lunary-primary-400'>
               5. The 12 Zodiac Signs
             </a>
           </li>
           <li>
-            <a href='#houses' className='hover:text-purple-400'>
+            <a href='#houses' className='hover:text-lunary-primary-400'>
               6. The 12 Houses of the Zodiac
             </a>
           </li>
           <li>
-            <a href='#aspects' className='hover:text-purple-400'>
+            <a href='#aspects' className='hover:text-lunary-primary-400'>
               7. Understanding Aspects
             </a>
           </li>
           <li>
-            <a href='#reading-chart' className='hover:text-purple-400'>
+            <a href='#reading-chart' className='hover:text-lunary-primary-400'>
               8. How to Read Your Birth Chart Step by Step
             </a>
           </li>
           <li>
-            <a href='#advanced' className='hover:text-purple-400'>
+            <a href='#advanced' className='hover:text-lunary-primary-400'>
               9. Advanced Birth Chart Techniques
             </a>
           </li>
           <li>
-            <a href='#faq' className='hover:text-purple-400'>
+            <a href='#faq' className='hover:text-lunary-primary-400'>
               10. Frequently Asked Questions
             </a>
           </li>
@@ -234,8 +243,8 @@ export default function BirthChartCompleteGuidePage() {
           career path, and life purpose.
         </p>
 
-        <div className='bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-6'>
-          <h3 className='text-lg font-medium text-purple-300 mb-3'>
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-6'>
+          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
             Key Components of a Birth Chart
           </h3>
           <ul className='space-y-2 text-zinc-300'>
@@ -321,7 +330,7 @@ export default function BirthChartCompleteGuidePage() {
 
         <Link
           href='/birth-chart'
-          className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+          className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
         >
           Calculate Your Free Birth Chart Now →
         </Link>
@@ -375,7 +384,7 @@ export default function BirthChartCompleteGuidePage() {
           </div>
 
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-purple-400 mb-3'>
+            <h3 className='text-xl font-medium text-lunary-primary-400 mb-3'>
               AC Rising Sign: Your Outer Personality
             </h3>
             <p className='text-zinc-300 mb-4'>
@@ -409,7 +418,7 @@ export default function BirthChartCompleteGuidePage() {
             <Link
               key={sign}
               href={`/grimoire/zodiac/${sign.toLowerCase()}`}
-              className='p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-purple-500 transition-colors text-center'
+              className='p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary transition-colors text-center'
             >
               <span className='text-zinc-100'>{sign}</span>
             </Link>
@@ -443,7 +452,7 @@ export default function BirthChartCompleteGuidePage() {
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Ready to Explore Your Birth Chart?
         </h2>
@@ -455,13 +464,13 @@ export default function BirthChartCompleteGuidePage() {
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
             href='/birth-chart'
-            className='px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Calculate Free Birth Chart
           </Link>
           <Link
             href='/pricing'
-            className='px-8 py-3 border border-purple-500 text-purple-300 hover:bg-purple-500/10 rounded-lg font-medium transition-colors'
+            className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
           >
             Get Full Interpretation
           </Link>

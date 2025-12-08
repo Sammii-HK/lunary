@@ -80,10 +80,10 @@ export default function AspectsIndexPage() {
             <Link
               key={planet}
               href={`/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}`}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
             >
               <div className='text-3xl mb-2'>{PLANET_SYMBOLS[planet]}</div>
-              <h3 className='text-lg font-medium group-hover:text-purple-300 transition-colors'>
+              <h3 className='text-lg font-medium group-hover:text-lunary-primary-300 transition-colors'>
                 {PLANET_DISPLAY[planet]} Aspects
               </h3>
               <p className='text-sm text-zinc-500'>
@@ -93,8 +93,8 @@ export default function AspectsIndexPage() {
           ))}
         </div>
 
-        <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             Find Aspects in Your Chart
           </h2>
           <p className='text-zinc-300 mb-4'>
@@ -103,7 +103,7 @@ export default function AspectsIndexPage() {
           </p>
           <Link
             href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Generate Your Birth Chart
           </Link>

@@ -37,7 +37,8 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
-  zodiac: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  zodiac:
+    'bg-lunary-primary-900/20 text-lunary-primary-300 border-lunary-primary-700',
   planet:
     'bg-lunary-accent-900 text-lunary-accent-300 border-lunary-accent-700',
   tarot: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
@@ -70,7 +71,7 @@ function SearchResultCard({ entry }: SearchResultCardProps) {
       className={`
         block p-5 rounded-2xl border
         bg-black/30 backdrop-blur-sm
-        hover:bg-purple-500/10 hover:border-purple-500/40
+        hover:bg-lunary-primary-900/10 hover:border-lunary-primary-600
         transition-all duration-300 group
         ${CATEGORY_COLORS[entry.category].split(' ')[2]}
       `}
@@ -88,7 +89,7 @@ function SearchResultCard({ entry }: SearchResultCardProps) {
 
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-3 mb-2'>
-            <h3 className='text-lg font-medium text-white group-hover:text-purple-200 transition-colors'>
+            <h3 className='text-lg font-medium text-white group-hover:text-lunary-primary-200 transition-colors'>
               {entry.title}
             </h3>
             <span
@@ -101,13 +102,15 @@ function SearchResultCard({ entry }: SearchResultCardProps) {
             </span>
           </div>
 
-          <p className='text-sm text-purple-300/70 mb-3'>{entry.summary}</p>
+          <p className='text-sm text-lunary-primary-300/70 mb-3'>
+            {entry.summary}
+          </p>
 
           <div className='flex flex-wrap gap-2'>
             {entry.keywords.slice(0, 5).map((keyword) => (
               <span
                 key={keyword}
-                className='text-xs px-2 py-1 rounded-lg bg-white/5 text-purple-300/50'
+                className='text-xs px-2 py-1 rounded-lg bg-white/5 text-lunary-primary-300/50'
               >
                 {keyword}
               </span>
@@ -115,7 +118,7 @@ function SearchResultCard({ entry }: SearchResultCardProps) {
           </div>
         </div>
 
-        <ArrowRight className='h-5 w-5 text-purple-400/30 group-hover:text-purple-400 group-hover:translate-x-1 transition-all flex-shrink-0 mt-1' />
+        <ArrowRight className='h-5 w-5 text-lunary-primary-400/30 group-hover:text-lunary-primary-400 group-hover:translate-x-1 transition-all flex-shrink-0 mt-1' />
       </div>
     </Link>
   );
@@ -132,7 +135,7 @@ function SearchContent({ query }: { query: string }) {
     <div className='space-y-6'>
       {/* Results Header */}
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2 text-purple-300/70'>
+        <div className='flex items-center gap-2 text-lunary-primary-300/70'>
           <Sparkles className='h-4 w-4' />
           <span>
             {isDefaultView
@@ -151,11 +154,11 @@ function SearchContent({ query }: { query: string }) {
         </div>
       ) : (
         <div className='text-center py-16'>
-          <Sparkles className='h-12 w-12 text-purple-400/30 mx-auto mb-4' />
-          <h3 className='text-xl font-medium text-purple-300 mb-2'>
+          <Sparkles className='h-12 w-12 text-lunary-primary-400/30 mx-auto mb-4' />
+          <h3 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             No cosmic insights found
           </h3>
-          <p className='text-purple-300/60 max-w-md mx-auto'>
+          <p className='text-lunary-primary-300/60 max-w-md mx-auto'>
             Try searching for a zodiac sign, planet, tarot card, crystal, or
             astrological concept.
           </p>
@@ -164,7 +167,7 @@ function SearchContent({ query }: { query: string }) {
 
       {/* Browse by Category */}
       {isDefaultView && (
-        <div className='mt-12 pt-8 border-t border-purple-500/20'>
+        <div className='mt-12 pt-8 border-t border-lunary-primary-700'>
           <h2 className='text-xl font-medium text-white mb-6'>
             Browse by Category
           </h2>
@@ -197,7 +200,7 @@ function SearchContent({ query }: { query: string }) {
                     <span className='text-white capitalize font-medium'>
                       {category}
                     </span>
-                    <span className='text-purple-300/50 text-sm block'>
+                    <span className='text-lunary-primary-300/50 text-sm block'>
                       {count} {count === 1 ? 'entry' : 'entries'}
                     </span>
                   </div>
@@ -222,34 +225,34 @@ export default async function GrimoireSearchPage({
   return (
     <main className='min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#12121a] to-[#0a0a0f] text-white'>
       {/* Header */}
-      <div className='border-b border-purple-500/20'>
+      <div className='border-b border-lunary-primary-700'>
         <div className='max-w-4xl mx-auto px-4 py-6'>
           {/* Breadcrumb */}
-          <nav className='flex items-center gap-2 text-sm text-purple-300/60 mb-6'>
+          <nav className='flex items-center gap-2 text-sm text-lunary-primary-300/60 mb-6'>
             <Link
               href='/'
-              className='flex items-center gap-1 hover:text-purple-300'
+              className='flex items-center gap-1 hover:text-lunary-primary-300'
             >
               <Home className='h-4 w-4' />
               <span>Home</span>
             </Link>
             <span>/</span>
-            <Link href='/grimoire' className='hover:text-purple-300'>
+            <Link href='/grimoire' className='hover:text-lunary-primary-300'>
               Grimoire
             </Link>
             <span>/</span>
-            <span className='text-purple-300'>Search</span>
+            <span className='text-lunary-primary-300'>Search</span>
           </nav>
 
           {/* Title */}
           <div className='flex items-center gap-3 mb-6'>
-            <BookOpen className='h-8 w-8 text-purple-400' />
+            <BookOpen className='h-8 w-8 text-lunary-primary-400' />
             <h1 className='text-3xl md:text-4xl font-light'>
               Ask the <span className='font-medium'>Grimoire</span>
             </h1>
           </div>
 
-          <p className='text-purple-300/70 mb-8 max-w-2xl'>
+          <p className='text-lunary-primary-300/70 mb-8 max-w-2xl'>
             Search our cosmic knowledge base for astrology, tarot, crystals,
             rituals, and spiritual wisdom. Find the answers you seek.
           </p>
@@ -267,7 +270,7 @@ export default async function GrimoireSearchPage({
         <Suspense
           fallback={
             <div className='flex items-center justify-center py-16'>
-              <div className='animate-spin h-8 w-8 border-2 border-purple-500 border-t-transparent rounded-full' />
+              <div className='animate-spin h-8 w-8 border-2 border-lunary-primary border-t-transparent rounded-full' />
             </div>
           }
         >

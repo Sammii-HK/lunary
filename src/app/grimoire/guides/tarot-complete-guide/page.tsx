@@ -274,11 +274,11 @@ export default function TarotCompleteGuidePage() {
 
       {/* Breadcrumbs */}
       <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-purple-400'>
+        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
         <span className='mx-2'>→</span>
-        <Link href='/grimoire/tarot' className='hover:text-purple-400'>
+        <Link href='/grimoire/tarot' className='hover:text-lunary-primary-400'>
           Tarot
         </Link>
         <span className='mx-2'>→</span>
@@ -289,7 +289,7 @@ export default function TarotCompleteGuidePage() {
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
           Tarot: The Complete Guide
-          <span className='block text-2xl text-purple-400 mt-2'>
+          <span className='block text-2xl text-lunary-primary-400 mt-2'>
             All 78 Cards Explained
           </span>
         </h1>
@@ -303,13 +303,13 @@ export default function TarotCompleteGuidePage() {
         <div className='flex flex-wrap gap-4'>
           <Link
             href='/tarot'
-            className='px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Get a Free Tarot Reading
           </Link>
           <Link
             href='#major-arcana'
-            className='px-6 py-3 border border-zinc-700 hover:border-purple-500 text-zinc-300 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
           >
             Start Learning
           </Link>
@@ -323,52 +323,52 @@ export default function TarotCompleteGuidePage() {
         </h2>
         <ol className='space-y-2 text-zinc-400'>
           <li>
-            <a href='#what-is-tarot' className='hover:text-purple-400'>
+            <a href='#what-is-tarot' className='hover:text-lunary-primary-400'>
               1. What is Tarot?
             </a>
           </li>
           <li>
-            <a href='#history' className='hover:text-purple-400'>
+            <a href='#history' className='hover:text-lunary-primary-400'>
               2. History of Tarot
             </a>
           </li>
           <li>
-            <a href='#deck-structure' className='hover:text-purple-400'>
+            <a href='#deck-structure' className='hover:text-lunary-primary-400'>
               3. Understanding the Deck Structure
             </a>
           </li>
           <li>
-            <a href='#major-arcana' className='hover:text-purple-400'>
+            <a href='#major-arcana' className='hover:text-lunary-primary-400'>
               4. The 22 Major Arcana Cards
             </a>
           </li>
           <li>
-            <a href='#minor-arcana' className='hover:text-purple-400'>
+            <a href='#minor-arcana' className='hover:text-lunary-primary-400'>
               5. The 56 Minor Arcana Cards
             </a>
           </li>
           <li>
-            <a href='#suits' className='hover:text-purple-400'>
+            <a href='#suits' className='hover:text-lunary-primary-400'>
               6. The Four Suits Explained
             </a>
           </li>
           <li>
-            <a href='#court-cards' className='hover:text-purple-400'>
+            <a href='#court-cards' className='hover:text-lunary-primary-400'>
               7. Understanding Court Cards
             </a>
           </li>
           <li>
-            <a href='#reading-basics' className='hover:text-purple-400'>
+            <a href='#reading-basics' className='hover:text-lunary-primary-400'>
               8. How to Read Tarot
             </a>
           </li>
           <li>
-            <a href='#spreads' className='hover:text-purple-400'>
+            <a href='#spreads' className='hover:text-lunary-primary-400'>
               9. Popular Tarot Spreads
             </a>
           </li>
           <li>
-            <a href='#faq' className='hover:text-purple-400'>
+            <a href='#faq' className='hover:text-lunary-primary-400'>
               10. Frequently Asked Questions
             </a>
           </li>
@@ -396,8 +396,8 @@ export default function TarotCompleteGuidePage() {
           universal human experiences.
         </p>
 
-        <div className='bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-6'>
-          <h3 className='text-lg font-medium text-purple-300 mb-3'>
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-6'>
+          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
             What Tarot Can Help You With
           </h3>
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-2 text-zinc-300'>
@@ -504,10 +504,10 @@ export default function TarotCompleteGuidePage() {
             <Link
               key={card.number}
               href={`/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}`}
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-purple-500 transition-colors'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary transition-colors'
             >
               <div className='flex items-center gap-3'>
-                <span className='text-2xl font-light text-purple-400 w-8'>
+                <span className='text-2xl font-light text-lunary-primary-400 w-8'>
                   {card.number}
                 </span>
                 <div>
@@ -622,7 +622,7 @@ export default function TarotCompleteGuidePage() {
 
         <div className='space-y-4'>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               1
             </span>
             <div>
@@ -636,7 +636,7 @@ export default function TarotCompleteGuidePage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               2
             </span>
             <div>
@@ -650,7 +650,7 @@ export default function TarotCompleteGuidePage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               3
             </span>
             <div>
@@ -664,7 +664,7 @@ export default function TarotCompleteGuidePage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               4
             </span>
             <div>
@@ -677,7 +677,7 @@ export default function TarotCompleteGuidePage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               5
             </span>
             <div>
@@ -764,7 +764,7 @@ export default function TarotCompleteGuidePage() {
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Ready to Explore the Tarot?
         </h2>
@@ -775,13 +775,13 @@ export default function TarotCompleteGuidePage() {
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
             href='/tarot'
-            className='px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Get Free Tarot Reading
           </Link>
           <Link
             href='/grimoire/tarot'
-            className='px-8 py-3 border border-purple-500 text-purple-300 hover:bg-purple-500/10 rounded-lg font-medium transition-colors'
+            className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
           >
             Browse All Cards
           </Link>

@@ -47,9 +47,9 @@ const Moon = () => {
               <Link
                 key={phase}
                 href={`/grimoire/moon-phases/${phaseSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <div className='text-sm text-zinc-300 leading-relaxed group-hover:text-purple-300 transition-colors'>
+                <div className='text-sm text-zinc-300 leading-relaxed group-hover:text-lunary-primary-300 transition-colors'>
                   <span className='text-lg mr-2'>
                     {monthlyMoonPhases[phase as MoonPhase].symbol}
                   </span>
@@ -72,9 +72,9 @@ const Moon = () => {
               <Link
                 key={moon.name}
                 href={`/grimoire/full-moons/${monthSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-1 group-hover:text-lunary-primary-400 transition-colors'>
                   {moon.name} -{' '}
                   <span className='font-normal'>{months[index]}</span>
                 </h3>
@@ -91,7 +91,7 @@ const Moon = () => {
         <h2 className='text-xl font-medium text-zinc-100'>
           <a
             href='/grimoire/moon-rituals'
-            className='hover:text-purple-400 transition-colors'
+            className='hover:text-lunary-primary-400 transition-colors'
           >
             Moon Rituals by Phase
           </a>
@@ -103,7 +103,7 @@ const Moon = () => {
         </p>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               New Moon Ritual
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -116,7 +116,7 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Waxing Moon Ritual
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -128,7 +128,7 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Full Moon Ritual
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -141,7 +141,7 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Waning Moon Ritual
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -161,7 +161,7 @@ const Moon = () => {
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
             <a
               href='/grimoire/moon-signs'
-              className='hover:text-purple-400 transition-colors'
+              className='hover:text-lunary-primary-400 transition-colors'
             >
               Moon Signs & Daily Influence
             </a>
@@ -174,27 +174,27 @@ const Moon = () => {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Fire Moon Signs
             </h3>
             <p className='text-xs text-zinc-400 mb-2'>
               <Link
                 href='/grimoire/moon-in/aries'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Aries
               </Link>
               ,{' '}
               <Link
                 href='/grimoire/moon-in/leo'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Leo
               </Link>
               ,{' '}
               <Link
                 href='/grimoire/moon-in/sagittarius'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Sagittarius
               </Link>
@@ -206,27 +206,27 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Earth Moon Signs
             </h3>
             <p className='text-xs text-zinc-400 mb-2'>
               <Link
                 href='/grimoire/moon-in/taurus'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Taurus
               </Link>
               ,{' '}
               <Link
                 href='/grimoire/moon-in/virgo'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Virgo
               </Link>
               ,{' '}
               <Link
                 href='/grimoire/moon-in/capricorn'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Capricorn
               </Link>
@@ -237,27 +237,27 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Air Moon Signs
             </h3>
             <p className='text-xs text-zinc-400 mb-2'>
               <Link
                 href='/grimoire/moon-in/gemini'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Gemini
               </Link>
               ,{' '}
               <Link
                 href='/grimoire/moon-in/libra'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Libra
               </Link>
               ,{' '}
               <Link
                 href='/grimoire/moon-in/aquarius'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Aquarius
               </Link>
@@ -269,27 +269,27 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Water Moon Signs
             </h3>
             <p className='text-xs text-zinc-400 mb-2'>
               <Link
                 href='/grimoire/moon-in/cancer'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Cancer
               </Link>
               ,{' '}
               <Link
                 href='/grimoire/moon-in/scorpio'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Scorpio
               </Link>
               ,{' '}
               <Link
                 href='/grimoire/moon-in/pisces'
-                className='hover:text-purple-300 transition-colors'
+                className='hover:text-lunary-primary-300 transition-colors'
               >
                 Pisces
               </Link>
@@ -317,7 +317,7 @@ const Moon = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What It Means
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -332,7 +332,7 @@ const Moon = () => {
             </ul>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What to Avoid
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -347,7 +347,7 @@ const Moon = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What to Do Instead
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -380,9 +380,9 @@ const Moon = () => {
         <div className='space-y-4'>
           <Link
             href='/grimoire/eclipses/solar-eclipse'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-purple-300 mb-2 group-hover:text-purple-200 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2 group-hover:text-lunary-primary-200 transition-colors'>
               Solar Eclipses (New Moon)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -407,9 +407,9 @@ const Moon = () => {
           </Link>
           <Link
             href='/grimoire/eclipses/lunar-eclipse'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-purple-300 mb-2 group-hover:text-purple-200 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2 group-hover:text-lunary-primary-200 transition-colors'>
               Lunar Eclipses (Full Moon)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -432,7 +432,7 @@ const Moon = () => {
             </div>
           </Link>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Eclipse Season
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -459,7 +459,7 @@ const Moon = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               New Moon to First Quarter
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -468,7 +468,7 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               First Quarter to Full Moon
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -477,7 +477,7 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Full Moon to Last Quarter
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -486,7 +486,7 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Last Quarter to New Moon
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -504,7 +504,7 @@ const Moon = () => {
         </h2>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What is a void of course moon?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -516,7 +516,7 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How do moon signs affect daily life?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -529,7 +529,7 @@ const Moon = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Can I do moon rituals if I can't see the moon?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -550,37 +550,37 @@ const Moon = () => {
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <a
             href='/grimoire/practices#spellcraft-fundamentals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon Magic & Spellcraft
           </a>
           <a
             href='/grimoire/candle-magic'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Candle Magic
           </a>
           <a
             href='/grimoire/birth-chart#planets'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Planetary Influences
           </a>
           <a
             href='/grimoire/astronomy'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Astronomy & Zodiac
           </a>
           <a
             href='/grimoire/crystals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Crystals for Moon Magic
           </a>
           <a
             href='/grimoire/correspondences#days'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Day Correspondences
           </a>

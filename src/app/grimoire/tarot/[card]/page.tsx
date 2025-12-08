@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { tarotCards } from '../../../../../utils/tarot/tarot-cards';
 import { tarotSuits } from '@/constants/tarot';
 import { stringToKebabCase } from '../../../../../utils/string';
@@ -323,6 +324,13 @@ Mystical Properties: ${suitInfo.mysticalProperties}`
         ctaText={`Want a personalized interpretation of ${cardData.card.name}?`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='tarot'
+            entityKey={card}
+            title={`${cardData.card.name} Cosmic Web`}
+          />
+        }
       />
     </div>
   );

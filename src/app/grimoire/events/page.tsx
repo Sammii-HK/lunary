@@ -42,15 +42,15 @@ export default function EventsIndexPage() {
         <div className='grid gap-6'>
           <Link
             href='/grimoire/events/2025'
-            className='group p-6 rounded-lg border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 transition-colors'
+            className='group p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 hover:bg-lunary-primary-900/20 transition-colors'
           >
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-4'>
-                <div className='p-3 rounded-lg bg-purple-500/20'>
-                  <Calendar className='h-8 w-8 text-purple-400' />
+                <div className='p-3 rounded-lg bg-lunary-primary-900/20'>
+                  <Calendar className='h-8 w-8 text-lunary-primary-400' />
                 </div>
                 <div>
-                  <h2 className='text-xl font-medium text-zinc-100 group-hover:text-purple-300 transition-colors'>
+                  <h2 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                     2025 Astrology Events
                   </h2>
                   <p className='text-zinc-400'>
@@ -59,14 +59,14 @@ export default function EventsIndexPage() {
                   </p>
                 </div>
               </div>
-              <ArrowRight className='h-6 w-6 text-zinc-500 group-hover:text-purple-400 transition-colors' />
+              <ArrowRight className='h-6 w-6 text-zinc-500 group-hover:text-lunary-primary-400 transition-colors' />
             </div>
           </Link>
 
           <div className='grid md:grid-cols-2 gap-4'>
             <Link
               href='/grimoire/events/2025/mercury-retrograde'
-              className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose/10 hover:bg-lunary-rose-900 transition-colors'
+              className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose-950 hover:bg-lunary-rose-900 transition-colors'
             >
               <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 mb-1'>
                 Mercury Retrograde 2025
@@ -78,7 +78,7 @@ export default function EventsIndexPage() {
 
             <Link
               href='/grimoire/events/2025/venus-retrograde'
-              className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose/10 hover:bg-lunary-rose-900 transition-colors'
+              className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose-950 hover:bg-lunary-rose-900 transition-colors'
             >
               <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 mb-1'>
                 Venus Retrograde 2025
@@ -90,7 +90,7 @@ export default function EventsIndexPage() {
 
             <Link
               href='/grimoire/events/2025/eclipses'
-              className='group p-4 rounded-lg border border-lunary-accent-700 bg-lunary-accent/10 hover:bg-lunary-accent-900 transition-colors'
+              className='group p-4 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 hover:bg-lunary-accent-900 transition-colors'
             >
               <h3 className='font-medium text-zinc-100 group-hover:text-lunary-accent-300 mb-1'>
                 2025 Eclipses
@@ -102,7 +102,7 @@ export default function EventsIndexPage() {
 
             <Link
               href='/grimoire/moon-rituals'
-              className='group p-4 rounded-lg border border-lunary-secondary-700 bg-lunary-secondary/10 hover:bg-lunary-secondary-900 transition-colors'
+              className='group p-4 rounded-lg border border-lunary-secondary-700 bg-lunary-secondary-950 hover:bg-lunary-secondary-900 transition-colors'
             >
               <h3 className='font-medium text-zinc-100 group-hover:text-lunary-secondary-300 mb-1'>
                 Moon Rituals
@@ -117,7 +117,7 @@ export default function EventsIndexPage() {
         <div className='mt-12 text-center'>
           <Link
             href='/welcome'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Get Personalized Event Notifications
             <ArrowRight className='h-5 w-5' />

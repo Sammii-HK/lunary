@@ -62,7 +62,7 @@ export default function TransitsIndexPage() {
 
           return (
             <div key={year} id={`year-${year}`} className='mb-12'>
-              <h2 className='text-2xl font-light mb-6 text-purple-300'>
+              <h2 className='text-2xl font-light mb-6 text-lunary-primary-300'>
                 {year} Transits
               </h2>
               <div className='grid md:grid-cols-2 gap-4'>
@@ -70,12 +70,12 @@ export default function TransitsIndexPage() {
                   <Link
                     key={transit.id}
                     href={`/grimoire/transits/${transit.id}`}
-                    className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                    className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
                   >
                     <div className='text-sm text-zinc-500 mb-1'>
                       {transit.dates}
                     </div>
-                    <h3 className='text-lg font-medium mb-2 group-hover:text-purple-300 transition-colors'>
+                    <h3 className='text-lg font-medium mb-2 group-hover:text-lunary-primary-300 transition-colors'>
                       {transit.title}
                     </h3>
                     <p className='text-sm text-zinc-400 line-clamp-2'>
@@ -85,7 +85,7 @@ export default function TransitsIndexPage() {
                       {transit.signs.map((sign) => (
                         <span
                           key={sign}
-                          className='text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-300'
+                          className='text-xs px-2 py-1 rounded bg-lunary-primary-900/20 text-lunary-primary-300'
                         >
                           {sign}
                         </span>
@@ -98,8 +98,8 @@ export default function TransitsIndexPage() {
           );
         })}
 
-        <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             Personal Transit Readings
           </h2>
           <p className='text-zinc-300 mb-4'>
@@ -108,7 +108,7 @@ export default function TransitsIndexPage() {
           </p>
           <Link
             href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Get Personal Transit Report
           </Link>

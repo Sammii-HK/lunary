@@ -310,11 +310,11 @@ export default function MoonPhasesGuidePage() {
 
       {/* Breadcrumbs */}
       <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-purple-400'>
+        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
         <span className='mx-2'>→</span>
-        <Link href='/grimoire/moon' className='hover:text-purple-400'>
+        <Link href='/grimoire/moon' className='hover:text-lunary-primary-400'>
           Moon
         </Link>
         <span className='mx-2'>→</span>
@@ -325,7 +325,7 @@ export default function MoonPhasesGuidePage() {
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
           Moon Phases: The Complete Guide
-          <span className='block text-2xl text-purple-400 mt-2'>
+          <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Master the Lunar Cycle
           </span>
         </h1>
@@ -338,13 +338,13 @@ export default function MoonPhasesGuidePage() {
         <div className='flex flex-wrap gap-4'>
           <Link
             href='/moon'
-            className='px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Today&apos;s Moon Phase
           </Link>
           <Link
             href='#eight-phases'
-            className='px-6 py-3 border border-zinc-700 hover:border-purple-500 text-zinc-300 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
           >
             Explore the Phases
           </Link>
@@ -358,47 +358,59 @@ export default function MoonPhasesGuidePage() {
         </h2>
         <ol className='space-y-2 text-zinc-400'>
           <li>
-            <a href='#understanding-moon' className='hover:text-purple-400'>
+            <a
+              href='#understanding-moon'
+              className='hover:text-lunary-primary-400'
+            >
               1. Understanding the Lunar Cycle
             </a>
           </li>
           <li>
-            <a href='#eight-phases' className='hover:text-purple-400'>
+            <a href='#eight-phases' className='hover:text-lunary-primary-400'>
               2. The 8 Moon Phases Explained
             </a>
           </li>
           <li>
-            <a href='#full-moon-names' className='hover:text-purple-400'>
+            <a
+              href='#full-moon-names'
+              className='hover:text-lunary-primary-400'
+            >
               3. Full Moon Names by Month
             </a>
           </li>
           <li>
-            <a href='#new-moon-ritual' className='hover:text-purple-400'>
+            <a
+              href='#new-moon-ritual'
+              className='hover:text-lunary-primary-400'
+            >
               4. New Moon Ritual Guide
             </a>
           </li>
           <li>
-            <a href='#full-moon-ritual' className='hover:text-purple-400'>
+            <a
+              href='#full-moon-ritual'
+              className='hover:text-lunary-primary-400'
+            >
               5. Full Moon Ritual Guide
             </a>
           </li>
           <li>
-            <a href='#manifestation' className='hover:text-purple-400'>
+            <a href='#manifestation' className='hover:text-lunary-primary-400'>
               6. Manifestation & the Moon
             </a>
           </li>
           <li>
-            <a href='#moon-signs' className='hover:text-purple-400'>
+            <a href='#moon-signs' className='hover:text-lunary-primary-400'>
               7. Moon Signs & Emotional Nature
             </a>
           </li>
           <li>
-            <a href='#special-moons' className='hover:text-purple-400'>
+            <a href='#special-moons' className='hover:text-lunary-primary-400'>
               8. Special Moons: Supermoons, Eclipses & Blue Moons
             </a>
           </li>
           <li>
-            <a href='#faq' className='hover:text-purple-400'>
+            <a href='#faq' className='hover:text-lunary-primary-400'>
               9. Frequently Asked Questions
             </a>
           </li>
@@ -425,8 +437,8 @@ export default function MoonPhasesGuidePage() {
           Moon, we see the fully lit Full Moon.
         </p>
 
-        <div className='bg-purple-900/20 border border-purple-500/30 rounded-lg p-6'>
-          <h3 className='text-lg font-medium text-purple-300 mb-3'>
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
             The Two Halves of the Lunar Cycle
           </h3>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -482,7 +494,7 @@ export default function MoonPhasesGuidePage() {
                 </div>
               </div>
 
-              <p className='text-purple-300 mb-4'>{phase.energy}</p>
+              <p className='text-lunary-primary-300 mb-4'>{phase.energy}</p>
 
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div>
@@ -528,10 +540,10 @@ export default function MoonPhasesGuidePage() {
             <Link
               key={moon.month}
               href={`/grimoire/moon/full-moon-names#${moon.month.toLowerCase()}`}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 hover:border-purple-500 transition-colors'
+              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 hover:border-lunary-primary transition-colors'
             >
               <h4 className='text-zinc-100 font-medium'>{moon.name}</h4>
-              <p className='text-sm text-purple-400'>{moon.month}</p>
+              <p className='text-sm text-lunary-primary-400'>{moon.month}</p>
               <p className='text-xs text-zinc-500 mt-1'>{moon.meaning}</p>
             </Link>
           ))}
@@ -556,7 +568,7 @@ export default function MoonPhasesGuidePage() {
           </h3>
           <ol className='space-y-4'>
             <li className='flex gap-4'>
-              <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+              <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
                 1
               </span>
               <div>
@@ -570,7 +582,7 @@ export default function MoonPhasesGuidePage() {
               </div>
             </li>
             <li className='flex gap-4'>
-              <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+              <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
                 2
               </span>
               <div>
@@ -582,7 +594,7 @@ export default function MoonPhasesGuidePage() {
               </div>
             </li>
             <li className='flex gap-4'>
-              <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+              <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
                 3
               </span>
               <div>
@@ -594,7 +606,7 @@ export default function MoonPhasesGuidePage() {
               </div>
             </li>
             <li className='flex gap-4'>
-              <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+              <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
                 4
               </span>
               <div>
@@ -607,7 +619,7 @@ export default function MoonPhasesGuidePage() {
               </div>
             </li>
             <li className='flex gap-4'>
-              <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+              <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
                 5
               </span>
               <div>
@@ -770,7 +782,7 @@ export default function MoonPhasesGuidePage() {
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Ready to Work with the Moon?
         </h2>
@@ -781,13 +793,13 @@ export default function MoonPhasesGuidePage() {
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
             href='/moon'
-            className='px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Today&apos;s Moon Phase
           </Link>
           <Link
             href='/grimoire/moon'
-            className='px-8 py-3 border border-purple-500 text-purple-300 hover:bg-purple-500/10 rounded-lg font-medium transition-colors'
+            className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
           >
             Explore Moon Content
           </Link>

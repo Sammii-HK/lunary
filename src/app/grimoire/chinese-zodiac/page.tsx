@@ -77,13 +77,13 @@ export default function ChineseZodiacIndexPage() {
           </p>
 
           {currentYearData && (
-            <div className='mb-12 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+            <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
               <div className='flex items-center gap-4 mb-4'>
                 <span className='text-5xl'>
                   {CHINESE_ZODIAC_DATA[currentYearData.animal].emoji}
                 </span>
                 <div>
-                  <h2 className='text-2xl font-medium text-purple-300'>
+                  <h2 className='text-2xl font-medium text-lunary-primary-300'>
                     {currentYear}: Year of the{' '}
                     {CHINESE_ZODIAC_DATA[currentYearData.animal].displayName}
                   </h2>
@@ -95,7 +95,7 @@ export default function ChineseZodiacIndexPage() {
               </div>
               <Link
                 href={`/grimoire/chinese-zodiac/${currentYearData.animal}`}
-                className='inline-flex px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 text-sm transition-colors'
+                className='inline-flex px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 text-sm transition-colors'
               >
                 Learn about the{' '}
                 {CHINESE_ZODIAC_DATA[currentYearData.animal].displayName}
@@ -113,13 +113,13 @@ export default function ChineseZodiacIndexPage() {
                 <Link
                   key={animal}
                   href={`/grimoire/chinese-zodiac/${animal}`}
-                  className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 hover:bg-zinc-900 transition-all group'
+                  className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all group'
                 >
                   <div className='flex items-center gap-3 mb-3'>
                     <span className='text-3xl'>{data.emoji}</span>
                     <span className='text-xs text-zinc-500'>#{index + 1}</span>
                   </div>
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                     {data.displayName}
                   </h3>
                   <p className='text-sm text-zinc-500'>

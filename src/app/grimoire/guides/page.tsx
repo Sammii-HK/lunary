@@ -115,12 +115,12 @@ export default function GuidesIndexPage() {
             <Link
               key={guide.slug}
               href={`/grimoire/guides/${guide.slug}`}
-              className='group block p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 hover:border-purple-500/50 transition-all duration-300'
+              className='group block p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 hover:border-lunary-primary-600 transition-all duration-300'
             >
               <div className='flex items-start gap-4'>
                 <span className='text-4xl'>{guide.icon}</span>
                 <div className='flex-1'>
-                  <h2 className='text-xl font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-2'>
+                  <h2 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-2'>
                     {guide.title}
                   </h2>
                   <p className='text-zinc-400 text-sm mb-4'>
@@ -140,7 +140,7 @@ export default function GuidesIndexPage() {
                     <span className='text-xs text-zinc-500'>
                       {guide.wordCount} words
                     </span>
-                    <span className='text-purple-400 text-sm group-hover:translate-x-1 transition-transform'>
+                    <span className='text-lunary-primary-400 text-sm group-hover:translate-x-1 transition-transform'>
                       Read guide →
                     </span>
                   </div>
@@ -193,7 +193,7 @@ export default function GuidesIndexPage() {
           </p>
           <Link
             href='/birth-chart'
-            className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Calculate Your Birth Chart Free
           </Link>

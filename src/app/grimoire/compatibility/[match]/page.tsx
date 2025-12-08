@@ -222,7 +222,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
             <Star className='h-6 w-6 text-lunary-success' />
             Relationship Strengths
           </h2>
-          <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success/10'>
+          <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success-950'>
             <ul className='space-y-3'>
               {content.strengths.map((strength, i) => (
                 <li key={i} className='flex items-start gap-3 text-zinc-300'>
@@ -239,7 +239,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
             Potential Challenges
           </h2>
-          <div className='p-6 rounded-lg border border-lunary-accent-700 bg-lunary-accent/10'>
+          <div className='p-6 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950'>
             <ul className='space-y-3'>
               {content.challenges.map((challenge, i) => (
                 <li key={i} className='flex items-start gap-3 text-zinc-300'>
@@ -256,7 +256,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
             Advice for This Pairing
           </h2>
-          <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+          <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
             <p className='text-zinc-300 leading-relaxed'>{content.advice}</p>
           </div>
         </section>
@@ -277,7 +277,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
                 <Link
                   key={signKey}
                   href={`/grimoire/compatibility/${slug}`}
-                  className='px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-purple-300 text-sm transition-colors'
+                  className='px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-lunary-primary-300 text-sm transition-colors'
                 >
                   {content.sign1} & {sign.name}
                 </Link>
@@ -288,7 +288,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
 
         {/* CTA */}
         <section className='text-center'>
-          <div className='p-8 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+          <div className='p-8 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
             <h2 className='text-xl font-medium text-zinc-100 mb-2'>
               Check Your Full Compatibility
             </h2>
@@ -298,7 +298,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
             </p>
             <Link
               href='/welcome'
-              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
             >
               Generate Synastry Chart
               <ArrowRight className='h-5 w-5' />

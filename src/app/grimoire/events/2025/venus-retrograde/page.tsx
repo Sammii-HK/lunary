@@ -93,7 +93,7 @@ Venus Retrograde asks us to:
           <h2 className='text-2xl font-medium text-zinc-100'>
             Venus Retrograde 2025 Timeline
           </h2>
-          <div className='p-6 rounded-lg border border-lunary-rose-700 bg-lunary-rose/10'>
+          <div className='p-6 rounded-lg border border-lunary-rose-700 bg-lunary-rose-950'>
             <div className='flex items-start gap-4'>
               <div className='p-2 rounded-lg bg-lunary-rose-900'>
                 <Heart className='h-6 w-6 text-lunary-rose' />
@@ -134,7 +134,7 @@ Venus Retrograde asks us to:
             Venus Retrograde Guidance
           </h2>
           <div className='grid md:grid-cols-2 gap-4'>
-            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success/10'>
+            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success-950'>
               <h3 className='text-lg font-medium text-lunary-success mb-4'>
                 Embrace During Venus Rx
               </h3>
@@ -147,7 +147,7 @@ Venus Retrograde asks us to:
                 <li>• Heal past heartaches</li>
               </ul>
             </div>
-            <div className='p-6 rounded-lg border border-lunary-error-700 bg-lunary-error/10'>
+            <div className='p-6 rounded-lg border border-lunary-error-700 bg-lunary-error-950'>
               <h3 className='text-lg font-medium text-lunary-error mb-4'>
                 Avoid If Possible
               </h3>
@@ -167,12 +167,12 @@ Venus Retrograde asks us to:
           <h2 className='text-2xl font-medium text-zinc-100'>
             Venus Retrograde Rituals
           </h2>
-          <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+          <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
             <div className='flex items-start gap-4'>
-              <Sparkles className='h-6 w-6 text-purple-400 flex-shrink-0' />
+              <Sparkles className='h-6 w-6 text-lunary-primary-400 flex-shrink-0' />
               <div className='space-y-4'>
                 <div>
-                  <h3 className='font-medium text-purple-300'>
+                  <h3 className='font-medium text-lunary-primary-300'>
                     Self-Love Bath Ritual
                   </h3>
                   <p className='text-zinc-300 text-sm'>
@@ -182,7 +182,7 @@ Venus Retrograde asks us to:
                   </p>
                 </div>
                 <div>
-                  <h3 className='font-medium text-purple-300'>
+                  <h3 className='font-medium text-lunary-primary-300'>
                     Rose Quartz Heart Healing
                   </h3>
                   <p className='text-zinc-300 text-sm'>
@@ -192,7 +192,7 @@ Venus Retrograde asks us to:
                   </p>
                 </div>
                 <div>
-                  <h3 className='font-medium text-purple-300'>
+                  <h3 className='font-medium text-lunary-primary-300'>
                     Venus Altar Creation
                   </h3>
                   <p className='text-zinc-300 text-sm'>

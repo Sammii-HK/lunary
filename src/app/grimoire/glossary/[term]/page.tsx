@@ -107,7 +107,7 @@ export default async function GlossaryTermPage({
 
         <header className='mb-8'>
           <div className='flex items-center gap-3 mb-4'>
-            <span className='px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm'>
+            <span className='px-3 py-1 rounded-full bg-lunary-primary-900/20 text-lunary-primary-300 text-sm'>
               {categoryLabels[term.category] || term.category}
             </span>
           </div>
@@ -142,9 +142,9 @@ export default async function GlossaryTermPage({
                 <Link
                   key={related.slug}
                   href={`/grimoire/glossary/${related.slug}`}
-                  className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-purple-500/50 hover:bg-zinc-900/50 transition-all group'
+                  className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 hover:bg-zinc-900/50 transition-all group'
                 >
-                  <h3 className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-1'>
+                  <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
                     {related.term}
                   </h3>
                   <p className='text-sm text-zinc-400 line-clamp-2'>
@@ -175,8 +175,8 @@ export default async function GlossaryTermPage({
           </section>
         )}
 
-        <section className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <section className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             See {term.term} in Your Chart
           </h2>
           <p className='text-zinc-300 mb-4'>
@@ -185,7 +185,7 @@ export default async function GlossaryTermPage({
           </p>
           <Link
             href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Generate Your Birth Chart
           </Link>
@@ -194,7 +194,7 @@ export default async function GlossaryTermPage({
         <div className='mt-8 text-center'>
           <Link
             href='/grimoire/glossary'
-            className='text-purple-400 hover:text-purple-300 transition-colors'
+            className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
           >
             ← Back to Full Glossary
           </Link>

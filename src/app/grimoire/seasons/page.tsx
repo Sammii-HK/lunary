@@ -75,7 +75,7 @@ export default function SeasonsIndexPage() {
                     >
                       <div className='flex items-center gap-3'>
                         <span className='text-xl'>{s.symbol}</span>
-                        <span className='font-medium group-hover:text-purple-300 transition-colors'>
+                        <span className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
                           {s.displayName} Season
                         </span>
                       </div>
@@ -90,8 +90,8 @@ export default function SeasonsIndexPage() {
           ))}
         </div>
 
-        <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             Personalized Season Forecasts
           </h2>
           <p className='text-zinc-300 mb-4'>
@@ -101,7 +101,7 @@ export default function SeasonsIndexPage() {
           </p>
           <Link
             href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Get Your Seasonal Forecast
           </Link>

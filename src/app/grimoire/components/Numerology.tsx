@@ -150,9 +150,9 @@ const Numerology = () => {
             <Link
               key={number.number}
               href={`/grimoire/life-path/${number.number}`}
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+              <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                 {number.number} - {number.meaning}
               </h3>
               <p className='text-sm text-zinc-300 mb-2'>{number.traits}</p>
@@ -169,9 +169,9 @@ const Numerology = () => {
             <Link
               key={master.number}
               href={`/grimoire/life-path/${master.number}`}
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+              <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                 {master.number} - {master.meaning}
               </h3>
               <p className='text-sm text-zinc-300 leading-relaxed'>

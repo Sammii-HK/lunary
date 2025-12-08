@@ -218,7 +218,7 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
         {prevDay ? (
           <Link
             href={`/grimoire/birthday/${prevDay}`}
-            className='text-purple-400 hover:text-purple-300'
+            className='text-lunary-primary-400 hover:text-lunary-primary-300'
           >
             ← {birthday.monthName} {birthday.day - 1}
           </Link>
@@ -228,7 +228,7 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
         {nextDay && (
           <Link
             href={`/grimoire/birthday/${nextDay}`}
-            className='text-purple-400 hover:text-purple-300'
+            className='text-lunary-primary-400 hover:text-lunary-primary-300'
           >
             {birthday.monthName} {birthday.day + 1} →
           </Link>

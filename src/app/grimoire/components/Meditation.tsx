@@ -80,9 +80,9 @@ const Meditation = () => {
               <Link
                 key={technique.name}
                 href={`/grimoire/meditation/${techniqueSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-purple-300 mb-2 group-hover:text-purple-200 transition-colors'>
+                <h3 className='text-lg font-medium text-lunary-primary-300 mb-2 group-hover:text-lunary-primary-200 transition-colors'>
                   {technique.name}
                 </h3>
                 <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -103,7 +103,7 @@ const Meditation = () => {
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
             <a
               href='/grimoire/breathwork'
-              className='hover:text-purple-400 transition-colors'
+              className='hover:text-lunary-primary-400 transition-colors'
             >
               Breathwork Techniques
             </a>
@@ -115,7 +115,7 @@ const Meditation = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Deep Belly Breathing
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -130,7 +130,7 @@ const Meditation = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Box Breathing
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -145,7 +145,7 @@ const Meditation = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Pranayama (Alternate Nostril)
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -176,7 +176,7 @@ const Meditation = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Tree Root Visualization
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -188,7 +188,7 @@ const Meditation = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Physical Grounding
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -215,7 +215,7 @@ const Meditation = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How to Center
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -246,7 +246,7 @@ const Meditation = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What to Journal
             </h3>
             <ul className='list-disc list-inside space-y-1 text-sm text-zinc-300 ml-4'>
@@ -261,7 +261,7 @@ const Meditation = () => {
             </ul>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Journaling Prompts
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
