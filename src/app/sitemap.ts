@@ -22,6 +22,15 @@ import {
   angelNumbers,
   lifePathNumbers,
 } from '@/constants/grimoire/numerology-data';
+import {
+  mirrorHourKeys,
+  doubleHourKeys,
+} from '@/constants/grimoire/clock-numbers-data';
+import {
+  karmicDebtKeys,
+  expressionKeys,
+  soulUrgeKeys,
+} from '@/constants/grimoire/numerology-extended-data';
 import { ASTROLOGY_GLOSSARY } from '@/constants/grimoire/glossary';
 import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
@@ -768,6 +777,46 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  // Add mirror hour pages
+  const mirrorHourRoutes = mirrorHourKeys.map((time) => ({
+    url: `${baseUrl}/grimoire/mirror-hours/${time.replace(':', '-')}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // Add double hour pages
+  const doubleHourRoutes = doubleHourKeys.map((time) => ({
+    url: `${baseUrl}/grimoire/double-hours/${time.replace(':', '-')}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // Add expression number pages
+  const expressionRoutes = expressionKeys.map((num) => ({
+    url: `${baseUrl}/grimoire/numerology/expression/${num}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // Add soul urge number pages
+  const soulUrgeRoutes = soulUrgeKeys.map((num) => ({
+    url: `${baseUrl}/grimoire/numerology/soul-urge/${num}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // Add karmic debt number pages
+  const karmicDebtRoutes = karmicDebtKeys.map((num) => ({
+    url: `${baseUrl}/grimoire/numerology/karmic-debt/${num}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
   return [
     ...routes,
     ...blogRoutes,
@@ -815,5 +864,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...retrogradeRoutes,
     ...eclipseRoutes,
     ...lunarNodeRoutes,
+    ...mirrorHourRoutes,
+    ...doubleHourRoutes,
+    ...expressionRoutes,
+    ...soulUrgeRoutes,
+    ...karmicDebtRoutes,
   ];
 }
