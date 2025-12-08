@@ -41,25 +41,25 @@ const placeholderReport: CosmicReportData = {
 function SectionCard({ section }: { section: CosmicReportSection }) {
   return (
     <div className='space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4'>
-      <p className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+      <p className='text-xs uppercase tracking-[0.3em] text-lunary-accent-200'>
         {section.key}
       </p>
       <h4 className='text-xl font-semibold text-white'>{section.title}</h4>
       <p className='text-sm text-zinc-300'>{section.summary}</p>
-      <ul className='space-y-2 text-sm text-purple-100'>
+      <ul className='space-y-2 text-sm text-lunary-accent-100'>
         {section.highlights.map((item) => (
           <li key={item} className='flex items-start gap-2'>
-            <span className='text-purple-300'>✷</span>
+            <span className='text-lunary-accent-300'>✷</span>
             <span>{item}</span>
           </li>
         ))}
       </ul>
       {section.actionSteps && (
-        <div className='rounded-xl border border-purple-500/20 bg-purple-500/10 p-3 text-sm text-purple-100'>
-          <p className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+        <div className='rounded-xl border border-lunary-primary-800 bg-lunary-primary-950 p-3 text-sm text-lunary-accent-100'>
+          <p className='text-xs uppercase tracking-[0.3em] text-lunary-accent-200'>
             Rituals
           </p>
-          <ul className='mt-2 list-disc space-y-1 pl-4 text-purple-50'>
+          <ul className='mt-2 list-disc space-y-1 pl-4 text-lunary-accent-50'>
             {section.actionSteps.map((action) => (
               <li key={action}>{action}</li>
             ))}
@@ -82,7 +82,7 @@ export function CosmicReportPreview({
     <section className='space-y-6 rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-950/80 to-black/80 p-6'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-accent-200'>
             Report Preview
           </p>
           <h3 className='text-2xl font-semibold text-white'>{report.title}</h3>
@@ -99,7 +99,7 @@ export function CosmicReportPreview({
             <button
               onClick={onShare}
               disabled={isLoading}
-              className='inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-purple-400 disabled:opacity-50'
+              className='inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-lunary-accent disabled:opacity-50'
             >
               <Share2 className='h-4 w-4' />
               {isLoading ? 'Sharing…' : 'Generate Share Link'}
