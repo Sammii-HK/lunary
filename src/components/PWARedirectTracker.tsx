@@ -182,8 +182,8 @@ export function PWARedirectTracker() {
                 log.includes('⚠️') || log.includes('❌')
                   ? 'text-red-400'
                   : log.includes('URL')
-                    ? 'text-yellow-400'
-                    : 'text-green-400'
+                    ? 'text-lunary-accent'
+                    : 'text-lunary-success'
               }
             >
               {log}

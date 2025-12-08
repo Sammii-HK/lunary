@@ -59,12 +59,12 @@ export function PWAInstallGuard() {
 
   if (!isReady) {
     return (
-      <div className='fixed top-4 left-4 right-4 bg-yellow-900/20 border border-yellow-700 rounded-lg p-3 text-xs z-[100]'>
-        <div className='font-bold text-yellow-400 mb-1'>
+      <div className='fixed top-4 left-4 right-4 bg-lunary-accent-900/20 border border-lunary-accent-700 rounded-lg p-3 text-xs z-[100]'>
+        <div className='font-bold text-lunary-accent mb-1'>
           PWA Installation Status
         </div>
-        <div className='text-yellow-200'>{status}</div>
-        <div className='text-yellow-300/80 mt-2 text-[10px]'>
+        <div className='text-lunary-accent-200'>{status}</div>
+        <div className='text-lunary-accent-300/80 mt-2 text-[10px]'>
           ⚠️ Wait for this to show "Ready" before adding to home screen!
         </div>
       </div>
@@ -72,9 +72,9 @@ export function PWAInstallGuard() {
   }
 
   return (
-    <div className='fixed top-4 left-4 right-4 bg-green-900/20 border border-green-700 rounded-lg p-3 text-xs z-[100]'>
-      <div className='font-bold text-green-400 mb-1'>✅ PWA Ready!</div>
-      <div className='text-green-200'>
+    <div className='fixed top-4 left-4 right-4 bg-lunary-success-900/20 border border-lunary-success-700 rounded-lg p-3 text-xs z-[100]'>
+      <div className='font-bold text-lunary-success mb-1'>✅ PWA Ready!</div>
+      <div className='text-lunary-success-200'>
         Service worker is active and controlling. Safe to add to home screen
         now.
       </div>

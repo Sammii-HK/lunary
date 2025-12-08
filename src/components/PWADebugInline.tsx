@@ -135,7 +135,7 @@ export function PWADebugInline() {
   return (
     <div className='fixed top-4 right-4 bg-zinc-900/95 border border-zinc-700 rounded-lg p-4 max-w-md z-[9999] text-xs shadow-xl'>
       <div className='font-bold mb-2'>PWA Debug</div>
-      <div className='mb-2 text-green-400'>{status}</div>
+      <div className='mb-2 text-lunary-success'>{status}</div>
       <div className='space-y-1 max-h-64 overflow-auto font-mono'>
         {details.map((detail, i) => (
           <div
@@ -144,7 +144,7 @@ export function PWADebugInline() {
               detail.includes('❌')
                 ? 'text-red-400'
                 : detail.includes('⚠️')
-                  ? 'text-yellow-400'
+                  ? 'text-lunary-accent'
                   : 'text-zinc-300'
             }
           >
