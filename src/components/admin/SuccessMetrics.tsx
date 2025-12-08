@@ -211,14 +211,14 @@ function MetricCard({
   subtitle?: string;
 }) {
   const trendColors = {
-    up: 'text-emerald-400',
-    down: 'text-rose-400',
+    up: 'text-lunary-success',
+    down: 'text-lunary-error',
     stable: 'text-zinc-400',
   };
 
   const trendBgColors = {
-    up: 'bg-emerald-900/20 border-emerald-800/50',
-    down: 'bg-rose-900/20 border-rose-800/50',
+    up: 'bg-lunary-success-900/20 border-lunary-success-800',
+    down: 'bg-lunary-error-900/20 border-lunary-error-800',
     stable: 'bg-zinc-900/40 border-zinc-800',
   };
 
@@ -259,7 +259,7 @@ function MetricCard({
             <div
               className={cn(
                 'mt-1 flex items-center gap-1 text-xs',
-                isInTargetRange ? 'text-emerald-400' : 'text-amber-400',
+                isInTargetRange ? 'text-lunary-success' : 'text-lunary-accent',
               )}
             >
               <Target className='h-3 w-3' />
@@ -274,7 +274,7 @@ function MetricCard({
             <span>Target Range</span>
             <span
               className={cn(
-                isInTargetRange ? 'text-emerald-400' : 'text-amber-400',
+                isInTargetRange ? 'text-lunary-success' : 'text-lunary-accent',
               )}
             >
               {isInTargetRange ? '✓ In Range' : '⚠ Outside Range'}

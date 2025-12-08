@@ -20,9 +20,9 @@ export function MetricsCard({
   const hasChange = typeof change === 'number' && !Number.isNaN(change);
   const trendColor =
     trend === 'up'
-      ? 'text-emerald-400'
+      ? 'text-lunary-success'
       : trend === 'down'
-        ? 'text-rose-400'
+        ? 'text-lunary-error'
         : 'text-zinc-400';
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
 

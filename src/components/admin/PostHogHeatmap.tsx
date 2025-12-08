@@ -80,7 +80,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
 
   if (error) {
     return (
-      <div className='rounded-2xl border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200'>
+      <div className='rounded-2xl border border-lunary-error-800 bg-lunary-error-950 p-4 text-sm text-lunary-error-200'>
         {error}
       </div>
     );
@@ -125,11 +125,11 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
           <div className='space-y-2 text-xs text-zinc-400'>
             <div className='flex items-center justify-between'>
               <span>Heatmap Tracking:</span>
-              <span className='text-emerald-400'>Active</span>
+              <span className='text-lunary-success'>Active</span>
             </div>
             <div className='flex items-center justify-between'>
               <span>Session Recordings:</span>
-              <span className='text-emerald-400'>Enabled</span>
+              <span className='text-lunary-success'>Enabled</span>
             </div>
             {pagePath && (
               <div className='flex items-center justify-between'>
