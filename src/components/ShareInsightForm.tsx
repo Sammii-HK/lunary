@@ -176,12 +176,12 @@ export function ShareInsightForm({
         <div className='flex items-center justify-between text-xs text-lunary-accent-100/70'>
           <span
             className={cn(
-              isTooShort || isTooLong ? 'text-rose-300' : undefined,
+              isTooShort || isTooLong ? 'text-lunary-error-300' : undefined,
             )}
           >
             {helperText}
           </span>
-          <span className={cn(isTooLong ? 'text-rose-300' : undefined)}>
+          <span className={cn(isTooLong ? 'text-lunary-error-300' : undefined)}>
             {insightText.length}/{MAX_LENGTH}
           </span>
         </div>
@@ -237,8 +237,8 @@ export function ShareInsightForm({
             className={cn(
               'mt-2 rounded-xl px-3 py-2',
               status === 'error'
-                ? 'bg-rose-500/10 text-rose-200'
-                : 'bg-emerald-500/10 text-emerald-200',
+                ? 'bg-lunary-error-950 text-lunary-error-200'
+                : 'bg-lunary-success-950 text-lunary-success-200',
             )}
           >
             {message}

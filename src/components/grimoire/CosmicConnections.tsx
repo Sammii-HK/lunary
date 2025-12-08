@@ -41,11 +41,15 @@ const TYPE_ICONS: Record<ConnectionItem['type'], React.ReactNode> = {
 
 const TYPE_COLORS: Record<ConnectionItem['type'], string> = {
   zodiac: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-  planet: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  tarot: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-  crystal: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  element: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  house: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+  planet:
+    'bg-lunary-accent-900 text-lunary-accent-300 border-lunary-accent-700',
+  tarot: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+  crystal:
+    'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
+  element:
+    'bg-lunary-success-900 text-lunary-success-300 border-lunary-success-700',
+  house:
+    'bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700',
   other: 'bg-zinc-500/20 text-zinc-300 border-zinc-500/30',
 };
 
