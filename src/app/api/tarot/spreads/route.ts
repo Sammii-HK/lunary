@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { TAROT_SPREADS } from '@/constants/tarotSpreads';
 
-export const runtime = 'edge';
 export const revalidate = 86400; // Cache static spreads data for 24 hours
 
 export async function GET() {

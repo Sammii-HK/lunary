@@ -72,10 +72,24 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       `;
 
       if (result.rows.length === 0) {
-        return NextResponse.json(
-          { error: 'Subscriber not found' },
-          { status: 404 },
-        );
+        // User not in newsletter table - insert as unsubscribed
+        // This handles the case where someone clicks unsubscribe from a transactional email
+        // before ever subscribing to marketing emails
+        const insertResult = await sql`
+          INSERT INTO newsletter_subscribers (email, is_active, unsubscribed_at, source)
+          VALUES (${decodedEmail}, false, NOW(), 'unsubscribe_link')
+          ON CONFLICT (email) DO UPDATE SET
+            is_active = false,
+            unsubscribed_at = NOW(),
+            updated_at = NOW()
+          RETURNING id, email, is_active, is_verified, preferences
+        `;
+
+        return NextResponse.json({
+          success: true,
+          subscriber: insertResult.rows[0],
+          message: 'You have been unsubscribed from marketing emails.',
+        });
       }
 
       return NextResponse.json({

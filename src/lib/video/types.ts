@@ -39,4 +39,10 @@ export const BRAND_COLORS = {
   zinc900: '#18181b',
   zinc800: '#27272a',
   white: '#ffffff',
+  lunaryViolet: '#7358FF',
+  lunaryRose: '#FF7B9C',
+  lunaryBlue: '#4F5BFF',
+  lunaryMidnight: '#0A0A1A',
+  lunaryOrchid: '#E066FF',
+  lunaryLavender: '#C77DFF',
 } as const;

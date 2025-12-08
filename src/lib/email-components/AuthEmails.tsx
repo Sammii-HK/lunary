@@ -45,110 +45,105 @@ export function VerificationEmail({
           fontFamily:
             "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           lineHeight: '1.6',
-          color: '#333',
+          color: '#f1f1ff',
           maxWidth: '600px',
           margin: '0 auto',
           padding: '20px',
-          backgroundColor: '#f8f9fa',
+          backgroundColor: '#0b0b12',
         }}
       >
         <Container
           style={{
-            background: '#ffffff',
+            background: '#101020',
             padding: '40px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            borderRadius: '16px',
+            boxShadow: '0 20px 45px rgba(106, 90, 205, 0.25)',
+            border: '1px solid rgba(147, 112, 219, 0.2)',
+            color: '#f1f1ff',
           }}
         >
           <Section
-            style={{ textAlign: 'center' as const, marginBottom: '30px' }}
+            style={{ textAlign: 'center' as const, marginBottom: '32px' }}
           >
             <Img
               src={`${baseUrl}/logo.png`}
               alt='Lunary'
-              width='120'
-              style={{ margin: '0 auto 20px', display: 'block' }}
+              width='80'
+              height='80'
+              style={{ margin: '0 auto 16px', display: 'block' }}
             />
             <Heading
               as='h1'
-              style={{ color: '#6366f1', fontSize: '28px', margin: 0 }}
+              style={{ color: '#a78bfa', fontSize: '28px', margin: 0 }}
             >
               Welcome to Lunary
             </Heading>
             <Text
-              style={{ color: '#6b7280', fontSize: '16px', margin: '8px 0 0' }}
+              style={{ color: '#d1c4ff', fontSize: '16px', margin: '12px 0 0' }}
             >
               Your Cosmic Journey Begins
             </Text>
           </Section>
 
-          <Section style={{ margin: '30px 0' }}>
-            <Text>Hi there,</Text>
-            <Text>
-              Thank you for joining Lunary! To complete your registration and
-              start your cosmic journey, please verify your email address.
-            </Text>
+          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
+            Thank you for joining Lunary! To complete your registration and
+            start your cosmic journey, please verify your email address.
+          </Text>
 
-            <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
-              <Link
-                href={verificationUrl}
-                style={{
-                  display: 'inline-block',
-                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                  color: '#ffffff',
-                  padding: '16px 32px',
-                  textDecoration: 'none',
-                  borderRadius: '8px',
-                  fontWeight: '600',
-                  fontSize: '16px',
-                }}
-              >
-                ✨ Verify Your Email
-              </Link>
-            </Section>
-
-            <Text>This link will expire in 24 hours for security reasons.</Text>
-
-            <Text>
-              <strong>
-                If the button doesn&apos;t work, copy and paste this link into
-                your browser:
-              </strong>
-            </Text>
-            <Section
+          <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
+            <Link
+              href={verificationUrl}
               style={{
-                background: '#f3f4f6',
-                padding: '16px',
-                borderRadius: '6px',
-                margin: '20px 0',
-                wordBreak: 'break-all' as const,
-                fontSize: '14px',
+                display: 'inline-block',
+                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                color: '#ffffff',
+                padding: '16px 32px',
+                textDecoration: 'none',
+                borderRadius: '999px',
+                fontWeight: '600',
+                fontSize: '16px',
               }}
             >
-              <Text style={{ margin: 0 }}>{verificationUrl}</Text>
-            </Section>
-
-            <Text>Once verified, you&apos;ll have access to:</Text>
-            <Text style={{ margin: '15px 0' }}>
-              🌙 Personalized moon phase guidance
-              <br />
-              ✨ Daily tarot insights
-              <br />
-              🔮 Astrological horoscopes
-              <br />
-              📚 Digital grimoire and spells
-              <br />
-              ☁️ Cross-device sync
-            </Text>
+              Verify Your Email
+            </Link>
           </Section>
+
+          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
+            This link will expire in 24 hours for security reasons.
+          </Text>
+
+          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
+            If clicking the button doesn&apos;t work, copy and paste this URL
+            into your browser:
+          </Text>
+          <Section
+            style={{
+              background: 'rgba(99, 102, 241, 0.1)',
+              padding: '16px',
+              borderRadius: '12px',
+              margin: '20px 0',
+              wordBreak: 'break-all' as const,
+              fontSize: '14px',
+              border: '1px dashed rgba(167, 139, 250, 0.35)',
+              color: '#e1d9ff',
+            }}
+          >
+            <Text style={{ margin: 0 }}>{verificationUrl}</Text>
+          </Section>
+
+          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
+            Once verified, you&apos;ll have access to personalized moon phase
+            guidance, daily tarot insights, astrological horoscopes, and your
+            digital grimoire synced across all devices.
+          </Text>
 
           <Section
             style={{
               textAlign: 'center' as const,
-              marginTop: '40px',
-              color: '#6b7280',
-              fontSize: '14px',
-              borderTop: '1px solid #e5e7eb',
+              marginTop: '32px',
+              fontSize: '13px',
+              color: '#9ca3af',
+              borderTop: '1px solid rgba(147, 112, 219, 0.2)',
               paddingTop: '20px',
             }}
           >
@@ -156,35 +151,27 @@ export function VerificationEmail({
               If you didn&apos;t create an account with Lunary, you can safely
               ignore this email.
             </Text>
-            <Text>
+            <Text style={{ margin: '12px 0' }}>
               Questions? Reply to this email or visit our support page.
             </Text>
-            <Section
-              style={{
-                marginTop: '20px',
-                paddingTop: '20px',
-                borderTop: '1px solid #e5e7eb',
-              }}
-            >
-              <Text style={{ margin: 0 }}>
-                <Link
-                  href={unsubscribeUrl}
-                  style={{ color: '#6b7280', textDecoration: 'underline' }}
-                >
-                  Unsubscribe
-                </Link>
-                {' | '}
-                <Link
-                  href={`${baseUrl}/profile`}
-                  style={{ color: '#6b7280', textDecoration: 'underline' }}
-                >
-                  Manage Preferences
-                </Link>
-              </Text>
-            </Section>
+            <Text style={{ margin: '12px 0' }}>
+              <Link
+                href={unsubscribeUrl}
+                style={{ color: '#9ca3af', textDecoration: 'underline' }}
+              >
+                Unsubscribe
+              </Link>
+              {' | '}
+              <Link
+                href={`${baseUrl}/profile`}
+                style={{ color: '#9ca3af', textDecoration: 'underline' }}
+              >
+                Manage Preferences
+              </Link>
+            </Text>
             <Text style={{ marginTop: '15px' }}>
-              © {new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙
-              for your cosmic journey.
+              © {new Date().getFullYear()} Lunar Computing, Inc. Guided by the
+              stars, powered by magic.
             </Text>
           </Section>
         </Container>
@@ -212,7 +199,7 @@ export function PasswordResetEmail({
           fontFamily:
             "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           lineHeight: '1.6',
-          color: '#333',
+          color: '#f1f1ff',
           maxWidth: '600px',
           margin: '0 auto',
           padding: '20px',
@@ -232,7 +219,13 @@ export function PasswordResetEmail({
           <Section
             style={{ textAlign: 'center' as const, marginBottom: '32px' }}
           >
-            <Text style={{ fontSize: '48px', marginBottom: '12px' }}>🌙</Text>
+            <Img
+              src={`${baseUrl}/logo.png`}
+              alt='Lunary'
+              width='80'
+              height='80'
+              style={{ margin: '0 auto 16px', display: 'block' }}
+            />
             <Heading
               as='h1'
               style={{ margin: 0, fontSize: '28px', color: '#a78bfa' }}

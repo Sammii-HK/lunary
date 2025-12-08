@@ -309,6 +309,9 @@ export default function ProfilePage() {
 
       setIsEditing(false);
 
+      // Refresh user data to update UI with saved changes
+      await refetchUser();
+
       if (birthday) {
         conversionTracking.birthdayEntered(authState.user?.id);
       }
@@ -322,9 +325,27 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     try {
+      // Clear storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Clear cookies
+      document.cookie.split(';').forEach((c) => {
+        const name = c.split('=')[0].trim();
+        if (name) {
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        }
+      });
+
+      // Sign out from server
       await betterAuthClient.signOut();
+
+      // Hard reload to update UI
+      window.location.href = '/';
     } catch (error) {
       console.error('Sign out failed:', error);
+      // Still reload even if error
+      window.location.href = '/';
     }
   };
 
@@ -876,6 +897,89 @@ export default function ProfilePage() {
                 // The AuthStatus hook should automatically detect the new session
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Data & Privacy Section */}
+      {authState.isAuthenticated && (
+        <div className='w-full max-w-3xl mt-8'>
+          <div className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-6'>
+            <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+              Data & Privacy
+            </h3>
+
+            <div className='space-y-4'>
+              {/* Export Data */}
+              <div className='flex items-center justify-between p-4 rounded-lg bg-zinc-800/50'>
+                <div>
+                  <h4 className='text-sm font-medium text-zinc-200'>
+                    Export Your Data
+                  </h4>
+                  <p className='text-xs text-zinc-500'>
+                    Download all your Lunary data as JSON
+                  </p>
+                </div>
+                <a
+                  href='/api/account/export'
+                  download
+                  className='px-4 py-2 text-sm font-medium text-purple-400 hover:text-purple-300 border border-purple-500/30 rounded-lg hover:bg-purple-500/10 transition-colors'
+                >
+                  Download
+                </a>
+              </div>
+
+              {/* Delete Account */}
+              <div className='flex items-center justify-between p-4 rounded-lg bg-red-900/10 border border-red-500/20'>
+                <div>
+                  <h4 className='text-sm font-medium text-red-300'>
+                    Delete Account
+                  </h4>
+                  <p className='text-xs text-zinc-500'>
+                    Permanently delete your account and all data (30-day grace
+                    period)
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    if (
+                      !confirm(
+                        'Are you sure you want to delete your account? This will schedule your account for deletion in 30 days. You can cancel during this period.',
+                      )
+                    ) {
+                      return;
+                    }
+
+                    try {
+                      const response = await fetch('/api/account/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          reason: 'User requested deletion from profile',
+                        }),
+                      });
+
+                      const data = await response.json();
+
+                      if (!response.ok) {
+                        alert(data.error || 'Failed to request deletion');
+                        return;
+                      }
+
+                      alert(
+                        `Account deletion scheduled for ${new Date(data.scheduledFor).toLocaleDateString()}. You can cancel this from your profile within 30 days.`,
+                      );
+                    } catch (error) {
+                      alert('Failed to request account deletion');
+                    }
+                  }}
+                  className='px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors'
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

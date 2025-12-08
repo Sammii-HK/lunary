@@ -27,6 +27,7 @@ import {
 } from '@/lib/ai/weekly-ritual-usage';
 import { recordAiInteraction } from '@/lib/analytics/tracking';
 import { captureAIGeneration } from '@/lib/posthog-server';
+import { retrieveGrimoireContext } from '@/lib/ai/astral-guide';
 
 type ChatRequest = {
   message?: string;
@@ -182,6 +183,8 @@ export async function POST(request: NextRequest) {
             information: string;
           }>;
           rituals?: Array<{ title: string; description: string }>;
+          semanticContext?: string;
+          sources?: Array<{ title: string; slug: string; category: string }>;
         }
       | undefined;
 
@@ -205,6 +208,25 @@ export async function POST(request: NextRequest) {
           console.error('[Chat] Failed to fetch tarot card data:', error);
         }
       }
+    }
+
+    // Retrieve relevant grimoire context via semantic search (RAG)
+    try {
+      const { context: semanticContext, sources } =
+        await retrieveGrimoireContext(userMessage, 3);
+      if (semanticContext && sources.length > 0) {
+        grimoireData = {
+          ...grimoireData,
+          semanticContext,
+          sources: sources.map((s) => ({
+            title: s.title,
+            slug: s.slug,
+            category: s.category,
+          })),
+        };
+      }
+    } catch (error) {
+      console.error('[Chat] Failed to retrieve grimoire context:', error);
     }
 
     if (assistCommand.type && assistCommand.type !== 'none') {

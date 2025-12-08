@@ -256,6 +256,41 @@ const nextConfig = {
     const isDev = process.env.NODE_ENV === 'development';
 
     return [
+      // Security headers for all routes
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value:
+              'camera=(), microphone=(), geolocation=(self), interest-cohort=()',
+          },
+        ],
+      },
       {
         source: '/sw.js',
         headers: [
@@ -393,6 +428,19 @@ const nextConfig = {
       {
         source: '/grimoire/witches/:witch',
         destination: '/grimoire/modern-witchcraft/witch-types/:witch',
+        permanent: true,
+      },
+      // Aspects and Houses route restructure (SEO preservation)
+      {
+        source:
+          '/grimoire/aspects/:aspect(conjunction|opposition|trine|square|sextile)',
+        destination: '/grimoire/aspects/types/:aspect',
+        permanent: true,
+      },
+      {
+        source:
+          '/grimoire/houses/:house(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)',
+        destination: '/grimoire/houses/overview/:house',
         permanent: true,
       },
     ];

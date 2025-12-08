@@ -6,6 +6,7 @@ import {
   SOCIAL_PLATFORM_LABELS,
 } from '@/constants/socialHandles';
 import { Logo } from './Logo';
+import { CookieSettingsButton } from './CookieConsent';
 
 export function MarketingFooter() {
   const socialLinks = [
@@ -83,87 +84,138 @@ export function MarketingFooter() {
 
   return (
     <footer className='border-t border-zinc-800/50 bg-zinc-950/50'>
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
-          {/* Brand */}
-          <div className='space-y-4'>
-            <Link
-              href='/'
-              className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
-            >
-              <Logo size={28} />
-              Lunary
-            </Link>
-            <p className='text-sm text-zinc-400'>
-              Your AI-powered astral guide for personalized astrology, tarot,
-              and cosmic insight.
-            </p>
-          </div>
-
-          {/* Links */}
-          <div className='space-y-4'>
-            <h3 className='text-sm font-medium text-zinc-300 uppercase tracking-wider'>
-              Links
-            </h3>
-            <nav className='flex flex-col space-y-2'>
-              <Link
-                href='/blog'
-                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10'>
+        {/* Top: Brand + Social */}
+        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8'>
+          <Link
+            href='/'
+            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
+          >
+            <Logo size={24} />
+            Lunary
+          </Link>
+          <div className='flex items-center gap-2'>
+            {socialLinks.map((social) => (
+              <a
+                key={social.platform}
+                href={social.url}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='inline-flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-purple-400 transition-colors'
+                aria-label={social.label}
+                title={social.label}
               >
-                Blog
-              </Link>
-              <Link
-                href='/pricing'
-                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-              >
-                Pricing
-              </Link>
-              <Link
-                href='/welcome'
-                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-              >
-                Features
-              </Link>
-              <Link
-                href='/help'
-                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-              >
-                Help
-              </Link>
-              <Link
-                href='/profile'
-                className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-              >
-                Start free trial
-              </Link>
-            </nav>
-          </div>
-
-          {/* Social */}
-          <div className='space-y-4'>
-            <h3 className='text-sm font-medium text-zinc-300 uppercase tracking-wider'>
-              Connect
-            </h3>
-            <div className='flex flex-wrap gap-3'>
-              {socialLinks.map((social) => (
-                <a
-                  key={social.platform}
-                  href={social.url}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='inline-flex items-center justify-center w-10 h-10 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-400 hover:text-purple-400 transition-colors'
-                  aria-label={social.label}
-                  title={social.label}
-                >
-                  {social.icon}
-                </a>
-              ))}
-            </div>
+                {social.icon}
+              </a>
+            ))}
           </div>
         </div>
 
+        {/* Links Grid - 3 columns */}
+        <div className='grid grid-cols-2 md:grid-cols-3 gap-6 mb-8'>
+          {/* Product */}
+          <nav className='space-y-2'>
+            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+              Product
+            </h3>
+            <Link
+              href='/pricing'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Pricing
+            </Link>
+            <Link
+              href='/grimoire'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Grimoire
+            </Link>
+            <Link
+              href='/horoscope'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Horoscopes
+            </Link>
+            <Link
+              href='/blog'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Blog
+            </Link>
+            <Link
+              href='/developers'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Developers
+            </Link>
+          </nav>
+
+          {/* Resources */}
+          <nav className='space-y-2'>
+            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+              Resources
+            </h3>
+            <Link
+              href='/help'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Help Center
+            </Link>
+            <Link
+              href='/comparison'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Compare Apps
+            </Link>
+            <Link
+              href='/press-kit'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Press Kit
+            </Link>
+            <Link
+              href='/accessibility'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Accessibility
+            </Link>
+          </nav>
+
+          {/* Legal */}
+          <nav className='space-y-2'>
+            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+              Legal
+            </h3>
+            <Link
+              href='/privacy'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Privacy
+            </Link>
+            <Link
+              href='/terms'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Terms
+            </Link>
+            <Link
+              href='/cookies'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Cookies
+            </Link>
+            <Link
+              href='/refund'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Refunds
+            </Link>
+            <CookieSettingsButton />
+          </nav>
+        </div>
+
         {/* Copyright */}
-        <div className='mt-8 pt-8 border-t border-zinc-800/50'>
+        <div className='pt-6 border-t border-zinc-800/50'>
           <p className='text-xs text-zinc-500 text-center'>
             © {new Date().getFullYear()} Lunar Computing, Inc. All rights
             reserved.

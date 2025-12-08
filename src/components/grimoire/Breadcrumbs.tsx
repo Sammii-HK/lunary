@@ -1,16 +1,33 @@
+'use client';
+
 import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
+import { useAuthStatus } from '@/components/AuthStatus';
 
 export interface BreadcrumbItem {
   label: string;
-  href: string;
+  href?: string;
 }
 
 interface BreadcrumbsProps {
   items: BreadcrumbItem[];
+  /** Override home href - if not provided, auto-detects based on auth status */
+  homeHref?: string;
+  /** Force marketing home (/) regardless of auth */
+  forceMarketingHome?: boolean;
 }
 
-export function Breadcrumbs({ items }: BreadcrumbsProps) {
+export function Breadcrumbs({
+  items,
+  homeHref,
+  forceMarketingHome = false,
+}: BreadcrumbsProps) {
+  const { isAuthenticated } = useAuthStatus();
+
+  // Determine home href: explicit > force marketing > auth-based
+  const resolvedHomeHref =
+    homeHref ?? (forceMarketingHome ? '/' : isAuthenticated ? '/app' : '/');
+
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -21,12 +38,14 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
         name: 'Home',
         item: 'https://lunary.app',
       },
-      ...items.map((item, index) => ({
-        '@type': 'ListItem',
-        position: index + 2,
-        name: item.label,
-        item: `https://lunary.app${item.href}`,
-      })),
+      ...items
+        .filter((item) => item.href)
+        .map((item, index) => ({
+          '@type': 'ListItem',
+          position: index + 2,
+          name: item.label,
+          item: `https://lunary.app${item.href}`,
+        })),
     ],
   };
 
@@ -37,16 +56,19 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
         aria-label='Breadcrumb'
       >
         <Link
-          href='/'
+          href={resolvedHomeHref}
           className='hover:text-purple-400 transition-colors flex items-center gap-1'
         >
           <Home className='w-4 h-4' />
           <span className='sr-only'>Home</span>
         </Link>
         {items.map((item, index) => (
-          <span key={item.href} className='flex items-center gap-2'>
+          <span
+            key={item.href || item.label}
+            className='flex items-center gap-2'
+          >
             <ChevronRight className='w-4 h-4 text-zinc-600' />
-            {index === items.length - 1 ? (
+            {index === items.length - 1 || !item.href ? (
               <span className='text-zinc-300 font-medium'>{item.label}</span>
             ) : (
               <Link

@@ -42,6 +42,22 @@ export const requireUser = async (
       headers,
     });
 
+    // Debug logging to understand session structure
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[AI Auth] Session response:', {
+        responseType: typeof sessionResponse,
+        isNull: sessionResponse === null,
+        isUndefined: sessionResponse === undefined,
+        keys: sessionResponse ? Object.keys(sessionResponse) : [],
+        hasData: !!sessionResponse?.data,
+        hasUser: !!sessionResponse?.user,
+        hasSession: !!sessionResponse?.session,
+        dataKeys: sessionResponse?.data
+          ? Object.keys(sessionResponse.data)
+          : [],
+      });
+    }
+
     const user =
       sessionResponse?.data?.user ??
       sessionResponse?.user ??
@@ -56,6 +72,10 @@ export const requireUser = async (
         sessionData: sessionResponse?.data
           ? Object.keys(sessionResponse.data)
           : null,
+        // Add more details about what we received
+        rawResponse: sessionResponse
+          ? JSON.stringify(sessionResponse).substring(0, 500)
+          : 'null',
       });
       throw new UnauthorizedError();
     }
@@ -118,20 +138,8 @@ export const requireUser = async (
       console.error('[AI Auth] Failed to fetch subscription', error);
     }
 
-    // Try to get birthday from Jazz if still missing
-    let jazzBirthday: string | undefined;
-    const sessionBirthday = user.birthday ?? user.birthDate ?? dbBirthday;
-    if (!sessionBirthday) {
-      try {
-        const { loadJazzProfile } = await import('../jazz/server');
-        const jazzProfile = await loadJazzProfile(user.id);
-        jazzBirthday = (jazzProfile as any)?.birthday;
-      } catch (error) {
-        // Jazz profile fetch is optional, don't fail auth
-      }
-    }
-
-    const finalBirthday = sessionBirthday ?? jazzBirthday ?? undefined;
+    const finalBirthday =
+      user.birthday ?? user.birthDate ?? dbBirthday ?? undefined;
 
     return {
       id: user.id,

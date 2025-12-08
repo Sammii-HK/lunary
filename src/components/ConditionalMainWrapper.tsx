@@ -20,9 +20,26 @@ export function ConditionalMainWrapper({
     if (typeof window === 'undefined' || !pathname) return;
 
     // Define core marketing pages (always show marketing nav)
-    const coreMarketingRoutes = ['/', '/welcome', '/help', '/auth'];
+    const coreMarketingRoutes = [
+      '/',
+      '/welcome',
+      '/help',
+      '/auth',
+      '/comparison',
+      '/privacy',
+      '/terms',
+      '/cookies',
+      '/refund',
+      '/accessibility',
+      '/trademark',
+      '/press-kit',
+      '/developers',
+      '/pricing',
+    ];
     const isCoreMarketingRoute =
-      coreMarketingRoutes.includes(pathname) || pathname.startsWith('/admin');
+      coreMarketingRoutes.includes(pathname) ||
+      pathname.startsWith('/comparison/') ||
+      pathname.startsWith('/admin');
 
     // Define app pages
     const appPages = [

@@ -1,32 +1,35 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 
-export function SignOutButton() {
+interface SignOutButtonProps {
+  variant?: 'primary' | 'text' | 'full-width';
+  redirect?: boolean;
+}
+
+export function SignOutButton({
+  variant = 'primary',
+  redirect = true,
+}: SignOutButtonProps) {
   const [loading, setLoading] = useState(false);
   const { isAuthenticated, signOut } = useAuthStatus();
-  const router = useRouter();
-  const isSigningOut = useRef(false);
 
   const handleSignOut = async () => {
-    if (isSigningOut.current || loading) return;
-
-    isSigningOut.current = true;
+    if (loading) return;
     setLoading(true);
 
-    // Step 1: IMMEDIATELY update auth state - UI reacts instantly
+    // Update local auth state immediately
     signOut();
 
-    // Step 2: Clear all storage first
+    // Clear all storage
     if (typeof window !== 'undefined') {
       localStorage.clear();
       sessionStorage.clear();
     }
 
-    // Step 3: Clear cookies
+    // Clear cookies
     if (typeof document !== 'undefined') {
       document.cookie.split(';').forEach((c) => {
         const name = c.split('=')[0].trim();
@@ -37,35 +40,42 @@ export function SignOutButton() {
       });
     }
 
-    // Step 4: Sign out from better-auth - AWAIT this
+    // Sign out from server
     try {
       await betterAuthClient.signOut();
     } catch {
-      // Ignore errors, session might already be gone
+      // Ignore - session might already be gone
     }
 
-    // Step 5: Invalidate cache again after server signout
+    // Clear auth cache
     invalidateAuthCache();
 
-    // Step 6: Navigate home and force refresh to clear all state
-    router.replace('/');
-    router.refresh();
-
-    setLoading(false);
-    setTimeout(() => {
-      isSigningOut.current = false;
-    }, 500);
+    // Hard reload to guarantee UI updates
+    if (redirect) {
+      window.location.href = '/';
+    } else {
+      window.location.reload();
+    }
   };
 
   if (!isAuthenticated) {
     return null;
   }
 
+  const baseClasses = 'font-medium transition-colors disabled:opacity-50';
+  const variantClasses = {
+    primary:
+      'bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white px-4 py-2 rounded-lg',
+    text: 'text-red-400 hover:text-red-300 px-4 py-2',
+    'full-width':
+      'w-full bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white py-3 px-4 rounded-lg',
+  };
+
   return (
     <button
       onClick={handleSignOut}
       disabled={loading}
-      className='bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-colors'
+      className={`${baseClasses} ${variantClasses[variant]}`}
     >
       {loading ? 'Signing Out...' : 'Sign Out'}
     </button>

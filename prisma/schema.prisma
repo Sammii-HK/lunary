@@ -56,3 +56,26 @@ model AiUsage {
   @@map("ai_usage")
 }
 
+model ApiKey {
+  id           String   @id @default(cuid())
+  keyHash      String   @unique @map("key_hash")
+  keyPrefix    String   @map("key_prefix")
+  userId       String   @map("user_id")
+  name         String   @default("Default API Key")
+  tier         String   @default("free")
+  requests     Int      @default(0)
+  requestLimit Int      @default(100) @map("request_limit")
+  rateLimit    Int      @default(10) @map("rate_limit")
+  isActive     Boolean  @default(true) @map("is_active")
+  lastUsedAt   DateTime? @map("last_used_at") @db.Timestamptz(6)
+  expiresAt    DateTime? @map("expires_at") @db.Timestamptz(6)
+  resetAt      DateTime @default(now()) @map("reset_at") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId], name: "idx_api_keys_user_id")
+  @@index([keyHash], name: "idx_api_keys_key_hash")
+  @@index([tier], name: "idx_api_keys_tier")
+  @@map("api_keys")
+}
+

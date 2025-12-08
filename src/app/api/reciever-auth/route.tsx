@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-export const runtime = 'edge'; // or 'nodejs' – match the real route
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('authorization') ?? '';

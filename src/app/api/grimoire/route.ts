@@ -16,7 +16,13 @@ import { runesList } from '../../../constants/runes';
 import { wiccanWeek } from '../../../constants/weekDays';
 import { wheelOfTheYearSabbats } from '../../../constants/sabbats';
 
-export const dynamic = 'force-dynamic';
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=604800, stale-while-revalidate=86400',
+};
+
+function jsonWithCache(data: unknown, status = 200) {
+  return NextResponse.json(data, { status, headers: CACHE_HEADERS });
+}
 
 // Main Grimoire API - Single source of truth for all magical data
 export async function GET(request: NextRequest) {
@@ -33,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     // If no type specified, return API overview
     if (!type) {
-      return NextResponse.json({
+      return jsonWithCache({
         message:
           'Lunary Grimoire API - Your comprehensive magical knowledge base',
         version: '1.0.0',
@@ -101,12 +107,12 @@ export async function GET(request: NextRequest) {
             { status: 404 },
           );
         }
-        return NextResponse.json({ crystal });
+        return jsonWithCache({ crystal });
       }
 
       if (action === 'search' && query) {
         const results = searchCrystals(query);
-        return NextResponse.json({
+        return jsonWithCache({
           query,
           count: results.length,
           crystals: results,
@@ -141,7 +147,7 @@ export async function GET(request: NextRequest) {
           );
         }
 
-        return NextResponse.json({
+        return jsonWithCache({
           filters: { category, intention, moonPhase, zodiacSign },
           count: results.length,
           crystals: results,
@@ -149,7 +155,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Default: return all crystals
-      return NextResponse.json({
+      return jsonWithCache({
         count: crystalDatabase.length,
         crystals: crystalDatabase,
       });
@@ -165,12 +171,12 @@ export async function GET(request: NextRequest) {
             { status: 404 },
           );
         }
-        return NextResponse.json({ spell });
+        return jsonWithCache({ spell });
       }
 
       if (action === 'search' && query) {
         const results = searchSpells(query);
-        return NextResponse.json({
+        return jsonWithCache({
           query,
           count: results.length,
           spells: results,
@@ -184,7 +190,7 @@ export async function GET(request: NextRequest) {
           results = getSpellsByCategory(category);
         }
 
-        return NextResponse.json({
+        return jsonWithCache({
           filters: { category },
           count: results.length,
           spells: results,
@@ -192,7 +198,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Default: return all spells
-      return NextResponse.json({
+      return jsonWithCache({
         count: spellDatabase.length,
         spells: spellDatabase,
       });
@@ -208,7 +214,7 @@ export async function GET(request: NextRequest) {
             { status: 404 },
           );
         }
-        return NextResponse.json({ rune });
+        return jsonWithCache({ rune });
       }
 
       if (action === 'search' && query) {
@@ -219,7 +225,7 @@ export async function GET(request: NextRequest) {
             rune.magicalProperties.toLowerCase().includes(query.toLowerCase()),
         );
 
-        return NextResponse.json({
+        return jsonWithCache({
           query,
           count: results.length,
           runes: Object.fromEntries(results),
@@ -227,7 +233,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Default: return all runes
-      return NextResponse.json({
+      return jsonWithCache({
         count: Object.keys(runesList).length,
         runes: runesList,
       });
@@ -315,12 +321,12 @@ export async function GET(request: NextRequest) {
         },
       };
 
-      return NextResponse.json({ correspondences });
+      return jsonWithCache({ correspondences });
     }
 
     // Handle Calendar
     if (type === 'calendar') {
-      return NextResponse.json({
+      return jsonWithCache({
         planetaryDays: wiccanWeek,
         sabbats: wheelOfTheYearSabbats,
         currentInfo: {

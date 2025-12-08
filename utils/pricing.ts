@@ -107,6 +107,7 @@ export const FEATURE_ACCESS = {
     'grimoire',
     'lunar_calendar',
     'weekly_ai_ritual',
+    'birthday_collection', // Allow free users to enter birthday (birth chart still requires paid)
   ],
   lunary_plus: [
     'birth_chart',

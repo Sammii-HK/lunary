@@ -301,7 +301,7 @@ const BirthChart = () => {
             return (
               <Link
                 key={house.number}
-                href={`/grimoire/houses/${houseSlug}`}
+                href={`/grimoire/houses/overview/${houseSlug}`}
                 className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
               >
                 <div className='flex items-start gap-3'>
@@ -327,7 +327,7 @@ const BirthChart = () => {
         </p>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <Link
-            href='/grimoire/aspects/conjunction'
+            href='/grimoire/aspects/types/conjunction'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
             <h3 className='text-lg font-medium text-green-400 mb-2 group-hover:text-green-300 transition-colors'>
@@ -339,7 +339,7 @@ const BirthChart = () => {
             </p>
           </Link>
           <Link
-            href='/grimoire/aspects/opposition'
+            href='/grimoire/aspects/types/opposition'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
             <h3 className='text-lg font-medium text-red-400 mb-2 group-hover:text-red-300 transition-colors'>
@@ -352,7 +352,7 @@ const BirthChart = () => {
             </p>
           </Link>
           <Link
-            href='/grimoire/aspects/trine'
+            href='/grimoire/aspects/types/trine'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
             <h3 className='text-lg font-medium text-blue-400 mb-2 group-hover:text-blue-300 transition-colors'>
@@ -364,7 +364,7 @@ const BirthChart = () => {
             </p>
           </Link>
           <Link
-            href='/grimoire/aspects/square'
+            href='/grimoire/aspects/types/square'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
             <h3 className='text-lg font-medium text-yellow-400 mb-2 group-hover:text-yellow-300 transition-colors'>
@@ -376,7 +376,7 @@ const BirthChart = () => {
             </p>
           </Link>
           <Link
-            href='/grimoire/aspects/sextile'
+            href='/grimoire/aspects/types/sextile'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
           >
             <h3 className='text-lg font-medium text-purple-400 mb-2 group-hover:text-purple-300 transition-colors'>

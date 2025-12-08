@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
+import { SignOutButton } from './SignOutButton';
 import { conversionTracking } from '@/lib/analytics';
 
 interface AuthFormData {
@@ -45,21 +46,6 @@ export function AuthComponent({
     setSuccess(null);
 
     try {
-      // Create a timeout promise for auth requests (10 seconds for login)
-      const createTimeout = (ms: number) => {
-        return new Promise<never>((_, reject) => {
-          setTimeout(
-            () =>
-              reject(
-                new Error(
-                  'Request timed out. Please check your connection or try again later.',
-                ),
-              ),
-            ms,
-          );
-        });
-      };
-
       if (isForgot) {
         if (!formData.email) {
           throw new Error('Enter the email you use with Lunary.');
@@ -101,16 +87,12 @@ export function AuthComponent({
       }
 
       if (isSignUp) {
-        const signUpPromise = betterAuthClient.signUp.email({
+        // No timeout - let the request complete naturally
+        const result = await betterAuthClient.signUp.email({
           email: formData.email,
           password: formData.password,
           name: formData.name || 'User',
         });
-
-        const result = await Promise.race([
-          signUpPromise,
-          createTimeout(15000),
-        ]);
 
         console.log('✅ Sign up result:', result);
 
@@ -137,15 +119,11 @@ export function AuthComponent({
           setSuccess('Account created successfully! Welcome to Lunary.');
         }
       } else {
-        const signInPromise = betterAuthClient.signIn.email({
+        // No timeout - let the request complete naturally
+        const result = await betterAuthClient.signIn.email({
           email: formData.email,
           password: formData.password,
         });
-
-        const result = await Promise.race([
-          signInPromise,
-          createTimeout(10000),
-        ]);
 
         console.log('✅ Sign in result:', result);
 
@@ -212,23 +190,7 @@ export function AuthComponent({
 
       const msg = err.message || '';
 
-      if (
-        msg.includes('secret') ||
-        msg.includes('seed') ||
-        msg.includes('Jazz')
-      ) {
-        console.log(
-          '[Auth] Ignoring Jazz-related error, account was created successfully',
-        );
-        setSuccess('Account created! Refreshing...');
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        invalidateAuthCache();
-        refreshAuth();
-        if (onSuccess) {
-          onSuccess();
-        }
-        return;
-      } else if (msg.includes('timed out')) {
+      if (msg.includes('timed out')) {
         errorMessage =
           'Request timed out. The authentication server may not be responding. Please check your connection and try again.';
       } else if (
@@ -250,17 +212,6 @@ export function AuthComponent({
       setError(errorMessage);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await betterAuthClient.signOut();
-      invalidateAuthCache();
-      refreshAuth();
-      console.log('✅ Signed out successfully');
-    } catch (err) {
-      console.error('Sign out error:', err);
     }
   };
 
@@ -292,12 +243,7 @@ export function AuthComponent({
           </p>
         </div>
 
-        <button
-          onClick={handleSignOut}
-          className='w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors'
-        >
-          Sign Out
-        </button>
+        <SignOutButton variant='full-width' redirect={false} />
       </div>
     );
   }

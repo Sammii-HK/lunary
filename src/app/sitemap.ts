@@ -22,6 +22,7 @@ import {
   angelNumbers,
   lifePathNumbers,
 } from '@/constants/grimoire/numerology-data';
+import { ASTROLOGY_GLOSSARY } from '@/constants/grimoire/glossary';
 import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
 
@@ -109,6 +110,66 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/cookies`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/refund`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/acceptable-use`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/accessibility`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/api-terms`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/referral-terms`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/dmca`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/trademark`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
     },
     {
       url: `${baseUrl}/building-lunary`,
@@ -206,6 +267,45 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     },
+    // Pillar pages - high priority guides
+    {
+      url: `${baseUrl}/grimoire/guides/birth-chart-complete-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/grimoire/guides/tarot-complete-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/grimoire/guides/crystal-healing-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/grimoire/guides/moon-phases-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    // Glossary index
+    {
+      url: `${baseUrl}/grimoire/glossary`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    // Glossary term pages
+    ...ASTROLOGY_GLOSSARY.map((term) => ({
+      url: `${baseUrl}/grimoire/glossary/${term.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
   ];
 
   // Generate all blog week posts (from start of 2025 to current week)
@@ -598,7 +698,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add all house pages
   const houseRoutes = Object.keys(astrologicalHouses).map((house) => ({
-    url: `${baseUrl}/grimoire/houses/${stringToKebabCase(house)}`,
+    url: `${baseUrl}/grimoire/houses/overview/${stringToKebabCase(house)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
@@ -630,7 +730,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add all aspect pages
   const aspectRoutes = Object.keys(astrologicalAspects).map((aspect) => ({
-    url: `${baseUrl}/grimoire/aspects/${stringToKebabCase(aspect)}`,
+    url: `${baseUrl}/grimoire/aspects/types/${stringToKebabCase(aspect)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,

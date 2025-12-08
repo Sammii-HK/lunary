@@ -6,6 +6,10 @@ import {
   bodiesSymbols,
   planetUnicode,
 } from '../../../../../../utils/zodiac/zodiac';
+import {
+  PLANETARY_CORRESPONDENCES,
+  getEntityRelationships,
+} from '@/constants/entity-relationships';
 
 const planetKeys = Object.keys(planetaryBodies);
 
@@ -244,13 +248,19 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
           `What ${correspondences.themes[0]?.toLowerCase() || ''} goals can ${planetData.name} help me achieve?`,
         ]}
         relatedItems={[
+          ...getEntityRelationships('planet', planetKey)
+            .slice(0, 6)
+            .map((rel) => ({
+              name: rel.name,
+              href: rel.url,
+              type: rel.type.charAt(0).toUpperCase() + rel.type.slice(1),
+            })),
           {
             name: 'Astronomy Guide',
             href: '/grimoire/astronomy',
             type: 'Guide',
           },
           { name: 'Birth Chart', href: '/birth-chart', type: 'Tool' },
-          { name: 'Horoscope', href: '/horoscope', type: 'Daily Reading' },
         ]}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },

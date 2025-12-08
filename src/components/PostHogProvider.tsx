@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { hasAnalyticsConsent, getCookieConsent } from './CookieConsent';
 
 let posthogModule: any = null;
 let posthogLoaded = false;
@@ -40,15 +41,43 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const initializedRef = useRef(false);
   const posthogRef = useRef<any>(null);
   const [posthogAvailable, setPosthogAvailable] = useState(false);
+  const [hasConsent, setHasConsent] = useState<boolean | null>(null);
 
-  // Defer PostHog loading until after first paint to improve LCP
+  useEffect(() => {
+    const checkConsent = () => {
+      const consent = getCookieConsent();
+      if (consent) {
+        setHasConsent(consent.analytics);
+      } else {
+        setHasConsent(null);
+      }
+    };
+
+    checkConsent();
+
+    const handleConsentChange = (event: CustomEvent) => {
+      setHasConsent(event.detail?.analytics ?? false);
+    };
+
+    window.addEventListener(
+      'cookieConsentChanged',
+      handleConsentChange as EventListener,
+    );
+    return () => {
+      window.removeEventListener(
+        'cookieConsentChanged',
+        handleConsentChange as EventListener,
+      );
+    };
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (hasConsent !== true) return;
 
     const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
     if (!posthogKey || initializedRef.current) return;
 
-    // Use requestIdleCallback if available, otherwise setTimeout
     const scheduleLoad = (callback: () => void) => {
       if ('requestIdleCallback' in window) {
         (window as any).requestIdleCallback(callback, { timeout: 3000 });
@@ -67,7 +96,6 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
             return;
           }
 
-          // Detect CI/test environments for PostHog filtering
           const isPlaywright = navigator.userAgent.includes('Playwright');
           const isCITest =
             isPlaywright ||
@@ -83,7 +111,6 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
               initializedRef.current = true;
               setPosthogAvailable(true);
 
-              // Set person properties for CI/test filtering
               if (isCITest) {
                 posthog.register({
                   is_ci_test: true,
@@ -107,7 +134,17 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
         }
       });
     });
-  }, []);
+  }, [hasConsent]);
+
+  useEffect(() => {
+    if (hasConsent === false && posthogRef.current && initializedRef.current) {
+      try {
+        posthogRef.current.opt_out_capturing();
+      } catch (error) {
+        console.error('[PostHog] Failed to opt out:', error);
+      }
+    }
+  }, [hasConsent]);
 
   useEffect(() => {
     if (!posthogAvailable || !posthogRef.current || !initializedRef.current) {

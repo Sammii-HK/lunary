@@ -552,7 +552,7 @@ export async function POST(request: NextRequest) {
           EXECUTE FUNCTION update_jazz_migration_status_updated_at()
     `;
 
-    console.log('✅ Jazz migration status table created');
+    console.log('✅ 💩 migration status table created');
 
     await sql`
       CREATE TABLE IF NOT EXISTS journal_patterns (
@@ -588,12 +588,157 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Ritual message events table created');
 
+    // Create user_streaks table
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_streaks (
+        user_id TEXT PRIMARY KEY,
+        current_streak INTEGER DEFAULT 0,
+        longest_streak INTEGER DEFAULT 0,
+        ritual_streak INTEGER DEFAULT 0,
+        longest_ritual_streak INTEGER DEFAULT 0,
+        last_check_in DATE,
+        total_check_ins INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_streaks_last_check_in ON user_streaks(last_check_in)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_user_streaks_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`DROP TRIGGER IF EXISTS update_user_streaks_updated_at ON user_streaks`;
+
+    await sql`
+      CREATE TRIGGER update_user_streaks_updated_at
+          BEFORE UPDATE ON user_streaks
+          FOR EACH ROW
+          EXECUTE FUNCTION update_user_streaks_updated_at()
+    `;
+
+    console.log('✅ User streaks table created');
+
+    // Create email_events table
+    await sql`
+      CREATE TABLE IF NOT EXISTS email_events (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        email_type TEXT NOT NULL,
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        metadata JSONB,
+        UNIQUE(user_id, email_type)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_email_events_user_id ON email_events(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_email_events_email_type ON email_events(email_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_email_events_sent_at ON email_events(sent_at)`;
+
+    console.log('✅ Email events table created');
+
+    // Create api_keys table for developer API monetization
+    await sql`
+      CREATE TABLE IF NOT EXISTS api_keys (
+        id TEXT PRIMARY KEY,
+        key_hash TEXT NOT NULL UNIQUE,
+        key_prefix TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        tier TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        requests INTEGER DEFAULT 0,
+        request_limit INTEGER NOT NULL,
+        rate_limit INTEGER NOT NULL,
+        expires_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        last_used_at TIMESTAMP WITH TIME ZONE,
+        reset_at TIMESTAMP WITH TIME ZONE NOT NULL
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON api_keys(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_tier ON api_keys(tier)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_api_keys_is_active ON api_keys(is_active) WHERE is_active = true`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_api_keys_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`DROP TRIGGER IF EXISTS update_api_keys_updated_at ON api_keys`;
+
+    await sql`
+      CREATE TRIGGER update_api_keys_updated_at
+          BEFORE UPDATE ON api_keys
+          FOR EACH ROW
+          EXECUTE FUNCTION update_api_keys_updated_at()
+    `;
+
+    console.log('✅ API keys table created');
+
+    // Enable vector extension for semantic search
+    await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+
+    // Create grimoire_embeddings table for semantic search in Astral Guide
+    await sql`
+      CREATE TABLE IF NOT EXISTS grimoire_embeddings (
+        id TEXT PRIMARY KEY,
+        slug TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        content TEXT NOT NULL,
+        embedding vector(1536),
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_grimoire_embeddings_slug ON grimoire_embeddings(slug)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_grimoire_embeddings_category ON grimoire_embeddings(category)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_grimoire_embeddings_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`DROP TRIGGER IF EXISTS update_grimoire_embeddings_updated_at ON grimoire_embeddings`;
+
+    await sql`
+      CREATE TRIGGER update_grimoire_embeddings_updated_at
+          BEFORE UPDATE ON grimoire_embeddings
+          FOR EACH ROW
+          EXECUTE FUNCTION update_grimoire_embeddings_updated_at()
+    `;
+
+    console.log('✅ Grimoire embeddings table created');
+
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, conversion events, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status, ritual_message_events)',
+        'Database setup complete (push subscriptions, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status, ritual_message_events, user_streaks, email_events, api_keys, grimoire_embeddings)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

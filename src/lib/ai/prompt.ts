@@ -452,6 +452,8 @@ export const buildPromptSections = ({
       information: string;
     }>;
     rituals?: Array<{ title: string; description: string }>;
+    semanticContext?: string;
+    sources?: Array<{ title: string; slug: string; category: string }>;
   };
 }): PromptSections => {
   const memory =
@@ -462,10 +464,19 @@ export const buildPromptSections = ({
   const modeGuidance = getModeSpecificGuidance(userMessage);
   const systemPrompt = SYSTEM_PROMPT + modeGuidance;
 
+  let contextData = `Context data:\n${describeContext(context, grimoireData, userMessage)}`;
+
+  if (grimoireData?.semanticContext) {
+    contextData += grimoireData.semanticContext;
+    if (grimoireData.sources && grimoireData.sources.length > 0) {
+      contextData += `\n\nWhen referencing this knowledge, cite sources like: [Title](/grimoire/slug)`;
+    }
+  }
+
   return {
     system: systemPrompt,
     memory,
-    context: `Context data:\n${describeContext(context, grimoireData, userMessage)}`,
+    context: contextData,
     userMessage,
   };
 };
