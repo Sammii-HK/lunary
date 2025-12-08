@@ -170,7 +170,7 @@ export function ReferralProgram() {
 
   if (loading) {
     return (
-      <div className='rounded-lg border border-purple-500/30 bg-gradient-to-r from-purple-900/40 to-pink-900/40 p-6'>
+      <div className='rounded-lg border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/40 to-lunary-highlight-900/40 p-6'>
         <div className='space-y-3'>
           <div className='h-5 w-44 animate-pulse rounded bg-white/10' />
           <div className='h-4 w-full animate-pulse rounded bg-white/10' />
@@ -185,7 +185,7 @@ export function ReferralProgram() {
     : '';
 
   return (
-    <div className='rounded-lg border border-purple-500/30 bg-gradient-to-r from-purple-900/40 to-pink-900/40 p-6'>
+    <div className='rounded-lg border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/40 to-lunary-highlight-900/40 p-6'>
       <div className='flex items-start gap-4'>
         <div className='flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-lunary-primary-900'>
           <Gift className='h-6 w-6 text-lunary-accent' />
@@ -249,31 +249,31 @@ export function ReferralProgram() {
                 <div className='rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90'>
                   <div className='flex items-center justify-between'>
                     <span>Total referrals</span>
-                    <Users className='h-4 w-4 text-purple-200' />
+                    <Users className='h-4 w-4 text-lunary-accent-200' />
                   </div>
                   <p className='mt-1 text-2xl font-semibold text-white'>
                     {stats.totalReferrals}
                   </p>
-                  <p className='text-xs text-purple-100/70'>
+                  <p className='text-xs text-lunary-accent-100/70'>
                     People who signed up through your link.
                   </p>
                 </div>
-                <div className='rounded-lg border border-purple-400/30 bg-purple-500/10 px-4 py-3 text-sm text-white/90'>
+                <div className='rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 px-4 py-3 text-sm text-white/90'>
                   <div className='flex items-center justify-between'>
                     <span>Active rewards</span>
-                    <Gift className='h-4 w-4 text-purple-200' />
+                    <Gift className='h-4 w-4 text-lunary-accent-200' />
                   </div>
                   <p className='mt-1 text-2xl font-semibold text-white'>
                     {stats.activeReferrals}
                   </p>
-                  <p className='text-xs text-purple-100/70'>
+                  <p className='text-xs text-lunary-accent-100/70'>
                     Friends who activated their trial (free month granted).
                   </p>
                 </div>
               </div>
 
               <div className='rounded-lg border border-white/10 bg-zinc-900/60 px-4 py-3 text-sm text-zinc-200'>
-                <p className='mb-2 text-xs uppercase tracking-[0.2em] text-purple-200/80'>
+                <p className='mb-2 text-xs uppercase tracking-[0.2em] text-lunary-accent-200/80'>
                   How it works
                 </p>
                 <ol className='space-y-1 text-xs text-zinc-300'>
@@ -287,14 +287,14 @@ export function ReferralProgram() {
 
               <button
                 onClick={loadReferralData}
-                className='inline-flex items-center gap-2 text-xs font-medium text-purple-200 transition-colors hover:text-white'
+                className='inline-flex items-center gap-2 text-xs font-medium text-lunary-accent-200 transition-colors hover:text-white'
               >
                 <RefreshCw className='h-3.5 w-3.5' />
                 Refresh stats
               </button>
             </div>
           ) : (
-            <div className='space-y-3 rounded-lg border border-purple-400/30 bg-purple-500/10 p-4 text-sm text-purple-100'>
+            <div className='space-y-3 rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 p-4 text-sm text-lunary-accent-100'>
               <p className='text-sm'>
                 You don&apos;t have a referral link yet. Generate one to start
                 sharing Lunary and earn free premium time.
@@ -302,7 +302,7 @@ export function ReferralProgram() {
               <button
                 onClick={handleCreateLink}
                 disabled={isGenerating}
-                className='flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-purple-600/60'
+                className='flex items-center justify-center gap-2 rounded-lg bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:bg-lunary-primary/60'
               >
                 {isGenerating && (
                   <span className='h-3 w-3 animate-spin rounded-full border border-white/60 border-t-transparent' />

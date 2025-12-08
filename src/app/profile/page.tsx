@@ -443,7 +443,7 @@ export default function ProfilePage() {
                         type='text'
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                         placeholder='Enter your name'
                       />
                     </div>
@@ -473,7 +473,7 @@ export default function ProfilePage() {
                         type='time'
                         value={birthTime}
                         onChange={(e) => setBirthTime(e.target.value)}
-                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                       />
                     </div>
                     <div className='space-y-2'>
@@ -487,7 +487,7 @@ export default function ProfilePage() {
                         type='text'
                         value={birthLocation}
                         onChange={(e) => setBirthLocation(e.target.value)}
-                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                         placeholder='e.g., London, UK or 51.4769, 0.0005'
                       />
                     </div>
@@ -554,7 +554,7 @@ export default function ProfilePage() {
                   {canEditProfile && (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className='rounded-full bg-blue-600/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500'
+                      className='rounded-full bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
                     >
                       Edit details
                     </button>
@@ -582,7 +582,7 @@ export default function ProfilePage() {
                 <button
                   onClick={handleSave}
                   disabled={!name}
-                  className='rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300'
+                  className='rounded-full bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300'
                 >
                   Save Profile
                 </button>
