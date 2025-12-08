@@ -170,8 +170,8 @@ export function SEOContentTemplate({
 
       {/* TL;DR Quick Meaning Block */}
       {tldr && (
-        <div className='bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-8'>
-          <h2 className='text-xl font-medium text-purple-300 mb-3'>
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-8'>
+          <h2 className='text-xl font-medium text-lunary-accent-300 mb-3'>
             Quick Meaning
           </h2>
           <p className='text-zinc-200 leading-relaxed'>{tldr}</p>
@@ -204,7 +204,7 @@ export function SEOContentTemplate({
           <ul className='space-y-2'>
             {emotionalThemes.map((theme, index) => (
               <li key={index} className='flex items-start gap-3 text-zinc-300'>
-                <span className='text-purple-400 mt-1'>•</span>
+                <span className='text-lunary-accent mt-1'>•</span>
                 <span>{theme}</span>
               </li>
             ))}
@@ -242,7 +242,7 @@ export function SEOContentTemplate({
               <Link
                 key={index}
                 href={`/grimoire/zodiac/${sign.toLowerCase()}`}
-                className='px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-purple-300 transition-colors'
+                className='px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors'
               >
                 {sign}
               </Link>
@@ -402,7 +402,7 @@ export function SEOContentTemplate({
             {journalPrompts.map((prompt, index) => (
               <div
                 key={index}
-                className='bg-purple-900/10 border border-purple-500/20 rounded-lg p-4'
+                className='bg-lunary-primary-950 border border-lunary-primary-800 rounded-lg p-4'
               >
                 <p className='text-zinc-300 leading-relaxed italic'>
                   "{prompt}"
@@ -424,7 +424,7 @@ export function SEOContentTemplate({
               <Link
                 key={index}
                 href={item.href}
-                className='block p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg hover:bg-zinc-800/50 hover:border-purple-500/50 transition-colors'
+                className='block p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors'
               >
                 <div className='flex items-center justify-between'>
                   <span className='text-zinc-300 font-medium'>{item.name}</span>
@@ -449,7 +449,7 @@ export function SEOContentTemplate({
               <Link
                 key={index}
                 href={link.href}
-                className='px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-purple-300 transition-colors'
+                className='px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors'
               >
                 {link.text}
               </Link>
@@ -460,11 +460,11 @@ export function SEOContentTemplate({
 
       {/* CTA */}
       {ctaText && ctaHref && (
-        <section className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-lg p-8 text-center'>
+        <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-8 text-center'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-3'>{ctaText}</h2>
           <Link
             href={ctaHref}
-            className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='inline-block px-6 py-3 bg-lunary-primary hover:bg-lunary-primary-400 text-white rounded-lg font-medium transition-colors'
           >
             Get Started
           </Link>
@@ -534,7 +534,7 @@ export function SEOContentTemplate({
                           href={source.url}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='text-purple-400 hover:text-purple-300 transition-colors'
+                          className='text-lunary-accent hover:text-lunary-accent-300 transition-colors'
                         >
                           {source.name}
                         </a>

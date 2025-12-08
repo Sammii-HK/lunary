@@ -165,7 +165,7 @@ export function ExploreThisWeek() {
         className='flex w-full items-center justify-between mb-3'
       >
         <div className='flex items-center gap-2'>
-          <Calendar className='w-4 h-4 text-purple-400' />
+          <Calendar className='w-4 h-4 text-lunary-accent' />
           <h2 className='text-base font-semibold text-zinc-100'>
             Explore This Week
           </h2>
@@ -181,9 +181,9 @@ export function ExploreThisWeek() {
         <div className='space-y-3'>
           {/* Weekly Theme */}
           {data.weeklyTheme && (
-            <div className='rounded-lg border border-purple-500/30 bg-purple-950/20 p-2.5'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-2.5'>
               <div className='flex items-start gap-2'>
-                <Sparkles className='w-3.5 h-3.5 text-purple-400 mt-0.5 flex-shrink-0' />
+                <Sparkles className='w-3.5 h-3.5 text-lunary-accent mt-0.5 flex-shrink-0' />
                 <p className='text-xs text-zinc-200 leading-relaxed'>
                   {data.weeklyTheme}
                 </p>
@@ -214,7 +214,7 @@ export function ExploreThisWeek() {
                       </div>
                       <div className='flex items-center gap-1.5 mb-1'>
                         <span className='text-xs'>{day.bestActivity.icon}</span>
-                        <p className='text-xs text-purple-300 font-medium'>
+                        <p className='text-xs text-lunary-accent-300 font-medium'>
                           {day.bestActivity.activity}
                         </p>
                       </div>
@@ -232,12 +232,12 @@ export function ExploreThisWeek() {
             {ritualPrompt && (
               <Link
                 href={`/book-of-shadows?prompt=${encodeURIComponent(ritualPrompt.prompt)}`}
-                className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-purple-500/40'
+                className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary-600'
               >
                 {ritualPrompt.time === 'morning' ? (
                   <Sunrise className='w-3.5 h-3.5 text-yellow-500' />
                 ) : (
-                  <Sunset className='w-3.5 h-3.5 text-purple-500' />
+                  <Sunset className='w-3.5 h-3.5 text-lunary-primary' />
                 )}
                 <span className='text-xs'>
                   {ritualPrompt.time === 'morning' ? 'Morning' : 'Evening'}{' '}
@@ -247,21 +247,21 @@ export function ExploreThisWeek() {
             )}
             <Link
               href='/book-of-shadows?prompt=weekly overview'
-              className='inline-flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/20 px-2.5 py-1.5 text-xs text-purple-300 transition hover:bg-purple-950/40 hover:border-purple-500/60'
+              className='inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 px-2.5 py-1.5 text-xs text-lunary-accent-300 transition hover:bg-lunary-primary-900 hover:border-lunary-primary'
             >
               <Sparkles className='w-3.5 h-3.5' />
               Weekly Overview
             </Link>
             <Link
               href='/tarot'
-              className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-purple-500/40'
+              className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary-600'
             >
               <BookOpen className='w-3.5 h-3.5' />
               Tarot
             </Link>
             <Link
               href='/horoscope'
-              className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-purple-500/40'
+              className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary-600'
             >
               <Calendar className='w-3.5 h-3.5' />
               Horoscope
