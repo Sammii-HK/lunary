@@ -59,7 +59,7 @@ export function FreeHoroscopeView() {
           title='Solar Return Insights'
           description='Discover your personal year themes and birthday insights'
           blurredContent={
-            <div className='rounded-lg border border-amber-500/30 bg-amber-500/10 p-6 opacity-60'>
+            <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-6 opacity-60'>
               <div className='space-y-3'>
                 <div className='flex justify-between items-center'>
                   <span className='text-sm text-zinc-300'>
@@ -89,7 +89,7 @@ export function FreeHoroscopeView() {
           title='Personal Transit Impact'
           description='See how planetary transits specifically affect your birth chart'
           blurredContent={
-            <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-6 opacity-60'>
+            <div className='rounded-lg border border-lunary-secondary-700 bg-lunary-secondary-950 p-6 opacity-60'>
               <p className='text-sm text-zinc-300 mb-4'>
                 ●●● ●●●●● ●●●●●●● ●●●●●● ●●●●●●●●● ●●● ●●●● ●●●●● ●●●●●
                 ●●●●●●●●●
@@ -98,7 +98,7 @@ export function FreeHoroscopeView() {
                 {[...Array(3)].map((_, index) => (
                   <div
                     key={index}
-                    className='rounded border-l-4 border-indigo-500/50 bg-zinc-800/50 p-4'
+                    className='rounded border-l-4 border-lunary-secondary-600 bg-zinc-800/50 p-4'
                   >
                     <div className='flex justify-between items-start mb-2'>
                       <div>

@@ -6,7 +6,7 @@ interface TransitCardProps {
 
 export function TransitCard({ transit }: TransitCardProps) {
   return (
-    <div className='rounded-lg border-l-4 border-indigo-500/50 bg-zinc-800/50 p-4'>
+    <div className='rounded-lg border-l-4 border-lunary-secondary-600 bg-zinc-800/50 p-4'>
       <div className='flex justify-between items-start mb-2'>
         <div>
           <h4 className='font-medium text-zinc-100 text-sm mb-1'>
@@ -21,8 +21,8 @@ export function TransitCard({ transit }: TransitCardProps) {
             transit.significance === 'high'
               ? 'bg-red-500/20 text-red-300/90 border border-red-500/30'
               : transit.significance === 'medium'
-                ? 'bg-amber-500/20 text-amber-300/90 border border-amber-500/30'
-                : 'bg-blue-500/20 text-blue-300/90 border border-blue-500/30'
+                ? 'bg-lunary-accent-900 text-lunary-accent-300 border border-lunary-accent-700'
+                : 'bg-lunary-secondary-900 text-lunary-secondary-300 border border-lunary-secondary-700'
           }`}
         >
           {transit.significance}

@@ -6,10 +6,10 @@ interface HoroscopeSectionProps {
 
 const colorClasses = {
   purple: 'border-lunary-primary-700 bg-lunary-primary-950',
-  blue: 'border-blue-500/20 bg-blue-500/10',
-  emerald: 'border-emerald-500/20 bg-emerald-500/10',
-  amber: 'border-amber-500/30 bg-amber-500/10',
-  indigo: 'border-indigo-500/20 bg-indigo-500/10',
+  blue: 'border-lunary-secondary-800 bg-lunary-secondary-950',
+  emerald: 'border-lunary-success-800 bg-lunary-success-950',
+  amber: 'border-lunary-accent-700 bg-lunary-accent-950',
+  indigo: 'border-lunary-primary-800 bg-lunary-primary-950',
   zinc: 'border-zinc-800/50 bg-zinc-900/30',
 };
 

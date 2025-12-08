@@ -607,7 +607,7 @@ export function PaidHoroscopeView({
             </p>
             <Link
               href='/profile'
-              className='inline-block rounded-lg border border-amber-500/30 bg-amber-500/15 hover:bg-amber-500/20 text-amber-300/90 px-4 py-2 text-sm font-medium transition-colors'
+              className='inline-block rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 hover:bg-lunary-accent-900 text-lunary-accent-300 px-4 py-2 text-sm font-medium transition-colors'
             >
               Update Profile
             </Link>
@@ -645,7 +645,7 @@ export function PaidHoroscopeView({
                   {solarReturnData.themes.map((theme, index) => (
                     <span
                       key={index}
-                      className='px-2 py-1 rounded border border-amber-500/30 bg-amber-500/10 text-xs text-zinc-300'
+                      className='px-2 py-1 rounded border border-lunary-accent-700 bg-lunary-accent-950 text-xs text-zinc-300'
                     >
                       {theme}
                     </span>

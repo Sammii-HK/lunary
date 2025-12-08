@@ -8,7 +8,7 @@ export function PersonalTransitImpactCard({
   impact,
 }: PersonalTransitImpactProps) {
   return (
-    <div className='rounded-lg border-l-4 border-indigo-500/50 bg-zinc-800/50 p-4'>
+    <div className='rounded-lg border-l-4 border-lunary-secondary-600 bg-zinc-800/50 p-4'>
       <div className='flex justify-between items-start mb-2'>
         <div>
           <h4 className='font-medium text-zinc-100 text-sm mb-1'>
@@ -25,8 +25,8 @@ export function PersonalTransitImpactCard({
             impact.significance === 'high'
               ? 'bg-red-500/20 text-red-300/90 border border-red-500/30'
               : impact.significance === 'medium'
-                ? 'bg-amber-500/20 text-amber-300/90 border border-amber-500/30'
-                : 'bg-blue-500/20 text-blue-300/90 border border-blue-500/30'
+                ? 'bg-lunary-accent-900 text-lunary-accent-300 border border-lunary-accent-700'
+                : 'bg-lunary-secondary-900 text-lunary-secondary-300 border border-lunary-secondary-700'
           }`}
         >
           {impact.significance}
@@ -35,9 +35,11 @@ export function PersonalTransitImpactCard({
       <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
         {impact.description}
       </p>
-      <div className='mt-2 pt-2 border-t border-indigo-500/20 space-y-2'>
-        <p className='text-xs text-indigo-300/90 leading-relaxed'>
-          <span className='font-medium text-indigo-200'>Personal Impact:</span>{' '}
+      <div className='mt-2 pt-2 border-t border-lunary-secondary-800 space-y-2'>
+        <p className='text-xs text-lunary-secondary-300 leading-relaxed'>
+          <span className='font-medium text-lunary-secondary-200'>
+            Personal Impact:
+          </span>{' '}
           {impact.personalImpact}
         </p>
         {impact.actionableGuidance && (
