@@ -144,19 +144,19 @@ export function ShareInsightForm({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        'space-y-4 rounded-3xl border border-purple-500/30 bg-black/40 p-6 shadow-lg shadow-purple-500/20 backdrop-blur',
+        'space-y-4 rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary/20 backdrop-blur',
         className,
       )}
     >
       <div className='flex items-center gap-3'>
-        <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-200'>
+        <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-lunary-primary-900 text-lunary-accent-200'>
           <Sparkles className='h-5 w-5' />
         </div>
         <div>
           <h3 className='text-lg font-semibold text-white'>
             Share your insight
           </h3>
-          <p className='text-sm text-purple-100/70'>
+          <p className='text-sm text-lunary-accent-100/70'>
             Reflect on the energy of this circle—your words support others.
           </p>
         </div>
@@ -170,10 +170,10 @@ export function ShareInsightForm({
           onChange={(event) =>
             setInsightText(event.target.value.slice(0, MAX_LENGTH))
           }
-          className='min-h-[140px] resize-none border-purple-500/30 bg-black/40 text-sm text-white placeholder:text-purple-200/40 focus-visible:border-purple-300 focus-visible:ring-purple-400/40'
+          className='min-h-[140px] resize-none border-lunary-primary-700 bg-black/40 text-sm text-white placeholder:text-lunary-accent-200/40 focus-visible:border-lunary-accent-300 focus-visible:ring-lunary-accent/40'
           maxLength={MAX_LENGTH + 10}
         />
-        <div className='flex items-center justify-between text-xs text-purple-100/70'>
+        <div className='flex items-center justify-between text-xs text-lunary-accent-100/70'>
           <span
             className={cn(
               isTooShort || isTooLong ? 'text-rose-300' : undefined,
@@ -187,7 +187,7 @@ export function ShareInsightForm({
         </div>
       </div>
 
-      <div className='flex items-center justify-between gap-4 rounded-2xl border border-purple-500/20 bg-purple-500/5 px-4 py-3'>
+      <div className='flex items-center justify-between gap-4 rounded-2xl border border-lunary-primary-800 bg-lunary-primary-950 px-4 py-3'>
         <div className='flex-1'>
           <Label
             htmlFor='share-anonymous'
@@ -195,7 +195,7 @@ export function ShareInsightForm({
           >
             Share anonymously
           </Label>
-          <p className='text-xs text-purple-100/60 mt-0.5'>
+          <p className='text-xs text-lunary-accent-100/60 mt-0.5'>
             Your name and profile stay hidden unless toggled off.
           </p>
         </div>
@@ -204,7 +204,7 @@ export function ShareInsightForm({
           checked={isAnonymous}
           onCheckedChange={setIsAnonymous}
           aria-label='Toggle anonymous sharing'
-          className='shrink-0 data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-purple-500/30'
+          className='shrink-0 data-[state=checked]:bg-lunary-primary data-[state=unchecked]:bg-lunary-primary-700'
           thumbClassName='bg-white'
         />
       </div>
@@ -212,7 +212,7 @@ export function ShareInsightForm({
       <Button
         type='submit'
         disabled={isSubmitDisabled}
-        className='w-full rounded-2xl bg-purple-500 py-3 text-base font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50'
+        className='w-full rounded-2xl bg-lunary-primary py-3 text-base font-semibold text-white shadow-lg shadow-lunary-primary/40 transition hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:opacity-50'
       >
         {status === 'loading' ? (
           <span className='flex items-center justify-center gap-2'>
@@ -227,7 +227,7 @@ export function ShareInsightForm({
         )}
       </Button>
 
-      <div className='text-xs text-purple-100/70'>
+      <div className='text-xs text-lunary-accent-100/70'>
         <p className='flex items-center gap-1.5'>
           <Lock className='h-3.5 w-3.5' />
           Community-ready content only. Moderation keeps things safe.
