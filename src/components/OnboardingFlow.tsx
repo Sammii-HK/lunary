@@ -230,8 +230,8 @@ export function OnboardingFlow() {
         {currentStep === 'welcome' && (
           <div className='space-y-6'>
             <div className='text-center'>
-              <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-500/20 mb-4'>
-                <Sparkles className='w-8 h-8 text-purple-300' />
+              <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-lunary-primary-900 mb-4'>
+                <Sparkles className='w-8 h-8 text-lunary-accent-300' />
               </div>
               <h2 className='text-2xl font-bold text-white mb-2'>
                 Welcome to your Book of Shadows
@@ -244,8 +244,8 @@ export function OnboardingFlow() {
 
             <div className='space-y-4'>
               <div className='flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg'>
-                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center'>
-                  <Calendar className='w-5 h-5 text-purple-300' />
+                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                  <Calendar className='w-5 h-5 text-lunary-accent-300' />
                 </div>
                 <div>
                   <h3 className='text-white font-medium mb-1'>
@@ -259,8 +259,8 @@ export function OnboardingFlow() {
               </div>
 
               <div className='flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg'>
-                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center'>
-                  <Star className='w-5 h-5 text-purple-300' />
+                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                  <Star className='w-5 h-5 text-lunary-accent-300' />
                 </div>
                 <div>
                   <h3 className='text-white font-medium mb-1'>
@@ -273,8 +273,8 @@ export function OnboardingFlow() {
               </div>
 
               <div className='flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg'>
-                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center'>
-                  <NotebookPen className='w-5 h-5 text-purple-300' />
+                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                  <NotebookPen className='w-5 h-5 text-lunary-accent-300' />
                 </div>
                 <div>
                   <h3 className='text-white font-medium mb-1'>
@@ -292,7 +292,7 @@ export function OnboardingFlow() {
             <div className='pt-4'>
               <button
                 onClick={() => setCurrentStep('birthday')}
-                className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
+                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
                 Get Started
               </button>
@@ -333,7 +333,7 @@ export function OnboardingFlow() {
                   type='time'
                   value={birthTime}
                   onChange={(e) => setBirthTime(e.target.value)}
-                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500'
+                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                 />
                 <p className='text-xs text-zinc-400 mt-1'>
                   More precise time = more accurate chart
@@ -349,7 +349,7 @@ export function OnboardingFlow() {
                   value={birthLocation}
                   onChange={(e) => setBirthLocation(e.target.value)}
                   placeholder='City, Country'
-                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500'
+                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                 />
               </div>
 
@@ -363,7 +363,7 @@ export function OnboardingFlow() {
               <button
                 onClick={handleSaveBirthday}
                 disabled={!birthday || saving}
-                className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg font-medium transition-all'
+                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
                 {saving ? 'Saving...' : 'Continue'}
               </button>
@@ -416,13 +416,13 @@ export function OnboardingFlow() {
                     onClick={() => setSelectedIntention(intention.id)}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       isSelected
-                        ? 'border-purple-500 bg-purple-500/20'
+                        ? 'border-lunary-primary bg-lunary-primary-900'
                         : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                     }`}
                   >
                     <Icon
                       className={`w-6 h-6 mx-auto mb-2 ${
-                        isSelected ? 'text-purple-300' : 'text-zinc-400'
+                        isSelected ? 'text-lunary-accent-300' : 'text-zinc-400'
                       }`}
                     />
                     <div
@@ -448,7 +448,7 @@ export function OnboardingFlow() {
                   }
                   handleNext();
                 }}
-                className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
+                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
                 Continue
               </button>
@@ -499,7 +499,9 @@ export function OnboardingFlow() {
                     .map((planet: any, idx: number) => (
                       <div key={idx} className='flex justify-between'>
                         <span>{planet.body}</span>
-                        <span className='text-purple-300'>{planet.sign}</span>
+                        <span className='text-lunary-accent-300'>
+                          {planet.sign}
+                        </span>
                       </div>
                     ))}
                   {birthChartPreview.length > 3 && (
@@ -511,30 +513,30 @@ export function OnboardingFlow() {
               </div>
             )}
 
-            <div className='p-4 bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-lg border border-purple-500/30'>
+            <div className='p-4 bg-gradient-to-br from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded-lg border border-lunary-primary/30'>
               <h3 className='text-sm font-medium text-white mb-2 flex items-center gap-2'>
-                <Sparkles className='w-4 h-4 text-purple-300' />
+                <Sparkles className='w-4 h-4 text-lunary-accent-300' />
                 What&apos;s Now Available to You
               </h3>
               <ul className='space-y-2 text-xs text-zinc-300'>
                 <li className='flex items-start gap-2'>
-                  <span className='text-purple-300 mt-0.5'>•</span>
+                  <span className='text-lunary-accent-300 mt-0.5'>•</span>
                   <span>
                     Unlimited conversations with your cosmic companion
                   </span>
                 </li>
                 <li className='flex items-start gap-2'>
-                  <span className='text-purple-300 mt-0.5'>•</span>
+                  <span className='text-lunary-accent-300 mt-0.5'>•</span>
                   <span>
                     Personalized insights based on your exact birth chart
                   </span>
                 </li>
                 <li className='flex items-start gap-2'>
-                  <span className='text-purple-300 mt-0.5'>•</span>
+                  <span className='text-lunary-accent-300 mt-0.5'>•</span>
                   <span>Ritual suggestions aligned with current transits</span>
                 </li>
                 <li className='flex items-start gap-2'>
-                  <span className='text-purple-300 mt-0.5'>•</span>
+                  <span className='text-lunary-accent-300 mt-0.5'>•</span>
                   <span>Deeper tarot interpretations and cosmic guidance</span>
                 </li>
               </ul>
@@ -543,7 +545,7 @@ export function OnboardingFlow() {
             <div className='pt-4 space-y-3'>
               <button
                 onClick={handleComplete}
-                className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
+                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
                 Start Exploring
               </button>
@@ -573,7 +575,7 @@ export function OnboardingFlow() {
             <div className='pt-4'>
               <button
                 onClick={handleComplete}
-                className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-medium transition-all'
+                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
                 Open Book of Shadows
               </button>
