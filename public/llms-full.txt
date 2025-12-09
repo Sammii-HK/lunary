@@ -382,6 +382,126 @@ Emotional mastery. Calm wisdom and balanced leadership through empathy.
 
 ---
 
+## Minor Arcana - Suit of Swords (Air/Intellect)
+
+### Ace of Swords
+Keywords: Breakthroughs, new ideas, mental clarity, success
+New ideas and breakthroughs. Mental clarity and the power to cut through confusion.
+
+### Two of Swords
+Keywords: Difficult decisions, weighing options, impasse, avoidance
+Difficult decisions. A state of impasse where choices must be made to move forward.
+
+### Three of Swords
+Keywords: Heartbreak, emotional pain, sorrow, grief
+Heartbreak and emotional pain. Acknowledging and healing from grief.
+
+### Four of Swords
+Keywords: Rest, relaxation, meditation, recuperation
+Rest and recuperation. Time for meditation and recharging mental energy.
+
+### Five of Swords
+Keywords: Conflict, disagreements, competition, defeat
+Conflict and the desire to win at all costs. Assess motives and seek resolution.
+
+### Six of Swords
+Keywords: Transition, change, rite of passage, releasing baggage
+Transition and moving away from difficulties. Embracing new beginnings.
+
+### Seven of Swords
+Keywords: Betrayal, deception, strategy, acting strategically
+Betrayal or deception. Need for strategic thinking and caution.
+
+### Eight of Swords
+Keywords: Negative thoughts, self-imposed restriction, imprisonment
+Mental barriers and self-imposed restrictions. Recognize your power to change.
+
+### Nine of Swords
+Keywords: Anxiety, worry, fear, nightmares
+Anxiety and worry. Address fears and seek solutions to alleviate stress.
+
+### Ten of Swords
+Keywords: Painful endings, deep wounds, betrayal, crisis
+Painful endings and betrayal. Let go of the past and find ways to heal.
+
+### Page of Swords
+Keywords: New ideas, curiosity, thirst for knowledge
+New ideas and curiosity. Embrace new perspectives and intellectual pursuits.
+
+### Knight of Swords
+Keywords: Ambitious, action-oriented, driven, fast-thinking
+Ambition and quick action. Tackle challenges with determination.
+
+### Queen of Swords
+Keywords: Independent, unbiased judgment, clear boundaries
+Independence and clear judgment. Communicate with honesty and fairness.
+
+### King of Swords
+Keywords: Mental clarity, intellectual power, authority, truth
+Mental clarity and authority. Lead with wisdom, fairness, and objectivity.
+
+---
+
+## Minor Arcana - Suit of Pentacles (Earth/Material)
+
+### Ace of Pentacles
+Keywords: New financial opportunity, manifestation, abundance
+New financial or career opportunities. Potential for prosperity through hard work.
+
+### Two of Pentacles
+Keywords: Multiple priorities, time management, adaptability
+Juggling multiple responsibilities. Importance of balance and flexibility.
+
+### Three of Pentacles
+Keywords: Teamwork, collaboration, learning, implementation
+Teamwork and collaboration. Value of working together toward common goals.
+
+### Four of Pentacles
+Keywords: Saving money, security, conservatism, control
+Financial security and resource management. Balance between security and generosity.
+
+### Five of Pentacles
+Keywords: Financial loss, poverty, lack mindset, isolation
+Financial hardship and worry. Seek support and remain hopeful.
+
+### Six of Pentacles
+Keywords: Giving, receiving, sharing wealth, generosity
+Balance of giving and receiving. Practice generosity and be open to help.
+
+### Seven of Pentacles
+Keywords: Long-term view, sustainable results, perseverance
+Patience and long-term investment. Trust in the process of growth.
+
+### Eight of Pentacles
+Keywords: Apprenticeship, skill development, mastery
+Hard work and skill mastery. Commitment to continuous improvement.
+
+### Nine of Pentacles
+Keywords: Abundance, luxury, self-sufficiency, independence
+Self-sufficiency and financial independence. Enjoy the fruits of your labor.
+
+### Ten of Pentacles
+Keywords: Wealth, family, long-term success, legacy
+Long-term success and legacy. Building a lasting foundation for loved ones.
+
+### Page of Pentacles
+Keywords: Manifestation, financial opportunity, skill development
+New financial opportunities and practical skill development.
+
+### Knight of Pentacles
+Keywords: Hard work, productivity, routine, conservatism
+Diligence and methodical approach. Steady, patient progress toward goals.
+
+### Queen of Pentacles
+Keywords: Nurturing, practical, providing financially
+Practicality and nurturing. Balance of work and family life.
+
+### King of Pentacles
+Keywords: Wealth, business, leadership, discipline, abundance
+Financial success and disciplined resource management. Lead with integrity.
+
+---
+
 ## More Crystals
 
 ### Selenite
@@ -610,6 +730,86 @@ Magical Properties: Happiness, well-being, harmony
 Used to create happiness and harmony, attracts positive energies.
 https://lunary.app/grimoire/runes/wunjo
 
+### Hagalaz ᚺ (Hail)
+Magical Properties: Disruption, change
+Represents uncontrollable forces, used for breaking destructive patterns.
+https://lunary.app/grimoire/runes/hagalaz
+
+### Nauthiz ᚾ (Need)
+Magical Properties: Resistance, constraint
+Helps in overcoming limitations, teaches the necessity of facing hardships.
+https://lunary.app/grimoire/runes/nauthiz
+
+### Isa ᛁ (Ice)
+Magical Properties: Stasis, clarity
+Used to halt situations or forces, promotes concentration and focus.
+https://lunary.app/grimoire/runes/isa
+
+### Jera ᛃ (Year/Harvest)
+Magical Properties: Fertility, fruition
+Symbolizes cycles and seasons, used to bring events to completion.
+https://lunary.app/grimoire/runes/jera
+
+### Eihwaz ᛇ (Yew Tree)
+Magical Properties: Protection, endurance
+Strengthens personal power, used for protection in challenges.
+https://lunary.app/grimoire/runes/eihwaz
+
+### Perthro ᛈ (Dice Cup)
+Magical Properties: Chance, mystery
+Linked to fate and prophecy, used in divination and understanding destiny.
+https://lunary.app/grimoire/runes/perthro
+
+### Algiz ᛉ (Elk)
+Magical Properties: Protection, defense
+Strongly protective, wards off negative energies and attacks.
+https://lunary.app/grimoire/runes/algiz
+
+### Sowilo ᛊ (Sun)
+Magical Properties: Guidance, vitality
+Represents success and solar power, brings energy and health.
+https://lunary.app/grimoire/runes/sowilo
+
+### Tiwaz ᛏ (Tyr)
+Magical Properties: Justice, sacrifice
+Associated with law and order, used for victory in battles.
+https://lunary.app/grimoire/runes/tiwaz
+
+### Berkano ᛒ (Birch)
+Magical Properties: Birth, regeneration
+Used for new beginnings, nurturing growth, and healing.
+https://lunary.app/grimoire/runes/berkano
+
+### Ehwaz ᛖ (Horse)
+Magical Properties: Trust, loyalty
+Symbolizes partnerships and trust, strengthens alliances.
+https://lunary.app/grimoire/runes/ehwaz
+
+### Mannaz ᛗ (Mankind)
+Magical Properties: Humanity, support
+Focuses on social relationships and community assistance.
+https://lunary.app/grimoire/runes/mannaz
+
+### Laguz ᛚ (Water)
+Magical Properties: Intuition, dreams
+Connected to emotions and psychic abilities, aids in dream work.
+https://lunary.app/grimoire/runes/laguz
+
+### Ingwaz ᛜ (Ing)
+Magical Properties: Potential, fertility
+Encapsulates potential energy, used for manifesting ideas into action.
+https://lunary.app/grimoire/runes/ingwaz
+
+### Dagaz ᛞ (Day/Dawn)
+Magical Properties: Awakening, clarity
+Represents breakthroughs and new beginnings, illuminates and transforms.
+https://lunary.app/grimoire/runes/dagaz
+
+### Othala ᛟ (Heritage)
+Magical Properties: Heritage, inheritance
+Strengthens ties to home and family, protects and retains wealth.
+https://lunary.app/grimoire/runes/othala
+
 ---
 
 ## Popular Crystals
@@ -651,31 +851,499 @@ https://lunary.app/grimoire/crystals/citrine
 
 ---
 
-## Spell Categories
+## Spell Categories & Popular Spells
 
 ### Protection Spells
-Spells and rituals for creating shields, barriers, and safeguards. Protect yourself, your home, and loved ones.
+Spells and rituals for creating shields, barriers, and safeguards.
+- Salt Circle Protection: Creates protective barrier using salt and candle
+- Black Tourmaline Energy Shield: Crystal-based personal protection
+- Mirror Spell: Reflects negative energy back to sender
 https://lunary.app/grimoire/spells?category=protection
 
 ### Love & Relationships
-Workings for self-love, attracting love, and strengthening bonds. Ethical love magic focuses on opening yourself to love.
+Workings for self-love, attracting love, and strengthening bonds.
+- Rose Quartz Self-Love Ritual: Opens heart chakra for self-acceptance
+- Honey Jar Spell: Sweetens relationships and attracts harmony
+- Venus Bath Ritual: Enhances beauty and attractiveness
 https://lunary.app/grimoire/spells?category=love
 
 ### Prosperity & Abundance
-Spells for financial success, career advancement, and abundance. Attract opportunities and remove blocks to prosperity.
+Spells for financial success, career advancement, and abundance.
+- Basil Prosperity Jar: Attracts wealth using herb correspondences
+- Money Bowl Spell: Creates ongoing abundance magnet
+- Citrine Career Success: Crystal magic for professional growth
 https://lunary.app/grimoire/spells?category=prosperity
 
 ### Healing & Wellness
-Rituals for physical, emotional, and spiritual healing. Support (not replace) medical treatment.
+Rituals for physical, emotional, and spiritual healing.
+- Lavender Healing Bath: Combines aromatherapy and water magic
+- Cord Cutting Ritual: Releases unhealthy attachments
+- Blue Candle Healing: Promotes physical and emotional recovery
 https://lunary.app/grimoire/spells?category=healing
 
 ### Cleansing & Purification
-Spells for removing negative energy, cleansing spaces, and purifying objects. Essential maintenance for magical practice.
+Spells for removing negative energy and purifying spaces.
+- Sacred Sage Space Cleansing: Traditional smoke cleansing
+- Salt Water Floor Wash: Removes negative energy from home
+- Sound Cleansing Ritual: Uses bells or singing bowls
 https://lunary.app/grimoire/spells?category=cleansing
 
 ### Manifestation
-Workings for bringing desires into reality. Combine intention, visualization, and energy work.
+Workings for bringing desires into reality.
+- New Moon Intention Setting: Plant seeds during lunar new beginnings
+- Candle Manifestation: Focus intention through flame
+- Vision Board Blessing: Empower visual goals with energy
 https://lunary.app/grimoire/spells?category=manifestation
+
+### Divination & Wisdom
+Enhancing psychic abilities and gaining insight.
+- Third Eye Opening Meditation: Develops intuition
+- Scrying Practice: Reading messages in reflective surfaces
+- Dream Enhancement Spell: Promotes prophetic dreams
+https://lunary.app/grimoire/spells?category=divination
+
+### Banishing & Release
+Removing unwanted influences and letting go.
+- Freezer Spell: Stops harmful behavior from others
+- Burning Release Ritual: Lets go of what no longer serves
+- Waning Moon Banishing: Works with lunar energy for release
+https://lunary.app/grimoire/spells?category=banishing
+
+---
+
+## Astrological Houses
+
+### First House (Self)
+Natural Sign: Aries | Natural Ruler: Mars
+Life Area: Self, identity, physical body, first impressions
+The house of new beginnings and personal identity. How you present yourself to the world.
+https://lunary.app/grimoire/birth-chart/houses/1
+
+### Second House (Values)
+Natural Sign: Taurus | Natural Ruler: Venus
+Life Area: Finances, possessions, personal values, self-worth
+Governs your relationship with money and what you value most.
+https://lunary.app/grimoire/birth-chart/houses/2
+
+### Third House (Communication)
+Natural Sign: Gemini | Natural Ruler: Mercury
+Life Area: Communication, siblings, neighbors, short journeys
+Rules thinking patterns, siblings, and immediate environment.
+https://lunary.app/grimoire/birth-chart/houses/3
+
+### Fourth House (Home)
+Natural Sign: Cancer | Natural Ruler: Moon
+Life Area: Home, family, ancestry, emotional foundation
+Represents roots, family, and emotional security.
+https://lunary.app/grimoire/birth-chart/houses/4
+
+### Fifth House (Creativity)
+Natural Sign: Leo | Natural Ruler: Sun
+Life Area: Creativity, romance, children, pleasure
+Governs self-expression, romance, and finding joy.
+https://lunary.app/grimoire/birth-chart/houses/5
+
+### Sixth House (Health)
+Natural Sign: Virgo | Natural Ruler: Mercury
+Life Area: Health, daily work, service, routines
+Rules health, daily habits, and service to others.
+https://lunary.app/grimoire/birth-chart/houses/6
+
+### Seventh House (Partnership)
+Natural Sign: Libra | Natural Ruler: Venus
+Life Area: Marriage, partnerships, contracts
+Represents committed partnerships and significant others.
+https://lunary.app/grimoire/birth-chart/houses/7
+
+### Eighth House (Transformation)
+Natural Sign: Scorpio | Natural Ruler: Pluto
+Life Area: Shared resources, transformation, death, rebirth
+Governs deep change, intimacy, and life's mysteries.
+https://lunary.app/grimoire/birth-chart/houses/8
+
+### Ninth House (Philosophy)
+Natural Sign: Sagittarius | Natural Ruler: Jupiter
+Life Area: Higher education, philosophy, long-distance travel
+Rules expansion of horizons and search for meaning.
+https://lunary.app/grimoire/birth-chart/houses/9
+
+### Tenth House (Career)
+Natural Sign: Capricorn | Natural Ruler: Saturn
+Life Area: Career, public reputation, authority, life direction
+Represents ambitions and how the world sees you professionally.
+https://lunary.app/grimoire/birth-chart/houses/10
+
+### Eleventh House (Community)
+Natural Sign: Aquarius | Natural Ruler: Uranus
+Life Area: Friends, groups, hopes, humanitarian causes
+Governs friendships, group associations, and future hopes.
+https://lunary.app/grimoire/birth-chart/houses/11
+
+### Twelfth House (Spirituality)
+Natural Sign: Pisces | Natural Ruler: Neptune
+Life Area: Subconscious, spirituality, solitude, hidden matters
+Rules the unseen, karma, and spiritual transcendence.
+https://lunary.app/grimoire/birth-chart/houses/12
+
+---
+
+## Planetary Aspects
+
+### Conjunction (0°)
+Symbol: ☌ | Nature: Neutral
+Fusion of two planetary energies at the same degree. Intensifies and blends qualities. The most powerful aspect.
+https://lunary.app/grimoire/aspects/types/conjunct
+
+### Sextile (60°)
+Symbol: ⚹ | Nature: Harmonious
+Creates opportunities and natural talents when activated consciously. Ease in communication between energies.
+https://lunary.app/grimoire/aspects/types/sextile
+
+### Square (90°)
+Symbol: □ | Nature: Challenging
+Creates tension and friction that drives action and growth. Obstacles that build strength.
+https://lunary.app/grimoire/aspects/types/square
+
+### Trine (120°)
+Symbol: △ | Nature: Harmonious
+The most flowing aspect. Creates natural gifts and ease. Talents that come effortlessly.
+https://lunary.app/grimoire/aspects/types/trine
+
+### Opposition (180°)
+Symbol: ☍ | Nature: Challenging
+Creates polarity requiring balance. Integration of opposite energies. Awareness through contrast.
+https://lunary.app/grimoire/aspects/types/opposite
+
+---
+
+## Chinese Zodiac
+
+### Rat 🐀
+Element: Water | Yin/Yang: Yang
+Traits: Quick-witted, resourceful, versatile, charming
+Years: 1924, 1936, 1948, 1960, 1972, 1984, 1996, 2008, 2020
+Compatible: Ox, Dragon, Monkey
+https://lunary.app/grimoire/chinese-zodiac/rat
+
+### Ox 🐂
+Element: Earth | Yin/Yang: Yin
+Traits: Diligent, dependable, strong, determined
+Years: 1925, 1937, 1949, 1961, 1973, 1985, 1997, 2009, 2021
+Compatible: Rat, Snake, Rooster
+https://lunary.app/grimoire/chinese-zodiac/ox
+
+### Tiger 🐅
+Element: Wood | Yin/Yang: Yang
+Traits: Brave, confident, competitive, charming
+Years: 1926, 1938, 1950, 1962, 1974, 1986, 1998, 2010, 2022
+Compatible: Dragon, Horse, Pig
+https://lunary.app/grimoire/chinese-zodiac/tiger
+
+### Rabbit 🐇
+Element: Wood | Yin/Yang: Yin
+Traits: Quiet, elegant, kind, responsible
+Years: 1927, 1939, 1951, 1963, 1975, 1987, 1999, 2011, 2023
+Compatible: Goat, Monkey, Dog, Pig
+https://lunary.app/grimoire/chinese-zodiac/rabbit
+
+### Dragon 🐉
+Element: Earth | Yin/Yang: Yang
+Traits: Confident, intelligent, ambitious, powerful
+Years: 1928, 1940, 1952, 1964, 1976, 1988, 2000, 2012, 2024
+Compatible: Rooster, Rat, Monkey
+https://lunary.app/grimoire/chinese-zodiac/dragon
+
+### Snake 🐍
+Element: Fire | Yin/Yang: Yin
+Traits: Enigmatic, intelligent, wise, intuitive
+Years: 1929, 1941, 1953, 1965, 1977, 1989, 2001, 2013, 2025
+Compatible: Dragon, Rooster
+https://lunary.app/grimoire/chinese-zodiac/snake
+
+### Horse 🐎
+Element: Fire | Yin/Yang: Yang
+Traits: Animated, active, energetic, intelligent
+Years: 1930, 1942, 1954, 1966, 1978, 1990, 2002, 2014, 2026
+Compatible: Tiger, Goat, Rabbit
+https://lunary.app/grimoire/chinese-zodiac/horse
+
+### Goat 🐐
+Element: Earth | Yin/Yang: Yin
+Traits: Calm, gentle, creative, sympathetic
+Years: 1931, 1943, 1955, 1967, 1979, 1991, 2003, 2015, 2027
+Compatible: Rabbit, Horse, Pig
+https://lunary.app/grimoire/chinese-zodiac/goat
+
+### Monkey 🐒
+Element: Metal | Yin/Yang: Yang
+Traits: Sharp, smart, curious, playful
+Years: 1932, 1944, 1956, 1968, 1980, 1992, 2004, 2016, 2028
+Compatible: Ox, Rabbit
+https://lunary.app/grimoire/chinese-zodiac/monkey
+
+### Rooster 🐓
+Element: Metal | Yin/Yang: Yin
+Traits: Observant, hardworking, courageous, confident
+Years: 1933, 1945, 1957, 1969, 1981, 1993, 2005, 2017, 2029
+Compatible: Ox, Snake
+https://lunary.app/grimoire/chinese-zodiac/rooster
+
+### Dog 🐕
+Element: Earth | Yin/Yang: Yang
+Traits: Loyal, honest, kind, cautious
+Years: 1934, 1946, 1958, 1970, 1982, 1994, 2006, 2018, 2030
+Compatible: Rabbit
+https://lunary.app/grimoire/chinese-zodiac/dog
+
+### Pig 🐷
+Element: Water | Yin/Yang: Yin
+Traits: Compassionate, generous, diligent, sociable
+Years: 1935, 1947, 1959, 1971, 1983, 1995, 2007, 2019, 2031
+Compatible: Tiger, Rabbit, Goat
+https://lunary.app/grimoire/chinese-zodiac/pig
+
+---
+
+## Zodiac Cusps
+
+### Cusp of Power (Aries-Taurus)
+Dates: April 16-22
+Combines Aries' pioneering spirit with Taurus' determination. Exceptional drive and staying power.
+Traits: Determined, pioneering, persistent, authoritative
+https://lunary.app/grimoire/cusps/aries-taurus
+
+### Cusp of Energy (Taurus-Gemini)
+Dates: May 17-23
+Blends Taurus' sensuality with Gemini's mental agility. Dynamic, charming individuals.
+Traits: Adaptable, charming, witty, versatile
+https://lunary.app/grimoire/cusps/taurus-gemini
+
+### Cusp of Magic (Gemini-Cancer)
+Dates: June 17-23
+Combines Gemini's communication with Cancer's emotional depth. Deeply intuitive and expressive.
+Traits: Intuitive, expressive, nurturing, curious
+https://lunary.app/grimoire/cusps/gemini-cancer
+
+### Cusp of Oscillation (Cancer-Leo)
+Dates: July 19-25
+Swings between Cancer's sensitivity and Leo's confidence. Passionate, emotionally expressive.
+Traits: Dramatic, nurturing, confident, creative
+https://lunary.app/grimoire/cusps/cancer-leo
+
+### Cusp of Exposure (Leo-Virgo)
+Dates: August 19-25
+Combines Leo's creativity with Virgo's precision. Talented perfectionists.
+Traits: Analytical, charismatic, hardworking, detail-oriented
+https://lunary.app/grimoire/cusps/leo-virgo
+
+### Cusp of Beauty (Virgo-Libra)
+Dates: September 19-25
+Merges Virgo's analytical eye with Libra's aesthetic sensibility. Refined taste.
+Traits: Aesthetic, balanced, analytical, graceful
+https://lunary.app/grimoire/cusps/virgo-libra
+
+### Cusp of Drama (Libra-Scorpio)
+Dates: October 19-25
+Fuses Libra's charm with Scorpio's intensity. Magnetic, powerful personalities.
+Traits: Magnetic, intense, charming, passionate
+https://lunary.app/grimoire/cusps/libra-scorpio
+
+### Cusp of Revolution (Scorpio-Sagittarius)
+Dates: November 18-24
+Combines Scorpio's depth with Sagittarius' quest for truth. Fearless seekers.
+Traits: Rebellious, adventurous, intense, philosophical
+https://lunary.app/grimoire/cusps/scorpio-sagittarius
+
+### Cusp of Prophecy (Sagittarius-Capricorn)
+Dates: December 18-24
+Merges Sagittarius' vision with Capricorn's practicality. Manifest big dreams.
+Traits: Visionary, ambitious, wise, determined
+https://lunary.app/grimoire/cusps/sagittarius-capricorn
+
+### Cusp of Mystery (Capricorn-Aquarius)
+Dates: January 16-22
+Blends Capricorn's ambition with Aquarius' innovation. Revolutionize traditions.
+Traits: Innovative, disciplined, eccentric, visionary
+https://lunary.app/grimoire/cusps/capricorn-aquarius
+
+### Cusp of Sensitivity (Aquarius-Pisces)
+Dates: February 15-21
+Combines Aquarius' vision with Pisces' compassion. Intuitive humanitarians.
+Traits: Compassionate, visionary, intuitive, creative
+https://lunary.app/grimoire/cusps/aquarius-pisces
+
+### Cusp of Rebirth (Pisces-Aries)
+Dates: March 17-23
+Combines Pisces' spiritual depth with Aries' action. Intuitive pioneers.
+Traits: Intuitive, pioneering, dreamy, courageous
+https://lunary.app/grimoire/cusps/pisces-aries
+
+---
+
+## Magical Correspondences
+
+### Elements
+Fire (Aries, Leo, Sagittarius): Passion, energy, transformation, will
+Water (Cancer, Scorpio, Pisces): Emotions, intuition, healing, purification
+Air (Gemini, Libra, Aquarius): Communication, intellect, travel, learning
+Earth (Taurus, Virgo, Capricorn): Stability, prosperity, grounding, manifestation
+
+### Days of the Week
+Monday (Moon): Intuition, dreams, emotions, feminine energy
+Tuesday (Mars): Courage, action, strength, protection
+Wednesday (Mercury): Communication, learning, travel, mental clarity
+Thursday (Jupiter): Prosperity, expansion, luck, growth
+Friday (Venus): Love, beauty, relationships, creativity
+Saturday (Saturn): Protection, banishing, discipline, karma
+Sunday (Sun): Success, prosperity, strength, vitality
+
+### Colors in Magic
+Red: Passion, courage, strength, love, protection
+Orange: Creativity, joy, success, manifestation
+Yellow: Communication, intellect, learning, clarity
+Green: Growth, prosperity, healing, money
+Blue: Peace, healing, protection, psychic ability
+Purple: Spirituality, psychic work, wisdom, magic
+White: Purity, protection, all-purpose
+Black: Protection, banishing, absorption
+Pink: Love, friendship, self-love, emotional healing
+Gold: Sun energy, prosperity, success
+Silver: Moon energy, intuition, psychic ability
+
+### Herbs in Magic
+Sage: Purification, wisdom, protection, longevity
+Rosemary: Memory, protection, purification, love
+Lavender: Peace, sleep, purification, protection
+Basil: Protection, prosperity, love, peace
+Cinnamon: Prosperity, protection, love, success
+Mint: Prosperity, protection, healing, travel
+Rose: Love, beauty, healing, protection
+Thyme: Courage, purification, health, sleep
+
+---
+
+## Life Path Numbers (Numerology)
+
+### Life Path 1 - The Leader
+Traits: Independent, pioneering, ambitious, innovative
+Strengths: Initiative, originality, confidence, problem-solving
+Career: Entrepreneurship, leadership, innovation, consulting
+Love: Values independence, needs respect for autonomy
+https://lunary.app/grimoire/life-path/1
+
+### Life Path 2 - The Diplomat
+Traits: Cooperative, sensitive, intuitive, supportive
+Strengths: Mediation, intuition, harmony, listening
+Career: Counseling, diplomacy, support services
+Love: Thrives in partnerships, needs emotional connection
+https://lunary.app/grimoire/life-path/2
+
+### Life Path 3 - The Communicator
+Traits: Creative, optimistic, social, artistic
+Strengths: Creativity, communication, enthusiasm
+Career: Arts, writing, teaching, marketing
+Love: Expressive, romantic, values fun and joy
+https://lunary.app/grimoire/life-path/3
+
+### Life Path 4 - The Builder
+Traits: Practical, organized, reliable, hardworking
+Strengths: Organization, dependability, work ethic
+Career: Engineering, finance, project management
+Love: Stable partner, values security and commitment
+https://lunary.app/grimoire/life-path/4
+
+### Life Path 5 - The Adventurer
+Traits: Adventurous, versatile, energetic, adaptable
+Strengths: Adaptability, versatility, curiosity
+Career: Travel, sales, media, entertainment
+Love: Needs freedom, values excitement and variety
+https://lunary.app/grimoire/life-path/5
+
+### Life Path 6 - The Nurturer
+Traits: Responsible, caring, protective, harmonious
+Strengths: Nurturing, responsibility, artistic sense
+Career: Healthcare, teaching, counseling, arts
+Love: Devoted partner, values family and harmony
+https://lunary.app/grimoire/life-path/6
+
+### Life Path 7 - The Seeker
+Traits: Analytical, introspective, spiritual, wise
+Strengths: Analysis, research, spiritual insight
+Career: Research, philosophy, psychology, healing
+Love: Needs intellectual connection and space
+https://lunary.app/grimoire/life-path/7
+
+### Life Path 8 - The Achiever
+Traits: Ambitious, authoritative, business-minded
+Strengths: Leadership, financial acumen, judgment
+Career: Business, finance, law, management
+Love: Seeks powerful partnerships, values success
+https://lunary.app/grimoire/life-path/8
+
+### Life Path 9 - The Humanitarian
+Traits: Compassionate, generous, wise, idealistic
+Strengths: Compassion, wisdom, artistic talent
+Career: Humanitarian work, arts, teaching, healing
+Love: Idealistic, needs shared values and purpose
+https://lunary.app/grimoire/life-path/9
+
+### Master Numbers (11, 22, 33)
+Master Number 11: The Intuitive - Heightened intuition and spiritual insight
+Master Number 22: The Master Builder - Ability to turn dreams into reality
+Master Number 33: The Master Teacher - Spiritual teaching and healing
+https://lunary.app/grimoire/numerology/master-numbers
+
+---
+
+## Astrology Glossary
+
+### Ascendant (Rising Sign)
+The zodiac sign rising on the eastern horizon at birth. Represents outward personality, physical appearance, and first impressions.
+
+### Natal Chart (Birth Chart)
+A map of the sky at the exact moment and location of birth. Shows positions of Sun, Moon, planets in signs and houses.
+
+### Transit
+Current planetary movements and how they interact with your natal chart. Used for timing and forecasting.
+
+### Retrograde
+When a planet appears to move backward from Earth's perspective. Signals times of review and reconsideration.
+
+### Conjunction
+Aspect where two planets occupy the same degree (0°). Intensifies and blends planetary energies.
+
+### Opposition
+Aspect of 180° creating polarity between planets. Requires balance and integration of opposites.
+
+### Trine
+Harmonious aspect of 120° indicating natural talent and ease. Gifts that flow effortlessly.
+
+### Square
+Challenging aspect of 90° creating tension and obstacles that drive growth and action.
+
+### Midheaven (MC)
+The highest point in the chart representing career, public image, and life direction.
+
+### Lunar Nodes
+North Node: Life purpose and growth direction
+South Node: Past life patterns and natural abilities
+
+### Planetary Dignity
+Domicile: Planet in its ruling sign (strongest)
+Exaltation: Planet in its honored sign
+Detriment: Planet opposite its ruling sign
+Fall: Planet opposite its exaltation sign
+
+### Elements
+Fire Signs (Aries, Leo, Sagittarius): Passion, action, inspiration
+Earth Signs (Taurus, Virgo, Capricorn): Practicality, stability, material
+Air Signs (Gemini, Libra, Aquarius): Intellect, communication, ideas
+Water Signs (Cancer, Scorpio, Pisces): Emotions, intuition, healing
+
+### Modalities
+Cardinal (Aries, Cancer, Libra, Capricorn): Initiative, leadership, action
+Fixed (Taurus, Leo, Scorpio, Aquarius): Stability, persistence, determination
+Mutable (Gemini, Virgo, Sagittarius, Pisces): Adaptability, flexibility, change
 
 ---
 
