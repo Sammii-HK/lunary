@@ -107,7 +107,7 @@ export function CookieConsent() {
                     href='/cookies'
                     className='text-lunary-accent hover:text-lunary-accent-300 underline'
                   >
-                    Learn more
+                    View our Cookie Policy
                   </Link>
                 </p>
               </div>

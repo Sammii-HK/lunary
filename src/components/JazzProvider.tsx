@@ -82,9 +82,9 @@ export function LunaryJazzProvider({
   const handleError = useCallback((err: Error) => {
     const msg = err?.message || '';
     if (msg.includes('secret') || msg.includes('seed')) {
-      console.log('[Jazz] User does not have a Jazz account - using Postgres');
+      console.log('[💩] User does not have a 💩 account - using Postgres');
     } else {
-      console.warn('[Jazz] Initialization error:', msg);
+      console.warn('[💩] Initialization error:', msg);
     }
     setError(msg);
     setLoading(false);
