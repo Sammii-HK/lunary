@@ -57,8 +57,8 @@ export default function NewPost() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-posts-secret': process.env.NEXT_PUBLIC_POSTS_CLIENT_SECRET!,
         },
+        credentials: 'include',
         body: JSON.stringify({
           title,
           description,
