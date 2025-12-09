@@ -168,7 +168,7 @@ export const SkyNowCard = () => {
 
   if (planets.length === 0) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md animate-pulse'>
+      <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse'>
         <div className='h-5 w-32 bg-zinc-800 rounded' />
       </div>
     );
@@ -177,7 +177,7 @@ export const SkyNowCard = () => {
   const preview = (
     <div className='w-full'>
       <ExpandableCardHeader
-        icon={<Telescope className='w-4 h-4' />}
+        icon={<Telescope className='w-4 h-4 text-lunary-secondary-300' />}
         title='Sky Now'
         badge={
           retrogradeCount > 0 ? `${retrogradeCount} Retrograde` : undefined
@@ -189,7 +189,7 @@ export const SkyNowCard = () => {
           {planets.map((planet) => (
             <span
               key={planet.body}
-              className={`font-astro text-base ${planet.retrograde ? 'text-red-400' : 'text-zinc-300'}`}
+              className={`font-astro text-base ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-300'}`}
               title={planet.body}
             >
               {getPlanetSymbol(planet.body)}
@@ -200,7 +200,7 @@ export const SkyNowCard = () => {
           {planets.map((planet) => (
             <span
               key={planet.body}
-              className={`text-xs font-astro ${planet.retrograde ? 'text-red-400' : 'text-zinc-500'}`}
+              className={`text-xs font-astro ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-500'}`}
             >
               {getZodiacSymbol(planet.sign)}
             </span>
@@ -216,11 +216,11 @@ export const SkyNowCard = () => {
         {planets.map((planet) => (
           <div
             key={planet.body}
-            className={`py-2 border-b border-zinc-800/50 last:border-0 ${planet.retrograde ? 'text-red-300' : ''}`}
+            className={`py-2 border-b border-zinc-800/30 last:border-0 ${planet.retrograde ? 'text-lunary-error-200' : ''}`}
           >
             <div className='flex items-baseline gap-2'>
               <span
-                className={`font-astro text-lg ${planet.retrograde ? 'text-red-400' : 'text-lunary-accent'}`}
+                className={`font-astro text-lg ${planet.retrograde ? 'text-lunary-error-300' : 'text-lunary-secondary-300'}`}
               >
                 {getPlanetSymbol(planet.body)}
               </span>
@@ -236,14 +236,16 @@ export const SkyNowCard = () => {
                   `${planet.formattedDegree.minute}'`}
               </span>
               {planet.retrograde && (
-                <span className='text-xs text-red-400 font-medium'>℞</span>
+                <span className='text-xs text-lunary-error-300 font-medium'>
+                  ℞
+                </span>
               )}
             </div>
             <p className='text-xs text-zinc-500 mt-1 ml-7'>
               {getPlanetMeaning(planet.body, planet.sign)}
             </p>
             {planet.retrograde && (
-              <p className='text-xs text-red-400/80 mt-1 ml-7 leading-relaxed'>
+              <p className='text-xs text-lunary-error-300/80 mt-1 ml-7 leading-relaxed'>
                 {getRetrogradeGuidance(planet.body, planet.sign)}
               </p>
             )}

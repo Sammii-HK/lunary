@@ -32,7 +32,6 @@ import {
   expressionKeys,
   soulUrgeKeys,
 } from '@/constants/grimoire/numerology-extended-data';
-import { ASTROLOGY_GLOSSARY } from '@/constants/grimoire/glossary';
 import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
 
@@ -513,20 +512,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
-    // Glossary index
+    // Glossary index (single page with all terms inline)
     {
       url: `${baseUrl}/grimoire/glossary`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
-    // Glossary term pages
-    ...ASTROLOGY_GLOSSARY.map((term) => ({
-      url: `${baseUrl}/grimoire/glossary/${term.slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    })),
   ];
 
   // Generate all blog week posts (from start of 2025 to current week)

@@ -274,7 +274,7 @@ export const MoonPreview = () => {
 
   if (!currentMoonPhase) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md animate-pulse'>
+      <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse'>
         <div className='h-5 w-32 bg-zinc-800 rounded' />
       </div>
     );

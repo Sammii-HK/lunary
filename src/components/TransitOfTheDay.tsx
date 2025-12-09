@@ -86,16 +86,16 @@ export const TransitOfTheDay = () => {
     return (
       <Link
         href='/pricing'
-        className='block py-3 px-4 border border-lunary-primary-700 bg-lunary-primary-950 rounded-md w-full h-full hover:bg-lunary-primary-900 transition-colors'
+        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors'
       >
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
-            <Sparkles className='w-4 h-4 text-lunary-accent' />
-            <span className='text-sm text-lunary-accent-300'>
+            <Sparkles className='w-4 h-4 text-lunary-secondary-200' />
+            <span className='text-sm text-lunary-primary-200'>
               Unlock personal transit insights
             </span>
           </div>
-          <ArrowRight className='w-4 h-4 text-lunary-accent' />
+          <ArrowRight className='w-4 h-4 text-lunary-secondary-200' />
         </div>
       </Link>
     );
@@ -117,19 +117,21 @@ export const TransitOfTheDay = () => {
   return (
     <Link
       href='/horoscope'
-      className='block py-3 px-4 border border-stone-800 rounded-md w-full h-full hover:border-lunary-primary-600 transition-colors group'
+      className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>
-          <div className='flex items-center gap-2 mb-1'>
-            <span className='font-astro text-lg text-lunary-accent'>
-              {getPlanetSymbol(transit.planet)}
-            </span>
-            <span className='text-xs text-zinc-500 uppercase tracking-wide'>
-              {dateLabel}
-            </span>
+          <div className='flex items-center justify-between mb-1'>
+            <div className='flex items-center gap-2'>
+              <span className='font-astro text-lg text-lunary-secondary-200'>
+                {getPlanetSymbol(transit.planet)}
+              </span>
+              <span className='text-xs text-zinc-500 uppercase tracking-wide'>
+                {dateLabel}
+              </span>
+            </div>
             {transit.significance === 'high' && (
-              <span className='text-xs bg-lunary-primary-900 text-lunary-accent-300 px-1.5 py-0.5 rounded'>
+              <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
                 Major
               </span>
             )}
@@ -148,7 +150,7 @@ export const TransitOfTheDay = () => {
             {transit.actionableGuidance}
           </p>
         </div>
-        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors flex-shrink-0 mt-1' />
+        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />
       </div>
     </Link>
   );

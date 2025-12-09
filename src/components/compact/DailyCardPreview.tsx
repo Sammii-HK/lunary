@@ -56,17 +56,17 @@ export const DailyCardPreview = () => {
     return (
       <Link
         href='/tarot'
-        className='block py-3 px-4 border border-stone-800 rounded-md hover:border-lunary-primary-600 transition-colors group h-full'
+        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
             <div className='flex items-center gap-2 mb-1'>
-              <Layers className='w-4 h-4 text-lunary-accent' />
+              <Layers className='w-4 h-4 text-lunary-accent-300' />
               <span className='text-sm font-medium text-zinc-200'>
                 Daily Card
               </span>
             </div>
-            <p className='text-sm text-lunary-accent-300 font-medium'>
+            <p className='text-sm text-lunary-primary-200 font-medium'>
               {dailyCard.name}
             </p>
             <p className='text-xs text-zinc-500'>
@@ -77,12 +77,12 @@ export const DailyCardPreview = () => {
                 {dailyCard.information}
               </p>
             )}
-            <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-accent group-hover:text-lunary-accent-300'>
+            <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 group-hover:text-lunary-primary-100'>
               <Lock className='w-3 h-3' />
               <span>Unlock personalized tarot</span>
             </div>
           </div>
-          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors flex-shrink-0 mt-1' />
+          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
         </div>
       </Link>
     );
@@ -91,20 +91,22 @@ export const DailyCardPreview = () => {
   return (
     <Link
       href='/tarot'
-      className='block py-3 px-4 border border-stone-800 rounded-md hover:border-lunary-primary-600 transition-colors group h-full'
+      className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>
-          <div className='flex items-center gap-2 mb-1'>
-            <Layers className='w-4 h-4 text-lunary-accent' />
-            <span className='text-sm font-medium text-zinc-200'>
-              Daily Card
-            </span>
-            <span className='text-xs bg-lunary-primary-900 text-lunary-accent-300 px-1.5 py-0.5 rounded'>
+          <div className='flex items-center justify-between mb-1'>
+            <div className='flex items-center gap-2'>
+              <Layers className='w-4 h-4 text-lunary-accent-300' />
+              <span className='text-sm font-medium text-zinc-200'>
+                Daily Card
+              </span>
+            </div>
+            <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
               Personal
             </span>
           </div>
-          <p className='text-sm text-lunary-accent-300 font-medium'>
+          <p className='text-sm text-lunary-primary-200 font-medium'>
             {dailyCard.name}
           </p>
           <p className='text-xs text-zinc-500'>
@@ -116,7 +118,7 @@ export const DailyCardPreview = () => {
             </p>
           )}
         </div>
-        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors flex-shrink-0 mt-1' />
+        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
       </div>
     </Link>
   );

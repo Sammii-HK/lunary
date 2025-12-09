@@ -81,14 +81,6 @@ export function useSubscription(): SubscriptionStatus {
     const isTrialActive = status === 'trial';
     const isSubscribed = status === 'active' || status === 'trial';
 
-    console.log('[useSubscription] State:', {
-      status,
-      plan: planForState,
-      normalizedPlan,
-      isSubscribed,
-      isPaid: user.isPaid,
-    });
-
     return {
       isSubscribed,
       isTrialActive,

@@ -54,8 +54,8 @@ export const ExpandableCard = ({
   return (
     <div
       className={cn(
-        'border border-stone-800 rounded-md w-full overflow-hidden transition-all relative',
-        isExpanded && 'border-lunary-primary-700',
+        'bg-lunary-bg border border-zinc-800/50 rounded-md w-full overflow-hidden transition-all relative',
+        isExpanded && 'border-lunary-primary-700/50',
         className,
       )}
     >
@@ -84,7 +84,7 @@ export const ExpandableCard = ({
       >
         <div
           className={cn(
-            'px-4 pb-4 border-t border-stone-800/50 max-h-[400px] overflow-y-auto',
+            'px-4 pb-4 border-t border-zinc-800/30 max-h-[400px] overflow-y-auto',
             expandedClassName,
           )}
         >
@@ -111,17 +111,19 @@ export const ExpandableCardHeader = ({
   badgeVariant = 'default',
 }: ExpandableCardHeaderProps) => {
   const badgeClasses = {
-    default: 'bg-zinc-700/50 text-zinc-300',
-    highlight: 'bg-lunary-primary-900 text-lunary-accent-300',
-    warning: 'bg-lunary-accent-900 text-lunary-accent-300',
-    danger: 'bg-red-500/20 text-red-300',
+    default: 'bg-zinc-800/50 text-zinc-400',
+    highlight: 'bg-zinc-800/50 text-lunary-primary-200',
+    warning: 'bg-zinc-800/50 text-lunary-accent-200',
+    danger: 'bg-lunary-error-950/50 text-lunary-error-300',
   };
 
   return (
-    <div className='flex items-center gap-2'>
-      {icon && <span className='text-lunary-accent'>{icon}</span>}
-      <span className='text-sm font-medium text-zinc-200'>{title}</span>
-      {subtitle && <span className='text-xs text-zinc-500'>{subtitle}</span>}
+    <div className='flex items-center justify-between w-full'>
+      <div className='flex items-center gap-2'>
+        {icon && <span>{icon}</span>}
+        <span className='text-sm font-medium text-zinc-200'>{title}</span>
+        {subtitle && <span className='text-xs text-zinc-500'>{subtitle}</span>}
+      </div>
       {badge && (
         <span
           className={cn(

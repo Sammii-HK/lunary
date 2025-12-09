@@ -103,7 +103,7 @@ export const CrystalPreview = () => {
 
   if (!crystalName) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md animate-pulse'>
+      <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse'>
         <div className='h-5 w-24 bg-zinc-800 rounded' />
       </div>
     );
@@ -113,17 +113,19 @@ export const CrystalPreview = () => {
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className='w-full h-full py-3 px-4 border border-stone-800 rounded-md hover:border-lunary-primary-600 transition-colors group text-left'
+        className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
-            <div className='flex items-center gap-2 mb-1'>
-              <Gem className='w-4 h-4 text-lunary-accent' />
-              <span className='text-sm font-medium text-zinc-200'>
-                {crystalName}
-              </span>
+            <div className='flex items-center justify-between mb-1'>
+              <div className='flex items-center gap-2'>
+                <Gem className='w-4 h-4 text-lunary-accent-200' />
+                <span className='text-sm font-medium text-zinc-200'>
+                  {crystalName}
+                </span>
+              </div>
               {hasChartAccess && (
-                <span className='text-xs bg-lunary-primary-900 text-lunary-accent-300 px-1.5 py-0.5 rounded'>
+                <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
                   For you
                 </span>
               )}
@@ -132,13 +134,13 @@ export const CrystalPreview = () => {
               {crystalReason}
             </p>
             {!hasChartAccess && (
-              <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-accent group-hover:text-lunary-accent-300'>
+              <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 group-hover:text-lunary-primary-100'>
                 <Lock className='w-3 h-3' />
                 <span>Unlock personalized crystal</span>
               </div>
             )}
           </div>
-          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors flex-shrink-0 mt-1' />
+          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-200 transition-colors flex-shrink-0 mt-1' />
         </div>
       </button>
 

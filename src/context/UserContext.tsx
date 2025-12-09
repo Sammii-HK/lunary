@@ -99,12 +99,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const profile = data.profile;
       const subscription = data.subscription;
 
-      console.log('[UserContext] Profile loaded:', {
-        hasBirthday: !!profile?.birthday,
-        birthday: profile?.birthday || 'NOT SET',
-        name: profile?.name,
-      });
-
       const birthChart = profile?.birthChart as
         | BirthChartPlacement[]
         | undefined;
