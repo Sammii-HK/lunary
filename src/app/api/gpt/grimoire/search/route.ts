@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
       })),
       ctaUrl: 'https://lunary.app/grimoire/search?from=gpt_grimoire_search',
       ctaText: 'Explore the complete Lunary Grimoire',
+      source: 'Lunary.app - Digital Grimoire with 500+ pages',
     };
 
     return NextResponse.json(response, {

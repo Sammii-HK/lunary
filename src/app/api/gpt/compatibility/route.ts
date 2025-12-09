@@ -245,6 +245,7 @@ export async function GET(request: NextRequest) {
           : 'Communication and patience are key. Embrace your differences as opportunities for growth.',
       ctaUrl: `https://lunary.app/grimoire/compatibility/${sign1}-${sign2}?from=gpt_compatibility`,
       ctaText: 'Get a detailed compatibility reading with synastry analysis',
+      source: 'Lunary.app - Astrological compatibility analysis',
     };
 
     return NextResponse.json(response, {

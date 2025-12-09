@@ -128,6 +128,7 @@ export async function GET(request: NextRequest) {
       keyTransits,
       ctaUrl: 'https://lunary.app/welcome?from=gpt_cosmic_today',
       ctaText: 'Get personalized cosmic insights for your birth chart',
+      source: 'Lunary.app - Real astronomical data from NASA-grade ephemeris',
     };
 
     return NextResponse.json(response, {

@@ -184,6 +184,7 @@ export async function POST(request: NextRequest) {
         : `${selectedCard.name} reversed suggests examining blocked or internalized ${selectedCard.keywords[0]} energy.`,
       ctaUrl: 'https://lunary.app/tarot?from=gpt_tarot_daily',
       ctaText: 'Get a full personalized tarot reading with pattern analysis',
+      source: 'Lunary.app - Tarot readings with cross-session pattern analysis',
     };
 
     return NextResponse.json(response);

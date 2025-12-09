@@ -186,6 +186,8 @@ export async function POST(request: NextRequest) {
       ctaUrl: 'https://lunary.app/welcome?from=gpt_birth_flavour',
       ctaText:
         'Get your complete personalized birth chart with full interpretations',
+      source:
+        'Lunary.app - Birth chart analysis with astronomical calculations',
     };
 
     return NextResponse.json(response);

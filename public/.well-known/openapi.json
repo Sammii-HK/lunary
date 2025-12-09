@@ -69,7 +69,11 @@
                       }
                     },
                     "ctaUrl": { "type": "string" },
-                    "ctaText": { "type": "string" }
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
                   }
                 }
               }
@@ -141,7 +145,11 @@
                     },
                     "limitationsNote": { "type": "string" },
                     "ctaUrl": { "type": "string" },
-                    "ctaText": { "type": "string" }
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
                   }
                 }
               }
@@ -199,7 +207,11 @@
                     "spreadType": { "type": "string" },
                     "interpretation": { "type": "string" },
                     "ctaUrl": { "type": "string" },
-                    "ctaText": { "type": "string" }
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
                   }
                 }
               }
@@ -262,7 +274,11 @@
                     },
                     "intent": { "type": "string" },
                     "ctaUrl": { "type": "string" },
-                    "ctaText": { "type": "string" }
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
                   }
                 }
               }
@@ -310,7 +326,11 @@
                     "moonPhase": { "type": "string" },
                     "element": { "type": "string" },
                     "ctaUrl": { "type": "string" },
-                    "ctaText": { "type": "string" }
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
                   }
                 }
               }
@@ -365,7 +385,11 @@
                     },
                     "advice": { "type": "string" },
                     "ctaUrl": { "type": "string" },
-                    "ctaText": { "type": "string" }
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
                   }
                 }
               }
@@ -414,7 +438,11 @@
                       }
                     },
                     "ctaUrl": { "type": "string" },
-                    "ctaText": { "type": "string" }
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
                   }
                 }
               }

@@ -203,6 +203,7 @@ export async function GET(request: NextRequest) {
       element: SIGN_DATA[sign].element,
       ctaUrl: `https://lunary.app/horoscope?sign=${sign}&from=gpt_horoscope`,
       ctaText: 'Get your personalized daily horoscope based on your full chart',
+      source: 'Lunary.app - Personalized astrology with real astronomical data',
     };
 
     return NextResponse.json(response, {
