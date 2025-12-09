@@ -1,21 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { Calendar, TrendingUp, Sparkles, BarChart3 } from 'lucide-react';
 import { useAuthStatus } from './AuthStatus';
 import { SharePersonalized } from './SharePersonalized';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+
+const UsageChart = lazy(() => import('./charts/UsageChart'));
 
 interface UsagePattern {
   date: string;
@@ -311,62 +301,17 @@ export function MonthlyInsights() {
                 Daily Activity
               </h3>
             </div>
-            <div className='h-48'>
-              <ResponsiveContainer width='100%' height='100%'>
-                <LineChart data={insight.usagePatterns}>
-                  <CartesianGrid
-                    strokeDasharray='3 3'
-                    stroke='#3f3f46'
-                    opacity={0.3}
-                  />
-                  <XAxis
-                    dataKey='date'
-                    tick={{ fill: '#a1a1aa', fontSize: 10 }}
-                    tickFormatter={(value) => {
-                      const date = new Date(value);
-                      return `${date.getMonth() + 1}/${date.getDate()}`;
-                    }}
-                  />
-                  <YAxis tick={{ fill: '#a1a1aa', fontSize: 10 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#18181b',
-                      border: '1px solid #3f3f46',
-                      borderRadius: '8px',
-                      color: '#e4e4e7',
-                    }}
-                    labelFormatter={(value) => {
-                      const date = new Date(value);
-                      return date.toLocaleDateString();
-                    }}
-                  />
-                  <Line
-                    type='monotone'
-                    dataKey='tarotReadings'
-                    stroke='#a855f7'
-                    strokeWidth={2}
-                    dot={false}
-                    name='Tarot'
-                  />
-                  <Line
-                    type='monotone'
-                    dataKey='journalEntries'
-                    stroke='#ec4899'
-                    strokeWidth={2}
-                    dot={false}
-                    name='Journal'
-                  />
-                  <Line
-                    type='monotone'
-                    dataKey='rituals'
-                    stroke='#f59e0b'
-                    strokeWidth={2}
-                    dot={false}
-                    name='Rituals'
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <Suspense
+              fallback={
+                <div className='h-48 flex items-center justify-center'>
+                  <div className='animate-pulse text-zinc-500 text-sm'>
+                    Loading chart...
+                  </div>
+                </div>
+              }
+            >
+              <UsageChart data={insight.usagePatterns} />
+            </Suspense>
           </div>
         )}
 

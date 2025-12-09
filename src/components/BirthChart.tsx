@@ -6,7 +6,7 @@ import {
   bodiesSymbols,
   zodiacSymbol,
   astroPointSymbols,
-} from '../../utils/zodiac/zodiac';
+} from '@/constants/symbols';
 import classNames from 'classnames';
 
 const cx = classNames;

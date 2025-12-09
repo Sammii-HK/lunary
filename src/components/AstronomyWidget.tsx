@@ -1,7 +1,7 @@
 'use client';
 
 import { useAstronomyContext } from '@/context/AstronomyContext';
-import { bodiesSymbols, zodiacSymbol } from '../../utils/zodiac/zodiac';
+import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 import classNames from 'classnames';
 
 const cx = classNames;

@@ -5,15 +5,26 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { MoonPhaseLabels } from '../../../utils/moon/moonPhases';
-import {
-  zodiacSigns,
-  bodiesSymbols,
-  zodiacSymbol,
-} from '../../../utils/zodiac/zodiac';
+import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 import {
   ExpandableCard,
   ExpandableCardHeader,
 } from '@/components/ui/expandable-card';
+
+const ZODIAC_ELEMENTS: Record<string, string> = {
+  aries: 'Fire',
+  taurus: 'Earth',
+  gemini: 'Air',
+  cancer: 'Water',
+  leo: 'Fire',
+  virgo: 'Earth',
+  libra: 'Air',
+  scorpio: 'Water',
+  sagittarius: 'Fire',
+  capricorn: 'Earth',
+  aquarius: 'Air',
+  pisces: 'Water',
+};
 
 const NAMED_FULL_MOONS = [
   'wolf moon',
@@ -107,8 +118,8 @@ const getMoonPhaseGuidance = (phase: MoonPhaseLabels, sign: string): string => {
 };
 
 const getZodiacInfo = (sign: string) => {
-  const signKey = sign.toLowerCase() as keyof typeof zodiacSigns;
-  const signData = zodiacSigns[signKey];
+  const signKey = sign.toLowerCase();
+  const element = ZODIAC_ELEMENTS[signKey] || 'Unknown';
 
   const rulingPlanets: Record<string, string> = {
     aries: 'Mars',
@@ -172,8 +183,8 @@ const getZodiacInfo = (sign: string) => {
     zodiacSymbol[signKey as keyof typeof zodiacSymbol] || '';
 
   return {
-    element: signData?.element || 'Unknown',
-    elementSymbol: elementSymbols[signData?.element || ''] || '',
+    element,
+    elementSymbol: elementSymbols[element] || '',
     rulingPlanet: rulingPlanets[signKey] || 'Unknown',
     rulingPlanetSymbol:
       bodiesSymbols[

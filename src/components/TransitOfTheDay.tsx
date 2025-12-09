@@ -11,7 +11,7 @@ import {
 } from '../../utils/astrology/personalTransits';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../utils/pricing';
-import { bodiesSymbols } from '../../utils/zodiac/zodiac';
+import { bodiesSymbols } from '@/constants/symbols';
 import dayjs from 'dayjs';
 
 const getOrdinalSuffix = (n: number): string => {

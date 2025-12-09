@@ -92,7 +92,6 @@ export function ShareDailyInsight() {
     }
 
     const currentTransits = getAstrologicalChart(normalizedDate, observer);
-    const sunSign = birthChart.find((p) => p.body === 'Sun')?.sign || 'Aries';
     const { crystal, reasons } = calculateCrystalRecommendation(
       birthChart,
       currentTransits,
@@ -100,7 +99,7 @@ export function ShareDailyInsight() {
       userBirthday,
     );
 
-    const guidance = getCrystalGuidance(crystal, reasons, sunSign);
+    const guidance = getCrystalGuidance(crystal, birthChart);
 
     return {
       name: crystal.name,

@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Telescope } from 'lucide-react';
 import { useAstronomyContext } from '@/context/AstronomyContext';
-import { bodiesSymbols, zodiacSymbol } from '../../../utils/zodiac/zodiac';
+import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 import {
   ExpandableCard,
   ExpandableCardHeader,

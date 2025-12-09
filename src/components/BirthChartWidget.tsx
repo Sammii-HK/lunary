@@ -2,7 +2,7 @@
 
 import { SmartTrialButton } from './SmartTrialButton';
 import { useUser } from '@/context/UserContext';
-import { bodiesSymbols, zodiacSymbol } from '../../utils/zodiac/zodiac';
+import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../utils/pricing';
 import Link from 'next/link';

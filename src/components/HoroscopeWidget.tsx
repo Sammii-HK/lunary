@@ -6,7 +6,7 @@ import { useUser } from '@/context/UserContext';
 import { BirthChartData } from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
-import { bodiesSymbols } from '../../utils/zodiac/zodiac';
+import { bodiesSymbols } from '@/constants/symbols';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
 import { useAstronomyContext } from '../context/AstronomyContext';
