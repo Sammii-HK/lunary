@@ -189,6 +189,26 @@ const BirthChart = () => {
         </p>
       </div>
 
+      {/* Complete Guide Banner */}
+      <Link
+        href='/grimoire/guides/birth-chart-complete-guide'
+        className='block p-4 rounded-lg bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
+      >
+        <div className='flex items-center justify-between'>
+          <div>
+            <h3 className='text-lg font-medium text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors'>
+              📖 Read the Complete Birth Chart Guide
+            </h3>
+            <p className='text-sm text-zinc-400'>
+              In-depth tutorial on reading and interpreting your natal chart
+            </p>
+          </div>
+          <span className='text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+            →
+          </span>
+        </div>
+      </Link>
+
       <section id='planets' className='space-y-4'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
@@ -736,6 +756,25 @@ const BirthChart = () => {
               </p>
             </div>
           </div>
+          <Link
+            href='/grimoire/synastry/generate'
+            className='block p-4 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-lunary-primary-900/30 border border-lunary-rose-700 hover:border-lunary-rose-500 transition-colors group'
+          >
+            <div className='flex items-center justify-between'>
+              <div>
+                <h3 className='text-lg font-medium text-lunary-rose-300 group-hover:text-lunary-rose-200 transition-colors'>
+                  💕 Generate Synastry Chart
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  Compare two birth charts to discover relationship
+                  compatibility
+                </p>
+              </div>
+              <span className='text-lunary-rose-400 group-hover:text-lunary-rose-300 transition-colors'>
+                →
+              </span>
+            </div>
+          </Link>
         </div>
       </section>
 

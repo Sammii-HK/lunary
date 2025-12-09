@@ -70,6 +70,27 @@ const Crystals = () => {
         </p>
       </div>
 
+      {/* Complete Guide Banner */}
+      <Link
+        href='/grimoire/guides/crystal-healing-guide'
+        className='block p-4 rounded-lg bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
+      >
+        <div className='flex items-center justify-between'>
+          <div>
+            <h3 className='text-lg font-medium text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors'>
+              📖 Read the Complete Crystal Healing Guide
+            </h3>
+            <p className='text-sm text-zinc-400'>
+              Learn crystal selection, cleansing, programming, and healing
+              practices
+            </p>
+          </div>
+          <span className='text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+            →
+          </span>
+        </div>
+      </Link>
+
       <section id='daily-selection' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Daily Selection</h2>
         <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>

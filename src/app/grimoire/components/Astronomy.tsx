@@ -53,12 +53,13 @@ const AstronomyItems = ({ type }: { type: string }) => {
     element?: string;
   };
   const content = type === 'Zodiac' ? zodiacSigns : planetaryBodies;
+  const validKeys = Object.keys(items).filter((key) => key in content);
 
   return (
     <section id={type.toLowerCase()} className='space-y-4'>
       <h2 className='text-xl font-medium text-zinc-100'>{type}</h2>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-        {Object.keys(items).map((item: string) => {
+        {validKeys.map((item: string) => {
           const itemSlug = stringToKebabCase(item);
           const linkPath =
             type === 'Zodiac'

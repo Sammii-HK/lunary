@@ -261,7 +261,7 @@ const ModernWitchcraft = () => {
       </section>
 
       {/* Coven vs Solitary Section */}
-      <section id='coven-solitary' className='space-y-6'>
+      <section id='coven-vs-solitary' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
             Coven vs Solitary Practice
