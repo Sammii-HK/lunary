@@ -193,7 +193,8 @@ export default function Events2025Page() {
                     href={category.link}
                     className={`flex items-center gap-1 text-sm ${colors.text} hover:underline`}
                   >
-                    Learn More <ArrowRight className='h-4 w-4' />
+                    View {category.category} Details{' '}
+                    <ArrowRight className='h-4 w-4' />
                   </Link>
                 </div>
                 <div className='space-y-3'>

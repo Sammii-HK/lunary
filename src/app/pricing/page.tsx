@@ -10,7 +10,8 @@ import {
   getPricingPlansWithStripeData,
   type PricingPlan,
 } from '../../../utils/pricing';
-import { createCheckoutSession, stripePromise } from '../../../utils/stripe';
+import { createCheckoutSession } from '../../../utils/stripe';
+import { loadStripe } from '@stripe/stripe-js';
 import {
   Check,
   Sparkles,
@@ -147,7 +148,9 @@ export default function PricingPage() {
         currentUserId,
       );
 
-      const stripe = await stripePromise;
+      const stripe = await loadStripe(
+        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+      );
       if (stripe) {
         await stripe.redirectToCheckout({ sessionId });
       }

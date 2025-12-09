@@ -742,7 +742,7 @@ export default function SocialPostsPage() {
                             {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({}),
+                              body: JSON.stringify({ currentWeek: false }),
                             },
                           );
                           const data = await response.json();

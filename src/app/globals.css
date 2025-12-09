@@ -59,3 +59,27 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Performance optimizations */
+@layer components {
+  /* Improve paint performance for cards and widgets */
+  .contain-paint {
+    contain: paint;
+  }
+
+  /* Skip rendering for off-screen content */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+  }
+
+  /* Optimize layout calculations */
+  .contain-layout {
+    contain: layout;
+  }
+
+  /* Full containment for independent widgets */
+  .contain-strict {
+    contain: strict;
+  }
+}

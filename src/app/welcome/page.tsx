@@ -58,6 +58,7 @@ export default function WelcomePage() {
             className='w-full max-w-[420px] md:max-w-[380px] h-auto rounded-2xl border border-zinc-700/50'
             width={380}
             height={827}
+            priority
             style={{
               boxShadow:
                 '0 18px 28px rgba(0, 0, 0, 0.28), 0 0 22px rgba(178, 126, 255, 0.18)',

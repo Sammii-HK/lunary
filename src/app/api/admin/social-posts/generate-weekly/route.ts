@@ -88,6 +88,12 @@ export async function POST(request: NextRequest) {
   try {
     const { weekStart, currentWeek } = await request.json();
 
+    console.log('📥 Generate weekly posts request:', {
+      weekStart,
+      currentWeek,
+      currentWeekType: typeof currentWeek,
+    });
+
     // Trim whitespace from API key (common issue with .env files)
     const apiKey = process.env.OPENAI_API_KEY?.trim();
     const rawKey = process.env.OPENAI_API_KEY;

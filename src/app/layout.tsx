@@ -140,6 +140,13 @@ export default function RootLayout({
           crossOrigin='anonymous'
         />
         <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
+        {/* Preload hero image for LCP optimization */}
+        <link
+          rel='preload'
+          href='/lunary_hero.png'
+          as='image'
+          type='image/png'
+        />
         {/* Prefetch API endpoint for app dashboard */}
         <link
           rel='prefetch'

@@ -13,16 +13,17 @@ export async function GET(request: NextRequest) {
     const dateParam = searchParams.get('date');
     const format = searchParams.get('format') || 'json'; // json, markdown, html
 
-    // Parse date or default to start of current week (Monday)
+    // Parse date or default to start of NEXT week (Monday) for forecasting
     let startDate: Date;
     if (dateParam) {
       startDate = new Date(dateParam);
     } else {
       const today = new Date();
       const dayOfWeek = today.getDay();
-      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday is 0, Monday is 1
+      // Calculate days until next Monday (if today is Monday, go to next Monday)
+      const daysUntilNextMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
       startDate = new Date(
-        today.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+        today.getTime() + daysUntilNextMonday * 24 * 60 * 60 * 1000,
       );
     }
 
