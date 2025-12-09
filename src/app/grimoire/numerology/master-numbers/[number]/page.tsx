@@ -200,7 +200,11 @@ Keywords: ${numberData.keywords.join(', ')}`}
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
           {
-            label: `Master Number ${number}`,
+            label: 'Master Numbers',
+            href: '/grimoire/numerology/master-numbers',
+          },
+          {
+            label: `Number ${number}`,
             href: `/grimoire/numerology/master-numbers/${number}`,
           },
         ]}

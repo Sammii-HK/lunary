@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 import {
   expressionNumbers,
   expressionKeys,
@@ -154,7 +155,10 @@ Expression ${number} thrives in careers that allow you to use your natural talen
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
-          { label: 'Expression Numbers', href: '/grimoire/numerology' },
+          {
+            label: 'Expression Numbers',
+            href: '/grimoire/numerology/expression',
+          },
           {
             label: `Number ${number}`,
             href: `/grimoire/numerology/expression/${number}`,
@@ -168,7 +172,9 @@ Expression ${number} thrives in careers that allow you to use your natural talen
         ctaText='Want personalized numerology insights?'
         ctaHref='/pricing'
         faqs={faqs}
-      />
+      >
+        <NumerologyCalculator type='expression' />
+      </SEOContentTemplate>
     </div>
   );
 }

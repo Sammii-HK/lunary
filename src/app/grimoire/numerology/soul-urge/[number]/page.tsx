@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 import {
   soulUrgeNumbers,
   soulUrgeKeys,
@@ -152,7 +153,10 @@ ${numberData.inRelationships}`}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
-          { label: 'Soul Urge Numbers', href: '/grimoire/numerology' },
+          {
+            label: 'Soul Urge Numbers',
+            href: '/grimoire/numerology/soul-urge',
+          },
           {
             label: `Number ${number}`,
             href: `/grimoire/numerology/soul-urge/${number}`,
@@ -166,7 +170,9 @@ ${numberData.inRelationships}`}
         ctaText='Want personalized numerology insights?'
         ctaHref='/pricing'
         faqs={faqs}
-      />
+      >
+        <NumerologyCalculator type='soul-urge' />
+      </SEOContentTemplate>
     </div>
   );
 }

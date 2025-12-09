@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 
 const lifePathKeys = Object.keys(lifePathNumbers);
@@ -200,7 +201,9 @@ Keywords: ${numberData.keywords.join(', ')}`}
         ctaText={`Want to calculate your Life Path Number?`}
         ctaHref='/pricing'
         faqs={faqs}
-      />
+      >
+        <NumerologyCalculator type='life-path' />
+      </SEOContentTemplate>
     </div>
   );
 }

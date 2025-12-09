@@ -86,6 +86,7 @@ export default async function NumerologyYearPage({
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Numerology', href: '/grimoire/numerology' },
+        { label: 'Personal Year', href: '/grimoire/numerology/year' },
         { label: `${year}` },
       ]}
       whatIs={{
@@ -162,7 +163,7 @@ ${data.opportunities.map((o) => `- ${o}`).join('\n')}
         },
       ]}
       ctaText='Calculate your personal year number'
-      ctaHref='/welcome'
+      ctaHref='/horoscope'
       sources={[
         { name: 'Pythagorean numerology' },
         { name: 'Universal year calculations' },

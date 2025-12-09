@@ -144,7 +144,7 @@ ${numberData.challenges.map((c) => `- ${c}`).join('\n')}`}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
-          { label: 'Karmic Debt', href: '/grimoire/numerology' },
+          { label: 'Karmic Debt', href: '/grimoire/numerology/karmic-debt' },
           {
             label: `Number ${number}`,
             href: `/grimoire/numerology/karmic-debt/${number}`,

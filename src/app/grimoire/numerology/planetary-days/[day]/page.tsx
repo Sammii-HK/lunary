@@ -222,6 +222,10 @@ Associated Number: ${numerologyNumber}`}
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
           {
+            label: 'Planetary Days',
+            href: '/grimoire/numerology/planetary-days',
+          },
+          {
             label: `${dayKey}`,
             href: `/grimoire/numerology/planetary-days/${day}`,
           },
