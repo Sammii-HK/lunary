@@ -66,7 +66,7 @@ const witchTypes = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Types of Witches: Complete Guide to Witch Paths | Lunary',
+  title: 'Types of Witches: Hedge, Kitchen, Green, Eclectic & More | Lunary',
   description:
     'Explore different types of witches and magical paths. From Green Witch to Cosmic Witch, find the practice that resonates with you.',
   keywords: [

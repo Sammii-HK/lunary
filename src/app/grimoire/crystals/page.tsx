@@ -7,7 +7,7 @@ import { crystalDatabase } from '@/constants/grimoire/crystals';
 export const revalidate = 86400; // Revalidate every 24 hours
 
 export const metadata: Metadata = {
-  title: 'Crystals: Complete Guide to Crystal Meanings & Uses - Lunary',
+  title: 'Crystals A-Z: Meanings, Properties & Healing Uses - Lunary',
   description:
     'Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic. Learn crystal properties, correspondences, and practices. Essential guide for crystal work.',
   keywords: [
@@ -21,14 +21,14 @@ export const metadata: Metadata = {
     'how to use crystals',
   ],
   openGraph: {
-    title: 'Crystals: Complete Guide to Crystal Meanings & Uses - Lunary',
+    title: 'Crystals A-Z: Meanings, Properties & Healing Uses - Lunary',
     description:
       'Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Crystals: Complete Guide to Crystal Meanings & Uses - Lunary',
+    title: 'Crystals A-Z: Meanings, Properties & Healing Uses - Lunary',
     description:
       'Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic.',
   },
@@ -54,7 +54,7 @@ export default function CrystalsPage() {
     <>
       {renderJsonLd(crystalListSchema)}
       <SEOContentTemplate
-        title='Crystals: Complete Guide to Crystal Meanings & Uses - Lunary'
+        title='Crystals A-Z: Meanings, Properties & Healing Uses - Lunary'
         h1='Crystals'
         description='Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic. Learn crystal properties, correspondences, and practices.'
         keywords={[

@@ -8,7 +8,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Tarot Cards: Complete Guide to All 78 Cards | Lunary',
+  title: 'All 78 Tarot Cards: Major & Minor Arcana Meanings | Lunary',
   description:
     'Explore all 78 tarot cards with detailed meanings. Learn the Major Arcana, Minor Arcana, and how to read tarot cards for guidance and insight.',
   keywords: [
@@ -60,7 +60,7 @@ export default function TarotIndexPage() {
     <>
       {renderJsonLd(tarotListSchema)}
       <SEOContentTemplate
-        title='Tarot Cards: Complete Guide to All 78 Cards'
+        title='All 78 Tarot Cards: Major & Minor Arcana Meanings'
         h1='Tarot Cards'
         description="Explore all 78 tarot cards — 22 Major Arcana representing life's spiritual lessons, and 56 Minor Arcana reflecting daily experiences."
         keywords={[

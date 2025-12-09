@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { astrologicalAspects } from '@/constants/grimoire/seo-data';
 import { stringToKebabCase } from '../../../../../../utils/string';
+import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 const aspectKeys = Object.keys(astrologicalAspects);
 
@@ -30,8 +31,8 @@ export async function generateMetadata({
 
   const aspectData =
     astrologicalAspects[aspectKey as keyof typeof astrologicalAspects];
-  const title = `${aspectData.name} Aspect Meaning: ${aspectData.degrees}° - Lunary`;
-  const description = `Discover the complete meaning of ${aspectData.name} aspect (${aspectData.degrees}°). Learn about ${aspectData.name} meaning, nature (${aspectData.nature}), and how this aspect affects your birth chart.`;
+  const title = `${aspectData.name} (${aspectData.degrees}°): Meaning in Astrology - Lunary`;
+  const description = `${aspectData.name} aspect (${aspectData.degrees}°) in astrology: ${aspectData.nature.toLowerCase()} aspect. What ${aspectData.name.toLowerCase()} means between planets in your birth chart.`;
 
   return {
     title,
@@ -118,8 +119,24 @@ export default async function AspectPage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const aspectSchema = createCosmicEntitySchema({
+    name: `${aspectData.name} Aspect`,
+    description: `${aspectData.name} (${aspectData.degrees}°) is a ${aspectData.nature.toLowerCase()} aspect in astrology. ${aspectData.meaning.slice(0, 100)}...`,
+    url: `/grimoire/aspects/types/${aspect}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Astrological_aspect',
+    keywords: [
+      `${aspectData.name.toLowerCase()} aspect`,
+      `${aspectData.degrees} degree aspect`,
+      aspectData.nature.toLowerCase(),
+      'astrological aspects',
+      'planetary aspects',
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(aspectSchema)}
       <SEOContentTemplate
         title={`${aspectData.name} Aspect - Lunary`}
         h1={`${aspectData.name} Aspect: Complete Guide`}

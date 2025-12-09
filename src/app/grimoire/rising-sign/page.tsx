@@ -9,7 +9,7 @@ import {
 } from '@/components/grimoire/PeopleAlsoAsk';
 
 export const metadata: Metadata = {
-  title: 'Rising Sign (Ascendant): Complete Guide - Lunary',
+  title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
   description:
     'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality, appearance, and first impressions. Discover how to calculate your rising sign and understand its meaning.',
   keywords: [
@@ -23,14 +23,14 @@ export const metadata: Metadata = {
     'rising sign calculator',
   ],
   openGraph: {
-    title: 'Rising Sign (Ascendant): Complete Guide - Lunary',
+    title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
     description:
       'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality and appearance.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Rising Sign (Ascendant): Complete Guide - Lunary',
+    title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
     description:
       'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality.',
   },
@@ -51,7 +51,7 @@ export default function RisingSignPage() {
     <>
       {renderJsonLd(qaSchema)}
       <SEOContentTemplate
-        title='Rising Sign (Ascendant): Complete Guide - Lunary'
+        title='Rising Sign Calculator: Find Your Ascendant Sign - Lunary'
         h1='Rising Sign (Ascendant)'
         description='Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality, appearance, and first impressions. Discover how to calculate your rising sign.'
         keywords={[

@@ -3,6 +3,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { chakras } from '@/constants/chakras';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
+import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 const chakraKeys = Object.keys(chakras);
 
@@ -29,16 +30,17 @@ export async function generateMetadata({
   const chakraData = chakras[chakraKey as keyof typeof chakras];
 
   return createGrimoireMetadata({
-    title: `${chakraData.name} Chakra: Meaning, Location & Balancing - Lunary`,
-    description: `Discover the complete guide to ${chakraData.name} Chakra. Learn about ${chakraData.name} Chakra meaning, location (${chakraData.location}), color (${chakraData.color}), properties, and how to balance this chakra.`,
+    title: `${chakraData.name} Chakra: Meaning, Healing & How to Balance - Lunary`,
+    description: `${chakraData.name} Chakra (${chakraData.color}, ${chakraData.location}): healing, balancing & activation. Signs of blockage, crystals, yoga poses & meditation techniques for ${chakraData.name} Chakra.`,
     keywords: [
       `${chakraData.name} chakra`,
+      `${chakraData.name} chakra healing`,
       `${chakraData.name} chakra meaning`,
       `${chakraData.color} chakra`,
-      `chakra ${chakraData.location}`,
       `${chakraData.name} chakra balancing`,
+      `${chakraData.name} chakra blocked`,
     ],
-    url: `https://lunary.app/grimoire/chakras/${chakra}`,
+    url: `/grimoire/chakras/${chakra}`,
     ogImagePath: '/api/og/grimoire/chakras',
     ogImageAlt: `${chakraData.name} Chakra`,
   });
@@ -83,8 +85,31 @@ export default async function ChakraPage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const chakraSchema = createCosmicEntitySchema({
+    name: `${chakraData.name} Chakra`,
+    description: `The ${chakraData.name} Chakra (${chakraData.sanskritName}) is located at ${chakraData.location.toLowerCase()}. Color: ${chakraData.color}. ${chakraData.mysticalProperties}`,
+    url: `/grimoire/chakras/${chakra}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Chakra',
+    keywords: [
+      `${chakraData.name} chakra`,
+      chakraData.sanskritName,
+      chakraData.color,
+      chakraData.location,
+      'chakra healing',
+      'energy center',
+      ...chakraData.crystals,
+    ],
+    relatedEntities: chakraData.crystals.slice(0, 3).map((crystal) => ({
+      name: crystal,
+      url: `/grimoire/crystals/${stringToKebabCase(crystal)}`,
+      relationship: `Crystal for ${chakraData.name} Chakra`,
+    })),
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(chakraSchema)}
       <SEOContentTemplate
         title={`${chakraData.name} Chakra - Lunary`}
         h1={`${chakraData.name} Chakra: Complete Guide`}

@@ -5,7 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Chakras from '../components/Chakras';
 
 export const metadata: Metadata = {
-  title: 'Chakras: Seven Energy Centers Guide - Lunary',
+  title: '7 Chakras Explained: Root to Crown Energy Centers - Lunary',
   description:
     'Understanding the seven chakras, their colors, meanings, and balancing practices. Align your energy centers for healing, spiritual growth, and magical work. Complete chakra system guide.',
   keywords: [
@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     'chakra system',
   ],
   openGraph: {
-    title: 'Chakras: Seven Energy Centers Guide - Lunary',
+    title: '7 Chakras Explained: Root to Crown Energy Centers - Lunary',
     description:
       'Understanding the seven chakras, their colors, meanings, and balancing practices. Align your energy centers.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Chakras: Seven Energy Centers Guide - Lunary',
+    title: '7 Chakras Explained: Root to Crown Energy Centers - Lunary',
     description:
       'Understanding the seven chakras, their colors, meanings, and balancing practices. Align your energy centers.',
   },
@@ -39,7 +39,7 @@ export default function ChakrasPage() {
   return (
     <>
       <SEOContentTemplate
-        title='Chakras: Seven Energy Centers Guide - Lunary'
+        title='7 Chakras Explained: Root to Crown Energy Centers - Lunary'
         h1='Chakras'
         description='Understanding the seven chakras, their colors, meanings, and balancing practices. Align your energy centers for healing, spiritual growth, and magical work.'
         keywords={[

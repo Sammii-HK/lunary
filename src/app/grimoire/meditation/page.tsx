@@ -5,7 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Meditation from '../components/Meditation';
 
 export const metadata: Metadata = {
-  title: 'Meditation & Mindfulness: Complete Guide - Lunary',
+  title: 'Spiritual Meditation: Grounding, Breathwork & Journaling - Lunary',
   description:
     'Meditation and mindfulness practices for spiritual growth: techniques, breathwork, grounding exercises, centering, and magical journaling. Essential skills for any magical practice. Comprehensive meditation guide.',
   keywords: [
@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     'how to meditate',
   ],
   openGraph: {
-    title: 'Meditation & Mindfulness: Complete Guide - Lunary',
+    title: 'Spiritual Meditation: Grounding, Breathwork & Journaling - Lunary',
     description:
       'Meditation and mindfulness practices for spiritual growth: techniques, breathwork, grounding exercises, centering, and magical journaling.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Meditation & Mindfulness: Complete Guide - Lunary',
+    title: 'Spiritual Meditation: Grounding, Breathwork & Journaling - Lunary',
     description:
       'Meditation and mindfulness practices for spiritual growth: techniques, breathwork, grounding exercises, centering, and magical journaling.',
   },
@@ -39,7 +39,7 @@ export default function MeditationPage() {
   return (
     <>
       <SEOContentTemplate
-        title='Meditation & Mindfulness: Complete Guide - Lunary'
+        title='Spiritual Meditation: Grounding, Breathwork & Journaling - Lunary'
         h1='Meditation & Mindfulness'
         description='Meditation and mindfulness practices for spiritual growth: techniques, breathwork, grounding exercises, centering, and magical journaling. Essential skills for any magical practice.'
         keywords={[

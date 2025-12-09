@@ -4,11 +4,11 @@ import { Sun, Moon, Calendar, Sparkles } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 export const metadata: Metadata = {
-  title: 'Solar & Lunar Eclipses 2025: Complete Guide & Dates',
+  title: 'Solar & Lunar Eclipses 2025: All Dates & Astrology Meanings',
   description:
     '2025 eclipse dates and meanings. Solar eclipses March 29 and September 21, Lunar eclipses March 14 and September 7. Learn what each eclipse means for your sign.',
   openGraph: {
-    title: 'Solar & Lunar Eclipses 2025: Complete Guide & Dates',
+    title: 'Solar & Lunar Eclipses 2025: All Dates & Astrology Meanings',
     description:
       '2025 eclipse guide with all dates, meanings, and rituals for solar and lunar eclipses.',
     url: 'https://lunary.app/grimoire/events/2025/eclipses',

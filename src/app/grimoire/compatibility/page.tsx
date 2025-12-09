@@ -22,11 +22,12 @@ const ZODIAC_SYMBOLS: Record<string, string> = {
 };
 
 export const metadata: Metadata = {
-  title: 'Zodiac Compatibility Guide: Love & Relationship Matches - Lunary',
+  title:
+    'Zodiac Compatibility: Best & Worst Matches for Every Sign: Love & Relationship Matches - Lunary',
   description:
     'Complete zodiac compatibility guide. Explore love, friendship, and work compatibility between all 12 zodiac signs. 78+ detailed match analyses.',
   openGraph: {
-    title: 'Zodiac Compatibility Guide - Lunary',
+    title: 'Zodiac Compatibility: Best & Worst Matches for Every Sign - Lunary',
     description:
       'Explore compatibility between all 12 zodiac signs in love and relationships.',
     url: 'https://lunary.app/grimoire/compatibility',
@@ -40,7 +41,7 @@ export default function CompatibilityIndexPage() {
   const signs = Object.entries(signDescriptions);
 
   const compatibilityListSchema = createItemListSchema({
-    name: 'Zodiac Compatibility Guide',
+    name: 'Zodiac Compatibility: Best & Worst Matches for Every Sign',
     description:
       'Complete zodiac compatibility guide with 78+ detailed match analyses for love, friendship, and work.',
     url: 'https://lunary.app/grimoire/compatibility',
@@ -63,7 +64,7 @@ export default function CompatibilityIndexPage() {
         />
         <div className='mb-12'>
           <h1 className='text-4xl font-light text-zinc-100 mb-4'>
-            Zodiac Compatibility Guide
+            Zodiac Compatibility: Best & Worst Matches for Every Sign
           </h1>
           <p className='text-lg text-zinc-400 max-w-2xl'>
             Explore how zodiac signs interact in love, friendship, and work.

@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 export const metadata: Metadata = {
-  title: 'Book of Shadows: Complete Guide - Lunary',
+  title: 'Book of Shadows: How to Create Your Personal Grimoire - Lunary',
   description:
     'Learn how to create and maintain your Book of Shadows (BOS). Discover what to include, how to organize it, and how to make it personal. Your personal grimoire for spells, rituals, and spiritual journey.',
   keywords: [
@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     'witchcraft journaling',
   ],
   openGraph: {
-    title: 'Book of Shadows: Complete Guide - Lunary',
+    title: 'Book of Shadows: How to Create Your Personal Grimoire - Lunary',
     description:
       'Learn how to create and maintain your Book of Shadows. Discover what to include and how to organize it.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Book of Shadows: Complete Guide - Lunary',
+    title: 'Book of Shadows: How to Create Your Personal Grimoire - Lunary',
     description: 'Learn how to create and maintain your Book of Shadows.',
   },
   alternates: {
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 export default function BookOfShadowsPage() {
   return (
     <SEOContentTemplate
-      title='Book of Shadows: Complete Guide - Lunary'
+      title='Book of Shadows: How to Create Your Personal Grimoire - Lunary'
       h1='Book of Shadows'
       description='Learn how to create and maintain your Book of Shadows (BOS). Discover what to include, how to organize it, and how to make it personal. Your personal grimoire for spells, rituals, and spiritual journey.'
       keywords={[

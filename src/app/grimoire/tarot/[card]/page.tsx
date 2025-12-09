@@ -5,6 +5,7 @@ import { tarotCards } from '../../../../../utils/tarot/tarot-cards';
 import { tarotSuits } from '@/constants/tarot';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
+import { createTarotCardSchema, renderJsonLd } from '@/lib/schema';
 
 // Helper to find card by slug
 function findCardBySlug(slug: string) {
@@ -70,12 +71,12 @@ export async function generateMetadata({
   }
 
   return createGrimoireMetadata({
-    title: `${cardData.card.name} Meaning: Upright & Reversed - Lunary`,
-    description: `Discover the complete meaning of ${cardData.card.name} tarot card. Learn about ${cardData.card.name} upright and reversed meanings, symbolism, and how to interpret this card in readings.`,
+    title: `${cardData.card.name} Tarot Card: Meaning Upright & Reversed - Lunary`,
+    description: `${cardData.card.name} tarot card meaning: upright & reversed interpretations. ${cardData.type === 'major' ? 'Major Arcana' : `${cardData.suit ? cardData.suit.charAt(0).toUpperCase() + cardData.suit.slice(1) : ''} suit`}. Learn symbolism, keywords & how to read ${cardData.card.name} in spreads.`,
     keywords: [
-      `${cardData.card.name} meaning`,
       `${cardData.card.name} tarot`,
-      `${cardData.card.name} card`,
+      `${cardData.card.name} tarot card`,
+      `${cardData.card.name} meaning`,
       `${cardData.card.name} upright`,
       `${cardData.card.name} reversed`,
       `tarot ${cardData.card.name}`,
@@ -234,8 +235,28 @@ export default async function TarotCardPage({
       : []),
   ];
 
+  // Entity schema for Knowledge Graph
+  const tarotSchema = createTarotCardSchema({
+    name: cardData.card.name,
+    description:
+      cardDetails.information ||
+      `${cardData.card.name} is a ${cardData.type === 'major' ? 'Major Arcana' : 'Minor Arcana'} tarot card.`,
+    uprightMeaning:
+      cardDetails.uprightMeaning || cardData.card.keywords.join(', '),
+    reversedMeaning:
+      cardDetails.reversedMeaning || 'Reversed meaning varies by context',
+    keywords: cardData.card.keywords,
+    element: cardDetails.element || suitInfo?.element,
+    planet: cardDetails.planet,
+    sign: cardDetails.zodiacSign,
+    number: cardDetails.number,
+    arcana: cardData.type as 'major' | 'minor',
+    suit: suitInfo?.name,
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(tarotSchema)}
       <SEOContentTemplate
         title={`${cardData.card.name} - Lunary`}
         h1={`${cardData.card.name} Meaning: Upright & Reversed`}

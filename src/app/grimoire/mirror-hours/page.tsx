@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'Discover the spiritual meaning of mirror hours like 11:11, 12:12, and 22:22. Complete guide to synchronicity and what the universe is telling you.',
   openGraph: {
-    title: 'Mirror Hours Guide - Lunary',
+    title: 'Mirror Hours: 01:10, 02:20, 03:30 Meanings - Lunary',
     description:
       'Complete guide to mirror hour meanings and spiritual messages.',
     url: 'https://lunary.app/grimoire/mirror-hours',

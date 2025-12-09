@@ -6,7 +6,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Spells: Complete Spell Collection | Lunary',
+  title: 'Spells for Beginners: Love, Protection & Prosperity Magic - Lunary',
   description:
     'Explore our collection of spells for protection, love, prosperity, healing, and more. Find detailed instructions, correspondences, and guidance for your magical practice.',
   keywords: [

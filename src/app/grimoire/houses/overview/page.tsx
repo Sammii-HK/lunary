@@ -102,7 +102,7 @@ const houses = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Astrological Houses: The 12 Houses Guide | Lunary',
+  title: 'The 12 Astrological Houses: Life Areas & Themes | Lunary',
   description:
     'Learn about all 12 astrological houses and their meanings. Understand how houses represent different life areas in your birth chart.',
   keywords: [
@@ -194,7 +194,7 @@ export default function HousesOverviewIndexPage() {
               Planets in Houses
             </Link>
             <Link
-              href='/grimoire/planets'
+              href='/grimoire/astronomy/planets'
               className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
             >
               Planets

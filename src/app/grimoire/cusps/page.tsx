@@ -5,7 +5,7 @@ import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Zodiac Cusps: All 12 Cusp Signs Explained | Lunary',
+  title: 'Zodiac Cusps: Born on the Cusp? What It Means | Lunary',
   description:
     'Complete guide to zodiac cusps. Born on the cusp of two signs? Learn about the Cusp of Power, Magic, Rebirth, and more. Find your cusp personality.',
   keywords: [

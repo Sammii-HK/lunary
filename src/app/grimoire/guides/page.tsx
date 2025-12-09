@@ -4,7 +4,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Complete Astrology & Spiritual Guides - Lunary',
+  title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
   description:
     'In-depth guides to astrology, tarot, crystals, and moon phases. Comprehensive pillar content for beginners and advanced practitioners. Your complete reference library.',
   keywords: [
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'spiritual guides',
   ],
   openGraph: {
-    title: 'Complete Astrology & Spiritual Guides - Lunary',
+    title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
     description:
       'In-depth guides to astrology, tarot, crystals, and moon phases.',
     url: 'https://lunary.app/grimoire/guides',
@@ -88,7 +88,7 @@ const GUIDES = [
 
 export default function GuidesIndexPage() {
   const guidesListSchema = createItemListSchema({
-    name: 'Complete Astrology & Spiritual Guides',
+    name: 'Astrology & Witchcraft Guides: Learn the Basics',
     description:
       'In-depth pillar content covering astrology, tarot, crystals, and moon phases for beginners to advanced practitioners.',
     url: 'https://lunary.app/grimoire/guides',
@@ -103,7 +103,7 @@ export default function GuidesIndexPage() {
     <>
       {renderJsonLd(guidesListSchema)}
       <SEOContentTemplate
-        title='Complete Astrology & Spiritual Guides'
+        title='Astrology & Witchcraft Guides: Learn the Basics'
         h1='Complete Guides'
         description='In-depth pillar content covering the essential topics in astrology and spiritual practice. Each guide is designed to take you from beginner to confident practitioner.'
         keywords={[

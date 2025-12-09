@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 export const metadata: Metadata = {
-  title: 'Witchcraft Tools: Essential Tools Guide - Lunary',
+  title: 'Witchcraft Tools: Altar Setup & Ritual Essentials - Lunary',
   description:
     'Learn about essential witchcraft tools: athame, wand, chalice, pentacle, cauldron, and more. Discover what each tool represents and how to use them in your practice.',
   keywords: [
@@ -18,14 +18,14 @@ export const metadata: Metadata = {
     'ritual tools',
   ],
   openGraph: {
-    title: 'Witchcraft Tools: Essential Tools Guide - Lunary',
+    title: 'Witchcraft Tools: Altar Setup & Ritual Essentials - Lunary',
     description:
       'Learn about essential witchcraft tools: athame, wand, chalice, pentacle, cauldron, and more.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Witchcraft Tools: Essential Tools Guide - Lunary',
+    title: 'Witchcraft Tools: Altar Setup & Ritual Essentials - Lunary',
     description: 'Learn about essential witchcraft tools and how to use them.',
   },
   alternates: {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export default function WitchcraftToolsPage() {
   return (
     <SEOContentTemplate
-      title='Witchcraft Tools: Essential Tools Guide - Lunary'
+      title='Witchcraft Tools: Altar Setup & Ritual Essentials - Lunary'
       h1='Witchcraft Tools'
       description='Learn about essential witchcraft tools: athame, wand, chalice, pentacle, cauldron, and more. Discover what each tool represents and how to use them in your practice.'
       keywords={[

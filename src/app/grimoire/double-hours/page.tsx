@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'Discover the spiritual meaning of double hours like 12:12, 13:13, and 21:21. Complete guide to clock synchronicities.',
   openGraph: {
-    title: 'Double Hours Guide - Lunary',
+    title: 'Double Hours: 10:10, 12:12, 21:21 Meanings - Lunary',
     description:
       'Complete guide to double hour meanings and spiritual messages.',
     url: 'https://lunary.app/grimoire/double-hours',

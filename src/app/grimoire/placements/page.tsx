@@ -6,11 +6,12 @@ import {
 } from '@/constants/seo/planet-sign-content';
 
 export const metadata: Metadata = {
-  title: 'Astrological Placements Guide: Planet in Sign Meanings - Lunary',
+  title:
+    'Astrological Placements: Sun, Moon & Rising in Every Sign: Planet in Sign Meanings - Lunary',
   description:
     'Complete guide to astrological placements. Explore what each planet means in every zodiac sign. 144+ detailed interpretations for your birth chart analysis.',
   openGraph: {
-    title: 'Astrological Placements Guide - Lunary',
+    title: 'Astrological Placements: Sun, Moon & Rising in Every Sign - Lunary',
     description: 'Explore 144+ planet-in-sign combinations and their meanings.',
     url: 'https://lunary.app/grimoire/placements',
   },
@@ -36,7 +37,7 @@ export default function PlacementsIndexPage() {
             <span className='text-zinc-400'>Placements</span>
           </nav>
           <h1 className='text-4xl font-light text-zinc-100 mb-4'>
-            Astrological Placements Guide
+            Astrological Placements: Sun, Moon & Rising in Every Sign
           </h1>
           <p className='text-lg text-zinc-400 max-w-2xl'>
             Explore what each planet means in every zodiac sign. Click any

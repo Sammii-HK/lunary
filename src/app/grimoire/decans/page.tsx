@@ -10,7 +10,7 @@ import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Zodiac Decans: All 36 Decans Explained | Lunary',
+  title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
   description:
     'Complete guide to the 36 zodiac decans. Each sign is divided into three 10-degree sections with unique sub-rulers and traits. Find your decan.',
   keywords: [

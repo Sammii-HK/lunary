@@ -3,6 +3,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { runesList } from '@/constants/runes';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
+import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 const runeKeys = Object.keys(runesList);
 
@@ -29,16 +30,16 @@ export async function generateMetadata({
   const runeData = runesList[runeKey as keyof typeof runesList];
 
   return createGrimoireMetadata({
-    title: `${runeData.name} Rune Meaning: ${runeData.meaning} - Lunary`,
-    description: `Discover the complete meaning of ${runeData.name} rune (${runeData.symbol}). Learn about ${runeData.name} meaning, magical properties, and how to use this rune in divination and spellwork.`,
+    title: `${runeData.name} Rune (${runeData.symbol}): Meaning & Uses - Lunary`,
+    description: `${runeData.name} rune meaning: ${runeData.meaning.toLowerCase()}. Symbol: ${runeData.symbol}. Learn ${runeData.name} magical properties, divination interpretations & how to use in spellwork.`,
     keywords: [
       `${runeData.name} rune`,
       `${runeData.name} meaning`,
       `rune ${runeData.symbol}`,
       `${runeData.name} magical properties`,
-      `${runeData.meaning} rune`,
+      `${runeData.meaning.toLowerCase()} rune`,
     ],
-    url: `https://lunary.app/grimoire/runes/${rune}`,
+    url: `/grimoire/runes/${rune}`,
     ogImagePath: '/api/og/grimoire/runes',
     ogImageAlt: `${runeData.name} Rune`,
   });
@@ -83,8 +84,25 @@ export default async function RunePage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const runeSchema = createCosmicEntitySchema({
+    name: `${runeData.name} Rune`,
+    description: `${runeData.name} (${runeData.symbol}) is a rune meaning "${runeData.meaning}". ${runeData.notes}`,
+    url: `/grimoire/runes/${rune}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Rune',
+    keywords: [
+      runeData.name,
+      runeData.symbol,
+      runeData.meaning,
+      'rune',
+      'elder futhark',
+      ...runeData.magicalUses,
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(runeSchema)}
       <SEOContentTemplate
         title={`${runeData.name} Rune - Lunary`}
         h1={`${runeData.name} Rune: Complete Guide`}

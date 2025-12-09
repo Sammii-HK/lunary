@@ -5,7 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import CandleMagic from '../components/CandleMagic';
 
 export const metadata: Metadata = {
-  title: 'Candle Magic: Complete Guide - Lunary',
+  title: 'Candle Magic: Colors, Spells & Rituals for Beginners - Lunary',
   description:
     'Learn the art of candle magic: color meanings, carving techniques, anointing with oils, lighting candles on altar, incantations by color, safety practices, and candle rituals. Comprehensive guide for beginners and advanced practitioners.',
   keywords: [
@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     'how to do candle magic',
   ],
   openGraph: {
-    title: 'Candle Magic: Complete Guide - Lunary',
+    title: 'Candle Magic: Colors, Spells & Rituals for Beginners - Lunary',
     description:
       'Learn the art of candle magic: color meanings, carving techniques, anointing with oils, lighting candles on altar, incantations by color, safety practices, and candle rituals.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Candle Magic: Complete Guide - Lunary',
+    title: 'Candle Magic: Colors, Spells & Rituals for Beginners - Lunary',
     description:
       'Learn the art of candle magic: color meanings, carving techniques, anointing with oils, lighting candles on altar, incantations by color, safety practices, and candle rituals.',
   },
@@ -40,7 +40,7 @@ export default function CandleMagicPage() {
   return (
     <>
       <SEOContentTemplate
-        title='Candle Magic: Complete Guide - Lunary'
+        title='Candle Magic: Colors, Spells & Rituals for Beginners - Lunary'
         h1='Candle Magic'
         description='Learn the art of candle magic: color meanings, carving techniques, anointing, safety, and rituals. Candle magic is one of the most accessible forms of spellwork, perfect for beginners and experienced practitioners alike.'
         keywords={[

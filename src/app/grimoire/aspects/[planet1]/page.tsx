@@ -141,7 +141,7 @@ export default async function PlanetAspectsPage({
               Aspect Types
             </Link>
             <Link
-              href='/grimoire/planets'
+              href='/grimoire/astronomy/planets'
               className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
             >
               All Planets

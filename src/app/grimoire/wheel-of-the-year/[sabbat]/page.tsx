@@ -3,6 +3,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
+import { createEventSchema, renderJsonLd } from '@/lib/schema';
 
 export async function generateStaticParams() {
   return wheelOfTheYearSabbats.map((sabbat) => ({
@@ -25,18 +26,19 @@ export async function generateMetadata({
   }
 
   return createGrimoireMetadata({
-    title: `${sabbatData.name}: Meaning, Rituals & Traditions - Lunary`,
-    description: `Discover ${sabbatData.name} (${sabbatData.date}). Learn about this sabbat's meaning, rituals, traditions, and how to celebrate the Wheel of the Year.`,
+    title: `${sabbatData.name} (${sabbatData.date}): Rituals, Meaning & Traditions - Lunary`,
+    description: `${sabbatData.name} sabbat: ${sabbatData.date}. Rituals, traditions, correspondences & how to celebrate. Complete Wheel of the Year guide for ${sabbatData.name}.`,
     keywords: [
       sabbatData.name.toLowerCase(),
       `${sabbatData.name.toLowerCase()} sabbat`,
       `${sabbatData.name.toLowerCase()} rituals`,
       `${sabbatData.name.toLowerCase()} meaning`,
+      `${sabbatData.name.toLowerCase()} traditions`,
       'wheel of the year',
     ],
-    url: `https://lunary.app/grimoire/wheel-of-the-year/${sabbat}`,
+    url: `/grimoire/wheel-of-the-year/${sabbat}`,
     ogImagePath: '/api/og/grimoire/wheel-of-the-year',
-    ogImageAlt: sabbatData.name,
+    ogImageAlt: `${sabbatData.name} Sabbat`,
   });
 }
 
@@ -77,8 +79,26 @@ export default async function SabbatPage({
     },
   ];
 
+  // Event schema for sabbats - helps with Google's event search
+  const currentYear = new Date().getFullYear();
+  const eventSchema = createEventSchema({
+    name: `${sabbatData.name} ${currentYear}`,
+    description: `${sabbatData.name} celebration on ${sabbatData.date}. ${sabbatData.spiritualMeaning.slice(0, 150)}...`,
+    url: `/grimoire/wheel-of-the-year/${sabbat}`,
+    startDate: `${currentYear}-${sabbatData.date.includes('December') ? '12' : sabbatData.date.includes('January') ? '01' : sabbatData.date.includes('February') ? '02' : sabbatData.date.includes('March') ? '03' : sabbatData.date.includes('April') || sabbatData.date.includes('May 1') ? '05' : sabbatData.date.includes('June') ? '06' : sabbatData.date.includes('August') ? '08' : sabbatData.date.includes('September') ? '09' : '10'}-01`,
+    eventType: 'Festival',
+    keywords: [
+      sabbatData.name,
+      'sabbat',
+      'wheel of the year',
+      'pagan holiday',
+      ...sabbatData.colors.slice(0, 2),
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(eventSchema)}
       <SEOContentTemplate
         title={`${sabbatData.name} - Lunary`}
         h1={`${sabbatData.name}: Complete Guide`}

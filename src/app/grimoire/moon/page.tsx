@@ -5,7 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Moon from '../components/Moon';
 
 export const metadata: Metadata = {
-  title: 'Moon Phases & Lunar Wisdom: Complete Guide - Lunary',
+  title: 'Moon Phases: New, Full, Waxing & Waning Meanings - Lunary',
   description:
     "Explore moon phases, full moon names, and lunar wisdom. Learn about the moon's influence on magic and daily life. Discover moon rituals, moon signs, eclipses, and how to work with lunar energy for manifestation and spiritual growth.",
   keywords: [
@@ -21,14 +21,14 @@ export const metadata: Metadata = {
     'moon in signs',
   ],
   openGraph: {
-    title: 'Moon Phases & Lunar Wisdom: Complete Guide - Lunary',
+    title: 'Moon Phases: New, Full, Waxing & Waning Meanings - Lunary',
     description:
       "Explore moon phases, full moon names, and lunar wisdom. Learn about the moon's influence on magic and daily life.",
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Moon Phases & Lunar Wisdom: Complete Guide - Lunary',
+    title: 'Moon Phases: New, Full, Waxing & Waning Meanings - Lunary',
     description:
       "Explore moon phases, full moon names, and lunar wisdom. Learn about the moon's influence on magic and daily life.",
   },
@@ -41,7 +41,7 @@ export default function MoonPage() {
   return (
     <>
       <SEOContentTemplate
-        title='Moon Phases & Lunar Wisdom: Complete Guide - Lunary'
+        title='Moon Phases: New, Full, Waxing & Waning Meanings - Lunary'
         h1='Moon Phases & Lunar Wisdom'
         description="Explore moon phases, full moon names, and lunar wisdom. Learn about the moon's influence on magic and daily life. Discover moon rituals, moon signs, and how to work with lunar energy."
         keywords={[

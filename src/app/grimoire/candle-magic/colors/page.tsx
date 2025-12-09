@@ -78,7 +78,7 @@ const candleColors = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Candle Colors & Meanings: Complete Guide | Lunary',
+  title: 'Candle Colors & Meanings: Which Color to Use for Spells | Lunary',
   description:
     'Learn the magical meanings of candle colors. Discover which color candles to use for love, money, protection, healing, and more.',
   keywords: [

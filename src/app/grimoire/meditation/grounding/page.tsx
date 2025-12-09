@@ -48,7 +48,8 @@ const groundingTechniques = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Grounding Techniques: Complete Guide | Lunary',
+  title:
+    'Grounding Techniques: Earthing, Tree Root & 5-4-3-2-1 Method - Lunary',
   description:
     'Learn powerful grounding techniques to anchor your energy, reduce anxiety, and connect with the earth. Essential practices for empaths and sensitives.',
   keywords: [

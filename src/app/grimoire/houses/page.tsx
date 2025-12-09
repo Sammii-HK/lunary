@@ -11,7 +11,7 @@ import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'The 12 Astrological Houses: Complete Guide | Lunary',
+  title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
   description:
     'Complete guide to the 12 houses in astrology. Learn what each house represents, from identity (1st) to spirituality (12th), and how planet placements affect you.',
   keywords: [

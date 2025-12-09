@@ -5,6 +5,7 @@ import {
   mirrorHours,
   mirrorHourKeys,
 } from '@/constants/grimoire/clock-numbers-data';
+import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 export async function generateStaticParams() {
   return mirrorHourKeys.map((time) => ({
@@ -87,8 +88,24 @@ export default async function MirrorHourPage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const mirrorHourSchema = createCosmicEntitySchema({
+    name: `${hourData.time} Mirror Hour`,
+    description: `${hourData.time} mirror hour meaning: ${hourData.spiritualMeaning.slice(0, 120)}...`,
+    url: `/grimoire/mirror-hours/${time}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Numerology',
+    keywords: [
+      `${hourData.time} meaning`,
+      'mirror hour',
+      'angel numbers',
+      'clock synchronicity',
+      'spiritual signs',
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(mirrorHourSchema)}
       <SEOContentTemplate
         title={`${hourData.time} Mirror Hour - Lunary`}
         h1={`${hourData.time} Mirror Hour: Complete Spiritual Guide`}

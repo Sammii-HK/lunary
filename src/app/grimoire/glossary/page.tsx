@@ -14,11 +14,55 @@ import {
 } from '@/constants/grimoire/glossary';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
+const GRIMOIRE_LINKS: Record<string, { label: string; href: string }> = {
+  'new-moon': { label: 'New Moon', href: '/grimoire/moon/phases/new-moon' },
+  'full-moon': { label: 'Full Moon', href: '/grimoire/moon/phases/full-moon' },
+  waxing: { label: 'Waxing Moon', href: '/grimoire/moon/phases' },
+  waning: { label: 'Waning Moon', href: '/grimoire/moon/phases' },
+  'mercury-retrograde': {
+    label: 'Mercury Retrograde',
+    href: '/grimoire/retrogrades/mercury',
+  },
+  'first-house': { label: '1st House', href: '/grimoire/houses/overview/1' },
+  'fourth-house': { label: '4th House', href: '/grimoire/houses/overview/4' },
+  'seventh-house': { label: '7th House', href: '/grimoire/houses/overview/7' },
+  'tenth-house': { label: '10th House', href: '/grimoire/houses/overview/10' },
+  compatibility: { label: 'Compatibility', href: '/grimoire/compatibility' },
+  lilith: { label: 'Lilith', href: '/grimoire/glossary/lilith' },
+  'vedic-astrology': {
+    label: 'Vedic Astrology',
+    href: '/grimoire/glossary/vedic-astrology',
+  },
+  'world-astrology': {
+    label: 'Mundane Astrology',
+    href: '/grimoire/glossary/mundane-astrology',
+  },
+  horary: { label: 'Horary Astrology', href: '/grimoire/glossary/horary' },
+  composite: { label: 'Composite Charts', href: '/grimoire/synastry' },
+  'relationship-astrology': { label: 'Synastry', href: '/grimoire/synastry' },
+  forecast: { label: 'Forecasting', href: '/grimoire/transits' },
+  return: { label: 'Returns', href: '/grimoire/transits' },
+  birthday: { label: 'Birthday Astrology', href: '/grimoire/birthday' },
+  'lot-of-fortune': {
+    label: 'Lot of Fortune',
+    href: '/grimoire/glossary/lot-of-fortune',
+  },
+  'arabic-parts': {
+    label: 'Arabic Parts',
+    href: '/grimoire/glossary/arabic-parts',
+  },
+  'aspect-pattern': { label: 'Aspect Patterns', href: '/grimoire/aspects' },
+  emotions: { label: 'Moon', href: '/grimoire/planets/moon' },
+  destiny: { label: 'Lunar Nodes', href: '/grimoire/lunar-nodes' },
+  fate: { label: 'Lunar Nodes', href: '/grimoire/lunar-nodes' },
+  'yin-yang': { label: 'Polarities', href: '/grimoire/zodiac' },
+};
+
 export const metadata: Metadata = {
   title:
-    'Astrology Glossary: Complete Dictionary of 80+ Astrological Terms - Lunary',
+    'Astrology Glossary: Complete Dictionary of 100+ Astrological Terms - Lunary',
   description:
-    'Comprehensive astrology glossary with 80+ definitions. Learn about aspects, houses, signs, planets, retrogrades, lunar nodes, synastry, and more. Essential reference for astrology students and enthusiasts.',
+    'Comprehensive astrology glossary with 100+ definitions. Learn about aspects, houses, signs, planets, retrogrades, lunar nodes, synastry, and more. Essential reference for astrology students and enthusiasts.',
   keywords: [
     'astrology glossary',
     'astrological terms',
@@ -213,23 +257,37 @@ export default function GlossaryPage() {
                 {term.relatedTerms && term.relatedTerms.length > 0 && (
                   <div className='flex flex-wrap gap-2'>
                     <span className='text-zinc-500 text-sm'>See also:</span>
-                    {term.relatedTerms.map((related) => {
+                    {term.relatedTerms.map((relatedSlug) => {
                       const relatedTerm = GLOSSARY_TERMS.find(
-                        (t) => t.term === related,
+                        (t) => t.slug === relatedSlug,
                       );
-                      return relatedTerm ? (
-                        <a
-                          key={related}
-                          href={`#${relatedTerm.slug}`}
-                          className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
-                        >
-                          {related}
-                        </a>
-                      ) : (
-                        <span key={related} className='text-sm text-zinc-500'>
-                          {related}
-                        </span>
-                      );
+                      const grimoireLink = GRIMOIRE_LINKS[relatedSlug];
+
+                      if (relatedTerm) {
+                        return (
+                          <a
+                            key={relatedSlug}
+                            href={`#${relatedTerm.slug}`}
+                            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                          >
+                            {relatedTerm.term}
+                          </a>
+                        );
+                      }
+
+                      if (grimoireLink) {
+                        return (
+                          <Link
+                            key={relatedSlug}
+                            href={grimoireLink.href}
+                            className='text-sm text-lunary-accent hover:text-lunary-accent/80 transition-colors'
+                          >
+                            {grimoireLink.label}
+                          </Link>
+                        );
+                      }
+
+                      return null;
                     })}
                   </div>
                 )}

@@ -62,7 +62,7 @@ const meditationTechniques = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Meditation Techniques: Complete Guide | Lunary',
+  title: 'Meditation Techniques: Chakra, Guided & Visualization | Lunary',
   description:
     'Explore different meditation techniques from mindfulness to visualization. Find the perfect practice for your spiritual journey.',
   keywords: [

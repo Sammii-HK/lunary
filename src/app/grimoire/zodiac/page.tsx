@@ -6,7 +6,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Zodiac Signs: Complete Guide to All 12 Signs - Lunary',
+  title: 'All 12 Zodiac Signs: Dates, Traits & Compatibility - Lunary',
   description:
     "Explore all 12 zodiac signs. Learn about each sign's traits, elements, ruling planets, and compatibility. Comprehensive astrology guide.",
   keywords: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     'zodiac traits',
   ],
   openGraph: {
-    title: 'Zodiac Signs: Complete Guide - Lunary',
+    title: 'All 12 Zodiac Signs: Dates, Traits & Compatibility - Lunary',
     description:
       'Explore all 12 zodiac signs and their unique characteristics.',
     url: 'https://lunary.app/grimoire/zodiac',
@@ -47,7 +47,7 @@ export default function ZodiacIndexPage() {
     <>
       {renderJsonLd(zodiacListSchema)}
       <SEOContentTemplate
-        title='Zodiac Signs: Complete Guide to All 12 Signs'
+        title='All 12 Zodiac Signs: Dates, Traits & Compatibility'
         h1='The 12 Zodiac Signs'
         description='Explore the unique traits, elements, and ruling planets of each zodiac sign.'
         keywords={[

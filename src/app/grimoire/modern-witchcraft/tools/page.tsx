@@ -90,7 +90,7 @@ const witchcraftTools = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Witchcraft Tools: Complete Guide to Magical Tools | Lunary',
+  title: 'Witchcraft Tools: Athame, Wand, Cauldron & Altar Essentials - Lunary',
   description:
     'Learn about essential witchcraft tools from athame to wand. Understand their uses, symbolism, and how to incorporate them into your practice.',
   keywords: [
