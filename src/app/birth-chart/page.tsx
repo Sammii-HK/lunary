@@ -21,6 +21,64 @@ import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 import { ShareBirthChart } from '@/components/ShareBirthChart';
 
+const ZODIAC_ORDER = [
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
+];
+
+const calculateWholeSigHouses = (birthChart: BirthChartData[]) => {
+  const ascendant = birthChart.find((p) => p.body === 'Ascendant');
+  if (!ascendant) return null;
+
+  const ascendantSignIndex = ZODIAC_ORDER.findIndex(
+    (sign) => sign.toLowerCase() === ascendant.sign.toLowerCase(),
+  );
+  if (ascendantSignIndex === -1) return null;
+
+  const houses: Array<{
+    house: number;
+    sign: string;
+    planets: BirthChartData[];
+  }> = [];
+
+  for (let i = 0; i < 12; i++) {
+    const houseSign = ZODIAC_ORDER[(ascendantSignIndex + i) % 12];
+    const planetsInHouse = birthChart.filter((p) => {
+      if (
+        [
+          'Ascendant',
+          'Midheaven',
+          'North Node',
+          'South Node',
+          'Chiron',
+          'Lilith',
+        ].includes(p.body)
+      ) {
+        return false;
+      }
+      return p.sign.toLowerCase() === houseSign.toLowerCase();
+    });
+
+    houses.push({
+      house: i + 1,
+      sign: houseSign,
+      planets: planetsInHouse,
+    });
+  }
+
+  return houses;
+};
+
 // Function to generate concise planetary interpretations
 const getPlanetaryInterpretation = (planet: BirthChartData): string => {
   const planetMeanings: Record<string, string> = {
@@ -995,6 +1053,89 @@ const BirthChartPage = () => {
                 );
               }
               return null;
+            })()}
+
+            {/* Houses Section */}
+            {(() => {
+              const houses = calculateWholeSigHouses(birthChartData);
+              if (!houses) {
+                return (
+                  <div className='mb-4 pb-4 border-b border-zinc-700'>
+                    <h4 className='text-xs font-medium text-lunary-highlight mb-2 uppercase tracking-wide'>
+                      Houses
+                    </h4>
+                    <p className='text-xs text-zinc-400'>
+                      Add your birth time to see accurate house placements.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className='mb-4 pb-4 border-b border-zinc-700'>
+                  <h4 className='text-xs font-medium text-lunary-highlight mb-3 uppercase tracking-wide'>
+                    Your 12 Houses
+                  </h4>
+                  <div className='grid grid-cols-2 gap-2'>
+                    {houses.map(({ house, sign, planets }) => {
+                      const houseInfo = houseThemes[house];
+                      return (
+                        <div
+                          key={house}
+                          className={`rounded p-2 ${
+                            planets.length > 0
+                              ? 'bg-lunary-highlight-950 border border-lunary-highlight-700/30'
+                              : 'bg-zinc-700/50'
+                          }`}
+                        >
+                          <div className='flex items-center justify-between mb-1'>
+                            <span className='text-xs font-medium text-zinc-300'>
+                              {house}
+                              {house === 1
+                                ? 'st'
+                                : house === 2
+                                  ? 'nd'
+                                  : house === 3
+                                    ? 'rd'
+                                    : 'th'}
+                            </span>
+                            <span className='text-xs font-astro text-lunary-accent'>
+                              {
+                                zodiacSymbol[
+                                  sign.toLowerCase() as keyof typeof zodiacSymbol
+                                ]
+                              }
+                            </span>
+                          </div>
+                          <div className='text-xs text-zinc-400 mb-1'>
+                            {sign}
+                          </div>
+                          {planets.length > 0 && (
+                            <div className='flex flex-wrap gap-1 mt-1'>
+                              {planets.map((p) => (
+                                <span
+                                  key={p.body}
+                                  className='text-sm font-astro text-lunary-highlight-300'
+                                  title={p.body}
+                                >
+                                  {
+                                    bodiesSymbols[
+                                      p.body.toLowerCase() as keyof typeof bodiesSymbols
+                                    ]
+                                  }
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <div className='text-[10px] text-zinc-500 mt-1'>
+                            {houseInfo?.theme}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
             })()}
 
             {/* Personal Planets */}

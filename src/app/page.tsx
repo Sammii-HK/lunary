@@ -5,10 +5,9 @@ import { Metadata } from 'next';
 import WelcomePage from './welcome/page';
 
 export const metadata: Metadata = {
-  title:
-    'Lunary: Personalised Astrology and AI Guided Insights Based on Your Birth Chart',
+  title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
   description:
-    'Lunary blends real astronomy, birth chart astrology, tarot and lunar cycles into personal daily guidance. Understand your emotions and patterns with accurate insights based on your real chart. Start free.',
+    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. AI-powered insights from your natal chart. Free to start.',
   keywords: [
     'personalised astrology app',
     'birth chart astrology',

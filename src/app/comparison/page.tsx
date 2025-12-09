@@ -2,12 +2,20 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Star } from 'lucide-react';
 
+const year = new Date().getFullYear();
+
 export const metadata: Metadata = {
-  title: 'Astrology App Comparisons - Lunary',
-  description:
-    'Compare Lunary with other astrology apps. See why Lunary uses real astronomical data, personalized birth charts, and includes a complete grimoire. Free 7-day trial available.',
+  title: `Best Astrology Apps ${year}: Honest Comparisons & Reviews - Lunary`,
+  description: `Compare the best astrology apps in ${year}. Lunary vs Co-Star, Pattern, Sanctuary & more. Features, accuracy, pricing & which app is right for you.`,
+  keywords: [
+    `best astrology app ${year}`,
+    'astrology app comparison',
+    'lunary vs costar',
+    'astrology app reviews',
+    'personalized astrology apps',
+  ],
   openGraph: {
-    title: 'Astrology App Comparisons - Lunary',
+    title: `Best Astrology Apps ${year}: Honest Comparisons`,
     description:
       'Compare Lunary with other astrology apps. See why Lunary stands out with real astronomical data and personalized insights.',
     url: 'https://lunary.app/comparison',

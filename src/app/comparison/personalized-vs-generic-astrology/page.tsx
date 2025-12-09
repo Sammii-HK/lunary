@@ -3,11 +3,18 @@ import Link from 'next/link';
 import { Check, ArrowRight, Star } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Personalized Astrology vs Generic: Why It Matters',
+  title: 'Personalized vs Generic Astrology: Which is More Accurate? - Lunary',
   description:
-    'Learn why personalized astrology based on your exact birth chart is more accurate than generic zodiac horoscopes. Discover the benefits of real astronomical calculations and chart-based insights.',
+    'Why birth chart astrology beats generic horoscopes. Personalized predictions based on your exact birth time vs. sun sign-only readings. The science explained.',
+  keywords: [
+    'personalized astrology',
+    'birth chart accuracy',
+    'generic horoscopes',
+    'natal chart astrology',
+    'astrology accuracy',
+  ],
   openGraph: {
-    title: 'Personalized Astrology vs Generic: Why It Matters',
+    title: 'Personalized vs Generic Astrology: Which is More Accurate?',
     description:
       'Learn why personalized astrology based on your exact birth chart is more accurate than generic zodiac horoscopes.',
     url: 'https://lunary.app/comparison/personalized-vs-generic-astrology',
