@@ -1,0 +1,51 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Daily at 8am UTC
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        id: audit
+        run: |
+          AUDIT=$(npm audit --json 2>/dev/null || true)
+
+          # Filter out the cursed framework (known issue, being removed)
+          CRITICAL=$(echo "$AUDIT" | jq '[.vulnerabilities // {} | to_entries[] | select(.key | startswith("jazz") | not) | select(.value.severity == "critical")] | length')
+          HIGH=$(echo "$AUDIT" | jq '[.vulnerabilities // {} | to_entries[] | select(.key | startswith("jazz") | not) | select(.value.severity == "high")] | length')
+
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+
+      - name: Send Discord alert
+        if: steps.audit.outputs.critical > 0 || steps.audit.outputs.high > 0
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URGENT }}
+        run: |
+          CRITICAL="${{ steps.audit.outputs.critical }}"
+          HIGH="${{ steps.audit.outputs.high }}"
+
+          curl -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"username\": \"Lunary Security\",
+              \"embeds\": [{
+                \"title\": \"Security Vulnerabilities Found\",
+                \"description\": \"Daily audit: **${CRITICAL}** critical, **${HIGH}** high\",
+                \"color\": 16711680,
+                \"url\": \"https://github.com/${{ github.repository }}/security/dependabot\"
+              }]
+            }"

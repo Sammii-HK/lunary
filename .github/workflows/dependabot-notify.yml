@@ -1,0 +1,33 @@
+name: Dependabot PR Notification
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  notify:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+
+      - name: Send Discord alert
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URGENT }}
+        run: |
+          DEPS="${{ steps.meta.outputs.dependency-names }}"
+          PR_URL="${{ github.event.pull_request.html_url }}"
+
+          curl -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"username\": \"Lunary Security\",
+              \"embeds\": [{
+                \"title\": \"Dependabot Security Update\",
+                \"description\": \"${DEPS}\",
+                \"color\": 16744448,
+                \"url\": \"${PR_URL}\"
+              }]
+            }"
