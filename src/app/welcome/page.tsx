@@ -116,7 +116,7 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <Sparkles
-                className='w-8 h-8 text-lunary-primary-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-300 mx-auto'
                 strokeWidth={1.5}
               />
               <h3 className='text-lg font-medium text-zinc-100'>
@@ -129,7 +129,7 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <NotebookPen
-                className='w-8 h-8 text-lunary-primary-400 mx-auto'
+                className='w-8 h-8 text-blue-400/70 mx-auto'
                 strokeWidth={1.5}
               />
               <h3 className='text-lg font-medium text-zinc-100'>
@@ -168,7 +168,12 @@ export default function WelcomePage() {
             <div className='space-y-2'>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <span className='text-lg'>🌘</span>
+                  <Image
+                    src='/icons/moon-phases/waning-cresent-moon.svg'
+                    alt='Waning Crescent'
+                    width={20}
+                    height={20}
+                  />
                   <span className='text-sm font-medium text-zinc-200'>
                     Waning Crescent
                   </span>
@@ -378,10 +383,10 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <Map
-                className='w-8 h-8 text-lunary-primary-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-300 mx-auto'
                 strokeWidth={1.5}
               />
-              <div className='text-sm text-lunary-primary-400 font-medium'>
+              <div className='text-sm text-lunary-primary-300 font-medium'>
                 2
               </div>
               <h3 className='text-base font-medium text-zinc-100'>
@@ -396,12 +401,10 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <MessagesSquare
-                className='w-8 h-8 text-lunary-primary-400 mx-auto'
+                className='w-8 h-8 text-blue-400/70 mx-auto'
                 strokeWidth={1.5}
               />
-              <div className='text-sm text-lunary-primary-400 font-medium'>
-                3
-              </div>
+              <div className='text-sm text-blue-400/70 font-medium'>3</div>
               <h3 className='text-base font-medium text-zinc-100'>
                 Talk to your astral guide
               </h3>
