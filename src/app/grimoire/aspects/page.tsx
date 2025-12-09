@@ -102,10 +102,10 @@ export default function AspectsIndexPage() {
             planetary energies interact.
           </p>
           <Link
-            href='/welcome'
+            href='/birth-chart'
             className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
-            Generate Your Birth Chart
+            View Your Birth Chart
           </Link>
         </div>
       </div>

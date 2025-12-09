@@ -161,7 +161,7 @@ ${interp.inSynastry}
         { name: 'Aspects Overview', href: '/grimoire/aspects', type: 'Guide' },
       ]}
       ctaText='Discover aspects in your chart'
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[{ name: 'Traditional astrological aspects' }]}
     >
       <div className='mt-8'>

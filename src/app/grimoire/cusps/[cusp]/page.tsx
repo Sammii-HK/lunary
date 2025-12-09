@@ -152,7 +152,7 @@ ${data.celebrities.join(', ')}
         { name: 'Cusps Overview', href: '/grimoire/cusps', type: 'Guide' },
       ]}
       ctaText="Discover if you're a cusp baby"
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[{ name: 'Cusp astrology interpretations' }]}
     >
       <div className='mt-8'>

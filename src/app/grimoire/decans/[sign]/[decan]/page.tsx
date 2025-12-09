@@ -155,7 +155,7 @@ The ${data.tarotCard} is associated with this decan, reflecting its themes and e
         { name: 'Decans Overview', href: '/grimoire/decans', type: 'Guide' },
       ]}
       ctaText='Discover your decan placement'
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[{ name: 'Traditional decan system' }]}
     >
       <div className='mt-8'>

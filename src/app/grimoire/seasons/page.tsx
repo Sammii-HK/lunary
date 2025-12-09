@@ -2,38 +2,41 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ZODIAC_SEASONS, getSeasonDates } from '@/constants/seo/zodiac-seasons';
 
-export const metadata: Metadata = {
-  title: 'Zodiac Seasons 2025-2026: Astrological Calendar & Dates | Lunary',
-  description:
-    'Complete guide to zodiac seasons. Learn when each astrological season begins, its meaning, and how to work with the cosmic energy. All 12 zodiac seasons explained.',
-  keywords: [
-    'zodiac seasons',
-    'astrological seasons',
-    'aries season',
-    'taurus season',
-    'gemini season',
-    'cancer season',
-    'leo season',
-    'virgo season',
-    'libra season',
-    'scorpio season',
-    'sagittarius season',
-    'capricorn season',
-    'aquarius season',
-    'pisces season',
-  ],
-  openGraph: {
-    title: 'Zodiac Seasons 2025-2026: Astrological Calendar & Dates',
-    description:
-      'Complete guide to all 12 zodiac seasons with dates, meanings, and cosmic energies.',
-    url: 'https://lunary.app/grimoire/seasons',
-  },
-  alternates: {
-    canonical: 'https://lunary.app/grimoire/seasons',
-  },
-};
-
 const currentYear = new Date().getFullYear();
+const nextYear = currentYear + 1;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Zodiac Seasons ${currentYear}-${nextYear}: Astrological Calendar & Dates | Lunary`,
+    description:
+      'Complete guide to zodiac seasons. Learn when each astrological season begins, its meaning, and how to work with the cosmic energy. All 12 zodiac seasons explained.',
+    keywords: [
+      'zodiac seasons',
+      'astrological seasons',
+      'aries season',
+      'taurus season',
+      'gemini season',
+      'cancer season',
+      'leo season',
+      'virgo season',
+      'libra season',
+      'scorpio season',
+      'sagittarius season',
+      'capricorn season',
+      'aquarius season',
+      'pisces season',
+    ],
+    openGraph: {
+      title: `Zodiac Seasons ${currentYear}-${nextYear}: Astrological Calendar & Dates`,
+      description:
+        'Complete guide to all 12 zodiac seasons with dates, meanings, and cosmic energies.',
+      url: 'https://lunary.app/grimoire/seasons',
+    },
+    alternates: {
+      canonical: 'https://lunary.app/grimoire/seasons',
+    },
+  };
+}
 
 export default function SeasonsIndexPage() {
   return (
@@ -100,10 +103,10 @@ export default function SeasonsIndexPage() {
             each season impacts you.
           </p>
           <Link
-            href='/welcome'
+            href='/horoscope'
             className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
-            Get Your Seasonal Forecast
+            View Your Personalized Horoscope
           </Link>
         </div>
       </div>

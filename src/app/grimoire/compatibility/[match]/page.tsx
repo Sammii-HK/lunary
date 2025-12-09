@@ -286,21 +286,40 @@ export default async function CompatibilityPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* Synastry CTA */}
+        <section>
+          <Link
+            href='/grimoire/synastry/generate'
+            className='block p-6 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-lunary-primary-900/30 border border-lunary-rose-700 hover:border-lunary-rose-500 transition-colors group'
+          >
+            <div className='flex items-center justify-between'>
+              <div>
+                <h3 className='text-xl font-medium text-lunary-rose-300 group-hover:text-lunary-rose-200 transition-colors flex items-center gap-2'>
+                  💕 Generate Your Synastry Chart
+                </h3>
+                <p className='text-zinc-400 mt-1'>
+                  Go beyond Sun signs! Compare complete birth charts for deeper
+                  compatibility insights
+                </p>
+              </div>
+              <span className='text-lunary-rose-400 group-hover:text-lunary-rose-300 transition-colors text-2xl'>
+                →
+              </span>
+            </div>
+          </Link>
+        </section>
+
+        {/* Birth Chart CTA */}
         <section className='text-center'>
-          <div className='p-8 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-            <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-              Check Your Full Compatibility
-            </h2>
-            <p className='text-zinc-400 mb-6'>
-              Sun signs are just the beginning. Get a complete synastry analysis
-              based on both birth charts.
+          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+            <p className='text-zinc-400 mb-4'>
+              Sun signs are just the beginning. View your complete birth chart.
             </p>
             <Link
-              href='/welcome'
-              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+              href='/birth-chart'
+              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-zinc-100 transition-colors'
             >
-              Generate Synastry Chart
+              View Your Birth Chart
               <ArrowRight className='h-5 w-5' />
             </Link>
           </div>

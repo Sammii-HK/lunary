@@ -286,10 +286,10 @@ export default async function PlacementPage({ params }: PageProps) {
               story. Get your complete birth chart analysis.
             </p>
             <Link
-              href='/welcome'
+              href='/birth-chart'
               className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
             >
-              Generate Your Birth Chart
+              View Your Birth Chart
               <ArrowRight className='h-5 w-5' />
             </Link>
           </div>

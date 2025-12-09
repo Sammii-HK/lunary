@@ -165,7 +165,7 @@ ${seasonData.displayName} Season falls during ${seasonData.season} in the Northe
         },
       ]}
       ctaText={`Discover how ${seasonData.displayName} Season affects your chart`}
-      ctaHref='/welcome'
+      ctaHref='/horoscope'
       sources={[
         { name: 'Solar transit calculations' },
         { name: 'Traditional astrological seasons' },

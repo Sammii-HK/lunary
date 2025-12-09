@@ -155,7 +155,7 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
         { name: 'Houses Overview', href: '/grimoire/houses', type: 'Guide' },
       ]}
       ctaText='Find your house placements'
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[{ name: 'Traditional house meanings' }]}
     >
       <div className='mt-8'>

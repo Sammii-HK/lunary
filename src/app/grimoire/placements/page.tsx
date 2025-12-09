@@ -72,6 +72,7 @@ export default function PlacementsIndexPage() {
           {planets.map(([planetKey, planet]) => (
             <section
               key={planetKey}
+              id={`${planetKey}-placements`}
               className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
             >
               <div className='mb-6'>
@@ -129,7 +130,7 @@ export default function PlacementsIndexPage() {
         {/* CTA */}
         <section className='mt-12 text-center'>
           <Link
-            href='/welcome'
+            href='/birth-chart'
             className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
           >
             Discover Your Placements

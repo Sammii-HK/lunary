@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
+import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
@@ -79,50 +80,10 @@ export default function CompatibilityIndexPage() {
             Compatibility Matrix
           </h2>
           <p className='text-zinc-400 text-sm mb-6'>
-            Click any cell to see the full compatibility analysis
+            Hover to highlight row and column. Click any cell to see the full
+            compatibility analysis.
           </p>
-          <div className='min-w-[800px]'>
-            <table className='w-full border-collapse'>
-              <thead>
-                <tr>
-                  <th className='p-2'></th>
-                  {signs.map(([key, sign]) => (
-                    <th
-                      key={key}
-                      className='p-2 text-xs text-zinc-400 font-medium'
-                    >
-                      {sign.name.slice(0, 3)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {signs.map(([key1, sign1]) => (
-                  <tr key={key1}>
-                    <td className='p-2 text-xs text-zinc-400 font-medium'>
-                      {sign1.name.slice(0, 3)}
-                    </td>
-                    {signs.map(([key2]) => {
-                      const slug =
-                        key1 <= key2
-                          ? `${key1}-and-${key2}`
-                          : `${key2}-and-${key1}`;
-                      return (
-                        <td key={key2} className='p-1'>
-                          <Link
-                            href={`/grimoire/compatibility/${slug}`}
-                            className='block w-8 h-8 rounded bg-zinc-800 hover:bg-lunary-rose-800 hover:border-lunary-rose-600 border border-transparent transition-colors flex items-center justify-center'
-                          >
-                            <Heart className='h-3 w-3 text-zinc-600 hover:text-lunary-rose' />
-                          </Link>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <CompatibilityMatrix signs={signs} />
         </div>
 
         {/* Browse by Sign */}
@@ -165,17 +126,40 @@ export default function CompatibilityIndexPage() {
           ))}
         </div>
 
-        {/* CTA */}
-        <section className='mt-12 text-center'>
+        {/* Synastry CTA */}
+        <section className='mt-12'>
           <Link
-            href='/welcome'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-rose-900 hover:bg-lunary-rose-800 border border-lunary-rose-700 text-lunary-rose-300 font-medium text-lg transition-colors'
+            href='/grimoire/synastry/generate'
+            className='block p-6 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-lunary-primary-900/30 border border-lunary-rose-700 hover:border-lunary-rose-500 transition-colors group'
           >
-            <Heart className='h-5 w-5' />
-            Get Your Synastry Reading
+            <div className='flex items-center justify-between'>
+              <div>
+                <h3 className='text-xl font-medium text-lunary-rose-300 group-hover:text-lunary-rose-200 transition-colors flex items-center gap-2'>
+                  <Heart className='h-5 w-5' />
+                  Generate Synastry Chart
+                </h3>
+                <p className='text-zinc-400 mt-1'>
+                  Compare two birth charts to discover deep compatibility,
+                  strengths, and growth areas
+                </p>
+              </div>
+              <span className='text-lunary-rose-400 group-hover:text-lunary-rose-300 transition-colors text-2xl'>
+                →
+              </span>
+            </div>
+          </Link>
+        </section>
+
+        {/* Birth Chart CTA */}
+        <section className='mt-6 text-center'>
+          <Link
+            href='/birth-chart'
+            className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-zinc-100 transition-colors'
+          >
+            View Your Birth Chart
           </Link>
           <p className='mt-3 text-sm text-zinc-500'>
-            Compare full birth charts for deeper compatibility insights
+            Understand your complete astrological profile
           </p>
         </section>
       </div>

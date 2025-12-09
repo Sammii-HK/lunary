@@ -55,6 +55,8 @@ export default function SynastryPage() {
         { label: 'Synastry', href: '/grimoire/synastry' },
       ]}
       intro={`Synastry is the comparison of two birth charts to understand relationship dynamics, compatibility, and how two people interact. It reveals how planets in one person's chart interact with planets in another person's chart, showing areas of harmony, challenge, and growth potential.`}
+      ctaText='Generate Synastry Chart'
+      ctaHref='/grimoire/synastry/generate'
       meaning={`Synastry looks at how planets in one person's chart interact with planets in another person's chart. Key areas to examine:
 
 **Understanding Synastry:**
