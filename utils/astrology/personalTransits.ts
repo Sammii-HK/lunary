@@ -18,6 +18,10 @@ export type PersonalTransitImpact = {
     natalPlanet: string;
     aspectType: string;
     intensity: number;
+    transitDegree?: string;
+    natalDegree?: string;
+    transitSign?: string;
+    natalSign?: string;
   };
 };
 
@@ -55,35 +59,63 @@ const getHouseMeaning = (house: number): string => {
 const calculateAspectsToNatal = (
   transitPlanet: AstroChartInformation,
   natalChart: any[],
-): { natalPlanet: string; aspectType: string; intensity: number } | null => {
+): {
+  natalPlanet: string;
+  aspectType: string;
+  intensity: number;
+  transitDegree?: string;
+  natalDegree?: string;
+  transitSign?: string;
+  natalSign?: string;
+} | null => {
   for (const natal of natalChart) {
     let diff = Math.abs(
       transitPlanet.eclipticLongitude - natal.eclipticLongitude,
     );
     if (diff > 180) diff = 360 - diff;
 
+    const formatDegree = (longitude: number, sign: string) => {
+      const degreeInSign = longitude % 30;
+      const wholeDegree = Math.floor(degreeInSign);
+      const minutes = Math.floor((degreeInSign - wholeDegree) * 60);
+      return `${wholeDegree}°${minutes.toString().padStart(2, '0')}' ${sign}`;
+    };
+
+    const result = {
+      natalPlanet: natal.body,
+      aspectType: '',
+      intensity: 0,
+      transitDegree: formatDegree(
+        transitPlanet.eclipticLongitude,
+        transitPlanet.sign,
+      ),
+      natalDegree: formatDegree(natal.eclipticLongitude, natal.sign),
+      transitSign: transitPlanet.sign,
+      natalSign: natal.sign,
+    };
+
     // Check for major aspects
     if (Math.abs(diff - 0) <= 8) {
       return {
-        natalPlanet: natal.body,
+        ...result,
         aspectType: 'conjunction',
         intensity: 10 - Math.abs(diff - 0),
       };
     } else if (Math.abs(diff - 180) <= 8) {
       return {
-        natalPlanet: natal.body,
+        ...result,
         aspectType: 'opposition',
         intensity: 10 - Math.abs(diff - 180),
       };
     } else if (Math.abs(diff - 120) <= 6) {
       return {
-        natalPlanet: natal.body,
+        ...result,
         aspectType: 'trine',
         intensity: 8 - Math.abs(diff - 120),
       };
     } else if (Math.abs(diff - 90) <= 6) {
       return {
-        natalPlanet: natal.body,
+        ...result,
         aspectType: 'square',
         intensity: 8 - Math.abs(diff - 90),
       };
