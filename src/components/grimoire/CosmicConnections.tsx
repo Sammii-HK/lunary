@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { ArrowRight, Sparkles, Star, Moon, Sun } from 'lucide-react';
-import { PLANETARY_CORRESPONDENCES } from '@/constants/entity-relationships';
+import {
+  PLANETARY_CORRESPONDENCES,
+  ZODIAC_CORRESPONDENCES,
+} from '@/constants/entity-relationships';
 import {
   MAJOR_ARCANA_CORRESPONDENCES,
   ELEMENTS,
@@ -11,6 +14,20 @@ import {
 // Helper to convert string to kebab-case
 function toSlug(str: string): string {
   return str.toLowerCase().replace(/['']/g, '').replace(/\s+/g, '-');
+}
+
+// Helper to deduplicate connections by URL
+function deduplicateConnections(
+  connections: ConnectionItem[],
+): ConnectionItem[] {
+  const seen = new Set<string>();
+  return connections.filter((connection) => {
+    if (seen.has(connection.url)) {
+      return false;
+    }
+    seen.add(connection.url);
+    return true;
+  });
 }
 
 // Convert house number to slug
@@ -118,8 +135,10 @@ function getConnectionsForPlanet(planetKey: string): ConnectionItem[] {
     });
   }
 
-  return connections;
+  return deduplicateConnections(connections);
 }
+
+const MODERN_RULERS = ['uranus', 'neptune', 'pluto'];
 
 function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
   const connections: ConnectionItem[] = [];
@@ -127,11 +146,12 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
 
   for (const [planetKey, planet] of Object.entries(PLANETARY_CORRESPONDENCES)) {
     if (planet.rulesZodiac.map((s) => s.toLowerCase()).includes(signLower)) {
+      const isModernRuler = MODERN_RULERS.includes(planetKey.toLowerCase());
       connections.push({
         name: planetKey.charAt(0).toUpperCase() + planetKey.slice(1),
         url: `/grimoire/planets/${planetKey}`,
         type: 'planet',
-        description: 'Ruling planet',
+        description: isModernRuler ? 'Modern ruler' : 'Traditional ruler',
       });
     }
   }
@@ -158,13 +178,16 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
       type: 'element',
       description: element.description.slice(0, 50) + '...',
     });
+  }
 
-    element.crystals.slice(0, 2).forEach((crystal) => {
+  const zodiacData = ZODIAC_CORRESPONDENCES[signLower];
+  if (zodiacData) {
+    zodiacData.crystals.slice(0, 2).forEach((crystal) => {
       connections.push({
         name: crystal,
         url: `/grimoire/crystals/${toSlug(crystal)}`,
         type: 'crystal',
-        description: `${element.name} element crystal`,
+        description: `${signKey} crystal`,
       });
     });
   }
@@ -181,7 +204,7 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
           name: sign,
           url: `/grimoire/zodiac/${sign.toLowerCase()}`,
           type: 'zodiac',
-          description: `${modality.name} sign`,
+          description: `Also ${modality.name} modality`,
         });
       });
   }
@@ -198,7 +221,7 @@ function getConnectionsForZodiac(signKey: string): ConnectionItem[] {
     });
   }
 
-  return connections;
+  return deduplicateConnections(connections);
 }
 
 function getConnectionsForTarot(cardKey: string): ConnectionItem[] {
@@ -238,7 +261,7 @@ function getConnectionsForTarot(cardKey: string): ConnectionItem[] {
     }
   }
 
-  return connections;
+  return deduplicateConnections(connections);
 }
 
 function getConnectionsForCrystal(crystalKey: string): ConnectionItem[] {
@@ -276,7 +299,7 @@ function getConnectionsForCrystal(crystalKey: string): ConnectionItem[] {
     }
   }
 
-  return connections;
+  return deduplicateConnections(connections);
 }
 
 export function CosmicConnections({
