@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { astrologicalHouses } from '@/constants/grimoire/seo-data';
 import { stringToKebabCase } from '../../../../../../utils/string';
+import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 const houseKeys = Object.keys(astrologicalHouses);
 
@@ -30,8 +31,16 @@ export async function generateMetadata({
 
   const houseData =
     astrologicalHouses[houseKey as keyof typeof astrologicalHouses];
-  const title = `${houseData.name} Meaning: Astrological House Guide - Lunary`;
-  const description = `Discover the complete guide to the ${houseData.name} (${houseData.symbol}) in astrology. Learn about ${houseData.name} meaning, themes, and how it influences your birth chart.`;
+  const ordinal =
+    houseData.number === 1
+      ? '1st'
+      : houseData.number === 2
+        ? '2nd'
+        : houseData.number === 3
+          ? '3rd'
+          : `${houseData.number}th`;
+  const title = `${ordinal} House in Astrology: Meaning, Planets & Themes - Lunary`;
+  const description = `${ordinal} House (${houseData.name}) meaning in astrology. Planets, themes & how the ${ordinal} house affects your birth chart. Complete natal chart guide.`;
 
   return {
     title,
@@ -99,6 +108,15 @@ export default async function HousePage({
   const houseData =
     astrologicalHouses[houseKey as keyof typeof astrologicalHouses];
 
+  const ordinal =
+    houseData.number === 1
+      ? '1st'
+      : houseData.number === 2
+        ? '2nd'
+        : houseData.number === 3
+          ? '3rd'
+          : `${houseData.number}th`;
+
   const faqs = [
     {
       question: `What does the ${houseData.name} represent?`,
@@ -122,8 +140,24 @@ export default async function HousePage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const houseSchema = createCosmicEntitySchema({
+    name: `${houseData.name} in Astrology`,
+    description: `The ${houseData.name} (${houseData.symbol}) governs ${houseData.area.toLowerCase()}. ${houseData.description.slice(0, 100)}...`,
+    url: `/grimoire/houses/overview/${house}`,
+    additionalType: 'https://en.wikipedia.org/wiki/House_(astrology)',
+    keywords: [
+      houseData.name,
+      `${ordinal} house astrology`,
+      'astrological house',
+      'natal chart houses',
+      houseData.area,
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(houseSchema)}
       <SEOContentTemplate
         title={`${houseData.name} - Lunary`}
         h1={`${houseData.name} (${houseData.symbol}): Complete Astrological Guide`}

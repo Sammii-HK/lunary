@@ -3,6 +3,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
+import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 const lifePathKeys = Object.keys(lifePathNumbers);
 
@@ -75,8 +76,24 @@ export default async function LifePathNumberPage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const lifePathSchema = createCosmicEntitySchema({
+    name: numberData.name,
+    description: `${numberData.name} numerology meaning. Traits: ${numberData.traits.slice(0, 3).join(', ')}. ${numberData.description.slice(0, 100)}...`,
+    url: `/grimoire/life-path/${number}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Numerology',
+    keywords: [
+      numberData.name,
+      `life path ${number}`,
+      'numerology',
+      'life path number',
+      ...numberData.traits.slice(0, 3),
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(lifePathSchema)}
       <SEOContentTemplate
         title={`${numberData.name} - Lunary`}
         h1={`${numberData.name}: Complete Guide`}

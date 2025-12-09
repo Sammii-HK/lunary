@@ -8,6 +8,7 @@ import {
   createGrimoireMetadata,
   createNotFoundMetadata,
 } from '@/lib/grimoire-metadata';
+import { createCrystalSchema, renderJsonLd } from '@/lib/schema';
 
 export async function generateStaticParams() {
   return crystalDatabase.map((crystal) => ({
@@ -30,17 +31,19 @@ export async function generateMetadata({
   }
 
   return createGrimoireMetadata({
-    entityType: 'crystal',
-    entityName: crystalData.name,
-    description: `Discover the complete guide to ${crystalData.name} crystal. Learn about ${crystalData.name} meaning, properties (${crystalData.properties.slice(0, 3).join(', ')}), chakras, zodiac signs, and how to use this crystal.`,
+    title: `${crystalData.name} Crystal: Meaning, Properties & Uses - Lunary`,
+    description: `${crystalData.name} crystal meaning and healing properties. Associated with ${crystalData.properties.slice(0, 3).join(', ').toLowerCase()}. Works with ${crystalData.chakras.join(' & ')} chakras. Complete guide to using ${crystalData.name}.`,
     keywords: [
       `${crystalData.name} crystal`,
       `${crystalData.name} meaning`,
       `${crystalData.name} properties`,
+      `${crystalData.name} healing`,
       `${crystalData.name} uses`,
       `crystal ${crystalData.name}`,
     ],
-    path: `/grimoire/crystals/${crystal}`,
+    url: `/grimoire/crystals/${crystal}`,
+    ogImagePath: '/api/og/grimoire/crystals',
+    ogImageAlt: `${crystalData.name} Crystal`,
   });
 }
 
@@ -81,8 +84,19 @@ export default async function CrystalPage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const crystalSchema = createCrystalSchema({
+    name: crystalData.name,
+    description: `${crystalData.name} is a crystal known for ${crystalData.properties.slice(0, 3).join(', ').toLowerCase()}.`,
+    properties: crystalData.properties,
+    chakras: crystalData.chakras,
+    zodiacSigns: crystalData.zodiacSigns,
+    element: crystalData.elements[0],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(crystalSchema)}
       <SEOContentTemplate
         title={`${crystalData.name} Crystal - Lunary`}
         h1={`${crystalData.name} Crystal: Complete Guide`}

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { eclipseInfo } from '@/constants/grimoire/seo-data';
+import { createEventSchema, renderJsonLd } from '@/lib/schema';
 
 const eclipseKeys = Object.keys(eclipseInfo);
 
@@ -108,8 +109,26 @@ export default async function EclipsePage({
     },
   ];
 
+  // Event schema for eclipses - helps appear in Google's event search
+  const year = new Date().getFullYear();
+  const eclipseSchema = createEventSchema({
+    name: `${eclipseData.name} ${year}`,
+    description: `${eclipseData.name}: ${eclipseData.description.slice(0, 150)}...`,
+    url: `/grimoire/eclipses/${type}`,
+    startDate: `${year}-01-01`, // Approximate
+    eventType: 'Event',
+    keywords: [
+      eclipseData.name.toLowerCase(),
+      `${type} eclipse ${year}`,
+      'eclipse astrology',
+      'astronomical event',
+      ...eclipseData.effects.slice(0, 2),
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(eclipseSchema)}
       <SEOContentTemplate
         title={`${eclipseData.name} - Lunary`}
         h1={`${eclipseData.name}: Complete Guide`}

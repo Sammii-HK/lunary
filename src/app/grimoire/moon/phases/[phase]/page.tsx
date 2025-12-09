@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { monthlyMoonPhases } from '../../../../../../utils/moon/monthlyPhases';
 import { stringToKebabCase } from '../../../../../../utils/string';
+import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 const phaseKeys = Object.keys(monthlyMoonPhases);
 
@@ -34,18 +35,21 @@ export async function generateMetadata({
     .replace(/([A-Z])/g, ' $1')
     .replace(/^./, (str) => str.toUpperCase())
     .trim();
-  const title = `${phaseName} Moon: Meaning, Rituals & Magic - Lunary`;
-  const description = `Complete guide to the ${phaseName} Moon phase. Learn about ${phaseName} meaning, energy, rituals, and how to work with this lunar phase for manifestation and spiritual growth.`;
+  const displayName = phaseName.includes('Moon')
+    ? phaseName
+    : `${phaseName} Moon`;
+  const title = `${displayName}: Meaning, Rituals & Manifestation - Lunary`;
+  const description = `${displayName} meaning: energy, rituals & spiritual practices. Best activities, spell timing & manifestation guide for the ${phaseName.toLowerCase()} phase.`;
 
   return {
     title,
     description,
     keywords: [
-      `${phaseName} moon`,
-      `${phaseName} meaning`,
-      `${phaseName} phase`,
-      `${phaseName} rituals`,
-      `moon phase ${phaseName}`,
+      displayName.toLowerCase(),
+      `${displayName.toLowerCase()} meaning`,
+      `${displayName.toLowerCase()} rituals`,
+      `${displayName.toLowerCase()} manifestation`,
+      `moon phase ${phaseName.toLowerCase()}`,
     ],
     openGraph: {
       title,
@@ -57,7 +61,7 @@ export async function generateMetadata({
           url: '/api/og/grimoire/moon',
           width: 1200,
           height: 630,
-          alt: `${phaseName} Moon`,
+          alt: displayName,
         },
       ],
       locale: 'en_US',
@@ -106,6 +110,9 @@ export default async function MoonPhasePage({
     .replace(/([A-Z])/g, ' $1')
     .replace(/^./, (str) => str.toUpperCase())
     .trim();
+  const displayName = phaseName.includes('Moon')
+    ? phaseName
+    : `${phaseName} Moon`;
 
   const ritualTemplates: Record<string, string[]> = {
     newMoon: [
@@ -187,8 +194,24 @@ export default async function MoonPhasePage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const moonPhaseSchema = createCosmicEntitySchema({
+    name: displayName,
+    description: `The ${displayName} is a lunar phase ideal for ${phaseData.keywords.slice(0, 3).join(', ').toLowerCase()}. Best for ${rituals[0]?.toLowerCase() || 'lunar rituals'}.`,
+    url: `/grimoire/moon/phases/${phase}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Lunar_phase',
+    keywords: [
+      displayName.toLowerCase(),
+      `${phaseName.toLowerCase()} phase`,
+      'moon phase',
+      'lunar cycle',
+      ...phaseData.keywords.slice(0, 3),
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(moonPhaseSchema)}
       <SEOContentTemplate
         title={`${phaseName} Moon - Lunary`}
         h1={`${phaseName} Moon: Complete Guide`}
