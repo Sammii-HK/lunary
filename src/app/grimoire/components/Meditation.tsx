@@ -102,7 +102,7 @@ const Meditation = () => {
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
             <Link
-              href='/grimoire/breathwork'
+              href='/grimoire/meditation/breathwork'
               className='hover:text-lunary-primary-400 transition-colors'
             >
               Breathwork Techniques

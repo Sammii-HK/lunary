@@ -33,7 +33,7 @@ const Divination = () => {
       <section id='pendulum' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/pendulum-divination'
+            href='/grimoire/divination/pendulum'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Pendulum Divination
@@ -125,7 +125,7 @@ const Divination = () => {
       <section id='scrying' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/scrying'
+            href='/grimoire/divination/scrying'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Scrying
@@ -198,7 +198,7 @@ const Divination = () => {
       <section id='dream-interpretation' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/dream-interpretation'
+            href='/grimoire/divination/dream-interpretation'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Dream Interpretation
@@ -306,7 +306,7 @@ const Divination = () => {
       <section id='omen-reading' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/reading-omens'
+            href='/grimoire/divination/omen-reading'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Reading Omens

@@ -809,7 +809,7 @@ const Correspondences = () => {
             Moon & Timing
           </Link>
           <Link
-            href='/grimoire/planets'
+            href='/grimoire/astronomy/planets'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Planetary Influences
