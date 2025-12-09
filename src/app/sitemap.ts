@@ -87,7 +87,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire/planets`,
+      url: `${baseUrl}/grimoire/astronomy`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -147,7 +147,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire/retrogrades`,
+      url: `${baseUrl}/grimoire/astronomy/retrogrades`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -171,7 +171,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire/moon-rituals`,
+      url: `${baseUrl}/grimoire/moon/rituals`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -315,7 +315,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/book-of-shadows`,
+      url: `${baseUrl}/guide`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -465,13 +465,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/grimoire/moon-rituals`,
+      url: `${baseUrl}/grimoire/moon/rituals`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/grimoire/moon-signs`,
+      url: `${baseUrl}/grimoire/moon/signs`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
@@ -483,7 +483,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/grimoire/spellcraft-fundamentals`,
+      url: `${baseUrl}/grimoire/spells/fundamentals`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
@@ -1016,7 +1016,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add astrology index pages
   const astrologyIndexRoutes = [
     {
-      url: `${baseUrl}/grimoire/retrogrades`,
+      url: `${baseUrl}/grimoire/astronomy/retrogrades`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -1115,7 +1115,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add all retrograde pages
   const retrogradeRoutes = Object.keys(retrogradeInfo).map((planet) => ({
-    url: `${baseUrl}/grimoire/retrogrades/${planet}`,
+    url: `${baseUrl}/grimoire/astronomy/retrogrades/${planet}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
@@ -1226,6 +1226,186 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  // Add static grimoire pages (cleaned up - removed old URLs now handled by redirects)
+  const additionalGrimoirePages = [
+    // Divination hub pages (canonical locations)
+    {
+      url: `${baseUrl}/grimoire/divination/scrying`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/divination/dream-interpretation`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/divination/pendulum`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/divination/omen-reading`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    // Moon hub pages (canonical locations)
+    {
+      url: `${baseUrl}/grimoire/moon/phases`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire/moon/full-moons`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    // Astronomy hub pages (canonical locations)
+    {
+      url: `${baseUrl}/grimoire/astronomy/planets`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    // Meditation hub pages (canonical locations)
+    {
+      url: `${baseUrl}/grimoire/meditation/breathwork`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    // Tarot hub pages (canonical locations)
+    {
+      url: `${baseUrl}/grimoire/tarot/spreads`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    // Other pages that still exist at top level
+    {
+      url: `${baseUrl}/grimoire/rising-sign`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/candle-magic/incantations`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/candle-magic/altar-lighting`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/modern-witchcraft/ethics`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/candle-magic/anointing`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/modern-witchcraft/tools-guide`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/synastry`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/numerology/year`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/modern-witchcraft/famous-witches`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/grimoire/tarot/suits`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+  ];
+
+  // Add 2025/2026 events subpages
+  const eventSubpages = [
+    {
+      url: `${baseUrl}/grimoire/events/2025/mercury-retrograde`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/events/2025/venus-retrograde`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/events/2025/eclipses`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/events/2026`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/events/2026/mercury-retrograde`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/events/2026/venus-retrograde`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/events/2026/eclipses`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+  ];
+
+  // Add tarot suit pages
+  const tarotSuitRoutes = ['cups', 'pentacles', 'swords', 'wands'].map(
+    (suit) => ({
+      url: `${baseUrl}/grimoire/tarot/suits/${suit}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }),
+  );
+
   return [
     ...routes,
     ...blogRoutes,
@@ -1288,5 +1468,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...meditationIndexRoutes,
     ...witchcraftIndexRoutes,
     ...otherIndexRoutes,
+    ...additionalGrimoirePages,
+    ...eventSubpages,
+    ...tarotSuitRoutes,
   ];
 }
