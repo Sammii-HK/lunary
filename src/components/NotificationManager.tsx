@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 
 interface NotificationPermission {
@@ -37,17 +37,22 @@ export function NotificationManager() {
       }
     }
 
-    // Get existing subscription if permission is granted
-    if (permission.granted && 'serviceWorker' in navigator) {
+    // Get existing subscription and re-sync to server when permission is granted and user is available
+    if (permission.granted && 'serviceWorker' in navigator && user) {
       getExistingSubscription();
     }
-  }, [permission.granted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [permission.granted, user]);
 
   const getExistingSubscription = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
       const existingSub = await registration.pushManager.getSubscription();
       setSubscription(existingSub);
+
+      if (existingSub) {
+        await sendSubscriptionToServer(existingSub);
+      }
     } catch (error) {
       console.error('Error getting existing subscription:', error);
     }
