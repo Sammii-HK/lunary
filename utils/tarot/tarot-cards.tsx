@@ -656,539 +656,1145 @@ export const tarotCards = {
     cups: {
       aceOfCups: {
         name: 'Ace of Cups',
-        keywords: ['love', 'new relationships', 'compassion', 'creativity'],
+        element: 'Water',
+        keywords: [
+          'love',
+          'new relationships',
+          'compassion',
+          'creativity',
+          'emotional awakening',
+        ],
         information:
           'The Ace of Cups represents the beginning of emotional fulfillment, new relationships, and the flow of love and creativity. It signifies an outpouring of positive emotions and the potential for deep, meaningful connections.',
+        uprightMeaning:
+          'The Ace of Cups overflows with pure emotional energy—love, compassion, and spiritual connection pour forth like water from the divine cup. A new emotional beginning is at hand: perhaps a new relationship, deepening love, creative inspiration, or spiritual awakening. Your heart opens to receive and give love freely.',
+        reversedMeaning:
+          'Reversed, the Ace of Cups suggests blocked emotions, self-love issues, or repressed feelings. You may be closing yourself off to love or experiencing emotional emptiness. Creative blocks or spiritual disconnection may be present. Examine what is blocking your emotional flow.',
+        loveMeaning:
+          'New love is blossoming or existing love is deepening to new levels. For singles, a significant romantic opportunity approaches. For couples, renewed emotional intimacy and deeper connection.',
+        careerMeaning:
+          'Creative inspiration flows. New projects that feed your soul are beginning. A caring, emotionally fulfilling work environment is indicated.',
+        affirmation: 'I open my heart to receive and give love abundantly.',
       },
       twoOfCups: {
         name: 'Two of Cups',
-        keywords: ['unified love', 'partnership', 'mutual attraction'],
+        element: 'Water',
+        keywords: [
+          'unified love',
+          'partnership',
+          'mutual attraction',
+          'connection',
+          'harmony',
+        ],
         information:
-          'The Two of Cups symbolizes harmonious partnerships and mutual attraction. It represents the balance and unity found in a loving relationship, whether romantic or platonic, and highlights the importance of emotional connections and shared feelings.',
+          'The Two of Cups symbolizes harmonious partnerships and mutual attraction. It represents the balance and unity found in a loving relationship, whether romantic or platonic.',
+        uprightMeaning:
+          'The Two of Cups represents a beautiful union of two souls—mutual attraction, respect, and emotional connection. This card indicates partnerships where both parties give and receive equally. Whether romantic, business, or friendship, this connection is blessed with harmony and understanding.',
+        reversedMeaning:
+          'Reversed suggests imbalance in relationships, broken partnerships, or miscommunication. One person may be giving more than the other. Trust issues or falling out of love may be indicated. Seek to restore balance or recognize when partnerships no longer serve.',
+        loveMeaning:
+          'Strong indication of mutual love, soulmate connection, or engagement. For singles, meeting someone special. For couples, recommitment and renewed romance.',
+        careerMeaning:
+          'Successful business partnerships, beneficial collaborations, or finding a work ally who supports your growth. Harmonious working relationships.',
+        affirmation: 'I attract and nurture balanced, loving connections.',
       },
       threeOfCups: {
         name: 'Three of Cups',
-        keywords: ['celebration', 'friendship', 'creativity', 'collaborations'],
-        information:
-          'The Three of Cups signifies celebration, friendship, and joyous gatherings. It highlights the importance of social connections, creative collaborations, and the support of your community. This card encourages you to enjoy the moment and share your happiness with others.',
-      },
-      fourOfCups: {
-        name: 'Four of Cups',
-        keywords: ['meditation', 'contemplation', 'apathy', 'reevaluation'],
-        information:
-          'The Four of Cups represents introspection and contemplation. It suggests a period of apathy or dissatisfaction, urging you to reevaluate your situation and explore new opportunities. This card encourages mindfulness and a shift in perspective to find renewed purpose.',
-      },
-      fiveOfCups: {
-        name: 'Five of Cups',
-        keywords: ['regret', 'failure', 'disappointment', 'pessimism'],
-        information:
-          'The Five of Cups symbolizes loss, regret, and disappointment. It highlights the emotional impact of setbacks and encourages you to process your grief and move forward. This card reminds you to focus on what remains and seek out new possibilities for healing and growth.',
-      },
-      sixOfCups: {
-        name: 'Six of Cups',
+        element: 'Water',
         keywords: [
-          'Revisiting the past',
-          'childhood memories',
-          'innocence',
+          'celebration',
+          'friendship',
+          'creativity',
+          'community',
           'joy',
         ],
         information:
-          'The Six of Cups represents nostalgia, childhood memories, and the innocence of the past. It encourages you to find joy in simple pleasures and to reconnect with your inner child. This card often suggests looking back at past experiences with fondness and gratitude.',
+          'The Three of Cups signifies celebration, friendship, and joyous gatherings. It highlights the importance of social connections and creative collaborations.',
+        uprightMeaning:
+          'The Three of Cups celebrates friendship, community, and joyful gatherings. Raise a glass to life! This card indicates celebrations, reunions, and the support of your social circle. Creative collaborations flourish. Share your happiness with others and let the good times roll.',
+        reversedMeaning:
+          'Reversed may indicate social isolation, gossip, or overindulgence. Friendships may be strained or superficial. Third-party interference in relationships. Take care not to lose yourself in partying or to neglect important connections.',
+        loveMeaning:
+          'Social gatherings lead to romance. Celebrating milestones with your partner. Strong friendship foundations in relationships. Beware of third parties when reversed.',
+        careerMeaning:
+          'Team celebrations, successful group projects, and supportive work environments. Networking leads to opportunities. Creative collaborations thrive.',
+        affirmation: 'I celebrate life with my beloved community.',
+      },
+      fourOfCups: {
+        name: 'Four of Cups',
+        element: 'Water',
+        keywords: [
+          'meditation',
+          'contemplation',
+          'apathy',
+          'reevaluation',
+          'discontent',
+        ],
+        information:
+          'The Four of Cups represents introspection and contemplation. It suggests a period of apathy or dissatisfaction, urging reevaluation.',
+        uprightMeaning:
+          'The Four of Cups shows someone so lost in contemplation that they miss the opportunity being offered. Apathy, boredom, or dissatisfaction with current circumstances may be causing you to overlook blessings. Step out of self-absorption and see what the universe is offering you.',
+        reversedMeaning:
+          'Reversed indicates emerging from apathy, seeing new opportunities, or finally accepting what has been offered. Alternatively, deeper withdrawal and depression. The choice is yours—will you engage with life or continue to retreat?',
+        loveMeaning:
+          'Taking love for granted or feeling bored in relationships. Missing romantic opportunities due to emotional unavailability. Reevaluate what you truly want.',
+        careerMeaning:
+          'Career dissatisfaction or missing opportunities due to negativity. New offers may be overlooked. Time to reassess professional goals and attitude.',
+        affirmation: 'I open my eyes to the gifts the universe offers me.',
+      },
+      fiveOfCups: {
+        name: 'Five of Cups',
+        element: 'Water',
+        keywords: ['regret', 'failure', 'disappointment', 'grief', 'loss'],
+        information:
+          'The Five of Cups symbolizes loss, regret, and disappointment. It encourages processing grief while remembering what remains.',
+        uprightMeaning:
+          'The Five of Cups depicts grief and disappointment—three cups have spilled, and the figure mourns their loss. Yet two cups remain standing behind them. This card acknowledges real pain but reminds you that not all is lost. Feel your grief, but eventually turn around and see what blessings remain.',
+        reversedMeaning:
+          'Reversed indicates moving on from grief, acceptance, and recovery. You are beginning to see hope again and focus on what remains rather than what was lost. Alternatively, dwelling too long in sorrow.',
+        loveMeaning:
+          'Heartbreak, disappointment, or mourning a relationship that did not work out. Healing from past hurts. Remember: love remains possible.',
+        careerMeaning:
+          'Professional disappointment, failed projects, or job loss. Time to grieve but also to recognize remaining opportunities. Do not let setbacks define you.',
+        affirmation: 'I honor my grief while embracing what remains.',
+      },
+      sixOfCups: {
+        name: 'Six of Cups',
+        element: 'Water',
+        keywords: [
+          'nostalgia',
+          'childhood memories',
+          'innocence',
+          'reunion',
+          'past',
+        ],
+        information:
+          'The Six of Cups represents nostalgia, childhood memories, and the innocence of the past. It encourages finding joy in simple pleasures.',
+        uprightMeaning:
+          'The Six of Cups brings sweet nostalgia and memories of simpler times. This card may indicate reconnecting with people from your past, revisiting childhood places, or rediscovering innocent joy. It also represents gifts freely given, kindness, and the pure-hearted generosity of a child.',
+        reversedMeaning:
+          'Reversed suggests being stuck in the past, refusing to grow up, or having unresolved childhood issues. Nostalgia may be preventing forward movement. It is time to integrate the past and move into the present.',
+        loveMeaning:
+          'Reconnecting with first love, childhood sweethearts, or past partners. Innocent, playful romance. Alternatively, past relationship patterns resurfacing.',
+        careerMeaning:
+          'Past connections lead to opportunities. Returning to a former employer or career path. Mentoring others as you were once mentored.',
+        affirmation: 'I honor my past while creating a joyful present.',
       },
       sevenOfCups: {
         name: 'Seven of Cups',
-        keywords: ['opportunities', 'choices', 'wishful thinking', 'illusion'],
+        element: 'Water',
+        keywords: [
+          'opportunities',
+          'choices',
+          'wishful thinking',
+          'illusion',
+          'fantasy',
+        ],
         information:
-          'The Seven of Cups signifies a multitude of choices and opportunities, often accompanied by confusion or wishful thinking. It encourages you to carefully consider your options and avoid getting lost in illusions or unrealistic expectations. This card highlights the need for clarity and discernment.',
+          'The Seven of Cups signifies many choices and opportunities, often accompanied by confusion or wishful thinking.',
+        uprightMeaning:
+          'The Seven of Cups presents a dazzling array of options—but are they real or illusions? This card warns against getting lost in fantasy, wishful thinking, or scattered desires. Many paths appear before you; discernment is needed to separate genuine opportunities from mirages.',
+        reversedMeaning:
+          'Reversed indicates gaining clarity, making choices, or waking from illusion. You may be ready to commit to one path or recognize that some dreams were never meant to be. Alternatively, overwhelm and inability to choose.',
+        loveMeaning:
+          'Many romantic options but difficulty choosing. Idealization of partners. Fantasy about love rather than reality. Time to get clear about what you truly want.',
+        careerMeaning:
+          'Many career options causing confusion. Unrealistic expectations about success. Ground your dreams in practical action.',
+        affirmation: 'I discern between fantasy and reality, choosing wisely.',
       },
       eightOfCups: {
         name: 'Eight of Cups',
-        keywords: ['disappointment', 'abandonment', 'withdrawal', 'escapism'],
+        element: 'Water',
+        keywords: [
+          'disappointment',
+          'walking away',
+          'seeking truth',
+          'journey',
+          'letting go',
+        ],
         information:
-          'The Eight of Cups represents a decision to leave behind something unfulfilling and seek a more meaningful path. It signifies disappointment and the need for introspection, encouraging you to let go of what no longer serves you and to pursue personal growth and fulfillment.',
+          'The Eight of Cups represents leaving behind what no longer fulfills and seeking something deeper.',
+        uprightMeaning:
+          'The Eight of Cups shows a figure walking away from stacked cups—leaving behind something that once mattered. This card indicates the courage to abandon what no longer fulfills you in search of something deeper. It is a spiritual journey, a quest for meaning beyond material or emotional satisfaction.',
+        reversedMeaning:
+          'Reversed suggests difficulty letting go, staying in unfulfilling situations, or fear of the unknown. You may be returning to what you left or avoiding necessary departure. Sometimes it indicates aimless wandering without purpose.',
+        loveMeaning:
+          'Walking away from relationships that no longer serve your growth. Seeking deeper emotional connection. The courage to be alone rather than settle.',
+        careerMeaning:
+          'Leaving unfulfilling work to search for purpose. Career transitions. Prioritizing meaning over security.',
+        affirmation: 'I have the courage to seek what truly fulfills my soul.',
       },
       nineOfCups: {
         name: 'Nine of Cups',
+        element: 'Water',
         keywords: [
-          'Contentment',
+          'contentment',
           'satisfaction',
           'gratitude',
-          'wish come true',
+          'wishes fulfilled',
+          'abundance',
         ],
         information:
-          'The Nine of Cups symbolizes emotional fulfillment, satisfaction, and the attainment of your desires. It encourages you to appreciate your accomplishments and to express gratitude for the blessings in your life. This card often signifies a time of happiness and contentment.',
+          'The Nine of Cups symbolizes emotional fulfillment, satisfaction, and wishes coming true.',
+        uprightMeaning:
+          'The Nine of Cups is the "wish card"—emotional satisfaction and dreams coming true. The figure sits contentedly before nine golden cups, representing fulfilled desires. Enjoy this time of emotional abundance, gratitude, and well-being. Your wishes manifest when you align with joy.',
+        reversedMeaning:
+          'Reversed may indicate superficial happiness, unfulfilled wishes, or wanting more despite having much. Materialism over genuine happiness. Take inventory of what truly matters.',
+        loveMeaning:
+          'Deep romantic satisfaction and wishes for love fulfilled. Contentment in relationships. For singles, wishes for love manifesting.',
+        careerMeaning:
+          'Career wishes coming true. Professional satisfaction and recognition. Enjoying the fruits of your labor.',
+        affirmation: 'I am deeply grateful for my abundant blessings.',
       },
       tenOfCups: {
         name: 'Ten of Cups',
+        element: 'Water',
         keywords: [
-          'Divine love',
-          'blissful relationships',
+          'divine love',
+          'family happiness',
           'harmony',
-          'alignment',
+          'completion',
+          'emotional fulfillment',
         ],
         information:
-          'The Ten of Cups represents ultimate emotional fulfillment and harmony in relationships. It signifies a time of joy, love, and contentment with family and loved ones. This card encourages you to cherish and nurture the connections that bring you happiness and fulfillment.',
+          'The Ten of Cups represents ultimate emotional fulfillment, family harmony, and divine love.',
+        uprightMeaning:
+          "The Ten of Cups is the ultimate card of emotional fulfillment—a happy family beneath a rainbow of cups. This card represents lasting happiness, harmonious family life, and the achievement of your heart's deepest desires. Divine love blesses your home and relationships.",
+        reversedMeaning:
+          'Reversed may indicate family dysfunction, broken homes, or the fairy tale falling short of reality. Perfect love may be an illusion. Work on healing family relationships or adjusting expectations.',
+        loveMeaning:
+          'Happily ever after, marriage, family bliss, and lasting love. The relationship of your dreams manifesting in reality.',
+        careerMeaning:
+          'Finding your career "family," work-life balance, and professional fulfillment that supports home life.',
+        affirmation: 'Divine love flows through my family and home.',
       },
       daughterOfCups: {
         name: 'Daughter of Cups',
+        element: 'Water',
         keywords: [
-          'Creative opportunities',
+          'creative opportunities',
           'intuitive messages',
           'curiosity',
-          'possibility',
+          'dreamer',
+          'sensitivity',
         ],
         information:
-          'The Daughter of Cups symbolizes the emergence of new creative opportunities and intuitive insights. It encourages curiosity, imagination, and a willingness to explore new possibilities. This card often indicates a message of love or a new emotional experience.',
+          'The Daughter of Cups symbolizes emerging creative opportunities and intuitive insights.',
+        uprightMeaning:
+          "The Daughter of Cups is a gentle dreamer, bringing messages of love, creativity, and intuitive insights. This card represents the beginning of emotional or creative exploration—curious, open, and imaginative. Listen to your heart's quiet whispers and follow creative inspiration.",
+        reversedMeaning:
+          'Reversed indicates emotional immaturity, blocked creativity, or ignoring intuitive messages. The dreamer may be too lost in fantasy or overly sensitive to criticism.',
+        loveMeaning:
+          'New romantic messages or opportunities. A young, sensitive admirer. Exploring emotional depths for the first time.',
+        careerMeaning:
+          'Creative opportunities emerging. Following artistic or intuitive callings. Messages about new emotional directions in work.',
+        affirmation: 'I am open to love, creativity, and intuitive guidance.',
       },
       sonOfCups: {
         name: 'Son of Cups',
-        keywords: ['romance', 'charm', 'imagination', 'beauty'],
+        element: 'Water',
+        keywords: ['romance', 'charm', 'imagination', 'idealism', 'artistic'],
         information:
-          'The Son of Cups represents the pursuit of romance, beauty, and emotional fulfillment. It signifies charm, creativity, and a deep appreciation for the finer things in life. This card encourages you to follow your heart and express your feelings with grace and passion.',
+          'The Son of Cups represents the pursuit of romance, beauty, and emotional fulfillment through creative expression.',
+        uprightMeaning:
+          "The Son of Cups is the romantic knight, following his heart with grace and charm. This card represents pursuing love and beauty, artistic expression, and emotional depth. He may indicate a romantic person in your life or the need to follow your heart's calling.",
+        reversedMeaning:
+          'Reversed suggests moodiness, unrealistic expectations in love, or manipulation through charm. The romantic may be deceptive or emotionally unavailable.',
+        loveMeaning:
+          'A romantic gesture or person entering your life. Following the heart. Beware of superficial charm without substance.',
+        careerMeaning:
+          'Pursuing creative passions. Careers in arts, beauty, or emotional service. Bringing heart to your work.',
+        affirmation: 'I follow my heart with grace and integrity.',
       },
       motherOfCups: {
         name: 'Mother of Cups',
+        element: 'Water',
         keywords: [
-          'Compassionate',
+          'compassionate',
           'caring',
           'emotionally stable',
           'intuitive',
-          'in flow',
+          'nurturing',
         ],
         information:
-          'The Mother of Cups embodies compassion, emotional stability, and intuition. She represents a nurturing and caring presence, encouraging you to trust your inner wisdom and to offer support and empathy to others. This card signifies a deep connection to your emotions and a harmonious flow of feelings.',
+          'The Mother of Cups embodies compassion, emotional stability, and deep intuition.',
+        uprightMeaning:
+          'The Mother of Cups is the ultimate nurturer—compassionate, emotionally intelligent, and deeply intuitive. She represents emotional mastery, psychic ability, and the capacity to care for others while maintaining her own emotional well-being. Trust your intuition and lead with love.',
+        reversedMeaning:
+          'Reversed may indicate emotional manipulation, smothering, or neglecting self-care while caring for others. Intuition may be blocked or misused. Boundaries may need attention.',
+        loveMeaning:
+          'Deep emotional nurturing in relationships. A caring, intuitive partner. Alternatively, codependency or emotional manipulation.',
+        careerMeaning:
+          'Careers in healing, counseling, or nurturing professions. Using emotional intelligence professionally. Creating emotionally supportive environments.',
+        affirmation: 'I nurture others from a place of emotional wholeness.',
       },
       fatherOfCups: {
         name: 'Father of Cups',
-        keywords: ['emotionally balanced', 'compassionate', 'diplomatic'],
+        element: 'Water',
+        keywords: [
+          'emotionally balanced',
+          'compassionate',
+          'diplomatic',
+          'wise',
+          'counselor',
+        ],
         information:
-          'The Father of Cups symbolizes emotional balance, compassion, and diplomatic leadership. He represents the ability to navigate complex emotions with grace and understanding. This card encourages you to lead with empathy and to maintain harmony in your relationships.',
+          'The Father of Cups symbolizes emotional mastery, compassion, and diplomatic wisdom.',
+        uprightMeaning:
+          'The Father of Cups has mastered his emotions and now guides others with compassion and wisdom. He represents emotional maturity, diplomacy, and the ability to navigate complex emotional situations. This card encourages leading with heart while maintaining wise boundaries.',
+        reversedMeaning:
+          'Reversed indicates emotional manipulation, moodiness, or using emotional intelligence for selfish ends. The wise counselor may be giving poor advice or suppressing emotions unhealthily.',
+        loveMeaning:
+          'A wise, emotionally mature partner. Counseling relationships through difficulties. Beware of emotional control when reversed.',
+        careerMeaning:
+          'Leadership through emotional intelligence. Counseling or advisory roles. Creating harmonious work environments.',
+        affirmation: 'I lead with wisdom, compassion, and emotional mastery.',
       },
     },
     pentacles: {
       aceOfPentacles: {
         name: 'Ace of Pentacles',
+        element: 'Earth',
         keywords: [
-          'A new financial or career opportunity',
+          'new opportunity',
           'manifestation',
           'abundance',
+          'prosperity',
+          'new beginnings',
         ],
         information:
-          'The Ace of Pentacles represents the beginning of new financial or career opportunities. It signifies the potential for prosperity and abundance through manifestation and hard work. This card encourages you to seize opportunities and to build a solid foundation for future success.',
+          'The Ace of Pentacles represents the beginning of new financial or career opportunities with potential for prosperity and abundance.',
+        uprightMeaning:
+          'The Ace of Pentacles offers a golden opportunity—new financial beginnings, career advancement, or the seed of material success. A hand emerges from the clouds offering a pentacle, representing divine gifts of abundance. This is the time to plant seeds for future prosperity through practical action.',
+        reversedMeaning:
+          'Reversed indicates missed opportunities, poor financial planning, or lack of follow-through. Material goals may be blocked or delayed. Examine what is preventing you from manifesting abundance.',
+        loveMeaning:
+          'Stable new relationship with long-term potential. Building a solid foundation for love. Practical expressions of affection.',
+        careerMeaning:
+          'New job opportunity, promotion, or business venture. Financial improvement. Time to invest in career development.',
+        affirmation: 'I am open to receiving abundance in all forms.',
       },
       twoOfPentacles: {
         name: 'Two of Pentacles',
+        element: 'Earth',
         keywords: [
-          'Multiple priorities',
-          'time management',
-          'prioritization',
+          'balance',
           'adaptability',
+          'time management',
+          'juggling',
+          'flexibility',
         ],
         information:
-          'The Two of Pentacles symbolizes the juggling of multiple responsibilities and the need for careful time management. It highlights the importance of prioritization and adaptability in maintaining balance and harmony in your life. This card encourages you to stay flexible and to manage your resources wisely.',
+          'The Two of Pentacles symbolizes juggling multiple responsibilities and the need for adaptability and balance.',
+        uprightMeaning:
+          'The Two of Pentacles shows skillful juggling of multiple priorities—work and life, money and time, various responsibilities. The infinity symbol around the pentacles shows the eternal dance of balance. Stay flexible, adapt to changing circumstances, and keep all balls in the air.',
+        reversedMeaning:
+          'Reversed indicates overwhelm, dropped responsibilities, or poor time management. Balance is lost. Simplify and prioritize before everything collapses.',
+        loveMeaning:
+          'Balancing relationship with other life demands. Juggling multiple romantic interests. Need for flexibility in partnerships.',
+        careerMeaning:
+          'Multitasking at work. Managing multiple projects or jobs. Adaptability to changing work conditions.',
+        affirmation: 'I gracefully balance all aspects of my life.',
       },
       threeOfPentacles: {
         name: 'Three of Pentacles',
-        keywords: ['teamwork', 'collaboration', 'learning', 'implementation'],
+        element: 'Earth',
+        keywords: [
+          'teamwork',
+          'collaboration',
+          'mastery',
+          'learning',
+          'building',
+        ],
         information:
-          'The Three of Pentacles represents teamwork, collaboration, and the implementation of skills and knowledge. It signifies the value of working together to achieve common goals and the importance of learning and growth through cooperation. This card encourages you to seek out partnerships and to build on your collective strengths.',
+          'The Three of Pentacles represents teamwork, skill development, and the value of collaborative effort.',
+        uprightMeaning:
+          'The Three of Pentacles celebrates skilled work and collaboration. A craftsman works on a cathedral while experts consult—representing the value of combining talents. This card indicates learning, skill development, and the recognition that great things are built through teamwork.',
+        reversedMeaning:
+          'Reversed suggests lack of teamwork, sloppy work, or unappreciated efforts. Conflict within teams. Learning may be blocked or skills undervalued.',
+        loveMeaning:
+          'Working together to build relationship. Collaborative approach to partnership. Learning to be a better partner.',
+        careerMeaning:
+          'Successful teamwork, professional development, and recognition for skills. Quality work leads to advancement.',
+        affirmation: "I contribute my skills while honoring others' expertise.",
       },
       fourOfPentacles: {
         name: 'Four of Pentacles',
+        element: 'Earth',
         keywords: [
-          'Saving money',
           'security',
-          'conservatism',
-          'scarcity',
           'control',
+          'conservatism',
+          'saving',
+          'boundaries',
         ],
         information:
-          'The Four of Pentacles symbolizes financial security and the need for careful resource management. It highlights the importance of saving and conserving your resources while being mindful of the potential for scarcity and control issues. This card encourages you to find a balance between security and generosity.',
+          'The Four of Pentacles symbolizes financial security, conservation of resources, and the need for healthy boundaries.',
+        uprightMeaning:
+          'The Four of Pentacles shows tight grip on resources—security through careful management. This card indicates saving, protecting what you have, and establishing boundaries. Positively: financial prudence. Negatively: fear of loss, hoarding, or being overly controlling.',
+        reversedMeaning:
+          'Reversed may indicate letting go of control, spending freely, or financial insecurity. Either generosity flows or resources slip through fingers carelessly.',
+        loveMeaning:
+          'Holding too tightly in relationships. Fear of loss causing control issues. Alternatively, opening up emotionally after guarding your heart.',
+        careerMeaning:
+          'Financial security through careful planning. Resistance to change at work. Protecting your position or resources.',
+        affirmation: 'I balance security with generous flow.',
       },
       fiveOfPentacles: {
         name: 'Five of Pentacles',
-        keywords: [
-          'Financial loss',
-          'poverty',
-          'lack mindset',
-          'isolation',
-          'worry',
-        ],
+        element: 'Earth',
+        keywords: ['hardship', 'loss', 'isolation', 'worry', 'adversity'],
         information:
-          'The Five of Pentacles represents financial hardship, poverty, and a lack mindset. It signifies feelings of isolation and worry about your material well-being. This card encourages you to seek support and to remain hopeful, even in challenging times, and to focus on finding solutions to improve your situation.',
+          'The Five of Pentacles represents financial hardship, material loss, and feelings of isolation during difficult times.',
+        uprightMeaning:
+          'The Five of Pentacles depicts figures in cold and poverty, passing a lit church window. This card indicates financial hardship, material loss, or feeling left out in the cold. Yet help is available—the lit window suggests support exists if you seek it. Do not let pride prevent you from asking for assistance.',
+        reversedMeaning:
+          'Reversed indicates recovery from hardship, accepting help, or seeing the end of difficult times. Alternatively, deeper isolation or refusal to seek support.',
+        loveMeaning:
+          'Relationship difficulties, feeling abandoned, or financial strain affecting partnership. Seeking support together through hard times.',
+        careerMeaning:
+          'Job loss, financial difficulties, or professional setbacks. Help is available through networking and perseverance.',
+        affirmation: 'Even in hardship, I seek and accept support.',
       },
       sixOfPentacles: {
         name: 'Six of Pentacles',
-        keywords: [
-          'Giving',
-          'receiving',
-          'sharing wealth',
-          'generosity',
-          'charity',
-        ],
+        element: 'Earth',
+        keywords: ['generosity', 'charity', 'giving', 'receiving', 'balance'],
         information:
-          'The Six of Pentacles symbolizes the balance of giving and receiving, generosity, and the sharing of wealth. It signifies acts of charity and the importance of supporting others in need. This card encourages you to practice generosity and to be open to receiving help when necessary.',
+          'The Six of Pentacles symbolizes the balance of giving and receiving, generosity, and acts of charity.',
+        uprightMeaning:
+          'The Six of Pentacles shows a wealthy figure giving to those in need—the balance of giving and receiving. This card indicates generosity, charity, and the flow of resources. You may be in position to give or in need of receiving. Either role is honored when done with grace.',
+        reversedMeaning:
+          'Reversed suggests strings attached to gifts, one-sided generosity, or abuse of charity. Examine the true motivations behind giving and receiving.',
+        loveMeaning:
+          'Balance in giving and receiving love. Generosity in relationships. Beware of power imbalances when reversed.',
+        careerMeaning:
+          'Receiving help or recognition. Being in position to support colleagues. Mentorship and sharing resources.',
+        affirmation: 'I give and receive with equal grace.',
       },
       sevenOfPentacles: {
         name: 'Seven of Pentacles',
+        element: 'Earth',
         keywords: [
-          'Long-term view',
-          'sustainable results',
-          'perseverance',
+          'patience',
           'investment',
+          'long-term view',
+          'perseverance',
+          'assessment',
         ],
         information:
-          'The Seven of Pentacles represents patience, perseverance, and the long-term view. It signifies the importance of investing time and effort into your endeavors to achieve sustainable results. This card encourages you to stay committed to your goals and to trust in the process of growth and development.',
+          'The Seven of Pentacles represents patience, long-term planning, and evaluation of investments.',
+        uprightMeaning:
+          'The Seven of Pentacles shows a gardener surveying crops not yet ready for harvest. This card indicates patience, long-term investment, and evaluating progress. Sometimes you must wait for results. Assess whether your efforts are directed wisely and adjust as needed.',
+        reversedMeaning:
+          'Reversed suggests impatience, poor investments, or lack of growth despite effort. Time to reassess whether this path is worth continuing.',
+        loveMeaning:
+          'Evaluating relationship progress. Patience in developing love. Questioning whether partnership is growing.',
+        careerMeaning:
+          'Assessing career progress. Long-term professional planning. Patience while building toward goals.',
+        affirmation: 'I trust in the timing of my harvest.',
       },
       eightOfPentacles: {
         name: 'Eight of Pentacles',
+        element: 'Earth',
         keywords: [
-          'Apprenticeship',
-          'repetitive tasks',
           'mastery',
           'skill development',
+          'diligence',
+          'apprenticeship',
+          'dedication',
         ],
         information:
-          'The Eight of Pentacles symbolizes hard work, dedication, and the mastery of skills. It represents the commitment to continuous improvement through practice and repetition. This card encourages you to focus on your craft and to strive for excellence in your work.',
+          'The Eight of Pentacles symbolizes dedicated practice, skill mastery, and commitment to excellence.',
+        uprightMeaning:
+          'The Eight of Pentacles shows an artisan meticulously crafting pentacles—mastery through dedicated practice. This card indicates skill development, apprenticeship, and the commitment to excellence. Keep working at your craft; expertise comes through patient, focused effort.',
+        reversedMeaning:
+          'Reversed suggests shortcuts, shoddy work, or lack of dedication. Skills may plateau without proper attention. Perfectionism may cause paralysis.',
+        loveMeaning:
+          'Working on relationship skills. Dedication to being a better partner. Crafting love with care and attention.',
+        careerMeaning:
+          'Professional development and training. Mastery of skills leads to success. Focused work ethic appreciated.',
+        affirmation: 'I commit to excellence through dedicated practice.',
       },
       nineOfPentacles: {
         name: 'Nine of Pentacles',
+        element: 'Earth',
         keywords: [
-          'Abundance',
+          'abundance',
           'luxury',
           'self-sufficiency',
-          'financial independence',
+          'independence',
+          'accomplishment',
         ],
         information:
-          "The Nine of Pentacles represents self-sufficiency, financial independence, and the enjoyment of life's luxuries. It signifies abundance and the rewards of hard work and discipline. This card encourages you to appreciate your accomplishments and to enjoy the fruits of your labor.",
+          'The Nine of Pentacles represents self-sufficiency, enjoying abundance, and the rewards of disciplined effort.',
+        uprightMeaning:
+          'The Nine of Pentacles shows a elegant figure in a lush garden—self-made success and refined enjoyment. This card indicates financial independence, luxury earned through effort, and the pleasure of accomplishment. Enjoy what you have created; you deserve this abundance.',
+        reversedMeaning:
+          'Reversed may indicate financial dependence, superficial success, or overwork at the expense of enjoyment. Material success without inner fulfillment.',
+        loveMeaning:
+          'Independence in love. Self-sufficient partnership. Attracting love through self-worth rather than need.',
+        careerMeaning:
+          'Career success and financial rewards. Self-employment success. Enjoying professional accomplishments.',
+        affirmation: 'I deserve the abundance I have created.',
       },
       tenOfPentacles: {
         name: 'Ten of Pentacles',
+        element: 'Earth',
         keywords: [
-          'Wealth',
-          'financial security',
-          'family',
-          'long-term success',
-          'contribution',
+          'legacy',
+          'inheritance',
+          'family wealth',
+          'establishment',
+          'tradition',
         ],
         information:
-          "The Ten of Pentacles symbolizes long-term success, wealth, and financial security. It represents the importance of family, legacy, and the contributions you make to future generations. This card encourages you to focus on building a lasting foundation for your loved ones and to enjoy the stability and prosperity you've achieved.",
+          'The Ten of Pentacles symbolizes generational wealth, family legacy, and long-term stability.',
+        uprightMeaning:
+          'The Ten of Pentacles represents ultimate material success—wealth that spans generations. This card indicates family prosperity, inheritance, and the establishment of lasting security. Focus on what you are building for future generations and the traditions you are creating.',
+        reversedMeaning:
+          'Reversed suggests family financial disputes, squandered inheritance, or prioritizing money over family bonds. The legacy may be unstable.',
+        loveMeaning:
+          'Family approval of relationship. Building toward marriage and family. Generational patterns in love.',
+        careerMeaning:
+          'Family business, long-term career stability, and retirement planning. Building professional legacy.',
+        affirmation: 'I build lasting prosperity for generations.',
       },
       daughterOfPentacles: {
         name: 'Daughter of Pentacles',
+        element: 'Earth',
         keywords: [
-          'Manifestation',
-          'financial opportunity',
-          'skill development',
+          'manifestation',
+          'opportunity',
+          'student',
+          'practicality',
+          'nature',
         ],
         information:
-          'The Daughter of Pentacles represents new financial opportunities and the development of practical skills. It signifies the potential for growth and prosperity through dedication and hard work. This card encourages you to stay focused on your goals and to invest in your personal and professional development.',
+          'The Daughter of Pentacles represents new practical opportunities and the beginning of material development.',
+        uprightMeaning:
+          'The Daughter of Pentacles studies her pentacle with wonder—new opportunities for material growth are emerging. This card indicates practical learning, financial messages, and the beginning of prosperity. Stay grounded while nurturing new possibilities.',
+        reversedMeaning:
+          'Reversed suggests procrastination, missed opportunities, or impractical approaches to material matters. Ground dreams in reality.',
+        loveMeaning:
+          'New relationship with practical potential. Learning about love. Messages about partnership opportunities.',
+        careerMeaning:
+          'New job opportunities, scholarships, or skill development. Messages about financial matters.',
+        affirmation: 'I nurture new opportunities with practical care.',
       },
       sonOfPentacles: {
         name: 'Son of Pentacles',
-        keywords: ['hard work', 'productivity', 'routine', 'conservatism'],
+        element: 'Earth',
+        keywords: [
+          'hard work',
+          'routine',
+          'methodical',
+          'patience',
+          'reliability',
+        ],
         information:
-          'The Son of Pentacles symbolizes diligence, productivity, and a methodical approach to achieving goals. It represents the value of routine and consistency in building success. This card encourages you to remain disciplined and to approach your tasks with a steady, patient mindset.',
+          'The Son of Pentacles symbolizes steady progress through diligent, methodical effort.',
+        uprightMeaning:
+          'The Son of Pentacles rides slowly on a steady horse—patience and methodical progress. This card indicates hard work, routine, and reliable advancement. Success comes not through speed but through consistent, quality effort.',
+        reversedMeaning:
+          'Reversed suggests laziness, impatience, or being stuck in unfulfilling routine. The slow pace may feel frustrating.',
+        loveMeaning:
+          'Patient courtship. Reliable, steady partner. Slow-building but lasting love.',
+        careerMeaning:
+          'Steady career progress through hard work. Methodical approach to professional development.',
+        affirmation: 'Steady effort builds lasting success.',
       },
       motherOfPentacles: {
         name: 'Mother of Pentacles',
-        keywords: [
-          'Nurturing',
-          'practical',
-          'providing financially',
-          'a working parent',
-        ],
+        element: 'Earth',
+        keywords: ['nurturing', 'practical', 'abundance', 'provider', 'nature'],
         information:
-          'The Mother of Pentacles embodies practicality, nurturing, and the ability to provide financial stability. She represents the balance of work and family life, encouraging you to take a practical approach to your responsibilities. This card signifies a strong, supportive presence and the ability to care for others while managing your own needs.',
+          'The Mother of Pentacles embodies practical nurturing and the ability to create abundance.',
+        uprightMeaning:
+          'The Mother of Pentacles nurtures abundance in her garden—practical care creates material security. This card represents the ability to provide while nurturing, balancing work and home, and creating comfortable, prosperous environments.',
+        reversedMeaning:
+          'Reversed may indicate neglecting home for work (or vice versa), smothering with material things, or financial mismanagement in family matters.',
+        loveMeaning:
+          'Nurturing, practical partner. Creating comfortable home together. Balancing love with practical responsibilities.',
+        careerMeaning:
+          'Work-life balance. Nurturing work environment. Practical management and leadership.',
+        affirmation: 'I create abundance through loving, practical care.',
       },
       fatherOfPentacles: {
         name: 'Father of Pentacles',
-        keywords: [
-          'Wealth',
-          'business',
-          'leadership',
-          'security',
-          'discipline',
-          'abundance',
-        ],
+        element: 'Earth',
+        keywords: ['wealth', 'security', 'ambition', 'provider', 'success'],
         information:
-          'The Father of Pentacles symbolizes financial success, leadership, and the disciplined management of resources. He represents the ability to create and maintain wealth through strategic planning and hard work. This card encourages you to take a responsible approach to your finances and to lead with integrity and confidence.',
+          'The Father of Pentacles symbolizes material mastery, business success, and responsible wealth management.',
+        uprightMeaning:
+          'The Father of Pentacles sits on a throne adorned with bulls, surrounded by abundance—he has mastered the material world. This card indicates business success, financial security, and the wisdom to manage wealth responsibly. A reliable provider and steady leader.',
+        reversedMeaning:
+          'Reversed suggests workaholism, materialism without soul, or financial mismanagement. Success at the cost of relationships or values.',
+        loveMeaning:
+          'Stable, providing partner. Material security in relationships. Beware of substituting money for emotional connection.',
+        careerMeaning:
+          'Business success, financial mastery, and responsible leadership. Long-term career achievement.',
+        affirmation: 'I master the material world with wisdom and integrity.',
       },
     },
     swords: {
       aceOfSwords: {
         name: 'Ace of Swords',
-        keywords: ['breakthroughs', 'new ideas', 'mental clarity', 'success'],
+        element: 'Air',
+        keywords: [
+          'clarity',
+          'breakthrough',
+          'truth',
+          'new ideas',
+          'mental force',
+        ],
         information:
-          'The Ace of Swords represents new ideas, breakthroughs, and mental clarity. It signifies the power of intellect and the ability to cut through confusion to find truth and solutions. This card encourages you to embrace new opportunities for intellectual growth and success.',
+          'The Ace of Swords represents mental clarity, new ideas, and the power to cut through confusion to truth.',
+        uprightMeaning:
+          'The Ace of Swords pierces through clouds—breakthrough and mental clarity are at hand. This card represents new ideas, truth revealed, and the intellectual force needed to cut through confusion. Seize this moment of mental power; clarity leads to victory.',
+        reversedMeaning:
+          'Reversed indicates confusion, miscommunication, or the misuse of intellect. Truth may be distorted. Mental fog or using sharp words to wound.',
+        loveMeaning:
+          'Clear communication in relationships. Honest conversations about feelings. Cutting through relationship confusion.',
+        careerMeaning:
+          'Breakthrough ideas, clear thinking in professional matters, and intellectual success. Truth wins in conflicts.',
+        affirmation: 'I cut through confusion with clarity and truth.',
       },
       twoOfSwords: {
         name: 'Two of Swords',
+        element: 'Air',
         keywords: [
-          'Difficult decisions',
-          'weighing up options',
-          'an impasse',
-          'avoidance',
+          'indecision',
+          'stalemate',
+          'difficult choices',
+          'denial',
+          'balance',
         ],
         information:
-          'The Two of Swords symbolizes difficult decisions and the need to weigh options carefully. It represents a state of impasse or avoidance, where choices must be made to move forward. This card encourages you to confront your dilemmas with clarity and to make informed, balanced decisions.',
+          'The Two of Swords symbolizes difficult decisions, avoidance, and the need to confront blocked situations.',
+        uprightMeaning:
+          'The Two of Swords shows a blindfolded figure balancing crossed swords—refusing to see or decide. This card indicates stalemate, difficult choices, and avoidance. The truth must be faced, and a decision must be made. Remove the blindfold.',
+        reversedMeaning:
+          'Reversed may indicate making a difficult decision, removing barriers to choice, or information finally becoming clear. Alternatively, deeper denial.',
+        loveMeaning:
+          'Avoiding difficult conversations in relationships. Indecision about commitment. Time to face relationship truths.',
+        careerMeaning:
+          'Career crossroads requiring difficult choices. Workplace conflicts needing resolution. Breaking through professional stalemates.',
+        affirmation: 'I face difficult truths and make clear decisions.',
       },
       threeOfSwords: {
         name: 'Three of Swords',
-        keywords: ['heartbreak', 'emotional pain', 'sorrow', 'grief', 'hurt'],
+        element: 'Air',
+        keywords: ['heartbreak', 'grief', 'sorrow', 'pain', 'separation'],
         information:
-          'The Three of Swords represents heartbreak, emotional pain, and sorrow. It signifies the impact of loss and the need to process and heal from grief. This card encourages you to acknowledge your feelings and to seek support as you work through difficult emotions.',
+          'The Three of Swords represents heartbreak, emotional pain, and the necessity of processing grief.',
+        uprightMeaning:
+          'The Three of Swords pierces a heart with three blades—heartbreak, sorrow, and emotional pain. This card indicates grief, loss, and painful truth. The heart must break open for healing to begin. Acknowledge the pain; suppressing it only prolongs suffering.',
+        reversedMeaning:
+          'Reversed suggests healing from heartbreak, releasing grief, or coming to terms with loss. Alternatively, deeper pain or refusing to acknowledge hurt.',
+        loveMeaning:
+          'Heartbreak, separation, or painful revelations in love. Necessary grief that leads to healing.',
+        careerMeaning:
+          'Professional disappointment, painful truth about work, or difficult separations from colleagues or positions.',
+        affirmation: 'I allow my heart to break open for healing.',
       },
       fourOfSwords: {
         name: 'Four of Swords',
-        keywords: [
-          'Rest',
-          'relaxation',
-          'meditation',
-          'contemplation',
-          'recuperation',
-        ],
+        element: 'Air',
+        keywords: ['rest', 'recovery', 'contemplation', 'retreat', 'peace'],
         information:
-          'The Four of Swords symbolizes rest, relaxation, and the need for recuperation. It represents a time for meditation and contemplation, allowing you to recharge and gain new perspectives. This card encourages you to take a break from stress and to focus on self-care and mental clarity.',
+          'The Four of Swords symbolizes rest, recuperation, and the need for mental peace after stress.',
+        uprightMeaning:
+          'The Four of Swords shows a knight at rest in a chapel—recovery and contemplation after battle. This card indicates the need for rest, retreat, and mental recuperation. Step back from stress; healing requires stillness and peace.',
+        reversedMeaning:
+          'Reversed suggests restlessness, burnout, or refusal to rest. Alternatively, emerging from a period of recovery ready for action.',
+        loveMeaning:
+          'Taking space in relationships for self-reflection. Rest from relationship stress. Healing time.',
+        careerMeaning:
+          'Need for vacation or mental health break. Recovery from work stress. Contemplating next career moves.',
+        affirmation: 'I honor my need for rest and recovery.',
       },
       fiveOfSwords: {
         name: 'Five of Swords',
+        element: 'Air',
         keywords: [
-          'Conflict',
-          'disagreements',
-          'competition',
+          'conflict',
           'defeat',
           'winning at all costs',
+          'hostility',
+          'loss',
         ],
         information:
-          'The Five of Swords represents conflict, disagreements, and the desire to win at all costs. It signifies the impact of competition and the potential for defeat. This card encourages you to assess your motives and to seek resolution and compromise rather than escalating conflicts.',
+          'The Five of Swords represents conflict, hollow victory, and the costs of winning at all costs.',
+        uprightMeaning:
+          'The Five of Swords shows a victor collecting swords while others walk away defeated. This card indicates conflict, competition, and winning at all costs—but at what price? The victory may be hollow. Consider whether the battle is worth the cost to relationships and reputation.',
+        reversedMeaning:
+          'Reversed suggests reconciliation after conflict, accepting defeat gracefully, or ending hostilities. Alternatively, ongoing resentment and grudges.',
+        loveMeaning:
+          'Conflict in relationships, power struggles, or feeling defeated in love. Time to end the war or accept losses.',
+        careerMeaning:
+          'Workplace conflicts, competition gone too far, or Pyrrhic victories. Weigh the costs of winning.',
+        affirmation: 'I choose battles wisely and seek honorable resolution.',
       },
       sixOfSwords: {
         name: 'Six of Swords',
+        element: 'Air',
         keywords: [
-          'Transition',
-          'change',
-          'rite of passage',
-          'releasing baggage',
+          'transition',
+          'moving on',
+          'leaving behind',
+          'journey',
+          'healing',
         ],
         information:
-          'The Six of Swords symbolizes transition and change, often involving a journey or rite of passage. It represents the process of moving away from difficulties and releasing emotional baggage. This card encourages you to embrace new beginnings and to trust in the journey ahead.',
+          'The Six of Swords symbolizes transition, moving away from difficulty, and the journey toward healing.',
+        uprightMeaning:
+          'The Six of Swords shows a boat carrying passengers from rough to calm waters—transition and moving on. This card indicates leaving difficulties behind, necessary transitions, and the journey toward peace. Though the journey may be somber, calmer waters lie ahead.',
+        reversedMeaning:
+          'Reversed suggests inability to move on, returning to old difficulties, or delayed transitions. The journey may be blocked or circular.',
+        loveMeaning:
+          'Moving on from relationship difficulties. Transitioning out of troubled partnerships. Healing journey in love.',
+        careerMeaning:
+          'Career transition, leaving toxic work environments, or moving toward more peaceful professional waters.',
+        affirmation: 'I move forward toward calmer waters.',
       },
       sevenOfSwords: {
         name: 'Seven of Swords',
-        keywords: [
-          'Betrayal',
-          'deception',
-          'getting away with something',
-          'acting strategically',
-        ],
+        element: 'Air',
+        keywords: ['deception', 'strategy', 'stealth', 'betrayal', 'cunning'],
         information:
-          'The Seven of Swords represents betrayal, deception, and the act of getting away with something. It signifies the need for strategic thinking and caution in dealing with others. This card encourages you to be aware of dishonesty and to protect your interests while remaining ethical.',
+          'The Seven of Swords represents strategy, deception, and the need for careful, sometimes covert action.',
+        uprightMeaning:
+          'The Seven of Swords shows a figure sneaking away with stolen swords—strategy, deception, or getting away with something. This card indicates cunning action, sometimes necessary and sometimes unethical. Be aware of deception around you, or examine your own motivations for secretive behavior.',
+        reversedMeaning:
+          "Reversed suggests being caught in deception, conscience about dishonesty, or someone's true colors being revealed. Time for truth.",
+        loveMeaning:
+          "Secrets or deception in relationships. Hidden agendas. Need for honesty or uncovering partner's truth.",
+        careerMeaning:
+          'Strategic maneuvering at work, office politics, or dishonesty in business. Protect yourself while staying ethical.',
+        affirmation: 'I act strategically while honoring my integrity.',
       },
       eightOfSwords: {
         name: 'Eight of Swords',
+        element: 'Air',
         keywords: [
-          'Negative thoughts',
-          'self-imposed restriction',
+          'restriction',
           'imprisonment',
           'victim mentality',
+          'self-limiting',
+          'trapped',
         ],
         information:
-          'The Eight of Swords symbolizes negative thoughts, self-imposed restrictions, and feelings of imprisonment. It represents the mental barriers that hold you back and the tendency to feel trapped by circumstances. This card encourages you to recognize your own power to change your situation and to break free from limiting beliefs.',
+          'The Eight of Swords symbolizes mental imprisonment, self-imposed restrictions, and the power of limiting beliefs.',
+        uprightMeaning:
+          'The Eight of Swords shows a bound and blindfolded figure surrounded by swords—yet the bonds are loose and escape is possible. This card indicates feeling trapped by circumstances or thoughts that are actually self-imposed. Your prison exists primarily in your mind. Remove the blindfold and see freedom is closer than you think.',
+        reversedMeaning:
+          'Reversed suggests breaking free from mental prison, releasing limiting beliefs, or finally seeing a way out. Liberation from self-imposed restrictions.',
+        loveMeaning:
+          'Feeling trapped in relationship patterns. Self-limiting beliefs about love. Recognizing you have more options than you see.',
+        careerMeaning:
+          'Feeling stuck in career, self-imposed professional limitations, or breaking free from restrictive work situations.',
+        affirmation: 'I release the mental bonds that imprison me.',
       },
       nineOfSwords: {
         name: 'Nine of Swords',
-        keywords: ['anxiety', 'worry', 'fear', 'depression', 'nightmares'],
+        element: 'Air',
+        keywords: ['anxiety', 'nightmares', 'worry', 'fear', 'mental anguish'],
         information:
-          'The Nine of Swords represents anxiety, worry, and fear. It signifies the mental anguish and sleepless nights caused by stress and negative thoughts. This card encourages you to address your fears and to seek solutions to alleviate your worries, reminding you that much of your anxiety may be unfounded.',
+          'The Nine of Swords represents anxiety, nightmares, and mental anguish, often worse than reality warrants.',
+        uprightMeaning:
+          'The Nine of Swords shows a figure waking from nightmare, head in hands—anxiety, fear, and mental anguish. This card indicates worry that keeps you up at night, often worse than reality warrants. The nine swords represent thoughts, not facts. Much of what you fear may never come to pass.',
+        reversedMeaning:
+          'Reversed may indicate releasing anxiety, finding peace after worry, or finally addressing fears. Alternatively, inner turmoil hidden from others.',
+        loveMeaning:
+          'Anxiety about relationships, fears about love, or nightmares about partnership. Often the worry exceeds the reality.',
+        careerMeaning:
+          'Work-related stress causing sleepless nights. Professional anxiety. Time to address fears or recognize they are overblown.',
+        affirmation: 'I release anxiety and trust in peaceful resolution.',
       },
       tenOfSwords: {
         name: 'Ten of Swords',
-        keywords: [
-          'Painful endings',
-          'deep wounds',
-          'betrayal',
-          'loss',
-          'crisis',
-        ],
+        element: 'Air',
+        keywords: ['ending', 'betrayal', 'crisis', 'rock bottom', 'new dawn'],
         information:
-          'The Ten of Swords symbolizes painful endings, deep wounds, and betrayal. It represents a time of crisis and the need to accept and process the loss. This card encourages you to let go of the past and to find ways to heal and move forward, knowing that the worst is behind you.',
+          'The Ten of Swords represents painful endings, rock bottom, but also the dawn of new beginnings after crisis.',
+        uprightMeaning:
+          'The Ten of Swords shows a figure with ten swords in their back—but dawn breaks on the horizon. This card indicates painful endings, rock bottom, and the culmination of crisis. Yet it cannot get worse; the only way is up. Accept the ending; the worst is behind you, and new light approaches.',
+        reversedMeaning:
+          'Reversed suggests recovery from crisis, resisting inevitable endings, or slowly healing from deep wounds. The darkest hour is passing.',
+        loveMeaning:
+          'Painful relationship endings, betrayal, or reaching the lowest point in love. Yet healing and new love can follow.',
+        careerMeaning:
+          'Career crisis, professional betrayal, or hitting rock bottom at work. The only way is up from here.',
+        affirmation: 'Even at rock bottom, I see the dawn approaching.',
       },
       daughterOfSwords: {
         name: 'Daughter of Swords',
+        element: 'Air',
         keywords: [
-          'New ideas',
           'curiosity',
-          'thirst for knowledge',
-          'new ways of communicating',
+          'new ideas',
+          'truth-seeking',
+          'communication',
+          'vigilance',
         ],
         information:
-          'The Daughter of Swords represents new ideas, curiosity, and the desire for knowledge. It signifies the emergence of new perspectives and innovative ways of thinking and communicating. This card encourages you to embrace your curiosity and to explore new intellectual pursuits.',
+          'The Daughter of Swords represents intellectual curiosity, new ways of thinking, and messages of truth.',
+        uprightMeaning:
+          'The Daughter of Swords holds her sword high, ready for truth—intellectual curiosity and new ways of thinking are emerging. This card indicates messages, new ideas, and the beginning of mental endeavors. Stay alert and vigilant; truth is seeking to be discovered.',
+        reversedMeaning:
+          'Reversed suggests scattered thoughts, gossip, or using intellect unwisely. Messages may be misleading or communication problematic.',
+        loveMeaning:
+          'New communications about love, truth-seeking in relationships, or a young, intellectually curious admirer.',
+        careerMeaning:
+          'News about work, intellectual opportunities, or beginning of new mental challenges. Stay sharp.',
+        affirmation: 'I seek truth with sharp, curious intellect.',
       },
       sonOfSwords: {
         name: 'Son of Swords',
-        keywords: [
-          'Ambitious',
-          'action-oriented',
-          'driven to succeed',
-          'fast-thinking',
-        ],
+        element: 'Air',
+        keywords: ['action', 'ambition', 'drive', 'assertive', 'hasty'],
         information:
-          'The Son of Swords symbolizes ambition, action, and a drive to succeed. It represents quick thinking and the ability to tackle challenges head-on. This card encourages you to be proactive and to pursue your goals with determination and confidence.',
+          'The Son of Swords symbolizes swift action, ambitious pursuit of goals, and sometimes hasty decisions.',
+        uprightMeaning:
+          'The Son of Swords charges forward on his horse—swift action, ambition, and fearless pursuit of goals. This card indicates driving forward with mental energy, tackling challenges head-on, and fast-paced change. Act decisively, but avoid reckless haste.',
+        reversedMeaning:
+          'Reversed suggests recklessness, all talk and no action, or scattered energy. Hasty decisions may cause problems.',
+        loveMeaning:
+          'Fast-moving romance, assertive pursuit of love, or rushing into relationships. Slow down if needed.',
+        careerMeaning:
+          'Ambitious career moves, fast-paced professional action, or driving toward goals with determination.',
+        affirmation: 'I act swiftly and decisively toward my goals.',
       },
       motherOfSwords: {
         name: 'Mother of Swords',
+        element: 'Air',
         keywords: [
-          'Independent',
-          'unbiased judgement',
+          'independent',
+          'perceptive',
           'clear boundaries',
-          'direct communication',
+          'truth',
+          'direct',
         ],
         information:
-          'The Mother of Swords embodies independence, clear judgement, and direct communication. She represents the ability to set boundaries and to make decisions with logic and clarity. This card encourages you to communicate your needs and to approach situations with honesty and fairness.',
+          'The Mother of Swords embodies independence, clear perception, and direct communication of truth.',
+        uprightMeaning:
+          'The Mother of Swords sits on her throne, sword raised, seeing clearly—independent judgment and direct truth. This card represents the ability to perceive situations clearly, set strong boundaries, and communicate with precision. She speaks truth without cruelty but without softening it either.',
+        reversedMeaning:
+          'Reversed may indicate coldness, cruelty with words, or harsh judgment. Alternatively, not speaking truth when needed.',
+        loveMeaning:
+          'Clear boundaries in relationships, direct communication about needs, or an independent partner. Beware of coldness.',
+        careerMeaning:
+          'Direct professional communication, clear judgment in work matters, and boundary-setting with colleagues.',
+        affirmation: 'I speak truth clearly while respecting others.',
       },
       fatherOfSwords: {
         name: 'Father of Swords',
+        element: 'Air',
         keywords: [
-          'Mental clarity',
-          'intellectual power',
           'authority',
           'truth',
+          'intellectual power',
+          'justice',
+          'clarity',
         ],
         information:
-          'The Father of Swords symbolizes mental clarity, intellectual power, and authority. He represents the ability to discern truth and to make decisions with wisdom and integrity. This card encourages you to use your intellect and to lead with fairness and objectivity.',
+          'The Father of Swords symbolizes intellectual mastery, authority based on truth, and the power of clear judgment.',
+        uprightMeaning:
+          'The Father of Swords commands from his throne—intellectual authority and mastery of truth. This card represents the power to discern clearly, judge fairly, and communicate with authority. He leads with mind rather than heart, sometimes to the point of coldness, but always with clarity.',
+        reversedMeaning:
+          'Reversed indicates abuse of intellectual power, manipulation through logic, or tyrannical authority. Cold judgment without compassion.',
+        loveMeaning:
+          'Intellectual partner, clear communication in relationships, or analyzing love logically. Beware of emotional disconnect.',
+        careerMeaning:
+          'Authority through expertise, leadership requiring clear judgment, and mastery of professional domain.',
+        affirmation: 'I lead with clarity, truth, and fair judgment.',
       },
     },
     wands: {
       aceOfWands: {
         name: 'Ace of Wands',
-        keywords: ['inspiration', 'new opportunities', 'growth', 'potential'],
+        element: 'Fire',
+        keywords: [
+          'inspiration',
+          'new beginnings',
+          'creativity',
+          'potential',
+          'spark',
+        ],
         information:
-          'The Ace of Wands represents new beginnings, inspiration, and the potential for growth. It signifies the spark of creativity and the emergence of new opportunities. This card encourages you to embrace your passions and to pursue new ventures with enthusiasm and confidence.',
+          'The Ace of Wands represents the spark of inspiration, creative potential, and new beginnings filled with passionate energy.',
+        uprightMeaning:
+          'The Ace of Wands bursts forth with creative fire—inspiration, new beginnings, and raw potential. A hand holds a blossoming wand, representing the seed of a passionate venture. This is the spark that starts the fire. Seize this creative energy and channel it into action.',
+        reversedMeaning:
+          'Reversed indicates creative blocks, false starts, or lack of direction. The spark may be present but not catching fire. Examine what is blocking your creative flow.',
+        loveMeaning:
+          'New passionate romance, creative approach to love, or spark of attraction. Exciting new beginnings in relationships.',
+        careerMeaning:
+          'Inspiring new project, creative venture, or entrepreneurial spark. Time to pursue passionate work.',
+        affirmation: 'I ignite my creative potential with passionate action.',
       },
       twoOfWands: {
         name: 'Two of Wands',
-        keywords: ['future planning', 'progress', 'decisions', 'discovery'],
+        element: 'Fire',
+        keywords: [
+          'planning',
+          'decisions',
+          'discovery',
+          'future vision',
+          'progress',
+        ],
         information:
-          'The Two of Wands symbolizes future planning, progress, and the exploration of new possibilities. It represents the need to make decisions and to take steps toward your goals. This card encourages you to think ahead and to be open to discovering new opportunities and paths.',
+          'The Two of Wands symbolizes planning for the future, making decisions about direction, and holding the world in your hands.',
+        uprightMeaning:
+          'The Two of Wands shows a figure holding the world, looking out from a castle—planning, decisions, and future vision. The initial spark has caught; now comes strategic thinking about where to direct your fire. The world awaits; choose your direction wisely.',
+        reversedMeaning:
+          'Reversed indicates fear of the unknown, poor planning, or lacking vision. You may be staying in your comfort zone rather than expanding.',
+        loveMeaning:
+          'Planning future with partner, deciding about relationship direction, or considering romantic options.',
+        careerMeaning:
+          'Career planning, considering opportunities, and strategic professional thinking. The world is open to you.',
+        affirmation: 'I plan my future with vision and strategic purpose.',
       },
       threeOfWands: {
         name: 'Three of Wands',
-        keywords: [
-          'Progress',
-          'expansion',
-          'foresight',
-          'overseas opportunities',
-        ],
+        element: 'Fire',
+        keywords: ['expansion', 'foresight', 'progress', 'overseas', 'growth'],
         information:
-          'The Three of Wands represents progress, expansion, and the anticipation of future opportunities. It signifies the potential for growth through exploration and long-term planning. This card encourages you to look beyond your current circumstances and to embrace new possibilities for success and development.',
+          'The Three of Wands represents expansion, watching plans unfold, and opportunities arriving from afar.',
+        uprightMeaning:
+          'The Three of Wands shows a figure watching ships approach—plans are unfolding, expansion is underway. This card indicates progress, foresight paying off, and opportunities arriving. Your efforts are beginning to bear fruit; continue to think big.',
+        reversedMeaning:
+          'Reversed suggests delays in plans, obstacles to expansion, or disappointing returns on efforts. Patience may be needed.',
+        loveMeaning:
+          'Relationship expansion, long-distance love, or watching partnership grow. Planning future together.',
+        careerMeaning:
+          'Business expansion, international opportunities, and watching career plans unfold successfully.',
+        affirmation: 'My vision expands as opportunities arrive.',
       },
       fourOfWands: {
         name: 'Four of Wands',
-        keywords: ['celebration', 'joy', 'harmony', 'relaxation', 'homecoming'],
+        element: 'Fire',
+        keywords: [
+          'celebration',
+          'harmony',
+          'milestone',
+          'homecoming',
+          'community',
+        ],
         information:
-          'The Four of Wands symbolizes celebration, joy, and harmony. It represents the happiness and fulfillment that come from achieving milestones and creating a sense of community and belonging. This card encourages you to enjoy the moment and to celebrate your accomplishments with loved ones.',
+          'The Four of Wands symbolizes celebration, achievement of milestones, and joyous community gatherings.',
+        uprightMeaning:
+          'The Four of Wands depicts celebration under a flower-adorned canopy—milestones achieved, community gathered in joy. This card indicates celebration, harmony, and the happiness of homecoming. Take time to celebrate your achievements with loved ones.',
+        reversedMeaning:
+          'Reversed may indicate cancelled celebrations, lack of harmony, or feeling like an outsider. Home life may need attention.',
+        loveMeaning:
+          'Relationship milestones, engagement, wedding celebration, or joyous partnership achievements.',
+        careerMeaning:
+          'Work celebrations, team achievements, and professional milestones worthy of recognition.',
+        affirmation: 'I celebrate my achievements with joyous community.',
       },
       fiveOfWands: {
         name: 'Five of Wands',
+        element: 'Fire',
         keywords: [
-          'Conflict',
-          'disagreements',
+          'conflict',
           'competition',
-          'tension',
-          'diversity',
+          'disagreement',
+          'challenge',
+          'rivalry',
         ],
         information:
-          'The Five of Wands represents conflict, disagreements, and competition. It signifies the challenges and tensions that arise from differing opinions and perspectives. This card encourages you to embrace diversity and to seek constructive ways to resolve conflicts and to work collaboratively.',
+          'The Five of Wands represents conflict, competition, and the challenges of working with diverse perspectives.',
+        uprightMeaning:
+          'The Five of Wands shows figures in chaotic combat—conflict, competition, and clashing egos. This card indicates disagreement, rivalry, and the struggle of diverse opinions. While challenging, this competition can sharpen your skills. Channel the energy constructively.',
+        reversedMeaning:
+          'Reversed suggests conflict resolution, avoiding confrontation, or internal rather than external struggle. Peace may be possible.',
+        loveMeaning:
+          'Relationship conflicts, competing for attention, or power struggles in partnership. Work toward resolution.',
+        careerMeaning:
+          'Workplace competition, conflicting ideas, and professional rivalry. Stand your ground while remaining collaborative.',
+        affirmation: 'I navigate conflict constructively and grow stronger.',
       },
       sixOfWands: {
         name: 'Six of Wands',
+        element: 'Fire',
         keywords: [
-          'Success',
-          'public recognition',
-          'progress',
-          'self-confidence',
+          'victory',
+          'recognition',
+          'success',
+          'acclaim',
+          'achievement',
         ],
         information:
-          'The Six of Wands symbolizes success, recognition, and progress. It represents the achievements and accolades that come from hard work and perseverance. This card encourages you to celebrate your victories and to take pride in your accomplishments, knowing that your efforts are being acknowledged.',
+          'The Six of Wands symbolizes victory, public recognition, and the celebration of achievement.',
+        uprightMeaning:
+          'The Six of Wands shows a victor on horseback, crowned with laurels, celebrated by crowds—victory and public recognition. This card indicates success, acclaim, and the sweet taste of achievement. Your efforts are recognized; accept the praise graciously.',
+        reversedMeaning:
+          'Reversed suggests lack of recognition, hollow victory, or fall from grace. Success may be delayed or unacknowledged.',
+        loveMeaning:
+          'Relationship success, feeling victorious in love, or public celebration of partnership.',
+        careerMeaning:
+          'Professional recognition, career victory, and public acclaim for achievements. Success is celebrated.',
+        affirmation: 'I accept recognition for my achievements with grace.',
       },
       sevenOfWands: {
         name: 'Seven of Wands',
-        keywords: ['challenge', 'competition', 'protection', 'perseverance'],
+        element: 'Fire',
+        keywords: [
+          'defense',
+          'perseverance',
+          'standing ground',
+          'competition',
+          'challenge',
+        ],
         information:
-          'The Seven of Wands represents challenges, competition, and the need for perseverance. It signifies the obstacles and opposition you may face in pursuing your goals. This card encourages you to stand your ground and to protect your position with determination and resilience.',
+          'The Seven of Wands represents defending your position, standing your ground against opposition, and perseverance.',
+        uprightMeaning:
+          'The Seven of Wands shows a figure defending high ground against attackers—standing firm under pressure. This card indicates the need to defend your position, persevere against opposition, and maintain your ground. You have the advantage; do not give it up.',
+        reversedMeaning:
+          'Reversed suggests giving up, being overwhelmed by opposition, or choosing not to fight. Sometimes retreat is wisdom.',
+        loveMeaning:
+          'Defending relationship, fighting for love, or standing ground on relationship values.',
+        careerMeaning:
+          'Defending professional position, workplace challenges, and perseverance against competition.',
+        affirmation: 'I stand my ground with courage and conviction.',
       },
       eightOfWands: {
         name: 'Eight of Wands',
-        keywords: [
-          'Movement',
-          'fast-paced change',
-          'action',
-          'alignment',
-          'air travel',
-        ],
+        element: 'Fire',
+        keywords: ['speed', 'action', 'movement', 'progress', 'momentum'],
         information:
-          'The Eight of Wands symbolizes rapid movement, fast-paced change, and action. It represents the alignment of your efforts and the swift progress that follows. This card encourages you to embrace the momentum and to take decisive action to achieve your goals.',
+          'The Eight of Wands symbolizes rapid movement, swift progress, and things moving quickly toward completion.',
+        uprightMeaning:
+          'The Eight of Wands shows wands flying through clear sky—rapid movement and swift progress. This card indicates things moving quickly, momentum building, and actions bearing fruit fast. Strike while the iron is hot; delays are over.',
+        reversedMeaning:
+          'Reversed suggests delays, miscommunication, or arrows falling short. Momentum may be blocked or scattered.',
+        loveMeaning:
+          'Fast-moving romance, travel for love, or rapid developments in relationships.',
+        careerMeaning:
+          'Swift career progress, quick turnaround on projects, and momentum in professional matters.',
+        affirmation: 'I move swiftly toward my goals with clear direction.',
       },
       nineOfWands: {
         name: 'Nine of Wands',
+        element: 'Fire',
         keywords: [
-          'Resilience',
-          'courage',
+          'resilience',
           'persistence',
-          'test of faith',
+          'courage',
+          'last stand',
           'boundaries',
         ],
         information:
-          'The Nine of Wands represents resilience, courage, and persistence. It signifies the strength and determination needed to overcome challenges and to protect your boundaries. This card encourages you to stay strong and to trust in your ability to persevere, even in the face of adversity.',
+          'The Nine of Wands represents resilience, courage in the face of adversity, and persistence near the finish line.',
+        uprightMeaning:
+          'The Nine of Wands shows a wounded figure still standing guard—resilience after battle, persistence despite weariness. This card indicates you are near the end but must stay strong. One more challenge remains; do not give up now. Protect your boundaries.',
+        reversedMeaning:
+          'Reversed suggests exhaustion, giving up too soon, or stubbornness. Know when to rest and when to release.',
+        loveMeaning:
+          'Persisting in love despite challenges, protecting relationship boundaries, or feeling battle-weary in partnership.',
+        careerMeaning:
+          'Career resilience, persistence near goals, and maintaining professional boundaries under pressure.',
+        affirmation: 'I persist with courage; the finish line is near.',
       },
       tenOfWands: {
         name: 'Ten of Wands',
-        keywords: ['burden', 'extra responsibility', 'hard work', 'completion'],
+        element: 'Fire',
+        keywords: [
+          'burden',
+          'responsibility',
+          'hard work',
+          'stress',
+          'completion',
+        ],
         information:
-          'The Ten of Wands symbolizes burdens, extra responsibilities, and the hard work required to reach completion. It represents the weight of your obligations and the effort needed to achieve your goals. This card encourages you to manage your responsibilities wisely and to seek balance in your efforts.',
+          'The Ten of Wands symbolizes heavy burdens, overwhelming responsibility, and the weight of success.',
+        uprightMeaning:
+          'The Ten of Wands shows a figure bent under the weight of ten heavy wands—burden, responsibility, and hard work. This card indicates carrying too much, feeling overwhelmed by obligations, or success creating new burdens. Delegate or release what you can; the load is too heavy.',
+        reversedMeaning:
+          'Reversed suggests releasing burdens, learning to delegate, or collapse under weight. Time to set things down.',
+        loveMeaning:
+          'Relationship burdens, carrying too much for partner, or overwhelmed by love responsibilities.',
+        careerMeaning:
+          'Work overload, taking on too much responsibility, and career stress from success.',
+        affirmation: 'I release what I cannot carry and accept help.',
       },
       daughterOfWands: {
         name: 'Daughter of Wands',
+        element: 'Fire',
         keywords: [
-          'Inspiration',
-          'ideas',
-          'discovery',
-          'limitless potential',
+          'exploration',
+          'excitement',
           'free spirit',
+          'discovery',
+          'enthusiasm',
         ],
         information:
-          'The Daughter of Wands represents inspiration, new ideas, and the discovery of your limitless potential. It signifies the enthusiasm and adventurous spirit needed to explore new opportunities. This card encourages you to embrace your creativity and to pursue your passions with a free and open mind.',
+          'The Daughter of Wands represents the spark of adventure, enthusiastic new beginnings, and free-spirited exploration.',
+        uprightMeaning:
+          'The Daughter of Wands gazes at her wand with wonder and excitement—new adventures, enthusiastic beginnings, and free-spirited exploration. This card indicates messages of inspiration, the beginning of passionate ventures, and youthful excitement for life.',
+        reversedMeaning:
+          'Reversed suggests scattered energy, blocked creativity, or lack of direction. The enthusiasm may be unfocused.',
+        loveMeaning:
+          'Exciting new romantic interest, adventurous approach to love, or passionate messages about relationships.',
+        careerMeaning:
+          'Inspiring new project, creative opportunity, or enthusiastic beginning of career venture.',
+        affirmation: 'I embrace adventure with enthusiasm and wonder.',
       },
       sonOfWands: {
         name: 'Son of Wands',
-        keywords: [
-          'Energy',
-          'passion',
-          'inspired action',
-          'adventure',
-          'impulsiveness',
-        ],
+        element: 'Fire',
+        keywords: ['adventure', 'passion', 'action', 'impulsiveness', 'charm'],
         information:
-          'The Son of Wands symbolizes energy, passion, and inspired action. It represents the drive to embark on adventures and to pursue your goals with enthusiasm and determination. This card encourages you to embrace your adventurous side and to take bold, decisive action in your pursuits.',
+          'The Son of Wands symbolizes passionate action, adventurous spirit, and charming boldness.',
+        uprightMeaning:
+          'The Son of Wands charges forward full of passion and adventure—bold action, charming energy, and fearless pursuit of desires. This card indicates taking action on passion, adventurous journeys, and charismatic drive. Act boldly but beware of impulsiveness.',
+        reversedMeaning:
+          'Reversed suggests recklessness, scattered energy, or all passion with no follow-through. Haste may cause problems.',
+        loveMeaning:
+          'Passionate pursuit of love, adventurous romance, or charming but potentially unreliable suitor.',
+        careerMeaning:
+          'Bold career moves, passionate professional pursuits, and action-oriented approach to work.',
+        affirmation: 'I pursue my passions with bold, directed action.',
       },
       motherOfWands: {
         name: 'Mother of Wands',
+        element: 'Fire',
         keywords: [
-          'Courage',
           'confidence',
-          'independence',
-          'social butterfly',
           'determination',
+          'vibrant',
+          'warmth',
+          'independence',
         ],
         information:
-          'The Mother of Wands embodies courage, confidence, and independence. She represents the determination and charisma needed to achieve your goals and to inspire others. This card encourages you to be bold and assertive in your pursuits, and to embrace your leadership qualities with grace and confidence.',
+          'The Mother of Wands embodies confident warmth, vibrant energy, and determined independence.',
+        uprightMeaning:
+          'The Mother of Wands sits confidently with her sunflowers and black cat—vibrant, warm, and self-assured. This card represents confident leadership, determined pursuit of goals, and inspiring others with your passionate energy. Lead with warmth and authenticity.',
+        reversedMeaning:
+          'Reversed may indicate jealousy, domineering behavior, or confidence turning to arrogance. Fire needs proper direction.',
+        loveMeaning:
+          'Confident, passionate partner. Warmth and determination in relationships. Inspiring love through authentic self.',
+        careerMeaning:
+          'Charismatic professional leadership, inspiring others, and confident pursuit of career goals.',
+        affirmation: 'I lead with confident warmth and inspire others.',
       },
       fatherOfWands: {
         name: 'Father of Wands',
-        keywords: ['natural-born leader', 'vision', 'entrepreneur', 'honor'],
+        element: 'Fire',
+        keywords: ['leadership', 'vision', 'entrepreneur', 'boldness', 'honor'],
         information:
-          'The Father of Wands symbolizes leadership, vision, and entrepreneurial spirit. He represents the ability to inspire and guide others with integrity and honor. This card encourages you to embrace your leadership qualities and to pursue your vision with confidence and determination.',
+          'The Father of Wands symbolizes visionary leadership, entrepreneurial drive, and bold pursuit of goals with honor.',
+        uprightMeaning:
+          'The Father of Wands commands from his throne with salamander cape and wand—visionary leader, bold entrepreneur, and honorable pursuer of goals. This card represents mastery of fire energy: passionate leadership that inspires others while maintaining integrity.',
+        reversedMeaning:
+          'Reversed indicates tyrannical leadership, ruthless ambition, or burning out. Fire without wisdom destroys.',
+        loveMeaning:
+          'Passionate, visionary partner. Bold leadership in relationships. Beware of domination when reversed.',
+        careerMeaning:
+          'Entrepreneurial success, visionary professional leadership, and bold pursuit of career vision.',
+        affirmation: 'I lead with vision, passion, and honor.',
       },
     },
   },
