@@ -49,14 +49,6 @@ export default function LightingCandlesOnAltarPage() {
         'altar setup',
       ]}
       canonicalUrl='https://lunary.app/grimoire/lighting-candles-on-altar'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
-        {
-          label: 'Lighting Candles on Your Altar',
-          href: '/grimoire/lighting-candles-on-altar',
-        },
-      ]}
       intro='The order and method of lighting candles on your altar creates a powerful ritual structure. Each step builds energy and intention. Understanding proper candle lighting order helps you create sacred space, honor the elements, and focus your magical work effectively.'
       meaning={`**Traditional Lighting Order:**
 

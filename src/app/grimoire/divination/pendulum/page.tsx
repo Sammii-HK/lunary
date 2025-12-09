@@ -119,11 +119,6 @@ These movements can vary by practitioner, so it's important to program your own 
           { name: 'Tarot Reading', href: '/tarot', type: 'Tool' },
           { name: 'Scrying', href: '/grimoire/scrying', type: 'Practice' },
         ]}
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Divination', href: '/grimoire/divination' },
-          { label: 'Pendulum', href: '/grimoire/divination/pendulum' },
-        ]}
         internalLinks={[
           { text: 'Divination Guide', href: '/grimoire/divination' },
           { text: 'Tarot Reading', href: '/tarot' },

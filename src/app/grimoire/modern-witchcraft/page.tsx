@@ -51,10 +51,6 @@ export default function ModernWitchcraftPage() {
           'book of shadows',
         ]}
         canonicalUrl='https://lunary.app/grimoire/modern-witchcraft'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
-        ]}
         intro='Modern witchcraft is a diverse spiritual path that honors nature, works with energy, and empowers practitioners to create positive change. Unlike historical stereotypes, modern witchcraft is a personal, ethical practice that can be adapted to any lifestyle. This comprehensive guide covers different witchcraft paths, essential tools, ethics, and practices for both beginners and experienced practitioners.'
         meaning={`Witchcraft is a spiritual practice that works with natural energies, intention, and the cycles of nature. It's not about supernatural powers but rather about understanding energy, correspondences, and how to align your will with natural forces to create change. Modern witchcraft is highly personal—each practitioner develops their own path, practices, and beliefs.
 

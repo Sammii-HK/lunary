@@ -147,11 +147,6 @@ export default function AnimalsIndexPage() {
           'power animals',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/animals'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Animals', href: '/grimoire/correspondences/animals' },
-        ]}
         whatIs={{
           question: 'What are Animal Correspondences?',
           answer:

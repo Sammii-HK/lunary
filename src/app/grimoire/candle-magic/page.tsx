@@ -53,10 +53,6 @@ export default function CandleMagicPage() {
           'candle safety',
         ]}
         canonicalUrl='https://lunary.app/grimoire/candle-magic'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Candle Magic', href: '/grimoire/candle-magic' },
-        ]}
         intro='Candle magic is one of the most accessible and powerful forms of spellwork. By combining color correspondences, intention-setting, and the transformative power of fire, candle magic allows practitioners to manifest their desires and work with elemental energies. This comprehensive guide covers everything you need to know to practice candle magic safely and effectively, from choosing the right candle colors to advanced carving and anointing techniques.'
         meaning={`Candle magic harnesses the power of fire, one of the four classical elements, to manifest intentions and create change. The flame represents transformation, purification, and the connection between the physical and spiritual realms. When you light a candle with intention, you are activating powerful energetic forces that work to bring your desires into reality.
 

@@ -98,12 +98,6 @@ export default function Eclipses2025Page() {
         datePublished='2024-12-01'
         dateModified={new Date().toISOString().split('T')[0]}
         articleSection='Astrology Events'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Events', href: '/grimoire/events' },
-          { label: '2025', href: '/grimoire/events/2025' },
-          { label: 'Eclipses', href: '/grimoire/events/2025/eclipses' },
-        ]}
         intro='2025 brings four powerful eclipses that will catalyze major changes and new beginnings. Eclipses are cosmic wild cards—they accelerate fate and bring destined events into our lives. This guide covers all four 2025 eclipses with their meanings and rituals.'
         meaning={`**What Are Eclipses?**
 

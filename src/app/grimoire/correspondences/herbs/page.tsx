@@ -100,11 +100,6 @@ export default function HerbsIndexPage() {
           'witchcraft herbs',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/herbs'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Herbs', href: '/grimoire/correspondences/herbs' },
-        ]}
         whatIs={{
           question: 'What are Herb Correspondences?',
           answer:

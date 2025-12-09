@@ -46,14 +46,6 @@ export default function BookOfShadowsPage() {
         'book of shadows guide',
       ]}
       canonicalUrl='https://lunary.app/grimoire/book-of-shadows'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        {
-          label: 'Modern Witchcraft',
-          href: '/grimoire/modern-witchcraft',
-        },
-        { label: 'Book of Shadows', href: '/grimoire/book-of-shadows' },
-      ]}
       intro={`A Book of Shadows (BOS) is your personal grimoire—a record of your spells, rituals, correspondences, and spiritual journey. It's a living document that grows with your practice. Your BOS is uniquely yours, reflecting your path, experiences, and magical discoveries.`}
       meaning={`**What to Include:**
 - Spells and rituals you've performed

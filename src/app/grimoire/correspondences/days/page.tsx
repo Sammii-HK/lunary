@@ -100,11 +100,6 @@ export default function DaysIndexPage() {
           'weekly magic',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/days'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Days', href: '/grimoire/correspondences/days' },
-        ]}
         whatIs={{
           question: 'What are Day Correspondences?',
           answer:

@@ -128,11 +128,6 @@ To develop omen reading skills:
             type: 'Practice',
           },
         ]}
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Divination', href: '/grimoire/divination' },
-          { label: 'Omen Reading', href: '/grimoire/divination/omen-reading' },
-        ]}
         internalLinks={[
           { text: 'Divination Guide', href: '/grimoire/divination' },
           { text: 'Animal Correspondences', href: '/grimoire/correspondences' },

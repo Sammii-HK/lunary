@@ -106,11 +106,6 @@ export default function DeitiesIndexPage() {
           'pantheons',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/deities'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Deities', href: '/grimoire/correspondences/deities' },
-        ]}
         whatIs={{
           question: 'What are Deity Correspondences?',
           answer:

@@ -100,11 +100,6 @@ export default function FlowersIndexPage() {
           'floral magic',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/flowers'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Flowers', href: '/grimoire/correspondences/flowers' },
-        ]}
         whatIs={{
           question: 'What are Flower Correspondences?',
           answer:

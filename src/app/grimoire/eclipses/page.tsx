@@ -90,10 +90,6 @@ export default function EclipsesIndexPage() {
           'eclipse effects',
         ]}
         canonicalUrl='https://lunary.app/grimoire/eclipses'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Eclipses' },
-        ]}
         whatIs={{
           question: 'What are eclipses in astrology?',
           answer:

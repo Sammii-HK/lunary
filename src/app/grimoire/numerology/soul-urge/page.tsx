@@ -109,14 +109,6 @@ export default function SoulUrgeIndexPage() {
           'numerology',
         ]}
         canonicalUrl='https://lunary.app/grimoire/numerology/soul-urge'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Numerology', href: '/grimoire/numerology' },
-          {
-            label: 'Soul Urge Numbers',
-            href: '/grimoire/numerology/soul-urge',
-          },
-        ]}
         whatIs={{
           question: 'What is a Soul Urge Number?',
           answer:

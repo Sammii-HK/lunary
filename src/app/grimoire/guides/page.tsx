@@ -114,10 +114,6 @@ export default function GuidesIndexPage() {
           'spiritual guides',
         ]}
         canonicalUrl='https://lunary.app/grimoire/guides'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Complete Guides' },
-        ]}
         whatIs={{
           question: 'What are these complete guides?',
           answer:

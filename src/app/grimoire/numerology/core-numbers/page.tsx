@@ -99,11 +99,6 @@ export default function CoreNumbersIndexPage() {
           'number meanings',
         ]}
         canonicalUrl='https://lunary.app/grimoire/numerology/core-numbers'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Numerology', href: '/grimoire/numerology' },
-          { label: 'Core Numbers', href: '/grimoire/numerology/core-numbers' },
-        ]}
         whatIs={{
           question: 'What are Core Numbers?',
           answer:

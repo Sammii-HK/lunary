@@ -110,14 +110,6 @@ export default function ExpressionIndexPage() {
           'numerology',
         ]}
         canonicalUrl='https://lunary.app/grimoire/numerology/expression'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Numerology', href: '/grimoire/numerology' },
-          {
-            label: 'Expression Numbers',
-            href: '/grimoire/numerology/expression',
-          },
-        ]}
         whatIs={{
           question: 'What is an Expression Number?',
           answer:

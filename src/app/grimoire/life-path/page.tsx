@@ -107,11 +107,6 @@ export default function LifePathIndexPage() {
           'birth date numerology',
         ]}
         canonicalUrl='https://lunary.app/grimoire/life-path'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Numerology', href: '/grimoire/numerology' },
-          { label: 'Life Path Numbers', href: '/grimoire/life-path' },
-        ]}
         whatIs={{
           question: 'What is a Life Path Number?',
           answer:

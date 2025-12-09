@@ -116,11 +116,6 @@ export default function ElementsIndexPage() {
           'correspondences',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/elements'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Elements', href: '/grimoire/correspondences/elements' },
-        ]}
         whatIs={{
           question: 'What are the Four Elements?',
           answer:

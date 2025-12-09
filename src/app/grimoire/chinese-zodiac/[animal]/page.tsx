@@ -87,11 +87,6 @@ export default async function ChineseZodiacAnimalPage({
       datePublished='2025-01-01'
       dateModified='2025-12-06'
       articleSection='Chinese Zodiac'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Chinese Zodiac', href: '/grimoire/chinese-zodiac' },
-        { label: data.displayName },
-      ]}
       whatIs={{
         question: `What is the Year of the ${data.displayName} in Chinese zodiac?`,
         answer: `The ${data.displayName} is a ${data.yinYang} ${data.element} sign in Chinese astrology. People born in ${data.displayName} years (${data.years.slice(-5).join(', ')}) are characterized by being ${data.traits.slice(0, 4).join(', ')}. The ${data.displayName} is most compatible with ${data.compatibleWith.map((a) => CHINESE_ZODIAC_DATA[a].displayName).join(' and ')}.`,

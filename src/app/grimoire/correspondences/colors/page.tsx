@@ -114,11 +114,6 @@ export default function ColorsIndexPage() {
           'magical colors',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/colors'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Colors', href: '/grimoire/correspondences/colors' },
-        ]}
         whatIs={{
           question: 'What are Color Correspondences?',
           answer:

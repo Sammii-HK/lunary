@@ -67,10 +67,6 @@ export default function SpellsIndexPage() {
           'love spells',
         ]}
         canonicalUrl='https://lunary.app/grimoire/spells'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Spells' },
-        ]}
         whatIs={{
           question: 'What are spells in witchcraft?',
           answer:

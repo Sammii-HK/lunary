@@ -80,10 +80,6 @@ export default function EventsIndexPage() {
           'planetary transits',
         ]}
         canonicalUrl='https://lunary.app/grimoire/events'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Events' },
-        ]}
         whatIs={{
           question: 'What are astrological events?',
           answer:

@@ -35,14 +35,6 @@ export default function CardCombinationsPage() {
         'how to read multiple tarot cards',
       ]}
       canonicalUrl='https://lunary.app/grimoire/card-combinations'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Tarot', href: '/grimoire/tarot' },
-        {
-          label: 'Reading Card Combinations',
-          href: '/grimoire/card-combinations',
-        },
-      ]}
       meaning={`Reading tarot cards together creates richer, more nuanced interpretations than reading cards individually. When cards appear together, they tell a story, create themes, and reveal deeper layers of meaning.
 
 **Element Combinations:**

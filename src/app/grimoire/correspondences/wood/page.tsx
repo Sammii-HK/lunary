@@ -100,11 +100,6 @@ export default function WoodIndexPage() {
           'sacred trees',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/wood'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Wood', href: '/grimoire/correspondences/wood' },
-        ]}
         whatIs={{
           question: 'What are Wood Correspondences?',
           answer:

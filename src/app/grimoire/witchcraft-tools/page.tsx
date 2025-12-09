@@ -49,14 +49,6 @@ export default function WitchcraftToolsPage() {
         'ritual tools',
       ]}
       canonicalUrl='https://lunary.app/grimoire/witchcraft-tools'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        {
-          label: 'Modern Witchcraft',
-          href: '/grimoire/modern-witchcraft',
-        },
-        { label: 'Witchcraft Tools', href: '/grimoire/witchcraft-tools' },
-      ]}
       intro={`Essential witchcraft tools help focus energy and create sacred space. While tools aren't required for magic (your intention is most important), they can enhance your practice and provide structure. Learn about traditional tools and how to use them effectively.`}
       meaning={`**Essential Tools:**
 

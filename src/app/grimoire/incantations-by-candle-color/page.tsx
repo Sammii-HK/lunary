@@ -49,14 +49,6 @@ export default function IncantationsByCandleColorPage() {
         'candle magic words',
       ]}
       canonicalUrl='https://lunary.app/grimoire/incantations-by-candle-color'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
-        {
-          label: 'Incantations by Candle Color',
-          href: '/grimoire/incantations-by-candle-color',
-        },
-      ]}
       intro='Specific incantations to use when lighting candles of different colors. Speak with conviction and feel the energy of each color. These incantations combine the power of spoken word with color correspondences to amplify your candle magic.'
       meaning={`Each candle color carries specific energetic properties. When you combine color energy with powerful incantations, you create a focused intention that manifests your desires. Speak these incantations with conviction, feeling the energy of each color flowing through you.
 

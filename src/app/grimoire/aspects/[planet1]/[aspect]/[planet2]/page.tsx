@@ -100,11 +100,6 @@ export default async function AspectPage({
       datePublished='2025-01-01'
       dateModified={new Date().toISOString().split('T')[0]}
       articleSection='Astrological Aspects'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Aspects', href: '/grimoire/aspects' },
-        { label: interp.title },
-      ]}
       whatIs={{
         question: `What does ${PLANET_DISPLAY[p1]} ${aspectData.displayName.toLowerCase()} ${PLANET_DISPLAY[p2]} mean?`,
         answer: interp.summary,

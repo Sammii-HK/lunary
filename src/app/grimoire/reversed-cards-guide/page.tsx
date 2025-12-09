@@ -1,6 +1,7 @@
 export const revalidate = 86400;
 
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 export const metadata: Metadata = {
@@ -35,14 +36,6 @@ export default function ReversedCardsGuidePage() {
         'upside down tarot cards',
       ]}
       canonicalUrl='https://lunary.app/grimoire/reversed-cards-guide'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Tarot', href: '/grimoire/tarot' },
-        {
-          label: 'Reversed Cards Guide',
-          href: '/grimoire/reversed-cards-guide',
-        },
-      ]}
     >
       <div className='space-y-6'>
         <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
@@ -178,24 +171,24 @@ export default function ReversedCardsGuidePage() {
             Related Topics
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-            <a
+            <Link
               href='/grimoire/tarot'
               className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
             >
               Tarot Cards Guide
-            </a>
-            <a
+            </Link>
+            <Link
               href='/grimoire/card-combinations'
               className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
             >
               Reading Card Combinations
-            </a>
-            <a
+            </Link>
+            <Link
               href='/grimoire/tarot/spreads'
               className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
             >
               Tarot Spreads
-            </a>
+            </Link>
           </div>
         </div>
       </div>

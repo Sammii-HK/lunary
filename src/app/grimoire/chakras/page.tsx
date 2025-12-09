@@ -51,10 +51,6 @@ export default function ChakrasPage() {
           'chakra healing',
         ]}
         canonicalUrl='https://lunary.app/grimoire/chakras'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Chakras', href: '/grimoire/chakras' },
-        ]}
         intro='Chakras are energy centers located along the spine that regulate the flow of life force energy through your body. There are seven main chakras, each associated with specific colors, elements, and aspects of life. Understanding and balancing your chakras is essential for physical health, emotional well-being, and effective magical work. This comprehensive guide covers each chakra, its meaning, and practices for balancing and healing.'
         meaning='Chakras are spinning wheels of energy that connect your physical body with your spiritual self. Each chakra governs specific physical organs, emotional patterns, and spiritual lessons. When chakras are balanced and open, energy flows freely, supporting health and spiritual growth. When blocked or imbalanced, they can cause physical, emotional, or spiritual issues.
 

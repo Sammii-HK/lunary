@@ -131,14 +131,6 @@ The most important dream interpretation tool is your own intuition. Notice how s
             type: 'Practice',
           },
         ]}
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Divination', href: '/grimoire/divination' },
-          {
-            label: 'Dream Interpretation',
-            href: '/grimoire/divination/dream-interpretation',
-          },
-        ]}
         internalLinks={[
           { text: 'Divination Guide', href: '/grimoire/divination' },
           { text: 'Moon Phases', href: '/grimoire/moon' },

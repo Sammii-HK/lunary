@@ -39,12 +39,6 @@ export default function Eclipses2026Page() {
       datePublished='2025-12-01'
       dateModified='2025-12-06'
       articleSection='Astrological Events'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Events', href: '/grimoire/events' },
-        { label: '2026', href: '/grimoire/events/2026' },
-        { label: 'Eclipses' },
-      ]}
       whatIs={{
         question: 'What are the 2026 eclipse dates?',
         answer:

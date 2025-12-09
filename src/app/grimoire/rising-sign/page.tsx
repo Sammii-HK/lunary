@@ -63,11 +63,6 @@ export default function RisingSignPage() {
           'rising sign vs sun sign',
         ]}
         canonicalUrl='https://lunary.app/grimoire/rising-sign'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Birth Chart', href: '/grimoire/birth-chart' },
-          { label: 'Rising Sign', href: '/grimoire/rising-sign' },
-        ]}
         intro='Your rising sign, also called the Ascendant, is the zodiac sign that was rising on the eastern horizon at your exact moment of birth. It represents your outer personality, how others see you, and your approach to life. Understanding your rising sign helps you understand how you present yourself to the world and how others perceive you.'
         meaning={`The rising sign changes approximately every 2 hours, making it the most time-sensitive part of your chart. It's calculated using your exact birth time (most important), birth location (latitude/longitude), and birth date.
 

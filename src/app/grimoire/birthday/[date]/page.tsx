@@ -140,11 +140,6 @@ export default async function BirthdayZodiacPage({
       datePublished='2025-01-01'
       dateModified='2025-12-06'
       articleSection='Birthday Zodiac'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Birthday', href: '/grimoire/birthday' },
-        { label: birthday.dateString },
-      ]}
       whatIs={{
         question: `What zodiac sign is ${birthday.dateString}?`,
         answer: `People born on ${birthday.dateString} are ${zodiac.sign}. ${zodiac.sign} is a ${zodiac.modality} ${zodiac.element} sign ruled by ${zodiac.ruler}. Those born on this date are in the ${decan}${getOrdinalSuffix(decan)} decan of ${zodiac.sign}, which is sub-ruled by ${decanRuler}, adding extra depth to their personality.`,

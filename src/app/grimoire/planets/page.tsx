@@ -150,10 +150,6 @@ export default function PlanetsIndexPage() {
           'planetary influences',
         ]}
         canonicalUrl='https://lunary.app/grimoire/planets'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Planets' },
-        ]}
         whatIs={{
           question: 'What do planets represent in astrology?',
           answer:

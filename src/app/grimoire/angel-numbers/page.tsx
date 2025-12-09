@@ -112,11 +112,6 @@ export default function AngelNumbersIndexPage() {
           'repeating numbers',
         ]}
         canonicalUrl='https://lunary.app/grimoire/angel-numbers'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Numerology', href: '/grimoire/numerology' },
-          { label: 'Angel Numbers', href: '/grimoire/angel-numbers' },
-        ]}
         whatIs={{
           question: 'What are Angel Numbers?',
           answer:

@@ -49,14 +49,6 @@ export default function AnointingCandlesPage() {
         'how to anoint candles',
       ]}
       canonicalUrl='https://lunary.app/grimoire/anointing-candles'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
-        {
-          label: 'Anointing Candles with Oils',
-          href: '/grimoire/anointing-candles',
-        },
-      ]}
       intro='Anointing candles with oils adds another layer of intention and energy to your spellwork. Essential oils carry specific properties that enhance your candle magic. Understanding anointing methods and oil correspondences helps you create more powerful and focused candle spells.'
       meaning={`**Anointing Method:**
 

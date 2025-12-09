@@ -102,14 +102,6 @@ export default function KarmicDebtIndexPage() {
           'numerology karma',
         ]}
         canonicalUrl='https://lunary.app/grimoire/numerology/karmic-debt'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Numerology', href: '/grimoire/numerology' },
-          {
-            label: 'Karmic Debt Numbers',
-            href: '/grimoire/numerology/karmic-debt',
-          },
-        ]}
         whatIs={{
           question: 'What are Karmic Debt Numbers?',
           answer:

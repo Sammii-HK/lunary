@@ -51,10 +51,6 @@ export default function RunesPage() {
           'rune magic',
         ]}
         canonicalUrl='https://lunary.app/grimoire/runes'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Runes', href: '/grimoire/runes' },
-        ]}
         intro='Runes are ancient symbols used for writing, divination, and magic. The Elder Futhark, the oldest runic alphabet, contains 24 runes, each with deep symbolic meaning and magical power. Understanding runes opens a powerful system of divination and spellwork that connects you with ancient wisdom and natural forces. This comprehensive guide covers rune meanings, divination methods, and magical applications.'
         meaning={`Runes are more than letters—they're symbols of natural forces, archetypes, and cosmic principles. Each rune represents a specific energy, concept, or aspect of existence. When you work with runes, you're tapping into these fundamental forces and aligning with their power.
 

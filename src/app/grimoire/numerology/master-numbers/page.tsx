@@ -101,14 +101,6 @@ export default function MasterNumbersIndexPage() {
           'master number 33',
         ]}
         canonicalUrl='https://lunary.app/grimoire/numerology/master-numbers'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Numerology', href: '/grimoire/numerology' },
-          {
-            label: 'Master Numbers',
-            href: '/grimoire/numerology/master-numbers',
-          },
-        ]}
         whatIs={{
           question: 'What are Master Numbers?',
           answer:

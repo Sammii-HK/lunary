@@ -101,10 +101,6 @@ export default function MoonInSignsIndexPage() {
           'moon placements',
         ]}
         canonicalUrl='https://lunary.app/grimoire/moon-in'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Moon in Signs', href: '/grimoire/moon-in' },
-        ]}
         whatIs={{
           question: 'What does Moon in Signs mean?',
           answer:

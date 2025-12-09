@@ -64,10 +64,6 @@ export default function BirthChartPage() {
           'astrological houses',
         ]}
         canonicalUrl='https://lunary.app/grimoire/birth-chart'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Birth Chart', href: '/grimoire/birth-chart' },
-        ]}
         intro='Your birth chart (natal chart) is a snapshot of the sky at the moment you were born. It reveals your astrological blueprint—the positions of planets, signs, houses, and aspects that influence your personality, life path, and potential. Understanding your birth chart helps you understand yourself deeply, recognize your strengths and challenges, and align with your true purpose. This comprehensive guide covers all components of birth charts and how to interpret them.'
         meaning={`A birth chart maps the positions of planets, signs, and houses at your exact moment of birth. Each component reveals different aspects of your personality and life experience. Planets represent different parts of your psyche and life areas. Signs show how those planets express themselves. Houses indicate where in your life these energies manifest. Aspects show how planets interact with each other.
 

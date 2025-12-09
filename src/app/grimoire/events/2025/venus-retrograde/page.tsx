@@ -38,15 +38,6 @@ export default function VenusRetrograde2025Page() {
         datePublished='2024-12-01'
         dateModified={new Date().toISOString().split('T')[0]}
         articleSection='Astrology Events'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Events', href: '/grimoire/events' },
-          { label: '2025', href: '/grimoire/events/2025' },
-          {
-            label: 'Venus Retrograde',
-            href: '/grimoire/events/2025/venus-retrograde',
-          },
-        ]}
         intro='Venus Retrograde is a powerful time for reassessing relationships, values, and self-worth. In 2025, Venus will retrograde from March 1 to April 12, moving through Aries and Pisces. This guide covers everything you need to know about navigating love and finances during this cosmic period.'
         meaning={`**What is Venus Retrograde?**
 

@@ -100,10 +100,6 @@ export default function FullMoonsIndexPage() {
           'monthly moons',
         ]}
         canonicalUrl='https://lunary.app/grimoire/full-moons'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Full Moons', href: '/grimoire/full-moons' },
-        ]}
         whatIs={{
           question: 'What are Full Moon Names?',
           answer:

@@ -98,11 +98,6 @@ export default function NumbersIndexPage() {
           'numerology',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/numbers'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Correspondences', href: '/grimoire/correspondences' },
-          { label: 'Numbers', href: '/grimoire/correspondences/numbers' },
-        ]}
         whatIs={{
           question: 'What are Number Correspondences?',
           answer:

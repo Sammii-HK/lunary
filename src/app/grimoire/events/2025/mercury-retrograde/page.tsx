@@ -56,15 +56,6 @@ export default function MercuryRetrograde2025Page() {
         datePublished='2024-12-01'
         dateModified={new Date().toISOString().split('T')[0]}
         articleSection='Astrology Events'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Events', href: '/grimoire/events' },
-          { label: '2025', href: '/grimoire/events/2025' },
-          {
-            label: 'Mercury Retrograde',
-            href: '/grimoire/events/2025/mercury-retrograde',
-          },
-        ]}
         intro='Mercury Retrograde is the most well-known astrological event, occurring 3-4 times per year when Mercury appears to move backward in its orbit. In 2025, Mercury will retrograde three times, affecting communication, technology, and travel. This guide covers all the dates, meanings, and practical tips to navigate these periods.'
         meaning={`**What is Mercury Retrograde?**
 
