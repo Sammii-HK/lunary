@@ -173,7 +173,7 @@ Notable people born in ${data.displayName} years include ${data.famousPeople.joi
         },
       ]}
       ctaText='Discover your complete Chinese astrology profile'
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[
         { name: 'Traditional Chinese Astrology' },
         { name: 'Chinese zodiac calendar calculations' },

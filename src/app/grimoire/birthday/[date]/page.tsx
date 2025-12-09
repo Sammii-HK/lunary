@@ -207,7 +207,7 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
         })),
       ]}
       ctaText='Get your personalized birthday reading'
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[
         { name: 'Traditional Western Astrology' },
         { name: 'Numerology calculations' },

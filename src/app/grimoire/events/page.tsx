@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, ArrowRight } from 'lucide-react';
 
+const currentYear = new Date().getFullYear();
+const nextYear = currentYear + 1;
+
 export const metadata: Metadata = {
   title: 'Astrology Events Calendar - Lunary',
   description:
@@ -41,7 +44,7 @@ export default function EventsIndexPage() {
 
         <div className='grid gap-6'>
           <Link
-            href='/grimoire/events/2025'
+            href={`/grimoire/events/${currentYear}`}
             className='group p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 hover:bg-lunary-primary-900/20 transition-colors'
           >
             <div className='flex items-center justify-between'>
@@ -51,7 +54,7 @@ export default function EventsIndexPage() {
                 </div>
                 <div>
                   <h2 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
-                    2025 Astrology Events
+                    {currentYear} Astrology Events
                   </h2>
                   <p className='text-zinc-400'>
                     Complete guide to Mercury retrogrades, Venus retrograde,
@@ -65,38 +68,38 @@ export default function EventsIndexPage() {
 
           <div className='grid md:grid-cols-2 gap-4'>
             <Link
-              href='/grimoire/events/2025/mercury-retrograde'
+              href={`/grimoire/events/${currentYear}/mercury-retrograde`}
               className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose-950 hover:bg-lunary-rose-900 transition-colors'
             >
               <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 mb-1'>
-                Mercury Retrograde 2025
+                Mercury Retrograde {currentYear}
               </h3>
               <p className='text-sm text-zinc-400'>
-                3 retrograde periods: dates, meanings, survival tips
+                Retrograde periods: dates, meanings, survival tips
               </p>
             </Link>
 
             <Link
-              href='/grimoire/events/2025/venus-retrograde'
+              href={`/grimoire/events/${currentYear}/venus-retrograde`}
               className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose-950 hover:bg-lunary-rose-900 transition-colors'
             >
               <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 mb-1'>
-                Venus Retrograde 2025
+                Venus Retrograde {currentYear}
               </h3>
               <p className='text-sm text-zinc-400'>
-                March 1 - April 12: love, relationships, self-worth
+                Love, relationships, self-worth themes
               </p>
             </Link>
 
             <Link
-              href='/grimoire/events/2025/eclipses'
+              href={`/grimoire/events/${currentYear}/eclipses`}
               className='group p-4 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 hover:bg-lunary-accent-900 transition-colors'
             >
               <h3 className='font-medium text-zinc-100 group-hover:text-lunary-accent-300 mb-1'>
-                2025 Eclipses
+                {currentYear} Eclipses
               </h3>
               <p className='text-sm text-zinc-400'>
-                4 powerful eclipses: solar & lunar, meanings, rituals
+                Solar & lunar eclipses: meanings, rituals
               </p>
             </Link>
 
@@ -112,14 +115,31 @@ export default function EventsIndexPage() {
               </p>
             </Link>
           </div>
+
+          <Link
+            href={`/grimoire/events/${nextYear}`}
+            className='group p-4 rounded-lg border border-zinc-700 bg-zinc-900/50 hover:bg-zinc-900 transition-colors'
+          >
+            <div className='flex items-center justify-between'>
+              <div>
+                <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                  {nextYear} Astrology Events
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  Preview upcoming cosmic events
+                </p>
+              </div>
+              <ArrowRight className='h-5 w-5 text-zinc-500 group-hover:text-lunary-primary-400 transition-colors' />
+            </div>
+          </Link>
         </div>
 
         <div className='mt-12 text-center'>
           <Link
-            href='/welcome'
+            href='/horoscope'
             className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
-            Get Personalized Event Notifications
+            See How Events Affect Your Chart
             <ArrowRight className='h-5 w-5' />
           </Link>
         </div>

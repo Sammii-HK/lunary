@@ -8,37 +8,41 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 
-export const metadata: Metadata = {
-  title: 'Tarot: The Complete 78-Card Guide (2025 Edition) - Lunary',
-  description:
-    'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana meanings, Minor Arcana suits, spreads, reading techniques, and interpretation methods. Perfect for beginners and experienced readers.',
-  keywords: [
-    'tarot guide',
-    'tarot cards meaning',
-    'major arcana',
-    'minor arcana',
-    'tarot reading',
-    'how to read tarot',
-    'tarot spreads',
-    'tarot for beginners',
-    'tarot interpretation',
-    'tarot deck',
-    'learn tarot',
-    'tarot card meanings',
-    '78 tarot cards',
-    'tarot symbolism',
-  ],
-  openGraph: {
-    title: 'Tarot: The Complete 78-Card Guide (2025 Edition) - Lunary',
+const currentYear = new Date().getFullYear();
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Tarot: The Complete 78-Card Guide (${currentYear} Edition) - Lunary`,
     description:
-      'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana, Minor Arcana, spreads, and reading techniques.',
-    type: 'article',
-    url: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
-  },
-  alternates: {
-    canonical: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
-  },
-};
+      'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana meanings, Minor Arcana suits, spreads, reading techniques, and interpretation methods. Perfect for beginners and experienced readers.',
+    keywords: [
+      'tarot guide',
+      'tarot cards meaning',
+      'major arcana',
+      'minor arcana',
+      'tarot reading',
+      'how to read tarot',
+      'tarot spreads',
+      'tarot for beginners',
+      'tarot interpretation',
+      'tarot deck',
+      'learn tarot',
+      'tarot card meanings',
+      '78 tarot cards',
+      'tarot symbolism',
+    ],
+    openGraph: {
+      title: `Tarot: The Complete 78-Card Guide (${currentYear} Edition) - Lunary`,
+      description:
+        'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana, Minor Arcana, spreads, and reading techniques.',
+      type: 'article',
+      url: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
+    },
+    alternates: {
+      canonical: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
+    },
+  };
+}
 
 const MAJOR_ARCANA = [
   {
@@ -244,7 +248,7 @@ const faqs = [
 
 export default function TarotCompleteGuidePage() {
   const articleSchema = createArticleWithSpeakableSchema({
-    headline: 'Tarot: The Complete 78-Card Guide (2025 Edition)',
+    headline: `Tarot: The Complete 78-Card Guide (${currentYear} Edition)`,
     description:
       'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana, Minor Arcana, spreads, and reading techniques.',
     url: 'https://lunary.app/grimoire/guides/tarot-complete-guide',

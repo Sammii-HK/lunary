@@ -23,6 +23,8 @@ import {
   Wand,
 } from 'lucide-react';
 
+const currentYear = new Date().getFullYear();
+
 // Sidebar categories for organized navigation
 const SIDEBAR_CATEGORIES = [
   {
@@ -601,7 +603,7 @@ const GRIMOIRE_FULL_STRUCTURE = [
       {
         title: 'Astrological Events',
         href: '/grimoire/events',
-        description: '2025-2026 events',
+        description: `${currentYear} events`,
       },
       {
         title: 'Glossary',

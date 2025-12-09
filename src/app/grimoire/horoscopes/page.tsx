@@ -9,40 +9,43 @@ import {
 import Script from 'next/script';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
-export const metadata: Metadata = {
-  title: 'Monthly Horoscopes 2025 & 2026: All Zodiac Signs | Lunary',
-  description:
-    'Free monthly horoscopes for all 12 zodiac signs. Get your Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, and Pisces predictions for 2025 and 2026.',
-  keywords: [
-    'monthly horoscope',
-    'free horoscope',
-    '2025 horoscope',
-    '2026 horoscope',
-    'zodiac predictions',
-    'astrology forecast',
-    'aries horoscope',
-    'taurus horoscope',
-    'gemini horoscope',
-    'cancer horoscope',
-    'leo horoscope',
-    'virgo horoscope',
-    'libra horoscope',
-    'scorpio horoscope',
-    'sagittarius horoscope',
-    'capricorn horoscope',
-    'aquarius horoscope',
-    'pisces horoscope',
-  ],
-  openGraph: {
-    title: 'Monthly Horoscopes 2025 & 2026: All Zodiac Signs',
-    description:
-      'Free monthly horoscopes for all 12 zodiac signs. Get your predictions for 2025 and 2026.',
-    url: 'https://lunary.app/grimoire/horoscopes',
-  },
-  alternates: {
-    canonical: 'https://lunary.app/grimoire/horoscopes',
-  },
-};
+const currentYear = new Date().getFullYear();
+const nextYear = currentYear + 1;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Monthly Horoscopes ${currentYear} & ${nextYear}: All Zodiac Signs | Lunary`,
+    description: `Free monthly horoscopes for all 12 zodiac signs. Get your Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, and Pisces predictions for ${currentYear} and ${nextYear}.`,
+    keywords: [
+      'monthly horoscope',
+      'free horoscope',
+      `${currentYear} horoscope`,
+      `${nextYear} horoscope`,
+      'zodiac predictions',
+      'astrology forecast',
+      'aries horoscope',
+      'taurus horoscope',
+      'gemini horoscope',
+      'cancer horoscope',
+      'leo horoscope',
+      'virgo horoscope',
+      'libra horoscope',
+      'scorpio horoscope',
+      'sagittarius horoscope',
+      'capricorn horoscope',
+      'aquarius horoscope',
+      'pisces horoscope',
+    ],
+    openGraph: {
+      title: `Monthly Horoscopes ${currentYear} & ${nextYear}: All Zodiac Signs`,
+      description: `Free monthly horoscopes for all 12 zodiac signs. Get your predictions for ${currentYear} and ${nextYear}.`,
+      url: 'https://lunary.app/grimoire/horoscopes',
+    },
+    alternates: {
+      canonical: 'https://lunary.app/grimoire/horoscopes',
+    },
+  };
+}
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -59,7 +62,6 @@ const structuredData = {
 };
 
 const currentDate = new Date();
-const currentYear = currentDate.getFullYear();
 const currentMonth = currentDate
   .toLocaleString('en-US', { month: 'long' })
   .toLowerCase();

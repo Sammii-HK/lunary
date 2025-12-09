@@ -145,7 +145,7 @@ ${transit.avoidList.map((a) => `- ${a}`).join('\n')}
         })),
       ]}
       ctaText='See how this transit affects your chart'
-      ctaHref='/welcome'
+      ctaHref='/horoscope'
       sources={[{ name: 'Ephemeris calculations' }]}
     >
       {sameYearTransits.length > 0 && (

@@ -197,7 +197,7 @@ export default function Events2025Page() {
         {/* CTA */}
         <div className='mt-12 text-center'>
           <Link
-            href='/welcome'
+            href='/horoscope'
             className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
           >
             Get Your Personalized 2025 Forecast

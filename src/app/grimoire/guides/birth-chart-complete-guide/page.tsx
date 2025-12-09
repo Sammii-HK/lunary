@@ -9,35 +9,39 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 
-export const metadata: Metadata = {
-  title: 'Birth Chart: The Complete Guide (2025 Edition) - Lunary',
-  description:
-    'The definitive guide to birth charts and natal astrology. Learn how to read your birth chart, understand planetary placements, houses, aspects, and interpret your cosmic blueprint. Free birth chart calculator included.',
-  keywords: [
-    'birth chart',
-    'natal chart',
-    'birth chart guide',
-    'how to read birth chart',
-    'birth chart calculator',
-    'natal astrology',
-    'birth chart interpretation',
-    'astrological chart',
-    'birth chart meaning',
-    'free birth chart',
-    'natal chart reading',
-    'astrology birth chart',
-  ],
-  openGraph: {
-    title: 'Birth Chart: The Complete Guide (2025 Edition) - Lunary',
+const currentYear = new Date().getFullYear();
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Birth Chart: The Complete Guide (${currentYear} Edition) - Lunary`,
     description:
-      'The definitive guide to birth charts and natal astrology. Learn how to read and interpret your cosmic blueprint.',
-    type: 'article',
-    url: 'https://lunary.app/grimoire/guides/birth-chart-complete-guide',
-  },
-  alternates: {
-    canonical: 'https://lunary.app/grimoire/guides/birth-chart-complete-guide',
-  },
-};
+      'The definitive guide to birth charts and natal astrology. Learn how to read your birth chart, understand planetary placements, houses, aspects, and interpret your cosmic blueprint.',
+    keywords: [
+      'birth chart',
+      'natal chart',
+      'birth chart guide',
+      'how to read birth chart',
+      'birth chart calculator',
+      'natal astrology',
+      'birth chart interpretation',
+      'astrological chart',
+      'birth chart meaning',
+      'natal chart reading',
+      'astrology birth chart',
+    ],
+    openGraph: {
+      title: `Birth Chart: The Complete Guide (${currentYear} Edition) - Lunary`,
+      description:
+        'The definitive guide to birth charts and natal astrology. Learn how to read and interpret your cosmic blueprint.',
+      type: 'article',
+      url: 'https://lunary.app/grimoire/guides/birth-chart-complete-guide',
+    },
+    alternates: {
+      canonical:
+        'https://lunary.app/grimoire/guides/birth-chart-complete-guide',
+    },
+  };
+}
 
 const faqs = [
   {
@@ -56,9 +60,9 @@ const faqs = [
       'The "Big Three" are considered most important: your Sun sign (core identity), Moon sign (emotional nature), and Rising sign (outer personality). Beyond these, your chart ruler, dominant element, and major aspects between planets also play crucial roles in shaping your personality.',
   },
   {
-    question: 'How do I calculate my birth chart for free?',
+    question: 'How do I calculate my birth chart?',
     answer:
-      "You can calculate your birth chart for free using Lunary's birth chart calculator. Simply enter your birth date, exact birth time, and birth location. The calculator will generate your complete natal chart with interpretations of your planetary placements.",
+      "You can calculate your birth chart using Lunary's birth chart calculator. Simply enter your birth date, exact birth time, and birth location. Subscribers get access to a complete natal chart with detailed interpretations of all planetary placements, aspects, and houses.",
   },
   {
     question: 'What is the difference between Sun sign and Rising sign?',
@@ -84,7 +88,7 @@ const faqs = [
 
 export default function BirthChartCompleteGuidePage() {
   const articleSchema = createArticleWithSpeakableSchema({
-    headline: 'Birth Chart: The Complete Guide (2025 Edition)',
+    headline: `Birth Chart: The Complete Guide (${currentYear} Edition)`,
     description:
       'The definitive guide to birth charts and natal astrology. Learn how to read and interpret your cosmic blueprint.',
     url: 'https://lunary.app/grimoire/guides/birth-chart-complete-guide',
@@ -132,7 +136,7 @@ export default function BirthChartCompleteGuidePage() {
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
           Birth Chart: The Complete Guide
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
-            2025 Edition
+            {currentYear} Edition
           </span>
         </h1>
         <p className='text-xl text-zinc-400 leading-relaxed mb-6'>
@@ -146,7 +150,7 @@ export default function BirthChartCompleteGuidePage() {
             href='/birth-chart'
             className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
-            Calculate Your Birth Chart Free
+            Get Your Birth Chart
           </Link>
           <Link
             href='#what-is-birth-chart'
@@ -332,7 +336,7 @@ export default function BirthChartCompleteGuidePage() {
           href='/birth-chart'
           className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
         >
-          Calculate Your Free Birth Chart Now →
+          Get Your Personalized Birth Chart →
         </Link>
       </section>
 
@@ -458,21 +462,22 @@ export default function BirthChartCompleteGuidePage() {
         </h2>
         <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
           Get your personalized birth chart with detailed interpretations of
-          every placement. Understand your cosmic blueprint and unlock insights
-          about your personality, relationships, and life path.
+          every placement. Lunary subscribers unlock full access to their cosmic
+          blueprint—including personality insights, relationship patterns, and
+          life path guidance.
         </p>
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
             href='/birth-chart'
             className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
-            Calculate Free Birth Chart
+            Get Your Birth Chart
           </Link>
           <Link
             href='/pricing'
             className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
           >
-            Get Full Interpretation
+            View Subscription Plans
           </Link>
         </div>
       </section>

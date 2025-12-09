@@ -107,10 +107,10 @@ export default function TransitsIndexPage() {
             insights.
           </p>
           <Link
-            href='/welcome'
+            href='/horoscope'
             className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
-            Get Personal Transit Report
+            View Your Personal Transits
           </Link>
         </div>
       </div>

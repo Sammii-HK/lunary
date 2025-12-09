@@ -109,10 +109,10 @@ export default function Events2026Page() {
             See how these cosmic events affect your unique birth chart.
           </p>
           <Link
-            href='/welcome'
+            href='/birth-chart'
             className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
-            Create Your Birth Chart
+            View Your Birth Chart
           </Link>
         </section>
       </div>

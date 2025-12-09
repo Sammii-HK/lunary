@@ -24,6 +24,7 @@ type SearchDataType = {
   angelNumbers: any;
   lifePathNumbers: any;
   TAROT_SPREADS: any;
+  glossaryTerms: any;
 } | null;
 
 interface SearchResult {
@@ -71,6 +72,7 @@ export function AskTheGrimoire({
           { crystalDatabase },
           { angelNumbers, lifePathNumbers },
           { TAROT_SPREADS },
+          { ASTROLOGY_GLOSSARY },
         ] = await Promise.all([
           import('@/constants/runes'),
           import('@/constants/tarot'),
@@ -85,6 +87,7 @@ export function AskTheGrimoire({
           import('@/constants/grimoire/crystals'),
           import('@/constants/grimoire/numerology-data'),
           import('@/constants/tarotSpreads'),
+          import('@/constants/grimoire/glossary'),
         ]);
         setSearchData({
           runesList,
@@ -103,6 +106,7 @@ export function AskTheGrimoire({
           angelNumbers,
           lifePathNumbers,
           TAROT_SPREADS,
+          glossaryTerms: ASTROLOGY_GLOSSARY,
         });
       } catch (error) {
         console.error('Failed to load search data:', error);
@@ -771,6 +775,24 @@ export function AskTheGrimoire({
           title: `${planet.charAt(0).toUpperCase() + planet.slice(1)} Retrograde`,
           section: 'retrogrades',
           href: `/grimoire/retrogrades/${planet}`,
+          score,
+        });
+      }
+    });
+
+    (searchData.glossaryTerms || []).forEach((term: any) => {
+      const relatedMatch = term.relatedTerms?.some(
+        (t: string) => matchesQuery(t) > 0,
+      );
+      const score =
+        matchesAny(term.term, term.definition) || (relatedMatch ? 1 : 0);
+      if (score > 0) {
+        scoredResults.push({
+          type: 'glossary',
+          title: `${term.term}`,
+          section: 'glossary',
+          href: `/grimoire/glossary#${term.slug}`,
+          match: term.definition?.slice(0, 80),
           score,
         });
       }
