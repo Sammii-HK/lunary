@@ -4,15 +4,22 @@ import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { BirthChart } from '@/components/BirthChart';
-import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
+import {
+  bodiesSymbols,
+  zodiacSymbol,
+  elementAstro,
+  modalityAstro,
+  astroPointSymbols,
+  houseThemes,
+  astrologicalPoints,
+} from '../../../utils/zodiac/zodiac';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 import Link from 'next/link';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Share2 } from 'lucide-react';
-import { SocialShareButtons } from '@/components/SocialShareButtons';
+import { useEffect } from 'react';
+import { ShareBirthChart } from '@/components/ShareBirthChart';
 
 // Function to generate concise planetary interpretations
 const getPlanetaryInterpretation = (planet: BirthChartData): string => {
@@ -168,10 +175,10 @@ const getElementCounts = (birthChart: BirthChartData[]) => {
   });
 
   const symbols: Record<string, string> = {
-    Fire: '🔥',
-    Earth: '🌍',
-    Air: '💨',
-    Water: '🌊',
+    Fire: elementAstro.fire,
+    Earth: elementAstro.earth,
+    Air: elementAstro.air,
+    Water: elementAstro.water,
   };
 
   return Object.entries(elementGroups).map(([name, planets]) => ({
@@ -179,6 +186,7 @@ const getElementCounts = (birthChart: BirthChartData[]) => {
     count: planets.length,
     symbol: symbols[name],
     planets: planets,
+    useAstroFont: true,
   }));
 };
 
@@ -281,9 +289,9 @@ const getPlanetaryDignities = (
 
 const getModalitySymbol = (modality: string): string => {
   const symbols: Record<string, string> = {
-    Cardinal: '⚡',
-    Fixed: '🔒',
-    Mutable: '🔄',
+    Cardinal: modalityAstro.cardinal,
+    Fixed: modalityAstro.fixed,
+    Mutable: modalityAstro.mutable,
   };
   return symbols[modality] || '';
 };
@@ -512,19 +520,7 @@ const getChartPatterns = (birthChart: BirthChartData[]): ChartPattern[] => {
     });
   }
 
-  // 8. STELLIUM PATTERN (3+ planets within 8° in same sign)
-  const stelliumSigns = getStelliums(birthChart);
-  if (stelliumSigns.length > 0) {
-    stelliumSigns.forEach((stellium) => {
-      patterns.push({
-        name: `${stellium.sign} Stellium`,
-        description: `${stellium.planets.length} planets concentrated in ${stellium.sign}`,
-        meaning: `Intense focus on ${stellium.sign} themes dominates your personality and life direction.`,
-      });
-    });
-  }
-
-  // 9. GRAND CONJUNCTION (3+ planets within 10°)
+  // 8. GRAND CONJUNCTION (3+ planets within 10°)
   if (conjunctions.length >= 3) {
     const conjunctionPlanets = new Set(
       conjunctions.flatMap((c) => [c.planet1, c.planet2]),
@@ -801,122 +797,6 @@ const BirthChartPage = () => {
     subscription.status,
     subscription.plan,
   );
-  const [shareOrigin, setShareOrigin] = useState('https://lunary.app');
-  const [sharePopover, setSharePopover] = useState<string | null>(null);
-  const firstName = useMemo(
-    () => (userName ? userName.split(' ')[0] || userName : undefined),
-    [userName],
-  );
-  const truncate = useCallback((value?: string | null, limit = 160) => {
-    if (!value) return undefined;
-    if (value.length <= limit) return value;
-    return `${value.slice(0, limit - 1).trimEnd()}…`;
-  }, []);
-
-  const birthChartShare = useMemo(() => {
-    if (!birthChartData) return null;
-
-    try {
-      const sunSign =
-        birthChartData.find((planet) => planet.body === 'Sun')?.sign ?? null;
-      const moonSign =
-        birthChartData.find((planet) => planet.body === 'Moon')?.sign ?? null;
-      const risingSign =
-        birthChartData.find((planet) => planet.body === 'Ascendant')?.sign ??
-        null;
-
-      const shareKeywords = [
-        sunSign ? `Sun ${sunSign}` : null,
-        moonSign ? `Moon ${moonSign}` : null,
-        risingSign ? `Rising ${risingSign}` : null,
-      ].filter(Boolean) as string[];
-
-      const url = new URL('/share/birth-chart', shareOrigin);
-      url.searchParams.set('variant', 'birth-chart');
-      if (firstName) url.searchParams.set('name', firstName);
-      if (userBirthday) url.searchParams.set('date', userBirthday);
-      if (sunSign) url.searchParams.set('sun', sunSign);
-      if (moonSign) url.searchParams.set('moon', moonSign);
-      if (risingSign) url.searchParams.set('rising', risingSign);
-      if (shareKeywords.length) {
-        url.searchParams.set('keywords', shareKeywords.join(','));
-      }
-
-      const { elements, modalities } = getElementModality(birthChartData);
-      const dominantElement = [...elements].sort(
-        (a, b) => b.count - a.count,
-      )[0];
-      const dominantModality = [...modalities].sort(
-        (a, b) => b.count - a.count,
-      )[0];
-
-      if (dominantElement?.count) {
-        url.searchParams.set('element', dominantElement.name);
-      }
-      if (dominantModality?.count) {
-        url.searchParams.set('modality', dominantModality.name);
-      }
-
-      const topInsight = getChartAnalysis(birthChartData)[0]?.insight;
-      if (topInsight) {
-        url.searchParams.set('insight', topInsight);
-      }
-
-      return {
-        url: url.toString(),
-        title: `${firstName ? `${firstName}'s` : 'My'} Birth Chart Highlights`,
-        text: truncate(topInsight),
-      };
-    } catch (error) {
-      console.error('Failed to build birth chart share URL:', error);
-      return null;
-    }
-  }, [birthChartData, shareOrigin, firstName, userBirthday, truncate]);
-
-  const handleShareClick = useCallback(
-    async ({
-      id,
-      title,
-      url,
-      text,
-    }: {
-      id: string;
-      title: string;
-      url: string;
-      text?: string;
-    }) => {
-      const sharePayload = {
-        title,
-        text: text || title,
-        url,
-      };
-
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        try {
-          await navigator.share(sharePayload);
-          setSharePopover(null);
-          return;
-        } catch (error) {
-          if (error instanceof Error && error.name === 'AbortError') {
-            return;
-          }
-          console.error(
-            'Web Share API failed, falling back to share buttons:',
-            error,
-          );
-        }
-      }
-
-      setSharePopover((prev) => (prev === id ? null : id));
-    },
-    [setSharePopover],
-  );
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.location?.origin) {
-      setShareOrigin(window.location.origin);
-    }
-  }, []);
 
   useEffect(() => {
     if (hasChartAccess && user?.hasBirthChart && user?.id) {
@@ -1025,31 +905,13 @@ const BirthChartPage = () => {
         birthDate={userBirthday}
       />
 
-      {birthChartShare && (
+      {birthChartData && (
         <div className='flex flex-col items-center gap-3 mt-4'>
-          <button
-            type='button'
-            onClick={() =>
-              handleShareClick({
-                id: 'birth-chart-overview',
-                title: birthChartShare.title,
-                url: birthChartShare.url,
-                text: birthChartShare.text,
-              })
-            }
-            className='inline-flex items-center gap-2 rounded-full border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-xs font-medium text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
-          >
-            <Share2 className='w-4 h-4' />
-            Share your birth chart
-          </button>
-          {sharePopover === 'birth-chart-overview' && (
-            <div className='mt-1'>
-              <SocialShareButtons
-                url={birthChartShare.url}
-                title={birthChartShare.title}
-              />
-            </div>
-          )}
+          <ShareBirthChart
+            birthChart={birthChartData}
+            userName={userName}
+            userBirthday={userBirthday}
+          />
         </div>
       )}
 
@@ -1108,9 +970,18 @@ const BirthChartPage = () => {
                       {rising && (
                         <div className='bg-zinc-700 rounded p-3'>
                           <div className='flex items-center gap-2 mb-1'>
-                            <span className='text-lg'>⬆️</span>
+                            <span className='text-lg font-astro text-lunary-accent'>
+                              {astroPointSymbols.ascendant}
+                            </span>
                             <span className='text-sm font-medium text-white'>
-                              Rising in {rising.sign}
+                              {rising.sign} Rising
+                            </span>
+                            <span className='text-sm font-astro text-zinc-400'>
+                              {
+                                zodiacSymbol[
+                                  rising.sign.toLowerCase() as keyof typeof zodiacSymbol
+                                ]
+                              }
                             </span>
                           </div>
                           <p className='text-xs text-zinc-300'>
@@ -1244,6 +1115,197 @@ const BirthChartPage = () => {
                   })}
               </div>
             </div>
+
+            {/* Sensitive Points */}
+            {(() => {
+              const midheaven = birthChartData.find(
+                (p) => p.body === 'Midheaven',
+              );
+              const northNode = birthChartData.find(
+                (p) => p.body === 'North Node',
+              );
+              const southNode = birthChartData.find(
+                (p) => p.body === 'South Node',
+              );
+              const chiron = birthChartData.find((p) => p.body === 'Chiron');
+              const lilith = birthChartData.find((p) => p.body === 'Lilith');
+
+              const hasPoints =
+                midheaven || northNode || southNode || chiron || lilith;
+
+              if (!hasPoints) return null;
+
+              return (
+                <div>
+                  <h4 className='text-xs font-medium text-lunary-highlight mb-2 uppercase tracking-wide'>
+                    Sensitive Points
+                  </h4>
+                  <div className='space-y-2'>
+                    {midheaven && (
+                      <div className='border-l-2 border-lunary-highlight pl-3'>
+                        <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                          <span className='font-astro text-lg text-lunary-highlight'>
+                            {astroPointSymbols.midheaven}
+                          </span>
+                          Midheaven in {midheaven.sign}
+                          <span className='font-astro text-zinc-400'>
+                            {
+                              zodiacSymbol[
+                                midheaven.sign.toLowerCase() as keyof typeof zodiacSymbol
+                              ]
+                            }
+                          </span>
+                        </h5>
+                        <p className='text-xs text-zinc-300 mt-1'>
+                          {astrologicalPoints.midheaven.mysticalProperties}
+                        </p>
+                      </div>
+                    )}
+                    {northNode && (
+                      <div className='border-l-2 border-emerald-500 pl-3'>
+                        <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                          <span className='font-astro text-lg text-emerald-400'>
+                            {astroPointSymbols.northnode}
+                          </span>
+                          North Node in {northNode.sign}
+                          <span className='font-astro text-zinc-400'>
+                            {
+                              zodiacSymbol[
+                                northNode.sign.toLowerCase() as keyof typeof zodiacSymbol
+                              ]
+                            }
+                          </span>
+                        </h5>
+                        <p className='text-xs text-zinc-300 mt-1'>
+                          {astrologicalPoints.northnode.mysticalProperties}
+                        </p>
+                      </div>
+                    )}
+                    {southNode && (
+                      <div className='border-l-2 border-violet-500 pl-3'>
+                        <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                          <span className='font-astro text-lg text-violet-400'>
+                            {astroPointSymbols.southnode}
+                          </span>
+                          South Node in {southNode.sign}
+                          <span className='font-astro text-zinc-400'>
+                            {
+                              zodiacSymbol[
+                                southNode.sign.toLowerCase() as keyof typeof zodiacSymbol
+                              ]
+                            }
+                          </span>
+                        </h5>
+                        <p className='text-xs text-zinc-300 mt-1'>
+                          {astrologicalPoints.southnode.mysticalProperties}
+                        </p>
+                      </div>
+                    )}
+                    {chiron && (
+                      <div className='border-l-2 border-amber-500 pl-3'>
+                        <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                          <span className='font-astro text-lg text-amber-400'>
+                            {astroPointSymbols.chiron}
+                          </span>
+                          Chiron in {chiron.sign}
+                          <span className='font-astro text-zinc-400'>
+                            {
+                              zodiacSymbol[
+                                chiron.sign.toLowerCase() as keyof typeof zodiacSymbol
+                              ]
+                            }
+                          </span>
+                        </h5>
+                        <p className='text-xs text-zinc-300 mt-1'>
+                          {astrologicalPoints.chiron.mysticalProperties}
+                        </p>
+                      </div>
+                    )}
+                    {lilith && (
+                      <div className='border-l-2 border-fuchsia-500 pl-3'>
+                        <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                          <span className='font-astro text-lg text-fuchsia-400'>
+                            {astroPointSymbols.lilith}
+                          </span>
+                          Lilith in {lilith.sign}
+                          <span className='font-astro text-zinc-400'>
+                            {
+                              zodiacSymbol[
+                                lilith.sign.toLowerCase() as keyof typeof zodiacSymbol
+                              ]
+                            }
+                          </span>
+                        </h5>
+                        <p className='text-xs text-zinc-300 mt-1'>
+                          {astrologicalPoints.lilith.mysticalProperties}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Houses */}
+            {(() => {
+              const planetsWithHouses = birthChartData.filter((p) => p.house);
+              if (planetsWithHouses.length === 0) return null;
+
+              const houseGroups: Record<number, BirthChartData[]> = {};
+              planetsWithHouses.forEach((planet) => {
+                if (planet.house) {
+                  if (!houseGroups[planet.house])
+                    houseGroups[planet.house] = [];
+                  houseGroups[planet.house].push(planet);
+                }
+              });
+
+              return (
+                <div>
+                  <h4 className='text-xs font-medium text-lunary-secondary mb-2 uppercase tracking-wide'>
+                    Houses
+                  </h4>
+                  <div className='space-y-2'>
+                    {Object.entries(houseGroups)
+                      .sort(([a], [b]) => Number(a) - Number(b))
+                      .map(([houseNum, planets]) => {
+                        const houseInfo = houseThemes[Number(houseNum)];
+                        return (
+                          <div
+                            key={houseNum}
+                            className='bg-zinc-700 rounded p-3'
+                          >
+                            <div className='flex items-center justify-between mb-1'>
+                              <h5 className='text-sm font-medium text-white'>
+                                House {houseNum}: {houseInfo?.theme}
+                              </h5>
+                              <div className='flex gap-1'>
+                                {planets.map((p) => (
+                                  <span
+                                    key={p.body}
+                                    className='font-astro text-lunary-secondary'
+                                  >
+                                    {
+                                      bodiesSymbols[
+                                        p.body.toLowerCase() as keyof typeof bodiesSymbols
+                                      ]
+                                    }
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            <p className='text-xs text-zinc-400'>
+                              {planets.map((p) => p.body).join(', ')} in the
+                              house of{' '}
+                              {houseInfo?.keywords.slice(0, 2).join(' & ')}
+                            </p>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Chart Patterns & Analysis */}
@@ -1283,7 +1345,9 @@ const BirthChartPage = () => {
                       >
                         <div className='flex items-center justify-between mb-1'>
                           <div className='flex items-center gap-2'>
-                            <span className='text-sm'>{element.symbol}</span>
+                            <span className='text-sm font-astro'>
+                              {element.symbol}
+                            </span>
                             <span className='text-xs text-zinc-300'>
                               {element.name}
                             </span>
@@ -1298,7 +1362,7 @@ const BirthChartPage = () => {
                               (planet: BirthChartData) => (
                                 <span
                                   key={planet.body}
-                                  className='text-xs bg-zinc-600 px-1 rounded'
+                                  className='text-xs font-astro bg-zinc-600 px-1 rounded'
                                 >
                                   {
                                     bodiesSymbols[
@@ -1330,7 +1394,7 @@ const BirthChartPage = () => {
                       >
                         <div className='flex items-center justify-between mb-1'>
                           <div className='flex items-center gap-2'>
-                            <span className='text-sm'>
+                            <span className='text-sm font-astro'>
                               {getModalitySymbol(modality.name)}
                             </span>
                             <span className='text-xs text-zinc-300'>
@@ -1348,7 +1412,7 @@ const BirthChartPage = () => {
                                 (planet: BirthChartData) => (
                                   <span
                                     key={planet.body}
-                                    className='text-xs bg-zinc-600 px-1 rounded'
+                                    className='text-xs font-astro bg-zinc-600 px-1 rounded'
                                   >
                                     {
                                       bodiesSymbols[
