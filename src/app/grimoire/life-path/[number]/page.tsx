@@ -1,8 +1,8 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const lifePathKeys = Object.keys(lifePathNumbers);
 
@@ -16,22 +16,17 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ number: string }>;
-}): Promise<Metadata> {
+}) {
   const { number } = await params;
   const numberData = lifePathNumbers[number as keyof typeof lifePathNumbers];
 
   if (!numberData) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
-  const title = `${numberData.name} Meaning: Traits, Career & Love - Lunary`;
-  const description: string = `Discover the complete guide to ${numberData.name}. Learn about ${numberData.name} traits, strengths, challenges, career paths, love compatibility, and how to calculate your life path number.`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${numberData.name} Meaning: Traits, Career & Love - Lunary`,
+    description: `Discover the complete guide to ${numberData.name}. Learn about ${numberData.name} traits, strengths, challenges, career paths, love compatibility, and how to calculate your life path number.`,
     keywords: [
       `${numberData.name}`,
       `life path ${numberData.number}`,
@@ -39,43 +34,10 @@ export async function generateMetadata({
       `${numberData.name} traits`,
       `${numberData.name} meaning`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/life-path/${number}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/life-path',
-          width: 1200,
-          height: 630,
-          alt: `${numberData.name}`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/life-path/${number}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/life-path/${number}`,
+    ogImagePath: '/api/og/grimoire/life-path',
+    ogImageAlt: `${numberData.name}`,
+  });
 }
 
 export default async function LifePathNumberPage({

@@ -28,6 +28,7 @@ import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
+import { useModal } from '@/hooks/useModal';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import {
   SubscriptionStatus,
@@ -178,18 +179,11 @@ const TarotReadings = () => {
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
 
   // Handle ESC key to close upgrade modal
-  useEffect(() => {
-    if (!showUpgradeModal) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowUpgradeModal(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [showUpgradeModal]);
+  useModal({
+    isOpen: showUpgradeModal,
+    onClose: () => setShowUpgradeModal(false),
+    closeOnClickOutside: false,
+  });
   const [selectedCard, setSelectedCard] = useState<{
     name: string;
     keywords: string[];

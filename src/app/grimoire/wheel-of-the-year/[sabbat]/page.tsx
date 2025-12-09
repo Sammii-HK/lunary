@@ -1,8 +1,8 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { stringToKebabCase } from '../../../../../utils/string';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 export async function generateStaticParams() {
   return wheelOfTheYearSabbats.map((sabbat) => ({
@@ -14,24 +14,19 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ sabbat: string }>;
-}): Promise<Metadata> {
+}) {
   const { sabbat } = await params;
   const sabbatData = wheelOfTheYearSabbats.find(
     (s) => stringToKebabCase(s.name) === sabbat.toLowerCase(),
   );
 
   if (!sabbatData) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
-  const title = `${sabbatData.name}: Meaning, Rituals & Traditions - Lunary`;
-  const description = `Discover ${sabbatData.name} (${sabbatData.date}). Learn about this sabbat's meaning, rituals, traditions, and how to celebrate the Wheel of the Year.`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${sabbatData.name}: Meaning, Rituals & Traditions - Lunary`,
+    description: `Discover ${sabbatData.name} (${sabbatData.date}). Learn about this sabbat's meaning, rituals, traditions, and how to celebrate the Wheel of the Year.`,
     keywords: [
       sabbatData.name.toLowerCase(),
       `${sabbatData.name.toLowerCase()} sabbat`,
@@ -39,43 +34,10 @@ export async function generateMetadata({
       `${sabbatData.name.toLowerCase()} meaning`,
       'wheel of the year',
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/wheel-of-the-year/${sabbat}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/wheel-of-the-year',
-          width: 1200,
-          height: 630,
-          alt: sabbatData.name,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/wheel-of-the-year/${sabbat}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/wheel-of-the-year/${sabbat}`,
+    ogImagePath: '/api/og/grimoire/wheel-of-the-year',
+    ogImageAlt: sabbatData.name,
+  });
 }
 
 export default async function SabbatPage({

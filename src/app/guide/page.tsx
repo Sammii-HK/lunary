@@ -30,6 +30,7 @@ import {
 } from '@/hooks/useRitualBadge';
 import { useSubscription } from '@/hooks/useSubscription';
 import { WeeklyInsights } from '@/lib/rituals/engine';
+import { useModal } from '@/hooks/useModal';
 
 interface CollectionFolder {
   id: number;
@@ -503,18 +504,11 @@ function BookOfShadowsContent() {
     }
   };
 
-  useEffect(() => {
-    if (!showAuthModal) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowAuthModal(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [showAuthModal]);
+  useModal({
+    isOpen: showAuthModal,
+    onClose: () => setShowAuthModal(false),
+    closeOnClickOutside: false,
+  });
 
   if (authState.loading) {
     return (

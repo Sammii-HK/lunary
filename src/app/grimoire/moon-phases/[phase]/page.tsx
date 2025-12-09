@@ -1,8 +1,8 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { monthlyMoonPhases } from '../../../../../utils/moon/monthlyPhases';
 import { stringToKebabCase } from '../../../../../utils/string';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const phaseKeys = Object.keys(monthlyMoonPhases);
 
@@ -16,30 +16,24 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ phase: string }>;
-}): Promise<Metadata> {
+}) {
   const { phase } = await params;
   const phaseKey = phaseKeys.find(
     (p) => stringToKebabCase(p) === phase.toLowerCase(),
   );
 
   if (!phaseKey) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
-  const phaseData =
-    monthlyMoonPhases[phaseKey as keyof typeof monthlyMoonPhases];
   const phaseName = phaseKey
     .replace(/([A-Z])/g, ' $1')
     .replace(/^./, (str) => str.toUpperCase())
     .trim();
-  const title = `${phaseName} Moon: Meaning & Rituals - Lunary`;
-  const description = `Discover the complete guide to the ${phaseName} Moon phase. Learn about ${phaseName} meaning, energy, rituals, and how to work with this lunar phase.`;
 
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${phaseName} Moon: Meaning & Rituals - Lunary`,
+    description: `Discover the complete guide to the ${phaseName} Moon phase. Learn about ${phaseName} meaning, energy, rituals, and how to work with this lunar phase.`,
     keywords: [
       `${phaseName} moon`,
       `${phaseName} meaning`,
@@ -47,43 +41,10 @@ export async function generateMetadata({
       `${phaseName} rituals`,
       `moon phase ${phaseName}`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/moon-phases/${phase}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/moon',
-          width: 1200,
-          height: 630,
-          alt: `${phaseName} Moon`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/moon-phases/${phase}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/moon-phases/${phase}`,
+    ogImagePath: '/api/og/grimoire/moon',
+    ogImageAlt: `${phaseName} Moon`,
+  });
 }
 
 export default async function MoonPhasePage({

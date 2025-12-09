@@ -1,4 +1,3 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -7,6 +6,7 @@ import {
   generateAllTransitParams,
 } from '@/constants/seo/yearly-transits';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 export async function generateStaticParams() {
   return generateAllTransitParams();
@@ -16,7 +16,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ transit: string }>;
-}): Promise<Metadata> {
+}) {
   const { transit: transitId } = await params;
 
   const transit = YEARLY_TRANSITS.find((t) => t.id === transitId);
@@ -24,12 +24,9 @@ export async function generateMetadata({
     return { title: 'Transit Not Found | Lunary' };
   }
 
-  const title = `${transit.title}: ${transit.transitType} Meaning & Dates | Lunary`;
-  const description = `${transit.title} (${transit.dates}). ${transit.description.slice(0, 150)}...`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${transit.title}: ${transit.transitType} Meaning & Dates | Lunary`,
+    description: `${transit.title} (${transit.dates}). ${transit.description.slice(0, 150)}...`,
     keywords: [
       transit.title.toLowerCase(),
       transit.transitType.toLowerCase(),
@@ -38,15 +35,10 @@ export async function generateMetadata({
         (s) => `${transit.planet.toLowerCase()} in ${s.toLowerCase()}`,
       ),
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/transits/${transitId}`,
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/transits/${transitId}`,
-    },
-  };
+    url: `https://lunary.app/grimoire/transits/${transitId}`,
+    ogImagePath: '/api/og/grimoire/transits',
+    ogImageAlt: transit.title,
+  });
 }
 
 export default async function TransitPage({

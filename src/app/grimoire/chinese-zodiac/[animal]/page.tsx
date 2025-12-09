@@ -1,4 +1,3 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -7,6 +6,7 @@ import {
   ChineseAnimal,
 } from '@/constants/seo/chinese-zodiac';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 export async function generateStaticParams() {
   return CHINESE_ANIMALS.map((animal) => ({ animal }));
@@ -16,7 +16,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ animal: string }>;
-}): Promise<Metadata> {
+}) {
   const { animal } = await params;
   const data = CHINESE_ZODIAC_DATA[animal as ChineseAnimal];
 
@@ -24,12 +24,9 @@ export async function generateMetadata({
     return { title: 'Chinese Zodiac Not Found | Lunary' };
   }
 
-  const title = `${data.displayName} Chinese Zodiac: Personality, Compatibility & Years | Lunary`;
-  const description = `Year of the ${data.displayName} ${data.emoji} - Chinese zodiac personality traits, compatibility, lucky numbers, and which years are ${data.displayName} years. Complete guide to the ${data.displayName} in Chinese astrology.`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${data.displayName} Chinese Zodiac: Personality, Compatibility & Years | Lunary`,
+    description: `Year of the ${data.displayName} ${data.emoji} - Chinese zodiac personality traits, compatibility, lucky numbers, and which years are ${data.displayName} years. Complete guide to the ${data.displayName} in Chinese astrology.`,
     keywords: [
       `year of the ${data.animal}`,
       `${data.animal} chinese zodiac`,
@@ -40,18 +37,10 @@ export async function generateMetadata({
       'chinese astrology',
       'chinese horoscope',
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/chinese-zodiac/${animal}`,
-      images: [
-        `/api/og/cosmic?title=${encodeURIComponent(`${data.emoji} Year of the ${data.displayName}`)}`,
-      ],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/chinese-zodiac/${animal}`,
-    },
-  };
+    url: `https://lunary.app/grimoire/chinese-zodiac/${animal}`,
+    ogImagePath: `/api/og/cosmic?title=${encodeURIComponent(`${data.emoji} Year of the ${data.displayName}`)}`,
+    ogImageAlt: `${data.displayName} Chinese Zodiac`,
+  });
 }
 
 export default async function ChineseZodiacAnimalPage({

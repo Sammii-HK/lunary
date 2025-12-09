@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AuthComponent } from './Auth';
+import { useModal } from '@/hooks/useModal';
 
 interface SmartTrialButtonProps {
   size?: 'sm' | 'md' | 'lg';
@@ -21,18 +22,11 @@ export function SmartTrialButton({
   const { isSubscribed, isTrialActive } = useSubscription();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  useEffect(() => {
-    if (!showAuthModal) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowAuthModal(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [showAuthModal]);
+  useModal({
+    isOpen: showAuthModal,
+    onClose: () => setShowAuthModal(false),
+    closeOnClickOutside: false,
+  });
 
   const getButtonConfig = () => {
     if (isSubscribed) {

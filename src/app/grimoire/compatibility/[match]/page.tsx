@@ -1,8 +1,13 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Heart, Users, Briefcase, Star } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
+import {
+  generateCompatibilityContent,
+  getAllCompatibilitySlugs,
+} from '@/constants/seo/compatibility-content';
+import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
@@ -18,11 +23,6 @@ const ZODIAC_SYMBOLS: Record<string, string> = {
   aquarius: '♒',
   pisces: '♓',
 };
-import {
-  generateCompatibilityContent,
-  getAllCompatibilitySlugs,
-} from '@/constants/seo/compatibility-content';
-import { createArticleSchema, renderJsonLd } from '@/lib/schema';
 
 interface PageProps {
   params: Promise<{ match: string }>;
@@ -44,9 +44,7 @@ function parseMatch(slug: string): { sign1: string; sign2: string } | null {
   return { sign1, sign2 };
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps) {
   const { match } = await params;
   const parsed = parseMatch(match);
 
@@ -56,20 +54,14 @@ export async function generateMetadata({
 
   const content = generateCompatibilityContent(parsed.sign1, parsed.sign2);
 
-  return {
+  return createGrimoireMetadata({
     title: `${content.title} - Lunary`,
     description: content.description,
     keywords: content.keywords,
-    openGraph: {
-      title: `${content.title} - Lunary`,
-      description: content.description,
-      type: 'article',
-      url: `https://lunary.app/grimoire/compatibility/${match}`,
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/compatibility/${content.slug}`,
-    },
-  };
+    url: `https://lunary.app/grimoire/compatibility/${content.slug}`,
+    ogImagePath: '/api/og/grimoire/compatibility',
+    ogImageAlt: content.title,
+  });
 }
 
 function ScoreBar({ score, label }: { score: number; label: string }) {

@@ -16,6 +16,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { calculateLifePathNumber } from '../../../utils/personalization';
+import { useModal } from '@/hooks/useModal';
 
 const SkeletonCard = () => (
   <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
@@ -128,18 +129,11 @@ export default function ProfilePage() {
   }, [authState.loading]);
 
   // ESC key handler for auth modal
-  useEffect(() => {
-    if (!showAuthModal) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowAuthModal(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [showAuthModal]);
+  useModal({
+    isOpen: showAuthModal,
+    onClose: () => setShowAuthModal(false),
+    closeOnClickOutside: false,
+  });
 
   // Load existing profile data when component mounts
   useEffect(() => {

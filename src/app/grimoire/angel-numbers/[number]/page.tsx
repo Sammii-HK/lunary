@@ -1,7 +1,7 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { angelNumbers } from '@/constants/grimoire/numerology-data';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const angelNumberKeys = Object.keys(angelNumbers);
 
@@ -15,22 +15,17 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ number: string }>;
-}): Promise<Metadata> {
+}) {
   const { number } = await params;
   const numberData = angelNumbers[number as keyof typeof angelNumbers];
 
   if (!numberData) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
-  const title = `${numberData.name} Meaning: Spiritual Significance - Lunary`;
-  const description = `Discover the complete meaning of ${numberData.name}. Learn about ${numberData.name} spiritual significance, love meaning, career meaning, and what it means when you see this angel number.`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${numberData.name} Meaning: Spiritual Significance - Lunary`,
+    description: `Discover the complete meaning of ${numberData.name}. Learn about ${numberData.name} spiritual significance, love meaning, career meaning, and what it means when you see this angel number.`,
     keywords: [
       `${numberData.name} meaning`,
       `angel number ${numberData.number}`,
@@ -38,43 +33,10 @@ export async function generateMetadata({
       `${numberData.number} spiritual meaning`,
       `${numberData.number} meaning`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/angel-numbers/${number}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/angel-numbers',
-          width: 1200,
-          height: 630,
-          alt: `${numberData.name}`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/angel-numbers/${number}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/angel-numbers/${number}`,
+    ogImagePath: '/api/og/grimoire/angel-numbers',
+    ogImageAlt: `${numberData.name}`,
+  });
 }
 
 export default async function AngelNumberPage({
