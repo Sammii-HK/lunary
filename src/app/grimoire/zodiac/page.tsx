@@ -58,10 +58,6 @@ export default function ZodiacIndexPage() {
           'zodiac modalities',
         ]}
         canonicalUrl='https://lunary.app/grimoire/zodiac'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Zodiac Signs' },
-        ]}
         whatIs={{
           question: 'What are the 12 zodiac signs?',
           answer:

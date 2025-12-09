@@ -72,10 +72,6 @@ export default function TarotIndexPage() {
           'tarot guide',
         ]}
         canonicalUrl='https://lunary.app/grimoire/tarot'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Tarot Cards' },
-        ]}
         whatIs={{
           question: 'What are tarot cards?',
           answer:

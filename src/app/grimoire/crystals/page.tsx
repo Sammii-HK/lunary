@@ -66,10 +66,6 @@ export default function CrystalsPage() {
           'crystal properties',
         ]}
         canonicalUrl='https://lunary.app/grimoire/crystals'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Crystals', href: '/grimoire/crystals' },
-        ]}
         intro='Crystals are powerful tools for healing, protection, and magical work. Each crystal carries unique vibrational energy that can enhance your practice, support healing, and amplify intentions. This comprehensive guide covers crystal meanings, properties, correspondences, and how to work with crystals effectively in your magical practice.'
         meaning={`Crystals are formed deep within the Earth over millions of years, absorbing and storing the planet's energy. Each crystal has a unique molecular structure that creates specific vibrational frequencies. These frequencies interact with your own energy field, helping to balance, heal, and amplify your intentions.
 

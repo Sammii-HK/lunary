@@ -307,3 +307,214 @@ export async function getTopPages(
     );
   }
 }
+
+// ============================================
+// URL Inspection API - Indexing Status
+// ============================================
+
+export interface PageIndexingStatus {
+  url: string;
+  verdict: string; // "PASS" = indexed, "NEUTRAL" = not indexed, "FAIL" = error
+  coverageState: string; // "Submitted and indexed", "Crawled - currently not indexed", etc.
+  robotsTxtState: string;
+  indexingState: string;
+  lastCrawlTime: string | null;
+  pageFetchState: string;
+  googleCanonical: string | null;
+  userCanonical: string | null;
+  crawledAs: string;
+  issues: string[];
+}
+
+/**
+ * Get the indexing status of a specific URL using the URL Inspection API
+ * @param pageUrl - The full URL to inspect (e.g., "https://lunary.app/grimoire/zodiac/aries")
+ */
+export async function getPageIndexingStatus(
+  pageUrl: string,
+): Promise<PageIndexingStatus> {
+  const searchConsole = getSearchConsoleClient();
+  let propertyUrl = process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
+
+  if (!propertyUrl) {
+    throw new Error(
+      'Missing GOOGLE_SEARCH_CONSOLE_SITE_URL. Set the site URL in environment variables.',
+    );
+  }
+
+  // Convert to sc-domain format if needed
+  if (
+    propertyUrl.startsWith('https://') &&
+    !propertyUrl.startsWith('sc-domain:')
+  ) {
+    const domain = propertyUrl.replace(/^https?:\/\/(www\.)?/, '');
+    propertyUrl = `sc-domain:${domain}`;
+  }
+
+  try {
+    const response = await searchConsole.urlInspection.index.inspect({
+      requestBody: {
+        inspectionUrl: pageUrl,
+        siteUrl: propertyUrl,
+      },
+    });
+
+    const result = response.data.inspectionResult;
+    const indexStatus = result?.indexStatusResult;
+    const issues: string[] = [];
+
+    // Collect any issues
+    if (indexStatus?.verdict === 'NEUTRAL' || indexStatus?.verdict === 'FAIL') {
+      if (indexStatus?.coverageState) {
+        issues.push(indexStatus.coverageState);
+      }
+      if (indexStatus?.robotsTxtState === 'DISALLOWED') {
+        issues.push('Blocked by robots.txt');
+      }
+      if (indexStatus?.pageFetchState !== 'SUCCESSFUL') {
+        issues.push(`Page fetch: ${indexStatus?.pageFetchState || 'Unknown'}`);
+      }
+    }
+
+    return {
+      url: pageUrl,
+      verdict: indexStatus?.verdict || 'UNKNOWN',
+      coverageState: indexStatus?.coverageState || 'Unknown',
+      robotsTxtState: indexStatus?.robotsTxtState || 'Unknown',
+      indexingState: indexStatus?.indexingState || 'Unknown',
+      lastCrawlTime: indexStatus?.lastCrawlTime || null,
+      pageFetchState: indexStatus?.pageFetchState || 'Unknown',
+      googleCanonical: indexStatus?.googleCanonical || null,
+      userCanonical: indexStatus?.userCanonical || null,
+      crawledAs: indexStatus?.crawledAs || 'Unknown',
+      issues,
+    };
+  } catch (error: unknown) {
+    const googleError = error as {
+      code?: number;
+      message?: string;
+      response?: { status: number; data?: unknown };
+    };
+
+    console.error('[Search Console] URL Inspection error:', {
+      url: pageUrl,
+      message: googleError.message,
+      code: googleError.code,
+      responseStatus: googleError.response?.status,
+    });
+
+    // Return error status instead of throwing
+    return {
+      url: pageUrl,
+      verdict: 'ERROR',
+      coverageState: 'API Error',
+      robotsTxtState: 'Unknown',
+      indexingState: 'Unknown',
+      lastCrawlTime: null,
+      pageFetchState: 'Unknown',
+      googleCanonical: null,
+      userCanonical: null,
+      crawledAs: 'Unknown',
+      issues: [googleError.message || 'Unknown API error'],
+    };
+  }
+}
+
+export interface IndexingAuditResult {
+  totalUrls: number;
+  indexed: number;
+  notIndexed: number;
+  errors: number;
+  pages: PageIndexingStatus[];
+  notIndexedReasons: Record<string, number>;
+}
+
+/**
+ * Audit indexing status for multiple URLs
+ * Note: URL Inspection API has a rate limit of 600 requests per minute
+ * @param urls - Array of URLs to check
+ * @param delayMs - Delay between requests to respect rate limits (default: 100ms)
+ */
+export async function auditUrlsIndexing(
+  urls: string[],
+  delayMs: number = 100,
+): Promise<IndexingAuditResult> {
+  const results: PageIndexingStatus[] = [];
+  const notIndexedReasons: Record<string, number> = {};
+
+  for (let i = 0; i < urls.length; i++) {
+    const url = urls[i];
+
+    try {
+      const status = await getPageIndexingStatus(url);
+      results.push(status);
+
+      // Track not-indexed reasons
+      if (status.verdict !== 'PASS') {
+        const reason = status.coverageState || 'Unknown';
+        notIndexedReasons[reason] = (notIndexedReasons[reason] || 0) + 1;
+      }
+
+      // Rate limiting delay
+      if (i < urls.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    } catch (error) {
+      console.error(`[Indexing Audit] Error checking ${url}:`, error);
+      results.push({
+        url,
+        verdict: 'ERROR',
+        coverageState: 'Check Failed',
+        robotsTxtState: 'Unknown',
+        indexingState: 'Unknown',
+        lastCrawlTime: null,
+        pageFetchState: 'Unknown',
+        googleCanonical: null,
+        userCanonical: null,
+        crawledAs: 'Unknown',
+        issues: ['Failed to check URL'],
+      });
+    }
+  }
+
+  const indexed = results.filter((r) => r.verdict === 'PASS').length;
+  const notIndexed = results.filter(
+    (r) => r.verdict === 'NEUTRAL' || r.verdict === 'FAIL',
+  ).length;
+  const errors = results.filter((r) => r.verdict === 'ERROR').length;
+
+  return {
+    totalUrls: urls.length,
+    indexed,
+    notIndexed,
+    errors,
+    pages: results,
+    notIndexedReasons,
+  };
+}
+
+/**
+ * Get suggested fix for a coverage state
+ */
+export function getSuggestedFix(coverageState: string): string {
+  const fixes: Record<string, string> = {
+    'Crawled - currently not indexed':
+      'Add more internal links to this page, improve content quality, or ensure unique value',
+    'Discovered - currently not indexed':
+      'Submit URL to Google Search Console, add internal links, include in sitemap',
+    'Excluded by noindex tag': 'Remove noindex meta tag or X-Robots-Tag header',
+    'Blocked by robots.txt': 'Update robots.txt to allow crawling of this path',
+    'Duplicate without user-selected canonical':
+      'Add canonical tag pointing to preferred URL',
+    'Duplicate, Google chose different canonical than user':
+      'Review canonical tags, ensure they point to correct URL',
+    'Soft 404':
+      'Ensure page returns meaningful content, not empty or error-like',
+    'Not found (404)':
+      'Page does not exist - remove from sitemap or create the page',
+    'Redirect error': 'Fix redirect chain or loops',
+    'Server error (5xx)': 'Fix server errors preventing page from loading',
+  };
+
+  return fixes[coverageState] || 'Review page for technical SEO issues';
+}

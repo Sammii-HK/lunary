@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
 import {
@@ -10,6 +10,32 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 import { ParsedMarkdown } from '@/utils/markdown';
+
+/**
+ * Format a URL segment into a human-readable label
+ * "the-fool" → "The Fool"
+ * "birth-chart" → "Birth Chart"
+ */
+function formatSegmentLabel(segment: string): string {
+  return segment
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Auto-generate breadcrumbs from a canonical URL
+ * https://lunary.app/grimoire/zodiac/aries → [Grimoire, Zodiac, Aries]
+ */
+function generateBreadcrumbsFromUrl(canonicalUrl: string): BreadcrumbItem[] {
+  const path = canonicalUrl.replace(/^https?:\/\/[^/]+/, '');
+  const segments = path.split('/').filter(Boolean);
+
+  return segments.map((segment, index) => ({
+    label: formatSegmentLabel(segment),
+    href: '/' + segments.slice(0, index + 1).join('/'),
+  }));
+}
 
 export interface FAQItem {
   question: string;
@@ -119,11 +145,20 @@ export function SEOContentTemplate({
   sources,
   children,
 }: SEOContentTemplateProps) {
+  // Auto-generate breadcrumbs from URL if not provided
+  const autoBreadcrumbs = useMemo(() => {
+    if (breadcrumbs && breadcrumbs.length > 0) {
+      return breadcrumbs;
+    }
+    return generateBreadcrumbsFromUrl(canonicalUrl);
+  }, [canonicalUrl, breadcrumbs]);
+
   const faqSchema = faqs ? createFAQPageSchema(faqs) : null;
 
   const articleImage = image || `https://lunary.app/api/og/cosmic`;
   const articleImageAlt = imageAlt || `${h1} - Lunary Grimoire`;
 
+  // Create article schema with auto-speakable for AI/voice results
   const articleSchema = createArticleSchema({
     headline: h1,
     description,
@@ -134,6 +169,24 @@ export function SEOContentTemplate({
     image: articleImage,
     section: articleSection,
   });
+
+  // Add speakable specification for Google AI Overviews and voice assistants
+  const speakableSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: h1,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: [
+        'h1',
+        '.tldr',
+        '.what-is-answer',
+        'header p',
+        'section > p:first-of-type',
+      ],
+    },
+    url: canonicalUrl,
+  };
 
   const imageSchema = createImageObjectSchema({
     url: articleImage,
@@ -146,11 +199,10 @@ export function SEOContentTemplate({
       {renderJsonLd(faqSchema)}
       {renderJsonLd(articleSchema)}
       {renderJsonLd(imageSchema)}
+      {renderJsonLd(speakableSchema)}
 
-      {/* Breadcrumbs */}
-      {breadcrumbs && breadcrumbs.length > 0 && (
-        <Breadcrumbs items={breadcrumbs} />
-      )}
+      {/* Breadcrumbs - auto-generated from URL if not provided */}
+      {autoBreadcrumbs.length > 0 && <Breadcrumbs items={autoBreadcrumbs} />}
 
       {/* H1 */}
       <header className='mb-8'>
@@ -168,13 +220,15 @@ export function SEOContentTemplate({
           <h2 className='text-2xl font-medium text-zinc-100 mb-3'>
             {whatIs.question}
           </h2>
-          <p className='text-zinc-300 leading-relaxed'>{whatIs.answer}</p>
+          <p className='what-is-answer text-zinc-300 leading-relaxed'>
+            {whatIs.answer}
+          </p>
         </section>
       )}
 
       {/* TL;DR Quick Meaning Block */}
       {tldr && (
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-8'>
+        <div className='tldr bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-8'>
           <h2 className='text-xl font-medium text-lunary-accent-300 mb-3'>
             Quick Meaning
           </h2>
