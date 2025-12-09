@@ -106,7 +106,7 @@ export default function GrimoireHoroscopesPage() {
                   <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-accent-300 transition-colors'>
                     {SIGN_DISPLAY_NAMES[sign]}
                   </h3>
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     {SIGN_ELEMENTS[sign]} Sign
                   </p>
                 </Link>

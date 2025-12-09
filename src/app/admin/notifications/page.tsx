@@ -697,7 +697,7 @@ export default function NotificationAdminPage() {
                     <div className='text-sm text-zinc-400 capitalize'>
                       {item.type.replace(/_/g, ' ')}
                     </div>
-                    <div className='text-xs text-zinc-500 mt-1'>
+                    <div className='text-xs text-zinc-400 mt-1'>
                       Last: {new Date(item.lastSent).toLocaleDateString()}
                     </div>
                   </div>

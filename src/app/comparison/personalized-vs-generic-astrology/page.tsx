@@ -116,7 +116,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                       </span>
                     </div>
                     <div className='flex items-start gap-2'>
-                      <span className='text-zinc-500'>✗</span>
+                      <span className='text-zinc-400'>✗</span>
                       <span>
                         <strong>Generic:</strong> Based only on sun sign
                         position, doesn't require birth time or location
@@ -143,7 +143,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                       </span>
                     </div>
                     <div className='flex items-start gap-2'>
-                      <span className='text-zinc-500'>✗</span>
+                      <span className='text-zinc-400'>✗</span>
                       <span>
                         <strong>Generic:</strong> Only considers sun sign,
                         ignores other planetary influences
@@ -170,7 +170,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                       </span>
                     </div>
                     <div className='flex items-start gap-2'>
-                      <span className='text-zinc-500'>✗</span>
+                      <span className='text-zinc-400'>✗</span>
                       <span>
                         <strong>Generic:</strong> Same horoscope for millions of
                         people, not specific to your situation
@@ -197,7 +197,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                       </span>
                     </div>
                     <div className='flex items-start gap-2'>
-                      <span className='text-zinc-500'>✗</span>
+                      <span className='text-zinc-400'>✗</span>
                       <span>
                         <strong>Generic:</strong> Often uses simplified or
                         approximate positions, not real astronomy
@@ -360,7 +360,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
 
         {/* Legal Disclaimer */}
         <section className='mt-12 pt-8 border-t border-zinc-800'>
-          <p className='text-xs text-zinc-500 leading-relaxed'>
+          <p className='text-xs text-zinc-400 leading-relaxed'>
             <strong>Disclaimer:</strong> This educational content is for
             informational purposes only. Astrology is not a science and should
             not be used as a substitute for professional advice. This content

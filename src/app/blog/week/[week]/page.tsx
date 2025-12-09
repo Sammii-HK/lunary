@@ -791,7 +791,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                       <Badge variant='outline' className='text-xs'>
                         Week {related.week}
                       </Badge>
-                      <span className='text-xs text-zinc-500'>
+                      <span className='text-xs text-zinc-400'>
                         {related.year}
                       </span>
                     </div>

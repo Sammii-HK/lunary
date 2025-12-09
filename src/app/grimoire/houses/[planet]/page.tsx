@@ -107,7 +107,7 @@ export default async function PlanetInHousesPage({
                   <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors text-sm'>
                     {getOrdinalSuffix(house)} House
                   </h3>
-                  <p className='text-xs text-zinc-500 mt-1'>
+                  <p className='text-xs text-zinc-400 mt-1'>
                     {houseData.lifeArea}
                   </p>
                 </Link>

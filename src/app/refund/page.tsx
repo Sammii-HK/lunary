@@ -52,7 +52,7 @@ export default function RefundPolicyPage() {
           <h1 className='text-4xl font-semibold text-white mb-4'>
             Refund Policy
           </h1>
-          <p className='text-sm text-zinc-500'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
@@ -170,7 +170,7 @@ export default function RefundPolicyPage() {
                       )}
                     </button>
 
-                    <p className='text-xs text-zinc-500 text-center'>
+                    <p className='text-xs text-zinc-400 text-center'>
                       We&apos;ll automatically check your eligibility based on
                       your subscription date
                     </p>

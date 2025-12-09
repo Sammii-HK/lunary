@@ -180,7 +180,7 @@ export default function GuidesIndexPage() {
                       ))}
                     </div>
                     <div className='flex items-center justify-between'>
-                      <span className='text-xs text-zinc-500'>
+                      <span className='text-xs text-zinc-400'>
                         {guide.wordCount} words
                       </span>
                       <span className='text-lunary-primary-400 text-sm group-hover:translate-x-1 transition-transform'>

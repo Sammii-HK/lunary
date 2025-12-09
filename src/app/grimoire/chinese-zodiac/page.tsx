@@ -117,12 +117,12 @@ export default function ChineseZodiacIndexPage() {
                 >
                   <div className='flex items-center gap-3 mb-3'>
                     <span className='text-3xl'>{data.emoji}</span>
-                    <span className='text-xs text-zinc-500'>#{index + 1}</span>
+                    <span className='text-xs text-zinc-400'>#{index + 1}</span>
                   </div>
                   <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                     {data.displayName}
                   </h3>
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     {data.element} / {data.yinYang}
                   </p>
                   <p className='text-xs text-zinc-600 mt-2'>
@@ -151,7 +151,7 @@ export default function ChineseZodiacIndexPage() {
                       {yearData.year}:{' '}
                       {CHINESE_ZODIAC_DATA[yearData.animal].displayName}
                     </div>
-                    <div className='text-xs text-zinc-500'>
+                    <div className='text-xs text-zinc-400'>
                       {yearData.element} {yearData.yinYang}
                     </div>
                   </div>
@@ -169,7 +169,7 @@ export default function ChineseZodiacIndexPage() {
               your birth year to find your animal sign, or explore the signs
               above.
             </p>
-            <p className='text-sm text-zinc-500'>
+            <p className='text-sm text-zinc-400'>
               Note: Chinese New Year falls between late January and
               mid-February. If you were born in January or February, check
               whether your birthday falls before or after Chinese New Year in

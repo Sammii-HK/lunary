@@ -209,7 +209,7 @@ export default function SchedulerAdminPage() {
                 placeholder={getNextMonth()}
                 className='bg-zinc-800 border border-zinc-700 rounded px-3 py-2 w-48 text-white'
               />
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-zinc-400 mt-1'>
                 Default:{' '}
                 {new Date(getNextMonth() + '-01').toLocaleDateString('en-US', {
                   month: 'long',
@@ -362,7 +362,7 @@ export default function SchedulerAdminPage() {
                       </details>
                     )}
                     {(result as any).timestamp && (
-                      <div className='text-xs text-zinc-500 mt-2'>
+                      <div className='text-xs text-zinc-400 mt-2'>
                         Time:{' '}
                         {new Date((result as any).timestamp).toLocaleString()}
                       </div>
@@ -654,7 +654,7 @@ export default function SchedulerAdminPage() {
                   </div>
 
                   <div className='mt-4 pt-4 border-t border-zinc-600'>
-                    <p className='text-xs text-zinc-500'>
+                    <p className='text-xs text-zinc-400'>
                       💡 <strong>Tip:</strong> Instagram doesn't support URL
                       prefilling, so the content will be copied to your
                       clipboard instead. For best results with images, save or
@@ -681,7 +681,7 @@ export default function SchedulerAdminPage() {
                 {`SUCCULENT_SECRET_KEY=sk_live_your_api_key_here
 SUCCULENT_ACCOUNT_GROUP_ID=group_your_group_id_here`}
               </pre>
-              <p className='text-xs text-zinc-500 mt-2'>
+              <p className='text-xs text-zinc-400 mt-2'>
                 💡 <strong>Debugging tip:</strong> The enhanced error logging
                 will now show if these variables are missing or malformed. Check
                 the server logs or use the "Test Today's Post" button to see

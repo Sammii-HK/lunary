@@ -116,6 +116,7 @@ export function ShopClient({ initialPacks }: ShopClientProps) {
           ))}
         </div>
 
+        <h2 className='sr-only'>Our Products</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
           {filteredPacks.map((pack, index) => (
             <div
@@ -201,9 +202,9 @@ export function ShopClient({ initialPacks }: ShopClientProps) {
 
         <div className='mt-16 text-center'>
           <div className='bg-slate-800/30 rounded-xl p-6 max-w-2xl mx-auto'>
-            <h3 className='text-lg font-medium text-white mb-3'>
+            <h2 className='text-lg font-medium text-white mb-3'>
               Secure Digital Downloads
-            </h3>
+            </h2>
             <p className='text-slate-300 text-sm'>
               All purchases are processed securely through Stripe. After
               payment, you'll receive instant access to download your digital

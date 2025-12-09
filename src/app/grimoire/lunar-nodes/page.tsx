@@ -149,7 +149,7 @@ export default function LunarNodesIndexPage() {
                     >
                       {node.name}
                     </h3>
-                    <span className='text-sm text-zinc-500'>{node.aka}</span>
+                    <span className='text-sm text-zinc-400'>{node.aka}</span>
                   </div>
                 </div>
                 <p className='text-zinc-400 mb-4'>{node.description}</p>

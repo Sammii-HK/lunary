@@ -169,7 +169,7 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
             Success Metrics
           </CardTitle>
         </div>
-        <CardDescription className='text-xs text-zinc-500'>
+        <CardDescription className='text-xs text-zinc-400'>
           Key performance indicators
         </CardDescription>
       </CardHeader>
@@ -236,7 +236,7 @@ function MetricCard({
     >
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
-          <div className='text-xs font-medium text-zinc-500'>{label}</div>
+          <div className='text-xs font-medium text-zinc-400'>{label}</div>
           <div className='mt-2 text-xl font-light tracking-tight text-white'>
             {formattedValue}
           </div>
@@ -270,7 +270,7 @@ function MetricCard({
       </div>
       {target && (
         <div className='mt-3'>
-          <div className='mb-1 flex items-center justify-between text-xs text-zinc-500'>
+          <div className='mb-1 flex items-center justify-between text-xs text-zinc-400'>
             <span>Target Range</span>
             <span
               className={cn(

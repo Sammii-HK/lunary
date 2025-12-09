@@ -114,7 +114,7 @@ function ResetPasswordContent() {
                 placeholder='Paste your reset token'
                 required
               />
-              <p className='mt-2 text-xs text-zinc-500'>
+              <p className='mt-2 text-xs text-zinc-400'>
                 Paste the token from your password reset email.
               </p>
             </div>

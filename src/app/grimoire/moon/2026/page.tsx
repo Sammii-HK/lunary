@@ -115,7 +115,7 @@ export default function Moon2026Page() {
                     <h3 className='font-medium text-white group-hover:text-lunary-primary-300'>
                       {moon.name}
                     </h3>
-                    <p className='text-sm text-zinc-500'>
+                    <p className='text-sm text-zinc-400'>
                       {moon.date} • {moon.sign}
                     </p>
                   </div>
@@ -144,7 +144,7 @@ export default function Moon2026Page() {
                     <h3 className='font-medium text-white group-hover:text-lunary-primary-300'>
                       New Moon in {moon.sign}
                     </h3>
-                    <p className='text-sm text-zinc-500'>{moon.date}</p>
+                    <p className='text-sm text-zinc-400'>{moon.date}</p>
                   </div>
                 </div>
                 <ArrowRight className='h-5 w-5 text-zinc-600 group-hover:text-lunary-primary-400 transition-colors' />

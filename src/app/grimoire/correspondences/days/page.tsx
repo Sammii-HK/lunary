@@ -219,7 +219,7 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
                   <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                     {name}
                   </h3>
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     {data.correspondences.slice(0, 3).join(' • ')}
                   </p>
                 </div>
@@ -227,7 +227,7 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
                   <p className='text-sm text-lunary-primary-400'>
                     {data.planet}
                   </p>
-                  <p className='text-xs text-zinc-500'>{data.element}</p>
+                  <p className='text-xs text-zinc-400'>{data.element}</p>
                 </div>
               </Link>
             ))}

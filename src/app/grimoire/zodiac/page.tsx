@@ -113,7 +113,7 @@ export default function ZodiacIndexPage() {
                       <h2 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                         {sign.name}
                       </h2>
-                      <p className='text-sm text-zinc-500'>
+                      <p className='text-sm text-zinc-400'>
                         {sign.dates} • {sign.element}
                       </p>
                     </div>
@@ -172,7 +172,7 @@ export default function ZodiacIndexPage() {
             >
               View Your Birth Chart
             </Link>
-            <p className='mt-2 text-sm text-zinc-500'>
+            <p className='mt-2 text-sm text-zinc-400'>
               Discover which signs are in your planets and houses
             </p>
           </section>

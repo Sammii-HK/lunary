@@ -159,7 +159,7 @@ export function YearlyForecast() {
 
   const EmptyCard = ({ message }: { message: string }) => (
     <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4'>
-      <p className='text-sm text-zinc-500'>{message}</p>
+      <p className='text-sm text-zinc-400'>{message}</p>
     </div>
   );
 
@@ -289,7 +289,7 @@ export function YearlyForecast() {
                     <p className='text-xs uppercase tracking-wide text-zinc-400'>
                       {metric.label}
                     </p>
-                    <p className='text-xs text-zinc-500 leading-relaxed'>
+                    <p className='text-xs text-zinc-400 leading-relaxed'>
                       {metric.description}
                     </p>
                   </div>
@@ -479,7 +479,7 @@ export function YearlyForecast() {
                                         )}
                                       </span>
                                     </div>
-                                    <p className='text-xs uppercase tracking-wide text-zinc-500 mb-1'>
+                                    <p className='text-xs uppercase tracking-wide text-zinc-400 mb-1'>
                                       {aspect.planets
                                         .filter(Boolean)
                                         .join(' • ')}

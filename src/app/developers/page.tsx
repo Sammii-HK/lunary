@@ -357,7 +357,7 @@ export default function DevelopersPage() {
 
                 {endpoint.params && (
                   <div className='mb-4'>
-                    <h4 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2'>
+                    <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
                       Parameters
                     </h4>
                     <div className='space-y-2'>
@@ -369,7 +369,7 @@ export default function DevelopersPage() {
                           <code className='text-lunary-primary-300 bg-zinc-800 px-2 py-0.5 rounded'>
                             {param.name}
                           </code>
-                          <span className='text-zinc-500'>{param.type}</span>
+                          <span className='text-zinc-400'>{param.type}</span>
                           {param.required && (
                             <span className='text-lunary-error text-xs'>
                               required
@@ -386,7 +386,7 @@ export default function DevelopersPage() {
 
                 {endpoint.body && (
                   <div className='mb-4'>
-                    <h4 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2'>
+                    <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
                       Request Body
                     </h4>
                     <pre className='text-sm bg-zinc-800 p-3 rounded overflow-x-auto'>
@@ -396,7 +396,7 @@ export default function DevelopersPage() {
                 )}
 
                 <div>
-                  <h4 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2'>
+                  <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
                     Response
                   </h4>
                   <pre className='text-sm bg-zinc-800 p-3 rounded overflow-x-auto'>
@@ -417,7 +417,7 @@ export default function DevelopersPage() {
                 <h3 className='font-medium text-zinc-100 mb-1'>Free</h3>
                 <p className='text-2xl font-light text-zinc-100 mb-2'>$0</p>
                 <p className='text-sm text-zinc-400 mb-3'>100 requests/month</p>
-                <ul className='text-xs text-zinc-500 space-y-1'>
+                <ul className='text-xs text-zinc-400 space-y-1'>
                   <li>• Basic endpoints only</li>
                   <li>• No API key required</li>
                 </ul>
@@ -432,7 +432,7 @@ export default function DevelopersPage() {
                 <p className='text-sm text-zinc-400 mb-3'>
                   5,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-500 space-y-1'>
+                <ul className='text-xs text-zinc-400 space-y-1'>
                   <li>• All endpoints</li>
                   <li>• API key access</li>
                 </ul>
@@ -445,7 +445,7 @@ export default function DevelopersPage() {
                 <p className='text-sm text-zinc-400 mb-3'>
                   25,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-500 space-y-1'>
+                <ul className='text-xs text-zinc-400 space-y-1'>
                   <li>• Priority support</li>
                   <li>• Higher rate limits</li>
                 </ul>
@@ -458,13 +458,13 @@ export default function DevelopersPage() {
                 <p className='text-sm text-zinc-400 mb-3'>
                   100,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-500 space-y-1'>
+                <ul className='text-xs text-zinc-400 space-y-1'>
                   <li>• Webhooks</li>
                   <li>• Dedicated support</li>
                 </ul>
               </div>
             </div>
-            <p className='mt-4 text-sm text-zinc-500 text-center'>
+            <p className='mt-4 text-sm text-zinc-400 text-center'>
               <Link
                 href='/developers/dashboard'
                 className='text-lunary-primary-400 hover:underline'
@@ -527,7 +527,7 @@ export default function DevelopersPage() {
               <Key className='h-5 w-5' />
               Get Started with the API
             </Link>
-            <p className='mt-4 text-sm text-zinc-500'>
+            <p className='mt-4 text-sm text-zinc-400'>
               Need enterprise limits or custom features?{' '}
               <a
                 href='mailto:api@lunary.app'

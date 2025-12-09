@@ -96,7 +96,7 @@ export default function SeasonsIndexPage() {
                           {s.displayName} Season
                         </span>
                       </div>
-                      <span className='text-sm text-zinc-500'>
+                      <span className='text-sm text-zinc-400'>
                         {dates.start.split(',')[0]}
                       </span>
                     </Link>

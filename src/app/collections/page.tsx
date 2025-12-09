@@ -324,7 +324,7 @@ function CollectionsPageContent() {
                           <span className='text-sm text-zinc-200'>
                             {folder.name}
                           </span>
-                          <span className='text-xs text-zinc-500'>
+                          <span className='text-xs text-zinc-400'>
                             {folder.itemCount} item
                             {folder.itemCount !== 1 ? 's' : ''}
                           </span>
@@ -332,7 +332,7 @@ function CollectionsPageContent() {
                         <button
                           onClick={() => handleDeleteFolder(folder.id)}
                           disabled={deletingFolderId === folder.id}
-                          className='p-1.5 rounded text-zinc-500 hover:text-lunary-error-400 hover:bg-zinc-700 transition-colors disabled:opacity-50'
+                          className='p-1.5 rounded text-zinc-400 hover:text-lunary-error-400 hover:bg-zinc-700 transition-colors disabled:opacity-50'
                           title='Delete folder'
                         >
                           {deletingFolderId === folder.id ? (
@@ -344,7 +344,7 @@ function CollectionsPageContent() {
                       </div>
                     ))}
                   </div>
-                  <p className='text-xs text-zinc-500 mt-3'>
+                  <p className='text-xs text-zinc-400 mt-3'>
                     Deleting a folder will move its items to Uncategorized.
                   </p>
                 </div>
@@ -413,7 +413,7 @@ function CollectionsPageContent() {
                     {collection.category.replace('_', ' ')}
                   </span>
                   {collection.folderName && (
-                    <span className='text-xs text-zinc-500 flex items-center gap-1'>
+                    <span className='text-xs text-zinc-400 flex items-center gap-1'>
                       <Folder className='w-3 h-3' />
                       {collection.folderName}
                     </span>
@@ -439,7 +439,7 @@ function CollectionsPageContent() {
                     ))}
                   </div>
                 )}
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   {new Date(collection.createdAt).toLocaleDateString()}
                 </p>
               </button>
@@ -512,7 +512,7 @@ function CollectionsPageContent() {
                   )}
 
                   <div className='flex items-center justify-between pt-4 border-t border-zinc-800'>
-                    <p className='text-xs text-zinc-500'>
+                    <p className='text-xs text-zinc-400'>
                       Saved{' '}
                       {new Date(
                         selectedCollection.createdAt,
@@ -528,7 +528,7 @@ function CollectionsPageContent() {
                         handleDeleteCollection(selectedCollection.id)
                       }
                       disabled={deletingCollectionId === selectedCollection.id}
-                      className='text-zinc-500 hover:text-lunary-error-400 hover:bg-lunary-error-900/20'
+                      className='text-zinc-400 hover:text-lunary-error-400 hover:bg-lunary-error-900/20'
                     >
                       {deletingCollectionId === selectedCollection.id ? (
                         <Loader2 className='w-4 h-4 animate-spin mr-2' />

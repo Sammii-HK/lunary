@@ -224,7 +224,7 @@ Colors affect us psychologically and energetically. In magic, we harness these e
                     {name}
                   </h3>
                 </div>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   {data.correspondences.slice(0, 3).join(', ')}
                 </p>
               </Link>

@@ -160,7 +160,7 @@ export default function NumerologyIndexPage() {
               <div className='text-2xl font-light text-lunary-accent-400 group-hover:text-lunary-accent-300 transition-colors mb-1'>
                 {num}
               </div>
-              <div className='text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors'>
+              <div className='text-xs text-zinc-400 group-hover:text-zinc-400 transition-colors'>
                 {data.meaning.split(' & ')[0]}
               </div>
             </Link>
@@ -193,7 +193,7 @@ export default function NumerologyIndexPage() {
                 </span>
                 <span className='text-sm text-zinc-400'>{data.meaning}</span>
               </div>
-              <p className='text-sm text-zinc-500 line-clamp-2'>
+              <p className='text-sm text-zinc-400 line-clamp-2'>
                 {data.description.split('.')[0]}.
               </p>
             </Link>

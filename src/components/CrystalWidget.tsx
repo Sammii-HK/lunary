@@ -208,7 +208,7 @@ export const CrystalWidget = () => {
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative min-h-64'>
       {/* Info Icon with Popover */}
       <Popover.Root>
-        <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'>
+        <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-400 hover:text-zinc-300 transition-colors'>
           <Info size={14} />
         </Popover.Trigger>
         <Popover.Portal>
@@ -264,7 +264,7 @@ export const CrystalWidget = () => {
         </div>
 
         <div className='text-center mb-3'>
-          <div className='text-xs text-zinc-500 italic'>
+          <div className='text-xs text-zinc-400 italic'>
             &quot;{recommendedCrystal.intention}&quot;
           </div>
         </div>

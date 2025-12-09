@@ -178,7 +178,7 @@ Eclipses come in pairs or clusters called "eclipse seasons." In 2025, we have tw
                         {eclipse.description}
                       </p>
                       <div className='space-y-2'>
-                        <p className='text-xs text-zinc-500 uppercase tracking-wider'>
+                        <p className='text-xs text-zinc-400 uppercase tracking-wider'>
                           Suggested Rituals:
                         </p>
                         <ul className='text-sm text-zinc-300 space-y-1'>

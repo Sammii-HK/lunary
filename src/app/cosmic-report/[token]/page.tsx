@@ -68,7 +68,7 @@ export default async function SharedReportPage({ params }: PageProps) {
         </p>
         <h1 className='text-4xl font-semibold'>{report.report_data.title}</h1>
         <p className='text-sm text-zinc-300'>{report.report_data.subtitle}</p>
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-zinc-400'>
           Generated on {new Date(report.created_at).toLocaleDateString()}
         </p>
         <div className='mt-4 flex flex-wrap gap-3'>

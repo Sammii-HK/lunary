@@ -221,12 +221,12 @@ By converting your full name to numbers and reducing to a single digit (or Maste
                     <span className='text-2xl font-light text-lunary-primary-400'>
                       {number}
                     </span>
-                    <span className='text-zinc-500 text-sm'>Expression</span>
+                    <span className='text-zinc-400 text-sm'>Expression</span>
                   </div>
                   <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-500 line-clamp-2'>
+                  <p className='text-sm text-zinc-400 line-clamp-2'>
                     {data.talents[0]}
                   </p>
                 </Link>
@@ -265,7 +265,7 @@ By converting your full name to numbers and reducing to a single digit (or Maste
                   <h3 className='font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-500 line-clamp-2'>
+                  <p className='text-sm text-zinc-400 line-clamp-2'>
                     {data.talents[0]}
                   </p>
                 </Link>

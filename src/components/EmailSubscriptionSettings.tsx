@@ -241,7 +241,7 @@ export function EmailSubscriptionSettings() {
 
         {isSubscribed && (
           <div className='pt-3 border-t border-zinc-700'>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-zinc-400'>
               You can unsubscribe at any time by clicking the link in any email
               or disabling this toggle.
             </p>

@@ -197,7 +197,7 @@ Not all magical herbs are safe for consumption or skin contact. Always research 
                 <p className='text-sm text-zinc-400 mb-2'>
                   {data.correspondences.slice(0, 3).join(', ')}
                 </p>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   Planet: {data.planets.join(', ')}
                 </p>
               </Link>

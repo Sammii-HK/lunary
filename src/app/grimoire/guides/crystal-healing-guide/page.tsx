@@ -231,7 +231,7 @@ export default function CrystalHealingGuidePage() {
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-500 mb-8'>
+      <nav className='text-sm text-zinc-400 mb-8'>
         <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>

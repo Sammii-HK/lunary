@@ -99,7 +99,7 @@ export default function BirthChartHousesIndexPage() {
                 <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors text-sm'>
                   {house.name}
                 </h3>
-                <p className='text-xs text-zinc-500 mt-1'>{house.theme}</p>
+                <p className='text-xs text-zinc-400 mt-1'>{house.theme}</p>
               </Link>
             ))}
           </div>

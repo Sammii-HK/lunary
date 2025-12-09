@@ -85,7 +85,7 @@ export function QuickReflection({
           </button>
         </div>
 
-        {moonPhase && <p className='text-xs text-zinc-500 mb-3'>{moonPhase}</p>}
+        {moonPhase && <p className='text-xs text-zinc-400 mb-3'>{moonPhase}</p>}
 
         <form onSubmit={handleSubmit} className='space-y-4'>
           <textarea
@@ -98,7 +98,7 @@ export function QuickReflection({
           />
 
           <div>
-            <p className='text-xs text-zinc-500 mb-2'>How are you feeling?</p>
+            <p className='text-xs text-zinc-400 mb-2'>How are you feeling?</p>
             <div className='flex flex-wrap gap-2'>
               {MOOD_OPTIONS.map((mood) => (
                 <button

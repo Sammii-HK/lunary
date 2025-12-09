@@ -97,7 +97,7 @@ export default function ProductHuntPage() {
             decisions. Launching on Product Hunt lets us show that spirituality
             and data can co-exist beautifully.&rdquo;
           </p>
-          <p className='text-xs uppercase tracking-[0.3em] text-zinc-500'>
+          <p className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
             — [Founder Name], Builder of Lunary
           </p>
           <div className='rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-zinc-200'>

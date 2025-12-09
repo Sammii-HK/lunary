@@ -85,7 +85,7 @@ export default function DecansIndexPage() {
                         <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
                           {data.dateRange}
                         </div>
-                        <div className='text-sm text-zinc-500'>
+                        <div className='text-sm text-zinc-400'>
                           Sub-ruler: {data.subruler}
                         </div>
                       </Link>

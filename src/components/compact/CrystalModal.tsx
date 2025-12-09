@@ -130,7 +130,7 @@ export const CrystalPreview = () => {
                 </span>
               )}
             </div>
-            <p className='text-xs text-zinc-500 line-clamp-2'>
+            <p className='text-xs text-zinc-400 line-clamp-2'>
               {crystalReason}
             </p>
             {!hasChartAccess && (
@@ -176,7 +176,7 @@ export const CrystalPreview = () => {
 
             <div className='space-y-4'>
               <div>
-                <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wide mb-2'>
+                <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2'>
                   Why this crystal today
                 </h3>
                 {hasChartAccess && crystalData?.reasons ? (
@@ -199,7 +199,7 @@ export const CrystalPreview = () => {
               {crystalData?.crystal && (
                 <>
                   <div>
-                    <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1'>
+                    <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
                       Intention
                     </h3>
                     <p className='text-sm text-zinc-300 italic'>
@@ -207,7 +207,7 @@ export const CrystalPreview = () => {
                     </p>
                   </div>
                   <div>
-                    <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1'>
+                    <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
                       Properties
                     </h3>
                     <p className='text-sm text-zinc-400'>

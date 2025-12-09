@@ -367,7 +367,7 @@ export const BirthChart = ({
                   </span>
                   <span className='text-zinc-400 hidden sm:inline'>{sign}</span>
                   {house && (
-                    <span className='text-zinc-500 text-xs'>H{house}</span>
+                    <span className='text-zinc-400 text-xs'>H{house}</span>
                   )}
                   {retrograde && (
                     <span className='text-red-400 text-xs font-medium'>℞</span>

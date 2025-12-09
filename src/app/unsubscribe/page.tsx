@@ -96,7 +96,7 @@ function UnsubscribeContent() {
                 Unsubscribe
               </button>
             </form>
-            <p className='text-xs text-zinc-500 text-center mt-4'>
+            <p className='text-xs text-zinc-400 text-center mt-4'>
               You can also manage your email preferences from your{' '}
               <a
                 href='/profile'

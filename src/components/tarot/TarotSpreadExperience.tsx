@@ -125,7 +125,7 @@ function CollapsibleSpreadLibrary({ children }: { children: ReactNode }) {
         onClick={() => setIsCollapsed(!isCollapsed)}
         className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-3 py-2 text-left transition-colors hover:bg-zinc-900/50'
       >
-        <span className='text-xs uppercase tracking-wide text-zinc-500'>
+        <span className='text-xs uppercase tracking-wide text-zinc-400'>
           Spread Library
         </span>
         {isCollapsed ? (
@@ -558,7 +558,7 @@ export function TarotSpreadExperience({
                               <p
                                 className={clsx(
                                   'text-sm font-medium',
-                                  isLocked ? 'text-zinc-500' : 'text-zinc-100',
+                                  isLocked ? 'text-zinc-400' : 'text-zinc-100',
                                 )}
                               >
                                 {spread.name}
@@ -664,7 +664,7 @@ export function TarotSpreadExperience({
             </div>
             <div className='grid gap-3 md:grid-cols-2'>
               <div className='rounded-md border border-zinc-800/40 bg-zinc-950/40 p-3'>
-                <p className='text-xs font-semibold uppercase text-zinc-500'>
+                <p className='text-xs font-semibold uppercase text-zinc-400'>
                   Intention
                 </p>
                 <p className='text-sm text-zinc-300'>
@@ -672,7 +672,7 @@ export function TarotSpreadExperience({
                 </p>
               </div>
               <div className='rounded-md border border-zinc-800/40 bg-zinc-950/40 p-3'>
-                <p className='text-xs font-semibold uppercase text-zinc-500'>
+                <p className='text-xs font-semibold uppercase text-zinc-400'>
                   Journaling Prompts
                 </p>
                 <ul className='mt-1 space-y-1 text-xs text-zinc-300'>
@@ -680,7 +680,7 @@ export function TarotSpreadExperience({
                     <li key={prompt}>• {prompt}</li>
                   ))}
                   {selectedSpread.journalPrompts.length > 2 && (
-                    <li className='text-zinc-500'>+ more once you save</li>
+                    <li className='text-zinc-400'>+ more once you save</li>
                   )}
                 </ul>
               </div>
@@ -742,7 +742,7 @@ export function TarotSpreadExperience({
                     className='flex h-full flex-col overflow-hidden rounded-lg border border-zinc-800/50 bg-zinc-900/40'
                   >
                     <div className='border-b border-zinc-800/50 bg-zinc-900/60 px-3 py-2'>
-                      <p className='text-xs uppercase tracking-wide text-zinc-500'>
+                      <p className='text-xs uppercase tracking-wide text-zinc-400'>
                         {card.positionLabel}
                       </p>
                       <p className='text-xs text-zinc-400'>
@@ -782,7 +782,7 @@ export function TarotSpreadExperience({
                   <p className='text-sm font-medium text-zinc-200'>
                     Reflection Notes
                   </p>
-                  <span className='text-xs text-zinc-500'>
+                  <span className='text-xs text-zinc-400'>
                     {isSavingNotes ? 'Saving…' : 'Auto-saved'}
                   </span>
                 </div>
@@ -810,7 +810,7 @@ export function TarotSpreadExperience({
             </div>
             <div className='mt-3 space-y-2'>
               {readings.length === 0 && (
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   No saved spreads yet. Your pulls will appear here.
                 </p>
               )}
@@ -831,7 +831,7 @@ export function TarotSpreadExperience({
                     <p className='text-sm font-medium text-zinc-100'>
                       {reading.spreadName}
                     </p>
-                    <p className='text-xs text-zinc-500'>
+                    <p className='text-xs text-zinc-400'>
                       {new Date(reading.createdAt).toLocaleDateString()}
                     </p>
                   </button>

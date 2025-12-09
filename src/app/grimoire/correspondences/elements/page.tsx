@@ -249,19 +249,19 @@ To incorporate elements into your practice, consider:
                 </div>
                 <div className='space-y-2 text-sm text-zinc-400'>
                   <p>
-                    <span className='text-zinc-500'>Direction:</span>{' '}
+                    <span className='text-zinc-400'>Direction:</span>{' '}
                     {data.directions}
                   </p>
                   <p>
-                    <span className='text-zinc-500'>Season:</span>{' '}
+                    <span className='text-zinc-400'>Season:</span>{' '}
                     {data.seasons}
                   </p>
                   <p>
-                    <span className='text-zinc-500'>Zodiac:</span>{' '}
+                    <span className='text-zinc-400'>Zodiac:</span>{' '}
                     {data.zodiacSigns.join(', ')}
                   </p>
                   <p>
-                    <span className='text-zinc-500'>Colors:</span>{' '}
+                    <span className='text-zinc-400'>Colors:</span>{' '}
                     {data.colors.slice(0, 3).join(', ')}
                   </p>
                 </div>

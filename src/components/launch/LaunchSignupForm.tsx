@@ -82,7 +82,7 @@ export function LaunchSignupForm({
           placeholder='Preferred name (optional)'
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className='rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-lunary-primary-400 focus:outline-none'
+          className='rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-sm text-white placeholder:text-zinc-400 focus:border-lunary-primary-400 focus:outline-none'
         />
         <div className='flex gap-3'>
           <label htmlFor='launch-email' className='sr-only'>
@@ -95,7 +95,7 @@ export function LaunchSignupForm({
             placeholder='Email'
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className='flex-1 rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-lunary-primary-400 focus:outline-none'
+            className='flex-1 rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-sm text-white placeholder:text-zinc-400 focus:border-lunary-primary-400 focus:outline-none'
           />
           <button
             type='submit'

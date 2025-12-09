@@ -19,7 +19,7 @@ export default function ReferralTermsPage() {
           <h1 className='text-4xl font-semibold text-white mb-4'>
             Referral Program Terms
           </h1>
-          <p className='text-sm text-zinc-500'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>

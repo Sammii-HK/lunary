@@ -139,7 +139,7 @@ export default function EventsIndexPage() {
                   </p>
                 </div>
               </div>
-              <ArrowRight className='h-6 w-6 text-zinc-500 group-hover:text-lunary-primary-400 transition-colors' />
+              <ArrowRight className='h-6 w-6 text-zinc-400 group-hover:text-lunary-primary-400 transition-colors' />
             </div>
           </Link>
 

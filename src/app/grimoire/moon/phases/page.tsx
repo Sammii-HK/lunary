@@ -248,7 +248,7 @@ The key principle is simple: as the moon grows (waxing), work on growing things.
                       </span>
                     ))}
                   </div>
-                  <p className='text-sm text-zinc-500 line-clamp-2'>
+                  <p className='text-sm text-zinc-400 line-clamp-2'>
                     {phase.information}
                   </p>
                 </Link>

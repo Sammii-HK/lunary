@@ -168,11 +168,11 @@ export default function EclipsesIndexPage() {
                     </h3>
                   </div>
                   <p className='text-zinc-400 mb-3'>{eclipse.description}</p>
-                  <div className='text-sm text-zinc-500 mb-3'>
+                  <div className='text-sm text-zinc-400 mb-3'>
                     <span className='font-medium text-zinc-400'>Occurs: </span>
                     {eclipse.occurs}
                   </div>
-                  <div className='text-sm text-zinc-500 mb-4'>
+                  <div className='text-sm text-zinc-400 mb-4'>
                     <span className='font-medium text-zinc-400'>Energy: </span>
                     {eclipse.energy}
                   </div>

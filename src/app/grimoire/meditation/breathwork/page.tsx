@@ -303,7 +303,7 @@ Different breathing patterns activate different nervous system responses:
                   <h3 className='text-lg font-medium text-zinc-100 group-hover:text-cyan-300 transition-colors mb-1'>
                     {technique.name}
                   </h3>
-                  <p className='text-sm text-zinc-500 mb-2'>{technique.aka}</p>
+                  <p className='text-sm text-zinc-400 mb-2'>{technique.aka}</p>
                   <p className='text-sm text-zinc-400'>
                     {technique.description}
                   </p>

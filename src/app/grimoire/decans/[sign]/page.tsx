@@ -112,7 +112,7 @@ export default async function SignDecansPage({
                       {decan.name} Decan
                     </h3>
                   </div>
-                  <span className='text-sm text-zinc-500'>
+                  <span className='text-sm text-zinc-400'>
                     {decan.dateRange}
                   </span>
                 </div>

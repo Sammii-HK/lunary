@@ -257,7 +257,7 @@ export default function PricingPage() {
               <span className='text-lunary-accent-300'>starts here</span>
             </h1>
 
-            <p className='text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed'>
+            <p className='text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
               Personalized astrology based on your exact birth chart. No generic
               horoscopes.
             </p>
@@ -282,7 +282,7 @@ export default function PricingPage() {
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                   billingCycle === 'monthly'
                     ? 'bg-zinc-800 text-white'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    : 'text-zinc-400 hover:text-zinc-300'
                 }`}
               >
                 Monthly
@@ -292,7 +292,7 @@ export default function PricingPage() {
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
                   billingCycle === 'annual'
                     ? 'bg-zinc-800 text-white'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    : 'text-zinc-400 hover:text-zinc-300'
                 }`}
               >
                 Annual
@@ -307,6 +307,7 @@ export default function PricingPage() {
         {/* Pricing Cards */}
         <section className='relative pb-24'>
           <div className='max-w-5xl mx-auto px-6'>
+            <h2 className='sr-only'>Choose Your Plan</h2>
             {loadingPlans ? (
               <div className='flex justify-center py-20'>
                 <div className='w-5 h-5 border-2 border-zinc-700 border-t-lunary-primary rounded-full animate-spin' />
@@ -355,7 +356,7 @@ export default function PricingPage() {
                         <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                           {plan.name}
                         </h3>
-                        <p className='text-sm text-zinc-500'>
+                        <p className='text-sm text-zinc-400'>
                           {plan.description}
                         </p>
                       </div>
@@ -371,7 +372,7 @@ export default function PricingPage() {
                                 plan.displayCurrency,
                               )}
                             </span>
-                            <span className='text-zinc-500 ml-1'>
+                            <span className='text-zinc-400 ml-1'>
                               /{plan.interval}
                             </span>
                             {plan.interval === 'year' && (
@@ -527,7 +528,7 @@ export default function PricingPage() {
                     <h3 className='text-sm font-medium text-zinc-200 mb-1'>
                       {item.title}
                     </h3>
-                    <p className='text-xs text-zinc-500'>{item.desc}</p>
+                    <p className='text-xs text-zinc-400'>{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -576,7 +577,7 @@ export default function PricingPage() {
                   <h3 className='text-sm font-medium text-zinc-200 mb-2'>
                     {faq.question}
                   </h3>
-                  <p className='text-sm text-zinc-500 leading-relaxed'>
+                  <p className='text-sm text-zinc-400 leading-relaxed'>
                     {faq.answer}
                   </p>
                 </div>
@@ -606,7 +607,7 @@ export default function PricingPage() {
             <h2 className='text-3xl md:text-4xl font-light mb-4'>
               Ready to explore your chart?
             </h2>
-            <p className='text-zinc-500 mb-8'>
+            <p className='text-zinc-400 mb-8'>
               Start your free trial today. No payment required.
             </p>
             <SmartTrialButton />

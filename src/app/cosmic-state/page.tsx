@@ -575,7 +575,7 @@ export default function CosmicStatePage() {
                             <TrendingUp className='w-4 h-4 text-lunary-primary-400' />
                             Forming
                             <span
-                              className='text-xs text-zinc-500 ml-1'
+                              className='text-xs text-zinc-400 ml-1'
                               title='These aspects are forming but not exact yet'
                             >
                               (Applying)
@@ -653,8 +653,8 @@ export default function CosmicStatePage() {
                             </span>
                             {placement.house && (
                               <>
-                                <span className='text-zinc-500 mx-2'>•</span>
-                                <span className='text-xs text-zinc-500'>
+                                <span className='text-zinc-400 mx-2'>•</span>
+                                <span className='text-xs text-zinc-400'>
                                   House {placement.house}
                                 </span>
                               </>
@@ -751,7 +751,7 @@ export default function CosmicStatePage() {
                             </span>{' '}
                             : {placement.sign}
                             {placement.house && (
-                              <span className='text-zinc-500 ml-1'>
+                              <span className='text-zinc-400 ml-1'>
                                 (H{placement.house})
                               </span>
                             )}
@@ -783,7 +783,7 @@ export default function CosmicStatePage() {
                 : "We're creating your cosmic snapshot. It will appear here as soon as it is ready."}
             </p>
             {!loading && (
-              <div className='text-xs text-zinc-500'>
+              <div className='text-xs text-zinc-400'>
                 Make sure your profile has your birthday saved so we can build
                 your chart.
                 <span className='ml-1'>

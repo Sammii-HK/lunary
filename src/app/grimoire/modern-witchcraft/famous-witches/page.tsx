@@ -112,7 +112,7 @@ export default function WitchesIndexPage() {
                   <h3 className='font-medium text-zinc-100 group-hover:text-violet-300 transition-colors'>
                     {witch.name}
                   </h3>
-                  <span className='text-xs text-zinc-500'>{witch.era}</span>
+                  <span className='text-xs text-zinc-400'>{witch.era}</span>
                 </div>
                 <p className='text-sm text-zinc-400'>{witch.description}</p>
               </Link>

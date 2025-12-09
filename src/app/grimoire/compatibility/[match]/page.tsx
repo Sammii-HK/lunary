@@ -119,7 +119,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
 
       <div className='max-w-4xl mx-auto px-4 py-12'>
         {/* Breadcrumbs */}
-        <nav className='flex items-center gap-2 text-sm text-zinc-500 mb-8'>
+        <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-8'>
           <Link href='/grimoire' className='hover:text-zinc-300'>
             Grimoire
           </Link>
@@ -143,7 +143,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
               <div className='text-xl font-medium text-zinc-100'>
                 {content.sign1}
               </div>
-              <div className='text-sm text-zinc-500'>{sign1Info.element}</div>
+              <div className='text-sm text-zinc-400'>{sign1Info.element}</div>
             </div>
             <Heart className='h-8 w-8 text-lunary-rose' />
             <div className='text-center'>
@@ -153,7 +153,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
               <div className='text-xl font-medium text-zinc-100'>
                 {content.sign2}
               </div>
-              <div className='text-sm text-zinc-500'>{sign2Info.element}</div>
+              <div className='text-sm text-zinc-400'>{sign2Info.element}</div>
             </div>
           </div>
           <h1 className='text-3xl font-light text-zinc-100 mb-4'>
@@ -182,7 +182,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
               >
                 {content.overallScore}/10
               </div>
-              <div className='text-sm text-zinc-500'>Overall</div>
+              <div className='text-sm text-zinc-400'>Overall</div>
             </div>
             <div className='space-y-4'>
               <div className='flex items-center gap-2 text-lunary-rose'>
@@ -318,7 +318,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
         </section>
 
         {/* E-A-T Footer */}
-        <footer className='mt-12 pt-8 border-t border-zinc-800 text-sm text-zinc-500'>
+        <footer className='mt-12 pt-8 border-t border-zinc-800 text-sm text-zinc-400'>
           <p>
             Written by Sammii, Founder of Lunary • Last updated:{' '}
             {new Date().toLocaleDateString('en-US', {

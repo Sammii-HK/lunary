@@ -42,7 +42,7 @@ function EntryCard({ entry }: EntryCardProps) {
       <div className='flex items-center gap-2 mb-1'>
         <span className='text-sm text-zinc-400'>{formattedDate}</span>
         {entry.moonPhase && (
-          <span className='text-xs text-zinc-500 flex items-center gap-1'>
+          <span className='text-xs text-zinc-400 flex items-center gap-1'>
             <Moon className='w-3 h-3' />
             {entry.moonPhase}
           </span>
@@ -195,7 +195,7 @@ export default function JournalPage() {
               <BookOpen className='w-5 h-5 text-lunary-primary-400' />
               Living Book of Shadows
             </h1>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-zinc-400'>
               Your reflections and patterns connected
             </p>
           </div>
@@ -261,7 +261,7 @@ export default function JournalPage() {
           {entries.length === 0 ? (
             <div className='text-center py-8'>
               <Moon className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-              <p className='text-zinc-500'>No reflections yet</p>
+              <p className='text-zinc-400'>No reflections yet</p>
               <p className='text-xs text-zinc-600 mt-1'>
                 Add a reflection or chat with your Astral Guide
               </p>

@@ -87,7 +87,7 @@ export const PreviewCardHeader = ({
       {icon && <span className='text-lunary-accent'>{icon}</span>}
       <span className='text-sm font-medium text-zinc-200'>{title}</span>
       {subtitle && (
-        <span className='text-xs text-zinc-500 uppercase tracking-wide'>
+        <span className='text-xs text-zinc-400 uppercase tracking-wide'>
           {subtitle}
         </span>
       )}

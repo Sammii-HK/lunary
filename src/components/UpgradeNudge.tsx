@@ -140,7 +140,7 @@ export function UpgradeNudgeOverlay({
       <Sparkles className='w-6 h-6 text-lunary-accent-400 mb-3' />
       <p className='text-sm text-zinc-300 text-center mb-1'>{feature}</p>
       {description && (
-        <p className='text-xs text-zinc-500 text-center mb-3'>{description}</p>
+        <p className='text-xs text-zinc-400 text-center mb-3'>{description}</p>
       )}
       <Link
         href='/pricing'

@@ -203,7 +203,7 @@ While eclectic practice is valid, be aware that some traditions are closed or re
                   <h3 className='text-xl font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
                     {pantheon} Pantheon
                   </h3>
-                  <p className='text-sm text-zinc-500 mb-4'>
+                  <p className='text-sm text-zinc-400 mb-4'>
                     {pantheonInfo[pantheon]}
                   </p>
                 </Link>

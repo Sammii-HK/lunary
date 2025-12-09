@@ -216,7 +216,7 @@ Numbers above 9 carry the energy of their reduced digit. 13 (1+3=4) has 4 energy
                 <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-2'>
                   {data.correspondences[0]}
                 </h3>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   {data.planets.join(', ')}
                 </p>
               </Link>

@@ -232,7 +232,7 @@ Each named moon carries specific energy for your practice. Align your rituals wi
                   className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-amber-700/50 transition-all'
                 >
                   <div className='flex items-center justify-between mb-2'>
-                    <span className='text-sm text-zinc-500'>{month}</span>
+                    <span className='text-sm text-zinc-400'>{month}</span>
                     <span className='text-xl'>🌕</span>
                   </div>
                   <h3 className='text-lg font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>

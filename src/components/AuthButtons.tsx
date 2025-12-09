@@ -54,7 +54,7 @@ export function AuthButtons({
             </span>
             !
           </p>
-          <p className='text-sm text-zinc-500'>
+          <p className='text-sm text-zinc-400'>
             Your cosmic profile is synced and ready
           </p>
         </div>

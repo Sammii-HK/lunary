@@ -218,7 +218,7 @@ export function ExploreThisWeek() {
                           {day.bestActivity.activity}
                         </p>
                       </div>
-                      <p className='text-xs text-zinc-500 leading-tight'>
+                      <p className='text-xs text-zinc-400 leading-tight'>
                         {day.actionableInsight}
                       </p>
                     </div>

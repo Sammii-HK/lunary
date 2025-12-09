@@ -74,7 +74,7 @@ export function ReportPDF({
           placeholder='Email this report'
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className='w-full rounded-xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-lunary-primary-400 focus:outline-none'
+          className='w-full rounded-xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-400 focus:border-lunary-primary-400 focus:outline-none'
         />
       )}
     </div>

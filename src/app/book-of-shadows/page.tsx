@@ -73,7 +73,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       <div className='flex items-center gap-2 mb-1.5'>
         <span className='text-sm text-zinc-400'>{formattedDate}</span>
         {entry.moonPhase && (
-          <span className='text-xs text-zinc-500 flex items-center gap-1'>
+          <span className='text-xs text-zinc-400 flex items-center gap-1'>
             <Moon className='w-3 h-3' />
             {entry.moonPhase}
           </span>
@@ -127,13 +127,13 @@ function MemoryCard({
             {CATEGORY_LABELS[memory.category] || memory.category}
           </span>
           <p className='text-white text-sm mt-0.5'>{memory.fact}</p>
-          <span className='text-xs text-zinc-500'>
+          <span className='text-xs text-zinc-400'>
             Mentioned {memory.mentionedCount}x
           </span>
         </div>
         <button
           onClick={() => setShowConfirm(true)}
-          className='p-2 text-zinc-500 hover:text-lunary-error transition-colors'
+          className='p-2 text-zinc-400 hover:text-lunary-error transition-colors'
           aria-label='Delete memory'
         >
           <Trash2 className='w-4 h-4' />
@@ -371,7 +371,7 @@ export default function BookOfShadowsPage() {
                 <BookOpen className='w-5 h-5 text-lunary-primary-400' />
                 Book of Shadows
               </h1>
-              <p className='text-xs text-zinc-500'>Your living journal</p>
+              <p className='text-xs text-zinc-400'>Your living journal</p>
             </div>
             <Link
               href='/guide'
@@ -451,7 +451,7 @@ export default function BookOfShadowsPage() {
             {entries.length === 0 ? (
               <div className='text-center py-12'>
                 <Moon className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-                <p className='text-zinc-500'>No reflections yet</p>
+                <p className='text-zinc-400'>No reflections yet</p>
                 <p className='text-xs text-zinc-600 mt-1'>
                   Add a reflection or chat with your Astral Guide
                 </p>
@@ -479,7 +479,7 @@ export default function BookOfShadowsPage() {
             {memories.length === 0 ? (
               <div className='text-center py-12'>
                 <Brain className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-                <p className='text-zinc-500'>No memories yet</p>
+                <p className='text-zinc-400'>No memories yet</p>
                 <p className='text-xs text-zinc-600 mt-1'>
                   Chat with your Astral Guide to build your profile
                 </p>
@@ -503,7 +503,7 @@ export default function BookOfShadowsPage() {
             {patterns.length === 0 ? (
               <div className='text-center py-12'>
                 <Sparkles className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-                <p className='text-zinc-500'>No patterns detected yet</p>
+                <p className='text-zinc-400'>No patterns detected yet</p>
                 <p className='text-xs text-zinc-600 mt-1'>
                   Keep journaling to reveal recurring themes
                 </p>

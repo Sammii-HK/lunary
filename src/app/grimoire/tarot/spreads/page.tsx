@@ -220,13 +220,13 @@ export default function TarotSpreadsIndexPage() {
                           {spread.name}
                         </h3>
                         {spread.minimumPlan !== 'free' && (
-                          <Lock className='w-4 h-4 text-zinc-500' />
+                          <Lock className='w-4 h-4 text-zinc-400' />
                         )}
                       </div>
                       <p className='text-sm text-zinc-400 mb-3 line-clamp-2'>
                         {spread.description}
                       </p>
-                      <div className='flex items-center gap-4 text-xs text-zinc-500'>
+                      <div className='flex items-center gap-4 text-xs text-zinc-400'>
                         <span className='flex items-center gap-1'>
                           <Star className='w-3 h-3' />
                           {spread.cardCount} cards

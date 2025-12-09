@@ -77,7 +77,7 @@ export default function AspectsIndexPage() {
                   </span>
                 </div>
                 <h3 className='text-lg font-medium mb-1'>{data.displayName}</h3>
-                <p className='text-sm text-zinc-500 mb-2'>{data.degrees}°</p>
+                <p className='text-sm text-zinc-400 mb-2'>{data.degrees}°</p>
                 <p className='text-sm text-zinc-400'>
                   {data.keywords.join(', ')}
                 </p>
@@ -100,7 +100,7 @@ export default function AspectsIndexPage() {
               <h3 className='text-lg font-medium group-hover:text-lunary-primary-300 transition-colors'>
                 {PLANET_DISPLAY[planet]} Aspects
               </h3>
-              <p className='text-sm text-zinc-500'>
+              <p className='text-sm text-zinc-400'>
                 Explore all {PLANET_DISPLAY[planet]} aspect combinations
               </p>
             </Link>

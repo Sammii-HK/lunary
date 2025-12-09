@@ -106,7 +106,7 @@ export default async function PlanetAspectTypePage({
         <div className='text-center mb-12'>
           <div className='flex justify-center items-center gap-4 mb-4'>
             <span className='text-5xl'>{symbol}</span>
-            <span className='text-3xl text-zinc-500'>{aspectSymbol}</span>
+            <span className='text-3xl text-zinc-400'>{aspectSymbol}</span>
           </div>
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
             {planetName} {aspect.charAt(0).toUpperCase() + aspect.slice(1)}{' '}
@@ -132,7 +132,7 @@ export default async function PlanetAspectTypePage({
               >
                 <div className='flex items-center justify-center gap-2 mb-2'>
                   <span className='text-2xl'>{symbol}</span>
-                  <span className='text-lg text-zinc-500'>{aspectSymbol}</span>
+                  <span className='text-lg text-zinc-400'>{aspectSymbol}</span>
                   <span className='text-2xl'>
                     {PLANET_SYMBOLS[planet2 as Planet]}
                   </span>

@@ -121,7 +121,7 @@ export default function SocialPreviewPage() {
                 autoPlay={false}
               />
             ) : (
-              <p className='text-zinc-500'>
+              <p className='text-zinc-400'>
                 Click "Generate Voiceover" to hear the audio
               </p>
             )}

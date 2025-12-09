@@ -505,7 +505,7 @@ export function OnboardingFlow() {
                       </div>
                     ))}
                   {birthChartPreview.length > 3 && (
-                    <div className='text-zinc-500 text-xs'>
+                    <div className='text-zinc-400 text-xs'>
                       +{birthChartPreview.length - 3} more planets
                     </div>
                   )}

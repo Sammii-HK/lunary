@@ -214,7 +214,7 @@ Plus three Master Numbers (11, 22, 33) with amplified spiritual potential.`}
                   <span className='text-3xl font-light text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
                     {num}
                   </span>
-                  <p className='text-xs text-zinc-500 mt-2 line-clamp-1'>
+                  <p className='text-xs text-zinc-400 mt-2 line-clamp-1'>
                     {data?.meaning || 'The ' + num}
                   </p>
                 </Link>

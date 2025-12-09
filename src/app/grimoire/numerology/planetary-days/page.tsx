@@ -144,7 +144,7 @@ export default function PlanetaryDaysIndexPage() {
                     </h3>
                     <span className={`text-sm ${day.color}`}>{day.planet}</span>
                   </div>
-                  <p className='text-sm text-zinc-500'>{day.energy}</p>
+                  <p className='text-sm text-zinc-400'>{day.energy}</p>
                 </div>
                 <div className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors'>
                   →

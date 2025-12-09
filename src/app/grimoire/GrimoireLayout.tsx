@@ -655,7 +655,7 @@ function GrimoireIndexPage() {
                     <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
                       {item.title}
                     </h3>
-                    <p className='text-xs text-zinc-500'>{item.description}</p>
+                    <p className='text-xs text-zinc-400'>{item.description}</p>
                   </Link>
                 ))}
               </div>
@@ -795,7 +795,7 @@ export default function GrimoireLayout({
             {SIDEBAR_CATEGORIES.map((category) => (
               <div key={category.name}>
                 {/* Category Header */}
-                <div className='flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider'>
+                <div className='flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-zinc-400 uppercase tracking-wider'>
                   <span className='text-lunary-primary-500'>
                     {category.icon}
                   </span>
@@ -841,7 +841,7 @@ export default function GrimoireLayout({
                             >
                               <ChevronRightIcon
                                 size={14}
-                                className={`text-zinc-500 transition-transform duration-200 ${
+                                className={`text-zinc-400 transition-transform duration-200 ${
                                   isExpanded ? 'rotate-90' : ''
                                 }`}
                                 aria-hidden='true'

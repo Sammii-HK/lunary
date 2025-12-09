@@ -173,7 +173,7 @@ export function PWARedirectTracker() {
       </div>
       <div className='space-y-1'>
         {logs.length === 0 ? (
-          <div className='text-zinc-500'>No logs yet...</div>
+          <div className='text-zinc-400'>No logs yet...</div>
         ) : (
           logs.map((log, i) => (
             <div

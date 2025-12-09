@@ -128,7 +128,7 @@ export default function PlanetsIndexPage() {
       <p className='text-sm text-zinc-400 mb-2'>
         {planetInfo[planet]?.description}
       </p>
-      <p className='text-xs text-zinc-500'>
+      <p className='text-xs text-zinc-400'>
         Rules: {planetInfo[planet]?.rules}
       </p>
     </Link>

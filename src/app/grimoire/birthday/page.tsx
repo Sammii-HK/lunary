@@ -62,7 +62,7 @@ export default function BirthdayIndexPage() {
       />
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
-          <nav className='text-sm text-zinc-500 mb-8'>
+          <nav className='text-sm text-zinc-400 mb-8'>
             <Link href='/grimoire' className='hover:text-zinc-300'>
               Grimoire
             </Link>
@@ -113,7 +113,7 @@ export default function BirthdayIndexPage() {
                   </span>
                   <div>
                     <div className='font-medium'>{zodiac.sign}</div>
-                    <div className='text-sm text-zinc-500'>
+                    <div className='text-sm text-zinc-400'>
                       {MONTH_NAMES[zodiac.startMonth - 1].slice(0, 3)}{' '}
                       {zodiac.startDay} -{' '}
                       {MONTH_NAMES[zodiac.endMonth - 1].slice(0, 3)}{' '}

@@ -24,7 +24,7 @@ export default function WelcomePage() {
       {/* Section 1: Hero */}
       <section className='relative px-4 md:px-6 pt-20 pb-10 md:pt-28 md:pb-16 bg-zinc-950'>
         <div className='max-w-3xl mx-auto text-center space-y-6'>
-          <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>
+          <p className='text-xs uppercase tracking-[0.2em] text-zinc-400'>
             A calm AI companion for cosmic self understanding
           </p>
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 leading-tight tracking-tight'>
@@ -47,7 +47,7 @@ export default function WelcomePage() {
               See how it works
             </a>
           </div>
-          <p className='text-sm text-zinc-500'>Free to begin. No commitment.</p>
+          <p className='text-sm text-zinc-400'>Free to begin. No commitment.</p>
         </div>
 
         {/* Hero Screenshot */}
@@ -73,7 +73,7 @@ export default function WelcomePage() {
           <p className='text-base md:text-lg text-zinc-300 font-light'>
             A calm alternative to noisy horoscope apps
           </p>
-          <p className='text-sm text-zinc-500 mt-1.5'>
+          <p className='text-sm text-zinc-400 mt-1.5'>
             Built for people who want depth, not drama.
           </p>
         </div>
@@ -178,7 +178,7 @@ export default function WelcomePage() {
                     Waning Crescent
                   </span>
                 </div>
-                <p className='text-xs text-zinc-500'>in Scorpio</p>
+                <p className='text-xs text-zinc-400'>in Scorpio</p>
                 <p className='text-xs text-zinc-600 mt-1'>
                   3 days until New Moon
                 </p>
@@ -194,7 +194,7 @@ export default function WelcomePage() {
                   </span>
                 </div>
                 <p className='text-sm text-lunary-primary-300'>The Star</p>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   Hope • Renewal • Serenity
                 </p>
               </div>
@@ -208,7 +208,7 @@ export default function WelcomePage() {
                     For you
                   </span>
                 </div>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   Supports intuition during this reflective phase
                 </p>
               </div>
@@ -277,13 +277,13 @@ export default function WelcomePage() {
             <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
               <div className='space-y-2.5'>
                 <div className='p-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
-                  <p className='text-xs text-zinc-500 mb-0.5'>Nov 28</p>
+                  <p className='text-xs text-zinc-400 mb-0.5'>Nov 28</p>
                   <p className='text-sm text-zinc-300'>
                     Feeling introspective. The Star appeared again.
                   </p>
                 </div>
                 <div className='p-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
-                  <p className='text-xs text-zinc-500 mb-0.5'>Nov 25</p>
+                  <p className='text-xs text-zinc-400 mb-0.5'>Nov 25</p>
                   <p className='text-sm text-zinc-300'>
                     New Moon intention: trust the process.
                   </p>
@@ -303,7 +303,7 @@ export default function WelcomePage() {
                   <span className='text-sm text-zinc-400'>
                     Recurring themes
                   </span>
-                  <span className='text-xs text-zinc-500'>Last 30 days</span>
+                  <span className='text-xs text-zinc-400'>Last 30 days</span>
                 </div>
                 <div className='space-y-2'>
                   <div className='flex items-center gap-3'>
@@ -377,7 +377,7 @@ export default function WelcomePage() {
               <p className='text-sm text-zinc-400 leading-relaxed'>
                 Lunary creates an accurate map of your chart.
               </p>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-zinc-400'>
                 Sets the foundation for personalised insight.
               </p>
             </div>
@@ -395,7 +395,7 @@ export default function WelcomePage() {
               <p className='text-sm text-zinc-400 leading-relaxed'>
                 Your personalised dashboard reveals today's themes and patterns.
               </p>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-zinc-400'>
                 See what is influencing your day.
               </p>
             </div>
@@ -412,7 +412,7 @@ export default function WelcomePage() {
                 Ask questions and receive grounded insight that supports your
                 day.
               </p>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-zinc-400'>
                 Your companion for clarity and reflection.
               </p>
             </div>
@@ -426,7 +426,7 @@ export default function WelcomePage() {
           <div className='grid md:grid-cols-2 gap-4 md:gap-6'>
             {/* Other Apps */}
             <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-5 md:p-6'>
-              <h3 className='text-sm font-medium text-zinc-500 uppercase tracking-wider mb-5'>
+              <h3 className='text-sm font-medium text-zinc-400 uppercase tracking-wider mb-5'>
                 Other apps
               </h3>
               <ul className='space-y-3'>
@@ -435,7 +435,7 @@ export default function WelcomePage() {
                     className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
-                  <span className='text-sm text-zinc-500'>
+                  <span className='text-sm text-zinc-400'>
                     Generic horoscopes
                   </span>
                 </li>
@@ -444,14 +444,14 @@ export default function WelcomePage() {
                     className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
-                  <span className='text-sm text-zinc-500'>Sun sign only</span>
+                  <span className='text-sm text-zinc-400'>Sun sign only</span>
                 </li>
                 <li className='flex items-start gap-3'>
                   <X
                     className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
-                  <span className='text-sm text-zinc-500'>
+                  <span className='text-sm text-zinc-400'>
                     Drama and predictions
                   </span>
                 </li>
@@ -460,7 +460,7 @@ export default function WelcomePage() {
                     className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
-                  <span className='text-sm text-zinc-500'>
+                  <span className='text-sm text-zinc-400'>
                     Notification spam
                   </span>
                 </li>

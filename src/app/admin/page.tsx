@@ -457,7 +457,7 @@ export default function AdminDashboard() {
             {authIssue.details ||
               "You don't have permission to access the admin dashboard."}
           </p>
-          <p className='text-sm text-zinc-500'>
+          <p className='text-sm text-zinc-400'>
             Check the browser console for details or update your admin settings.
           </p>
         </div>
@@ -799,7 +799,7 @@ export default function AdminDashboard() {
                         </div>
                         {getStatusBadge(tool.status)}
                       </div>
-                      <CardDescription className='text-xs text-zinc-500 line-clamp-2'>
+                      <CardDescription className='text-xs text-zinc-400 line-clamp-2'>
                         {tool.description}
                       </CardDescription>
                     </CardHeader>
@@ -817,7 +817,7 @@ export default function AdminDashboard() {
             className='flex items-center justify-between w-full mb-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:bg-zinc-900 transition-colors'
           >
             <div className='flex items-center gap-3'>
-              <Settings className='h-5 w-5 text-zinc-500' />
+              <Settings className='h-5 w-5 text-zinc-400' />
               <h2 className='text-lg md:text-xl font-bold text-zinc-400'>
                 Debug & Testing
               </h2>
@@ -846,14 +846,14 @@ export default function AdminDashboard() {
                         <CardHeader className='pb-3'>
                           <div className='flex items-center justify-between mb-2'>
                             <div className='flex items-center gap-2'>
-                              <div className='text-zinc-500'>{tool.icon}</div>
+                              <div className='text-zinc-400'>{tool.icon}</div>
                               <CardTitle className='text-sm md:text-base text-zinc-400'>
                                 {tool.title}
                               </CardTitle>
                             </div>
                             {getStatusBadge(tool.status)}
                           </div>
-                          <CardDescription className='text-xs text-zinc-500'>
+                          <CardDescription className='text-xs text-zinc-400'>
                             {tool.description}
                           </CardDescription>
                         </CardHeader>
@@ -870,7 +870,7 @@ export default function AdminDashboard() {
                     <FileText className='h-5 w-5' />
                     Substack Post Testing
                   </CardTitle>
-                  <CardDescription className='text-xs md:text-sm text-zinc-500'>
+                  <CardDescription className='text-xs md:text-sm text-zinc-400'>
                     Preview and test Substack posts without publishing
                   </CardDescription>
                 </CardHeader>
@@ -878,7 +878,7 @@ export default function AdminDashboard() {
                   <div className='space-y-4'>
                     <div className='flex flex-col sm:flex-row gap-4 items-start sm:items-center'>
                       <div className='flex-1'>
-                        <label className='text-xs text-zinc-500 mb-2 block'>
+                        <label className='text-xs text-zinc-400 mb-2 block'>
                           Week Offset (0 = current week, 1 = next week)
                         </label>
                         <input
@@ -1497,7 +1497,7 @@ export default function AdminDashboard() {
                     </div>
                   )}
 
-                  <p className='text-xs text-zinc-500 mt-4'>
+                  <p className='text-xs text-zinc-400 mt-4'>
                     Last checked:{' '}
                     {migrationStatus.checkedAt
                       ? new Date(migrationStatus.checkedAt).toLocaleString()
@@ -1517,7 +1517,7 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-zinc-400'>
                 Users migrate automatically on login. No batch migration needed.
               </p>
             </div>
@@ -1666,7 +1666,7 @@ export default function AdminDashboard() {
                         )}
                         {activity.metadata &&
                           typeof activity.metadata === 'object' && (
-                            <div className='text-xs text-zinc-500 mt-1'>
+                            <div className='text-xs text-zinc-400 mt-1'>
                               {activity.metadata.packsCreated &&
                                 `${activity.metadata.packsCreated} packs`}
                               {activity.metadata.postsGenerated &&
@@ -1676,7 +1676,7 @@ export default function AdminDashboard() {
                             </div>
                           )}
                       </div>
-                      <div className='flex-shrink-0 text-xs text-zinc-500'>
+                      <div className='flex-shrink-0 text-xs text-zinc-400'>
                         {timeAgo(activity.created_at)}
                       </div>
                     </div>

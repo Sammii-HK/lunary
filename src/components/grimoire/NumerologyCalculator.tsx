@@ -178,7 +178,7 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
             <ol className='space-y-1 text-sm text-zinc-300'>
               {result.steps.map((step, index) => (
                 <li key={index} className='flex gap-2'>
-                  <span className='text-zinc-500'>{index + 1}.</span>
+                  <span className='text-zinc-400'>{index + 1}.</span>
                   <span>{step}</span>
                 </li>
               ))}

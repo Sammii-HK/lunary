@@ -102,7 +102,7 @@ export function SocialProof() {
               <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
                 &ldquo;{testimonial.text}&rdquo;
               </p>
-              <p className='text-xs text-zinc-500 font-medium'>
+              <p className='text-xs text-zinc-400 font-medium'>
                 — {testimonial.name}
               </p>
             </div>

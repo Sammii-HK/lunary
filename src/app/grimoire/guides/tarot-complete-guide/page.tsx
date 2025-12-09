@@ -277,7 +277,7 @@ export default function TarotCompleteGuidePage() {
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-500 mb-8'>
+      <nav className='text-sm text-zinc-400 mb-8'>
         <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
@@ -516,7 +516,7 @@ export default function TarotCompleteGuidePage() {
                 </span>
                 <div>
                   <span className='text-zinc-100 font-medium'>{card.name}</span>
-                  <p className='text-xs text-zinc-500 mt-1'>
+                  <p className='text-xs text-zinc-400 mt-1'>
                     {card.keywords.join(' • ')}
                   </p>
                 </div>
@@ -595,7 +595,7 @@ export default function TarotCompleteGuidePage() {
                 <h3 className='text-xl font-medium text-zinc-100'>
                   {suit.name}
                 </h3>
-                <span className='text-sm text-zinc-500'>({suit.element})</span>
+                <span className='text-sm text-zinc-400'>({suit.element})</span>
               </div>
               <p className='text-zinc-300 mb-3'>{suit.description}</p>
               <div className='flex flex-wrap gap-2'>
@@ -758,7 +758,7 @@ export default function TarotCompleteGuidePage() {
               Perfect for daily guidance or quick answers. Draw one card and
               reflect on its message for your day or situation.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Best for: Daily practice, simple questions
             </p>
           </div>
@@ -772,7 +772,7 @@ export default function TarotCompleteGuidePage() {
               Past/Present/Future, Situation/Action/Outcome, or
               Mind/Body/Spirit.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Best for: General readings, specific questions
             </p>
           </div>
@@ -785,7 +785,7 @@ export default function TarotCompleteGuidePage() {
               The classic comprehensive spread covering present situation,
               challenges, past influences, future possibilities, and outcome.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Best for: In-depth readings, complex situations
             </p>
           </div>

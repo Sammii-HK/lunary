@@ -126,7 +126,7 @@ export const TransitOfTheDay = () => {
               <span className='font-astro text-lg text-lunary-secondary-200'>
                 {getPlanetSymbol(transit.planet)}
               </span>
-              <span className='text-xs text-zinc-500 uppercase tracking-wide'>
+              <span className='text-xs text-zinc-400 uppercase tracking-wide'>
                 {dateLabel}
               </span>
             </div>

@@ -110,7 +110,7 @@ export default async function PlacementPage({ params }: PageProps) {
 
       <div className='max-w-4xl mx-auto px-4 py-12'>
         {/* Breadcrumbs */}
-        <nav className='flex items-center gap-2 text-sm text-zinc-500 mb-8'>
+        <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-8'>
           <Link href='/grimoire' className='hover:text-zinc-300'>
             Grimoire
           </Link>
@@ -150,22 +150,22 @@ export default async function PlacementPage({ params }: PageProps) {
                     ? '💨'
                     : '💧'}
             </div>
-            <div className='text-xs text-zinc-500'>Element</div>
+            <div className='text-xs text-zinc-400'>Element</div>
             <div className='text-sm text-zinc-300'>{signInfo.element}</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-2xl mb-1'>⚡</div>
-            <div className='text-xs text-zinc-500'>Modality</div>
+            <div className='text-xs text-zinc-400'>Modality</div>
             <div className='text-sm text-zinc-300'>{signInfo.modality}</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-2xl mb-1'>🌟</div>
-            <div className='text-xs text-zinc-500'>Planet Rules</div>
+            <div className='text-xs text-zinc-400'>Planet Rules</div>
             <div className='text-sm text-zinc-300'>{planetInfo.rules}</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-2xl mb-1'>♈</div>
-            <div className='text-xs text-zinc-500'>Sign Ruler</div>
+            <div className='text-xs text-zinc-400'>Sign Ruler</div>
             <div className='text-sm text-zinc-300'>{signInfo.ruler}</div>
           </div>
         </div>
@@ -241,7 +241,7 @@ export default async function PlacementPage({ params }: PageProps) {
           </h2>
           <div className='grid md:grid-cols-2 gap-4'>
             <div>
-              <h3 className='text-sm text-zinc-500 mb-3'>
+              <h3 className='text-sm text-zinc-400 mb-3'>
                 {content.planet} in Other Signs
               </h3>
               <div className='flex flex-wrap gap-2'>
@@ -257,7 +257,7 @@ export default async function PlacementPage({ params }: PageProps) {
               </div>
             </div>
             <div>
-              <h3 className='text-sm text-zinc-500 mb-3'>
+              <h3 className='text-sm text-zinc-400 mb-3'>
                 Other Planets in {content.sign}
               </h3>
               <div className='flex flex-wrap gap-2'>
@@ -296,7 +296,7 @@ export default async function PlacementPage({ params }: PageProps) {
         </section>
 
         {/* E-A-T Footer */}
-        <footer className='mt-12 pt-8 border-t border-zinc-800 text-sm text-zinc-500'>
+        <footer className='mt-12 pt-8 border-t border-zinc-800 text-sm text-zinc-400'>
           <p>
             Written by Sammii, Founder of Lunary • Last updated:{' '}
             {new Date().toLocaleDateString('en-US', {

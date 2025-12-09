@@ -36,7 +36,7 @@ export default function OfflinePage() {
           Try Again
         </button>
 
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-zinc-400'>
           Some content may still be available from cache
         </p>
       </div>

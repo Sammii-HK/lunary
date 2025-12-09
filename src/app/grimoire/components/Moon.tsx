@@ -91,7 +91,7 @@ const Moon = () => {
             className='block p-5 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
             <div className='flex items-start gap-4'>
-              <span className='text-zinc-500 group-hover:text-lunary-primary-400 transition-colors mt-1'>
+              <span className='text-zinc-400 group-hover:text-lunary-primary-400 transition-colors mt-1'>
                 {section.icon}
               </span>
               <div className='flex-1'>
@@ -149,7 +149,7 @@ const Moon = () => {
                 <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-400 transition-colors'>
                   {annualFullMoons[moon as keyof typeof annualFullMoons].name}
                 </h3>
-                <p className='text-xs text-zinc-500'>{months[index]}</p>
+                <p className='text-xs text-zinc-400'>{months[index]}</p>
               </Link>
             );
           })}

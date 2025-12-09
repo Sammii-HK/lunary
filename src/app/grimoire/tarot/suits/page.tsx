@@ -175,7 +175,7 @@ export default function TarotSuitsIndexPage() {
                 {suitDetails[key].themes.map((theme) => (
                   <span
                     key={theme}
-                    className='px-2 py-1 text-xs bg-zinc-800/50 text-zinc-500 rounded'
+                    className='px-2 py-1 text-xs bg-zinc-800/50 text-zinc-400 rounded'
                   >
                     {theme}
                   </span>

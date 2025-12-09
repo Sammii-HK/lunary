@@ -91,7 +91,7 @@ export default function Events2026Page() {
                     <h2 className='text-xl font-medium text-white group-hover:text-lunary-primary-300 transition-colors'>
                       {event.title}
                     </h2>
-                    <span className='text-sm text-zinc-500'>{event.dates}</span>
+                    <span className='text-sm text-zinc-400'>{event.dates}</span>
                   </div>
                   <p className='text-zinc-400'>{event.description}</p>
                 </div>

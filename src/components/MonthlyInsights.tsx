@@ -151,7 +151,7 @@ export function MonthlyInsights() {
                 Frequent Cards
               </h3>
             </div>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-zinc-400'>
               No frequent cards yet this month. Start pulling cards to see your
               patterns!
             </p>

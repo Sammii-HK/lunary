@@ -191,7 +191,7 @@ export default function TarotGalleryPage() {
                         </div>
 
                         {/* Note about daily rotation */}
-                        <div className='mt-2 text-xs text-zinc-500'>
+                        <div className='mt-2 text-xs text-zinc-400'>
                           Daily rotation: Card {globalIndex + 1} of{' '}
                           {allCards.length}
                         </div>

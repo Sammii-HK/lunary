@@ -124,13 +124,13 @@ function TermCard({ term }: { term: GlossaryTerm }) {
       </div>
       <p className='text-zinc-400 text-sm leading-relaxed'>{term.definition}</p>
       {term.example && (
-        <p className='text-zinc-500 text-xs italic mt-2'>
+        <p className='text-zinc-400 text-xs italic mt-2'>
           Example: {term.example}
         </p>
       )}
       {term.relatedTerms && term.relatedTerms.length > 0 && (
         <div className='flex flex-wrap gap-2 mt-3'>
-          <span className='text-zinc-500 text-xs'>See also:</span>
+          <span className='text-zinc-400 text-xs'>See also:</span>
           {term.relatedTerms.map((relatedSlug) => {
             const relatedTerm = GLOSSARY_TERMS.find(
               (t) => t.slug === relatedSlug,
@@ -242,6 +242,9 @@ export default function GlossaryPage() {
       </nav>
 
       <section className='mb-16'>
+        <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+          All Terms A-Z
+        </h2>
         {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map((letter) => {
           const letterTerms = GLOSSARY_TERMS.filter((t) =>
             t.term.toUpperCase().startsWith(letter),

@@ -459,7 +459,7 @@ export default function ProfilePage() {
                     <div className='space-y-2'>
                       <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
                         Birth Time (optional)
-                        <span className='ml-2 text-[10px] font-normal text-zinc-500'>
+                        <span className='ml-2 text-[10px] font-normal text-zinc-400'>
                           More precise = more accurate
                         </span>
                       </label>
@@ -473,7 +473,7 @@ export default function ProfilePage() {
                     <div className='space-y-2'>
                       <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
                         Birth Location (optional)
-                        <span className='ml-2 text-[10px] font-normal text-zinc-500'>
+                        <span className='ml-2 text-[10px] font-normal text-zinc-400'>
                           City, Country or coordinates
                         </span>
                       </label>
@@ -497,7 +497,7 @@ export default function ProfilePage() {
               <div className='flex flex-wrap items-center justify-between gap-3'>
                 <div className='flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white sm:text-base'>
                   <div className='flex items-center gap-2'>
-                    <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                    <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
                       {nameLabel}
                     </span>
                     <span
@@ -508,7 +508,7 @@ export default function ProfilePage() {
                   </div>
                   <span className='hidden text-zinc-600 sm:inline'>•</span>
                   <div className='flex items-center gap-2'>
-                    <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                    <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
                       {birthdayLabel}
                     </span>
                     <span
@@ -521,7 +521,7 @@ export default function ProfilePage() {
                     <>
                       <span className='hidden text-zinc-600 sm:inline'>•</span>
                       <div className='flex items-center gap-2'>
-                        <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                        <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
                           Time
                         </span>
                         <span className='font-medium text-zinc-300'>
@@ -534,7 +534,7 @@ export default function ProfilePage() {
                     <>
                       <span className='hidden text-zinc-600 sm:inline'>•</span>
                       <div className='flex items-center gap-2'>
-                        <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                        <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
                           Location
                         </span>
                         <span className='font-medium text-zinc-300'>
@@ -802,7 +802,7 @@ export default function ProfilePage() {
         </div>
 
         <div className='flex flex-col items-center gap-2 text-sm'>
-          <span className='text-zinc-500'>Looking for more?</span>
+          <span className='text-zinc-400'>Looking for more?</span>
           <div className='flex flex-wrap justify-center gap-3'>
             <a
               href='/shop'
@@ -867,7 +867,7 @@ export default function ProfilePage() {
                       )}
                       {personalCard.reason && (
                         <div>
-                          <h4 className='text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1'>
+                          <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
                             Why This Card
                           </h4>
                           <p className='leading-relaxed'>
@@ -938,7 +938,7 @@ export default function ProfilePage() {
                   <h4 className='text-sm font-medium text-zinc-200'>
                     Export Your Data
                   </h4>
-                  <p className='text-xs text-zinc-500'>
+                  <p className='text-xs text-zinc-400'>
                     Download all your Lunary data as JSON
                   </p>
                 </div>
@@ -957,7 +957,7 @@ export default function ProfilePage() {
                   <h4 className='text-sm font-medium text-lunary-error-300'>
                     Delete Account
                   </h4>
-                  <p className='text-xs text-zinc-500'>
+                  <p className='text-xs text-zinc-400'>
                     Permanently delete your account and all data (30-day grace
                     period)
                   </p>
@@ -1010,7 +1010,7 @@ export default function ProfilePage() {
         <div className='flex justify-center'>
           <Link
             href='/help'
-            className='inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-400 transition-colors'
+            className='inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-400 transition-colors'
           >
             <HelpCircle className='w-3.5 h-3.5' />
             Help & Support

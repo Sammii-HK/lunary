@@ -121,7 +121,7 @@ export default function AspectTypesIndexPage() {
                     <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                       {aspect.name}
                     </h3>
-                    <div className='flex items-center gap-3 text-sm text-zinc-500'>
+                    <div className='flex items-center gap-3 text-sm text-zinc-400'>
                       <span>{aspect.degrees}</span>
                       <span>•</span>
                       <span>{aspect.nature}</span>

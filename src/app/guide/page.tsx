@@ -774,7 +774,7 @@ function BookOfShadowsContent() {
           <h1 className='text-xl font-light tracking-tight text-zinc-50 md:text-4xl'>
             Astral Guide
           </h1>
-          <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-500'>
+          <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-400'>
             {planId ? (
               <span className='rounded-full border border-lunary-primary-600 px-3 py-1 text-lunary-primary-300/90'>
                 Plan: {planId.replace(/_/g, ' ')}
@@ -969,7 +969,7 @@ function BookOfShadowsContent() {
                   className={`p-1.5 rounded-lg transition mr-2 ${
                     isJournalMode
                       ? 'bg-lunary-primary-600/30 text-lunary-primary-300 ring-1 ring-lunary-primary-500'
-                      : 'text-zinc-500 hover:text-lunary-primary-400 hover:bg-zinc-800/50'
+                      : 'text-zinc-400 hover:text-lunary-primary-400 hover:bg-zinc-800/50'
                   }`}
                   title={
                     isJournalMode ? 'Exit journal mode' : 'Write journal entry'
@@ -1025,7 +1025,7 @@ function BookOfShadowsContent() {
                   ? 'Write a journal entry...'
                   : "Write your heart's question…"
               }
-              className={`w-full resize-none rounded-xl border bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 ${
+              className={`w-full resize-none rounded-xl border bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 ${
                 isJournalMode
                   ? 'border-lunary-primary-600/50 focus:border-lunary-primary focus:ring-lunary-primary-700'
                   : 'border-zinc-700/60 focus:border-lunary-primary focus:ring-lunary-primary-800'

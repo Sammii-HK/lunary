@@ -452,7 +452,7 @@ export function AdvancedPatterns({
                             <span className='text-xs font-medium text-zinc-300'>
                               {reading.day}
                             </span>
-                            <span className='text-[10px] text-zinc-500'>
+                            <span className='text-[10px] text-zinc-400'>
                               {reading.date}
                             </span>
                           </div>
@@ -461,7 +461,7 @@ export function AdvancedPatterns({
                               {reading.card.name}
                             </p>
                             {reading.card.keywords[0] && (
-                              <p className='text-[10px] text-zinc-500'>
+                              <p className='text-[10px] text-zinc-400'>
                                 {reading.card.keywords[0]}
                               </p>
                             )}
@@ -576,7 +576,7 @@ export function AdvancedPatterns({
                                             ? 'text-lunary-success'
                                             : cardTrend.direction === 'down'
                                               ? 'text-red-400'
-                                              : 'text-zinc-500',
+                                              : 'text-zinc-400',
                                         )}
                                       >
                                         {cardTrend.direction === 'up'
@@ -776,7 +776,7 @@ export function AdvancedPatterns({
                   <h4 className='text-sm font-medium text-zinc-300 mb-3'>
                     Multi-Dimensional Analysis
                     {typeof selectedView === 'number' && (
-                      <span className='text-xs text-zinc-500 ml-2'>
+                      <span className='text-xs text-zinc-400 ml-2'>
                         ({selectedView} days)
                       </span>
                     )}
@@ -955,7 +955,7 @@ export function AdvancedPatterns({
                                 <span className='text-lunary-accent-300 font-medium'>
                                   {correlation.dimension1}
                                 </span>
-                                <span className='text-zinc-500'>×</span>
+                                <span className='text-zinc-400'>×</span>
                                 <span className='text-lunary-accent-300 font-medium'>
                                   {correlation.dimension2}
                                 </span>

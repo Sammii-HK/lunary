@@ -705,7 +705,7 @@ export function NotificationSettings() {
         </div>
       ) : (
         <div className='space-y-3'>
-          <div className='text-xs text-zinc-500 space-y-1'>
+          <div className='text-xs text-zinc-400 space-y-1'>
             <p>• New & Full Moons</p>
             <p>• Planetary ingresses & retrogrades</p>
             <p>• Sabbats & seasonal shifts</p>

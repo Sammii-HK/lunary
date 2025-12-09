@@ -206,7 +206,7 @@ const Practices = () => {
                 </p>
 
                 <div className='space-y-2'>
-                  <div className='flex items-center gap-4 text-xs text-zinc-500'>
+                  <div className='flex items-center gap-4 text-xs text-zinc-400'>
                     <div className='flex items-center gap-1'>
                       <Clock className='w-3 h-3' />
                       {spell.duration}
@@ -243,7 +243,7 @@ const Practices = () => {
                     </div>
                   )}
 
-                  <div className='text-xs text-zinc-500'>
+                  <div className='text-xs text-zinc-400'>
                     <span className='font-medium'>Key ingredients: </span>
                     {spell.ingredients
                       .slice(0, 2)
@@ -269,7 +269,7 @@ const Practices = () => {
             <h3 className='text-lg font-medium text-zinc-400 mb-2'>
               No spells found
             </h3>
-            <p className='text-sm text-zinc-500'>
+            <p className='text-sm text-zinc-400'>
               {searchTerm
                 ? `No spells match "${searchTerm}". Try a different search term.`
                 : 'No spells in this category yet. Check back soon for more magical practices!'}

@@ -139,7 +139,7 @@ const calculateAspectsWithDegrees = (
 const getOrbColor = (orb: number): string => {
   if (orb <= 2) return 'text-lunary-success-400';
   if (orb <= 5) return 'text-lunary-accent-300';
-  return 'text-zinc-500';
+  return 'text-zinc-400';
 };
 
 const getAspectStyles = (
@@ -248,7 +248,7 @@ export function TodaysAspects({
                     >
                       {aspect.aspectType}
                     </span>
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       {getAspectDescription(aspect.aspectType)}
                     </span>
                   </div>

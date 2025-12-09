@@ -275,7 +275,7 @@ export default function DailyPostsPreviewPage() {
                   </div>
 
                   {/* Image URL for testing */}
-                  <div className='mt-3 text-xs text-zinc-500 break-all'>
+                  <div className='mt-3 text-xs text-zinc-400 break-all'>
                     {post.imageUrl}
                   </div>
 

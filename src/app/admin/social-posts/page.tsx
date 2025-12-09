@@ -526,7 +526,7 @@ export default function SocialPostsPage() {
             className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
               activeTab === 'approve'
                 ? 'text-white'
-                : 'text-zinc-500 hover:text-zinc-300'
+                : 'text-zinc-400 hover:text-zinc-300'
             }`}
           >
             Approval Queue
@@ -544,7 +544,7 @@ export default function SocialPostsPage() {
             className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
               activeTab === 'generate'
                 ? 'text-white'
-                : 'text-zinc-500 hover:text-zinc-300'
+                : 'text-zinc-400 hover:text-zinc-300'
             }`}
           >
             Generate Posts
@@ -795,7 +795,7 @@ export default function SocialPostsPage() {
                           {post}
                         </p>
                         <div className='flex items-center justify-between'>
-                          <span className='text-xs text-zinc-500'>
+                          <span className='text-xs text-zinc-400'>
                             {post.length} characters
                           </span>
                           <Button
@@ -928,7 +928,7 @@ export default function SocialPostsPage() {
                 <CardContent className='py-12 text-center'>
                   <Sparkles className='h-12 w-12 mx-auto mb-4 text-zinc-600' />
                   <p className='text-zinc-400'>No posts pending approval</p>
-                  <p className='text-sm text-zinc-500 mt-2'>
+                  <p className='text-sm text-zinc-400 mt-2'>
                     Generate posts from the Generate tab
                   </p>
                   <Button

@@ -657,14 +657,6 @@ export const ASTROLOGY_GLOSSARY: GlossaryTerm[] = [
 
   // Other Points
   {
-    term: 'Chiron',
-    slug: 'chiron',
-    definition:
-      'An asteroid/comet known as the "Wounded Healer." Chiron in your chart shows your deepest wound and your greatest potential for healing others.',
-    category: 'planet',
-    relatedTerms: ['asteroid'],
-  },
-  {
     term: 'Part of Fortune',
     slug: 'part-of-fortune',
     definition:
@@ -737,14 +729,6 @@ export const ASTROLOGY_GLOSSARY: GlossaryTerm[] = [
       'A branch of astrology that answers specific questions by casting a chart for the moment the question is asked.',
     category: 'technique',
     relatedTerms: ['electional-astrology'],
-  },
-  {
-    term: 'Mundane Astrology',
-    slug: 'mundane-astrology',
-    definition:
-      'The study of world events, nations, and collective trends through astrology. Analyzes eclipses, ingresses, and planetary cycles.',
-    category: 'technique',
-    relatedTerms: ['world-astrology'],
   },
 
   // Systems

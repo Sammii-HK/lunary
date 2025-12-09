@@ -879,7 +879,7 @@ export function AskTheGrimoire({
                           {result.match}
                         </div>
                       )}
-                      <div className='text-xs text-zinc-500 mt-1 capitalize'>
+                      <div className='text-xs text-zinc-400 mt-1 capitalize'>
                         {result.type}
                       </div>
                     </div>

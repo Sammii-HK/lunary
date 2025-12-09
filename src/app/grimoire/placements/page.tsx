@@ -29,7 +29,7 @@ export default function PlacementsIndexPage() {
       <div className='max-w-6xl mx-auto px-4 py-12'>
         {/* Header */}
         <div className='mb-12'>
-          <nav className='flex items-center gap-2 text-sm text-zinc-500 mb-4'>
+          <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-4'>
             <Link href='/grimoire' className='hover:text-zinc-300'>
               Grimoire
             </Link>
@@ -52,19 +52,19 @@ export default function PlacementsIndexPage() {
             <div className='text-3xl font-light text-lunary-primary-400'>
               {planets.length}
             </div>
-            <div className='text-sm text-zinc-500'>Planets</div>
+            <div className='text-sm text-zinc-400'>Planets</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-3xl font-light text-lunary-primary-400'>
               {signs.length}
             </div>
-            <div className='text-sm text-zinc-500'>Signs</div>
+            <div className='text-sm text-zinc-400'>Signs</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-3xl font-light text-lunary-primary-400'>
               {planets.length * signs.length}
             </div>
-            <div className='text-sm text-zinc-500'>Combinations</div>
+            <div className='text-sm text-zinc-400'>Combinations</div>
           </div>
         </div>
 
@@ -136,7 +136,7 @@ export default function PlacementsIndexPage() {
           >
             Discover Your Placements
           </Link>
-          <p className='mt-3 text-sm text-zinc-500'>
+          <p className='mt-3 text-sm text-zinc-400'>
             Generate your complete birth chart to see all your planetary
             placements
           </p>

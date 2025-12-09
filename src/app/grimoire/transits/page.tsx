@@ -86,7 +86,7 @@ export default function TransitsIndexPage() {
                     href={`/grimoire/transits/${transit.id}`}
                     className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
                   >
-                    <div className='text-sm text-zinc-500 mb-1'>
+                    <div className='text-sm text-zinc-400 mb-1'>
                       {transit.dates}
                     </div>
                     <h3 className='text-lg font-medium mb-2 group-hover:text-lunary-primary-300 transition-colors'>

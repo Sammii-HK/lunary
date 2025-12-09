@@ -216,7 +216,7 @@ This information helps you understand the specific message for you.`}
                     {num}
                   </span>
                   {data?.meaning && (
-                    <p className='text-xs text-zinc-500 mt-2 line-clamp-1'>
+                    <p className='text-xs text-zinc-400 mt-2 line-clamp-1'>
                       {data.meaning.split(' & ')[0]}
                     </p>
                   )}

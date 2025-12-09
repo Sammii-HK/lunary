@@ -37,7 +37,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
         <div className='text-sm text-zinc-400'>
           PostHog is not configured. To enable page-level heatmaps:
         </div>
-        <ol className='mt-4 space-y-2 text-left text-xs text-zinc-500'>
+        <ol className='mt-4 space-y-2 text-left text-xs text-zinc-400'>
           <li>
             1. Sign up at{' '}
             <a
@@ -110,7 +110,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
             <h3 className='text-sm font-medium text-zinc-200'>
               Page-Level Heatmaps
             </h3>
-            <p className='mt-1 text-xs text-zinc-500'>
+            <p className='mt-1 text-xs text-zinc-400'>
               View heatmaps and session recordings in PostHog
             </p>
           </div>
@@ -139,7 +139,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
             )}
           </div>
         </div>
-        <div className='mt-4 text-xs text-zinc-500'>
+        <div className='mt-4 text-xs text-zinc-400'>
           💡 Tip: PostHog heatmaps show where users click, scroll, and interact
           on your pages. Access the full dashboard for detailed insights and
           session recordings.

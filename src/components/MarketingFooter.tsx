@@ -115,7 +115,7 @@ export function MarketingFooter() {
         <div className='grid grid-cols-2 md:grid-cols-3 gap-6 mb-8'>
           {/* Product */}
           <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
               Product
             </h3>
             <Link
@@ -152,7 +152,7 @@ export function MarketingFooter() {
 
           {/* Resources */}
           <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
               Resources
             </h3>
             <Link
@@ -183,7 +183,7 @@ export function MarketingFooter() {
 
           {/* Legal */}
           <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
               Legal
             </h3>
             <Link
@@ -216,7 +216,7 @@ export function MarketingFooter() {
 
         {/* Copyright */}
         <div className='pt-6 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-500 text-center'>
+          <p className='text-xs text-zinc-400 text-center'>
             © {new Date().getFullYear()} Lunar Computing, Inc. All rights
             reserved.
           </p>

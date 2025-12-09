@@ -542,7 +542,7 @@ export default function SubstackManagerPage() {
                   </div>
                 )}
                 {!publishResults.free && !publishResults.paid && (
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     No posts published yet
                   </p>
                 )}
@@ -824,7 +824,7 @@ export default function SubstackManagerPage() {
                             {Object.entries(content).map(([type, text]) => (
                               <div key={type} className='mb-2'>
                                 <div className='flex items-center justify-between'>
-                                  <span className='text-xs text-zinc-500 capitalize'>
+                                  <span className='text-xs text-zinc-400 capitalize'>
                                     {type}
                                   </span>
                                   <button

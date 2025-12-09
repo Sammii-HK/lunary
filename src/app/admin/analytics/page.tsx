@@ -464,7 +464,7 @@ export default function AnalyticsPage() {
           <h1 className='text-2xl font-light tracking-tight text-white md:text-3xl'>
             Engagement & Growth
           </h1>
-          <p className='text-sm text-zinc-500'>
+          <p className='text-sm text-zinc-400'>
             Monitor active usage, AI engagement, conversions, and feature
             adoption
           </p>
@@ -472,7 +472,7 @@ export default function AnalyticsPage() {
 
         <div className='flex flex-wrap gap-2'>
           <div className='flex items-center gap-2 rounded-xl border border-zinc-800/30 bg-zinc-900/20 px-3 py-2'>
-            <CalendarRange className='h-3.5 w-3.5 text-zinc-500' />
+            <CalendarRange className='h-3.5 w-3.5 text-zinc-400' />
             <div className='flex items-center gap-1.5 text-xs text-zinc-400'>
               <input
                 type='date'
@@ -601,7 +601,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Retention & Churn
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Cohort retention ({startDate} → {endDate})
             </CardDescription>
           </CardHeader>
@@ -635,7 +635,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Conversion Funnel
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Free → Trial → Paid
             </CardDescription>
           </CardHeader>
@@ -668,7 +668,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Trigger Features
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Top conversion drivers
             </CardDescription>
           </CardHeader>
@@ -701,7 +701,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               AI Mode Breakdown
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Usage by mode
             </CardDescription>
           </CardHeader>
@@ -715,7 +715,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Feature Usage Heatmap
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Past 7 days activity
             </CardDescription>
           </CardHeader>
@@ -731,7 +731,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Notification Health
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Open rates by channel
             </CardDescription>
           </CardHeader>
@@ -771,7 +771,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               AI Usage Summary
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Engagement metrics
             </CardDescription>
           </CardHeader>
@@ -812,7 +812,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Page-Level Heatmaps
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               User interaction patterns
             </CardDescription>
           </CardHeader>
@@ -829,7 +829,7 @@ export default function AnalyticsPage() {
               <CardTitle className='text-base font-medium'>
                 Discord Bot Engagement
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-500'>
+              <CardDescription className='text-xs text-zinc-400'>
                 Command usage and interactions (last 7 days)
               </CardDescription>
             </CardHeader>
@@ -872,7 +872,7 @@ export default function AnalyticsPage() {
               <CardTitle className='text-base font-medium'>
                 Top Discord Commands
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-500'>
+              <CardDescription className='text-xs text-zinc-400'>
                 Most popular bot interactions
               </CardDescription>
             </CardHeader>
@@ -905,7 +905,7 @@ export default function AnalyticsPage() {
                         }}
                       />
                     </div>
-                    <div className='flex items-center justify-between text-xs text-zinc-500'>
+                    <div className='flex items-center justify-between text-xs text-zinc-400'>
                       <span>{cmd.unique_users} users</span>
                       <span>{cmd.linked_users} linked</span>
                     </div>
@@ -913,7 +913,7 @@ export default function AnalyticsPage() {
                 ))}
               {(!discordAnalytics.stats?.commands ||
                 discordAnalytics.stats.commands.length === 0) && (
-                <div className='text-sm text-zinc-500'>
+                <div className='text-sm text-zinc-400'>
                   No Discord interactions yet
                 </div>
               )}
@@ -928,7 +928,7 @@ export default function AnalyticsPage() {
 function MultiLineChart({ data }: { data: ActivityTrend[] }) {
   if (!data.length) {
     return (
-      <div className='flex h-48 items-center justify-center text-sm text-zinc-500'>
+      <div className='flex h-48 items-center justify-center text-sm text-zinc-400'>
         Not enough data for this range.
       </div>
     );
@@ -1023,7 +1023,7 @@ function RetentionCard({
 
   return (
     <div className={`rounded-xl border px-3 py-2.5 ${color}`}>
-      <div className='text-xs font-medium text-zinc-500'>{label}</div>
+      <div className='text-xs font-medium text-zinc-400'>{label}</div>
       <div className='mt-1.5 text-2xl font-light tracking-tight text-white'>
         {value.toFixed(1)}%
       </div>
@@ -1034,7 +1034,7 @@ function RetentionCard({
 function ModeBreakdown({ modes }: { modes: AiMode[] }) {
   if (!modes.length) {
     return (
-      <div className='text-sm text-zinc-500'>No AI usage data available.</div>
+      <div className='text-sm text-zinc-400'>No AI usage data available.</div>
     );
   }
 
@@ -1072,7 +1072,7 @@ function HeatmapGrid({
 }) {
   if (!data.length) {
     return (
-      <div className='text-sm text-zinc-500'>
+      <div className='text-sm text-zinc-400'>
         No feature usage data available.
       </div>
     );
@@ -1100,7 +1100,7 @@ function HeatmapGrid({
         <tbody>
           {data.map((row) => (
             <tr key={row.date}>
-              <td className='py-2 text-zinc-500'>{row.date.slice(5)}</td>
+              <td className='py-2 text-zinc-400'>{row.date.slice(5)}</td>
               {row.entries.map((entry) => {
                 const intensity = entry.value / max;
                 return (
@@ -1138,7 +1138,7 @@ function MiniStat({
 }) {
   return (
     <div className='rounded-xl border border-zinc-800/20 bg-zinc-900/5 p-3'>
-      <div className='flex items-center gap-1.5 text-xs font-medium text-zinc-500'>
+      <div className='flex items-center gap-1.5 text-xs font-medium text-zinc-400'>
         {icon}
         {label}
       </div>

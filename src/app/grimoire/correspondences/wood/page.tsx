@@ -206,7 +206,7 @@ Wood carries the living essence of the tree long after harvest. Each species has
                 <p className='text-sm text-zinc-400 mb-2'>
                   {data.correspondences.slice(0, 3).join(', ')}
                 </p>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   Planet: {data.planets.join(', ')}
                 </p>
               </Link>

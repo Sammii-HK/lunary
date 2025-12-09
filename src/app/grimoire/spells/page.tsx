@@ -135,7 +135,7 @@ export default function SpellsIndexPage() {
                     {category.subcategories.slice(0, 3).map((sub) => (
                       <span
                         key={sub}
-                        className='text-xs px-2 py-0.5 bg-zinc-800 text-zinc-500 rounded'
+                        className='text-xs px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded'
                       >
                         {sub.replace(/-/g, ' ')}
                       </span>
@@ -171,7 +171,7 @@ export default function SpellsIndexPage() {
                     <p className='text-sm text-zinc-400 mb-3'>
                       {spell.description}
                     </p>
-                    <div className='flex items-center gap-4 text-xs text-zinc-500'>
+                    <div className='flex items-center gap-4 text-xs text-zinc-400'>
                       <span>{spell.duration}</span>
                       <span>{spell.category}</span>
                     </div>

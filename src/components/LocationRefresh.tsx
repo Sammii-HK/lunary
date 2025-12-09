@@ -54,12 +54,12 @@ export default function LocationRefresh({
   const descriptionClasses =
     variant === 'card'
       ? 'mt-1 text-xs text-zinc-400'
-      : 'mt-1 text-xs text-zinc-500';
+      : 'mt-1 text-xs text-zinc-400';
 
   const infoTextClasses =
     variant === 'card'
       ? 'text-center text-xs text-zinc-400'
-      : 'text-xs text-zinc-500';
+      : 'text-xs text-zinc-400';
 
   const feedbackClasses =
     variant === 'card'

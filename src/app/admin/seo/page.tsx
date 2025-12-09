@@ -214,7 +214,7 @@ export default function SEODashboard() {
                   ([reason, count]) => (
                     <div key={reason} className='flex justify-between text-sm'>
                       <span className='text-zinc-300'>{reason}</span>
-                      <span className='text-zinc-500'>{count} pages</span>
+                      <span className='text-zinc-400'>{count} pages</span>
                     </div>
                   ),
                 )}
@@ -241,7 +241,7 @@ export default function SEODashboard() {
                       >
                         {page.url.replace('https://lunary.app', '')}
                       </a>
-                      <ExternalLink className='h-3 w-3 text-zinc-500 flex-shrink-0' />
+                      <ExternalLink className='h-3 w-3 text-zinc-400 flex-shrink-0' />
                     </div>
                     <div className='text-xs text-zinc-400 mt-1'>
                       {page.coverageState}

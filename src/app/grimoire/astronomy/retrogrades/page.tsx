@@ -170,7 +170,7 @@ export default function RetrogradesIndexPage() {
                       {retrograde.name}
                     </h3>
                   </div>
-                  <div className='flex gap-4 text-sm text-zinc-500 mb-2'>
+                  <div className='flex gap-4 text-sm text-zinc-400 mb-2'>
                     <span>{retrograde.frequency}</span>
                     <span>•</span>
                     <span>{retrograde.duration}</span>

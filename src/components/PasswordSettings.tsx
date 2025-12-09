@@ -85,7 +85,7 @@ export function PasswordSettings() {
           >
             Set a Password
           </button>
-          <p className='text-xs text-zinc-500 text-center'>
+          <p className='text-xs text-zinc-400 text-center'>
             If you signed in with magic link and want to use a password instead
           </p>
         </div>
@@ -97,7 +97,7 @@ export function PasswordSettings() {
           >
             Change Password
           </button>
-          <p className='text-xs text-zinc-500 text-center'>
+          <p className='text-xs text-zinc-400 text-center'>
             If you already have a password and want to change it
           </p>
         </div>

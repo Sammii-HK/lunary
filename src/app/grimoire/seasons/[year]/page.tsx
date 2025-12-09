@@ -168,7 +168,7 @@ export default async function YearSeasonsPage({
                   {season.name}
                 </h3>
                 <p className='text-sm text-zinc-400 mb-1'>{season.dates}</p>
-                <p className='text-xs text-zinc-500'>{season.element} Season</p>
+                <p className='text-xs text-zinc-400'>{season.element} Season</p>
               </Link>
             ))}
           </div>

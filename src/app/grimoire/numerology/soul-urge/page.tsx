@@ -211,12 +211,12 @@ Many people live disconnected from their Soul Urge, pursuing what society expect
                     <span className='text-2xl font-light text-lunary-rose-400'>
                       {number}
                     </span>
-                    <span className='text-zinc-500 text-sm'>Soul Urge</span>
+                    <span className='text-zinc-400 text-sm'>Soul Urge</span>
                   </div>
                   <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-500 line-clamp-2'>
+                  <p className='text-sm text-zinc-400 line-clamp-2'>
                     {data.desires[0]}
                   </p>
                 </Link>
@@ -255,7 +255,7 @@ Many people live disconnected from their Soul Urge, pursuing what society expect
                   <h3 className='font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-500 line-clamp-2'>
+                  <p className='text-sm text-zinc-400 line-clamp-2'>
                     {data.desires[0]}
                   </p>
                 </Link>

@@ -160,7 +160,7 @@ export function BirthdayInput({
         )}
       />
       {error && <p className='mt-1 text-xs text-red-400'>{error}</p>}
-      <p className='mt-1 text-xs text-zinc-500'>Format: {placeholder}</p>
+      <p className='mt-1 text-xs text-zinc-400'>Format: {placeholder}</p>
     </div>
   );
 }

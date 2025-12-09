@@ -133,7 +133,7 @@ function AspectCard({ aspect }: { aspect: SynastryAspect }) {
             {aspect.personA.planet} {aspect.aspect} {aspect.personB.planet}
           </span>
         </div>
-        <span className='text-xs text-zinc-500'>orb: {aspect.orb}°</span>
+        <span className='text-xs text-zinc-400'>orb: {aspect.orb}°</span>
       </div>
       <p className='text-sm text-zinc-400'>
         {aspect.personA.planet} in {aspect.personA.sign} {aspect.aspect}{' '}
@@ -154,7 +154,7 @@ function CompatibilityScore({ score }: { score: number }) {
   return (
     <div className='text-center p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
       <div className={`text-5xl font-light ${getScoreColor()}`}>{score}</div>
-      <div className='text-sm text-zinc-500 mt-1'>Compatibility Score</div>
+      <div className='text-sm text-zinc-400 mt-1'>Compatibility Score</div>
       <div className='flex justify-center gap-1 mt-2'>
         {[...Array(5)].map((_, i) => (
           <Star
@@ -257,7 +257,7 @@ export default function SynastryGeneratorPage() {
     return (
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-2xl mx-auto px-4 py-12'>
-          <nav className='text-sm text-zinc-500 mb-8'>
+          <nav className='text-sm text-zinc-400 mb-8'>
             <Link href='/grimoire' className='hover:text-zinc-300'>
               Grimoire
             </Link>
@@ -294,7 +294,7 @@ export default function SynastryGeneratorPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
+        <nav className='text-sm text-zinc-400 mb-8'>
           <Link href='/grimoire' className='hover:text-zinc-300'>
             Grimoire
           </Link>
@@ -344,7 +344,7 @@ export default function SynastryGeneratorPage() {
             <button
               onClick={handleCalculate}
               disabled={loading || !personA.birthDate || !personB.birthDate}
-              className='w-full py-4 rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-medium transition-colors flex items-center justify-center gap-2'
+              className='w-full py-4 rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-800 disabled:text-zinc-400 text-white font-medium transition-colors flex items-center justify-center gap-2'
             >
               {loading ? (
                 <>

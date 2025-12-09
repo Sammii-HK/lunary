@@ -79,7 +79,7 @@ export function StreakDisplay() {
             <span className='text-xl font-bold text-lunary-rose'>0 days</span>
           </div>
           <div className='pt-2 border-t border-zinc-800/60'>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-zinc-400'>
               Start your streak today! Check in to begin tracking.
             </p>
           </div>
@@ -116,7 +116,7 @@ export function StreakDisplay() {
         )}
 
         <div className='pt-2 border-t border-zinc-800/60'>
-          <p className='text-xs text-zinc-500 mb-3'>
+          <p className='text-xs text-zinc-400 mb-3'>
             {streak.current === 0
               ? 'Start your streak today! Check in to begin tracking.'
               : 'Keep it going! Check in today to maintain your streak.'}

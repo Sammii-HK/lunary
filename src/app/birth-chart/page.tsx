@@ -1127,7 +1127,7 @@ const BirthChartPage = () => {
                               ))}
                             </div>
                           )}
-                          <div className='text-[10px] text-zinc-500 mt-1'>
+                          <div className='text-[10px] text-zinc-400 mt-1'>
                             {houseInfo?.theme}
                           </div>
                         </div>

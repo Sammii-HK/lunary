@@ -59,7 +59,7 @@ export function ConversionFunnel({
               )}
             </div>
             {stage.subtitle && (
-              <div className='text-xs text-zinc-500'>{stage.subtitle}</div>
+              <div className='text-xs text-zinc-400'>{stage.subtitle}</div>
             )}
             {index < stages.length - 1 && (
               <div className='flex items-center justify-center text-xs text-zinc-600'>

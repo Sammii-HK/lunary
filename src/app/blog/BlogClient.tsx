@@ -165,7 +165,7 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
                   <span className='px-3 py-1 text-xs font-medium rounded-full bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'>
                     This Week
                   </span>
-                  <span className='text-sm text-zinc-500'>
+                  <span className='text-sm text-zinc-400'>
                     Week {currentWeekData.weekNumber}, {currentWeekData.year}
                   </span>
                 </div>
@@ -228,7 +228,7 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
                       <span className='px-2.5 py-0.5 text-xs font-medium rounded bg-zinc-800/50 text-zinc-300 border border-zinc-700/50'>
                         Week {post.weekNumber}
                       </span>
-                      <span className='text-xs text-zinc-500'>{post.year}</span>
+                      <span className='text-xs text-zinc-400'>{post.year}</span>
                     </div>
                     <h3 className='text-xl md:text-2xl font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-300 transition-colors'>
                       {post.title}
@@ -242,7 +242,7 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
                   {post.summary}
                 </p>
 
-                <div className='flex items-center gap-4 text-xs text-zinc-500 mb-4'>
+                <div className='flex items-center gap-4 text-xs text-zinc-400 mb-4'>
                   <span className='flex items-center gap-1.5'>
                     <Calendar className='h-3.5 w-3.5' />
                     {new Date(post.weekStart).toLocaleDateString('en-US', {

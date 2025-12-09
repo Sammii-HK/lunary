@@ -173,7 +173,7 @@ export default function HousesOverviewIndexPage() {
                     {house.name}
                   </h3>
                 </div>
-                <p className='text-xs text-zinc-500 mb-2'>{house.keywords}</p>
+                <p className='text-xs text-zinc-400 mb-2'>{house.keywords}</p>
                 <p className='text-sm text-zinc-400 line-clamp-2'>
                   {house.description}
                 </p>

@@ -314,7 +314,7 @@ export function ShareBirthChart({
                       <p className='text-xs text-zinc-400 uppercase tracking-wider'>
                         Share as Link
                       </p>
-                      <p className='text-xs text-zinc-500'>
+                      <p className='text-xs text-zinc-400'>
                         Anyone with this link can view your birth chart
                         highlights
                       </p>
@@ -387,7 +387,7 @@ export function ShareBirthChart({
                     </div>
                   </div>
 
-                  <p className='mt-4 text-xs text-zinc-500 text-center'>
+                  <p className='mt-4 text-xs text-zinc-400 text-center'>
                     People who click your link can see your Big Three and chart
                     highlights without needing an account
                   </p>

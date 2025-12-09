@@ -76,15 +76,15 @@ export default function CompatibilityIndexPage() {
         <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-3xl font-light text-lunary-rose'>12</div>
-            <div className='text-sm text-zinc-500'>Signs</div>
+            <div className='text-sm text-zinc-400'>Signs</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-3xl font-light text-lunary-rose'>78</div>
-            <div className='text-sm text-zinc-500'>Unique Pairs</div>
+            <div className='text-sm text-zinc-400'>Unique Pairs</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-3xl font-light text-lunary-rose'>3</div>
-            <div className='text-sm text-zinc-500'>Categories</div>
+            <div className='text-sm text-zinc-400'>Categories</div>
           </div>
         </div>
 
@@ -114,7 +114,7 @@ export default function CompatibilityIndexPage() {
                   <h3 className='text-xl font-medium text-zinc-100'>
                     {sign1.name} Compatibility
                   </h3>
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     {sign1.element} • {sign1.modality}
                   </p>
                 </div>
@@ -172,7 +172,7 @@ export default function CompatibilityIndexPage() {
           >
             View Your Birth Chart
           </Link>
-          <p className='mt-3 text-sm text-zinc-500'>
+          <p className='mt-3 text-sm text-zinc-400'>
             Understand your complete astrological profile
           </p>
         </section>

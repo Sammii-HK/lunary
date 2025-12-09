@@ -37,14 +37,14 @@ function FeatureCell({ value }: { value: FeatureValue }) {
     return <Check className='h-5 w-5 text-lunary-success mx-auto' />;
   }
   if (value.type === 'x') {
-    return <X className='h-5 w-5 text-zinc-500 mx-auto' />;
+    return <X className='h-5 w-5 text-zinc-400 mx-auto' />;
   }
   return (
     <span
       className={
         value.highlight
           ? 'text-lunary-success font-medium text-sm'
-          : 'text-zinc-500 text-sm'
+          : 'text-zinc-400 text-sm'
       }
     >
       {value.value}
@@ -119,7 +119,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
                       {feature.description && (
                         <>
                           <br />
-                          <span className='text-xs text-zinc-500'>
+                          <span className='text-xs text-zinc-400'>
                             {feature.description}
                           </span>
                         </>
@@ -194,7 +194,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         </section>
 
         <section className='mt-12 pt-8 border-t border-zinc-800'>
-          <p className='text-xs text-zinc-500 leading-relaxed'>
+          <p className='text-xs text-zinc-400 leading-relaxed'>
             <strong>Disclaimer:</strong>{' '}
             {disclaimer ||
               `This comparison is based on publicly available information as of 2025. Features and pricing may change. ${competitorName} is a registered trademark of its respective owner. This comparison is for informational purposes only and is not intended to disparage any competitor. We strive to be fair and accurate in our assessments.`}

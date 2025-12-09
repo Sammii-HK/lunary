@@ -74,7 +74,7 @@ export const DateWidget = () => {
                 table: 'w-full border-collapse space-y-1',
                 head_row: 'flex',
                 head_cell:
-                  'text-zinc-500 rounded-md w-8 font-normal text-[0.8rem]',
+                  'text-zinc-400 rounded-md w-8 font-normal text-[0.8rem]',
                 row: 'flex w-full mt-2',
                 cell: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-lunary-primary-900 [&:has([aria-selected])]:rounded-md',
                 day: 'h-8 w-8 p-0 font-normal text-zinc-300 hover:bg-zinc-800 hover:text-lunary-accent-300 rounded-md transition-colors aria-selected:opacity-100',

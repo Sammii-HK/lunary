@@ -309,7 +309,7 @@ export default function MoonPhasesGuidePage() {
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-500 mb-8'>
+      <nav className='text-sm text-zinc-400 mb-8'>
         <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
@@ -488,7 +488,7 @@ export default function MoonPhasesGuidePage() {
                   <h3 className='text-xl font-medium text-zinc-100'>
                     {phase.name}
                   </h3>
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     {phase.illumination} illuminated • ~{phase.duration}
                   </p>
                 </div>
@@ -544,7 +544,7 @@ export default function MoonPhasesGuidePage() {
             >
               <h4 className='text-zinc-100 font-medium'>{moon.name}</h4>
               <p className='text-sm text-lunary-primary-400'>{moon.month}</p>
-              <p className='text-xs text-zinc-500 mt-1'>{moon.meaning}</p>
+              <p className='text-xs text-zinc-400 mt-1'>{moon.meaning}</p>
             </Link>
           ))}
         </div>
@@ -705,7 +705,7 @@ export default function MoonPhasesGuidePage() {
               Moon&apos;s closest approach to Earth (perigee). The Moon appears
               up to 14% larger and 30% brighter.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Energy is amplified—emotions run higher, manifestation is more
               powerful, and rituals have extra potency.
             </p>
@@ -720,7 +720,7 @@ export default function MoonPhasesGuidePage() {
               Sun, temporarily blocking sunlight. These are powerful New Moons
               that can mark major new beginnings.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Eclipse energy lasts 6 months and can trigger significant life
               changes. Many practitioners avoid rituals during eclipses and
               instead observe and receive.
@@ -736,7 +736,7 @@ export default function MoonPhasesGuidePage() {
               casting a shadow on the Moon. These are intense Full Moons that
               often bring revelations and endings.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Lunar Eclipses illuminate what&apos;s been hidden. They&apos;re
               powerful for releasing and completing cycles.
             </p>
@@ -751,7 +751,7 @@ export default function MoonPhasesGuidePage() {
               roughly every 2.5 years. Despite the name, the Moon doesn&apos;t
               actually appear blue.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Blue Moons are considered especially magical and powerful for
               manifestation. &quot;Once in a blue moon&quot; refers to their
               rarity.

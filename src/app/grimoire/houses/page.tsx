@@ -67,13 +67,13 @@ export default function HousesIndexPage() {
                   <span className='text-3xl font-light text-lunary-primary-400'>
                     {house}
                   </span>
-                  <span className='text-xs text-zinc-500'>
+                  <span className='text-xs text-zinc-400'>
                     Natural Ruler: {data.naturalSign}
                   </span>
                 </div>
                 <h3 className='text-lg font-medium mb-1'>{data.name}</h3>
                 <p className='text-sm text-zinc-400 mb-2'>{data.lifeArea}</p>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   {data.keywords.join(' • ')}
                 </p>
               </div>
@@ -92,7 +92,7 @@ export default function HousesIndexPage() {
               <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
                 {PLANET_HOUSE_DISPLAY[planet]}
               </div>
-              <div className='text-xs text-zinc-500'>in houses</div>
+              <div className='text-xs text-zinc-400'>in houses</div>
             </Link>
           ))}
         </div>

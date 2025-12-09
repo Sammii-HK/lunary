@@ -137,7 +137,7 @@ export default function MeditationTechniquesIndexPage() {
                   <span className='text-xs px-2 py-0.5 rounded bg-indigo-900/50 text-indigo-300'>
                     {technique.type}
                   </span>
-                  <span className='text-xs text-zinc-500'>
+                  <span className='text-xs text-zinc-400'>
                     {technique.duration}
                   </span>
                 </div>

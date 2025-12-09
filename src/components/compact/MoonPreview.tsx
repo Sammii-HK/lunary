@@ -298,7 +298,7 @@ export const MoonPreview = () => {
             : `${illuminationDisplay}% illuminated`
         }
       />
-      <p className='text-xs text-zinc-500 mt-1'>
+      <p className='text-xs text-zinc-400 mt-1'>
         {nextPhaseInfo.days} {nextPhaseInfo.days === 1 ? 'day' : 'days'} until{' '}
         {nextPhaseInfo.phase}
       </p>
@@ -311,25 +311,25 @@ export const MoonPreview = () => {
         <div className='grid grid-cols-4 gap-2 text-center'>
           <div>
             <span className='block text-base'>{zodiacInfo.elementSymbol}</span>
-            <span className='text-xs text-zinc-500'>{zodiacInfo.element}</span>
+            <span className='text-xs text-zinc-400'>{zodiacInfo.element}</span>
           </div>
           <div>
             <span className='block text-base font-astro'>
               {zodiacInfo.rulingPlanetSymbol}
             </span>
-            <span className='text-xs text-zinc-500'>
+            <span className='text-xs text-zinc-400'>
               {zodiacInfo.rulingPlanet}
             </span>
           </div>
           <div>
             <span className='block text-base'>{zodiacInfo.modalitySymbol}</span>
-            <span className='text-xs text-zinc-500'>{zodiacInfo.modality}</span>
+            <span className='text-xs text-zinc-400'>{zodiacInfo.modality}</span>
           </div>
           <div>
             <span className='block text-base font-astro'>
               {zodiacInfo.zodiacSymbol}
             </span>
-            <span className='text-xs text-zinc-500'>{zodiacInfo.symbol}</span>
+            <span className='text-xs text-zinc-400'>{zodiacInfo.symbol}</span>
           </div>
         </div>
       )}
@@ -359,7 +359,7 @@ export const MoonPreview = () => {
                 className='block p-2 rounded bg-zinc-800/50 hover:bg-zinc-800 transition-colors'
               >
                 <p className='text-sm text-zinc-200'>{spell.title}</p>
-                <p className='text-xs text-zinc-500'>{spell.purpose}</p>
+                <p className='text-xs text-zinc-400'>{spell.purpose}</p>
               </Link>
             ))}
           </div>

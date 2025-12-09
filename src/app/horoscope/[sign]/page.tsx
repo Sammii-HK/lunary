@@ -75,7 +75,7 @@ export default async function SignHoroscopePage({
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
+        <nav className='text-sm text-zinc-400 mb-8'>
           <Link href='/horoscope' className='hover:text-zinc-300'>
             Horoscope
           </Link>
@@ -107,7 +107,7 @@ export default async function SignHoroscopePage({
                 <div className='text-2xl font-light text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                   {year}
                 </div>
-                <div className='text-sm text-zinc-500 mt-1'>
+                <div className='text-sm text-zinc-400 mt-1'>
                   {signName} Horoscopes
                 </div>
               </Link>

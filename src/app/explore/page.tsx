@@ -122,7 +122,7 @@ export default function ExplorePage() {
         </header>
 
         <section>
-          <h2 className='text-xs font-medium text-zinc-500 uppercase tracking-wide mb-3'>
+          <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
             Your Space
           </h2>
           <div className='space-y-2'>
@@ -133,7 +133,7 @@ export default function ExplorePage() {
         </section>
 
         <section>
-          <h2 className='text-xs font-medium text-zinc-500 uppercase tracking-wide mb-3'>
+          <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
             Resources
           </h2>
           <div className='grid grid-cols-2 gap-2'>
@@ -161,7 +161,7 @@ function ExploreLink({ item }: { item: ExploreItem }) {
         <h3 className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
           {item.label}
         </h3>
-        <p className='text-xs text-zinc-500'>{item.description}</p>
+        <p className='text-xs text-zinc-400'>{item.description}</p>
       </div>
       <ChevronRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-400 transition-colors' />
     </Link>
@@ -175,7 +175,7 @@ function ExploreLinkCompact({ item }: { item: ExploreItem }) {
       href={item.href}
       className='flex items-center gap-3 p-3 rounded-lg border border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50 transition-colors group'
     >
-      <Icon className='w-4 h-4 text-zinc-500 group-hover:text-lunary-primary-400 transition-colors' />
+      <Icon className='w-4 h-4 text-zinc-400 group-hover:text-lunary-primary-400 transition-colors' />
       <span className='text-sm text-zinc-300 group-hover:text-zinc-100 transition-colors truncate'>
         {item.label}
       </span>

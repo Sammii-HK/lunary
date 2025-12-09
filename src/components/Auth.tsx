@@ -431,7 +431,7 @@ export function AuthComponent({
       </div>
 
       <div className='mt-4 text-center'>
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-zinc-400'>
           🔒 Your data is securely encrypted and synced across devices
         </p>
       </div>

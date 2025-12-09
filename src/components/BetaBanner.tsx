@@ -12,7 +12,7 @@ export function BetaBanner() {
   return (
     <div className='bg-zinc-900 border-b border-zinc-800/50 px-4 py-2 fixed top-0 left-0 right-0 z-[60]'>
       <p className='text-center text-sm text-zinc-300'>
-        <span className='text-zinc-500'>Beta launch: </span>
+        <span className='text-zinc-400'>Beta launch: </span>
         use code{' '}
         <span className='text-lunary-highlight font-medium'>
           STARGAZER

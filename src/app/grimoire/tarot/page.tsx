@@ -131,7 +131,7 @@ export default function TarotIndexPage() {
                   href={`/grimoire/tarot/${stringToKebabCase(card.name)}`}
                   className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
                 >
-                  <div className='text-xs text-zinc-500 mb-1'>{index}</div>
+                  <div className='text-xs text-zinc-400 mb-1'>{index}</div>
                   <h3 className='font-medium text-zinc-100 group-hover:text-violet-300 transition-colors text-sm'>
                     {card.name}
                   </h3>
@@ -158,7 +158,7 @@ export default function TarotIndexPage() {
                   <h3 className='text-lg font-medium text-zinc-100 group-hover:text-violet-300 transition-colors mb-2'>
                     {suit.name}
                   </h3>
-                  <p className='text-sm text-zinc-500 mb-2'>
+                  <p className='text-sm text-zinc-400 mb-2'>
                     Element: {suit.element}
                   </p>
                   <p className='text-sm text-zinc-400'>{suit.qualities}</p>

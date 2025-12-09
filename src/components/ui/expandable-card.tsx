@@ -122,7 +122,7 @@ export const ExpandableCardHeader = ({
       <div className='flex items-center gap-2'>
         {icon && <span>{icon}</span>}
         <span className='text-sm font-medium text-zinc-200'>{title}</span>
-        {subtitle && <span className='text-xs text-zinc-500'>{subtitle}</span>}
+        {subtitle && <span className='text-xs text-zinc-400'>{subtitle}</span>}
       </div>
       {badge && (
         <span

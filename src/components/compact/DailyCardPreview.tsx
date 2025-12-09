@@ -69,7 +69,7 @@ export const DailyCardPreview = () => {
             <p className='text-sm text-lunary-primary-200 font-medium'>
               {dailyCard.name}
             </p>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-zinc-400'>
               {dailyCard.keywords.join(' • ')}
             </p>
             {dailyCard.information && (
@@ -109,7 +109,7 @@ export const DailyCardPreview = () => {
           <p className='text-sm text-lunary-primary-200 font-medium'>
             {dailyCard.name}
           </p>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-zinc-400'>
             {dailyCard.keywords.join(' • ')}
           </p>
           {dailyCard.information && (

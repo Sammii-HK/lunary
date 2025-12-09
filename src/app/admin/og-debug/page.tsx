@@ -178,7 +178,7 @@ export default function OGDebugPage() {
                   </div>
                 )}
 
-                <div className='text-xs text-zinc-500 break-all mb-2 font-mono bg-zinc-800 p-2 rounded'>
+                <div className='text-xs text-zinc-400 break-all mb-2 font-mono bg-zinc-800 p-2 rounded'>
                   {og.url}
                 </div>
 

@@ -81,7 +81,7 @@ export default function SabbatsIndexPage() {
                   <h3 className='text-lg font-medium text-zinc-100 group-hover:text-amber-300 transition-colors'>
                     {sabbat.name}
                   </h3>
-                  <span className='text-sm text-zinc-500'>{sabbat.date}</span>
+                  <span className='text-sm text-zinc-400'>{sabbat.date}</span>
                 </div>
                 <p className='text-sm text-zinc-400 line-clamp-3'>
                   {sabbat.description}

@@ -127,7 +127,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                       Calculation Method
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       How birth charts are calculated
                     </span>
                   </td>
@@ -137,12 +137,12 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-zinc-400 text-sm'>
                       Generic Astrology
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>AI-Powered</span>
+                    <span className='text-zinc-400 text-sm'>AI-Powered</span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
@@ -151,7 +151,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                       Personalized Birth Chart
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       Based on exact birth time, date, location
                     </span>
                   </td>
@@ -171,7 +171,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                       Personalized Horoscopes
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       Based on YOUR chart vs generic zodiac
                     </span>
                   </td>
@@ -181,19 +181,19 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-zinc-400 text-sm'>
                       Generic Zodiac
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>AI-Generated</span>
+                    <span className='text-zinc-400 text-sm'>AI-Generated</span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
                   <td className='border border-zinc-800 p-4 text-zinc-300'>
                     <strong className='text-zinc-100'>Grimoire Included</strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       Spells, rituals, correspondences
                     </span>
                   </td>
@@ -201,17 +201,17 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500'>—</span>
+                    <span className='text-zinc-400'>—</span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500'>—</span>
+                    <span className='text-zinc-400'>—</span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/50'>
                   <td className='border border-zinc-800 p-4 text-zinc-300'>
                     <strong className='text-zinc-100'>Tarot Readings</strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       Personalized to your chart
                     </span>
                   </td>
@@ -219,10 +219,10 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>Limited</span>
+                    <span className='text-zinc-400 text-sm'>Limited</span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>Limited</span>
+                    <span className='text-zinc-400 text-sm'>Limited</span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
@@ -231,7 +231,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                       Astronomical Accuracy
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       Uses real planetary positions
                     </span>
                   </td>
@@ -239,10 +239,10 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>Generic</span>
+                    <span className='text-zinc-400 text-sm'>Generic</span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-zinc-400 text-sm'>
                       AI Interpretation
                     </span>
                   </td>
@@ -251,7 +251,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   <td className='border border-zinc-800 p-4 text-zinc-300'>
                     <strong className='text-zinc-100'>Free Trial</strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       Try before you buy
                     </span>
                   </td>
@@ -265,12 +265,12 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-zinc-400 text-sm'>
                       Limited free features
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-zinc-400 text-sm'>
                       Limited free features
                     </span>
                   </td>
@@ -279,7 +279,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   <td className='border border-zinc-800 p-4 text-zinc-300'>
                     <strong className='text-zinc-100'>Pricing</strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       Monthly subscription
                     </span>
                   </td>
@@ -289,12 +289,12 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     <span className='text-xs text-zinc-400'>or $39.99/yr</span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-zinc-400 text-sm'>
                       Varies by plan
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-zinc-400 text-sm'>
                       Varies by plan
                     </span>
                   </td>
@@ -303,7 +303,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   <td className='border border-zinc-800 p-4 text-zinc-300'>
                     <strong className='text-zinc-100'>Cross-Device Sync</strong>
                     <br />
-                    <span className='text-xs text-zinc-500'>
+                    <span className='text-xs text-zinc-400'>
                       Access your chart anywhere
                     </span>
                   </td>
@@ -409,13 +409,13 @@ export default function BestPersonalizedAstrologyAppsPage() {
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-500'>—</span>
+                <span className='h-4 w-4 text-zinc-400'>—</span>
                 <span className='text-sm text-zinc-400'>
                   Uses generic astrology (not real astronomy)
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-500'>—</span>
+                <span className='h-4 w-4 text-zinc-400'>—</span>
                 <span className='text-sm text-zinc-400'>
                   No grimoire included
                 </span>
@@ -447,13 +447,13 @@ export default function BestPersonalizedAstrologyAppsPage() {
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-500'>—</span>
+                <span className='h-4 w-4 text-zinc-400'>—</span>
                 <span className='text-sm text-zinc-400'>
                   AI-generated (not real astronomy)
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-500'>—</span>
+                <span className='h-4 w-4 text-zinc-400'>—</span>
                 <span className='text-sm text-zinc-400'>
                   No grimoire included
                 </span>
@@ -510,7 +510,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
 
         {/* Legal Disclaimer */}
         <section className='mt-12 pt-8 border-t border-zinc-800'>
-          <p className='text-xs text-zinc-500 leading-relaxed'>
+          <p className='text-xs text-zinc-400 leading-relaxed'>
             <strong>Disclaimer:</strong> This comparison is based on publicly
             available information as of 2025. Features and pricing may change.
             All competitor names are registered trademarks of their respective

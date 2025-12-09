@@ -199,7 +199,7 @@ export default function DeveloperDashboard() {
               <h3 className='text-lg font-medium text-zinc-300 mb-2'>
                 No API Keys
               </h3>
-              <p className='text-zinc-500 mb-4'>
+              <p className='text-zinc-400 mb-4'>
                 Create your first API key to get started
               </p>
               <button
@@ -230,7 +230,7 @@ export default function DeveloperDashboard() {
                           {key.tier}
                         </span>
                       </div>
-                      <code className='text-sm text-zinc-500'>
+                      <code className='text-sm text-zinc-400'>
                         {key.keyPrefix}•••••••
                       </code>
                     </div>
@@ -255,7 +255,7 @@ export default function DeveloperDashboard() {
 
                 <div className='grid grid-cols-3 gap-4'>
                   <div className='p-3 rounded bg-zinc-800/50'>
-                    <div className='flex items-center gap-2 text-xs text-zinc-500 mb-1'>
+                    <div className='flex items-center gap-2 text-xs text-zinc-400 mb-1'>
                       <TrendingUp className='h-3 w-3' />
                       Monthly Usage
                     </div>
@@ -274,7 +274,7 @@ export default function DeveloperDashboard() {
                   </div>
 
                   <div className='p-3 rounded bg-zinc-800/50'>
-                    <div className='flex items-center gap-2 text-xs text-zinc-500 mb-1'>
+                    <div className='flex items-center gap-2 text-xs text-zinc-400 mb-1'>
                       <Zap className='h-3 w-3' />
                       Rate Limit
                     </div>
@@ -284,14 +284,14 @@ export default function DeveloperDashboard() {
                   </div>
 
                   <div className='p-3 rounded bg-zinc-800/50'>
-                    <div className='text-xs text-zinc-500 mb-1'>Last Used</div>
+                    <div className='text-xs text-zinc-400 mb-1'>Last Used</div>
                     <div className='text-lg font-medium text-zinc-100'>
                       {formatDate(key.lastUsedAt)}
                     </div>
                   </div>
                 </div>
 
-                <div className='mt-4 text-xs text-zinc-500'>
+                <div className='mt-4 text-xs text-zinc-400'>
                   Created {formatDate(key.createdAt)} • Resets{' '}
                   {formatDate(key.resetAt)}
                 </div>
@@ -331,7 +331,7 @@ export default function DeveloperDashboard() {
                     </div>
                     <div className='text-2xl font-light text-zinc-100 mb-1'>
                       ${prices[tier]}
-                      <span className='text-sm text-zinc-500'>/mo</span>
+                      <span className='text-sm text-zinc-400'>/mo</span>
                     </div>
                     <div className='text-sm text-zinc-400'>
                       {limits[tier]} requests/mo

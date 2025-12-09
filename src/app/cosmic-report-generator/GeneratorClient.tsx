@@ -252,7 +252,7 @@ export function GeneratorClient() {
                 placeholder='Send report to email when generating'
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-lunary-primary-400 focus:outline-none'
+                className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-400 focus:border-lunary-primary-400 focus:outline-none'
               />
             </div>
             <button

@@ -722,7 +722,7 @@ export const HoroscopeWidget = () => {
         <div className='space-y-2'>
           <div className='flex items-center justify-between'>
             {/* <h3 className='font-bold'>Daily Cosmic Energy</h3> */}
-            {/* <span className='text-xs text-zinc-500'>
+            {/* <span className='text-xs text-zinc-400'>
               {generalHoroscope.moonPhase}
             </span> */}
           </div>

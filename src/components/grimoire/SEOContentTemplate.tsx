@@ -486,7 +486,7 @@ export function SEOContentTemplate({
               >
                 <div className='flex items-center justify-between'>
                   <span className='text-zinc-300 font-medium'>{item.name}</span>
-                  <span className='text-xs text-zinc-500 uppercase'>
+                  <span className='text-xs text-zinc-400 uppercase'>
                     {item.type}
                   </span>
                 </div>
@@ -560,7 +560,7 @@ export function SEOContentTemplate({
       {/* E-A-T Credibility Section */}
       {showEAT && (
         <footer className='mt-12 pt-8 border-t border-zinc-800/50'>
-          <div className='space-y-4 text-sm text-zinc-500'>
+          <div className='space-y-4 text-sm text-zinc-400'>
             <div className='flex flex-wrap gap-x-6 gap-y-2'>
               <span>
                 <strong className='text-zinc-400'>Written by:</strong> Sammii,

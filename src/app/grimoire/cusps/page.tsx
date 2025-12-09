@@ -66,7 +66,7 @@ export default function CuspsIndexPage() {
                   {data.sign1}-{data.sign2} Cusp
                 </h3>
                 <div className='text-zinc-300 mb-2'>The {data.name}</div>
-                <div className='text-sm text-zinc-500'>
+                <div className='text-sm text-zinc-400'>
                   {data.element1} + {data.element2}
                 </div>
               </Link>
