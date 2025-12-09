@@ -173,57 +173,6 @@ export default function ProfilePage() {
           })();
         }
 
-        // // Check if we have migrated profile data to restore
-        // if (typeof window !== 'undefined') {
-        //   const migrationDataStr = localStorage.getItem('migration_profile_data');
-        //   if (migrationDataStr && (!profileName || profileName === 'New User')) {
-        //     try {
-        //       const migrationData = JSON.parse(migrationDataStr);
-        //       console.log('Restoring complete migrated profile data:', migrationData);
-
-        //       // Restore all profile fields using correct Jazz API
-        //       if (migrationData.name) {
-        //         profileName = migrationData.name;
-        //         me.profile.$jazz.set('name', migrationData.name);
-        //       }
-
-        //       if (migrationData.birthday) {
-        //         me.profile.$jazz.set('birthday', migrationData.birthday);
-        //         setBirthday(migrationData.birthday);
-        //       }
-
-        //       if (migrationData.birthChart) {
-        //         me.profile.$jazz.set('birthChart', migrationData.birthChart);
-        //       }
-
-        //       if (migrationData.personalCard) {
-        //         me.profile.$jazz.set('personalCard', migrationData.personalCard);
-        //       }
-
-        //       if (migrationData.location) {
-        //         me.profile.$jazz.set('location', migrationData.location);
-        //       }
-
-        //       if (migrationData.subscriptionData) {
-        //         me.profile.$jazz.set('subscription', migrationData.subscriptionData);
-        //       }
-
-        //       if (migrationData.stripeCustomerId) {
-        //         me.profile.$jazz.set('stripeCustomerId', migrationData.stripeCustomerId);
-        //       }
-
-        //       console.log('✅ Profile data fully restored from migration');
-
-        //       // Clean up the temporary storage
-        //       localStorage.removeItem('migration_profile_data');
-        //       localStorage.removeItem('migration_data'); // Clean up old format too
-
-        //     } catch (error) {
-        //       console.error('Error restoring migration data:', error);
-        //     }
-        //   }
-        // }
-
         setIsLoading(false);
       } catch (error) {
         console.log('Error loading profile:', error);

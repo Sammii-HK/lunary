@@ -18,7 +18,6 @@ const astronomicon = localFont({
   display: 'swap',
 });
 
-import { LunaryJazzProvider } from '@/components/JazzProvider';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
 import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
@@ -159,29 +158,27 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <PostHogProvider>
             <ErrorBoundaryWrapper>
-              <LunaryJazzProvider>
-                <AuthStatusProvider>
-                  <UserProvider>
-                    <Suspense
-                      fallback={
-                        <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
-                          {children}
-                        </main>
-                      }
-                    >
-                      <ConditionalMainWrapper>
-                        <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                        <Analytics />
-                        <SpeedInsights />
-                      </ConditionalMainWrapper>
-                    </Suspense>
-                    <Suspense fallback={null}>
-                      <AppChrome />
-                    </Suspense>
-                    <CookieConsent />
-                  </UserProvider>
-                </AuthStatusProvider>
-              </LunaryJazzProvider>
+              <AuthStatusProvider>
+                <UserProvider>
+                  <Suspense
+                    fallback={
+                      <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
+                        {children}
+                      </main>
+                    }
+                  >
+                    <ConditionalMainWrapper>
+                      <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                      <Analytics />
+                      <SpeedInsights />
+                    </ConditionalMainWrapper>
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <AppChrome />
+                  </Suspense>
+                  <CookieConsent />
+                </UserProvider>
+              </AuthStatusProvider>
             </ErrorBoundaryWrapper>
           </PostHogProvider>
         </Suspense>
