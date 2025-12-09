@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       <OGContentCenter>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${baseUrl}/icons/dotty/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
+          src={`${baseUrl}/icons/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
           width={180}
           height={180}
           alt={moonPhase.name}

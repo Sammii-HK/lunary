@@ -18,7 +18,6 @@ const astronomicon = localFont({
   display: 'swap',
 });
 
-import { getMoonSymbol } from '../../utils/moon/moonPhases';
 import { LunaryJazzProvider } from '@/components/JazzProvider';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
@@ -31,16 +30,9 @@ import { UserProvider } from '@/context/UserContext';
 import { CookieConsent } from '@/components/CookieConsent';
 
 export async function generateMetadata(): Promise<Metadata> {
-  let moonSymbol = '🌙';
-  try {
-    moonSymbol = getMoonSymbol() || '🌙';
-  } catch (error) {
-    console.error('Failed to get moon symbol:', error);
-  }
-
   return {
     metadataBase: new URL('https://lunary.app'),
-    title: `${moonSymbol} Lunary`,
+    title: 'Lunary',
     description:
       'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily horoscopes, tarot readings, moon phases, and cosmic guidance. Free 7-day trial - credit card required but no payment taken.',
     manifest: PWA_MANIFEST_URL,

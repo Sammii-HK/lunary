@@ -47,7 +47,7 @@ class ErrorBoundary extends React.Component<
             <div className='text-center max-w-md'>
               <div className='mb-6'>
                 <Image
-                  src='/icons/dotty/moon-phases/new-moon.svg'
+                  src='/icons/moon-phases/new-moon.svg'
                   alt='Moon'
                   width={80}
                   height={80}

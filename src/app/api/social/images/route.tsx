@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
         {/* Moon icon */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${baseUrl}/icons/dotty/moon-phases/${moonPhasePng}.png`}
+          src={`${baseUrl}/icons/moon-phases/${moonPhasePng}.png`}
           alt='Moon phase'
           width={sizes.emojiSize + 40}
           height={sizes.emojiSize + 40}

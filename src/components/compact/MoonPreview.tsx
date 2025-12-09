@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { MoonPhaseLabels } from '../../../utils/moon/moonPhases';
 import {
@@ -13,6 +14,41 @@ import {
   ExpandableCard,
   ExpandableCardHeader,
 } from '@/components/ui/expandable-card';
+
+const NAMED_FULL_MOONS = [
+  'wolf moon',
+  'snow moon',
+  'worm moon',
+  'pink moon',
+  'flower moon',
+  'strawberry moon',
+  'buck moon',
+  'sturgeon moon',
+  'harvest moon',
+  'hunter moon',
+  'beaver moon',
+  'cold moon',
+];
+
+function getMoonPhaseIconPath(phase: string | undefined): string {
+  if (!phase) return 'full-moon';
+  const lower = phase.toLowerCase();
+  if (NAMED_FULL_MOONS.some((name) => lower.includes(name))) return 'full-moon';
+  if (lower.includes('new')) return 'new-moon';
+  if (lower.includes('waxing') && lower.includes('crescent'))
+    return 'waxing-cresent-moon';
+  if (lower.includes('first quarter')) return 'first-quarter';
+  if (lower.includes('waxing') && lower.includes('gibbous'))
+    return 'waxing-gibbous-moon';
+  if (lower.includes('full')) return 'full-moon';
+  if (lower.includes('waning') && lower.includes('gibbous'))
+    return 'waning-gibbous-moon';
+  if (lower.includes('last quarter') || lower.includes('third quarter'))
+    return 'last-quarter';
+  if (lower.includes('waning') && lower.includes('crescent'))
+    return 'waning-cresent-moon';
+  return 'full-moon';
+}
 
 interface Spell {
   id: string;
@@ -186,10 +222,10 @@ export const MoonPreview = () => {
   const {
     currentMoonPhase,
     currentMoonConstellationPosition,
-    symbol,
     moonIllumination,
     moonAge,
   } = useAstronomyContext();
+  const iconPath = getMoonPhaseIconPath(currentMoonPhase);
   const [spells, setSpells] = useState<Spell[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -247,7 +283,14 @@ export const MoonPreview = () => {
   const preview = (
     <>
       <ExpandableCardHeader
-        icon={<span className='text-xl'>{symbol}</span>}
+        icon={
+          <Image
+            src={`/icons/moon-phases/${iconPath}.svg`}
+            alt={currentMoonPhase}
+            width={24}
+            height={24}
+          />
+        }
         title={currentMoonPhase}
         subtitle={
           currentMoonConstellationPosition

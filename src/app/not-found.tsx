@@ -18,7 +18,7 @@ export default function NotFound() {
           </div>
           <div className='absolute inset-0 flex items-center justify-center'>
             <Image
-              src='/icons/dotty/moon-phases/new-moon.svg'
+              src='/icons/moon-phases/new-moon.svg'
               alt='New Moon'
               width={80}
               height={80}
