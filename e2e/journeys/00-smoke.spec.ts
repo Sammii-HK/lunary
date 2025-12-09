@@ -151,10 +151,8 @@ test.describe('Smoke Tests @smoke', () => {
     // Look for pricing-related text with multiple fallbacks
     const pricingSelectors = [
       page.getByText(/pricing|Simple|Plan|Subscribe/i).first(),
-      page
-        .locator('text=/cosmic explorer|cosmic guide|cosmic master/i')
-        .first(),
-      page.locator('text=/monthly|yearly|free/i').first(),
+      page.locator('text=/Lunary Free|Lunary\\+|monthly|yearly/i').first(),
+      page.locator('text=/free|trial|premium/i').first(),
     ];
 
     let found = false;
