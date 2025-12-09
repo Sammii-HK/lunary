@@ -54,11 +54,6 @@ export const CrystalWidget = () => {
     return getGeneralCrystalRecommendation(normalizedDate);
   }, [hasChartAccess, canAccessDate, normalizedDate]);
 
-  const sunSign = useMemo(() => {
-    if (!birthChart) return 'Aries';
-    return birthChart.find((p) => p.body === 'Sun')?.sign || 'Aries';
-  }, [birthChart]);
-
   const crystalData = useMemo(() => {
     if (!birthChart || !userBirthday || !observer) return null;
     if (!canAccessDate) return null;
@@ -72,20 +67,13 @@ export const CrystalWidget = () => {
       userBirthday,
     );
 
-    const guidance = getCrystalGuidance(crystal, reasons, sunSign);
+    const guidance = getCrystalGuidance(crystal, birthChart);
 
     return {
       crystal,
       guidance,
     };
-  }, [
-    normalizedDate,
-    userBirthday,
-    observer,
-    birthChart,
-    canAccessDate,
-    sunSign,
-  ]);
+  }, [normalizedDate, userBirthday, observer, birthChart, canAccessDate]);
 
   useEffect(() => {
     if (crystalData && hasChartAccess && user?.id) {
