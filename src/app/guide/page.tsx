@@ -10,7 +10,13 @@ import React, {
   Suspense,
 } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ArrowUp, ChevronDown, ChevronUp, Square } from 'lucide-react';
+import {
+  ArrowUp,
+  ChevronDown,
+  ChevronUp,
+  Square,
+  NotebookPen,
+} from 'lucide-react';
 
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -31,6 +37,10 @@ import {
 import { useSubscription } from '@/hooks/useSubscription';
 import { WeeklyInsights } from '@/lib/rituals/engine';
 import { useModal } from '@/hooks/useModal';
+import {
+  extractMoodTags,
+  extractCardReferences,
+} from '@/lib/journal/extract-moments';
 
 interface CollectionFolder {
   id: number;
@@ -44,6 +54,100 @@ interface SavedCollection {
   category: string;
 }
 
+function extractMeaningfulTitle(content: string): string {
+  const cleaned = content.replace(/[*_~`#]/g, '').trim();
+
+  const sentences = cleaned
+    .split(/[.!?\n]+/)
+    .filter((s) => s.trim().length > 10);
+  const firstSentence = sentences[0]?.trim() || cleaned;
+
+  const themeKeywords = [
+    'moon',
+    'transit',
+    'energy',
+    'mercury',
+    'venus',
+    'mars',
+    'jupiter',
+    'saturn',
+    'retrograde',
+    'new moon',
+    'full moon',
+    'eclipse',
+    'equinox',
+    'solstice',
+    'aries',
+    'taurus',
+    'gemini',
+    'cancer',
+    'leo',
+    'virgo',
+    'libra',
+    'scorpio',
+    'sagittarius',
+    'capricorn',
+    'aquarius',
+    'pisces',
+    'tarot',
+    'star',
+    'tower',
+    'fool',
+    'magician',
+    'empress',
+    'emperor',
+    'lovers',
+    'chariot',
+    'strength',
+    'hermit',
+    'wheel',
+    'justice',
+    'hanged',
+    'death',
+    'temperance',
+    'devil',
+    'world',
+    'sun',
+    'judgement',
+    'ritual',
+    'intention',
+    'reflection',
+    'meditation',
+    'crystal',
+    'chakra',
+    'healing',
+    'manifestation',
+    'gratitude',
+    'release',
+    'abundance',
+  ];
+
+  const lowerContent = cleaned.toLowerCase();
+  const foundThemes: string[] = [];
+
+  for (const keyword of themeKeywords) {
+    if (lowerContent.includes(keyword)) {
+      foundThemes.push(keyword.charAt(0).toUpperCase() + keyword.slice(1));
+      if (foundThemes.length >= 2) break;
+    }
+  }
+
+  if (foundThemes.length > 0) {
+    const themePrefix = foundThemes.join(' & ');
+    const shortContent =
+      firstSentence.length > 40
+        ? firstSentence.substring(0, 40).replace(/\s+\S*$/, '') + '...'
+        : firstSentence;
+    return `${themePrefix}: ${shortContent}`;
+  }
+
+  if (firstSentence.length <= 60) {
+    return firstSentence;
+  }
+
+  return firstSentence.substring(0, 55).replace(/\s+\S*$/, '') + '...';
+}
+
 const MessageBubble = ({
   role,
   content,
@@ -52,6 +156,7 @@ const MessageBubble = ({
   savedCollections,
   folders,
   onSaved,
+  onFolderCreated,
 }: {
   role: 'user' | 'assistant';
   content: string;
@@ -64,6 +169,7 @@ const MessageBubble = ({
   savedCollections?: SavedCollection[];
   folders?: CollectionFolder[];
   onSaved?: () => void;
+  onFolderCreated?: (folder: CollectionFolder) => void;
 }) => {
   const isUser = role === 'user';
   // Only parse assistant messages for entities (user messages don't need parsing)
@@ -153,20 +259,26 @@ const MessageBubble = ({
         <div className='opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mb-1'>
           <SaveToCollection
             item={{
-              title: `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}`,
+              title: extractMeaningfulTitle(content),
               description: content.substring(0, 200),
-              category: 'chat',
-              content: { messageId, content, role },
-              tags: ['ai-chat'],
+              category: 'journal',
+              content: {
+                text: content,
+                moodTags: extractMoodTags(content),
+                cardReferences: extractCardReferences(content),
+                source: 'chat',
+                sourceMessageId: messageId,
+              },
+              tags: ['from-chat'],
             }}
             isSaved={savedCollections?.some(
               (c) =>
-                c.title ===
-                  `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}` &&
-                c.category === 'chat',
+                c.category === 'journal' &&
+                c.title === extractMeaningfulTitle(content),
             )}
             folders={folders}
             onSaved={onSaved}
+            onFolderCreated={onFolderCreated}
           />
         </div>
       )}
@@ -224,6 +336,8 @@ function BookOfShadowsContent() {
   const [collectionFolders, setCollectionFolders] = useState<
     CollectionFolder[]
   >([]);
+  const [isJournalMode, setIsJournalMode] = useState(false);
+  const [isSubmittingJournal, setIsSubmittingJournal] = useState(false);
 
   useEffect(() => {
     if (!authState.isAuthenticated || authState.loading) return;
@@ -274,6 +388,13 @@ function BookOfShadowsContent() {
         }
       })
       .catch(() => {});
+  }, []);
+
+  const handleFolderCreated = useCallback((folder: CollectionFolder) => {
+    setCollectionFolders((prev) => {
+      if (prev.some((f) => f.id === folder.id)) return prev;
+      return [...prev, folder];
+    });
   }, []);
 
   // Initialize tarot card parser on mount (client-side only)
@@ -500,7 +621,66 @@ function BookOfShadowsContent() {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      attemptSend();
+      if (isJournalMode) {
+        handleJournalSubmit();
+      } else {
+        attemptSend();
+      }
+    }
+  };
+
+  const handleJournalSubmit = async () => {
+    const trimmed = input.trim();
+    if (!trimmed || isSubmittingJournal) return;
+
+    setIsSubmittingJournal(true);
+    try {
+      const moodTags = extractMoodTags(trimmed);
+      const cardReferences = extractCardReferences(trimmed);
+
+      let moonPhase: string | null = null;
+      let transitHighlight: string | null = null;
+
+      try {
+        const cosmicRes = await fetch('/api/gpt/cosmic-today');
+        if (cosmicRes.ok) {
+          const cosmicData = await cosmicRes.json();
+          moonPhase = cosmicData.moonPhase?.name || null;
+          if (cosmicData.keyTransits?.length > 0) {
+            transitHighlight = cosmicData.keyTransits[0].label;
+          }
+        }
+      } catch {
+        // Continue without cosmic context
+      }
+
+      const response = await fetch('/api/journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          content: trimmed,
+          moodTags,
+          cardReferences,
+          moonPhase,
+          transitHighlight,
+          source: 'chat-journal',
+        }),
+      });
+
+      if (response.ok) {
+        setInput('');
+        setIsJournalMode(false);
+        addMessage({
+          id: `journal-${Date.now()}`,
+          role: 'assistant',
+          content: `✨ Journal entry saved to your Book of Shadows${moonPhase ? ` (${moonPhase})` : ''}`,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to save journal entry:', error);
+    } finally {
+      setIsSubmittingJournal(false);
     }
   };
 
@@ -649,6 +829,7 @@ function BookOfShadowsContent() {
                         savedCollections={savedCollections}
                         folders={collectionFolders}
                         onSaved={handleCollectionSaved}
+                        onFolderCreated={handleFolderCreated}
                         onEntityClick={async (entity) => {
                           try {
                             // For spells/rituals, navigate to grimoire page
@@ -782,17 +963,32 @@ function BookOfShadowsContent() {
             </div>
 
             <div className='shrink-0 border-t border-zinc-800/70 bg-zinc-900/40'>
-              <button
-                onClick={() => setIsAssistExpanded(!isAssistExpanded)}
-                className='flex w-full items-center justify-between px-3 py-2 text-sm font-semibold text-lunary-primary-300/90 transition hover:bg-zinc-800/40 md:px-6 md:py-3'
-              >
-                <span>Assist</span>
-                {isAssistExpanded ? (
-                  <ChevronUp className='w-4 h-4' />
-                ) : (
-                  <ChevronDown className='w-4 h-4' />
-                )}
-              </button>
+              <div className='flex items-center px-3 py-2 md:px-6 md:py-3'>
+                <button
+                  onClick={() => setIsJournalMode(!isJournalMode)}
+                  className={`p-1.5 rounded-lg transition mr-2 ${
+                    isJournalMode
+                      ? 'bg-lunary-primary-600/30 text-lunary-primary-300 ring-1 ring-lunary-primary-500'
+                      : 'text-zinc-500 hover:text-lunary-primary-400 hover:bg-zinc-800/50'
+                  }`}
+                  title={
+                    isJournalMode ? 'Exit journal mode' : 'Write journal entry'
+                  }
+                >
+                  <NotebookPen className='w-4 h-4' />
+                </button>
+                <button
+                  onClick={() => setIsAssistExpanded(!isAssistExpanded)}
+                  className='flex flex-1 items-center justify-between text-sm font-semibold text-lunary-primary-300/90 transition hover:text-lunary-primary-200'
+                >
+                  <span>{isJournalMode ? 'Journal Mode' : 'Assist'}</span>
+                  {isAssistExpanded ? (
+                    <ChevronUp className='w-4 h-4' />
+                  ) : (
+                    <ChevronDown className='w-4 h-4' />
+                  )}
+                </button>
+              </div>
               {isAssistExpanded && (
                 <div className='px-3 pb-2 text-sm text-zinc-300 md:px-6 md:pb-4'>
                   <CopilotQuickActions
@@ -805,11 +1001,18 @@ function BookOfShadowsContent() {
           </section>
 
           <form
-            onSubmit={handleSubmit}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (isJournalMode) {
+                handleJournalSubmit();
+              } else {
+                attemptSend();
+              }
+            }}
             className='shrink-0 relative flex items-center'
           >
             <label htmlFor='book-of-shadows-message' className='sr-only'>
-              Share with Lunary
+              {isJournalMode ? 'Write a journal entry' : 'Share with Lunary'}
             </label>
             <textarea
               id='book-of-shadows-message'
@@ -817,8 +1020,16 @@ function BookOfShadowsContent() {
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder="Write your heart's question…"
-              className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-lunary-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary-800'
+              placeholder={
+                isJournalMode
+                  ? 'Write a journal entry...'
+                  : "Write your heart's question…"
+              }
+              className={`w-full resize-none rounded-xl border bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 ${
+                isJournalMode
+                  ? 'border-lunary-primary-600/50 focus:border-lunary-primary focus:ring-lunary-primary-700'
+                  : 'border-zinc-700/60 focus:border-lunary-primary focus:ring-lunary-primary-800'
+              }`}
             />
             {isStreaming ? (
               <button
@@ -831,10 +1042,18 @@ function BookOfShadowsContent() {
             ) : (
               <button
                 type='submit'
-                disabled={input.trim().length === 0}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-lunary-primary-600 text-white transition hover:bg-lunary-primary-500 disabled:opacity-40 disabled:cursor-not-allowed'
+                disabled={input.trim().length === 0 || isSubmittingJournal}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white transition disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isJournalMode
+                    ? 'bg-lunary-primary-500 hover:bg-lunary-primary-400'
+                    : 'bg-lunary-primary-600 hover:bg-lunary-primary-500'
+                }`}
               >
-                <ArrowUp className='w-4 h-4' />
+                {isJournalMode ? (
+                  <NotebookPen className='w-4 h-4' />
+                ) : (
+                  <ArrowUp className='w-4 h-4' />
+                )}
               </button>
             )}
           </form>

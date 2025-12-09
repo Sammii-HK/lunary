@@ -185,7 +185,7 @@ export default function WelcomePage() {
               </div>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <Layers className='w-4 h-4 text-lunary-primary-400' />
+                  <Layers className='w-4 h-4 text-lunary-accent-300' />
                   <span className='text-sm font-medium text-zinc-200'>
                     Daily Card
                   </span>
@@ -200,7 +200,7 @@ export default function WelcomePage() {
               </div>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <Gem className='w-4 h-4 text-lunary-primary-400' />
+                  <Gem className='w-4 h-4 text-lunary-accent-200' />
                   <span className='text-sm font-medium text-zinc-200'>
                     Amethyst
                   </span>

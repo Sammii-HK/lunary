@@ -78,8 +78,9 @@ export function Modal({
       <div
         ref={contentRef}
         className={cn(
-          'relative w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl',
+          'relative w-full rounded-2xl border border-zinc-700/50 bg-zinc-900/70 backdrop-blur-xl shadow-2xl',
           'animate-in fade-in-0 zoom-in-95 duration-200',
+          'max-h-[85vh] flex flex-col',
           sizeClasses[size],
           className,
         )}
@@ -87,13 +88,13 @@ export function Modal({
         {showCloseButton && (
           <button
             onClick={onClose}
-            className='absolute right-4 top-4 min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-zinc-200 transition-colors'
+            className='absolute right-3 top-3 z-10 h-9 w-9 flex items-center justify-center text-zinc-400 hover:text-white bg-black/30 hover:bg-black/50 backdrop-blur-2xl border border-zinc-700/50 rounded-full transition-all'
             aria-label='Close'
           >
-            <X className='w-5 h-5' />
+            <X className='w-4 h-4' />
           </button>
         )}
-        {children}
+        <div className='flex-1 min-h-0 overflow-y-auto p-6'>{children}</div>
       </div>
     </div>
   );

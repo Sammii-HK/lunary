@@ -60,6 +60,39 @@ body {
   }
 }
 
+/* Custom scrollbar - Comet Trail (desktop only) */
+@media (min-width: 768px) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(123, 123, 232, 0.45) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(123, 123, 232, 0.45);
+    border-radius: 3px;
+  }
+}
+
+/* Hide custom scrollbar on mobile - use native touch scrolling */
+@media (max-width: 767px) {
+  * {
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Performance optimizations */
 @layer components {
   /* Improve paint performance for cards and widgets */

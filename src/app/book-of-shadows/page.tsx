@@ -22,6 +22,10 @@ import {
   ModalFooter,
 } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import {
+  extractMoodTags,
+  extractCardReferences,
+} from '@/lib/journal/extract-moments';
 
 interface JournalEntry {
   id: number;
@@ -240,11 +244,37 @@ export default function BookOfShadowsPage() {
 
     setIsSubmitting(true);
     try {
+      const moodTags = extractMoodTags(newReflection);
+      const cardReferences = extractCardReferences(newReflection);
+
+      let moonPhase: string | null = null;
+      let transitHighlight: string | null = null;
+
+      try {
+        const cosmicRes = await fetch('/api/gpt/cosmic-today');
+        if (cosmicRes.ok) {
+          const cosmicData = await cosmicRes.json();
+          moonPhase = cosmicData.moonPhase?.name || null;
+          if (cosmicData.keyTransits?.length > 0) {
+            transitHighlight = cosmicData.keyTransits[0].label;
+          }
+        }
+      } catch {
+        // Continue without cosmic context if fetch fails
+      }
+
       const response = await fetch('/api/journal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ content: newReflection }),
+        body: JSON.stringify({
+          content: newReflection,
+          moodTags,
+          cardReferences,
+          moonPhase,
+          transitHighlight,
+          source: 'manual',
+        }),
       });
 
       if (response.ok) {

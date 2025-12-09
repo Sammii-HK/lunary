@@ -156,7 +156,7 @@ export function ConditionalMainWrapper({
   return (
     <main
       className={cn(
-        'flex flex-col w-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-700 hover:scrollbar-thumb-zinc-600',
+        'flex flex-col w-full overflow-y-auto',
         showMarketingNav && 'mt-8 h-[calc(100vh-2rem)]',
         showAppNav && 'h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)]',
         !showMarketingNav && !showAppNav && 'h-screen',

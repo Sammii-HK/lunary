@@ -126,7 +126,7 @@ const MOOD_KEYWORDS: Record<string, string> = {
   introspective: 'reflective',
 };
 
-function extractMoodTags(text: string): string[] {
+export function extractMoodTags(text: string): string[] {
   const moods = new Set<string>();
   const lowerText = text.toLowerCase();
 
@@ -139,7 +139,7 @@ function extractMoodTags(text: string): string[] {
   return Array.from(moods);
 }
 
-function extractCardReferences(text: string): string[] {
+export function extractCardReferences(text: string): string[] {
   const cards = new Set<string>();
   const lowerText = text.toLowerCase();
 
