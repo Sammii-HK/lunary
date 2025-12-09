@@ -94,6 +94,9 @@ export async function generateMetadata(): Promise<Metadata> {
       statusBarStyle: 'black-translucent',
       title: 'Lunary',
     },
+    icons: {
+      apple: '/apple-touch-icon.png',
+    },
     other: {
       'mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-capable': 'yes',
