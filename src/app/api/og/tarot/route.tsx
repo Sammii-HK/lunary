@@ -118,109 +118,107 @@ export async function GET(request: NextRequest) {
   const robotoFont = await loadGoogleFont(request);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        background: theme.background,
+        fontFamily: 'Roboto Mono',
+        color: 'white',
+        padding: '60px 40px',
+        justifyContent: 'space-between',
+      }}
+    >
+      {/* Keywords at top */}
       <div
         style={{
-          height: '100%',
-          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingBottom: '40px',
+          paddingTop: '100px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '24px',
+            fontWeight: '400',
+            color: 'white',
+            textAlign: 'center',
+            letterSpacing: '0.1em',
+            opacity: 0.7,
+          }}
+        >
+          {card.keywords.join(' • ')}
+        </div>
+      </div>
+
+      {/* Card name in middle - large for social */}
+      <div
+        style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          background: theme.background,
-          fontFamily: 'Roboto Mono',
-          color: 'white',
-          padding: '60px 40px',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
+          flex: 1,
+          width: '100%',
         }}
       >
-        {/* Keywords at top */}
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingBottom: '40px',
-            paddingTop: '100px',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '24px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              opacity: 0.7,
-            }}
-          >
-            {card.keywords.join(' • ')}
-          </div>
-        </div>
-
-        {/* Card name in middle - large for social */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            width: '100%',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '64px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              marginBottom: '40px',
-            }}
-          >
-            {card.name}
-          </div>
-          <div
-            style={{
-              fontSize: '32px',
-              color: 'white',
-              textAlign: 'center',
-              fontWeight: '300',
-              opacity: 0.8,
-            }}
-          >
-            {card.archetype}
-          </div>
-        </div>
-
-        {/* Date */}
-        <div
-          style={{
-            fontSize: '28px',
-            fontWeight: '300',
+            fontSize: '64px',
+            fontWeight: '400',
             color: 'white',
             textAlign: 'center',
-            fontFamily: 'Roboto Mono',
-            marginBottom: '20px',
-          }}
-        >
-          {formattedDate}
-        </div>
-
-        {/* Footer - exactly same as cosmic */}
-        <div
-          style={{
-            fontSize: '28px',
-            fontWeight: '300',
-            color: 'white',
-            letterSpacing: '1px',
+            letterSpacing: '0.1em',
             marginBottom: '40px',
           }}
         >
-          lunary.app
+          {card.name}
+        </div>
+        <div
+          style={{
+            fontSize: '32px',
+            color: 'white',
+            textAlign: 'center',
+            fontWeight: '300',
+            opacity: 0.8,
+          }}
+        >
+          {card.archetype}
         </div>
       </div>
-    ),
+
+      {/* Date */}
+      <div
+        style={{
+          fontSize: '28px',
+          fontWeight: '300',
+          color: 'white',
+          textAlign: 'center',
+          fontFamily: 'Roboto Mono',
+          marginBottom: '20px',
+        }}
+      >
+        {formattedDate}
+      </div>
+
+      {/* Footer - exactly same as cosmic */}
+      <div
+        style={{
+          fontSize: '28px',
+          fontWeight: '300',
+          color: 'white',
+          letterSpacing: '1px',
+          marginBottom: '40px',
+        }}
+      >
+        lunary.app
+      </div>
+    </div>,
     {
       width: 1200,
       height: 1200,

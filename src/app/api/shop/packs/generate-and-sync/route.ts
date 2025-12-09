@@ -327,9 +327,8 @@ async function generateGrimoirePackWithNaming(
     };
 
     // Import pack naming utility
-    const { generatePackNaming } = await import(
-      '../../../../../../utils/grimoire/packNaming'
-    );
+    const { generatePackNaming } =
+      await import('../../../../../../utils/grimoire/packNaming');
     const newNaming = generatePackNaming(metadata);
 
     Object.assign(basePack, {

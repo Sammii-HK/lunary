@@ -34,9 +34,8 @@ export async function POST(request: NextRequest) {
     const freePost = generateFreeSubstackPost(weeklyData);
     const paidPost = generatePaidSubstackPost(weeklyData);
 
-    const { publishBothTiers, publishToSubstack } = await import(
-      '../../../../../utils/substack/publisher'
-    );
+    const { publishBothTiers, publishToSubstack } =
+      await import('../../../../../utils/substack/publisher');
 
     let results;
 

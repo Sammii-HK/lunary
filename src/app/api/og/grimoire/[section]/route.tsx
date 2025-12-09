@@ -166,101 +166,99 @@ export async function GET(
   }
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: `linear-gradient(135deg, #0f172a 0%, #1e293b 30%, ${data.color}40 70%, #1e1b2e 100%)`,
+        fontFamily: 'Roboto Mono',
+        color: 'white',
+        padding: '60px 40px',
+      }}
+    >
       <div
         style={{
-          height: '100%',
-          width: '100%',
           display: 'flex',
-          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          background: `linear-gradient(135deg, #0f172a 0%, #1e293b 30%, ${data.color}40 70%, #1e1b2e 100%)`,
-          fontFamily: 'Roboto Mono',
-          color: 'white',
-          padding: '60px 40px',
+          paddingTop: '40px',
         }}
       >
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingTop: '40px',
+            fontSize: '28px',
+            fontWeight: '400',
+            color: 'rgba(255,255,255,0.7)',
+            textAlign: 'center',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
           }}
         >
-          <div
-            style={{
-              fontSize: '28px',
-              fontWeight: '400',
-              color: 'rgba(255,255,255,0.7)',
-              textAlign: 'center',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-            }}
-          >
-            Grimoire
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            gap: '30px',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '120px',
-              display: 'flex',
-            }}
-          >
-            {data.emoji}
-          </div>
-          <div
-            style={{
-              fontSize: '64px',
-              fontWeight: '600',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.02em',
-              display: 'flex',
-            }}
-          >
-            {data.title}
-          </div>
-          <div
-            style={{
-              fontSize: '28px',
-              fontWeight: '300',
-              color: 'rgba(255,255,255,0.7)',
-              textAlign: 'center',
-              letterSpacing: '0.05em',
-              display: 'flex',
-            }}
-          >
-            {data.subtitle}
-          </div>
-        </div>
-
-        <div
-          style={{
-            fontSize: '24px',
-            fontWeight: '300',
-            color: 'rgba(255,255,255,0.6)',
-            letterSpacing: '0.1em',
-            paddingBottom: '20px',
-            display: 'flex',
-          }}
-        >
-          lunary.app
+          Grimoire
         </div>
       </div>
-    ),
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+          gap: '30px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '120px',
+            display: 'flex',
+          }}
+        >
+          {data.emoji}
+        </div>
+        <div
+          style={{
+            fontSize: '64px',
+            fontWeight: '600',
+            color: 'white',
+            textAlign: 'center',
+            letterSpacing: '0.02em',
+            display: 'flex',
+          }}
+        >
+          {data.title}
+        </div>
+        <div
+          style={{
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'rgba(255,255,255,0.7)',
+            textAlign: 'center',
+            letterSpacing: '0.05em',
+            display: 'flex',
+          }}
+        >
+          {data.subtitle}
+        </div>
+      </div>
+
+      <div
+        style={{
+          fontSize: '24px',
+          fontWeight: '300',
+          color: 'rgba(255,255,255,0.6)',
+          letterSpacing: '0.1em',
+          paddingBottom: '20px',
+          display: 'flex',
+        }}
+      >
+        lunary.app
+      </div>
+    </div>,
     {
       width: 1200,
       height: 630,

@@ -435,9 +435,8 @@ export async function POST(request: NextRequest) {
         // For Reddit, select appropriate subreddit based on post type
         let subreddit: string | undefined;
         if (platform === 'reddit') {
-          const { selectSubredditForPostType } = await import(
-            '@/config/reddit-subreddits'
-          );
+          const { selectSubredditForPostType } =
+            await import('@/config/reddit-subreddits');
           const selectedSubreddit = selectSubredditForPostType(postType);
           subreddit = selectedSubreddit.name;
         }
@@ -515,9 +514,8 @@ export async function POST(request: NextRequest) {
       // Reddit-specific guidelines
       let redditGuidelines = '';
       if (postPlan.platform === 'reddit' && postPlan.subreddit) {
-        const { getSubredditByName } = await import(
-          '@/config/reddit-subreddits'
-        );
+        const { getSubredditByName } =
+          await import('@/config/reddit-subreddits');
         const subredditInfo = getSubredditByName(postPlan.subreddit);
         if (subredditInfo) {
           redditGuidelines = `\n\nREDDIT SUBREDDIT: r/${postPlan.subreddit}

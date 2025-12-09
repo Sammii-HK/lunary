@@ -158,9 +158,8 @@ async function createJazzFallbackAdapter() {
       return null;
     }
 
-    const { JazzBetterAuthDatabaseAdapter } = await import(
-      'jazz-tools/better-auth/database-adapter'
-    );
+    const { JazzBetterAuthDatabaseAdapter } =
+      await import('jazz-tools/better-auth/database-adapter');
 
     return JazzBetterAuthDatabaseAdapter({
       syncServer:

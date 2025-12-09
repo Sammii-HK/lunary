@@ -77,8 +77,8 @@ function EmailFooter({
       }}
     >
       <Text style={{ margin: 0 }}>
-        © {new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for
-        your cosmic journey.
+        © {new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your
+        cosmic journey.
       </Text>
       <Text style={{ margin: '10px 0 0 0' }}>
         <Link href={unsubscribeUrl} style={{ color: '#6b7280' }}>

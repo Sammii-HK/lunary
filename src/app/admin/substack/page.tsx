@@ -17,7 +17,7 @@ import {
   History,
   AlertCircle,
   Share2,
-  Image,
+  Image as ImageIcon,
   Download,
   Copy,
 } from 'lucide-react';
@@ -718,7 +718,7 @@ export default function SubstackManagerPage() {
                     </>
                   ) : (
                     <>
-                      <Image className='mr-2 h-4 w-4' />
+                      <ImageIcon className='mr-2 h-4 w-4' />
                       Generate Content
                     </>
                   )}

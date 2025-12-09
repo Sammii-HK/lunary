@@ -73,120 +73,119 @@ export async function GET(request: NextRequest) {
   const robotoFont = await loadGoogleFont(request);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        background: themes[dayVariation],
+        fontFamily: 'Roboto Mono',
+        color: 'white',
+        padding: '60px 40px',
+        justifyContent: 'space-between',
+      }}
+    >
+      {/* Illumination at top */}
       <div
         style={{
-          height: '100%',
-          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingBottom: '40px',
+          paddingTop: '100px',
+          fontSize: '24px',
+          fontWeight: '400',
+          color: 'white',
+          textAlign: 'center',
+          letterSpacing: '0.1em',
+          opacity: 0.7,
+        }}
+      >
+        {Math.round(moonPhase.illumination)}% ILLUMINATED
+      </div>
+
+      <div
+        style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          background: themes[dayVariation],
-          fontFamily: 'Roboto Mono',
-          color: 'white',
-          padding: '60px 40px',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
+          flex: 1,
+          width: '100%',
         }}
       >
-        {/* Illumination at top */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`${baseUrl}/icons/dotty/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
+          width={180}
+          height={180}
+          alt={moonPhase.name}
+          style={{ marginBottom: '30px' }}
+        />
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingBottom: '40px',
-            paddingTop: '100px',
-            fontSize: '24px',
+            fontSize: '64px',
             fontWeight: '400',
             color: 'white',
             textAlign: 'center',
             letterSpacing: '0.1em',
+            marginBottom: '30px',
+          }}
+        >
+          {moonPhase.name}
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            fontSize: '24px',
+            color: 'white',
+            textAlign: 'center',
             opacity: 0.7,
+            letterSpacing: '0.1em',
           }}
         >
-          {Math.round(moonPhase.illumination)}% ILLUMINATED
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            width: '100%',
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/dotty/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
-            width={180}
-            height={180}
-            alt={moonPhase.name}
-            style={{ marginBottom: '30px' }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '64px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              marginBottom: '30px',
-            }}
-          >
-            {moonPhase.name}
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '24px',
-              color: 'white',
-              textAlign: 'center',
-              opacity: 0.7,
-              letterSpacing: '0.1em',
-            }}
-          >
-            {moonPhase.energy}
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '28px',
-              fontWeight: '300',
-              color: 'white',
-              textAlign: 'center',
-              fontFamily: 'Roboto Mono',
-              marginBottom: '20px',
-            }}
-          >
-            {formattedDate}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '28px',
-              fontWeight: '300',
-              color: 'white',
-              letterSpacing: '1px',
-              marginBottom: '40px',
-            }}
-          >
-            lunary.app
-          </div>
+          {moonPhase.energy}
         </div>
       </div>
-    ),
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'white',
+            textAlign: 'center',
+            fontFamily: 'Roboto Mono',
+            marginBottom: '20px',
+          }}
+        >
+          {formattedDate}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'white',
+            letterSpacing: '1px',
+            marginBottom: '40px',
+          }}
+        >
+          lunary.app
+        </div>
+      </div>
+    </div>,
     {
       width: 1200,
       height: 1200,

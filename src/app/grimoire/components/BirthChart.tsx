@@ -866,30 +866,30 @@ const BirthChart = () => {
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <a
+          <Link
             href='/grimoire/moon'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon Phases & Influences
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/astronomy'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Astronomy & Zodiac
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/tarot'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Tarot Readings
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/planets'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Planetary Correspondences
-          </a>
+          </Link>
         </div>
       </section>
     </div>

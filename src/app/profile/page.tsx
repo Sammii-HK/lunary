@@ -291,9 +291,8 @@ export default function ProfilePage() {
 
         if (!hasExistingPersonalCard) {
           console.log('Generating personal card...');
-          const { calculatePersonalCard } = await import(
-            '../../../utils/tarot/personalCard'
-          );
+          const { calculatePersonalCard } =
+            await import('../../../utils/tarot/personalCard');
           const personalCard = calculatePersonalCard(birthday, name);
 
           await fetch('/api/profile/personal-card', {

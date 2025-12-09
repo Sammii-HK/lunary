@@ -291,42 +291,42 @@ const Crystals = () => {
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <a
+          <Link
             href='/grimoire/practices'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Spells & Rituals
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/moon'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon Magic
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/candle-magic'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Candle Magic
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/correspondences/colors'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Color Correspondences
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/chakras'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Chakra Healing
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/correspondences'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Magical Correspondences
-          </a>
+          </Link>
         </div>
       </section>
     </div>

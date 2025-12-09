@@ -101,12 +101,12 @@ const Meditation = () => {
       <section id='breathwork' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-            <a
+            <Link
               href='/grimoire/breathwork'
               className='hover:text-lunary-primary-400 transition-colors'
             >
               Breathwork Techniques
-            </a>
+            </Link>
           </h2>
           <p className='text-sm text-zinc-400 mb-4'>
             Conscious breathing regulates energy, calms the mind, and prepares

@@ -671,9 +671,8 @@ function BookOfShadowsContent() {
                                 return;
                               }
                               // Fallback: try to find the spell and get its ID
-                              const { spellDatabase } = await import(
-                                '@/constants/grimoire/spells'
-                              );
+                              const { spellDatabase } =
+                                await import('@/constants/grimoire/spells');
                               const spell = spellDatabase.find(
                                 (s) =>
                                   s.title.toLowerCase() ===
@@ -697,9 +696,8 @@ function BookOfShadowsContent() {
 
                             if (entity.type === 'tarot') {
                               // Fetch tarot card data directly from grimoire
-                              const { getTarotCardByName } = await import(
-                                '@/utils/tarot/getCardByName'
-                              );
+                              const { getTarotCardByName } =
+                                await import('@/utils/tarot/getCardByName');
                               const cardData = getTarotCardByName(entity.name);
 
                               if (cardData) {

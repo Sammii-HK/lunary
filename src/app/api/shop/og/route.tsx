@@ -62,150 +62,148 @@ export async function GET(request: NextRequest) {
   const background = getCategoryColor(category);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background,
+        fontFamily: 'Roboto Mono',
+        color: 'white',
+        padding: '60px 40px',
+      }}
+    >
+      {/* Header */}
       <div
         style={{
-          height: '100%',
-          width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          background,
-          fontFamily: 'Roboto Mono',
-          color: 'white',
-          padding: '60px 40px',
+          gap: '20px',
+          paddingTop: '40px',
         }}
       >
-        {/* Header */}
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px',
-            paddingTop: '40px',
+            fontSize: '32px',
+            fontWeight: '300',
+            color: 'rgba(255,255,255,0.8)',
+            textAlign: 'center',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
           }}
         >
-          <div
-            style={{
-              fontSize: '32px',
-              fontWeight: '300',
-              color: 'rgba(255,255,255,0.8)',
-              textAlign: 'center',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-            }}
-          >
-            Digital Pack
-          </div>
+          Digital Pack
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '40px',
+          flex: 1,
+          justifyContent: 'center',
+        }}
+      >
+        {/* Category Emoji */}
+        <div
+          style={{
+            fontSize: '200px',
+            lineHeight: '1',
+          }}
+        >
+          {emoji}
         </div>
 
-        {/* Main Content */}
+        {/* Pack Name */}
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '40px',
-            flex: 1,
-            justifyContent: 'center',
+            fontSize: '48px',
+            fontWeight: '400',
+            color: 'white',
+            textAlign: 'center',
+            maxWidth: '900px',
+            lineHeight: '1.2',
           }}
         >
-          {/* Category Emoji */}
+          {name}
+        </div>
+
+        {/* Items Count */}
+        {items > 0 && (
           <div
             style={{
-              fontSize: '200px',
-              lineHeight: '1',
-            }}
-          >
-            {emoji}
-          </div>
-
-          {/* Pack Name */}
-          <div
-            style={{
-              fontSize: '48px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              maxWidth: '900px',
-              lineHeight: '1.2',
-            }}
-          >
-            {name}
-          </div>
-
-          {/* Items Count */}
-          {items > 0 && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '15px',
-                fontSize: '24px',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.9)',
-                background: 'rgba(255,255,255,0.1)',
-                padding: '12px 24px',
-                borderRadius: '12px',
-                border: '1px solid rgba(255,255,255,0.2)',
-              }}
-            >
-              <span>📄</span>
-              <span>{items} Items</span>
-            </div>
-          )}
-
-          {/* Category Badge */}
-          <div
-            style={{
-              fontSize: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              fontSize: '24px',
               fontWeight: '300',
-              color: 'rgba(255,255,255,0.8)',
-              textTransform: 'capitalize',
+              color: 'rgba(255,255,255,0.9)',
               background: 'rgba(255,255,255,0.1)',
-              padding: '8px 16px',
-              borderRadius: '8px',
+              padding: '12px 24px',
+              borderRadius: '12px',
               border: '1px solid rgba(255,255,255,0.2)',
             }}
           >
-            {category.replace('_', ' ')}
+            <span>📄</span>
+            <span>{items} Items</span>
           </div>
-        </div>
+        )}
 
-        {/* Footer */}
+        {/* Category Badge */}
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '10px',
+            fontSize: '20px',
+            fontWeight: '300',
+            color: 'rgba(255,255,255,0.8)',
+            textTransform: 'capitalize',
+            background: 'rgba(255,255,255,0.1)',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: '1px solid rgba(255,255,255,0.2)',
           }}
         >
-          <div
-            style={{
-              fontSize: '28px',
-              fontWeight: '300',
-              color: 'white',
-              letterSpacing: '1px',
-            }}
-          >
-            lunary.app
-          </div>
-          <div
-            style={{
-              fontSize: '16px',
-              fontWeight: '300',
-              color: 'rgba(255,255,255,0.7)',
-              letterSpacing: '0.1em',
-            }}
-          >
-            Digital Spiritual Guidance
-          </div>
+          {category.replace('_', ' ')}
         </div>
       </div>
-    ),
+
+      {/* Footer */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '10px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '28px',
+            fontWeight: '300',
+            color: 'white',
+            letterSpacing: '1px',
+          }}
+        >
+          lunary.app
+        </div>
+        <div
+          style={{
+            fontSize: '16px',
+            fontWeight: '300',
+            color: 'rgba(255,255,255,0.7)',
+            letterSpacing: '0.1em',
+          }}
+        >
+          Digital Spiritual Guidance
+        </div>
+      </div>
+    </div>,
     {
       width: 1200,
       height: 1200,

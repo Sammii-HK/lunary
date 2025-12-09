@@ -52,110 +52,108 @@ export async function GET(request: NextRequest) {
   const propertiesText = crystalRec.properties.slice(0, 3).join(' • ');
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        background: theme,
+        fontFamily: 'Roboto Mono',
+        color: 'white',
+        padding: '60px 40px',
+        justifyContent: 'space-between',
+      }}
+    >
       <div
         style={{
-          height: '100%',
-          width: '100%',
           display: 'flex',
-          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
-          background: theme,
-          fontFamily: 'Roboto Mono',
-          color: 'white',
-          padding: '60px 40px',
-          justifyContent: 'space-between',
+          paddingBottom: '40px',
+          paddingTop: '100px',
         }}
       >
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingBottom: '40px',
-            paddingTop: '100px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '24px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              opacity: 0.7,
-            }}
-          >
-            {propertiesText}
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            width: '100%',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '64px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              marginBottom: '40px',
-            }}
-          >
-            {crystalRec.name}
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '32px',
-              color: 'white',
-              textAlign: 'center',
-              fontWeight: '300',
-              opacity: 0.8,
-            }}
-          >
-            Crystal of the Day
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            fontSize: '28px',
-            fontWeight: '300',
+            fontSize: '24px',
+            fontWeight: '400',
             color: 'white',
             textAlign: 'center',
-            fontFamily: 'Roboto Mono',
-            marginBottom: '20px',
+            letterSpacing: '0.1em',
+            opacity: 0.7,
           }}
         >
-          {formattedDate}
+          {propertiesText}
         </div>
+      </div>
 
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+          width: '100%',
+        }}
+      >
         <div
           style={{
             display: 'flex',
-            fontSize: '28px',
-            fontWeight: '300',
+            fontSize: '64px',
+            fontWeight: '400',
             color: 'white',
-            letterSpacing: '1px',
+            textAlign: 'center',
+            letterSpacing: '0.1em',
             marginBottom: '40px',
           }}
         >
-          lunary.app
+          {crystalRec.name}
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            fontSize: '32px',
+            color: 'white',
+            textAlign: 'center',
+            fontWeight: '300',
+            opacity: 0.8,
+          }}
+        >
+          Crystal of the Day
         </div>
       </div>
-    ),
+
+      <div
+        style={{
+          display: 'flex',
+          fontSize: '28px',
+          fontWeight: '300',
+          color: 'white',
+          textAlign: 'center',
+          fontFamily: 'Roboto Mono',
+          marginBottom: '20px',
+        }}
+      >
+        {formattedDate}
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          fontSize: '28px',
+          fontWeight: '300',
+          color: 'white',
+          letterSpacing: '1px',
+          marginBottom: '40px',
+        }}
+      >
+        lunary.app
+      </div>
+    </div>,
     {
       width: 1200,
       height: 1200,

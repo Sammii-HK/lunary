@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { betterAuthClient } from '@/lib/auth-client';
 
 export default function VerifyEmailPage() {
@@ -166,12 +167,12 @@ export default function VerifyEmailPage() {
           </div>
 
           <div className='mt-8 pt-6 border-t border-zinc-700'>
-            <a
+            <Link
               href='/'
               className='text-zinc-400 hover:text-white transition-colors text-sm'
             >
               ← Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

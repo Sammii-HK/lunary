@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { test as base, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { TEST_USERS } from './test-users';

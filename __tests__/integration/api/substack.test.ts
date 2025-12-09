@@ -25,9 +25,8 @@ describe('Substack API Endpoints', () => {
 
   describe('Preview Endpoint', () => {
     it('should handle preview request structure', async () => {
-      const { generateWeeklyContent } = await import(
-        'utils/blog/weeklyContentGenerator'
-      );
+      const { generateWeeklyContent } =
+        await import('utils/blog/weeklyContentGenerator');
       const { generateFreeSubstackPost, generatePaidSubstackPost } =
         await import('utils/substack/contentFormatter');
 
@@ -187,12 +186,12 @@ describe('Substack API Endpoints', () => {
       invalidCookies.forEach((cookie) => {
         const isValid = Boolean(
           cookie !== null &&
-            cookie !== undefined &&
-            typeof cookie === 'object' &&
-            !Array.isArray(cookie) &&
-            'name' in cookie &&
-            'value' in cookie &&
-            'domain' in cookie,
+          cookie !== undefined &&
+          typeof cookie === 'object' &&
+          !Array.isArray(cookie) &&
+          'name' in cookie &&
+          'value' in cookie &&
+          'domain' in cookie,
         );
         expect(isValid).toBe(false);
       });

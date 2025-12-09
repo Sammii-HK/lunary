@@ -87,107 +87,105 @@ export async function GET(request: NextRequest) {
   const robotoFont = await loadGoogleFont(request);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        background: themes[dayVariation],
+        fontFamily: 'Roboto Mono',
+        color: 'white',
+        padding: '60px 40px',
+        justifyContent: 'space-between',
+      }}
+    >
+      {/* Chakra at top */}
       <div
         style={{
-          height: '100%',
-          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingBottom: '40px',
+          paddingTop: '100px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '24px',
+            fontWeight: '400',
+            color: 'white',
+            textAlign: 'center',
+            letterSpacing: '0.1em',
+            opacity: 0.7,
+          }}
+        >
+          Daily Guidance
+        </div>
+      </div>
+
+      {/* Crystal name in middle - large for mobile */}
+      <div
+        style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          background: themes[dayVariation],
-          fontFamily: 'Roboto Mono',
-          color: 'white',
-          padding: '60px 40px',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
+          flex: 1,
+          width: '100%',
         }}
       >
-        {/* Chakra at top */}
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingBottom: '40px',
-            paddingTop: '100px',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '24px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              opacity: 0.7,
-            }}
-          >
-            Daily Guidance
-          </div>
-        </div>
-
-        {/* Crystal name in middle - large for mobile */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            width: '100%',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '36px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              marginBottom: '40px',
-            }}
-          >
-            {horoscopeSnippet}
-          </div>
-          <div
-            style={{
-              fontSize: '24px',
-              color: 'white',
-              textAlign: 'center',
-              opacity: 0.7,
-              letterSpacing: '0.1em',
-            }}
-          ></div>
-        </div>
-
-        {/* Date */}
-        <div
-          style={{
-            fontSize: '28px',
-            fontWeight: '300',
+            fontSize: '36px',
+            fontWeight: '400',
             color: 'white',
             textAlign: 'center',
-            fontFamily: 'Roboto Mono',
-            marginBottom: '20px',
-          }}
-        >
-          {formattedDate}
-        </div>
-
-        {/* Footer - exactly same as cosmic */}
-        <div
-          style={{
-            fontSize: '28px',
-            fontWeight: '300',
-            color: 'white',
-            letterSpacing: '1px',
+            letterSpacing: '0.1em',
             marginBottom: '40px',
           }}
         >
-          lunary.app
+          {horoscopeSnippet}
         </div>
+        <div
+          style={{
+            fontSize: '24px',
+            color: 'white',
+            textAlign: 'center',
+            opacity: 0.7,
+            letterSpacing: '0.1em',
+          }}
+        ></div>
       </div>
-    ),
+
+      {/* Date */}
+      <div
+        style={{
+          fontSize: '28px',
+          fontWeight: '300',
+          color: 'white',
+          textAlign: 'center',
+          fontFamily: 'Roboto Mono',
+          marginBottom: '20px',
+        }}
+      >
+        {formattedDate}
+      </div>
+
+      {/* Footer - exactly same as cosmic */}
+      <div
+        style={{
+          fontSize: '28px',
+          fontWeight: '300',
+          color: 'white',
+          letterSpacing: '1px',
+          marginBottom: '40px',
+        }}
+      >
+        lunary.app
+      </div>
+    </div>,
     {
       width: 1200,
       height: 1200,

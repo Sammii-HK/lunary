@@ -43,9 +43,8 @@ describe('Unified Notification Service', () => {
 
   describe('createEventKey', () => {
     it('creates correct event key format', async () => {
-      const { sendUnifiedNotification } = await import(
-        '@/lib/notifications/unified-service'
-      );
+      const { sendUnifiedNotification } =
+        await import('@/lib/notifications/unified-service');
 
       const event: NotificationEvent = {
         name: 'New Moon',
@@ -70,9 +69,8 @@ describe('Unified Notification Service', () => {
     });
 
     it('handles missing event name', async () => {
-      const { sendUnifiedNotification } = await import(
-        '@/lib/notifications/unified-service'
-      );
+      const { sendUnifiedNotification } =
+        await import('@/lib/notifications/unified-service');
 
       const event: NotificationEvent = {
         name: '',
@@ -92,9 +90,8 @@ describe('Unified Notification Service', () => {
 
   describe('deduplication', () => {
     it('skips already sent events', async () => {
-      const { sendUnifiedNotification } = await import(
-        '@/lib/notifications/unified-service'
-      );
+      const { sendUnifiedNotification } =
+        await import('@/lib/notifications/unified-service');
 
       const event: NotificationEvent = {
         name: 'New Moon',

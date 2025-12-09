@@ -422,9 +422,8 @@ Return only valid JSON.`,
       : 'http://localhost:3000';
 
     // Use quote pool for Instagram posts (quotes are stored and reused)
-    const { generateCatchyQuote, getQuoteImageUrl } = await import(
-      '@/lib/social/quote-generator'
-    );
+    const { generateCatchyQuote, getQuoteImageUrl } =
+      await import('@/lib/social/quote-generator');
 
     // Calculate scheduled_date based on weekOffset
     const now = new Date();

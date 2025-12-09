@@ -158,9 +158,8 @@ export const getCurrentTransits = async ({
   personalizeForNotifications?: boolean;
   isPayingUser?: boolean;
 }): Promise<CurrentTransitsResponse> => {
-  const { getGlobalCosmicData } = await import(
-    '../cosmic-snapshot/global-cache'
-  );
+  const { getGlobalCosmicData } =
+    await import('../cosmic-snapshot/global-cache');
   const globalData = await getGlobalCosmicData(now);
 
   if (!globalData) {

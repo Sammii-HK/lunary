@@ -784,42 +784,42 @@ const Correspondences = () => {
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <a
+          <Link
             href='/grimoire/candle-magic/colors'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Candle Color Meanings
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/practices'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Spells & Rituals
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/crystals'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Crystal Correspondences
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/moon'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon & Timing
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/planets'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Planetary Influences
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/numerology'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Number Correspondences
-          </a>
+          </Link>
         </div>
       </section>
     </div>

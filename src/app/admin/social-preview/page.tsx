@@ -85,6 +85,7 @@ export default function SocialPreviewPage() {
         {formats.map((format) => (
           <div key={format} className='bg-zinc-900 p-4 rounded'>
             <h3 className='text-white mb-2 capitalize'>{format}</h3>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/social/images?week=${week}&format=${format}&t=${Date.now()}`}
               alt={format}
@@ -104,6 +105,7 @@ export default function SocialPreviewPage() {
         </p>
         <div className='flex gap-6'>
           <div className='w-64'>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/social/images?week=${week}&format=story&t=${Date.now()}`}
               alt='Story preview'
