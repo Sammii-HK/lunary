@@ -199,7 +199,7 @@ export default function BlogPage() {
       <div
         className={cn(
           'max-w-7xl mx-auto p-4 md:px-6 lg:px-8',
-          showMarketingNav && 'mt-8',
+          showMarketingNav && 'pt-28',
         )}
       >
         {/* Header */}

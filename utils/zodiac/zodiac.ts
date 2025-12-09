@@ -31,11 +31,43 @@ export const bodiesSymbols = {
   uranus: 'X',
   neptune: 'Y',
   pluto: 'Z',
+  ascendant: 'a',
+  midheaven: 'm',
+  northnode: 'n',
+  southnode: 's',
+  chiron: 'c',
+  lilith: 'l',
 };
 
 export const planetSymbols = {
   ...bodiesSymbols,
   earth: 'L',
+};
+
+// Astromicon symbols for astrological points (use with font-astro class)
+export const astroPointSymbols = {
+  ascendant: 'a',
+  descendant: 'd',
+  midheaven: 'm',
+  imumcoeli: 'i',
+  northnode: 'n',
+  southnode: 's',
+  chiron: 'c',
+  lilith: 'l',
+  partoffortune: 'f',
+};
+
+// Unicode symbols for astrological points (fallback without special font)
+export const astroPointUnicode = {
+  ascendant: 'AC',
+  descendant: 'DC',
+  midheaven: 'MC',
+  imumcoeli: 'IC',
+  northnode: '☊',
+  southnode: '☋',
+  chiron: '⚷',
+  lilith: '⚸',
+  partoffortune: '⊗',
 };
 
 // Astromicon zodiac characters (use with font-astro class)
@@ -85,6 +117,7 @@ export const planetUnicode = {
   pluto: '♇',
 };
 
+// Alchemical element symbols (may not render on all systems)
 export const elementUnicode = {
   earth: '🜃',
   fire: '🜂',
@@ -92,10 +125,41 @@ export const elementUnicode = {
   water: '🜄',
 };
 
+// Astromicon element symbols (use with font-astro class)
+export const elementAstro = {
+  fire: '1',
+  earth: '2',
+  air: '3',
+  water: '4',
+};
+
+// Standard Unicode element symbols (better cross-platform support)
+export const elementSymbols = {
+  fire: '△',
+  earth: '▽',
+  air: '△',
+  water: '▽',
+};
+
+// Alchemical modality symbols (may not render on all systems)
 export const qualityUnicode = {
   cardinal: '🜍',
   fixed: '🜔',
   mutable: '☿',
+};
+
+// Astromicon modality symbols (use with font-astro class)
+export const modalityAstro = {
+  cardinal: '5',
+  fixed: '6',
+  mutable: '7',
+};
+
+// Standard Unicode modality symbols (better cross-platform support)
+export const modalitySymbols = {
+  cardinal: '⚹',
+  fixed: '□',
+  mutable: '△',
 };
 export const getIcon = (
   type: constellationItems,
@@ -277,5 +341,115 @@ export const zodiacSigns = {
     element: 'Water',
     mysticalProperties:
       'Symbolizes empathy, compassion, and intuition. Associated with mysticism, spirituality, and sensitivity.',
+  },
+};
+
+export const astrologicalPoints = {
+  ascendant: {
+    name: 'Rising',
+    alias: 'Ascendant',
+    mysticalProperties:
+      'Your outer personality and first impression. How others perceive you and how you approach new situations.',
+  },
+  midheaven: {
+    name: 'Midheaven',
+    alias: 'MC',
+    mysticalProperties:
+      'Your career path, public image, and life direction. How you want to be seen by the world.',
+  },
+  northnode: {
+    name: 'North Node',
+    alias: "Dragon's Head",
+    mysticalProperties:
+      "Your soul's purpose and destiny. The lessons you're meant to learn and the direction of growth.",
+  },
+  southnode: {
+    name: 'South Node',
+    alias: "Dragon's Tail",
+    mysticalProperties:
+      'Your past life karma and innate talents. What comes naturally but may hold you back if overused.',
+  },
+  chiron: {
+    name: 'Chiron',
+    alias: 'The Wounded Healer',
+    mysticalProperties:
+      'Your deepest wound and greatest healing gift. Where you can help others through your own struggles.',
+  },
+  lilith: {
+    name: 'Lilith',
+    alias: 'Black Moon Lilith',
+    mysticalProperties:
+      'Your shadow self and suppressed desires. Raw, untamed feminine energy and hidden power.',
+  },
+};
+
+export const houseThemes: Record<
+  number,
+  { name: string; theme: string; keywords: string[] }
+> = {
+  1: {
+    name: 'First House',
+    theme: 'Self & Identity',
+    keywords: [
+      'appearance',
+      'personality',
+      'self-expression',
+      'first impressions',
+    ],
+  },
+  2: {
+    name: 'Second House',
+    theme: 'Values & Resources',
+    keywords: ['money', 'possessions', 'self-worth', 'material security'],
+  },
+  3: {
+    name: 'Third House',
+    theme: 'Communication & Mind',
+    keywords: ['siblings', 'short trips', 'learning', 'writing', 'neighbors'],
+  },
+  4: {
+    name: 'Fourth House',
+    theme: 'Home & Roots',
+    keywords: ['family', 'ancestry', 'private life', 'emotional foundation'],
+  },
+  5: {
+    name: 'Fifth House',
+    theme: 'Creativity & Joy',
+    keywords: ['romance', 'children', 'play', 'self-expression', 'hobbies'],
+  },
+  6: {
+    name: 'Sixth House',
+    theme: 'Health & Service',
+    keywords: ['daily routines', 'work', 'health habits', 'pets', 'duty'],
+  },
+  7: {
+    name: 'Seventh House',
+    theme: 'Partnerships',
+    keywords: ['marriage', 'business partners', 'contracts', 'open enemies'],
+  },
+  8: {
+    name: 'Eighth House',
+    theme: 'Transformation',
+    keywords: ['shared resources', 'intimacy', 'death', 'rebirth', 'occult'],
+  },
+  9: {
+    name: 'Ninth House',
+    theme: 'Philosophy & Travel',
+    keywords: ['higher education', 'long journeys', 'beliefs', 'publishing'],
+  },
+  10: {
+    name: 'Tenth House',
+    theme: 'Career & Status',
+    keywords: ['public image', 'achievements', 'authority', 'reputation'],
+  },
+  11: {
+    name: 'Eleventh House',
+    theme: 'Community & Dreams',
+    keywords: ['friendships', 'groups', 'hopes', 'humanitarian goals'],
+  },
+  12: {
+    name: 'Twelfth House',
+    theme: 'Spirituality & Hidden',
+    keywords: ['subconscious', 'isolation', 'dreams', 'secrets', 'karma'],
   },
 };

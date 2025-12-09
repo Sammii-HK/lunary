@@ -443,6 +443,22 @@ const nextConfig = {
         destination: '/grimoire/houses/overview/:house',
         permanent: true,
       },
+      // Monthly horoscopes moved under Grimoire
+      {
+        source: '/horoscope/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)',
+        destination: '/grimoire/horoscopes/:sign',
+        permanent: true,
+      },
+      {
+        source: '/horoscope/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)/:year(\\d{4})',
+        destination: '/grimoire/horoscopes/:sign/:year',
+        permanent: true,
+      },
+      {
+        source: '/horoscope/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)/:year(\\d{4})/:month',
+        destination: '/grimoire/horoscopes/:sign/:year/:month',
+        permanent: true,
+      },
     ];
   },
 };

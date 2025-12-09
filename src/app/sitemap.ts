@@ -10,6 +10,7 @@ import { tarotSpreads } from '@/constants/tarot';
 import { monthlyMoonPhases } from '../../utils/moon/monthlyPhases';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import { zodiacSigns, planetaryBodies } from '../../utils/zodiac/zodiac';
+import { ZODIAC_SIGNS, MONTHS } from '@/constants/seo/monthly-horoscope';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import {
@@ -721,6 +722,162 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
+  // Add numerology index pages
+  const numerologyIndexRoutes = [
+    {
+      url: `${baseUrl}/grimoire/angel-numbers`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/life-path`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/mirror-hours`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/double-hours`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/numerology/soul-urge`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/numerology/expression`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/numerology/core-numbers`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/numerology/master-numbers`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/numerology/karmic-debt`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/numerology/planetary-days`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+  ];
+
+  // Add moon index pages
+  const moonIndexRoutes = [
+    {
+      url: `${baseUrl}/grimoire/moon/phases`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/moon/full-moons`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+  ];
+
+  // Add astrology index pages
+  const astrologyIndexRoutes = [
+    {
+      url: `${baseUrl}/grimoire/retrogrades`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/lunar-nodes`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/eclipses`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+  ];
+
+  // Add meditation index pages
+  const meditationIndexRoutes = [
+    {
+      url: `${baseUrl}/grimoire/meditation/techniques`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/meditation/breathwork`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/meditation/grounding`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+  ];
+
+  // Add witchcraft index pages
+  const witchcraftIndexRoutes = [
+    {
+      url: `${baseUrl}/grimoire/modern-witchcraft/witch-types`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/modern-witchcraft/tools`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+  ];
+
+  // Add tarot/candle index pages
+  const otherIndexRoutes = [
+    {
+      url: `${baseUrl}/grimoire/tarot/spreads`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/candle-magic/colors`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+  ];
+
   // Add all angel number pages
   const angelNumberRoutes = Object.keys(angelNumbers).map((number) => ({
     url: `${baseUrl}/grimoire/angel-numbers/${number}`,
@@ -776,6 +933,47 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
   ];
+
+  // Add synastry generator page
+  const synastryGeneratorRoute = {
+    url: `${baseUrl}/grimoire/synastry/generate`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  };
+
+  // Add grimoire horoscope routes (monthly horoscopes under grimoire)
+  const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+
+  // Sign pages
+  const grimoireHoroscopeSignRoutes = ZODIAC_SIGNS.map((sign) => ({
+    url: `${baseUrl}/grimoire/horoscopes/${sign}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // Year pages
+  const grimoireHoroscopeYearRoutes = ZODIAC_SIGNS.flatMap((sign) =>
+    AVAILABLE_YEARS.map((year) => ({
+      url: `${baseUrl}/grimoire/horoscopes/${sign}/${year}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
+  );
+
+  // Month pages
+  const grimoireHoroscopeMonthRoutes = ZODIAC_SIGNS.flatMap((sign) =>
+    AVAILABLE_YEARS.flatMap((year) =>
+      MONTHS.map((month) => ({
+        url: `${baseUrl}/grimoire/horoscopes/${sign}/${year}/${month}`,
+        lastModified: now,
+        changeFrequency: 'monthly' as const,
+        priority: 0.5,
+      })),
+    ),
+  );
 
   // Add mirror hour pages
   const mirrorHourRoutes = mirrorHourKeys.map((time) => ({
@@ -869,5 +1067,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...expressionRoutes,
     ...soulUrgeRoutes,
     ...karmicDebtRoutes,
+    synastryGeneratorRoute,
+    ...grimoireHoroscopeSignRoutes,
+    ...grimoireHoroscopeYearRoutes,
+    ...grimoireHoroscopeMonthRoutes,
+    ...numerologyIndexRoutes,
+    ...moonIndexRoutes,
+    ...astrologyIndexRoutes,
+    ...meditationIndexRoutes,
+    ...witchcraftIndexRoutes,
+    ...otherIndexRoutes,
   ];
 }

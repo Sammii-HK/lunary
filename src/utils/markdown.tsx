@@ -5,6 +5,61 @@ interface ParsedMarkdownProps {
   className?: string;
 }
 
+function parseInlineMarkdown(text: string): React.ReactNode[] {
+  const result: React.ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+    const italicMatch = remaining.match(/(?<!\*)\*([^*]+?)\*(?!\*)/);
+
+    let nextMatch: { type: 'bold' | 'italic'; match: RegExpMatchArray } | null =
+      null;
+
+    if (boldMatch && italicMatch) {
+      nextMatch =
+        (boldMatch.index ?? Infinity) < (italicMatch.index ?? Infinity)
+          ? { type: 'bold', match: boldMatch }
+          : { type: 'italic', match: italicMatch };
+    } else if (boldMatch) {
+      nextMatch = { type: 'bold', match: boldMatch };
+    } else if (italicMatch) {
+      nextMatch = { type: 'italic', match: italicMatch };
+    }
+
+    if (!nextMatch) {
+      result.push(remaining);
+      break;
+    }
+
+    const { type, match } = nextMatch;
+    const index = match.index ?? 0;
+
+    if (index > 0) {
+      result.push(remaining.slice(0, index));
+    }
+
+    if (type === 'bold') {
+      result.push(
+        <strong key={key++} className='font-semibold text-zinc-100'>
+          {match[1]}
+        </strong>,
+      );
+      remaining = remaining.slice(index + match[0].length);
+    } else {
+      result.push(
+        <em key={key++} className='italic text-zinc-200'>
+          {match[1]}
+        </em>,
+      );
+      remaining = remaining.slice(index + match[0].length);
+    }
+  }
+
+  return result;
+}
+
 export function ParsedMarkdown({
   content,
   className = '',
@@ -23,7 +78,7 @@ export function ParsedMarkdown({
           {currentList.map((item, i) => (
             <li key={i} className='flex items-start gap-3 text-zinc-300'>
               <span className='text-lunary-primary-400 mt-1'>•</span>
-              <span>{item}</span>
+              <span>{parseInlineMarkdown(item)}</span>
             </li>
           ))}
         </ul>,
@@ -49,7 +104,7 @@ export function ParsedMarkdown({
           key={`h2-${index}`}
           className='text-2xl font-medium text-zinc-100 mt-8 mb-4'
         >
-          {text}
+          {parseInlineMarkdown(text)}
         </h2>,
       );
       return;
@@ -64,7 +119,7 @@ export function ParsedMarkdown({
           key={`h3-${index}`}
           className='text-xl font-medium text-zinc-200 mt-6 mb-3'
         >
-          {text}
+          {parseInlineMarkdown(text)}
         </h3>,
       );
       return;
@@ -79,7 +134,7 @@ export function ParsedMarkdown({
           key={`h4-${index}`}
           className='text-lg font-medium text-zinc-200 mt-4 mb-2'
         >
-          {text}
+          {parseInlineMarkdown(text)}
         </h4>,
       );
       return;
@@ -96,7 +151,7 @@ export function ParsedMarkdown({
     flushList();
     elements.push(
       <p key={`p-${index}`} className='text-zinc-300 leading-relaxed mb-4'>
-        {trimmed}
+        {parseInlineMarkdown(trimmed)}
       </p>,
     );
   });
