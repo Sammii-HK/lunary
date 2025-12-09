@@ -126,10 +126,8 @@ Understanding planetary days helps you time your spellwork for maximum effective
       faqs={faqs}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
-        {
-          label: 'Magical Correspondences',
-          href: '/grimoire/correspondences',
-        },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Days', href: '/grimoire/correspondences/days' },
         {
           label: `${dayKey}`,
           href: `/grimoire/correspondences/days/${day}`,

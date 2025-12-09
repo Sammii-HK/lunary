@@ -130,10 +130,8 @@ Understanding ${animalKey.toLowerCase()}'s correspondences helps you interpret w
       faqs={faqs}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
-        {
-          label: 'Magical Correspondences',
-          href: '/grimoire/correspondences',
-        },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Animals', href: '/grimoire/correspondences/animals' },
         {
           label: `${animalKey}`,
           href: `/grimoire/correspondences/animals/${animal}`,

@@ -130,10 +130,8 @@ Understanding ${herbKey.toLowerCase()}'s correspondences helps you incorporate i
       faqs={faqs}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
-        {
-          label: 'Magical Correspondences',
-          href: '/grimoire/correspondences',
-        },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Herbs', href: '/grimoire/correspondences/herbs' },
         {
           label: `${herbKey}`,
           href: `/grimoire/correspondences/herbs/${herb}`,

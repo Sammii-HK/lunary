@@ -126,12 +126,10 @@ Understanding ${woodKey.toLowerCase()} wood's correspondences helps you choose t
       faqs={faqs}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Wood', href: '/grimoire/correspondences/wood' },
         {
-          label: 'Magical Correspondences',
-          href: '/grimoire/correspondences',
-        },
-        {
-          label: `${woodKey} Wood`,
+          label: `${woodKey}`,
           href: `/grimoire/correspondences/wood/${wood}`,
         },
       ]}

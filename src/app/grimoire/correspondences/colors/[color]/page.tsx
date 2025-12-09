@@ -130,12 +130,10 @@ Understanding ${colorKey.toLowerCase()} color correspondences helps you choose t
       faqs={faqs}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Colors', href: '/grimoire/correspondences/colors' },
         {
-          label: 'Magical Correspondences',
-          href: '/grimoire/correspondences',
-        },
-        {
-          label: `${colorKey} Color`,
+          label: `${colorKey}`,
           href: `/grimoire/correspondences/colors/${color}`,
         },
       ]}
