@@ -2,12 +2,19 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { tarotSpreads } from '@/constants/tarot';
+import { stringToKebabCase } from '../../../../../../utils/string';
 
 const spreadKeys = Object.keys(tarotSpreads);
 
+// Convert kebab-case slug back to camelCase key
+function kebabToCamel(str: string): string {
+  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
 export async function generateStaticParams() {
+  // Generate kebab-case slugs for consistency
   return spreadKeys.map((spread) => ({
-    spread: spread,
+    spread: stringToKebabCase(spread),
   }));
 }
 
@@ -17,7 +24,9 @@ export async function generateMetadata({
   params: Promise<{ spread: string }>;
 }): Promise<Metadata> {
   const { spread } = await params;
-  const spreadData = tarotSpreads[spread as keyof typeof tarotSpreads];
+  // Convert kebab-case URL slug back to camelCase key
+  const spreadKey = kebabToCamel(spread);
+  const spreadData = tarotSpreads[spreadKey as keyof typeof tarotSpreads];
 
   if (!spreadData) {
     return {
@@ -83,7 +92,9 @@ export default async function TarotSpreadPage({
   params: Promise<{ spread: string }>;
 }) {
   const { spread } = await params;
-  const spreadData = tarotSpreads[spread as keyof typeof tarotSpreads];
+  // Convert kebab-case URL slug back to camelCase key
+  const spreadKey = kebabToCamel(spread);
+  const spreadData = tarotSpreads[spreadKey as keyof typeof tarotSpreads];
 
   if (!spreadData) {
     notFound();
@@ -187,7 +198,7 @@ export default async function TarotSpreadPage({
     },
   };
 
-  const details = spreadDetails[spread] || {
+  const details = spreadDetails[spreadKey] || {
     positions: [],
     bestFor: [],
     difficulty: 'Varies',

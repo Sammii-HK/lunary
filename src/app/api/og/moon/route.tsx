@@ -1,9 +1,19 @@
-import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import {
   getAccurateMoonPhase,
   loadGoogleFont,
 } from '../../../../../utils/astrology/cosmic-og';
+import {
+  OGWrapper,
+  OGHeader,
+  OGContentCenter,
+  OGTitle,
+  OGSubtitle,
+  OGFooter,
+  createOGResponse,
+  getLunarBackgroundVariant,
+  formatOGDate,
+} from '../../../../../utils/og/base';
 
 export const runtime = 'nodejs';
 export const revalidate = 86400;
@@ -32,13 +42,11 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
 
-  // Get base URL for icons
   const baseUrl =
     process.env.NODE_ENV === 'production'
       ? 'https://lunary.app'
       : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
 
-  // Normalize date to noon UTC for consistent moon phase calculation
   let targetDate: Date;
   if (dateParam) {
     targetDate = new Date(dateParam + 'T12:00:00Z');
@@ -47,75 +55,20 @@ export async function GET(request: NextRequest) {
     targetDate = new Date(todayStr + 'T12:00:00Z');
   }
 
-  // Get actual moon phase data for the date
   const moonPhase = getAccurateMoonPhase(targetDate);
+  const formattedDate = formatOGDate(targetDate);
+  const background = getLunarBackgroundVariant(targetDate.getDate());
 
-  // Format date for display
-  const formattedDate = targetDate
-    .toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-    .replace(/\//g, '/');
-
-  // Blue lunar backgrounds (not crystal colors)
-  const dayVariation = targetDate.getDate() % 5;
-  const themes = [
-    'linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 50%, #0a0a0f 100%)',
-    'linear-gradient(135deg, #1a0f1f 0%, #1a1a2e 50%, #0a0a0f 100%)',
-    'linear-gradient(135deg, #1a1a2e 0%, #150d1a 50%, #0a0a0f 100%)',
-    'linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #0a0a0f 100%)',
-    'linear-gradient(135deg, #1a1a2e 0%, #0a0a12 50%, #0a0a0f 100%)',
-  ];
-
-  // Load Roboto Mono font
   const robotoFont = await loadGoogleFont(request);
 
-  return new ImageResponse(
-    <div
-      style={{
-        height: '100%',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        background: themes[dayVariation],
-        fontFamily: 'Roboto Mono',
-        color: 'white',
-        padding: '60px 40px',
-        justifyContent: 'space-between',
-      }}
-    >
-      {/* Illumination at top */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingBottom: '40px',
-          paddingTop: '100px',
-          fontSize: '24px',
-          fontWeight: '400',
-          color: 'white',
-          textAlign: 'center',
-          letterSpacing: '0.1em',
-          opacity: 0.7,
-        }}
-      >
-        {Math.round(moonPhase.illumination)}% ILLUMINATED
-      </div>
+  return createOGResponse(
+    <OGWrapper theme={{ background }}>
+      <OGHeader
+        title={`${Math.round(moonPhase.illumination)}% ILLUMINATED`}
+        fontSize={24}
+      />
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: 1,
-          width: '100%',
-        }}
-      >
+      <OGContentCenter>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`${baseUrl}/icons/dotty/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
@@ -124,79 +77,16 @@ export async function GET(request: NextRequest) {
           alt={moonPhase.name}
           style={{ marginBottom: '30px' }}
         />
-        <div
-          style={{
-            display: 'flex',
-            fontSize: '64px',
-            fontWeight: '400',
-            color: 'white',
-            textAlign: 'center',
-            letterSpacing: '0.1em',
-            marginBottom: '30px',
-          }}
-        >
-          {moonPhase.name}
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            fontSize: '24px',
-            color: 'white',
-            textAlign: 'center',
-            opacity: 0.7,
-            letterSpacing: '0.1em',
-          }}
-        >
-          {moonPhase.energy}
-        </div>
-      </div>
+        <OGTitle text={moonPhase.name} marginBottom='30px' />
+        <OGSubtitle text={moonPhase.energy} />
+      </OGContentCenter>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            fontSize: '28px',
-            fontWeight: '300',
-            color: 'white',
-            textAlign: 'center',
-            fontFamily: 'Roboto Mono',
-            marginBottom: '20px',
-          }}
-        >
-          {formattedDate}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            fontSize: '28px',
-            fontWeight: '300',
-            color: 'white',
-            letterSpacing: '1px',
-            marginBottom: '40px',
-          }}
-        >
-          lunary.app
-        </div>
-      </div>
-    </div>,
+      <OGFooter date={formattedDate} />
+    </OGWrapper>,
     {
-      width: 1200,
-      height: 1200,
+      size: 'square',
       fonts: robotoFont
-        ? [
-            {
-              name: 'Roboto Mono',
-              data: robotoFont,
-              style: 'normal',
-            },
-          ]
+        ? [{ name: 'Roboto Mono', data: robotoFont, style: 'normal' as const }]
         : [],
     },
   );

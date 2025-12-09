@@ -1,6 +1,11 @@
-import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { loadGoogleFont } from '../../../../../../utils/astrology/cosmic-og';
+import {
+  OGWrapper,
+  OGFooter,
+  OGContentCenter,
+  createOGResponse,
+} from '../../../../../../utils/og/base';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -165,21 +170,10 @@ export async function GET(
     console.error('Failed to load font:', error);
   }
 
-  return new ImageResponse(
-    <div
-      style={{
-        height: '100%',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: `linear-gradient(135deg, #0f172a 0%, #1e293b 30%, ${data.color}40 70%, #1e1b2e 100%)`,
-        fontFamily: 'Roboto Mono',
-        color: 'white',
-        padding: '60px 40px',
-      }}
-    >
+  const background = `linear-gradient(135deg, #0f172a 0%, #1e293b 30%, ${data.color}40 70%, #1e1b2e 100%)`;
+
+  return createOGResponse(
+    <OGWrapper theme={{ background }}>
       <div
         style={{
           display: 'flex',
@@ -202,16 +196,7 @@ export async function GET(
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: 1,
-          gap: '30px',
-        }}
-      >
+      <OGContentCenter>
         <div
           style={{
             fontSize: '120px',
@@ -228,6 +213,7 @@ export async function GET(
             textAlign: 'center',
             letterSpacing: '0.02em',
             display: 'flex',
+            marginTop: '30px',
           }}
         >
           {data.title}
@@ -240,36 +226,19 @@ export async function GET(
             textAlign: 'center',
             letterSpacing: '0.05em',
             display: 'flex',
+            marginTop: '30px',
           }}
         >
           {data.subtitle}
         </div>
-      </div>
+      </OGContentCenter>
 
-      <div
-        style={{
-          fontSize: '24px',
-          fontWeight: '300',
-          color: 'rgba(255,255,255,0.6)',
-          letterSpacing: '0.1em',
-          paddingBottom: '20px',
-          display: 'flex',
-        }}
-      >
-        lunary.app
-      </div>
-    </div>,
+      <OGFooter />
+    </OGWrapper>,
     {
-      width: 1200,
-      height: 630,
+      size: 'landscape',
       fonts: robotoFont
-        ? [
-            {
-              name: 'Roboto Mono',
-              data: robotoFont,
-              style: 'normal',
-            },
-          ]
+        ? [{ name: 'Roboto Mono', data: robotoFont, style: 'normal' as const }]
         : [],
     },
   );

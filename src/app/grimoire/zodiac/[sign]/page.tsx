@@ -1,4 +1,3 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
@@ -9,6 +8,7 @@ import {
 } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { getEntityRelationships } from '@/constants/entity-relationships';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const signSlugs = Object.keys(zodiacSigns);
 
@@ -22,26 +22,21 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ sign: string }>;
-}): Promise<Metadata> {
+}) {
   const { sign } = await params;
   const signKey = signSlugs.find(
     (s) => stringToKebabCase(s) === sign.toLowerCase(),
   );
 
   if (!signKey) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
   const signData = zodiacSigns[signKey as keyof typeof zodiacSigns];
-  const symbol = zodiacSymbol[signKey as keyof typeof zodiacSymbol];
-  const title = `${signData.name} Zodiac Sign: Meaning, Traits & Dates - Lunary`;
-  const description = `Discover the complete guide to ${signData.name} zodiac sign. Learn about ${signData.name} traits, dates (${signData.dates}), element (${signData.element}), and mystical properties. Explore how ${signData.name} influences your personality, relationships, and spiritual journey.`;
 
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${signData.name} Zodiac Sign: Meaning, Traits & Dates - Lunary`,
+    description: `Discover the complete guide to ${signData.name} zodiac sign. Learn about ${signData.name} traits, dates (${signData.dates}), element (${signData.element}), and mystical properties. Explore how ${signData.name} influences your personality, relationships, and spiritual journey.`,
     keywords: [
       `${signData.name} zodiac sign`,
       `${signData.name} meaning`,
@@ -51,43 +46,10 @@ export async function generateMetadata({
       `${signData.element} sign`,
       `zodiac sign ${signData.name}`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/zodiac/${sign}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/zodiac',
-          width: 1200,
-          height: 630,
-          alt: `${signData.name} Zodiac Sign`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/zodiac/${sign}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/zodiac/${sign}`,
+    ogImagePath: '/api/og/grimoire/zodiac',
+    ogImageAlt: `${signData.name} Zodiac Sign`,
+  });
 }
 
 export default async function ZodiacSignPage({

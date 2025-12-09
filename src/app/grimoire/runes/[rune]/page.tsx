@@ -1,8 +1,8 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { runesList } from '@/constants/runes';
 import { stringToKebabCase } from '../../../../../utils/string';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const runeKeys = Object.keys(runesList);
 
@@ -16,25 +16,21 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ rune: string }>;
-}): Promise<Metadata> {
+}) {
   const { rune } = await params;
   const runeKey = runeKeys.find(
     (r) => stringToKebabCase(r) === rune.toLowerCase(),
   );
 
   if (!runeKey) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
   const runeData = runesList[runeKey as keyof typeof runesList];
-  const title = `${runeData.name} Rune Meaning: ${runeData.meaning} - Lunary`;
-  const description = `Discover the complete meaning of ${runeData.name} rune (${runeData.symbol}). Learn about ${runeData.name} meaning, magical properties, and how to use this rune in divination and spellwork.`;
 
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${runeData.name} Rune Meaning: ${runeData.meaning} - Lunary`,
+    description: `Discover the complete meaning of ${runeData.name} rune (${runeData.symbol}). Learn about ${runeData.name} meaning, magical properties, and how to use this rune in divination and spellwork.`,
     keywords: [
       `${runeData.name} rune`,
       `${runeData.name} meaning`,
@@ -42,43 +38,10 @@ export async function generateMetadata({
       `${runeData.name} magical properties`,
       `${runeData.meaning} rune`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/runes/${rune}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/runes',
-          width: 1200,
-          height: 630,
-          alt: `${runeData.name} Rune`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/runes/${rune}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/runes/${rune}`,
+    ogImagePath: '/api/og/grimoire/runes',
+    ogImageAlt: `${runeData.name} Rune`,
+  });
 }
 
 export default async function RunePage({
@@ -100,19 +63,23 @@ export default async function RunePage({
   const faqs = [
     {
       question: `What does ${runeData.name} rune mean?`,
-      answer: `${runeData.name} (${runeData.symbol}) means "${runeData.meaning}". ${runeData.notes}`,
+      answer: `${runeData.name} (${runeData.symbol}) means "${runeData.meaning}". ${runeData.divinationMeaning}`,
     },
     {
-      question: `What are ${runeData.name}'s magical properties?`,
-      answer: `${runeData.name} is associated with ${runeData.magicalProperties.toLowerCase()}. ${runeData.notes}`,
+      question: `What does ${runeData.name} mean upright in a reading?`,
+      answer: runeData.uprightMeaning,
+    },
+    {
+      question: `What does ${runeData.name} mean reversed?`,
+      answer: runeData.reversedMeaning,
     },
     {
       question: `How do I use ${runeData.name} in spellwork?`,
-      answer: `${runeData.name} can be used in spells for ${runeData.magicalProperties.toLowerCase()}. ${runeData.notes}`,
+      answer: `${runeData.name} can be used for ${runeData.magicalUses.join(', ').toLowerCase()}. ${runeData.notes}`,
     },
     {
-      question: `What does ${runeData.name} mean in divination?`,
-      answer: `In rune readings, ${runeData.name} represents ${runeData.meaning.toLowerCase()} and ${runeData.magicalProperties.toLowerCase()}.`,
+      question: `What is the history of ${runeData.name}?`,
+      answer: runeData.history,
     },
   ];
 
@@ -129,35 +96,34 @@ export default async function RunePage({
           `${runeData.name} magical`,
         ]}
         canonicalUrl={`https://lunary.app/grimoire/runes/${rune}`}
-        intro={`${runeData.name} (${runeData.symbol}) is an Elder Futhark rune meaning "${runeData.meaning}". ${runeData.notes}`}
-        tldr={`${runeData.name} (${runeData.symbol}) means "${runeData.meaning}" and is associated with ${runeData.magicalProperties.toLowerCase()}.`}
-        meaning={`The runes are an ancient alphabet used by Germanic peoples for writing, divination, and magic. Each rune carries deep symbolic meaning and magical power. ${runeData.name} is one of the 24 Elder Futhark runes, the oldest known runic alphabet.
+        intro={`${runeData.name} (${runeData.symbol}) is an Elder Futhark rune meaning "${runeData.meaning}". Pronounced "${runeData.pronunciation}", it belongs to ${runeData.aett}'s Aett and is associated with the element of ${runeData.element}${runeData.deity ? ` and the deity ${runeData.deity}` : ''}.`}
+        tldr={`${runeData.name} (${runeData.symbol}) means "${runeData.meaning}" and represents ${runeData.keywords.slice(0, 4).join(', ').toLowerCase()}.`}
+        meaning={`${runeData.history}
 
-${runeData.name} (${runeData.symbol}) means "${runeData.meaning}" and carries the energy of ${runeData.magicalProperties.toLowerCase()}. This rune has been used for centuries in divination, spellwork, and magical practices.
+**Upright Meaning:**
+${runeData.uprightMeaning}
 
-${runeData.notes}
+**Reversed Meaning:**
+${runeData.reversedMeaning}
 
-Understanding ${runeData.name} helps you work with its energy in your magical practice, whether you're using it for divination, spellwork, or personal growth. Each rune offers unique insights and can be a powerful tool for transformation and manifestation.`}
+**In Divination:**
+${runeData.divinationMeaning}
+
+**Affirmation:** "${runeData.affirmation}"`}
         glyphs={[runeData.symbol]}
-        symbolism={`${runeData.name} (${runeData.symbol}) symbolizes ${runeData.meaning.toLowerCase()} and represents ${runeData.magicalProperties.toLowerCase()}. The rune's shape and meaning connect to ancient Germanic traditions and carry powerful magical energy.
+        symbolism={`${runeData.name} (${runeData.symbol}) is the ${runeData.aettPosition === 1 ? 'first' : runeData.aettPosition === 2 ? 'second' : runeData.aettPosition === 3 ? 'third' : `${runeData.aettPosition}th`} rune of ${runeData.aett}'s Aett in the Elder Futhark. It is associated with the ${runeData.element} element${runeData.deity ? ` and connected to ${runeData.deity}` : ''}.
 
-In runic traditions, ${runeData.name} is associated with specific energies and can be used to:
-- Enhance spells related to ${runeData.magicalProperties.toLowerCase()}
-- Provide guidance in divination
-- Connect with ancient wisdom
-- Manifest ${runeData.magicalProperties.toLowerCase()}`}
-        howToWorkWith={[
-          `Use ${runeData.name} in spells for ${runeData.magicalProperties.toLowerCase()}`,
-          `Draw ${runeData.name} for divination guidance`,
-          `Carve or draw ${runeData.symbol} for magical work`,
-          `Meditate on ${runeData.name}'s meaning`,
-          `Work with ${runeData.name} energy consciously`,
-        ]}
+**Keywords:** ${runeData.keywords.join(', ')}
+
+**Magical Properties:** ${runeData.magicalProperties}
+
+${runeData.notes}`}
+        howToWorkWith={runeData.magicalUses}
         journalPrompts={[
-          `What does ${runeData.name} mean to me?`,
-          `How can I work with ${runeData.name} energy?`,
-          `What does ${runeData.meaning.toLowerCase()} represent in my life?`,
-          `How can ${runeData.name} guide my path?`,
+          `How does the energy of ${runeData.keywords[0].toLowerCase()} manifest in my life?`,
+          `What is ${runeData.name} trying to teach me right now?`,
+          `How can I embody the affirmation: "${runeData.affirmation}"?`,
+          `Where do I see ${runeData.meaning.toLowerCase()} themes appearing in my journey?`,
         ]}
         relatedItems={[
           {

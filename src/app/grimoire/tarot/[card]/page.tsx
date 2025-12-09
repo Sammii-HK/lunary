@@ -1,10 +1,10 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { tarotCards } from '../../../../../utils/tarot/tarot-cards';
 import { tarotSuits } from '@/constants/tarot';
 import { stringToKebabCase } from '../../../../../utils/string';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 // Helper to find card by slug
 function findCardBySlug(slug: string) {
@@ -61,22 +61,17 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ card: string }>;
-}): Promise<Metadata> {
+}) {
   const { card } = await params;
   const cardData = findCardBySlug(card);
 
   if (!cardData) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
-  const title = `${cardData.card.name} Meaning: Upright & Reversed - Lunary`;
-  const description = `Discover the complete meaning of ${cardData.card.name} tarot card. Learn about ${cardData.card.name} upright and reversed meanings, symbolism, and how to interpret this card in readings.`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${cardData.card.name} Meaning: Upright & Reversed - Lunary`,
+    description: `Discover the complete meaning of ${cardData.card.name} tarot card. Learn about ${cardData.card.name} upright and reversed meanings, symbolism, and how to interpret this card in readings.`,
     keywords: [
       `${cardData.card.name} meaning`,
       `${cardData.card.name} tarot`,
@@ -85,43 +80,10 @@ export async function generateMetadata({
       `${cardData.card.name} reversed`,
       `tarot ${cardData.card.name}`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/tarot/${card}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/tarot',
-          width: 1200,
-          height: 630,
-          alt: `${cardData.card.name} Tarot Card`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/tarot/${card}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/tarot/${card}`,
+    ogImagePath: '/api/og/grimoire/tarot',
+    ogImageAlt: `${cardData.card.name} Tarot Card`,
+  });
 }
 
 export default async function TarotCardPage({
@@ -140,8 +102,41 @@ export default async function TarotCardPage({
     ? tarotSuits[cardData.suit as keyof typeof tarotSuits]
     : null;
 
-  // Generate reversed meaning (simplified - would need actual data)
-  const reversedMeaning = `When ${cardData.card.name} appears reversed, it suggests blocked or inverted energy. The card's themes may be internalized, delayed, or expressed in unhealthy ways. Consider what obstacles are preventing the upright energy from manifesting.`;
+  // Use detailed card data if available, otherwise generate generic content
+  const cardDetails = cardData.card as {
+    name: string;
+    keywords: string[];
+    information: string;
+    number?: number;
+    element?: string;
+    planet?: string;
+    zodiacSign?: string;
+    uprightMeaning?: string;
+    reversedMeaning?: string;
+    symbolism?: string;
+    loveMeaning?: string;
+    careerMeaning?: string;
+    affirmation?: string;
+  };
+
+  const reversedMeaning =
+    cardDetails.reversedMeaning ||
+    `When ${cardData.card.name} appears reversed, it suggests blocked or inverted energy. The card's themes may be internalized, delayed, or expressed in unhealthy ways. Consider what obstacles are preventing the upright energy from manifesting.`;
+
+  const uprightMeaning =
+    cardDetails.uprightMeaning || cardData.card.information;
+
+  const symbolismContent =
+    cardDetails.symbolism ||
+    `${cardData.card.name} symbolizes ${cardData.card.keywords.join(', ').toLowerCase()}. The card's imagery and symbolism reflect these themes, offering insights into how this energy manifests in your life.`;
+
+  const loveMeaning =
+    cardDetails.loveMeaning ||
+    `In love readings, ${cardData.card.name} suggests ${cardData.card.keywords[0]?.toLowerCase() || 'emotional themes'} in relationships. The specific meaning depends on the question and surrounding cards.`;
+
+  const careerMeaning =
+    cardDetails.careerMeaning ||
+    `In career readings, ${cardData.card.name} indicates ${cardData.card.keywords[0]?.toLowerCase() || 'work-related themes'}. Consider how the card's energy applies to your professional life.`;
 
   // Generate related cards (simplified)
   const relatedCards: Array<{ name: string; href: string; type: string }> = [];
@@ -215,11 +210,11 @@ export default async function TarotCardPage({
     },
     {
       question: `What does ${cardData.card.name} mean in love?`,
-      answer: `In love readings, ${cardData.card.name} suggests ${cardData.card.keywords[0]?.toLowerCase() || 'emotional themes'} in relationships. The specific meaning depends on the question and surrounding cards.`,
+      answer: loveMeaning,
     },
     {
       question: `What does ${cardData.card.name} mean in career?`,
-      answer: `In career readings, ${cardData.card.name} indicates ${cardData.card.keywords[0]?.toLowerCase() || 'work-related themes'}. Consider how the card's energy applies to your professional life.`,
+      answer: careerMeaning,
     },
     {
       question: `What does ${cardData.card.name} reversed mean?`,
@@ -229,6 +224,14 @@ export default async function TarotCardPage({
       question: `Is ${cardData.card.name} a positive or negative card?`,
       answer: `${cardData.card.name} can be interpreted as ${cardData.card.keywords.some((k) => ['love', 'success', 'joy', 'harmony'].includes(k.toLowerCase())) ? 'generally positive' : 'neutral or challenging depending on context'}. The meaning depends on the question and surrounding cards.`,
     },
+    ...(cardDetails.affirmation
+      ? [
+          {
+            question: `What is the affirmation for ${cardData.card.name}?`,
+            answer: cardDetails.affirmation,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -253,26 +256,46 @@ export default async function TarotCardPage({
         tldr={`${cardData.card.name} represents ${cardData.card.keywords.join(', ').toLowerCase()}.`}
         meaning={`${cardData.card.name} is ${cardData.type === 'major' ? 'one of the 22 Major Arcana cards' : `a ${suitInfo?.name || 'Minor Arcana'} card`} in the tarot deck. ${cardData.type === 'major' ? 'Major Arcana cards represent significant life themes and spiritual lessons.' : suitInfo ? `${suitInfo.name} cards are associated with ${suitInfo.element} element and represent ${suitInfo.qualities.toLowerCase()}.` : ''}
 
-${cardData.card.information}
+## Upright Meaning
 
-When ${cardData.card.name} appears in a reading, it brings attention to ${cardData.card.keywords.join(', ').toLowerCase()}. The card's position, surrounding cards, and your question all influence how this energy manifests in your situation.
+${uprightMeaning}
 
-Understanding ${cardData.card.name} helps you interpret its message in your readings and apply its wisdom to your life.`}
-        symbolism={`${cardData.card.name} symbolizes ${cardData.card.keywords.join(', ').toLowerCase()}. The card's imagery and symbolism reflect these themes, offering insights into how this energy manifests in your life.
+## Reversed Meaning
 
-${cardData.type === 'major' ? 'As a Major Arcana card, ' + cardData.card.name + ' represents significant life themes and karmic lessons.' : suitInfo ? `As a ${suitInfo.name} card, ${cardData.card.name} is associated with ${suitInfo.element} element, representing ${suitInfo.qualities.toLowerCase()}.` : ''}
+${reversedMeaning}
 
-The card's meaning is enriched by its position in the spread and its relationship to other cards in the reading.`}
+When ${cardData.card.name} appears in a reading, it brings attention to ${cardData.card.keywords.join(', ').toLowerCase()}. The card's position, surrounding cards, and your question all influence how this energy manifests in your situation.`}
+        symbolism={
+          symbolismContent +
+          (cardData.type === 'major'
+            ? `\n\nAs a Major Arcana card, ${cardData.card.name} represents significant life themes and karmic lessons.`
+            : suitInfo
+              ? `\n\nAs a ${suitInfo.name} card, ${cardData.card.name} is associated with ${suitInfo.element} element, representing ${suitInfo.qualities.toLowerCase()}.`
+              : '')
+        }
         numerology={
           cardData.type === 'major'
-            ? `Major Arcana cards are numbered 0-21, each representing a stage in the Fool's Journey. ${cardData.card.name} represents a specific stage in this spiritual journey.`
+            ? cardDetails.number !== undefined
+              ? `${cardData.card.name} is card number ${cardDetails.number} in the Major Arcana, representing a significant stage in the Fool's Journey. The number ${cardDetails.number} carries its own numerological significance.`
+              : `Major Arcana cards are numbered 0-21, each representing a stage in the Fool's Journey. ${cardData.card.name} represents a specific stage in this spiritual journey.`
             : suitInfo
               ? `${suitInfo.name} cards are associated with ${suitInfo.element} element and numbered 1-10, plus court cards. Each number carries numerological significance.`
               : ''
         }
         astrologyCorrespondences={
           cardData.type === 'major'
-            ? `Major Arcana cards are associated with astrological signs, planets, and elements. ${cardData.card.name} connects to specific cosmic energies.`
+            ? cardDetails.zodiacSign ||
+              cardDetails.planet ||
+              cardDetails.element
+              ? [
+                  cardDetails.zodiacSign &&
+                    `Zodiac Sign: ${cardDetails.zodiacSign}`,
+                  cardDetails.planet && `Ruling Planet: ${cardDetails.planet}`,
+                  cardDetails.element && `Element: ${cardDetails.element}`,
+                ]
+                  .filter(Boolean)
+                  .join('\n')
+              : `Major Arcana cards are associated with astrological signs, planets, and elements. ${cardData.card.name} connects to specific cosmic energies.`
             : suitInfo
               ? `Suit: ${suitInfo.name}
 Element: ${suitInfo.element}

@@ -92,102 +92,10 @@ export default async function SabbatPage({
     notFound();
   }
 
-  const sabbatCorrespondences: Record<
-    string,
-    { colors: string[]; themes: string[]; activities: string[] }
-  > = {
-    samhain: {
-      colors: ['Black', 'Orange', 'Purple'],
-      themes: ['Ancestors', 'Death', 'Divination', 'Transformation'],
-      activities: [
-        'Honor ancestors',
-        'Divination work',
-        'Release rituals',
-        'Feast for the dead',
-      ],
-    },
-    yule: {
-      colors: ['Red', 'Green', 'Gold', 'White'],
-      themes: ['Rebirth', 'Light', 'Hope', 'Renewal'],
-      activities: [
-        'Yule log burning',
-        'Gift giving',
-        'Decorating with evergreens',
-        'Welcoming the returning sun',
-      ],
-    },
-    imbolc: {
-      colors: ['White', 'Red', 'Pink'],
-      themes: ['Purification', 'New beginnings', 'Inspiration', 'Creativity'],
-      activities: [
-        'Candle rituals',
-        'Spring cleaning',
-        'Seed blessing',
-        'Brigid devotions',
-      ],
-    },
-    ostara: {
-      colors: ['Pastels', 'Green', 'Yellow', 'Pink'],
-      themes: ['Balance', 'Fertility', 'Growth', 'New life'],
-      activities: [
-        'Egg decorating',
-        'Planting seeds',
-        'Balance rituals',
-        'Spring celebrations',
-      ],
-    },
-    beltane: {
-      colors: ['Green', 'Red', 'White'],
-      themes: ['Fertility', 'Passion', 'Fire', 'Union'],
-      activities: [
-        'Maypole dancing',
-        'Bonfires',
-        'Handfasting',
-        'Flower crowns',
-      ],
-    },
-    litha: {
-      colors: ['Gold', 'Yellow', 'Green'],
-      themes: ['Power', 'Abundance', 'Light', 'Vitality'],
-      activities: [
-        'Sunrise watching',
-        'Bonfires',
-        'Herb gathering',
-        'Solar magic',
-      ],
-    },
-    'lammas-or-lughnasadh': {
-      colors: ['Gold', 'Orange', 'Brown'],
-      themes: ['Harvest', 'Gratitude', 'Abundance', 'Sacrifice'],
-      activities: [
-        'Bread baking',
-        'First harvest feast',
-        'Games and competitions',
-        'Grain offerings',
-      ],
-    },
-    mabon: {
-      colors: ['Brown', 'Orange', 'Gold', 'Red'],
-      themes: ['Balance', 'Thanksgiving', 'Reflection', 'Preparation'],
-      activities: [
-        'Harvest feast',
-        'Apple magic',
-        'Gratitude rituals',
-        'Wine making',
-      ],
-    },
-  };
-
-  const correspondences = sabbatCorrespondences[sabbat.toLowerCase()] || {
-    colors: [],
-    themes: [],
-    activities: [],
-  };
-
   const faqs = [
     {
       question: `When is ${sabbatData.name}?`,
-      answer: `${sabbatData.name} is celebrated on ${sabbatData.date}. ${sabbatData.description}`,
+      answer: `${sabbatData.name} (pronounced "${sabbatData.pronunciation}") is celebrated on ${sabbatData.date}. It is a ${sabbatData.dateType === 'astronomical' ? `${sabbatData.astronomicalEvent}` : 'fixed date'} sabbat.`,
     },
     {
       question: `What is ${sabbatData.name}?`,
@@ -195,11 +103,15 @@ export default async function SabbatPage({
     },
     {
       question: `How do you celebrate ${sabbatData.name}?`,
-      answer: `${sabbatData.name} can be celebrated through ${correspondences.activities.slice(0, 2).join(' and ').toLowerCase()}. Focus on themes of ${correspondences.themes.join(', ').toLowerCase()}.`,
+      answer: `Celebrate ${sabbatData.name} through traditions like ${sabbatData.traditions.slice(0, 3).join(', ').toLowerCase()}. Rituals include ${sabbatData.rituals.slice(0, 2).join(' and ').toLowerCase()}.`,
     },
     {
-      question: `What colors represent ${sabbatData.name}?`,
-      answer: `${sabbatData.name} is associated with ${correspondences.colors.join(', ')} colors. Use these in altar decorations, candles, and ritual wear.`,
+      question: `What are the correspondences for ${sabbatData.name}?`,
+      answer: `${sabbatData.name} is associated with the ${sabbatData.element} element, colors ${sabbatData.colors.slice(0, 3).join(', ')}, crystals like ${sabbatData.crystals.slice(0, 3).join(', ')}, and herbs including ${sabbatData.herbs.slice(0, 3).join(', ')}.`,
+    },
+    {
+      question: `What is the spiritual meaning of ${sabbatData.name}?`,
+      answer: sabbatData.spiritualMeaning,
     },
   ];
 
@@ -216,41 +128,46 @@ export default async function SabbatPage({
           'wheel of the year',
         ]}
         canonicalUrl={`https://lunary.app/grimoire/wheel-of-the-year/${sabbat}`}
-        intro={`${sabbatData.name} is celebrated on ${sabbatData.date}. ${sabbatData.description}`}
-        tldr={`${sabbatData.name} (${sabbatData.date}) celebrates ${correspondences.themes.slice(0, 2).join(' and ').toLowerCase()}.`}
-        meaning={`The Wheel of the Year consists of eight sabbats that mark the seasonal cycles and the sun's journey through the year. ${sabbatData.name} holds a special place in this cycle.
+        intro={`${sabbatData.name} (${sabbatData.pronunciation}) is celebrated on ${sabbatData.date}. Also known as ${sabbatData.alternateNames.slice(0, 2).join(' or ')}, this ${sabbatData.season} sabbat is associated with the ${sabbatData.element} element and marks the ${sabbatData.wheelPosition}.`}
+        tldr={`${sabbatData.name} (${sabbatData.date}) celebrates ${sabbatData.keywords.slice(0, 3).join(', ').toLowerCase()}. ${sabbatData.affirmation}`}
+        meaning={`${sabbatData.description}
 
-${sabbatData.description}
+**History:**
+${sabbatData.history}
 
-Celebrating ${sabbatData.name} connects you to the natural rhythms of the earth and the turning of the seasons. This sabbat carries themes of ${correspondences.themes.join(', ').toLowerCase()}, making it a powerful time for related magical work.
+**Spiritual Meaning:**
+${sabbatData.spiritualMeaning}
 
-The traditions associated with ${sabbatData.name} have evolved over centuries, blending ancient pagan practices with modern interpretations. Whether you follow a specific tradition or create your own celebrations, honoring ${sabbatData.name} deepens your connection to the natural world.
+**Keywords:** ${sabbatData.keywords.join(', ')}
 
-Altar decorations for ${sabbatData.name} typically include ${correspondences.colors.join(', ')} colors, seasonal items, and symbols that reflect the sabbat's themes. Creating sacred space for this celebration enhances your experience of the turning wheel.`}
-        emotionalThemes={correspondences.themes}
-        howToWorkWith={[
-          `Decorate your altar with ${correspondences.colors.join(', ')} colors`,
-          ...correspondences.activities,
-          `Meditate on ${correspondences.themes[0]?.toLowerCase() || 'seasonal'} themes`,
-        ]}
-        rituals={correspondences.activities}
+**Deities:** ${sabbatData.deities.join(', ')}
+
+**Symbols:** ${sabbatData.symbols.join(', ')}
+
+**Affirmation:** "${sabbatData.affirmation}"`}
+        emotionalThemes={sabbatData.keywords}
+        howToWorkWith={sabbatData.traditions}
+        rituals={sabbatData.rituals}
         tables={[
           {
             title: `${sabbatData.name} Correspondences`,
             headers: ['Aspect', 'Details'],
             rows: [
               ['Date', sabbatData.date],
-              ['Colors', correspondences.colors.join(', ')],
-              ['Themes', correspondences.themes.join(', ')],
-              ['Activities', correspondences.activities.join(', ')],
+              ['Wheel Position', sabbatData.wheelPosition],
+              ['Element', sabbatData.element],
+              ['Colors', sabbatData.colors.join(', ')],
+              ['Crystals', sabbatData.crystals.join(', ')],
+              ['Herbs', sabbatData.herbs.join(', ')],
+              ['Foods', sabbatData.foods.slice(0, 5).join(', ')],
             ],
           },
         ]}
         journalPrompts={[
-          `What does ${sabbatData.name} mean to me?`,
-          `How can I honor ${correspondences.themes[0]?.toLowerCase() || 'this season'}?`,
-          `What am I grateful for this ${sabbatData.name}?`,
-          `How has the wheel turned since the last sabbat?`,
+          `How does ${sabbatData.keywords[0].toLowerCase()} manifest in my life right now?`,
+          `What traditions from ${sabbatData.name} resonate with me?`,
+          `How can I embody: "${sabbatData.affirmation}"?`,
+          `What am I harvesting or releasing this ${sabbatData.name}?`,
         ]}
         relatedItems={[
           {

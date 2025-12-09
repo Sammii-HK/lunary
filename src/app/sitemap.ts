@@ -651,9 +651,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  // Add all tarot spread pages
+  // Add all tarot spread pages (using kebab-case for SEO)
   const tarotSpreadRoutes = Object.keys(tarotSpreads).map((spreadId) => ({
-    url: `${baseUrl}/grimoire/tarot/spreads/${spreadId}`,
+    url: `${baseUrl}/grimoire/tarot/spreads/${stringToKebabCase(spreadId)}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
