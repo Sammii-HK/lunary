@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Lunary Cosmic Guide",
+  "name_for_model": "lunary_cosmic",
+  "description_for_human": "Get real-time cosmic conditions, moon phases, planetary positions, and personalized astrological insights from Lunary.",
+  "description_for_model": "Lunary provides real-time astronomical data and astrological insights. Use this plugin to get current moon phase, planetary positions, cosmic weather, daily horoscopes, birth chart summaries, tarot readings, and ritual suggestions. All data is based on real astronomical calculations using NASA-grade ephemeris, not generic predictions. Available endpoints: cosmic-today (current cosmic conditions), birth-chart-summary (natal chart interpretation), tarot/daily (daily tarot pull), ritual/suggest (ritual recommendations based on current transits), grimoire/search (search the 500+ page knowledge library).",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://lunary.app/.well-known/openapi.json"
+  },
+  "logo_url": "https://lunary.app/logo.png",
+  "contact_email": "hello@lunary.app",
+  "legal_info_url": "https://lunary.app/terms"
+}

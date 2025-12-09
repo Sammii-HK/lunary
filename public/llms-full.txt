@@ -205,6 +205,281 @@ Keywords: Luck, karma, cycles, destiny, turning point
 Signifies cycles of change and destiny. Reminds that what goes around comes around.
 https://lunary.app/grimoire/tarot/wheel-of-fortune
 
+### Justice
+Keywords: Fairness, truth, cause and effect, law
+Represents fairness, truth, and the law of cause and effect. Decisions have consequences.
+https://lunary.app/grimoire/tarot/justice
+
+### The Hanged Man
+Keywords: Pause, surrender, letting go, new perspectives
+Symbolizes suspension, sacrifice, and seeing things from a new perspective. Sometimes we must let go to move forward.
+https://lunary.app/grimoire/tarot/the-hanged-man
+
+### Death
+Keywords: Endings, change, transformation, transition
+Represents transformation and the end of a cycle. Not literal death, but profound change and rebirth.
+https://lunary.app/grimoire/tarot/death
+
+### Temperance
+Keywords: Balance, moderation, patience, purpose
+Symbolizes balance, patience, and moderation. Finding the middle ground and practicing self-control.
+https://lunary.app/grimoire/tarot/temperance
+
+### The Devil
+Keywords: Shadow self, attachment, addiction, restriction
+Represents bondage, addiction, and the shadow self. Reminds us to examine what chains us.
+https://lunary.app/grimoire/tarot/the-devil
+
+### The Tower
+Keywords: Sudden change, upheaval, chaos, revelation
+Signifies sudden upheaval and the destruction of false foundations. Chaos that leads to enlightenment.
+https://lunary.app/grimoire/tarot/the-tower
+
+### The Star
+Keywords: Hope, faith, purpose, renewal, spirituality
+Represents hope, inspiration, and serenity. A card of healing and renewed faith after difficulty.
+https://lunary.app/grimoire/tarot/the-star
+
+### The Moon
+Keywords: Illusion, fear, anxiety, subconscious, intuition
+Symbolizes illusion, fear, and the subconscious mind. Things may not be as they seem.
+https://lunary.app/grimoire/tarot/the-moon
+
+### The Sun
+Keywords: Positivity, fun, warmth, success, vitality
+Represents joy, success, and vitality. One of the most positive cards, bringing warmth and clarity.
+https://lunary.app/grimoire/tarot/the-sun
+
+### Judgement
+Keywords: Judgement, rebirth, inner calling, absolution
+Signifies reflection, reckoning, and answering a higher calling. Time for self-evaluation and awakening.
+https://lunary.app/grimoire/tarot/judgement
+
+### The World
+Keywords: Completion, integration, accomplishment, travel
+Represents completion, accomplishment, and wholeness. The end of a major life cycle.
+https://lunary.app/grimoire/tarot/the-world
+
+---
+
+## Minor Arcana - Suit of Wands (Fire/Action)
+
+### Ace of Wands
+Keywords: Inspiration, new opportunities, growth, potential
+A spark of creative inspiration. New beginnings in passion projects, career, or creative ventures.
+
+### Two of Wands
+Keywords: Future planning, progress, decisions, discovery
+Planning for the future. You've started something and now must decide where to take it.
+
+### Three of Wands
+Keywords: Progress, expansion, foresight, overseas opportunities
+Expansion and looking ahead. Your plans are taking shape and opportunities arise.
+
+### Four of Wands
+Keywords: Celebration, joy, harmony, relaxation, homecoming
+Celebration and stability. A time to enjoy achievements and harmonious gatherings.
+
+### Five of Wands
+Keywords: Conflict, disagreements, competition, tension
+Conflict and competition. Clashing egos and minor struggles that require resolution.
+
+### Six of Wands
+Keywords: Success, public recognition, progress, self-confidence
+Victory and recognition. Your efforts are being acknowledged and celebrated.
+
+### Seven of Wands
+Keywords: Challenge, competition, protection, perseverance
+Standing your ground. Defending your position against opposition and challenges.
+
+### Eight of Wands
+Keywords: Movement, fast paced change, action, alignment
+Rapid movement and swift action. Things are accelerating quickly.
+
+### Nine of Wands
+Keywords: Resilience, courage, persistence, test of faith
+Resilience and persistence. You're close to the finish but face one more challenge.
+
+### Ten of Wands
+Keywords: Burden, extra responsibility, hard work, completion
+Burden and responsibility. Carrying too much weight. Time to delegate or release.
+
+### Page of Wands
+Keywords: Exploration, excitement, freedom, adventure
+A messenger of inspiration. Enthusiasm for new adventures and creative exploration.
+
+### Knight of Wands
+Keywords: Energy, passion, adventure, impulsiveness
+Action and adventure. Passionate pursuit of goals, sometimes impulsive.
+
+### Queen of Wands
+Keywords: Courage, confidence, independence, warmth
+Confident and magnetic energy. Creative leadership with warmth and determination.
+
+### King of Wands
+Keywords: Natural-born leader, vision, entrepreneur, honour
+Visionary leadership. Bold action, entrepreneurial spirit, and charismatic command.
+
+---
+
+## Minor Arcana - Suit of Cups (Water/Emotions)
+
+### Ace of Cups
+Keywords: Love, new feelings, emotional awakening, creativity
+New emotional beginnings. Love, compassion, and creative inspiration flow.
+
+### Two of Cups
+Keywords: Partnership, unity, connection, love
+Deep connection and partnership. Mutual attraction and balanced relationships.
+
+### Three of Cups
+Keywords: Celebration, friendship, creativity, community
+Celebration and friendship. Joyful gatherings and creative collaborations.
+
+### Four of Cups
+Keywords: Meditation, contemplation, apathy, reevaluation
+Contemplation and possibly discontent. Time to reassess what truly matters.
+
+### Five of Cups
+Keywords: Regret, failure, disappointment, pessimism
+Loss and grief. Focusing on what's lost rather than what remains.
+
+### Six of Cups
+Keywords: Revisiting the past, childhood memories, innocence
+Nostalgia and happy memories. Reconnecting with the past or inner child.
+
+### Seven of Cups
+Keywords: Opportunities, choices, wishful thinking, illusion
+Many choices and fantasies. Beware of illusion versus reality.
+
+### Eight of Cups
+Keywords: Disappointment, abandonment, withdrawal, seeking truth
+Walking away from something unfulfilling. Seeking deeper meaning elsewhere.
+
+### Nine of Cups
+Keywords: Contentment, satisfaction, gratitude, wish fulfilled
+Emotional fulfillment. The "wish card" - contentment and gratitude.
+
+### Ten of Cups
+Keywords: Divine love, harmony, alignment, happy family
+Ultimate emotional fulfillment. Harmony, love, and lasting happiness.
+
+### Page of Cups
+Keywords: Creative opportunities, curiosity, possibility
+Emotional messenger. Intuitive insights and creative inspiration arriving.
+
+### Knight of Cups
+Keywords: Romance, charm, imagination, beauty
+Romantic idealist. Following the heart with charm and creativity.
+
+### Queen of Cups
+Keywords: Compassion, calm, comfort, intuitive
+Emotional intelligence and nurturing. Deep intuition and compassionate support.
+
+### King of Cups
+Keywords: Emotionally balanced, compassionate, diplomatic
+Emotional mastery. Calm wisdom and balanced leadership through empathy.
+
+---
+
+## More Crystals
+
+### Selenite
+Properties: Cleansing, charging, clarity, connection to higher realms
+Chakras: Crown, Third Eye
+A powerful cleansing stone that can charge other crystals. Named after the moon goddess Selene.
+https://lunary.app/grimoire/crystals/selenite
+
+### Labradorite
+Properties: Transformation, intuition, protection, magic
+Chakras: Third Eye, Throat
+The stone of magic and transformation. Protects the aura and enhances psychic abilities.
+https://lunary.app/grimoire/crystals/labradorite
+
+### Moonstone
+Properties: Intuition, inner growth, strength, new beginnings
+Chakras: Third Eye, Crown, Sacral
+Connected to the moon's energy. Enhances intuition and supports emotional balance.
+https://lunary.app/grimoire/crystals/moonstone
+
+### Tiger's Eye
+Properties: Courage, personal power, protection, good luck
+Chakras: Solar Plexus, Sacral, Root
+A stone of courage and motivation. Brings good luck and protection from negative energy.
+https://lunary.app/grimoire/crystals/tigers-eye
+
+### Obsidian
+Properties: Protection, grounding, truth, shadow work
+Chakras: Root
+Volcanic glass that offers powerful protection and helps with shadow work and truth-seeking.
+https://lunary.app/grimoire/crystals/obsidian
+
+### Carnelian
+Properties: Courage, vitality, sexuality, confidence, action
+Chakras: Sacral, Root
+A stone of motivation and endurance. Stimulates creativity and courage.
+https://lunary.app/grimoire/crystals/carnelian
+
+### Lapis Lazuli
+Properties: Wisdom, truth, self-awareness, communication
+Chakras: Throat, Third Eye
+The stone of wisdom and truth. Enhances intellectual ability and stimulates desire for knowledge.
+https://lunary.app/grimoire/crystals/lapis-lazuli
+
+### Fluorite
+Properties: Focus, clarity, protection, cleansing
+Chakras: Heart, Throat, Third Eye
+A highly protective and stabilizing stone. Excellent for mental clarity and decision-making.
+https://lunary.app/grimoire/crystals/fluorite
+
+### Malachite
+Properties: Transformation, emotional healing, protection
+Chakras: Heart, Solar Plexus
+A powerful stone of transformation that absorbs negative energies and pollutants.
+https://lunary.app/grimoire/crystals/malachite
+
+### Aventurine
+Properties: Prosperity, luck, confidence, heart healing
+Chakras: Heart
+Known as the stone of opportunity. Attracts luck and abundance while promoting compassion.
+https://lunary.app/grimoire/crystals/aventurine
+
+---
+
+## Wheel of the Year (Sabbats)
+
+### Samhain (October 31)
+The Witch's New Year. The veil between worlds is thinnest. Honor ancestors, practice divination, and embrace transformation.
+https://lunary.app/grimoire/wheel-of-the-year/samhain
+
+### Yule (December 21)
+Winter Solstice. The longest night, celebrating the return of the sun. Themes of rebirth, hope, and light in darkness.
+https://lunary.app/grimoire/wheel-of-the-year/yule
+
+### Imbolc (February 1-2)
+The first stirrings of spring. Honoring Brigid, goddess of healing and creativity. Time for purification and new beginnings.
+https://lunary.app/grimoire/wheel-of-the-year/imbolc
+
+### Ostara (March 20-21)
+Spring Equinox. Day and night are equal. Themes of fertility, balance, and new growth. The earth awakens.
+https://lunary.app/grimoire/wheel-of-the-year/ostara
+
+### Beltane (May 1)
+The height of spring. Fire festival celebrating fertility, passion, and the union of the God and Goddess.
+https://lunary.app/grimoire/wheel-of-the-year/beltane
+
+### Litha (June 20-21)
+Summer Solstice. The longest day. Celebrating the sun at its peak power. Abundance, growth, and fulfillment.
+https://lunary.app/grimoire/wheel-of-the-year/litha
+
+### Lughnasadh (August 1)
+First harvest festival. Celebrating the grain harvest and the sacrificial god Lugh. Gratitude for abundance.
+https://lunary.app/grimoire/wheel-of-the-year/lughnasadh
+
+### Mabon (September 21-22)
+Autumn Equinox. Second harvest. Balance of light and dark. Themes of thanksgiving, reflection, and preparation.
+https://lunary.app/grimoire/wheel-of-the-year/mabon
+
 ---
 
 ## Angel Numbers

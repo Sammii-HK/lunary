@@ -1,0 +1,163 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Lunary Cosmic API",
+    "description": "Real-time astronomical data and astrological insights based on NASA-grade ephemeris calculations.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Lunary",
+      "url": "https://lunary.app/help"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://lunary.app/api/gpt"
+    }
+  ],
+  "paths": {
+    "/cosmic-today": {
+      "get": {
+        "operationId": "getCosmicToday",
+        "summary": "Get today's cosmic conditions",
+        "description": "Returns current moon phase, planetary positions, key transits, and cosmic weather summary based on real astronomical calculations.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Optional date in YYYY-MM-DD format. Defaults to today.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cosmic conditions for the specified date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "date": { "type": "string" },
+                    "headline": { "type": "string" },
+                    "summary": { "type": "string" },
+                    "moonPhase": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "emoji": { "type": "string" },
+                        "sign": { "type": "string" },
+                        "illumination": { "type": "integer" }
+                      }
+                    },
+                    "sunSign": { "type": "string" },
+                    "keyTransits": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": { "type": "string" },
+                          "impact": { "type": "string" },
+                          "intensity": { "type": "number" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/birth-chart-summary": {
+      "get": {
+        "operationId": "getBirthChartSummary",
+        "summary": "Get a birth chart summary",
+        "description": "Calculate and summarize a natal birth chart based on birth date, time, and location.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Birth date in YYYY-MM-DD format",
+            "required": true,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "time",
+            "in": "query",
+            "description": "Birth time in HH:MM format (24-hour)",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Birth location latitude",
+            "required": false,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "description": "Birth location longitude",
+            "required": false,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Birth chart summary"
+          }
+        }
+      }
+    },
+    "/tarot/daily": {
+      "get": {
+        "operationId": "getDailyTarot",
+        "summary": "Get a daily tarot card",
+        "description": "Draw a tarot card for daily guidance with interpretation.",
+        "responses": {
+          "200": {
+            "description": "Daily tarot card and interpretation"
+          }
+        }
+      }
+    },
+    "/ritual/suggest": {
+      "get": {
+        "operationId": "suggestRitual",
+        "summary": "Get ritual suggestions",
+        "description": "Get ritual and practice suggestions based on current cosmic conditions.",
+        "responses": {
+          "200": {
+            "description": "Suggested rituals for current transits"
+          }
+        }
+      }
+    },
+    "/grimoire/search": {
+      "get": {
+        "operationId": "searchGrimoire",
+        "summary": "Search the grimoire",
+        "description": "Search Lunary's 500+ page digital grimoire for information on crystals, spells, tarot, zodiac, numerology, and more.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results from the grimoire"
+          }
+        }
+      }
+    }
+  }
+}

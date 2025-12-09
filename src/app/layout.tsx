@@ -110,6 +110,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'application-name': 'Lunary',
       'msapplication-TileColor': '#18181b',
       'msapplication-config': '/browserconfig.xml',
+      'ai-content-declaration': 'https://lunary.app/llms.txt',
     },
   };
 }
