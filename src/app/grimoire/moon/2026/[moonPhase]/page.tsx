@@ -750,7 +750,7 @@ export default async function MoonPhase2026Page({
         },
       ]}
       ctaText={`Get personalized ${data.type === 'full' ? 'Full Moon' : 'New Moon'} insights for your chart`}
-      ctaHref='/welcome'
+      ctaHref='/horoscope'
       sources={[
         { name: 'NASA Moon Phase Data' },
         { name: 'Traditional lunar correspondences' },

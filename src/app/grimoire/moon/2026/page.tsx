@@ -162,10 +162,10 @@ export default function Moon2026Page() {
             Get personalized lunar insights based on your birth chart.
           </p>
           <Link
-            href='/welcome'
+            href='/horoscope'
             className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
-            Start Free
+            Get Personalized Insights
           </Link>
         </section>
       </div>
