@@ -8,6 +8,10 @@ import {
   planetUnicode,
 } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
+import {
+  createGrimoireMetadata,
+  createNotFoundMetadata,
+} from '@/lib/grimoire-metadata';
 
 const planetKeys = Object.keys(planetaryBodies);
 
@@ -28,19 +32,15 @@ export async function generateMetadata({
   );
 
   if (!planetKey) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return createNotFoundMetadata();
   }
 
   const planetData = planetaryBodies[planetKey as keyof typeof planetaryBodies];
-  const symbol = planetSymbols[planetKey as keyof typeof planetSymbols];
-  const title = `${planetData.name} in Astrology: Meaning & Influence - Lunary`;
-  const description = `Discover the complete guide to ${planetData.name} in astrology. Learn about ${planetData.name}'s meaning, influence, mystical properties, and how it affects your birth chart and transits.`;
 
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    entityType: 'planet',
+    entityName: planetData.name,
+    description: `Discover the complete guide to ${planetData.name} in astrology. Learn about ${planetData.name}'s meaning, influence, mystical properties, and how it affects your birth chart and transits.`,
     keywords: [
       `${planetData.name} astrology`,
       `${planetData.name} meaning`,
@@ -49,43 +49,8 @@ export async function generateMetadata({
       `planet ${planetData.name}`,
       `${planetData.name} symbol`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/planets/${planet}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/planets',
-          width: 1200,
-          height: 630,
-          alt: `${planetData.name} Planet`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/planets/${planet}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    path: `/grimoire/planets/${planet}`,
+  });
 }
 
 export default async function PlanetPage({
@@ -105,7 +70,6 @@ export default async function PlanetPage({
   const planetData = planetaryBodies[planetKey as keyof typeof planetaryBodies];
   const symbol = planetSymbols[planetKey as keyof typeof planetSymbols];
 
-  // Get ruling signs (simplified - would need full data)
   const rulingSignsMap: Record<string, string[]> = {
     sun: ['Leo'],
     moon: ['Cancer'],

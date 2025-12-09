@@ -4,6 +4,10 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { crystalDatabase } from '@/constants/grimoire/crystals';
 import { stringToKebabCase } from '../../../../../utils/string';
+import {
+  createGrimoireMetadata,
+  createNotFoundMetadata,
+} from '@/lib/grimoire-metadata';
 
 export async function generateStaticParams() {
   return crystalDatabase.map((crystal) => ({
@@ -22,17 +26,13 @@ export async function generateMetadata({
   );
 
   if (!crystalData) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return createNotFoundMetadata();
   }
 
-  const title = `${crystalData.name} Crystal Meaning: Properties & Uses - Lunary`;
-  const description = `Discover the complete guide to ${crystalData.name} crystal. Learn about ${crystalData.name} meaning, properties (${crystalData.properties.slice(0, 3).join(', ')}), chakras, zodiac signs, and how to use this crystal.`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    entityType: 'crystal',
+    entityName: crystalData.name,
+    description: `Discover the complete guide to ${crystalData.name} crystal. Learn about ${crystalData.name} meaning, properties (${crystalData.properties.slice(0, 3).join(', ')}), chakras, zodiac signs, and how to use this crystal.`,
     keywords: [
       `${crystalData.name} crystal`,
       `${crystalData.name} meaning`,
@@ -40,43 +40,8 @@ export async function generateMetadata({
       `${crystalData.name} uses`,
       `crystal ${crystalData.name}`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/crystals/${crystal}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/crystals',
-          width: 1200,
-          height: 630,
-          alt: `${crystalData.name} Crystal`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/crystals/${crystal}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    path: `/grimoire/crystals/${crystal}`,
+  });
 }
 
 export default async function CrystalPage({
