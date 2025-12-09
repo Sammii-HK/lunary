@@ -2,15 +2,25 @@ import { Metadata } from 'next';
 import { ComparisonData } from './ComparisonPageTemplate';
 
 export function createComparisonMetadata(data: ComparisonData): Metadata {
-  const { competitorName, competitorSlug, tagline } = data;
+  const { competitorName, competitorSlug } = data;
   const url = `https://lunary.app/comparison/${competitorSlug}`;
+  const year = new Date().getFullYear();
+  const title = `Lunary vs ${competitorName} (${year}): Which Astrology App is Better?`;
+  const description = `Compare Lunary vs ${competitorName} in ${year}. Features, accuracy, pricing & user reviews. Find which astrology app is right for you.`;
 
   return {
-    title: tagline,
-    description: `Compare Lunary vs ${competitorName}. ${data.subtitle}`,
+    title,
+    description,
+    keywords: [
+      `lunary vs ${competitorName.toLowerCase()}`,
+      `${competitorName.toLowerCase()} alternative`,
+      `${competitorName.toLowerCase()} vs lunary`,
+      `best astrology app ${year}`,
+      'astrology app comparison',
+    ],
     openGraph: {
-      title: tagline,
-      description: `Compare Lunary vs ${competitorName}. See which app offers better personalized astrological guidance.`,
+      title,
+      description,
       url,
       siteName: 'Lunary',
     },

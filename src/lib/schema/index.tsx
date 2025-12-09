@@ -1163,3 +1163,174 @@ export function getRelatedEntities(
 
   return related;
 }
+
+// ============================================================================
+// EVENT SCHEMA - For Sabbats, Eclipses, Retrogrades, Astrological Events
+// ============================================================================
+
+interface EventSchemaProps {
+  name: string;
+  description: string;
+  url: string;
+  startDate: string;
+  endDate?: string;
+  eventType?: 'Festival' | 'SocialEvent' | 'Event';
+  location?: string;
+  isAccessibleForFree?: boolean;
+  eventStatus?: 'EventScheduled' | 'EventCancelled' | 'EventPostponed';
+  eventAttendanceMode?:
+    | 'OnlineEventAttendanceMode'
+    | 'OfflineEventAttendanceMode'
+    | 'MixedEventAttendanceMode';
+  image?: string;
+  keywords?: string[];
+}
+
+export function createEventSchema({
+  name,
+  description,
+  url,
+  startDate,
+  endDate,
+  eventType = 'Event',
+  location = 'Worldwide',
+  isAccessibleForFree = true,
+  eventStatus = 'EventScheduled',
+  eventAttendanceMode = 'OnlineEventAttendanceMode',
+  image,
+  keywords,
+}: EventSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': eventType,
+    name,
+    description,
+    url: url.startsWith('http') ? url : `${BASE_URL}${url}`,
+    startDate,
+    ...(endDate && { endDate }),
+    eventStatus: `https://schema.org/${eventStatus}`,
+    eventAttendanceMode: `https://schema.org/${eventAttendanceMode}`,
+    location: {
+      '@type': 'VirtualLocation',
+      name: location,
+      url: `${BASE_URL}${url}`,
+    },
+    organizer: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+    isAccessibleForFree,
+    ...(image && { image }),
+    ...(keywords && { keywords: keywords.join(', ') }),
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: `${BASE_URL}${url}`,
+      validFrom: new Date().toISOString(),
+    },
+  };
+}
+
+// ============================================================================
+// SOFTWARE APPLICATION SCHEMA - For App Pages
+// ============================================================================
+
+interface SoftwareAppSchemaProps {
+  name: string;
+  description: string;
+  applicationCategory: string;
+  operatingSystem?: string;
+  offers?: {
+    price: number;
+    priceCurrency: string;
+  };
+  aggregateRating?: {
+    ratingValue: number;
+    ratingCount: number;
+  };
+  featureList?: string[];
+}
+
+export function createSoftwareAppSchema({
+  name,
+  description,
+  applicationCategory,
+  operatingSystem = 'Web, iOS, Android',
+  offers,
+  aggregateRating,
+  featureList,
+}: SoftwareAppSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name,
+    description,
+    url: BASE_URL,
+    applicationCategory,
+    operatingSystem,
+    ...(offers && {
+      offers: {
+        '@type': 'Offer',
+        price: offers.price.toString(),
+        priceCurrency: offers.priceCurrency,
+      },
+    }),
+    ...(aggregateRating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: aggregateRating.ratingValue,
+        ratingCount: aggregateRating.ratingCount,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
+    ...(featureList && { featureList }),
+    provider: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
+
+// ============================================================================
+// COLLECTION PAGE SCHEMA - For Index/List Pages
+// ============================================================================
+
+interface CollectionPageSchemaProps {
+  name: string;
+  description: string;
+  url: string;
+  numberOfItems: number;
+  hasPart?: Array<{ name: string; url: string }>;
+}
+
+export function createCollectionPageSchema({
+  name,
+  description,
+  url,
+  numberOfItems,
+  hasPart,
+}: CollectionPageSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name,
+    description,
+    url: url.startsWith('http') ? url : `${BASE_URL}${url}`,
+    numberOfItems,
+    ...(hasPart && {
+      hasPart: hasPart.map((item) => ({
+        '@type': 'WebPage',
+        name: item.name,
+        url: item.url.startsWith('http') ? item.url : `${BASE_URL}${item.url}`,
+      })),
+    }),
+    isPartOf: {
+      '@type': 'WebSite',
+      '@id': `${BASE_URL}/#website`,
+    },
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}

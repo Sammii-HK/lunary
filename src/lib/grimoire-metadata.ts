@@ -22,7 +22,7 @@ type GrimoireEntityType =
   | 'scrying'
   | 'generic';
 
-interface GrimoireMetadataOptions {
+interface EntityBasedOptions {
   entityType: GrimoireEntityType;
   entityName: string;
   description: string;
@@ -30,6 +30,23 @@ interface GrimoireMetadataOptions {
   path: string;
   ogImagePath?: string;
   additionalKeywords?: string[];
+}
+
+interface CustomTitleOptions {
+  title: string;
+  description: string;
+  keywords: string[];
+  url: string;
+  ogImagePath?: string;
+  ogImageAlt?: string;
+}
+
+type GrimoireMetadataOptions = EntityBasedOptions | CustomTitleOptions;
+
+function isCustomTitleOptions(
+  opts: GrimoireMetadataOptions,
+): opts is CustomTitleOptions {
+  return 'title' in opts && 'url' in opts;
 }
 
 const entityTypeLabels: Record<GrimoireEntityType, string> = {
@@ -64,15 +81,75 @@ const defaultOgImages: Partial<Record<GrimoireEntityType, string>> = {
   generic: '/api/og/cosmic',
 };
 
-export function createGrimoireMetadata({
-  entityType,
-  entityName,
-  description,
-  keywords,
-  path,
-  ogImagePath,
-  additionalKeywords = [],
-}: GrimoireMetadataOptions): Metadata {
+export function createGrimoireMetadata(
+  opts: GrimoireMetadataOptions,
+): Metadata {
+  if (isCustomTitleOptions(opts)) {
+    const { title, description, keywords, url, ogImagePath, ogImageAlt } = opts;
+
+    const fullDescription =
+      description.length > 160
+        ? description.slice(0, 157) + '...'
+        : description;
+
+    const canonicalUrl = url.startsWith('http')
+      ? url
+      : `https://lunary.app${url}`;
+    const ogImage = ogImagePath || '/api/og/cosmic';
+
+    return {
+      title,
+      description: fullDescription,
+      keywords,
+      openGraph: {
+        title,
+        description: fullDescription,
+        url: canonicalUrl,
+        siteName: 'Lunary',
+        images: [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: ogImageAlt || title,
+          },
+        ],
+        locale: 'en_US',
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description: fullDescription,
+        images: [ogImage],
+      },
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
+    };
+  }
+
+  const {
+    entityType,
+    entityName,
+    description,
+    keywords,
+    path,
+    ogImagePath,
+    additionalKeywords = [],
+  } = opts;
+
   const label = entityTypeLabels[entityType];
   const title = label
     ? `${entityName} ${label}: ${description.slice(0, 50)}${description.length > 50 ? '...' : ''} - Lunary`
