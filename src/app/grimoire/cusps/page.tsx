@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ZODIAC_CUSPS, getCuspData, CuspId } from '@/constants/seo/cusps';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Zodiac Cusps: All 12 Cusp Signs Explained | Lunary',
@@ -18,16 +20,28 @@ export const metadata: Metadata = {
 };
 
 export default function CuspsIndexPage() {
+  const cuspsListSchema = createItemListSchema({
+    name: 'Zodiac Cusps',
+    description:
+      'Complete guide to all 12 zodiac cusps - born between two signs.',
+    url: 'https://lunary.app/grimoire/cusps',
+    items: ZODIAC_CUSPS.map((cusp) => {
+      const data = getCuspData(cusp.id as CuspId);
+      return {
+        name: `${data.sign1}-${data.sign2} Cusp: The ${data.name}`,
+        url: `https://lunary.app/grimoire/cusps/${cusp.id}`,
+        description: `${data.dates} - ${data.element1} + ${data.element2}`,
+      };
+    }),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(cuspsListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Cusps</span>
-        </nav>
+        <Breadcrumbs
+          items={[{ label: 'Grimoire', href: '/grimoire' }, { label: 'Cusps' }]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>Zodiac Cusps</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>

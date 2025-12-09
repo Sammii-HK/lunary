@@ -227,9 +227,7 @@ Each sign has optimal magical uses. Check the current Moon sign before important
                     Moon in {sign.name}
                   </h3>
                 </div>
-                <p className='text-sm text-zinc-500'>
-                  {sign.element} sign • {sign.quality}
-                </p>
+                <p className='text-sm text-zinc-500'>{sign.element} sign</p>
               </Link>
             ))}
           </div>

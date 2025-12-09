@@ -8,7 +8,7 @@ export function PersonalTransitImpactCard({
   impact,
 }: PersonalTransitImpactProps) {
   return (
-    <div className='rounded-lg border-l-4 border-lunary-secondary-600 bg-zinc-800/50 p-4'>
+    <div className='rounded-lg border-l-4 border-lunary-secondary-200 bg-zinc-800/50 p-4'>
       <div className='flex justify-between items-start mb-2'>
         <div>
           <h4 className='font-medium text-zinc-100 text-sm mb-1'>

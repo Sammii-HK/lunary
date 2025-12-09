@@ -173,17 +173,17 @@ const getActionGuidance = (dayRuler: string, moonSign: string): string => {
   );
 };
 
-// Calculate which house a planet is in (simplified equal house system)
-const calculateHouse = (
+// Calculate which house a planet is in using Whole Sign Houses
+// In Whole Sign Houses, the entire sign containing the Ascendant is the 1st house
+const calculateHouseWholeSig = (
   planetLongitude: number,
   ascendantLongitude: number,
 ): number => {
-  let diff = planetLongitude - ascendantLongitude;
-  if (diff < 0) diff += 360;
+  const ascendantSign = Math.floor(ascendantLongitude / 30);
+  const planetSign = Math.floor(planetLongitude / 30);
 
-  // Each house is 30 degrees in equal house system
-  const house = Math.floor(diff / 30) + 1;
-  return house > 12 ? house - 12 : house;
+  let house = ((planetSign - ascendantSign + 12) % 12) + 1;
+  return house;
 };
 
 // Get house meaning (full description for context)
@@ -516,20 +516,17 @@ const getTransitToHouseInsight = (
 } | null => {
   const ascendant = natalChart.find((p: any) => p.body === 'Ascendant');
 
-  // If no ascendant, use simplified approach based on Sun sign
+  // If no ascendant, use Sun-based approximation (less accurate)
   if (!ascendant) {
     const natalSun = natalChart.find((p: any) => p.body === 'Sun');
     if (!natalSun) return null;
 
-    // Calculate approximate house using Sun as reference (simplified)
-    const sunLongitude = natalSun.eclipticLongitude;
-    let diff = transitPlanet.eclipticLongitude - sunLongitude;
-    if (diff < 0) diff += 360;
-
-    const approximateHouse = Math.floor(diff / 30) + 1;
-    const house =
-      approximateHouse > 12 ? approximateHouse - 12 : approximateHouse;
-    const houseMeaning = getHouseMeaning(house);
+    // Whole Sign approximation using Sun as reference
+    const house = calculateHouseWholeSig(
+      transitPlanet.eclipticLongitude,
+      natalSun.eclipticLongitude,
+    );
+    const houseMeaning = `${getHouseMeaning(house)} (approximate - add birth time for accuracy)`;
     const sign = transitPlanet.sign;
 
     const insight = getPlanetHouseInsight(transitPlanet.body, house);
@@ -543,8 +540,8 @@ const getTransitToHouseInsight = (
     };
   }
 
-  // Use actual ascendant if available
-  const house = calculateHouse(
+  // Use actual ascendant with Whole Sign Houses
+  const house = calculateHouseWholeSig(
     transitPlanet.eclipticLongitude,
     ascendant.eclipticLongitude,
   );

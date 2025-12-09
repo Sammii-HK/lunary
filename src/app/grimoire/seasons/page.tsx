@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ZODIAC_SEASONS, getSeasonDates } from '@/constants/seo/zodiac-seasons';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 const currentYear = new Date().getFullYear();
 const nextYear = currentYear + 1;
@@ -39,16 +41,28 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function SeasonsIndexPage() {
+  const seasonsListSchema = createItemListSchema({
+    name: 'Zodiac Seasons',
+    description:
+      'Complete guide to all 12 zodiac seasons with dates and cosmic energies.',
+    url: 'https://lunary.app/grimoire/seasons',
+    items: ZODIAC_SEASONS.map((s) => ({
+      name: `${s.displayName} Season`,
+      url: `https://lunary.app/grimoire/seasons/${currentYear}/${s.sign}`,
+      description: `When the Sun moves through ${s.displayName}`,
+    })),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(seasonsListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Seasons</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Seasons' },
+          ]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>Zodiac Seasons</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>

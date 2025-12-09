@@ -318,7 +318,7 @@ Mystical Properties: ${suitInfo.mysticalProperties}`
         internalLinks={[
           { text: 'Get Daily Tarot Reading', href: '/tarot' },
           { text: 'Explore All Tarot Cards', href: '/grimoire/tarot' },
-          { text: 'Learn Tarot Spreads', href: '/grimoire/tarot#spreads' },
+          { text: 'Learn Tarot Spreads', href: '/grimoire/tarot/spreads' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText={`Want a personalized interpretation of ${cardData.card.name}?`}

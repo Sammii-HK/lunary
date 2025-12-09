@@ -17,6 +17,7 @@ export interface BirthChartPlacement {
   minute: number;
   eclipticLongitude: number;
   retrograde: boolean;
+  house?: number;
 }
 
 export interface PersonalCard {

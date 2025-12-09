@@ -12,6 +12,7 @@ import {
   glossaryCategories,
   type GlossaryTerm,
 } from '@/constants/grimoire/glossary';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
 export const metadata: Metadata = {
   title:
@@ -81,13 +82,12 @@ export default function GlossaryPage() {
       ))}
 
       {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
-          Grimoire
-        </Link>
-        <span className='mx-2'>→</span>
-        <span className='text-zinc-300'>Glossary</span>
-      </nav>
+      <Breadcrumbs
+        items={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Glossary' },
+        ]}
+      />
 
       {/* Header */}
       <header className='mb-12'>

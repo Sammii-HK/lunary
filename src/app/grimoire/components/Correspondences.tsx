@@ -785,7 +785,7 @@ const Correspondences = () => {
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <a
-            href='/grimoire/candle-magic#color-meanings'
+            href='/grimoire/candle-magic/colors'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Candle Color Meanings
@@ -809,7 +809,7 @@ const Correspondences = () => {
             Moon & Timing
           </a>
           <a
-            href='/grimoire/birth-chart#planets'
+            href='/grimoire/planets'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Planetary Influences

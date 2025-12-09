@@ -27,7 +27,7 @@ export default function MoonRitualsPage() {
     name: 'New Moon Manifestation Ritual',
     description:
       'A ritual to set intentions and manifest new beginnings during the New Moon.',
-    url: 'https://lunary.app/grimoire/moon-rituals#new-moon',
+    url: 'https://lunary.app/grimoire/moon-rituals',
     totalTime: 'PT30M',
     tools: ['candle', 'paper', 'pen'],
     steps: [
@@ -58,7 +58,7 @@ export default function MoonRitualsPage() {
     name: 'Full Moon Release Ritual',
     description:
       'A ritual to release what no longer serves you during the Full Moon.',
-    url: 'https://lunary.app/grimoire/moon-rituals#full-moon',
+    url: 'https://lunary.app/grimoire/moon-rituals',
     totalTime: 'PT30M',
     tools: ['candle', 'paper', 'pen', 'fire-safe container'],
     steps: [

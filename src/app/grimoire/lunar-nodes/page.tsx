@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 const lunarNodes = [
   {
@@ -60,10 +62,28 @@ export const metadata: Metadata = {
 };
 
 export default function LunarNodesIndexPage() {
+  const nodesListSchema = createItemListSchema({
+    name: 'Lunar Nodes Guide',
+    description:
+      'Complete guide to the North Node and South Node in astrology.',
+    url: 'https://lunary.app/grimoire/lunar-nodes',
+    items: lunarNodes.map((node) => ({
+      name: node.name,
+      url: `https://lunary.app/grimoire/lunar-nodes/${node.slug}`,
+      description: node.description,
+    })),
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(nodesListSchema)}
       <div className='max-w-5xl mx-auto'>
-        {/* Header */}
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Lunar Nodes' },
+          ]}
+        />
         <div className='text-center mb-12'>
           <div className='flex justify-center gap-4 mb-4'>
             <span className='text-4xl font-astro text-emerald-400'>☊</span>

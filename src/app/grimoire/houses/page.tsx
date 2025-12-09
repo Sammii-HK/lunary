@@ -7,6 +7,8 @@ import {
   PLANET_HOUSE_DISPLAY,
   getOrdinalSuffix,
 } from '@/constants/seo/houses';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'The 12 Astrological Houses: Complete Guide | Lunary',
@@ -23,16 +25,28 @@ export const metadata: Metadata = {
 };
 
 export default function HousesIndexPage() {
+  const housesListSchema = createItemListSchema({
+    name: 'The 12 Astrological Houses',
+    description:
+      'Complete guide to the 12 houses in astrology and their meanings in your birth chart.',
+    url: 'https://lunary.app/grimoire/houses',
+    items: HOUSES.map((house) => ({
+      name: `${house}${getOrdinalSuffix(house)} House`,
+      url: `https://lunary.app/grimoire/houses/overview/${house}`,
+      description: HOUSE_DATA[house].lifeArea,
+    })),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(housesListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Houses</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Houses' },
+          ]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>The 12 Astrological Houses</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>

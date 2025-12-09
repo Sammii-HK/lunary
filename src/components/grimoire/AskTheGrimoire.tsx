@@ -46,6 +46,7 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
   numerology: '🔢',
   birthday: '🎂',
   compatibility: '💕',
+  glossary: '📖',
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
@@ -61,6 +62,7 @@ const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
   numerology: 'bg-lunary-secondary-900 text-lunary-secondary-300',
   birthday: 'bg-lunary-highlight-900 text-lunary-highlight-300',
   compatibility: 'bg-lunary-highlight-900 text-lunary-highlight-300',
+  glossary: 'bg-lunary-secondary-900 text-lunary-secondary-300',
 };
 
 export function AskTheGrimoire({

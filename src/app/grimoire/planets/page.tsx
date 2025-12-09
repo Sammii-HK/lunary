@@ -6,6 +6,8 @@ import {
   PLANET_DISPLAY,
   PLANET_SYMBOLS,
 } from '@/constants/seo/aspects';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Planets in Astrology: Complete Guide | Lunary',
@@ -100,6 +102,18 @@ export default function PlanetsIndexPage() {
     (p) => planetInfo[p]?.category === 'Transpersonal',
   );
 
+  const planetsListSchema = createItemListSchema({
+    name: 'Planets in Astrology',
+    description:
+      'Complete guide to all planets in astrology, their meanings, and influences in the birth chart.',
+    url: 'https://lunary.app/grimoire/planets',
+    items: PLANETS.map((planet) => ({
+      name: PLANET_DISPLAY[planet],
+      url: `https://lunary.app/grimoire/planets/${planet}`,
+      description: planetInfo[planet]?.description || '',
+    })),
+  });
+
   const renderPlanetCard = (planet: (typeof PLANETS)[number]) => (
     <Link
       key={planet}
@@ -122,103 +136,96 @@ export default function PlanetsIndexPage() {
   );
 
   return (
-    <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-      <div className='max-w-5xl mx-auto'>
-        <div className='text-center mb-12'>
-          <div className='flex justify-center mb-4'>
-            <Orbit className='w-16 h-16 text-lunary-primary-400' />
-          </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
-            Planets in Astrology
-          </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
-            Each planet represents a different aspect of your psyche and life
-            experience. Together, they form the cosmic blueprint of your birth
-            chart.
-          </p>
-        </div>
+    <>
+      {renderJsonLd(planetsListSchema)}
+      <SEOContentTemplate
+        title='Planets in Astrology: Complete Guide'
+        h1='Planets in Astrology'
+        description='Each planet represents a different aspect of your psyche and life experience. Together, they form the cosmic blueprint of your birth chart.'
+        keywords={[
+          'planets astrology',
+          'astrological planets',
+          'planet meanings',
+          'birth chart planets',
+          'planetary influences',
+        ]}
+        canonicalUrl='https://lunary.app/grimoire/planets'
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Planets' },
+        ]}
+        whatIs={{
+          question: 'What do planets represent in astrology?',
+          answer:
+            "In astrology, planets represent different aspects of your personality, drives, and life experiences. Personal planets (Sun, Moon, Mercury, Venus, Mars) shape your core traits and daily life. Social planets (Jupiter, Saturn) influence growth and structure. Transpersonal planets (Uranus, Neptune, Pluto) represent generational and transformative forces. Each planet's sign and house placement reveals how and where its energy expresses in your life.",
+        }}
+        tldr='10 planets shape your chart: Personal planets (Sun = identity, Moon = emotions, Mercury = mind, Venus = love, Mars = action) move fast and shape personality. Social planets (Jupiter = expansion, Saturn = structure) influence society role. Outer planets (Uranus, Neptune, Pluto) = generational transformation.'
+        intro='In astrology, planets are divided into three categories: Personal planets (Sun through Mars) move quickly and shape your personality. Social planets (Jupiter and Saturn) influence your role in society. Transpersonal planets (Uranus, Neptune, Pluto) represent generational and transformative forces.'
+        faqs={[
+          {
+            question: 'Which planets are most important in my birth chart?',
+            answer:
+              'The Sun, Moon, and Rising sign (the "Big Three") are most important for understanding your core personality. After that, planets in your 1st house or conjunct angles (ASC, MC) have strong influence. Personal planets (Mercury, Venus, Mars) shape daily experience.',
+          },
+          {
+            question: 'What does it mean when a planet rules a sign?',
+            answer:
+              'Each zodiac sign has a planetary ruler that expresses naturally in that sign. For example, Mars rules Aries, so Mars energy (action, assertion) is at home in Aries. When a planet is in its ruling sign, its expression is strengthened.',
+          },
+          {
+            question: 'Do outer planets affect me personally?',
+            answer:
+              'Outer planets (Uranus, Neptune, Pluto) move slowly and affect entire generations. However, they become personal when aspecting your natal planets or transiting sensitive chart points, triggering major life transformations.',
+          },
+        ]}
+        relatedItems={[
+          { name: 'Zodiac Signs', href: '/grimoire/zodiac', type: 'topic' },
+          { name: 'Houses', href: '/grimoire/houses', type: 'topic' },
+          { name: 'Aspects', href: '/grimoire/aspects', type: 'topic' },
+          { name: 'Retrogrades', href: '/grimoire/retrogrades', type: 'topic' },
+        ]}
+      >
+        <div className='space-y-12'>
+          <section>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              Personal Planets
+            </h2>
+            <p className='text-zinc-400 mb-6'>
+              These fast-moving planets shape your core personality, daily
+              experiences, and how you interact with the world.
+            </p>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+              {personalPlanets.map(renderPlanetCard)}
+            </div>
+          </section>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
-            Understanding Planetary Influence
-          </h2>
-          <p className='text-zinc-400'>
-            In astrology, planets are divided into three categories: Personal
-            planets (Sun through Mars) move quickly and shape your personality.
-            Social planets (Jupiter and Saturn) influence your role in society.
-            Transpersonal planets (Uranus, Neptune, Pluto) represent
-            generational and transformative forces.
-          </p>
-        </div>
+          <section>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              Social Planets
+            </h2>
+            <p className='text-zinc-400 mb-6'>
+              Jupiter and Saturn influence how you grow within society and the
+              lessons you learn over longer periods.
+            </p>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              {socialPlanets.map(renderPlanetCard)}
+            </div>
+          </section>
 
-        <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
-            Personal Planets
-          </h2>
-          <p className='text-zinc-400 mb-6'>
-            These fast-moving planets shape your core personality, daily
-            experiences, and how you interact with the world.
-          </p>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-            {personalPlanets.map(renderPlanetCard)}
-          </div>
-        </section>
+          <section>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              Transpersonal Planets
+            </h2>
+            <p className='text-zinc-400 mb-6'>
+              These slow-moving outer planets represent generational influences
+              and deep transformative experiences.
+            </p>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+              {transpersonalPlanets.map(renderPlanetCard)}
+            </div>
+          </section>
 
-        <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
-            Social Planets
-          </h2>
-          <p className='text-zinc-400 mb-6'>
-            Jupiter and Saturn influence how you grow within society and the
-            lessons you learn over longer periods.
-          </p>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            {socialPlanets.map(renderPlanetCard)}
-          </div>
-        </section>
-
-        <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
-            Transpersonal Planets
-          </h2>
-          <p className='text-zinc-400 mb-6'>
-            These slow-moving outer planets represent generational influences
-            and deep transformative experiences.
-          </p>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-            {transpersonalPlanets.map(renderPlanetCard)}
-          </div>
-        </section>
-
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
-            Related Resources
-          </h3>
-          <div className='flex flex-wrap gap-3'>
-            <Link
-              href='/grimoire/zodiac'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
-            >
-              Zodiac Signs
-            </Link>
-            <Link
-              href='/grimoire/houses'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
-            >
-              Houses
-            </Link>
-            <Link
-              href='/grimoire/aspects'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
-            >
-              Aspects
-            </Link>
-            <Link
-              href='/grimoire/retrogrades'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
-            >
-              Retrogrades
-            </Link>
+          <div className='flex flex-wrap gap-3 pt-4'>
             <Link
               href='/birth-chart'
               className='px-4 py-2 rounded-lg bg-lunary-primary-900/30 text-lunary-primary-300 hover:bg-lunary-primary-900/50 transition-colors'
@@ -227,7 +234,7 @@ export default function PlanetsIndexPage() {
             </Link>
           </div>
         </div>
-      </div>
-    </div>
+      </SEOContentTemplate>
+    </>
   );
 }

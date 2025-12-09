@@ -6,6 +6,7 @@ import {
   CHINESE_YEARS,
 } from '@/constants/seo/chinese-zodiac';
 import Script from 'next/script';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Chinese Zodiac: 12 Animal Signs, Years & Compatibility | Lunary',
@@ -60,13 +61,12 @@ export default function ChineseZodiacIndexPage() {
       />
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
-          <nav className='text-sm text-zinc-500 mb-8'>
-            <Link href='/grimoire' className='hover:text-zinc-300'>
-              Grimoire
-            </Link>
-            <span className='mx-2'>/</span>
-            <span className='text-zinc-300'>Chinese Zodiac</span>
-          </nav>
+          <Breadcrumbs
+            items={[
+              { label: 'Grimoire', href: '/grimoire' },
+              { label: 'Chinese Zodiac' },
+            ]}
+          />
 
           <h1 className='text-4xl font-light mb-4'>Chinese Zodiac</h1>
           <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>

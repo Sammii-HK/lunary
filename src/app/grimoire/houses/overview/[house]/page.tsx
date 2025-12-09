@@ -188,7 +188,7 @@ Area: ${houseData.area}`}
         internalLinks={[
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
           { text: "View Today's Horoscope", href: '/horoscope' },
-          { text: 'Explore All Houses', href: '/grimoire/birth-chart#houses' },
+          { text: 'Explore All Houses', href: '/grimoire/houses' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText={`Want to see planets in your ${houseData.name}?`}

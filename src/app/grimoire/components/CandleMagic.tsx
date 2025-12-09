@@ -649,13 +649,13 @@ const CandleMagic = () => {
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <a
-            href='/grimoire/practices#spellcraft-fundamentals'
+            href='/grimoire/practices'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Spellcraft Fundamentals
           </a>
           <a
-            href='/grimoire/practices#altar-setup'
+            href='/grimoire/practices'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Altar Setup
@@ -667,19 +667,19 @@ const CandleMagic = () => {
             Crystals for Magic
           </a>
           <a
-            href='/grimoire/correspondences#herbs'
+            href='/grimoire/correspondences/herbs'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Herbs & Oils
           </a>
           <a
-            href='/grimoire/moon#rituals'
+            href='/grimoire/moon-rituals'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon Rituals
           </a>
           <a
-            href='/grimoire/correspondences#colors'
+            href='/grimoire/correspondences/colors'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Color Correspondences

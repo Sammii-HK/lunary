@@ -4,6 +4,8 @@ import {
   YEARLY_TRANSITS,
   getTransitsForYear,
 } from '@/constants/seo/yearly-transits';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -24,16 +26,28 @@ export const metadata: Metadata = {
 const years = [2025, 2026, 2027, 2028, 2029, 2030];
 
 export default function TransitsIndexPage() {
+  const transitsListSchema = createItemListSchema({
+    name: 'Yearly Astrological Transits 2025-2030',
+    description:
+      'Complete guide to major astrological transits including Saturn Return, Jupiter transits, and planetary ingresses.',
+    url: 'https://lunary.app/grimoire/transits',
+    items: YEARLY_TRANSITS.slice(0, 20).map((transit) => ({
+      name: transit.title,
+      url: `https://lunary.app/grimoire/transits/${transit.id}`,
+      description: transit.description,
+    })),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(transitsListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Transits</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Transits' },
+          ]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>
           Yearly Astrological Transits

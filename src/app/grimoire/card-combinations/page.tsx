@@ -90,7 +90,7 @@ export default function CardCombinationsPage() {
           text: 'Reversed Cards Guide',
           href: '/grimoire/reversed-cards-guide',
         },
-        { text: 'Tarot Spreads', href: '/grimoire/tarot#spreads' },
+        { text: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
       ]}
     />
   );

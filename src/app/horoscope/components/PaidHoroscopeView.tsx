@@ -14,6 +14,7 @@ import { getPersonalTransitImpacts } from '../../../../utils/astrology/personalT
 import { getUpcomingTransits } from '../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
 import { PersonalTransitImpactCard } from './PersonalTransitImpact';
+import { TodaysAspects } from './TodaysAspects';
 
 interface PaidHoroscopeViewProps {
   userBirthday?: string;
@@ -79,7 +80,7 @@ const generatePersonalizedHoroscope = (
       birthChart,
     );
     horoscopeElements.push(
-      `Today's most significant cosmic influence is ${primaryAspect.transitPlanet} in ${getCurrentTransitSign(primaryAspect.transitPlanet, currentTransits)} ${getAspectDescription(primaryAspect)} your birth ${primaryAspect.natalPlanet} in ${birthPlanetSign}. ${getDetailedAspectMeaning(primaryAspect)} This creates a powerful focus on ${getPlanetTheme(primaryAspect.natalPlanet)} in your life.`,
+      `Today's most significant cosmic influence is ${primaryAspect.transitPlanet} ${getAspectDescription(primaryAspect)} your birth ${primaryAspect.natalPlanet} at ${birthPlanetSign}. ${getDetailedAspectMeaning(primaryAspect)} This creates a powerful focus on ${getPlanetTheme(primaryAspect.natalPlanet)} in your life.`,
     );
   }
 
@@ -90,7 +91,7 @@ const generatePersonalizedHoroscope = (
       birthChart,
     );
     horoscopeElements.push(
-      `A secondary influence comes from ${secondaryAspect.transitPlanet} ${getAspectDescription(secondaryAspect)} your birth ${secondaryAspect.natalPlanet} in ${birthPlanetSign}, adding ${getAspectQuality(secondaryAspect.type)} energy to ${getPlanetTheme(secondaryAspect.natalPlanet)} matters.`,
+      `A secondary influence comes from ${secondaryAspect.transitPlanet} ${getAspectDescription(secondaryAspect)} your birth ${secondaryAspect.natalPlanet} at ${birthPlanetSign}, adding ${getAspectQuality(secondaryAspect.type)} energy to ${getPlanetTheme(secondaryAspect.natalPlanet)} matters.`,
     );
   }
 
@@ -136,15 +137,6 @@ const generatePersonalizedHoroscope = (
     );
   }
 
-  if (userBirthday) {
-    const personalDay = getPersonalDayNumber(userBirthday, today);
-    if (personalDay.number !== numerologyInfluence.number) {
-      horoscopeElements.push(
-        `Personal day ${personalDay.number} (${personalDay.meaning}).`,
-      );
-    }
-  }
-
   if (aspects.length > 1) {
     const hasChallengingAspects = aspects.some(
       (a) => a.type === 'square' || a.type === 'opposition',
@@ -177,6 +169,13 @@ const generatePersonalizedHoroscope = (
   return horoscopeElements.join(' ');
 };
 
+const formatDegreeForText = (longitude: number): string => {
+  const degreeInSign = longitude % 30;
+  const wholeDegree = Math.floor(degreeInSign);
+  const minutes = Math.floor((degreeInSign - wholeDegree) * 60);
+  return `${wholeDegree}°${minutes.toString().padStart(2, '0')}'`;
+};
+
 const calculateKeyAspects = (
   birthChart: BirthChartData[],
   currentTransits: any[],
@@ -188,35 +187,40 @@ const calculateKeyAspects = (
       let diff = Math.abs(transit.eclipticLongitude - natal.eclipticLongitude);
       if (diff > 180) diff = 360 - diff;
 
+      const baseAspect = {
+        transitPlanet: transit.body,
+        transitSign: transit.sign,
+        transitDegree: formatDegreeForText(transit.eclipticLongitude),
+        natalPlanet: natal.body,
+        natalSign: natal.sign,
+        natalDegree: formatDegreeForText(natal.eclipticLongitude),
+      };
+
       if (Math.abs(diff - 0) <= 10) {
         aspects.push({
+          ...baseAspect,
           type: 'conjunction',
-          transitPlanet: transit.body,
-          natalPlanet: natal.body,
           orb: Math.abs(diff - 0),
           intensity: 10 - Math.abs(diff - 0),
         });
       } else if (Math.abs(diff - 180) <= 10) {
         aspects.push({
+          ...baseAspect,
           type: 'opposition',
-          transitPlanet: transit.body,
-          natalPlanet: natal.body,
           orb: Math.abs(diff - 180),
           intensity: 10 - Math.abs(diff - 180),
         });
       } else if (Math.abs(diff - 120) <= 8) {
         aspects.push({
+          ...baseAspect,
           type: 'trine',
-          transitPlanet: transit.body,
-          natalPlanet: natal.body,
           orb: Math.abs(diff - 120),
           intensity: 8 - Math.abs(diff - 120),
         });
       } else if (Math.abs(diff - 90) <= 8) {
         aspects.push({
+          ...baseAspect,
           type: 'square',
-          transitPlanet: transit.body,
-          natalPlanet: natal.body,
           orb: Math.abs(diff - 90),
           intensity: 8 - Math.abs(diff - 90),
         });
@@ -300,15 +304,16 @@ const getVenusGuidance = (venusSign: string): string => {
 };
 
 const getAspectDescription = (aspect: any): string => {
+  const orbRounded = Math.round(aspect.orb * 10) / 10;
   const orbDescription =
     aspect.orb <= 3 ? 'closely' : aspect.orb <= 6 ? 'moderately' : 'loosely';
 
   const descriptions: Record<string, string> = {
-    conjunction: `is ${orbDescription} conjunct`,
-    opposition: `is ${orbDescription} opposite`,
-    trine: `forms a ${orbDescription} supportive trine with`,
-    square: `forms a ${orbDescription} challenging square with`,
-    sextile: `forms a ${orbDescription} helpful sextile with`,
+    conjunction: `at ${aspect.transitDegree} ${aspect.transitSign} is ${orbDescription} conjunct (${orbRounded}° orb)`,
+    opposition: `at ${aspect.transitDegree} ${aspect.transitSign} is ${orbDescription} opposite (${orbRounded}° orb)`,
+    trine: `at ${aspect.transitDegree} ${aspect.transitSign} forms a ${orbDescription} supportive trine (${orbRounded}° orb) with`,
+    square: `at ${aspect.transitDegree} ${aspect.transitSign} forms a ${orbDescription} challenging square (${orbRounded}° orb) with`,
+    sextile: `at ${aspect.transitDegree} ${aspect.transitSign} forms a ${orbDescription} helpful sextile (${orbRounded}° orb) with`,
   };
 
   return descriptions[aspect.type] || `aspects`;
@@ -369,7 +374,9 @@ const getBirthPlanetSign = (
   birthChart: BirthChartData[],
 ): string => {
   const planet = birthChart.find((p) => p.body === planetName);
-  return planet?.sign || '';
+  if (!planet) return '';
+  const degree = formatDegreeForText(planet.eclipticLongitude);
+  return `${degree} ${planet.sign}`;
 };
 
 const getRetrogradeInfluences = (
@@ -506,6 +513,7 @@ export function PaidHoroscopeView({
 }: PaidHoroscopeViewProps) {
   const [observer, setObserver] = useState<any>(null);
   const [fullHoroscope, setFullHoroscope] = useState<string | null>(null);
+  const [currentTransits, setCurrentTransits] = useState<any[]>([]);
 
   const birthChart = getBirthChartFromProfile(profile);
   const horoscope = getEnhancedPersonalizedHoroscope(
@@ -513,6 +521,12 @@ export function PaidHoroscopeView({
     userName,
     profile,
   );
+
+  const today = dayjs();
+  const universalDay = getDailyNumerology(today);
+  const personalDay = userBirthday
+    ? getPersonalDayNumber(userBirthday, today)
+    : null;
   const solarReturnData = userBirthday
     ? getSolarReturnInsights(userBirthday)
     : null;
@@ -529,17 +543,21 @@ export function PaidHoroscopeView({
   }, []);
 
   useEffect(() => {
-    if (!observer || !birthChart || !userBirthday) return;
+    if (!observer || !birthChart) return;
 
     const normalizedDate = new Date(dayjs().format('YYYY-MM-DD') + 'T12:00:00');
-    const currentTransits = getAstrologicalChart(normalizedDate, observer);
-    const generatedHoroscope = generatePersonalizedHoroscope(
-      birthChart,
-      currentTransits,
-      userName,
-      userBirthday,
-    );
-    setFullHoroscope(generatedHoroscope);
+    const transits = getAstrologicalChart(normalizedDate, observer);
+    setCurrentTransits(transits);
+
+    if (userBirthday) {
+      const generatedHoroscope = generatePersonalizedHoroscope(
+        birthChart,
+        transits,
+        userName,
+        userBirthday,
+      );
+      setFullHoroscope(generatedHoroscope);
+    }
   }, [observer, birthChart, userBirthday, userName]);
 
   return (
@@ -568,19 +586,48 @@ export function PaidHoroscopeView({
           )}
         </HoroscopeSection>
 
-        <HoroscopeSection title='Cosmic Highlight' color='emerald'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            {horoscope.cosmicHighlight}
-          </p>
-        </HoroscopeSection>
-
-        {horoscope.dailyAffirmation && (
-          <HoroscopeSection title='Daily Affirmation' color='amber'>
-            <p className='text-sm text-zinc-300 leading-relaxed italic'>
-              "{horoscope.dailyAffirmation}"
+        {birthChart && currentTransits.length > 0 && (
+          <HoroscopeSection
+            title="Today's Aspects to Your Chart"
+            color='indigo'
+          >
+            <p className='text-sm text-zinc-400 mb-4'>
+              How today&apos;s planetary positions align with your birth chart
             </p>
+            <TodaysAspects
+              birthChart={birthChart}
+              currentTransits={currentTransits}
+            />
           </HoroscopeSection>
         )}
+
+        <HoroscopeSection title='Cosmic Highlight' color='emerald'>
+          <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+            {horoscope.cosmicHighlight}
+          </p>
+          <div className='grid grid-cols-2 gap-4 pt-3 border-t border-zinc-700/50'>
+            <div className='text-center'>
+              <div className='text-2xl font-light text-emerald-400 mb-1'>
+                {universalDay.number}
+              </div>
+              <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
+                Universal Day
+              </div>
+              <p className='text-xs text-zinc-300'>{universalDay.meaning}</p>
+            </div>
+            {personalDay && (
+              <div className='text-center'>
+                <div className='text-2xl font-light text-lunary-accent-400 mb-1'>
+                  {personalDay.number}
+                </div>
+                <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
+                  Personal Day
+                </div>
+                <p className='text-xs text-zinc-300'>{personalDay.meaning}</p>
+              </div>
+            )}
+          </div>
+        </HoroscopeSection>
 
         <HoroscopeSection title='Personal Transit Impact' color='indigo'>
           <p className='text-sm text-zinc-400 mb-4'>

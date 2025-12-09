@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Moon, Sun, ArrowRight, Star, Sparkles } from 'lucide-react';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Astrology Events 2025: Complete Calendar & Guide',
@@ -92,22 +94,42 @@ const colorClasses: Record<
 };
 
 export default function Events2025Page() {
+  const events2025ListSchema = createItemListSchema({
+    name: 'Astrology Events 2025',
+    description:
+      'Complete 2025 astrology events calendar with Mercury retrograde dates, Venus retrograde, eclipses, and major planetary transits.',
+    url: 'https://lunary.app/grimoire/events/2025',
+    items: [
+      {
+        name: 'Mercury Retrograde 2025',
+        url: 'https://lunary.app/grimoire/events/2025/mercury-retrograde',
+        description: '3 retrograde periods in 2025',
+      },
+      {
+        name: 'Venus Retrograde 2025',
+        url: 'https://lunary.app/grimoire/events/2025/venus-retrograde',
+        description: 'March 1 - April 12 in Aries → Pisces',
+      },
+      {
+        name: '2025 Eclipses',
+        url: 'https://lunary.app/grimoire/events/2025/eclipses',
+        description: '4 eclipses: 2 solar and 2 lunar',
+      },
+    ],
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(events2025ListSchema)}
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        {/* Header */}
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Events', href: '/grimoire/events' },
+            { label: '2025' },
+          ]}
+        />
         <div className='mb-12'>
-          <div className='flex items-center gap-2 text-sm text-zinc-500 mb-4'>
-            <Link href='/grimoire' className='hover:text-zinc-300'>
-              Grimoire
-            </Link>
-            <span>/</span>
-            <Link href='/grimoire/events' className='hover:text-zinc-300'>
-              Events
-            </Link>
-            <span>/</span>
-            <span className='text-zinc-400'>2025</span>
-          </div>
           <h1 className='text-4xl font-light text-zinc-100 mb-4'>
             Astrology Events 2025
           </h1>

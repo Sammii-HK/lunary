@@ -25,16 +25,16 @@ export type PersonalTransitImpact = {
   };
 };
 
-// Calculate which house a planet is in (simplified equal house system)
-const calculateHouse = (
+// Calculate which house a planet is in using Whole Sign Houses
+const calculateHouseWholeSig = (
   planetLongitude: number,
   ascendantLongitude: number,
 ): number => {
-  let diff = planetLongitude - ascendantLongitude;
-  if (diff < 0) diff += 360;
+  const ascendantSign = Math.floor(ascendantLongitude / 30);
+  const planetSign = Math.floor(planetLongitude / 30);
 
-  const house = Math.floor(diff / 30) + 1;
-  return house > 12 ? house - 12 : house;
+  let house = ((planetSign - ascendantSign + 12) % 12) + 1;
+  return house;
 };
 
 const getHouseMeaning = (house: number): string => {
@@ -391,21 +391,20 @@ export const getPersonalTransitImpacts = (
     let houseMeaning: string | undefined;
 
     if (ascendant) {
-      house = calculateHouse(
+      house = calculateHouseWholeSig(
         transitPlanet.eclipticLongitude,
         ascendant.eclipticLongitude,
       );
       houseMeaning = getHouseMeaning(house);
     } else {
-      // Fallback to Sun-based calculation
+      // Fallback to Sun-based Whole Sign calculation (approximate)
       const natalSun = natalChart.find((p: any) => p.body === 'Sun');
       if (natalSun) {
-        let diff = transitPlanet.eclipticLongitude - natalSun.eclipticLongitude;
-        if (diff < 0) diff += 360;
-        const approximateHouse = Math.floor(diff / 30) + 1;
-        house =
-          approximateHouse > 12 ? approximateHouse - 12 : approximateHouse;
-        houseMeaning = getHouseMeaning(house);
+        house = calculateHouseWholeSig(
+          transitPlanet.eclipticLongitude,
+          natalSun.eclipticLongitude,
+        );
+        houseMeaning = `${getHouseMeaning(house)} (approximate)`;
       }
     }
 

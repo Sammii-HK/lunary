@@ -153,7 +153,7 @@ When ${suitData.name} cards appear in a reading, they bring attention to ${suitD
           text: 'Reading Card Combinations',
           href: '/grimoire/card-combinations',
         },
-        { text: 'Tarot Spreads', href: '/grimoire/tarot#spreads' },
+        { text: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
       ]}
       tables={[
         {

@@ -278,7 +278,7 @@ export default function SynastryGeneratorPage() {
               Compare two birth charts to discover relationship compatibility,
               strengths, and growth areas. Available for Lunary subscribers.
             </p>
-            <SmartTrialButton className='px-8 py-3' />
+            <SmartTrialButton size='lg' />
             <Link
               href='/grimoire/synastry'
               className='block mt-4 text-sm text-lunary-primary-400 hover:text-lunary-primary-300'

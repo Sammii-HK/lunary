@@ -190,7 +190,7 @@ Nature: ${aspectData.nature}`}
         ]}
         internalLinks={[
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
-          { text: 'Explore Aspects', href: '/grimoire/birth-chart#aspects' },
+          { text: 'Explore Aspects', href: '/grimoire/aspects' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         faqs={faqs}

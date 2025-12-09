@@ -526,7 +526,53 @@ export default function TarotCompleteGuidePage() {
         </div>
       </section>
 
-      {/* Section 6: Four Suits */}
+      {/* Section 5: Minor Arcana Overview */}
+      <section id='minor-arcana' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          5. The 56 Minor Arcana Cards
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          The Minor Arcana represents the everyday events, challenges, and
+          emotions we encounter in daily life. Unlike the Major Arcana&apos;s
+          significant life lessons, the Minor Arcana shows the day-to-day
+          energies that influence our experiences.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              56 Cards Total
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Four suits of 14 cards each: Ace through Ten plus four Court Cards
+              (Page, Knight, Queen, King).
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Numbered Cards (Ace-10)
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Each number carries meaning: Aces are new beginnings, numbers 2-10
+              show progression, and 10 represents completion.
+            </p>
+          </div>
+        </div>
+
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h4 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+            Reading Minor Arcana
+          </h4>
+          <p className='text-zinc-300'>
+            When Minor Arcana cards appear in a reading, they point to specific
+            situations, people, or temporary influences. Combine the suit&apos;s
+            element with the number&apos;s meaning for accurate interpretation.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 6: The Four Suits */}
       <section id='suits' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           6. The Four Suits Explained

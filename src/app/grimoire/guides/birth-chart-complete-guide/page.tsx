@@ -406,6 +406,66 @@ export default function BirthChartCompleteGuidePage() {
         </div>
       </section>
 
+      {/* Section 4: The Planets */}
+      <section id='planets' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          4. The Planets in Your Chart
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Each planet represents a different aspect of your personality and life
+          experience. Understanding what each planet signifies helps you
+          interpret your complete birth chart.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-lunary-accent-300'>☉ Sun</h4>
+            <p className='text-sm text-zinc-400'>
+              Core identity, ego, life purpose
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-lunary-accent-300'>☽ Moon</h4>
+            <p className='text-sm text-zinc-400'>
+              Emotions, instincts, inner self
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100'>☿ Mercury</h4>
+            <p className='text-sm text-zinc-400'>
+              Communication, thinking, learning
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100'>♀ Venus</h4>
+            <p className='text-sm text-zinc-400'>Love, beauty, values, money</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100'>♂ Mars</h4>
+            <p className='text-sm text-zinc-400'>
+              Action, desire, drive, assertion
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100'>♃ Jupiter</h4>
+            <p className='text-sm text-zinc-400'>Growth, luck, expansion</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100'>♄ Saturn</h4>
+            <p className='text-sm text-zinc-400'>
+              Structure, discipline, lessons
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100'>♅♆♇ Outer Planets</h4>
+            <p className='text-sm text-zinc-400'>
+              Generational & transformative forces
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Zodiac Signs Quick Reference */}
       <section id='zodiac-signs' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
@@ -432,6 +492,210 @@ export default function BirthChartCompleteGuidePage() {
         <p className='text-zinc-400 text-sm mt-4'>
           Click any sign to learn more about its meaning and traits.
         </p>
+      </section>
+
+      {/* Section 6: The 12 Houses */}
+      <section id='houses' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          6. The 12 Houses
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Houses represent different areas of life where planetary energy
+          manifests. Each house governs specific themes and life domains.
+        </p>
+
+        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>1st</span>
+            <p className='text-xs text-zinc-400'>Self, appearance</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>2nd</span>
+            <p className='text-xs text-zinc-400'>Money, values</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>3rd</span>
+            <p className='text-xs text-zinc-400'>Communication</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>4th</span>
+            <p className='text-xs text-zinc-400'>Home, family</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>5th</span>
+            <p className='text-xs text-zinc-400'>Creativity, romance</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>6th</span>
+            <p className='text-xs text-zinc-400'>Health, routine</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>7th</span>
+            <p className='text-xs text-zinc-400'>Partnerships</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>8th</span>
+            <p className='text-xs text-zinc-400'>Transformation</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>9th</span>
+            <p className='text-xs text-zinc-400'>Philosophy, travel</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>10th</span>
+            <p className='text-xs text-zinc-400'>Career, reputation</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>11th</span>
+            <p className='text-xs text-zinc-400'>Friends, hopes</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3'>
+            <span className='text-lunary-primary-400 font-medium'>12th</span>
+            <p className='text-xs text-zinc-400'>Subconscious, karma</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 7: Aspects */}
+      <section id='aspects' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          7. Planetary Aspects
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Aspects are the angles formed between planets, revealing how different
+          parts of your chart interact—either harmoniously or with tension.
+        </p>
+
+        <div className='space-y-3'>
+          <div className='bg-lunary-success-900/20 border border-lunary-success-700 rounded-lg p-4'>
+            <h4 className='font-medium text-lunary-success-300 mb-1'>
+              ☌ Conjunction (0°) - Fusion
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Planets combine their energies powerfully
+            </p>
+          </div>
+          <div className='bg-lunary-success-900/20 border border-lunary-success-700 rounded-lg p-4'>
+            <h4 className='font-medium text-lunary-success-300 mb-1'>
+              △ Trine (120°) - Harmony
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Natural flow and ease between planets
+            </p>
+          </div>
+          <div className='bg-lunary-success-900/20 border border-lunary-success-700 rounded-lg p-4'>
+            <h4 className='font-medium text-lunary-success-300 mb-1'>
+              ⚹ Sextile (60°) - Opportunity
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Supportive connection requiring action
+            </p>
+          </div>
+          <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded-lg p-4'>
+            <h4 className='font-medium text-lunary-error-300 mb-1'>
+              □ Square (90°) - Tension
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Friction that drives growth and change
+            </p>
+          </div>
+          <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded-lg p-4'>
+            <h4 className='font-medium text-lunary-error-300 mb-1'>
+              ☍ Opposition (180°) - Polarity
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Balance needed between opposing forces
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 8: Reading Your Chart */}
+      <section id='reading-chart' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          8. Reading Your Chart
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Follow these steps to begin interpreting your birth chart
+          systematically.
+        </p>
+
+        <ol className='space-y-4'>
+          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <span className='text-lunary-primary-400 font-medium'>1.</span>
+            <span className='text-zinc-300 ml-2'>
+              Start with your Big Three (Sun, Moon, Rising)
+            </span>
+          </li>
+          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <span className='text-lunary-primary-400 font-medium'>2.</span>
+            <span className='text-zinc-300 ml-2'>
+              Look at which houses have the most planets (stelliums)
+            </span>
+          </li>
+          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <span className='text-lunary-primary-400 font-medium'>3.</span>
+            <span className='text-zinc-300 ml-2'>
+              Examine your chart ruler (planet that rules your Rising sign)
+            </span>
+          </li>
+          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <span className='text-lunary-primary-400 font-medium'>4.</span>
+            <span className='text-zinc-300 ml-2'>
+              Check major aspects, especially to your Sun, Moon, and Rising
+            </span>
+          </li>
+          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <span className='text-lunary-primary-400 font-medium'>5.</span>
+            <span className='text-zinc-300 ml-2'>
+              Look at the overall element and modality balance
+            </span>
+          </li>
+        </ol>
+      </section>
+
+      {/* Section 9: Advanced Topics */}
+      <section id='advanced' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          9. Advanced Chart Features
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Once you understand the basics, explore these deeper layers of your
+          chart.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-2'>Lunar Nodes</h4>
+            <p className='text-sm text-zinc-400'>
+              North and South Nodes reveal your soul&apos;s purpose and past
+              life patterns
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-2'>Chiron</h4>
+            <p className='text-sm text-zinc-400'>
+              The &quot;wounded healer&quot; asteroid shows your deepest wound
+              and healing gifts
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-2'>Midheaven (MC)</h4>
+            <p className='text-sm text-zinc-400'>
+              Your public image, career path, and legacy in the world
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-2'>Chart Patterns</h4>
+            <p className='text-sm text-zinc-400'>
+              Bundle, Bowl, Bucket, Seesaw, and other planetary configurations
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* FAQ Section */}

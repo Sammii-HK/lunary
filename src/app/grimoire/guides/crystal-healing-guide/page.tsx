@@ -477,6 +477,62 @@ export default function CrystalHealingGuidePage() {
         </div>
       </section>
 
+      {/* Section 4: Choosing Crystals */}
+      <section id='choosing-crystals' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          4. How to Choose the Right Crystal
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Choosing crystals is a deeply personal process. While you can select
+          based on specific properties or intentions, the most powerful
+          connections often come from intuition.
+        </p>
+
+        <div className='space-y-4'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Follow Your Intuition
+            </h4>
+            <p className='text-zinc-400'>
+              Often the crystal that catches your eye or that you feel drawn to
+              is exactly what you need. Trust your instincts when browsing
+              crystals—your subconscious knows what energy you require.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Choose by Intention
+            </h4>
+            <p className='text-zinc-400'>
+              Identify what you want to manifest or heal. For love, try Rose
+              Quartz. For protection, Black Tourmaline. For abundance, Citrine.
+              Match your crystal to your specific goal.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Choose by Chakra
+            </h4>
+            <p className='text-zinc-400'>
+              If you feel blocked in a specific area, choose a crystal that
+              corresponds to that chakra. Heart chakra issues? Green or pink
+              stones. Throat chakra? Blue stones.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Choose by Zodiac
+            </h4>
+            <p className='text-zinc-400'>
+              Each zodiac sign has crystals that resonate with its energy.
+              Working with your birth sign crystals can enhance your natural
+              strengths and support your challenges.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Section 5: Cleansing */}
       <section id='cleansing' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
@@ -538,6 +594,70 @@ export default function CrystalHealingGuidePage() {
             Never cleanse these crystals with water: Selenite, Halite,
             Malachite, Pyrite, Hematite, Lepidolite, Azurite, Kyanite. Use
             moonlight or smoke cleansing instead.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 6: Charging and Programming */}
+      <section id='charging' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          6. Charging and Programming Crystals
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          After cleansing, charging restores a crystal&apos;s energy, while
+          programming sets a specific intention. Both practices enhance your
+          crystal&apos;s effectiveness.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+              Charging Methods
+            </h4>
+            <ul className='space-y-2 text-zinc-400 text-sm'>
+              <li>
+                <strong>Moonlight:</strong> Place under full moon overnight for
+                gentle, intuitive energy
+              </li>
+              <li>
+                <strong>Sunlight:</strong> Brief exposure (1-2 hours) for
+                energizing crystals
+              </li>
+              <li>
+                <strong>Earth:</strong> Bury in soil overnight to reconnect with
+                earth energy
+              </li>
+              <li>
+                <strong>Other crystals:</strong> Place on selenite or clear
+                quartz cluster
+              </li>
+            </ul>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+              Programming Steps
+            </h4>
+            <ol className='space-y-2 text-zinc-400 text-sm list-decimal list-inside'>
+              <li>Cleanse the crystal first</li>
+              <li>Hold it in your hands</li>
+              <li>Close your eyes and breathe deeply</li>
+              <li>Clearly state or visualize your intention</li>
+              <li>Imagine your intention flowing into the crystal</li>
+              <li>Thank the crystal and place it meaningfully</li>
+            </ol>
+          </div>
+        </div>
+
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h4 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+            When to Recharge
+          </h4>
+          <p className='text-zinc-300'>
+            Recharge your crystals monthly, after heavy use, or whenever they
+            feel energetically dull. The full moon is an ideal time for regular
+            recharging. You can reprogram a crystal anytime by cleansing it
+            first and setting a new intention.
           </p>
         </div>
       </section>
@@ -651,6 +771,92 @@ export default function CrystalHealingGuidePage() {
             <p className='text-zinc-400 text-sm'>
               Keep tumbled stones in your pocket or bag for on-the-go protection
               and support.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 9: Crystals by Zodiac */}
+      <section id='zodiac' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          9. Crystals by Zodiac Sign
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Each zodiac sign has crystals that resonate with its unique energy.
+          Working with your birth sign crystals enhances your natural strengths
+          and helps balance challenges.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♈ Aries</h4>
+            <p className='text-sm text-zinc-400'>
+              Carnelian, Red Jasper, Bloodstone
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♉ Taurus</h4>
+            <p className='text-sm text-zinc-400'>
+              Rose Quartz, Emerald, Malachite
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♊ Gemini</h4>
+            <p className='text-sm text-zinc-400'>
+              Citrine, Tiger&apos;s Eye, Aquamarine
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♋ Cancer</h4>
+            <p className='text-sm text-zinc-400'>Moonstone, Pearl, Selenite</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♌ Leo</h4>
+            <p className='text-sm text-zinc-400'>
+              Sunstone, Citrine, Tiger&apos;s Eye
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♍ Virgo</h4>
+            <p className='text-sm text-zinc-400'>
+              Amazonite, Peridot, Moss Agate
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♎ Libra</h4>
+            <p className='text-sm text-zinc-400'>
+              Rose Quartz, Lapis Lazuli, Lepidolite
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♏ Scorpio</h4>
+            <p className='text-sm text-zinc-400'>
+              Obsidian, Labradorite, Malachite
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♐ Sagittarius</h4>
+            <p className='text-sm text-zinc-400'>
+              Turquoise, Sodalite, Lapis Lazuli
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♑ Capricorn</h4>
+            <p className='text-sm text-zinc-400'>
+              Garnet, Black Tourmaline, Smoky Quartz
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♒ Aquarius</h4>
+            <p className='text-sm text-zinc-400'>
+              Amethyst, Aquamarine, Labradorite
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♓ Pisces</h4>
+            <p className='text-sm text-zinc-400'>
+              Amethyst, Aquamarine, Fluorite
             </p>
           </div>
         </div>

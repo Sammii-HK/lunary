@@ -34,6 +34,7 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
   numerology: '🔢',
   birthday: '🎂',
   compatibility: '💕',
+  glossary: '📖',
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
@@ -58,6 +59,8 @@ const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
   birthday: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
   compatibility:
     'bg-lunary-highlight-900 text-lunary-highlight-300 border-lunary-highlight-700',
+  glossary:
+    'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
 };
 
 interface SearchResultCardProps {

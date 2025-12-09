@@ -22,6 +22,8 @@ import {
   soulUrgeNumbers,
 } from '@/constants/grimoire/numerology-extended-data';
 import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -52,16 +54,56 @@ export const metadata: Metadata = {
 export default function NumerologyIndexPage() {
   const currentYear = new Date().getFullYear();
   const currentUniversalYear = getUniversalYear(currentYear);
+
+  const numerologyListSchema = createItemListSchema({
+    name: 'Numerology Guide',
+    description:
+      'Complete guide to numerology including angel numbers, life path numbers, universal years, and more.',
+    url: 'https://lunary.app/grimoire/numerology',
+    items: [
+      {
+        name: 'Angel Numbers',
+        url: 'https://lunary.app/grimoire/angel-numbers',
+        description: 'Repeating number sequences with divine guidance',
+      },
+      {
+        name: 'Life Path Numbers',
+        url: 'https://lunary.app/grimoire/life-path',
+        description: 'Your life purpose calculated from birth date',
+      },
+      {
+        name: 'Expression Numbers',
+        url: 'https://lunary.app/grimoire/numerology/expression',
+        description: 'Natural talents and abilities from your name',
+      },
+      {
+        name: 'Soul Urge Numbers',
+        url: 'https://lunary.app/grimoire/numerology/soul-urge',
+        description: 'Innermost motivations and heart desires',
+      },
+      {
+        name: 'Mirror Hours',
+        url: 'https://lunary.app/grimoire/mirror-hours',
+        description: 'Clock times with mirrored digits',
+      },
+      {
+        name: 'Double Hours',
+        url: 'https://lunary.app/grimoire/double-hours',
+        description: 'Clock times with repeated digits',
+      },
+    ],
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(numerologyListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Numerology</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Numerology' },
+          ]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>Numerology</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>

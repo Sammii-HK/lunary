@@ -760,6 +760,148 @@ export default function MoonPhasesGuidePage() {
         </div>
       </section>
 
+      {/* Section 7: Manifestation by Moon Phase */}
+      <section id='manifestation' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          7. Manifestation by Moon Phase
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Each lunar phase offers unique energy for different types of
+          manifestation work. Aligning your intentions with the Moon&apos;s
+          cycle amplifies your manifesting power.
+        </p>
+
+        <div className='space-y-4'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              🌑 New Moon - Plant Seeds
+            </h4>
+            <p className='text-zinc-400'>
+              Set new intentions. Write down goals. Start fresh projects. The
+              energy is perfect for new beginnings and clarifying what you want.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              🌒 Waxing Phase - Take Action
+            </h4>
+            <p className='text-zinc-400'>
+              Build momentum. Take concrete steps toward your goals. This is the
+              time for active manifestation—doing, creating, and attracting.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              🌕 Full Moon - Celebrate & Receive
+            </h4>
+            <p className='text-zinc-400'>
+              Gratitude and release. Celebrate what has manifested. Let go of
+              what no longer serves you. The Full Moon illuminates results.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              🌘 Waning Phase - Release & Rest
+            </h4>
+            <p className='text-zinc-400'>
+              Let go of obstacles. Break bad habits. Clear space for the next
+              cycle. This is a time for banishing and inner work.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 8: Moon Signs */}
+      <section id='moon-signs' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          8. Moon Signs & Their Energy
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          As the Moon moves through each zodiac sign (about 2.5 days per sign),
+          it takes on that sign&apos;s qualities. Knowing the current Moon sign
+          helps you choose the best times for different activities.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♈ Aries Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Action, starting new things, courage
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♉ Taurus Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Stability, self-care, financial matters
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♊ Gemini Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Communication, learning, socializing
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♋ Cancer Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Home, family, emotional healing
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♌ Leo Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Creativity, self-expression, romance
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♍ Virgo Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Organization, health routines, analysis
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♎ Libra Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Relationships, beauty, balance
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♏ Scorpio Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Deep transformation, shadow work
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>
+              ♐ Sagittarius Moon
+            </h4>
+            <p className='text-xs text-zinc-400'>
+              Adventure, expansion, optimism
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>
+              ♑ Capricorn Moon
+            </h4>
+            <p className='text-xs text-zinc-400'>Career, goals, discipline</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♒ Aquarius Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Innovation, community, breaking patterns
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♓ Pisces Moon</h4>
+            <p className='text-xs text-zinc-400'>
+              Intuition, dreams, spiritual work
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section id='faq' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     `;
 
     let userSubscription = null;
-    if (userEmail || userId) {
+    if (userEmail) {
       const userSub = await sql`
         SELECT 
           id,
@@ -45,7 +45,25 @@ export async function GET(request: NextRequest) {
           preferences,
           SUBSTRING(endpoint, 1, 80) as endpoint_preview
         FROM push_subscriptions
-        WHERE ${userEmail ? sql`user_email = ${userEmail}` : sql`user_id = ${userId}`}
+        WHERE user_email = ${userEmail}
+        ORDER BY updated_at DESC
+        LIMIT 1
+      `;
+      userSubscription = userSub.rows[0] || null;
+    } else if (userId) {
+      const userSub = await sql`
+        SELECT 
+          id,
+          user_id,
+          user_email,
+          is_active,
+          last_notification_sent,
+          created_at,
+          updated_at,
+          preferences,
+          SUBSTRING(endpoint, 1, 80) as endpoint_preview
+        FROM push_subscriptions
+        WHERE user_id = ${userId}
         ORDER BY updated_at DESC
         LIMIT 1
       `;

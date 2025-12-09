@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { RotateCcw } from 'lucide-react';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 const retrogrades = [
   {
@@ -95,10 +97,28 @@ export const metadata: Metadata = {
 };
 
 export default function RetrogradesIndexPage() {
+  const retrogradesListSchema = createItemListSchema({
+    name: 'Planetary Retrogrades Guide',
+    description:
+      'Complete guide to all planetary retrogrades from Mercury to Pluto.',
+    url: 'https://lunary.app/grimoire/retrogrades',
+    items: retrogrades.map((r) => ({
+      name: r.name,
+      url: `https://lunary.app/grimoire/retrogrades/${r.slug}`,
+      description: r.themes,
+    })),
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(retrogradesListSchema)}
       <div className='max-w-5xl mx-auto'>
-        {/* Header */}
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Retrogrades' },
+          ]}
+        />
         <div className='text-center mb-12'>
           <div className='flex justify-center mb-4'>
             <RotateCcw className='w-16 h-16 text-lunary-primary-400' />

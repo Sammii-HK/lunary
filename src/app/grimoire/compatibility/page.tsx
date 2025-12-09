@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
@@ -37,18 +39,29 @@ export const metadata: Metadata = {
 export default function CompatibilityIndexPage() {
   const signs = Object.entries(signDescriptions);
 
+  const compatibilityListSchema = createItemListSchema({
+    name: 'Zodiac Compatibility Guide',
+    description:
+      'Complete zodiac compatibility guide with 78+ detailed match analyses for love, friendship, and work.',
+    url: 'https://lunary.app/grimoire/compatibility',
+    items: Object.keys(signDescriptions).map((sign) => ({
+      name: `${signDescriptions[sign].name} Compatibility`,
+      url: `https://lunary.app/grimoire/zodiac/${sign}`,
+      description: `${signDescriptions[sign].element} sign compatibility`,
+    })),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(compatibilityListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        {/* Header */}
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Compatibility' },
+          ]}
+        />
         <div className='mb-12'>
-          <nav className='flex items-center gap-2 text-sm text-zinc-500 mb-4'>
-            <Link href='/grimoire' className='hover:text-zinc-300'>
-              Grimoire
-            </Link>
-            <span>/</span>
-            <span className='text-zinc-400'>Compatibility</span>
-          </nav>
           <h1 className='text-4xl font-light text-zinc-100 mb-4'>
             Zodiac Compatibility Guide
           </h1>
