@@ -153,12 +153,14 @@ export function ConditionalMainWrapper({
     setShowAppNav(appNav);
   }, [pathname, searchParams]);
 
+  // Marketing nav (64px h-16) + Beta banner (36px) = 100px total
+  // App nav is 48px mobile, 64px desktop
   return (
     <main
       className={cn(
         'flex flex-col w-full overflow-y-auto',
-        showMarketingNav && 'mt-8 h-[calc(100vh-2rem)]',
-        showAppNav && 'h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)]',
+        showMarketingNav && 'pt-[100px] h-screen',
+        showAppNav && 'pt-12 md:pt-16 h-screen',
         !showMarketingNav && !showAppNav && 'h-screen',
       )}
     >

@@ -27,35 +27,35 @@ export function MarketingNavbar() {
             Lunary
           </Link>
 
-          {/* Navigation Links */}
-          <div className='hidden sm:flex items-center gap-6'>
+          {/* Navigation Links - min-h-12 for 48px touch target */}
+          <div className='hidden sm:flex items-center gap-2'>
             <Link
               href='/grimoire'
-              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
             >
               Grimoire
             </Link>
             <Link
               href='/blog'
-              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
             >
               Blog
             </Link>
             <Link
               href='/pricing'
-              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
             >
               Pricing
             </Link>
             <Link
               href='/help'
-              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
             >
               Help
             </Link>
             <Link
               href='/app'
-              className='text-sm text-lunary-secondary hover:text-white transition-colors font-medium'
+              className='text-sm text-lunary-secondary hover:text-white transition-colors font-medium px-3 py-3 min-h-12 flex items-center'
             >
               App
             </Link>

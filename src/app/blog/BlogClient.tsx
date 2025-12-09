@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   Calendar,
@@ -13,9 +12,6 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
-import { cn } from '@/lib/utils';
-
-const NAV_CONTEXT_KEY = 'lunary_nav_context';
 
 interface BlogPost {
   id: string;
@@ -41,46 +37,8 @@ interface BlogClientProps {
 }
 
 export function BlogClient({ initialPosts }: BlogClientProps) {
-  const pathname = usePathname();
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
   const [currentWeekData, setCurrentWeekData] = useState<any>(null);
-  const [showMarketingNav, setShowMarketingNav] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !pathname) return;
-
-    const navContext = sessionStorage.getItem(NAV_CONTEXT_KEY);
-    const referrer = document.referrer;
-
-    const appPagesForContext = [
-      '/app',
-      '/tarot',
-      '/horoscope',
-      '/birth-chart',
-      '/book-of-shadows',
-      '/grimoire',
-      '/profile',
-      '/cosmic-state',
-      '/cosmic-report-generator',
-    ];
-
-    const referrerIsAppPage = referrer
-      ? appPagesForContext.some((page) => {
-          try {
-            const referrerUrl = new URL(referrer);
-            return (
-              referrerUrl.pathname === page ||
-              referrerUrl.pathname.startsWith(`${page}/`)
-            );
-          } catch {
-            return false;
-          }
-        })
-      : false;
-
-    const cameFromApp = navContext === 'app' || referrerIsAppPage;
-    setShowMarketingNav(!cameFromApp);
-  }, [pathname]);
 
   useEffect(() => {
     fetchCurrentWeek();
@@ -141,12 +99,7 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      <div
-        className={cn(
-          'max-w-7xl mx-auto p-4 md:px-6 lg:px-8',
-          showMarketingNav && 'pt-28',
-        )}
-      >
+      <div className='max-w-7xl mx-auto p-4 md:px-6 lg:px-8'>
         <div className='mb-8 md:mb-12'>
           <h1 className='text-3xl md:text-4xl font-light text-zinc-100 mb-2 flex items-center gap-3'>
             <BookOpen className='h-8 w-8 md:h-10 md:w-10 text-lunary-primary-400' />

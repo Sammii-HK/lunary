@@ -17,6 +17,16 @@ import {
 import { MarketingFooter } from '@/components/MarketingFooter';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
+  description:
+    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. AI-powered insights from your natal chart. Free to start.',
+  alternates: {
+    canonical: 'https://lunary.app',
+  },
+};
 
 export default function WelcomePage() {
   return (
