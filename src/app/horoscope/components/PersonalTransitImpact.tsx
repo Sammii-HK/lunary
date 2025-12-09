@@ -53,8 +53,12 @@ export function PersonalTransitImpactCard({
         {impact.aspectToNatal && (
           <p className='text-xs text-lunary-accent-300/80'>
             <span className='font-medium text-lunary-accent-200'>Aspect:</span>{' '}
+            Transit at{' '}
+            {impact.aspectToNatal.transitDegree ||
+              impact.aspectToNatal.transitSign}{' '}
             {impact.aspectToNatal.aspectType} your natal{' '}
-            {impact.aspectToNatal.natalPlanet}
+            {impact.aspectToNatal.natalPlanet} at{' '}
+            {impact.aspectToNatal.natalDegree || impact.aspectToNatal.natalSign}
           </p>
         )}
       </div>

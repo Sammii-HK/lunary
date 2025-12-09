@@ -213,7 +213,7 @@ Wearing or surrounding yourself with ${theme.powerColor} can help align your ene
         },
       ]}
       ctaText={`Get your personalized ${signName} reading`}
-      ctaHref='/welcome'
+      ctaHref='/horoscope'
       sources={[
         { name: 'Planetary transit calculations' },
         { name: 'Traditional astrological interpretations' },
