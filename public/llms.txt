@@ -1,0 +1,104 @@
+# Lunary
+
+> A calm AI companion for cosmic self understanding. Personalised astrology based on real astronomical data, not generic horoscopes.
+
+Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cycles into personal daily guidance. Built for people who want depth, not drama. Most astrology apps entertain you. Lunary helps you understand yourself.
+
+## What Makes Lunary Different
+
+- Uses NASA-grade Astronomy Engine for real planetary calculations
+- Personalized insights based on your full birth chart, not just sun sign
+- AI companion with memory that learns your patterns over time
+- 500+ page digital grimoire covering crystals, spells, tarot, numerology, runes, chakras
+- Community Moon Circles for new and full moon gatherings
+
+## Documentation
+
+- [About Lunary](https://lunary.app/welcome): Full introduction to what Lunary offers
+- [Pricing](https://lunary.app/pricing): Subscription tiers and features
+- [Help Center](https://lunary.app/help): FAQ and support
+- [Press Kit](https://lunary.app/press-kit): Brand assets and founder information
+
+## Core Features
+
+- [Daily Horoscope](https://lunary.app/horoscope): Personalized transit-based daily insights
+- [Tarot Reading](https://lunary.app/tarot): AI-powered personalized tarot with pattern analysis
+- [Birth Chart Calculator](https://lunary.app/birth-chart): Full natal chart with house calculations
+- [Book of Shadows](https://lunary.app/book-of-shadows): AI astro-tarot companion with memory
+- [Moon Circles](https://lunary.app/moon-circles): Community lunar gathering insights
+- [Cosmic Report Generator](https://lunary.app/cosmic-report-generator): Shareable PDF reports
+
+## The Grimoire (Knowledge Library)
+
+- [Grimoire Home](https://lunary.app/grimoire): 500+ page digital knowledge library
+- [Zodiac Signs](https://lunary.app/grimoire/zodiac): All 12 signs with deep interpretations
+- [Tarot Cards](https://lunary.app/grimoire/tarot): 78 card meanings, spreads, and guides
+- [Crystals](https://lunary.app/grimoire/crystals): 100+ crystals with properties and uses
+- [Numerology](https://lunary.app/grimoire/numerology): Angel numbers, life path, mirror hours
+- [Spells & Rituals](https://lunary.app/grimoire/spells): Beginner to advanced workings
+- [Moon Phases](https://lunary.app/grimoire/moon): Lunar cycle guidance and rituals
+- [Runes](https://lunary.app/grimoire/runes): Elder Futhark meanings and divination
+- [Chakras](https://lunary.app/grimoire/chakras): Energy centers and healing
+- [Wheel of the Year](https://lunary.app/grimoire/wheel-of-the-year): Sabbat celebrations
+- [Correspondences](https://lunary.app/grimoire/correspondences): Magical associations
+- [Planetary Bodies](https://lunary.app/grimoire/planets): Astrological planet meanings
+- [Houses](https://lunary.app/grimoire/houses): 12 astrological houses explained
+- [Aspects](https://lunary.app/grimoire/aspects): Planetary aspect interpretations
+- [Retrogrades](https://lunary.app/grimoire/retrogrades): Retrograde meanings and survival
+- [Eclipses](https://lunary.app/grimoire/eclipses): Eclipse types and spiritual significance
+
+## Guides & Learning
+
+- [Birth Chart Complete Guide](https://lunary.app/grimoire/guides/birth-chart-complete-guide): Learn to read your chart
+- [Tarot Complete Guide](https://lunary.app/grimoire/guides/tarot-complete-guide): Master tarot reading
+- [Crystal Healing Guide](https://lunary.app/grimoire/guides/crystal-healing-guide): Crystal work fundamentals
+- [Moon Phases Guide](https://lunary.app/grimoire/guides/moon-phases-guide): Working with lunar cycles
+
+## Blog
+
+- [Weekly Cosmic Forecast](https://lunary.app/blog): Planetary highlights and cosmic insights
+
+## Shop
+
+- [Digital Shop](https://lunary.app/shop): Moon packs and cosmic guides (PDF downloads)
+
+## Comparisons
+
+- [Best Personalized Astrology Apps](https://lunary.app/comparison/best-personalized-astrology-apps): Feature comparison
+- [Lunary vs Co-Star](https://lunary.app/comparison/lunary-vs-costar): Detailed comparison
+- [Lunary vs Pattern](https://lunary.app/comparison/lunary-vs-pattern): How we differ
+- [Lunary vs Moonly](https://lunary.app/comparison/lunary-vs-moonly): Moon tracking comparison
+
+## API (For GPT Actions)
+
+- [Current Cosmic Conditions](https://lunary.app/api/gpt/cosmic): Moon phase, retrogrades, aspects
+- [Daily Horoscope by Sign](https://lunary.app/api/gpt/horoscope): Sign-specific daily reading
+
+## Subscription Tiers
+
+- Free: Limited features, 3 AI messages/day
+- Lunary+ ($4.99/mo): Core subscription, 50 AI messages/day
+- Lunary+ AI ($9.99/mo): Premium tier, 300 AI messages/day
+
+## Technical
+
+- Built with Next.js 15, React 18, TypeScript
+- PostgreSQL database with Prisma ORM
+- Astronomy Engine for real astronomical calculations
+- OpenAI GPT-4o-mini for AI features
+
+## Policies
+
+- [Privacy Policy](https://lunary.app/privacy): How we handle your data
+- [Terms of Service](https://lunary.app/terms): Usage terms
+- [Accessibility](https://lunary.app/accessibility): Our accessibility commitment
+- [Refund Policy](https://lunary.app/refund): Refund information
+
+## Contact
+
+- [Help & Support](https://lunary.app/help): FAQ and contact
+- [Discord Community](https://discord.gg/2WCJncKrKj): Join our community
+
+## Optional
+
+For comprehensive content including zodiac interpretations, crystal properties, tarot meanings, and more, see: https://lunary.app/llms-full.txt

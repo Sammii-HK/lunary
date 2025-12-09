@@ -1,0 +1,428 @@
+# Lunary - Comprehensive Knowledge Base
+
+> A calm AI companion for cosmic self understanding. Personalised astrology based on real astronomical data.
+
+This document contains detailed reference content from Lunary's 500+ page digital grimoire. For the concise overview, see: https://lunary.app/llms.txt
+
+---
+
+## Zodiac Signs
+
+### Aries (March 21 - April 19)
+Element: Fire | Ruling Planet: Mars
+Represents courage, enthusiasm, and initiative. Rules beginnings and ventures, often associated with leadership qualities. Aries energy is pioneering, competitive, and action-oriented.
+https://lunary.app/grimoire/zodiac/aries
+
+### Taurus (April 20 - May 20)
+Element: Earth | Ruling Planet: Venus
+Symbolizes reliability, practicality, and determination. Influences matters of finance, comfort, and physical pleasures. Taurus energy is grounded, sensual, and steadfast.
+https://lunary.app/grimoire/zodiac/taurus
+
+### Gemini (May 21 - June 20)
+Element: Air | Ruling Planet: Mercury
+Associated with communication, intellectual curiosity, and versatility. Represents dual nature and adaptability. Gemini energy is curious, social, and mentally agile.
+https://lunary.app/grimoire/zodiac/gemini
+
+### Cancer (June 21 - July 22)
+Element: Water | Ruling Planet: Moon
+Emphasizes emotion, nurturing, and intuition. Rules home and family, focuses on caring and protective traits. Cancer energy is nurturing, intuitive, and emotionally deep.
+https://lunary.app/grimoire/zodiac/cancer
+
+### Leo (July 23 - August 22)
+Element: Fire | Ruling Planet: Sun
+Governs self-confidence, creativity, and drama. Symbolizes leadership, pride, and theatrical traits. Leo energy is generous, warm-hearted, and expressive.
+https://lunary.app/grimoire/zodiac/leo
+
+### Virgo (August 23 - September 22)
+Element: Earth | Ruling Planet: Mercury
+Represents practicality, analytical abilities, and attention to detail. Associated with service, meticulousness, and modesty. Virgo energy is helpful, precise, and health-conscious.
+https://lunary.app/grimoire/zodiac/virgo
+
+### Libra (September 23 - October 22)
+Element: Air | Ruling Planet: Venus
+Rules balance, harmony, and partnerships. Focused on justice, diplomacy, and relationships. Libra energy seeks fairness, beauty, and meaningful connections.
+https://lunary.app/grimoire/zodiac/libra
+
+### Scorpio (October 23 - November 21)
+Element: Water | Ruling Planet: Pluto/Mars
+Symbolizes transformation, mystery, and intensity. Influences themes of sexuality, death, and rebirth. Scorpio energy is passionate, investigative, and deeply emotional.
+https://lunary.app/grimoire/zodiac/scorpio
+
+### Sagittarius (November 22 - December 21)
+Element: Fire | Ruling Planet: Jupiter
+Associated with exploration, freedom, and philosophy. Represents optimism, love for freedom, and adventurous spirit. Sagittarius energy is philosophical, honest, and expansive.
+https://lunary.app/grimoire/zodiac/sagittarius
+
+### Capricorn (December 22 - January 19)
+Element: Earth | Ruling Planet: Saturn
+Emphasizes discipline, structure, and ambition. Rules career, determination, and careful planning. Capricorn energy is responsible, traditional, and achievement-oriented.
+https://lunary.app/grimoire/zodiac/capricorn
+
+### Aquarius (January 20 - February 18)
+Element: Air | Ruling Planet: Uranus/Saturn
+Represents innovation, individuality, and humanitarianism. Focuses on unconventional thinking, community, and idealism. Aquarius energy is progressive, original, and humanitarian.
+https://lunary.app/grimoire/zodiac/aquarius
+
+### Pisces (February 19 - March 20)
+Element: Water | Ruling Planet: Neptune/Jupiter
+Symbolizes empathy, compassion, and intuition. Associated with mysticism, spirituality, and sensitivity. Pisces energy is imaginative, artistic, and spiritually attuned.
+https://lunary.app/grimoire/zodiac/pisces
+
+---
+
+## Planetary Bodies
+
+### Sun
+Represents the self, individuality, and spirit. Symbolizes power, vitality, and the essence of being. In your birth chart, the Sun shows your core identity and life purpose.
+
+### Moon
+Controls emotions, moods, and the unconscious. Influences intuition, psychic abilities, and emotional well-being. Your Moon sign reveals your emotional nature and inner needs.
+
+### Mercury
+Governed by communication, intellect, and speed. Associated with travel, writing, speaking, and all forms of communication. Mercury retrograde affects technology and communication.
+
+### Venus
+Rules love, beauty, and finances. Influences personal charm, attractiveness, and personal relationships. Venus shows how you love and what you value.
+
+### Mars
+Associated with energy, passion, and war. Influences desire, aggression, and determination. Mars shows how you take action and express anger.
+
+### Jupiter
+Symbolizes growth, expansion, and abundance. Known for bringing luck and wealth. Jupiter shows where you find opportunity and meaning.
+
+### Saturn
+Represents discipline, responsibility, and restrictions. Teaches lessons about patience and diligence. Saturn shows where you face challenges and build mastery.
+
+### Uranus
+Associated with change, innovation, and disruption. Represents sudden shifts and revolutions. Uranus shows where you seek freedom and originality.
+
+### Neptune
+Rules dreams, imagination, and the subconscious. Linked to spirituality and intuition. Neptune shows where you seek transcendence and may experience confusion.
+
+### Pluto
+Represents transformation, power, and rebirth. Associated with deep psychological change and hidden forces. Pluto shows where you experience profound transformation.
+
+---
+
+## Moon Phases
+
+### New Moon
+Keywords: Beginnings, Intention, Renewal
+The New Moon is a time of new beginnings, setting intentions, and starting fresh. Plant seeds for future growth. Focus on setting clear goals and starting new projects.
+https://lunary.app/grimoire/moon/phases/new-moon
+
+### Waxing Crescent
+Keywords: Expansion, Courage, Action
+A time for building momentum and taking action. Move forward with your plans and pursue goals with courage. Take practical steps toward your objectives.
+https://lunary.app/grimoire/moon/phases/waxing-crescent
+
+### First Quarter
+Keywords: Challenges, Decisions, Growth
+A time to face challenges and make decisions. Push through obstacles and continue growing. Focus on problem-solving and making necessary adjustments.
+https://lunary.app/grimoire/moon/phases/first-quarter
+
+### Waxing Gibbous
+Keywords: Refinement, Patience, Preparation
+A time for refinement and preparation. Review your progress, make improvements, and prepare for fruition. Fine-tune your plans and stay dedicated.
+https://lunary.app/grimoire/moon/phases/waxing-gibbous
+
+### Full Moon
+Keywords: Completion, Clarity, Manifestation
+A time of completion, clarity, and manifestation. Celebrate achievements and see results of your efforts. Focus on gratitude and releasing what no longer serves you.
+https://lunary.app/grimoire/moon/phases/full-moon
+
+### Waning Gibbous
+Keywords: Gratitude, Sharing, Introspection
+A time for gratitude, sharing, and introspection. Give thanks for accomplishments and share knowledge with others. Reflect on your journey and give back.
+https://lunary.app/grimoire/moon/phases/waning-gibbous
+
+### Last Quarter
+Keywords: Release, Forgiveness, Transition
+A time for release and forgiveness. Let go of what no longer serves you and prepare for new beginnings. Clear out the old and embrace transitions.
+https://lunary.app/grimoire/moon/phases/last-quarter
+
+### Waning Crescent
+Keywords: Rest, Reflection, Closure
+A time for rest, reflection, and closure. Wind down and prepare for the new cycle ahead. Focus on introspection and recharging your energy.
+https://lunary.app/grimoire/moon/phases/waning-crescent
+
+---
+
+## Major Arcana Tarot Cards
+
+### The Fool
+Keywords: New beginnings, innocence, spontaneity, free spirit
+Represents new beginnings, taking a leap of faith, and embracing the unknown. Encourages spontaneity and trust in the journey ahead.
+https://lunary.app/grimoire/tarot/the-fool
+
+### The Magician
+Keywords: Manifestation, resourcefulness, power, inspired action
+Signifies the ability to turn ideas into reality through focused intention. Symbolizes skill and the power to manifest desires.
+https://lunary.app/grimoire/tarot/the-magician
+
+### The High Priestess
+Keywords: Intuition, sacred knowledge, divine feminine, subconscious
+Embodies wisdom, intuition, and the deep mysteries of the subconscious. Encourages trusting your inner voice.
+https://lunary.app/grimoire/tarot/the-high-priestess
+
+### The Empress
+Keywords: Femininity, beauty, nature, nurturing, abundance
+Represents fertility, nurturing, and the beauty of nature. Signifies abundance and creativity.
+https://lunary.app/grimoire/tarot/the-empress
+
+### The Emperor
+Keywords: Authority, establishment, structure, father figure
+Stands for authority, structure, and control. Suggests discipline, order, and strategic planning.
+https://lunary.app/grimoire/tarot/the-emperor
+
+### The Hierophant
+Keywords: Spiritual wisdom, tradition, conformity, institutions
+Represents traditional values and spiritual wisdom. Encourages learning through established systems.
+https://lunary.app/grimoire/tarot/the-hierophant
+
+### The Lovers
+Keywords: Love, harmony, relationships, choices
+Symbolizes deep emotional connections and harmony. Highlights aligning values and making decisions that honor true feelings.
+https://lunary.app/grimoire/tarot/the-lovers
+
+### The Chariot
+Keywords: Control, willpower, success, determination
+Signifies triumph through determination and willpower. Encourages focused action and confidence.
+https://lunary.app/grimoire/tarot/the-chariot
+
+### Strength
+Keywords: Courage, persuasion, influence, compassion
+Embodies courage, compassion, and inner resilience. True strength lies in understanding and mastering emotions.
+https://lunary.app/grimoire/tarot/strength
+
+### The Hermit
+Keywords: Soul-searching, introspection, solitude, inner guidance
+Represents introspection and self-discovery. Encourages seeking solitude and inner guidance.
+https://lunary.app/grimoire/tarot/the-hermit
+
+### Wheel of Fortune
+Keywords: Luck, karma, cycles, destiny, turning point
+Signifies cycles of change and destiny. Reminds that what goes around comes around.
+https://lunary.app/grimoire/tarot/wheel-of-fortune
+
+---
+
+## Angel Numbers
+
+### 111 - Manifestation & New Beginnings
+A powerful manifestation number signaling new beginnings and thought alignment with reality. Pay attention to your thoughts - they are manifesting rapidly.
+https://lunary.app/grimoire/angel-numbers/111
+
+### 222 - Balance & Harmony
+A number of balance, harmony, and partnership. Trust the process. Everything is unfolding in divine timing.
+https://lunary.app/grimoire/angel-numbers/222
+
+### 333 - Divine Protection & Guidance
+A sign that ascended masters and spiritual guides are with you. You are protected and supported on your path.
+https://lunary.app/grimoire/angel-numbers/333
+
+### 444 - Foundation & Stability
+A sign that you are building a strong foundation. Your angels are supporting you in creating stability and security.
+https://lunary.app/grimoire/angel-numbers/444
+
+### 555 - Change & Transformation
+Signals major changes and transformations ahead. Embrace the changes coming into your life.
+https://lunary.app/grimoire/angel-numbers/555
+
+### 666 - Balance & Material World
+Represents balance between material and spiritual worlds. Find harmony and avoid becoming too materialistic.
+https://lunary.app/grimoire/angel-numbers/666
+
+### 777 - Spiritual Awakening
+A highly spiritual number indicating you are on the right path. Spiritual awakening and enlightenment are unfolding.
+https://lunary.app/grimoire/angel-numbers/777
+
+### 888 - Abundance & Prosperity
+A sign of abundance, prosperity, and financial blessings. The universe is rewarding your efforts.
+https://lunary.app/grimoire/angel-numbers/888
+
+### 999 - Completion & Endings
+Signals the completion of a cycle. Something in your life is ending to make way for new beginnings.
+https://lunary.app/grimoire/angel-numbers/999
+
+---
+
+## Chakras
+
+### Root Chakra (Muladhara)
+Location: Base of spine | Color: Red
+Properties: Grounding, stability, physical energy, survival
+Connects individuals to their physical world, enhances feeling of security and safety.
+https://lunary.app/grimoire/chakras/root
+
+### Sacral Chakra (Svadhisthana)
+Location: Below the navel | Color: Orange
+Properties: Creativity, sexuality, pleasure, emotional body
+Fosters personal creativity and joy, helps in managing life's changes and emotional fluctuations.
+https://lunary.app/grimoire/chakras/sacral
+
+### Solar Plexus Chakra (Manipura)
+Location: Stomach area | Color: Yellow
+Properties: Self-esteem, willpower, self-discipline
+Increases confidence and the ability to assert personal power in a balanced manner.
+https://lunary.app/grimoire/chakras/solar-plexus
+
+### Heart Chakra (Anahata)
+Location: Center of chest | Color: Green
+Properties: Love, healing, inner peace
+Enhances the capacity to love others and oneself, brings healing and peace.
+https://lunary.app/grimoire/chakras/heart
+
+### Throat Chakra (Vishuddha)
+Location: Throat | Color: Blue
+Properties: Communication, expression, truth
+Facilitates honest and clear communication from the heart.
+https://lunary.app/grimoire/chakras/throat
+
+### Third Eye Chakra (Ajna)
+Location: Forehead, between eyes | Color: Indigo
+Properties: Intuition, insight, mental ability
+Promotes intuition and the ability to sense beyond the tangible world.
+https://lunary.app/grimoire/chakras/third-eye
+
+### Crown Chakra (Sahasrara)
+Location: Top of head | Color: Violet
+Properties: Spirituality, enlightenment, consciousness
+Connects individual with the universe, fostering spiritual openness and enlightenment.
+https://lunary.app/grimoire/chakras/crown
+
+---
+
+## Elder Futhark Runes
+
+### Fehu ᚠ (Cattle)
+Magical Properties: Wealth, prosperity, financial strength
+Used in spells for wealth, abundance, and success. Represents mobile power and new beginnings.
+https://lunary.app/grimoire/runes/fehu
+
+### Uruz ᚢ (Aurochs)
+Magical Properties: Strength, raw energy, vitality
+Empowers rituals for health and vitality, signifies overcoming challenges through strength.
+https://lunary.app/grimoire/runes/uruz
+
+### Thurisaz ᚦ (Giant)
+Magical Properties: Defense, reactive force
+Protective, used to ward off attacks and enforce spiritual boundaries.
+https://lunary.app/grimoire/runes/thurisaz
+
+### Ansuz ᚨ (Aesir God)
+Magical Properties: Communication, divine message
+Associated with wisdom and messages. Used in divination and matters requiring insight.
+https://lunary.app/grimoire/runes/ansuz
+
+### Raidho ᚱ (Journey)
+Magical Properties: Travel, movement
+Used in spells for safe travel, seeing the right path, and personal rhythm.
+https://lunary.app/grimoire/runes/raidho
+
+### Kenaz ᚲ (Torch)
+Magical Properties: Revelation, knowledge
+Lights up the dark, reveals secrets, enhances learning and understanding.
+https://lunary.app/grimoire/runes/kenaz
+
+### Gebo ᚷ (Gift)
+Magical Properties: Generosity, exchange
+Symbolizes gifts and hospitality, represents balance in partnerships.
+https://lunary.app/grimoire/runes/gebo
+
+### Wunjo ᚹ (Joy)
+Magical Properties: Happiness, well-being, harmony
+Used to create happiness and harmony, attracts positive energies.
+https://lunary.app/grimoire/runes/wunjo
+
+---
+
+## Popular Crystals
+
+### Amethyst
+Properties: Intuition, spiritual growth, calming, protection
+Chakras: Third Eye, Crown
+Zodiac: Pisces, Aquarius, Virgo
+A powerful stone for spiritual protection and purification. Enhances intuition and psychic abilities while providing calm and clarity.
+https://lunary.app/grimoire/crystals/amethyst
+
+### Rose Quartz
+Properties: Unconditional love, self-love, emotional healing
+Chakras: Heart
+Zodiac: Taurus, Libra
+The stone of universal love. Opens the heart to all forms of love and promotes deep inner healing and self-care.
+https://lunary.app/grimoire/crystals/rose-quartz
+
+### Clear Quartz
+Properties: Amplification, clarity, programming, healing
+Chakras: All chakras
+Zodiac: All signs
+The master healer. Amplifies energy and intention, can be programmed for any purpose.
+https://lunary.app/grimoire/crystals/clear-quartz
+
+### Black Tourmaline
+Properties: Protection, grounding, purification
+Chakras: Root
+Zodiac: Capricorn
+A powerful protective stone that creates a shield against negative energies and psychic attack.
+https://lunary.app/grimoire/crystals/black-tourmaline
+
+### Citrine
+Properties: Abundance, manifestation, personal will, creativity
+Chakras: Solar Plexus, Sacral
+Zodiac: Aries, Gemini, Leo, Libra
+The merchant's stone. Attracts wealth, prosperity, and success while promoting joy and positive energy.
+https://lunary.app/grimoire/crystals/citrine
+
+---
+
+## Spell Categories
+
+### Protection Spells
+Spells and rituals for creating shields, barriers, and safeguards. Protect yourself, your home, and loved ones.
+https://lunary.app/grimoire/spells?category=protection
+
+### Love & Relationships
+Workings for self-love, attracting love, and strengthening bonds. Ethical love magic focuses on opening yourself to love.
+https://lunary.app/grimoire/spells?category=love
+
+### Prosperity & Abundance
+Spells for financial success, career advancement, and abundance. Attract opportunities and remove blocks to prosperity.
+https://lunary.app/grimoire/spells?category=prosperity
+
+### Healing & Wellness
+Rituals for physical, emotional, and spiritual healing. Support (not replace) medical treatment.
+https://lunary.app/grimoire/spells?category=healing
+
+### Cleansing & Purification
+Spells for removing negative energy, cleansing spaces, and purifying objects. Essential maintenance for magical practice.
+https://lunary.app/grimoire/spells?category=cleansing
+
+### Manifestation
+Workings for bringing desires into reality. Combine intention, visualization, and energy work.
+https://lunary.app/grimoire/spells?category=manifestation
+
+---
+
+## About Lunary
+
+Lunary is a Next.js 15 full-stack astrology and spiritual app built for the 1.2 billion+ people who use astrology, tarot, rituals, moon cycles, crystals, journaling, or symbolic systems to understand their inner world.
+
+Where the market is fragmented, Lunary is unified - bringing together all these practices in one calm, personalized experience.
+
+### Technical Foundation
+- Astronomy Engine for NASA-grade planetary calculations
+- Real-time moon phase tracking with constellation positions
+- Personalized transit calculations based on your birth chart
+- AI companion with long-term memory across conversations
+
+### Subscription Tiers
+- Free: Limited features, 3 AI messages/day
+- Lunary+ ($4.99/mo): Full access, 50 AI messages/day
+- Lunary+ AI ($9.99/mo): Premium AI, 300 AI messages/day
+
+### Contact
+- Website: https://lunary.app
+- Help: https://lunary.app/help
+- Discord: https://discord.gg/2WCJncKrKj
+
