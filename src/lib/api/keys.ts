@@ -101,9 +101,9 @@ export function generateApiKey(): {
 }
 
 // SHA-256 is appropriate for API keys (high-entropy random tokens, not user passwords)
-// lgtm[js/insufficient-password-hash]
 export function hashApiKey(key: string): string {
-  return crypto.createHash('sha256').update(key).digest('hex');
+  // CodeQL: This is NOT password hashing - it's for high-entropy API keys where SHA-256 is standard
+  return crypto.createHash('sha256').update(key).digest('hex'); // nosemgrep: insufficient-password-hash
 }
 
 function generateId(): string {

@@ -13,7 +13,7 @@ import {
 
 // Helper to convert string to kebab-case
 function toSlug(str: string): string {
-  return str.toLowerCase().replace(/['']/g, '').replace(/\s+/g, '-');
+  return str.toLowerCase().replace(/[''']/g, '').replace(/\s+/g, '-');
 }
 
 // Helper to deduplicate connections by URL

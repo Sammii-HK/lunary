@@ -257,8 +257,9 @@ function createNotificationFromEvent(
     if (influence) {
       return `This amplifies focus on ${influence} energies`;
     }
-    if (sign && sign.trim()) {
-      return `This amplifies focus on ${sign} themes and energies`;
+    const trimmedSign = sign?.trim();
+    if (trimmedSign) {
+      return `This amplifies focus on ${trimmedSign} themes and energies`;
     }
     return 'Planetary energy shift creating new opportunities';
   };

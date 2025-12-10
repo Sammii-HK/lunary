@@ -285,11 +285,9 @@ export function AdvancedPatterns({
       return;
     }
 
-    // Only fetch if we don't have cached data and don't have current analysis
+    // At this point, we have no cached data and need fresh analysis
     // Note: year-over-year data is included in the API response, so we fetch for any advanced mode
-    if (!cachedData && !analysis && !error) {
-      fetchAdvancedPatterns();
-    }
+    fetchAdvancedPatterns();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMultidimensionalMode, selectedView]);
 
@@ -597,14 +595,10 @@ export function AdvancedPatterns({
                       <h5 className='text-xs font-medium text-lunary-secondary-300 mb-2'>
                         Last Year
                       </h5>
-                      {loading ? (
-                        <p className='text-xs text-zinc-400 mb-3'>
-                          Generating historical data...
-                        </p>
-                      ) : analysis.yearOverYear.lastYear.dominantThemes.length >
-                          0 ||
-                        analysis.yearOverYear.lastYear.frequentCards.length >
-                          0 ? (
+                      {analysis.yearOverYear.lastYear.dominantThemes.length >
+                        0 ||
+                      analysis.yearOverYear.lastYear.frequentCards.length >
+                        0 ? (
                         <>
                           {analysis.yearOverYear.lastYear.dominantThemes
                             .length > 0 && (

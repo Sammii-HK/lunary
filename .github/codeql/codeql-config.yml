@@ -1,0 +1,25 @@
+name: 'Lunary CodeQL Config'
+
+query-filters:
+  # API key hashing uses SHA-256 (industry standard for high-entropy tokens)
+  # Only exclude this rule for the API keys file - passwords elsewhere still checked
+  - exclude:
+      id: js/insufficient-password-hash
+      paths:
+        - src/lib/api/keys.ts
+
+  # HTML-to-markdown conversion for Discord/Substack is display formatting
+  # Output goes to external APIs as plain text, not rendered as HTML
+  - exclude:
+      id: js/incomplete-multi-character-sanitization
+      paths:
+        - src/lib/discord.ts
+        - utils/substack/contentFormatter.ts
+
+paths-ignore:
+  # Ignore test files - they often have intentional test patterns
+  - __tests__
+  - e2e
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - '**/*.spec.ts'

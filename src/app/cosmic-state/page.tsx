@@ -770,24 +770,21 @@ export default function CosmicStatePage() {
         ) : (
           <div className='bg-zinc-900 rounded-lg p-6 border border-zinc-800 text-center'>
             <p className='text-zinc-400 mb-4'>
-              {loading
-                ? 'Generating your cosmic state...'
-                : "We're creating your cosmic snapshot. It will appear here as soon as it is ready."}
+              We&apos;re creating your cosmic snapshot. It will appear here as
+              soon as it is ready.
             </p>
-            {!loading && (
-              <div className='text-xs text-zinc-400'>
-                Make sure your profile has your birthday saved so we can build
-                your chart.
-                <span className='ml-1'>
-                  <Link
-                    href='/profile'
-                    className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
-                  >
-                    Update profile →
-                  </Link>
-                </span>
-              </div>
-            )}
+            <div className='text-xs text-zinc-400'>
+              Make sure your profile has your birthday saved so we can build
+              your chart.
+              <span className='ml-1'>
+                <Link
+                  href='/profile'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
+                >
+                  Update profile →
+                </Link>
+              </span>
+            </div>
           </div>
         )}
       </div>
