@@ -180,12 +180,40 @@ const MessageBubble = ({
     [content, isUser],
   );
 
+  const parseMarkdown = (text: string): React.ReactNode[] => {
+    const result: React.ReactNode[] = [];
+    const regex = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+    let lastIndex = 0;
+    let match;
+    let key = 0;
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        result.push(text.slice(lastIndex, match.index));
+      }
+      if (match[2]) {
+        result.push(
+          <strong key={key++} className='font-semibold'>
+            {match[2]}
+          </strong>,
+        );
+      } else if (match[3]) {
+        result.push(<em key={key++}>{match[3]}</em>);
+      }
+      lastIndex = regex.lastIndex;
+    }
+    if (lastIndex < text.length) {
+      result.push(text.slice(lastIndex));
+    }
+    return result.length > 0 ? result : [text];
+  };
+
   const renderContent = () => {
     if (parsed.entities.length === 0) {
       const lines = content.split('\n');
       return lines.map((line, index) => (
         <span key={index}>
-          {line}
+          {parseMarkdown(line)}
           {index < lines.length - 1 && '\n'}
         </span>
       ));
@@ -235,7 +263,11 @@ const MessageBubble = ({
             </button>,
           );
         } else {
-          result.push(<span key={`${partIndex}-${lineIndex}`}>{line}</span>);
+          result.push(
+            <span key={`${partIndex}-${lineIndex}`}>
+              {parseMarkdown(line)}
+            </span>,
+          );
         }
       });
     });
@@ -249,7 +281,7 @@ const MessageBubble = ({
       <div
         className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm transition-colors ${
           isUser
-            ? 'bg-lunary-primary-950 text-white border border-lunary-primary-700 hover:bg-lunary-primary-950 hover:border-lunary-primary-00'
+            ? 'bg-lunary-primary-900 text-white border border-lunary-primary-700'
             : 'bg-zinc-950 text-zinc-100 border border-zinc-800'
         }`}
       >

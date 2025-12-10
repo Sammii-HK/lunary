@@ -173,6 +173,7 @@ export function AdvancedPatterns({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastFetchedRef = useRef<string>('');
+  const loadingRef = useRef(false);
 
   // Debug logging
   useEffect(() => {
@@ -194,7 +195,8 @@ export function AdvancedPatterns({
   }, [subscription, hasAdvancedAccess, hasTarotPatternsAccess]);
 
   const fetchAdvancedPatterns = useCallback(async () => {
-    if (loading) return; // Prevent concurrent fetches
+    if (loadingRef.current) return; // Prevent concurrent fetches
+    loadingRef.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -241,16 +243,17 @@ export function AdvancedPatterns({
       console.error('Failed to fetch advanced patterns:', err);
       setError('Unable to load advanced patterns');
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
-  }, [selectedView, isMultidimensionalMode, loading]);
+  }, [selectedView, isMultidimensionalMode]);
 
   useEffect(() => {
     // Fetch advanced patterns when:
     // 1. Multidimensional mode is ON and we don't have data yet
     // 2. Selected view is year-over-year
     // Skip fetching if already loading
-    if (loading) return;
+    if (loadingRef.current) return;
 
     const fetchKey = `${selectedView}-${isMultidimensionalMode}`;
     const needsFetch = isMultidimensionalMode;

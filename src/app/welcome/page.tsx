@@ -46,9 +46,9 @@ export default function WelcomePage() {
             Understand your emotions and patterns with insight that helps you
             move through your day with clarity.
           </p>
-          <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
-            <Button variant='lunary-solid' asChild>
-              <Link href='/profile'>Start free trial</Link>
+          <div className='flex flex-col sm:flex-row gap-6 justify-center items-center pt-2'>
+            <Button variant='lunary' asChild>
+              <Link href='/pricing'>Start free trial</Link>
             </Button>
             <a
               href='#how-it-works'
@@ -231,7 +231,7 @@ export default function WelcomePage() {
               <div className='space-y-3'>
                 <div className='flex justify-end'>
                   <div className='max-w-[80%]'>
-                    <div className='rounded-2xl bg-lunary-primary-600/80 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
+                    <div className='rounded-2xl bg-lunary-primary-900 border border-lunary-primary-700 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
                       Why am I feeling so restless today?
                     </div>
                   </div>
@@ -536,12 +536,9 @@ export default function WelcomePage() {
             interpretations and guided rituals.
           </p>
           <div className='pt-2'>
-            <Link
-              href='/pricing'
-              className='inline-flex items-center justify-center rounded-full border border-zinc-700 bg-zinc-800/50 px-8 py-3.5 text-sm font-medium text-zinc-200 hover:bg-zinc-800 hover:border-zinc-600 transition-colors'
-            >
-              View plans
-            </Link>
+            <Button variant='outline' asChild>
+              <Link href='/pricing'>View plans</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -570,16 +567,10 @@ export default function WelcomePage() {
             Begin your free trial and let Lunary translate the sky into clarity
             and personal meaning.
           </p>
-          <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
-            <Button variant='lunary-solid' asChild>
-              <Link href='/profile'>Start free trial</Link>
+          <div className='pt-2'>
+            <Button variant='lunary' asChild>
+              <Link href='/pricing'>Start free trial</Link>
             </Button>
-            <Link
-              href='/app'
-              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Open the app
-            </Link>
           </div>
         </div>
       </section>

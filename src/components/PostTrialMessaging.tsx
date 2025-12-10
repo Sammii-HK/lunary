@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from './SmartTrialButton';
+import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
 import Link from 'next/link';
 
@@ -40,12 +41,9 @@ export function PostTrialMessaging() {
           </p>
           <div className='flex flex-col sm:flex-row gap-3'>
             <SmartTrialButton size='default' />
-            <Link
-              href='/pricing'
-              className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-white text-sm font-medium transition-colors text-center'
-            >
-              View Plans
-            </Link>
+            <Button variant='outline' size='sm' asChild>
+              <Link href='/pricing'>View Plans</Link>
+            </Button>
           </div>
         </div>
       </div>

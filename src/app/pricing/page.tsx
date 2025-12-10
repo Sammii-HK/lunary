@@ -445,7 +445,7 @@ export default function PricingPage() {
                                 return;
                               }
                               if (isFree) {
-                                window.location.href = '/';
+                                window.location.href = '/profile';
                                 return;
                               }
                               handleSubscribe(priceId, plan.id);

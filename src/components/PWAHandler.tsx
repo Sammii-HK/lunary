@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { Button } from '@/components/ui/button';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -232,7 +233,7 @@ export function PWAHandler({
 
   return (
     <div className='fixed bottom-14 md:bottom-16 left-0 right-0 z-40'>
-      <div className='bg-zinc-950/80 border-t border-lunary-primary-800/50 px-4 py-3 backdrop-blur-md'>
+      <div className='bg-gradient-to-r from-lunary-primary-950/80 via-zinc-950/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-3 backdrop-blur-md'>
         <div className='max-w-4xl mx-auto flex items-center justify-between'>
           <div className='flex-1'>
             <h3 className='text-sm font-semibold text-lunary-primary-200'>
@@ -242,19 +243,13 @@ export function PWAHandler({
               Get faster access and offline support
             </p>
           </div>
-          <div className='flex gap-2 ml-4'>
-            <button
-              onClick={handleDismiss}
-              className='px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
+          <div className='flex gap-3 ml-4'>
+            <Button variant='ghost' size='sm' onClick={handleDismiss}>
               Later
-            </button>
-            <button
-              onClick={handleInstallClick}
-              className='px-4 py-1.5 bg-lunary-primary-900/50 hover:bg-lunary-primary-800/50 text-lunary-primary-200 text-xs rounded-xl font-medium transition-colors border border-lunary-primary-700/50'
-            >
+            </Button>
+            <Button variant='lunary' size='sm' onClick={handleInstallClick}>
               Install
-            </button>
+            </Button>
           </div>
         </div>
       </div>

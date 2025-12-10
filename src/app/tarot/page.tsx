@@ -1086,6 +1086,7 @@ const TarotReadings = () => {
               </button>
             </div>
             <AdvancedPatterns
+              key={`patterns-${selectedView}-${isMultidimensionalMode}`}
               basicPatterns={
                 hasChartAccess ? personalizedReading?.trendAnalysis : undefined
               }

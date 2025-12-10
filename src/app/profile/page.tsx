@@ -141,8 +141,9 @@ export default function ProfilePage() {
       try {
         let profileName = user.name || '';
         const profileBirthday = user.birthday || '';
-        const profileBirthTime = (user as any)?.birthTime || '';
-        const profileBirthLocation = (user as any)?.birthLocation || '';
+        const location = (user as any)?.location || {};
+        const profileBirthTime = location?.birthTime || '';
+        const profileBirthLocation = location?.birthLocation || '';
 
         setName(profileName);
         setBirthday(profileBirthday);
@@ -194,12 +195,19 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
-      // Save basic profile to Postgres
+      // Save basic profile to Postgres (including birthTime and birthLocation in location object)
       const profileResponse = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ name, birthday }),
+        body: JSON.stringify({
+          name,
+          birthday,
+          location:
+            birthTime || birthLocation
+              ? { birthTime, birthLocation }
+              : undefined,
+        }),
       });
 
       if (!profileResponse.ok) {
@@ -211,10 +219,11 @@ export default function ProfilePage() {
         const hasExistingChart = user?.hasBirthChart || false;
         const hasExistingPersonalCard = user?.personalCard ? true : false;
 
+        const userLocation = (user as any)?.location || {};
         const shouldRegenerateChart =
           !hasExistingChart ||
-          (birthTime && birthTime !== (user as any)?.birthTime) ||
-          (birthLocation && birthLocation !== (user as any)?.birthLocation);
+          (birthTime && birthTime !== userLocation?.birthTime) ||
+          (birthLocation && birthLocation !== userLocation?.birthLocation);
 
         if (shouldRegenerateChart) {
           console.log('Generating birth chart...');

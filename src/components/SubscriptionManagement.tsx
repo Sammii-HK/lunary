@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useSubscription } from '../hooks/useSubscription';
+import { Button } from '@/components/ui/button';
 import { Settings, ExternalLink, RefreshCw } from 'lucide-react';
+import Link from 'next/link';
 
 interface SubscriptionManagementProps {
   customerId?: string;
@@ -182,12 +184,9 @@ export default function SubscriptionManagement({
           <p className='text-zinc-400 text-sm mb-4'>
             Unlock personalized horoscopes, birth charts, and mystical insights
           </p>
-          <a
-            href='/pricing'
-            className='inline-block bg-gradient-to-r from-lunary-primary-600 to-lunary-rose-600 hover:from-lunary-primary-700 hover:to-lunary-rose-700 text-white px-5 py-2 rounded-md text-sm font-medium transition-all duration-300'
-          >
-            View Plans
-          </a>
+          <Button variant='outline' asChild>
+            <Link href='/pricing'>View Plans</Link>
+          </Button>
         </div>
       </div>
     );
