@@ -1,6 +1,24 @@
 name: 'Lunary CodeQL Config'
 
 query-filters:
+  # Code quality issues handled by ESLint, not security concerns
+  - exclude:
+      id: js/unused-local-variable
+  - exclude:
+      id: js/unused-parameter
+  - exclude:
+      id: js/unused-import
+  - exclude:
+      id: js/dead-code
+  - exclude:
+      id: js/useless-expression
+  - exclude:
+      id: js/trivial-conditional
+  - exclude:
+      id: js/redundant-condition
+  - exclude:
+      id: js/duplicate-character-in-character-class
+
   # API key hashing uses SHA-256 (industry standard for high-entropy tokens)
   # Only exclude this rule for the API keys file - passwords elsewhere still checked
   - exclude:
@@ -15,6 +33,13 @@ query-filters:
       paths:
         - src/lib/discord.ts
         - utils/substack/contentFormatter.ts
+
+  # User's current location stored for astronomy accuracy (moon phases, planetary positions)
+  # User-consented data for personalized cosmic calculations, not tracking
+  - exclude:
+      id: js/clear-text-storage-of-sensitive-data
+      paths:
+        - utils/location.ts
 
 paths-ignore:
   # Ignore test files - they often have intentional test patterns

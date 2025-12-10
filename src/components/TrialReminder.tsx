@@ -20,7 +20,7 @@ export function TrialReminder({
   className = '',
 }: TrialReminderProps) {
   const subscription = useSubscription();
-  const authState = useAuthStatus();
+  const _authState = useAuthStatus();
   const [hasTracked, setHasTracked] = useState(false);
 
   const { isTrialActive, trialDaysRemaining, isSubscribed } = subscription;

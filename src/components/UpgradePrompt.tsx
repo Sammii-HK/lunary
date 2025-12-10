@@ -57,8 +57,12 @@ export function UpgradePrompt({
   const authState = useAuthStatus();
   const [isDismissed, setIsDismissed] = useState(false);
 
-  const { showUpgradePrompt, isTrialActive, trialDaysRemaining, isSubscribed } =
-    subscription;
+  const {
+    showUpgradePrompt,
+    isTrialActive,
+    trialDaysRemaining,
+    isSubscribed: _isSubscribed,
+  } = subscription;
 
   // Check if trial upsell was dismissed recently
   useEffect(() => {

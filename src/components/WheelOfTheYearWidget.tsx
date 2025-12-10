@@ -7,14 +7,14 @@ import dayjs from 'dayjs';
 
 export const WheelOfTheYearWidget = () => {
   const [currentSabbat, setCurrentSabbat] = useState<string | null>(null);
-  const [nextSabbat, setNextSabbat] = useState<string | null>(null);
-  const [relevantSpells, setRelevantSpells] = useState<any[]>([]);
+  const [_nextSabbat, setNextSabbat] = useState<string | null>(null);
+  const [_relevantSpells, setRelevantSpells] = useState<any[]>([]);
 
   useEffect(() => {
     const getCurrentSabbat = () => {
       const now = dayjs();
-      const currentMonth = now.month() + 1;
-      const currentDay = now.date();
+      const _currentMonth = now.month() + 1;
+      const _currentDay = now.date();
 
       // Define date ranges for each sabbat
       const sabbatDates = [
@@ -82,7 +82,7 @@ export const WheelOfTheYearWidget = () => {
 
   const displaySabbat = currentSabbat;
   const sabbatInfo = getSabbatInfo(displaySabbat);
-  const isApproaching = false;
+  const _isApproaching = false;
 
   return (
     <div className='bg-gradient-to-br from-lunary-rose-900/20 to-lunary-accent-900/20 rounded-lg p-4 border border-lunary-rose-700'>

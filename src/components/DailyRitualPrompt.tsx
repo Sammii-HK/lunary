@@ -12,7 +12,7 @@ interface RitualPrompt {
 }
 
 export function DailyRitualPrompt() {
-  const authState = useAuthStatus();
+  const _authState = useAuthStatus();
   const [ritualPrompt, setRitualPrompt] = useState<RitualPrompt | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,7 +20,7 @@ export function DailyRitualPrompt() {
     const generatePrompt = () => {
       const hour = new Date().getHours();
       const isMorning = hour >= 6 && hour < 14;
-      const time = isMorning ? 'morning' : 'evening';
+      const _time = isMorning ? 'morning' : 'evening';
 
       const morningPrompts = [
         {

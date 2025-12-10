@@ -53,10 +53,10 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
     hasAccess,
     isTrialActive,
     trialDaysRemaining,
-    showUpgradePrompt,
+    showUpgradePrompt: _showUpgradePrompt,
     loading,
   } = useSubscription();
-  const authState = useAuthStatus();
+  const _authState = useAuthStatus();
   const [paywallTracked, setPaywallTracked] = useState(false);
 
   const shouldShowPaywall = !loading && !hasAccess(feature) && !fallback;

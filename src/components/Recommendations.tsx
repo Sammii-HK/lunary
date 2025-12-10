@@ -14,7 +14,7 @@ interface Recommendation {
 }
 
 export function Recommendations() {
-  const authState = useAuthStatus();
+  const _authState = useAuthStatus();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

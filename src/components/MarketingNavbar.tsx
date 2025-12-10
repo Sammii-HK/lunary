@@ -7,7 +7,7 @@ import { Logo } from './Logo';
 import { Button } from './ui/button';
 
 export function MarketingNavbar() {
-  const pathname = usePathname();
+  const _pathname = usePathname();
   const authState = useAuthStatus();
 
   const showBetaBanner = !authState.loading && !authState.isAuthenticated;

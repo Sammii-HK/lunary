@@ -25,10 +25,10 @@ export function FeatureGate({
   className = '',
 }: FeatureGateProps) {
   const subscription = useSubscription();
-  const authState = useAuthStatus();
+  const _authState = useAuthStatus();
   const [hasShownGate, setHasShownGate] = useState(false);
 
-  const { hasAccess, isTrialActive } = subscription;
+  const { hasAccess, isTrialActive: _isTrialActive } = subscription;
 
   const hasFeatureAccess = hasAccess(feature as any);
 

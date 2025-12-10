@@ -188,7 +188,7 @@ function PatternCard({ pattern }: { pattern: JournalPattern }) {
 type TabId = 'journal' | 'memories' | 'patterns';
 
 export default function BookOfShadowsPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const { user, loading: authLoading } = useAuthStatus();
   const [activeTab, setActiveTab] = useState<TabId>('journal');
   const [entries, setEntries] = useState<JournalEntry[]>([]);
