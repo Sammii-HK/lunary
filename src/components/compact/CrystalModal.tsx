@@ -73,7 +73,7 @@ export const CrystalPreview = () => {
     : generalCrystal?.name;
 
   const crystalReason = hasChartAccess
-    ? crystalData?.guidance
+    ? crystalData?.reasons?.join('. ') || crystalData?.guidance
     : generalCrystal?.reason;
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
