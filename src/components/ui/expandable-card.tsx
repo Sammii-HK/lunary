@@ -69,7 +69,7 @@ export const ExpandableCard = ({
         <div className='w-full'>{preview}</div>
         <div className='absolute top-1 right-2'>
           {isExpanded ? (
-            <ChevronUp className='w-4 h-4 text-lunary-accent' />
+            <ChevronUp className='w-4 h-4 text-zinc-500' />
           ) : (
             <ChevronDown className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors' />
           )}
@@ -118,7 +118,7 @@ export const ExpandableCardHeader = ({
   };
 
   return (
-    <div className='flex items-center justify-between w-full'>
+    <div className='flex items-center justify-between w-full pr-2'>
       <div className='flex items-center gap-2'>
         {icon && <span>{icon}</span>}
         <span className='text-sm font-medium text-zinc-200'>{title}</span>
@@ -127,7 +127,7 @@ export const ExpandableCardHeader = ({
       {badge && (
         <span
           className={cn(
-            'text-xs px-1.5 py-0.5 rounded',
+            'text-xs px-2 py-0.5 rounded',
             badgeClasses[badgeVariant],
           )}
         >

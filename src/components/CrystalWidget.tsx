@@ -130,7 +130,7 @@ export const CrystalWidget = () => {
               Get crystals chosen specifically for YOUR birth chart. See what
               the universe has selected for you!
             </p>
-            <SmartTrialButton variant='link' />
+            <SmartTrialButton size='sm' />
           </div>
         </div>
       </div>

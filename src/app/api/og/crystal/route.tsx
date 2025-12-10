@@ -19,7 +19,7 @@ export const revalidate = 86400;
 function getCrystalTheme(crystalName: string): string {
   const crystal = getCrystalByName(crystalName);
   const colorHex = crystal?.ogColor || '#9333EA';
-  return `linear-gradient(135deg, ${colorHex}40, #0a0a1a)`;
+  return `linear-gradient(135deg, ${colorHex}40, #0a0a0a)`;
 }
 
 export async function GET(request: NextRequest) {

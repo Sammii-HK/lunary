@@ -160,11 +160,11 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   const dayVariation = daysSinceEpoch % 5;
   const themes = [
     {
-      background: 'linear-gradient(135deg, #0a0a1a, #1a1a2e)',
+      background: 'linear-gradient(135deg, #0a0a0a, #1a1a1a)',
       accent: '#b19cd9',
     },
     {
-      background: 'linear-gradient(135deg, #1a1a2e, #2d3561)',
+      background: 'linear-gradient(135deg, #1a1a1a, #2d3561)',
       accent: '#87ceeb',
     },
     {
@@ -176,7 +176,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       accent: '#87cefa',
     },
     {
-      background: 'linear-gradient(135deg, #1a2332, #1e3c72)',
+      background: 'linear-gradient(135deg, #1a1a1a, #1f1f1f)',
       accent: '#f0a0a0',
     },
   ];

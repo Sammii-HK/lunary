@@ -31,8 +31,8 @@ export const metadata: Metadata = {
 };
 
 const brandColors = [
-  { name: 'Event Horizon', hex: '#0A0A1A' },
-  { name: 'Singularity', hex: '#050510' },
+  { name: 'Event Horizon', hex: '#0A0A0A' },
+  { name: 'Singularity', hex: '#050505' },
   { name: 'Nebula Violet', hex: '#8458D8' },
   { name: 'Comet Trail', hex: '#7B7BE8' },
   { name: 'Galaxy Haze', hex: '#C77DFF' },

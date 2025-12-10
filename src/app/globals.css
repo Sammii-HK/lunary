@@ -16,8 +16,8 @@ html {
   /* --background-end-rgb: 255, 255, 255; */
 
   /* Lunary Brand Colors */
-  --color-bg: #0a0a1a; /* Event Horizon */
-  --color-bg-deep: #050510; /* Singularity */
+  --color-bg: #0a0a0a; /* Event Horizon */
+  --color-bg-deep: #050505; /* Singularity */
   --color-primary: #8458d8; /* Nebula Violet */
   --color-secondary: #7b7be8; /* Comet Trail */
   --color-accent: #c77dff; /* Galaxy Haze */
@@ -114,5 +114,14 @@ body {
   /* Full containment for independent widgets */
   .contain-strict {
     contain: strict;
+  }
+}
+
+/* Prevent mobile zoom on input focus (iOS requires 16px minimum) */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
   }
 }

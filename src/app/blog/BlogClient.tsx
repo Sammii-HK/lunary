@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   Calendar,
   Star,
@@ -10,8 +11,11 @@ import {
   Moon,
   Sparkles,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
+import { Button } from '@/components/ui/button';
 
 interface BlogPost {
   id: string;
@@ -36,9 +40,15 @@ interface BlogClientProps {
   initialPosts: BlogPost[];
 }
 
+const POSTS_PER_PAGE = 8;
+
 export function BlogClient({ initialPosts }: BlogClientProps) {
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
   const [currentWeekData, setCurrentWeekData] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = useSearchParams();
+  const fromParam = searchParams?.get('from');
+  const linkSuffix = fromParam ? `?from=${fromParam}` : '';
 
   useEffect(() => {
     fetchCurrentWeek();
@@ -97,8 +107,19 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
     });
   }, [posts]);
 
+  const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE);
+  const paginatedPosts = useMemo(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    return sortedPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+  }, [sortedPosts, currentPage]);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='bg-zinc-950 text-zinc-100 pb-20'>
       <div className='max-w-7xl mx-auto p-4 md:px-6 lg:px-8'>
         <div className='mb-8 md:mb-12'>
           <h1 className='text-3xl md:text-4xl font-light text-zinc-100 mb-2 flex items-center gap-3'>
@@ -153,13 +174,14 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
                 {currentWeekData.majorAspects?.length || 0} major aspects
               </span>
             </div>
-            <Link
-              href={`/blog/week/week-${currentWeekData.weekNumber}-${currentWeekData.year}`}
-              className='inline-flex items-center gap-2 px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-md transition-colors text-sm font-medium'
-            >
-              Read Full Forecast
-              <ArrowRight className='h-4 w-4' />
-            </Link>
+            <Button variant='lunary-solid' asChild>
+              <Link
+                href={`/blog/week/week-${currentWeekData.weekNumber}-${currentWeekData.year}${linkSuffix}`}
+              >
+                Read Full Forecast
+                <ArrowRight className='h-4 w-4' />
+              </Link>
+            </Button>
           </div>
         )}
 
@@ -169,11 +191,11 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
           </h2>
 
           <div className='space-y-4'>
-            {sortedPosts.map((post, index) => (
+            {paginatedPosts.map((post) => (
               <Link
                 key={post.id}
-                href={`/blog/week/week-${post.weekNumber}-${post.year}`}
-                className={`block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group ${index > 3 ? 'content-auto' : ''}`}
+                href={`/blog/week/week-${post.weekNumber}-${post.year}${linkSuffix}`}
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
               >
                 <div className='flex items-start justify-between mb-3'>
                   <div className='flex-1'>
@@ -183,15 +205,15 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
                       </span>
                       <span className='text-xs text-zinc-400'>{post.year}</span>
                     </div>
-                    <h3 className='text-xl md:text-2xl font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-300 transition-colors'>
+                    <h3 className='text-xl md:text-2xl font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-300 transition-colors line-clamp-1'>
                       {post.title}
                     </h3>
-                    <p className='text-base text-zinc-300 italic mb-3'>
+                    <p className='text-base text-zinc-300 italic mb-3 line-clamp-1'>
                       {post.subtitle}
                     </p>
                   </div>
                 </div>
-                <p className='text-sm text-zinc-400 mb-4 leading-relaxed'>
+                <p className='text-sm text-zinc-400 mb-4 leading-relaxed line-clamp-2'>
                   {post.summary}
                 </p>
 
@@ -218,6 +240,50 @@ export function BlogClient({ initialPosts }: BlogClientProps) {
               </Link>
             ))}
           </div>
+
+          {totalPages > 1 && (
+            <div className='flex items-center justify-center gap-2 mt-8 pt-6 border-t border-zinc-800'>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className='disabled:opacity-40 disabled:text-zinc-500 disabled:cursor-not-allowed disabled:pointer-events-none'
+              >
+                <ChevronLeft className='h-4 w-4' />
+                Previous
+              </Button>
+
+              <div className='flex items-center gap-1'>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                        page === currentPage
+                          ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
+                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
+              </div>
+
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className='disabled:opacity-40 disabled:text-zinc-500 disabled:cursor-not-allowed disabled:pointer-events-none'
+              >
+                Next
+                <ChevronRight className='h-4 w-4' />
+              </Button>
+            </div>
+          )}
         </div>
 
         <section className='mt-12 pt-8 border-t border-zinc-800'>

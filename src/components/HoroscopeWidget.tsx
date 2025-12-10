@@ -741,7 +741,7 @@ export const HoroscopeWidget = () => {
               affects YOUR birth chart. Experience the difference personalized
               astrology makes!
             </p>
-            <SmartTrialButton variant='link' />
+            <SmartTrialButton size='sm' />
           </div>
         </div>
       </div>

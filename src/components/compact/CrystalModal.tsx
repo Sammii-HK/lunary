@@ -89,7 +89,7 @@ export const CrystalPreview = () => {
 
   if (!crystalName) {
     return (
-      <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse'>
+      <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse min-h-16'>
         <div className='h-5 w-24 bg-zinc-800 rounded' />
       </div>
     );
@@ -99,7 +99,7 @@ export const CrystalPreview = () => {
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left'
+        className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left min-h-16'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>

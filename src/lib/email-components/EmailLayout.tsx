@@ -30,14 +30,14 @@ export function EmailLayout({
           color: isDark ? '#FFFFFF' : '#333',
           margin: '0',
           padding: '20px',
-          backgroundColor: isDark ? '#050510' : '#f8f9fa',
+          backgroundColor: isDark ? '#050505' : '#f8f9fa',
         }}
       >
         <Container
           style={{
             maxWidth: '600px',
             margin: '0 auto',
-            background: isDark ? '#0A0A1A' : '#ffffff',
+            background: isDark ? '#0A0A0A' : '#ffffff',
             padding: '40px',
             borderRadius: '16px',
             boxShadow: isDark

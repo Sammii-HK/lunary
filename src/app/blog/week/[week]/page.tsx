@@ -20,6 +20,7 @@ import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
 
 interface BlogPostPageProps {
   params: Promise<{ week: string }>;
+  searchParams: Promise<{ from?: string }>;
 }
 
 interface WeekInfo {
@@ -116,7 +117,7 @@ const BLOG_SECTION_LIMITS = {
   retrogradeChanges: 2,
   moonPhases: 2,
   majorAspects: 3,
-  crystalRecommendations: 3,
+  crystalRecommendations: 7,
   bestDays: 3,
 };
 
@@ -216,9 +217,16 @@ async function getBlogData(weekInfo: WeekInfo) {
   return promise;
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
+export default async function BlogPostPage({
+  params,
+  searchParams,
+}: BlogPostPageProps) {
   let rawWeekParam: string | undefined;
   let weekInfo: WeekInfo | null = null;
+
+  const resolvedSearchParams = await searchParams;
+  const fromParam = resolvedSearchParams?.from;
+  const linkSuffix = fromParam ? `?from=${fromParam}` : '';
 
   try {
     const resolvedParams = await params;
@@ -354,7 +362,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     return (
       <div className='container mx-auto p-4 max-w-4xl'>
         <Link
-          href='/blog'
+          href={`/blog${linkSuffix}`}
           className='inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors'
         >
           <ArrowLeft className='h-4 w-4' />
@@ -783,7 +791,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 return (
                   <Link
                     key={weekSlug}
-                    href={`/blog/week/${weekSlug}`}
+                    href={`/blog/week/${weekSlug}${linkSuffix}`}
                     className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
                   >
                     <div className='flex items-center gap-2 mb-2'>
@@ -811,7 +819,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
           <div className='mt-6'>
             <Link
-              href='/blog'
+              href={`/blog${linkSuffix}`}
               className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors text-sm font-medium'
             >
               View All Weekly Forecasts

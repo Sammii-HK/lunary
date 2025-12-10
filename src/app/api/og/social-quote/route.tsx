@@ -47,14 +47,14 @@ export async function GET(request: NextRequest) {
     const fontData = await loadRobotoFont(request).catch(() => null);
 
     const gradients = [
-      'linear-gradient(135deg, #16213e, #1a1a2e, #0a0a1a)',
-      'linear-gradient(135deg, #1e3c72, #2d3561, #1a1a2e)',
-      'linear-gradient(135deg, #24243e, #302b63, #0f0c29)',
-      'linear-gradient(135deg, #34495e, #2c3e50, #1e1e2e)',
-      'linear-gradient(135deg, #1e3c72, #1a2332, #0a0a1a)',
-      'linear-gradient(135deg, #34495e, #2c3e50, #1a1a2e)',
-      'linear-gradient(135deg, #2d3561, #1a1a2e, #0f0c29)',
-      'linear-gradient(135deg, #1e3c72, #2d3561, #1e2332)',
+      'linear-gradient(135deg, #1a1a1a, #0d0d0d, #0a0a0a)',
+      'linear-gradient(135deg, #2d2d3a, #1a1a1a, #0a0a0a)',
+      'linear-gradient(135deg, #24243a, #1a1a1a, #0d0d0d)',
+      'linear-gradient(135deg, #2a2a2a, #1a1a1a, #0a0a0a)',
+      'linear-gradient(135deg, #1f1f2a, #1a1a1a, #0a0a0a)',
+      'linear-gradient(135deg, #2a2a2a, #1f1f1f, #0d0d0d)',
+      'linear-gradient(135deg, #252530, #1a1a1a, #0a0a0a)',
+      'linear-gradient(135deg, #1f1f25, #1a1a1a, #0d0d0d)',
     ];
 
     // Pick gradient based on quote text hash for consistency

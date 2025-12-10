@@ -338,7 +338,7 @@ export const BirthChart = ({
             ({ body, sign, degree, minute, retrograde, house }) => (
               <div
                 key={body}
-                className='flex items-center justify-between p-2 md:p-3 bg-zinc-800 rounded-lg'
+                className='flex items-center justify-between p-2 md:p-3 bg-zinc-900 rounded-lg'
               >
                 <div className='flex items-center space-x-2 md:space-x-3'>
                   <span
@@ -387,7 +387,7 @@ export const BirthChart = ({
               {angles.map(({ body, sign, degree, minute }) => (
                 <div
                   key={body}
-                  className='flex items-center justify-between p-2 md:p-3 bg-zinc-800 rounded-lg'
+                  className='flex items-center justify-between p-2 md:p-3 bg-zinc-900 rounded-lg'
                 >
                   <div className='flex items-center space-x-2 md:space-x-3'>
                     <span className='text-base md:text-lg font-astro text-lunary-accent'>
@@ -428,7 +428,7 @@ export const BirthChart = ({
               {points.map(({ body, sign, degree, minute, retrograde }) => (
                 <div
                   key={body}
-                  className='flex items-center justify-between p-2 md:p-3 bg-zinc-800 rounded-lg'
+                  className='flex items-center justify-between p-2 md:p-3 bg-zinc-900 rounded-lg'
                 >
                   <div className='flex items-center space-x-2 md:space-x-3'>
                     <span

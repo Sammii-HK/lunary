@@ -62,7 +62,7 @@ export function AuthComponent({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            email: formData.email,
+            email: formData.email.toLowerCase().trim(),
             ...(redirectTo ? { redirectTo } : {}),
           }),
         });
@@ -89,7 +89,7 @@ export function AuthComponent({
       if (isSignUp) {
         // No timeout - let the request complete naturally
         const result = await betterAuthClient.signUp.email({
-          email: formData.email,
+          email: formData.email.toLowerCase().trim(),
           password: formData.password,
           name: formData.name || 'User',
         });
@@ -121,7 +121,7 @@ export function AuthComponent({
       } else {
         // No timeout - let the request complete naturally
         const result = await betterAuthClient.signIn.email({
-          email: formData.email,
+          email: formData.email.toLowerCase().trim(),
           password: formData.password,
         });
 

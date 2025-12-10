@@ -41,15 +41,15 @@ function getCategoryEmoji(category: string): string {
 
 function getCategoryColor(category: string): string {
   const colors: { [key: string]: string } = {
-    moon_phases: 'linear-gradient(135deg, #1a1a2e, #2d3561)',
+    moon_phases: 'linear-gradient(135deg, #1a1a1a, #2d3561)',
     crystals: 'linear-gradient(135deg, #2c3e50, #34495e)',
     spells: 'linear-gradient(135deg, #1e2a3a, #2c3e50)',
-    tarot: 'linear-gradient(135deg, #1a2332, #1e3c72)',
-    astrology: 'linear-gradient(135deg, #0a0a1a, #1a1a2e)',
+    tarot: 'linear-gradient(135deg, #1a1a1a, #1f1f1f)',
+    astrology: 'linear-gradient(135deg, #0a0a0a, #1a1a1a)',
     seasonal: 'linear-gradient(135deg, #2d5016, #4a7c59)',
     calendar: 'linear-gradient(135deg, #1e3a5f, #2d4a7a)',
   };
-  return colors[category] || 'linear-gradient(135deg, #1a1a2e, #2d3561)';
+  return colors[category] || 'linear-gradient(135deg, #1a1a1a, #2d3561)';
 }
 
 export async function GET(request: NextRequest) {

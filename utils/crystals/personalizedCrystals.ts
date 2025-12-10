@@ -64,6 +64,7 @@ const propDecode: Record<string, string> = {
   ENG: 'energy',
   VIT: 'vitality',
   STR: 'strength',
+  STA: 'stability',
   CAL: 'calming',
   FOC: 'focus',
   LCK: 'luck',

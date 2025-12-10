@@ -51,7 +51,7 @@ export const DailyInsightCard = () => {
     return (
       <Link
         href='/horoscope'
-        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
+        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full min-h-20'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
@@ -78,7 +78,7 @@ export const DailyInsightCard = () => {
   return (
     <Link
       href='/horoscope'
-      className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
+      className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full min-h-20'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>

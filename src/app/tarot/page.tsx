@@ -646,7 +646,7 @@ const TarotReadings = () => {
             </div>
 
             <div className='space-y-4 pt-4 border-t border-zinc-800/50'>
-              <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-4'>
+              <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
                 <h3 className='text-sm font-medium text-lunary-primary-300/90 mb-2'>
                   Daily Message
                 </h3>
@@ -655,7 +655,7 @@ const TarotReadings = () => {
                 </p>
               </div>
 
-              <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
+              <div className='rounded-lg border border-lunary-secondary-800 bg-zinc-900/50 p-4'>
                 <h3 className='text-sm font-medium text-lunary-primary-300 mb-2'>
                   Weekly Energy
                 </h3>
@@ -664,7 +664,7 @@ const TarotReadings = () => {
                 </p>
               </div>
 
-              <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
+              <div className='rounded-lg border border-lunary-success-800 bg-zinc-900 p-4'>
                 <h3 className='text-sm font-medium text-lunary-success-300 mb-2'>
                   Key Guidance
                 </h3>
@@ -697,7 +697,7 @@ const TarotReadings = () => {
             </HoroscopeSection>
           )}
 
-          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6'>
             <h3 className='text-lg font-medium text-zinc-100 mb-2'>
               Unlock Personal Tarot Patterns
             </h3>
@@ -918,9 +918,9 @@ const TarotReadings = () => {
           </div>
         </HoroscopeSection>
 
-        <HoroscopeSection title='Guidance Highlights' color='indigo'>
+        <HoroscopeSection title='Guidance Highlights' color='zinc'>
           <div className='space-y-4'>
-            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-4'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
               <h3 className='text-sm font-medium text-lunary-primary-300/90 mb-2'>
                 Daily Message
               </h3>

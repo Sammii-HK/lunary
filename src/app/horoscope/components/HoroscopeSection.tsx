@@ -5,12 +5,12 @@ interface HoroscopeSectionProps {
 }
 
 const colorClasses = {
-  purple: 'border-lunary-primary-700 bg-lunary-primary-950',
-  blue: 'border-lunary-secondary-800 bg-lunary-secondary-950',
-  emerald: 'border-lunary-success-800 bg-lunary-success-950',
-  amber: 'border-lunary-accent-700 bg-lunary-accent-950',
-  indigo: 'border-lunary-primary-800 bg-lunary-primary-950',
-  zinc: 'border-zinc-800/50 bg-zinc-900/30',
+  purple: 'border-lunary-primary-800 bg-lunary-bg',
+  blue: 'border-lunary-secondary-800 bg-lunary-bg',
+  emerald: 'border-lunary-success-800 bg-lunary-bg',
+  amber: 'border-lunary-accent-800 bg-lunary-bg',
+  indigo: 'border-lunary-highlight-800 bg-lunary-bg',
+  zinc: 'border-zinc-800 bg-lunary-bg',
 };
 
 export function HoroscopeSection({

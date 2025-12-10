@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
+import { Button } from '@/components/ui/button';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import {
   PRICING_PLANS,
@@ -15,7 +16,6 @@ import { loadStripe } from '@stripe/stripe-js';
 import {
   Check,
   Sparkles,
-  Moon,
   Star,
   ArrowRight,
   ChevronDown,
@@ -244,12 +244,21 @@ export default function PricingPage() {
         {/* Header */}
         <section className='relative pt-24 pb-16 md:pt-32 md:pb-20'>
           <div className='max-w-5xl mx-auto px-6 text-center'>
-            <div className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-primary-900 border border-lunary-primary-700 mb-8'>
-              <Moon className='w-3.5 h-3.5 text-lunary-accent' />
-              <span className='text-xs font-medium text-lunary-accent-300'>
-                7-day free trial
-              </span>
-            </div>
+            {subscriptionStatus === 'trial' && trialDaysRemaining ? (
+              <div className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-accent-950 border border-lunary-accent-700 mb-8'>
+                <Sparkles className='w-3.5 h-3.5 text-lunary-accent' />
+                <span className='text-xs font-medium text-lunary-accent-300'>
+                  {trialDaysRemaining} days left in trial
+                </span>
+              </div>
+            ) : subscriptionStatus === 'active' ? (
+              <div className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-success-950 border border-lunary-success-700 mb-8'>
+                <Check className='w-3.5 h-3.5 text-lunary-success' />
+                <span className='text-xs font-medium text-lunary-success-300'>
+                  Active subscription
+                </span>
+              </div>
+            ) : null}
 
             <h1 className='text-4xl md:text-6xl font-light tracking-tight mb-6'>
               Your cosmic journey
@@ -261,15 +270,6 @@ export default function PricingPage() {
               Personalized astrology based on your exact birth chart. No generic
               horoscopes.
             </p>
-
-            {subscriptionStatus === 'trial' && trialDaysRemaining && (
-              <div className='mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lunary-accent-950 border border-lunary-accent-700'>
-                <Sparkles className='w-4 h-4 text-lunary-accent' />
-                <span className='text-sm text-lunary-accent-300'>
-                  {trialDaysRemaining} days left in trial
-                </span>
-              </div>
-            )}
           </div>
         </section>
 
@@ -305,7 +305,7 @@ export default function PricingPage() {
         </section>
 
         {/* Pricing Cards */}
-        <section className='relative pb-24'>
+        <section id='pricing-plans' className='relative pb-24 scroll-mt-48'>
           <div className='max-w-5xl mx-auto px-6'>
             <h2 className='sr-only'>Choose Your Plan</h2>
             {loadingPlans ? (
@@ -534,7 +534,7 @@ export default function PricingPage() {
               ))}
             </div>
 
-            <div className='mt-12 p-6 rounded-2xl bg-gradient-to-r from-lunary-primary-950/30 to-lunary-highlight-950/30 border border-lunary-primary-800'>
+            <div className='mt-12 p-6 rounded-2xl bg-gradient-to-r from-lunary-primary-900/40 via-lunary-secondary-900/30 to-lunary-rose-900/40 border border-lunary-primary-700/50'>
               <div className='flex flex-col md:flex-row items-center justify-between gap-6'>
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100 mb-2'>
@@ -545,17 +545,12 @@ export default function PricingPage() {
                     advanced pattern analysis
                   </p>
                 </div>
-                <Link
-                  href='#'
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className='flex items-center gap-2 px-5 py-2.5 rounded-xl bg-lunary-primary-900 border border-lunary-primary-700 text-lunary-accent-300 text-sm font-medium hover:bg-lunary-primary-800 transition-colors flex-shrink-0'
-                >
-                  Choose Plan
-                  <ArrowRight className='w-4 h-4' />
-                </Link>
+                <Button variant='lunary' className='flex-shrink-0' asChild>
+                  <a href='#pricing-plans'>
+                    Choose Plan
+                    <ArrowRight className='w-4 h-4' />
+                  </a>
+                </Button>
               </div>
             </div>
           </div>

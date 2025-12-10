@@ -65,7 +65,7 @@ export const TarotWidget = () => {
               Unlock it now to see what's influencing you today based on your
               name and birthday. Discover what the cards reveal about you!
             </p>
-            <SmartTrialButton variant='link' />
+            <SmartTrialButton size='sm' />
           </div>
         </div>
       </div>

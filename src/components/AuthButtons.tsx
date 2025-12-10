@@ -59,7 +59,7 @@ export function AuthButtons({
           </p>
         </div>
         <div className='flex gap-3'>
-          <Button variant='lunary-solid' className='rounded-full' asChild>
+          <Button variant='lunary-solid' asChild>
             <Link href='/profile'>View Profile</Link>
           </Button>
           <SignOutButton variant='text' />
@@ -87,7 +87,7 @@ export function AuthButtons({
   if (variant === 'secondary') {
     return (
       <div className={`flex justify-center ${className}`}>
-        <Button variant='lunary' className='rounded-full' asChild>
+        <Button variant='lunary' asChild>
           <Link href='/pricing'>Start Free Trial</Link>
         </Button>
       </div>

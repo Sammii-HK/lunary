@@ -249,8 +249,8 @@ const MessageBubble = ({
       <div
         className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm transition-colors ${
           isUser
-            ? 'bg-lunary-primary-900 text-white border border-lunary-primary-700 hover:bg-lunary-primary-800 hover:border-lunary-primary-600'
-            : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
+            ? 'bg-lunary-primary-950 text-white border border-lunary-primary-700 hover:bg-lunary-primary-950 hover:border-lunary-primary-00'
+            : 'bg-zinc-950 text-zinc-100 border border-zinc-800'
         }`}
       >
         {renderContent()}

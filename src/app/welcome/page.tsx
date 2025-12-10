@@ -47,7 +47,7 @@ export default function WelcomePage() {
             move through your day with clarity.
           </p>
           <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
-            <Button variant='lunary-solid' className='rounded-full' asChild>
+            <Button variant='lunary-solid' asChild>
               <Link href='/profile'>Start free trial</Link>
             </Button>
             <a
@@ -571,7 +571,7 @@ export default function WelcomePage() {
             and personal meaning.
           </p>
           <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
-            <Button variant='lunary-solid' className='rounded-full' asChild>
+            <Button variant='lunary-solid' asChild>
               <Link href='/profile'>Start free trial</Link>
             </Button>
             <Link

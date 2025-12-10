@@ -7,6 +7,7 @@ import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { betterAuthClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import { Lock, Sparkles, Moon, Calendar, TrendingUp, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function CosmicStatePage() {
   useUser();
@@ -338,7 +339,8 @@ export default function CosmicStatePage() {
               Error Loading Cosmic State
             </h2>
             <p className='text-lunary-error-300 mb-4'>{error}</p>
-            <button
+            <Button
+              variant='outline'
               onClick={() => {
                 setError(null);
                 setLoading(true);
@@ -385,10 +387,9 @@ export default function CosmicStatePage() {
                 };
                 fetchCosmicState();
               }}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
             >
               Retry
-            </button>
+            </Button>
           </div>
         </div>
       </div>

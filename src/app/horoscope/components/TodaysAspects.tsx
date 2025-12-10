@@ -257,9 +257,7 @@ export function TodaysAspects({
                   <span className={`${styles.symbol}`}>
                     {aspect.aspectSymbol}
                   </span>
-                  <span className='text-lunary-accent-200'>
-                    {aspect.natalPlanet}
-                  </span>
+                  <span className='text-zinc-300'>{aspect.natalPlanet}</span>
                   <span className='text-zinc-600'>
                     {aspect.natalDegree.split(' ')[0]}
                   </span>

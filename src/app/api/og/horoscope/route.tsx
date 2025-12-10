@@ -74,11 +74,11 @@ export async function GET(request: NextRequest) {
   const dayVariation =
     Math.floor(targetDate.getTime() / (1000 * 60 * 60 * 24)) % 5;
   const themes = [
-    'linear-gradient(135deg, #1a1a2e, #0a0a1a)',
-    'linear-gradient(135deg, #2d3561, #1a1a2e)',
+    'linear-gradient(135deg, #1a1a1a, #0a0a0a)',
+    'linear-gradient(135deg, #2d3561, #1a1a1a)',
     'linear-gradient(135deg, #34495e, #2c3e50)',
     'linear-gradient(135deg, #2c3e50, #1e2a3a)',
-    'linear-gradient(135deg, #1e3c72, #1a2332)',
+    'linear-gradient(135deg, #1f1f1f, #1a1a1a)',
   ];
 
   const robotoFont = await loadGoogleFont(request);

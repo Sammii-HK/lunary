@@ -7,13 +7,13 @@ function getMoonCircleTheme(type: string) {
   const lower = type.toLowerCase();
   if (lower.includes('new')) {
     return {
-      background: 'linear-gradient(135deg, #0a0a1a, #1a1a2e, #0d0d1a)',
+      background: 'linear-gradient(135deg, #0a0a0a, #1a1a1a, #0d0d0d)',
       iconPath: 'new-moon',
       subtitle: 'Set Your Intentions',
     };
   } else {
     return {
-      background: 'linear-gradient(135deg, #0d0d1a, #1a1a2e, #1a0f1f)',
+      background: 'linear-gradient(135deg, #0d0d0d, #1a1a1a, #1a0f1f)',
       iconPath: 'full-moon',
       subtitle: 'Release & Celebrate',
     };

@@ -10,8 +10,8 @@ const config: Config = {
       colors: {
         lunary: {
           // Backgrounds
-          bg: '#0A0A1A',
-          'bg-deep': '#050510',
+          bg: '#0A0A0A',
+          'bg-deep': '#050505',
 
           // Primary - Nebula Violet (#8458D8)
           primary: {

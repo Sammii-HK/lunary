@@ -3,6 +3,8 @@
 import { useState, useEffect, useId, useRef, FormEvent } from 'react';
 import { Mail, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 // Lazy load auth client to avoid webpack issues
 let betterAuthClient: any = null;
@@ -189,7 +191,7 @@ export function NewsletterSignupForm({
             <label htmlFor={`${inputId}-email`} className='sr-only'>
               Email address
             </label>
-            <input
+            <Input
               id={`${inputId}-email`}
               type='email'
               value={email}
@@ -201,15 +203,16 @@ export function NewsletterSignupForm({
                 }
               }}
               placeholder={inputPlaceholder}
-              className='w-full rounded-full border border-lunary-primary-600 bg-black/40 px-5 py-3 text-sm text-white placeholder:text-lunary-accent-200/40 focus:border-lunary-accent-300 focus:outline-none focus:ring-2 focus:ring-lunary-accent-700'
+              className='border-lunary-primary-600 bg-black/40 placeholder:text-lunary-accent-200/40 focus:border-lunary-accent-300 focus:ring-lunary-accent-700'
               autoComplete='email'
               inputMode='email'
             />
           </div>
-          <button
+          <Button
             type='submit'
+            variant='lunary-solid'
             disabled={status === 'loading'}
-            className='inline-flex items-center justify-center rounded-full bg-lunary-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-lunary-primary-800 transition-all hover:bg-lunary-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-accent-300 disabled:cursor-not-allowed disabled:opacity-60'
+            className='px-6'
           >
             {status === 'loading' ? (
               <>
@@ -219,7 +222,7 @@ export function NewsletterSignupForm({
             ) : (
               ctaLabel
             )}
-          </button>
+          </Button>
         </form>
 
         {message && (

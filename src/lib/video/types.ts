@@ -40,8 +40,8 @@ export const BRAND_COLORS = {
   zinc800: '#27272a',
   white: '#ffffff',
   // Lunary Brand Colors
-  lunaryBg: '#0A0A1A',
-  lunaryBgDeep: '#050510',
+  lunaryBg: '#0A0A0A',
+  lunaryBgDeep: '#050505',
   lunaryPrimary: '#8458D8',
   lunarySecondary: '#7B7BE8',
   lunaryAccentSoft: '#C77DFF',

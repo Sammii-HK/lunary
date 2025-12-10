@@ -10,8 +10,8 @@ const BRAND_COLORS = {
   purple300: '#b094e6', // lunary-primary-300
   pink600: '#921cb0', // lunary-highlight-600
   pink500: '#b723dc', // lunary-highlight-500
-  zinc900: '#0A0A1A', // lunary-bg
-  zinc800: '#050510', // lunary-bg-deep
+  zinc900: '#0A0A0A', // lunary-bg
+  zinc800: '#050505', // lunary-bg-deep
   zinc700: '#3f3f46',
   zinc400: '#a1a1aa',
   zinc300: '#d4d4d8',

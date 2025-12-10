@@ -78,7 +78,9 @@ export function ConditionalMainWrapper({
       (page) => pathname === page || pathname.startsWith(`${page}/`),
     );
 
-    const isActuallyAppPage = isAppPage && !isCoreMarketingRoute;
+    // Contextual pages (blog/pricing/explore) are NOT treated as actual app pages - they respect cameFromApp
+    const isActuallyAppPage =
+      isAppPage && !isCoreMarketingRoute && !isContextualPage;
 
     // Check if we came from an app page or explore menu
     const referrer = document.referrer;
@@ -160,7 +162,7 @@ export function ConditionalMainWrapper({
       className={cn(
         'flex flex-col w-full overflow-y-auto',
         showMarketingNav && 'pt-[100px] h-screen',
-        showAppNav && 'pt-12 md:pt-16 h-screen',
+        showAppNav && 'pb-14 md:pb-16 h-screen',
         !showMarketingNav && !showAppNav && 'h-screen',
       )}
     >

@@ -975,7 +975,7 @@ const BirthChartPage = () => {
 
       {/* Planetary Interpretations */}
       {birthChartData && (
-        <div className='bg-zinc-800 rounded-lg p-4 max-w-md mx-auto'>
+        <div className='bg-lunary-bg rounded-lg p-4 max-w-md mx-auto border border-zinc-800'>
           <h3 className='text-lg font-semibold text-lunary-success mb-3'>
             Your Cosmic Blueprint
           </h3>
@@ -994,7 +994,7 @@ const BirthChartPage = () => {
                     </h4>
                     <div className='grid grid-cols-1 gap-3'>
                       {sun && (
-                        <div className='bg-zinc-700 rounded p-3'>
+                        <div className='bg-zinc-900 rounded p-3'>
                           <div className='flex items-center gap-2 mb-1'>
                             <span className='font-astro text-lg'>
                               {bodiesSymbols.sun}
@@ -1010,7 +1010,7 @@ const BirthChartPage = () => {
                         </div>
                       )}
                       {moon && (
-                        <div className='bg-zinc-700 rounded p-3'>
+                        <div className='bg-zinc-900 rounded p-3'>
                           <div className='flex items-center gap-2 mb-1'>
                             <span className='font-astro text-lg'>
                               {bodiesSymbols.moon}
@@ -1026,7 +1026,7 @@ const BirthChartPage = () => {
                         </div>
                       )}
                       {rising && (
-                        <div className='bg-zinc-700 rounded p-3'>
+                        <div className='bg-zinc-900 rounded p-3'>
                           <div className='flex items-center gap-2 mb-1'>
                             <span className='text-lg font-astro text-lunary-accent'>
                               {astroPointSymbols.ascendant}
@@ -1085,7 +1085,7 @@ const BirthChartPage = () => {
                           className={`rounded p-2 ${
                             planets.length > 0
                               ? 'bg-lunary-highlight-950 border border-lunary-highlight-700/30'
-                              : 'bg-zinc-700/50'
+                              : 'bg-zinc-900'
                           }`}
                         >
                           <div className='flex items-center justify-between mb-1'>
@@ -1414,7 +1414,7 @@ const BirthChartPage = () => {
                         return (
                           <div
                             key={houseNum}
-                            className='bg-zinc-700 rounded p-3'
+                            className='bg-zinc-900 rounded p-3'
                           >
                             <div className='flex items-center justify-between mb-1'>
                               <h5 className='text-sm font-medium text-white'>
@@ -1456,7 +1456,7 @@ const BirthChartPage = () => {
             </h4>
             <div className='space-y-3'>
               {getChartAnalysis(birthChartData).map((analysis, index) => (
-                <div key={index} className='bg-zinc-700 rounded p-3'>
+                <div key={index} className='bg-zinc-900 rounded p-3'>
                   <h5 className='text-xs font-medium text-lunary-secondary-300 mb-1'>
                     {analysis.category}
                   </h5>
@@ -1482,7 +1482,7 @@ const BirthChartPage = () => {
                     (element) => (
                       <div
                         key={element.name}
-                        className='bg-zinc-700 rounded p-2'
+                        className='bg-zinc-900 rounded p-2'
                       >
                         <div className='flex items-center justify-between mb-1'>
                           <div className='flex items-center gap-2'>
@@ -1503,7 +1503,7 @@ const BirthChartPage = () => {
                               (planet: BirthChartData) => (
                                 <span
                                   key={planet.body}
-                                  className='text-xs font-astro bg-zinc-600 px-1 rounded'
+                                  className='text-xs font-astro bg-zinc-800 px-1 rounded'
                                 >
                                   {
                                     bodiesSymbols[
@@ -1531,7 +1531,7 @@ const BirthChartPage = () => {
                     (modality) => (
                       <div
                         key={modality.name}
-                        className='bg-zinc-700 rounded p-2'
+                        className='bg-zinc-900 rounded p-2'
                       >
                         <div className='flex items-center justify-between mb-1'>
                           <div className='flex items-center gap-2'>
@@ -1553,7 +1553,7 @@ const BirthChartPage = () => {
                                 (planet: BirthChartData) => (
                                   <span
                                     key={planet.body}
-                                    className='text-xs font-astro bg-zinc-600 px-1 rounded'
+                                    className='text-xs font-astro bg-zinc-800 px-1 rounded'
                                   >
                                     {
                                       bodiesSymbols[
@@ -1607,7 +1607,7 @@ const BirthChartPage = () => {
             </h4>
             <div className='space-y-2'>
               {getChartPatterns(birthChartData).map((pattern, index) => (
-                <div key={index} className='bg-zinc-700 rounded p-3'>
+                <div key={index} className='bg-zinc-900 rounded p-3'>
                   <h5 className='text-xs font-medium text-lunary-success-300 mb-1'>
                     {pattern.name}
                   </h5>

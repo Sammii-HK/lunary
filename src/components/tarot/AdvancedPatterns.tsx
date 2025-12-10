@@ -125,6 +125,14 @@ interface RecentReading {
   };
 }
 
+const getSuitTitleColor = (cardName: string): string => {
+  if (cardName.includes('Wands')) return 'text-lunary-rose-200';
+  if (cardName.includes('Cups')) return 'text-lunary-secondary-200';
+  if (cardName.includes('Swords')) return 'text-zinc-200';
+  if (cardName.includes('Pentacles')) return 'text-lunary-success-200';
+  return 'text-lunary-primary-200';
+};
+
 interface AdvancedPatternsProps {
   basicPatterns?: BasicPatterns;
   selectedView: number | 'year-over-year';
@@ -327,10 +335,10 @@ export function AdvancedPatterns({
                         key={theme}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
                           index === 0
-                            ? 'bg-lunary-primary-900 text-lunary-accent-300 border border-lunary-primary-700'
+                            ? 'bg-zinc-900 text-lunary-primary-300 border border-lunary-primary-800'
                             : index === 1
-                              ? 'bg-lunary-primary-900 text-lunary-accent-300 border border-lunary-primary-800'
-                              : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50'
+                              ? 'bg-zinc-900 text-zinc-300 border border-zinc-700'
+                              : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
                         }`}
                       >
                         {theme}
@@ -349,11 +357,17 @@ export function AdvancedPatterns({
                     {basicPatterns.frequentCards
                       .slice(0, 5)
                       .map((card, index) => (
-                        <div
+                        <button
                           key={index}
-                          className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950 p-4'
+                          onClick={() => onCardClick?.({ name: card.name })}
+                          className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-left w-full transition-colors hover:bg-zinc-800/50'
                         >
-                          <p className='font-medium text-zinc-100 mb-2'>
+                          <p
+                            className={cn(
+                              'font-medium mb-2',
+                              getSuitTitleColor(card.name),
+                            )}
+                          >
                             {card.name} ({card.count}x)
                           </p>
                           {card.reading && (
@@ -361,7 +375,7 @@ export function AdvancedPatterns({
                               {card.reading}
                             </p>
                           )}
-                        </div>
+                        </button>
                       ))}
                   </div>
                 </div>

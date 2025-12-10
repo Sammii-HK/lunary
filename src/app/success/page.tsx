@@ -306,7 +306,7 @@ export default function SuccessPage() {
             <Link href='/profile'>Complete Your Profile</Link>
           </Button>
 
-          <Button variant='lunary' size='lg' className='rounded-full' asChild>
+          <Button variant='lunary' size='lg' asChild>
             <Link href='/'>Explore Your Cosmic Dashboard</Link>
           </Button>
         </div>

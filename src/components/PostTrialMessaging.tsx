@@ -39,7 +39,7 @@ export function PostTrialMessaging() {
             journey.
           </p>
           <div className='flex flex-col sm:flex-row gap-3'>
-            <SmartTrialButton size='md' />
+            <SmartTrialButton size='default' />
             <Link
               href='/pricing'
               className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-white text-sm font-medium transition-colors text-center'

@@ -6,16 +6,15 @@ import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AuthComponent } from './Auth';
 import { useModal } from '@/hooks/useModal';
+import { Button } from '@/components/ui/button';
 
 interface SmartTrialButtonProps {
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'button' | 'link';
+  size?: 'sm' | 'default' | 'lg';
   fullWidth?: boolean;
 }
 
 export function SmartTrialButton({
-  size = 'md',
-  variant = 'button',
+  size = 'default',
   fullWidth = false,
 }: SmartTrialButtonProps) {
   const authState = useAuthStatus();
@@ -34,6 +33,7 @@ export function SmartTrialButton({
         text: 'Manage Subscription',
         href: '/profile',
         action: 'link' as const,
+        variant: 'outline' as const,
       };
     }
 
@@ -42,6 +42,7 @@ export function SmartTrialButton({
         text: isTrialActive ? 'Continue Trial' : 'Upgrade now',
         href: '/pricing',
         action: 'link' as const,
+        variant: 'lunary-solid' as const,
       };
     }
 
@@ -49,40 +50,22 @@ export function SmartTrialButton({
       text: 'Sign In to Start Trial',
       href: null,
       action: 'modal' as const,
+      variant: 'lunary-solid' as const,
     };
   };
 
   const config = getButtonConfig();
 
-  // Size styles
-  const sizeClasses = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg',
-  };
-
-  // Variant styles
-  const variantClasses = {
-    button:
-      'bg-lunary-primary-950 hover:bg-lunary-primary-900 text-lunary-primary border border-lunary-primary-800 hover:border-lunary-primary-700 rounded-lg font-medium',
-    link: 'text-xs underline font-medium bg-transparent hover:bg-lunary-primary-900 px-2 py-1 border-0',
-  };
-
-  // Base classes
-  const baseClasses = 'inline-block transition-all duration-200';
-
-  const buttonClasses = `
-    ${baseClasses}
-    ${sizeClasses[size]}
-    ${variantClasses[variant]}
-    ${fullWidth ? 'block w-full' : ''}
-  `.trim();
-
   if (config.action === 'link' && config.href) {
     return (
-      <Link href={config.href} className={buttonClasses}>
-        {config.text}
-      </Link>
+      <Button
+        variant={config.variant}
+        size={size}
+        className={fullWidth ? 'w-full' : ''}
+        asChild
+      >
+        <Link href={config.href}>{config.text}</Link>
+      </Button>
     );
   }
 
@@ -94,9 +77,14 @@ export function SmartTrialButton({
 
   return (
     <>
-      <button onClick={handleClick} className={buttonClasses}>
+      <Button
+        variant={config.variant}
+        size={size}
+        className={fullWidth ? 'w-full' : ''}
+        onClick={handleClick}
+      >
         {config.text}
-      </button>
+      </Button>
 
       {showAuthModal && (
         <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>

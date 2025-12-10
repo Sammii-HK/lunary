@@ -64,12 +64,7 @@ export function MarketingNavbar() {
           {/* Auth Buttons */}
           <div className='flex items-center gap-3'>
             {authState.isAuthenticated ? (
-              <Button
-                variant='lunary-solid'
-                size='sm'
-                className='rounded-full'
-                asChild
-              >
+              <Button variant='lunary' size='sm' asChild>
                 <Link href='/app'>Open App</Link>
               </Button>
             ) : (
@@ -80,12 +75,7 @@ export function MarketingNavbar() {
                 >
                   Sign In
                 </Link>
-                <Button
-                  variant='lunary-solid'
-                  size='sm'
-                  className='rounded-full'
-                  asChild
-                >
+                <Button variant='lunary' size='sm' asChild>
                   <Link href='/profile'>Start free trial</Link>
                 </Button>
               </>

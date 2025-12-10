@@ -29,18 +29,12 @@ type ExploreItem = {
 };
 
 const exploreItems: ExploreItem[] = [
+  // Your Space - Personalized features
   {
     href: '/book-of-shadows/journal',
     label: 'Book of Shadows',
     description: 'Your reflections and patterns connected',
     icon: NotebookPen,
-    featured: true,
-  },
-  {
-    href: '/profile',
-    label: 'Profile & Settings',
-    description: 'Manage your account, birth details, and preferences',
-    icon: User,
     featured: true,
   },
   {
@@ -51,23 +45,58 @@ const exploreItems: ExploreItem[] = [
     featured: true,
   },
   {
+    href: '/cosmic-state',
+    label: 'Cosmic State',
+    description: 'Current planetary positions and influences',
+    icon: Globe,
+    featured: true,
+  },
+  {
+    href: '/collections',
+    label: 'Collections',
+    description: 'Your saved readings and cosmic moments',
+    icon: FolderOpen,
+    featured: true,
+  },
+  {
+    href: '/forecast',
+    label: '2026 Forecast',
+    description: 'Your yearly astrological outlook',
+    icon: Calendar,
+    featured: true,
+  },
+  {
+    href: '/cosmic-report-generator',
+    label: 'Cosmic Report',
+    description: 'Generate detailed personal reports',
+    icon: FileText,
+    featured: true,
+  },
+  {
+    href: '/profile',
+    label: 'Profile & Settings',
+    description: 'Manage your account, birth details, and preferences',
+    icon: User,
+    featured: true,
+  },
+  // Resources - General content
+  {
+    href: '/moon-circles',
+    label: 'Moon Circles',
+    description: 'Join lunar rituals and community gatherings',
+    icon: CircleDot,
+  },
+  {
     href: '/grimoire',
     label: 'Grimoire',
     description: 'Explore the complete magical encyclopedia',
     icon: BookMarked,
-    featured: true,
   },
   {
-    href: '/blog',
+    href: '/blog?from=explore',
     label: 'Blog',
     description: 'Weekly cosmic updates and insights',
     icon: BookOpen,
-  },
-  {
-    href: '/pricing',
-    label: 'Pricing',
-    description: 'Subscription plans and features',
-    icon: Tag,
   },
   {
     href: '/shop',
@@ -76,34 +105,10 @@ const exploreItems: ExploreItem[] = [
     icon: Store,
   },
   {
-    href: '/moon-circles',
-    label: 'Moon Circles',
-    description: 'Join lunar rituals and community gatherings',
-    icon: CircleDot,
-  },
-  {
-    href: '/collections',
-    label: 'Collections',
-    description: 'Curated sets of readings and insights',
-    icon: FolderOpen,
-  },
-  {
-    href: '/forecast',
-    label: '2026 Forecast',
-    description: 'Your yearly astrological outlook',
-    icon: Calendar,
-  },
-  {
-    href: '/cosmic-report-generator',
-    label: 'Cosmic Report',
-    description: 'Generate detailed personal reports',
-    icon: FileText,
-  },
-  {
-    href: '/cosmic-state',
-    label: 'Cosmic State',
-    description: 'Current planetary positions and influences',
-    icon: Globe,
+    href: '/pricing?from=explore',
+    label: 'Pricing',
+    description: 'Subscription plans and features',
+    icon: Tag,
   },
 ];
 

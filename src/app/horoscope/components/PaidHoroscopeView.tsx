@@ -587,10 +587,7 @@ export function PaidHoroscopeView({
         </HoroscopeSection>
 
         {birthChart && currentTransits.length > 0 && (
-          <HoroscopeSection
-            title="Today's Aspects to Your Chart"
-            color='indigo'
-          >
+          <HoroscopeSection title="Today's Aspects to Your Chart" color='zinc'>
             <p className='text-sm text-zinc-400 mb-4'>
               How today&apos;s planetary positions align with your birth chart
             </p>
@@ -601,7 +598,7 @@ export function PaidHoroscopeView({
           </HoroscopeSection>
         )}
 
-        <HoroscopeSection title='Cosmic Highlight' color='emerald'>
+        <HoroscopeSection title='Cosmic Highlight' color='zinc'>
           <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
             {horoscope.cosmicHighlight}
           </p>
@@ -629,7 +626,7 @@ export function PaidHoroscopeView({
           </div>
         </HoroscopeSection>
 
-        <HoroscopeSection title='Personal Transit Impact' color='indigo'>
+        <HoroscopeSection title='Personal Transit Impact' color='zinc'>
           <p className='text-sm text-zinc-400 mb-4'>
             How upcoming transits specifically affect your birth chart
           </p>

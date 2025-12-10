@@ -16,18 +16,18 @@ export const defaultThemes = {
   },
   lunar: {
     background:
-      'linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 50%, #0a0a0f 100%)',
+      'linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #0a0a0a 100%)',
     textColor: 'white',
     accentColor: '#60a5fa',
   },
   tarot: (colorHex: string) => ({
-    background: `linear-gradient(135deg, ${colorHex}, #0a0a1a)`,
+    background: `linear-gradient(135deg, ${colorHex}, #0a0a0a)`,
     textColor: 'white',
     accentColor: colorHex,
   }),
   grimoire: {
     background:
-      'linear-gradient(135deg, #1a0f1f 0%, #1a1a2e 50%, #0a0a0f 100%)',
+      'linear-gradient(135deg, #1a1515 0%, #1a1a1a 50%, #0a0a0a 100%)',
     textColor: 'white',
     accentColor: '#c084fc',
   },
@@ -36,11 +36,11 @@ export const defaultThemes = {
 export function getLunarBackgroundVariant(dayOfMonth: number): string {
   const variation = dayOfMonth % 5;
   const themes = [
-    'linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 50%, #0a0a0f 100%)',
-    'linear-gradient(135deg, #1a0f1f 0%, #1a1a2e 50%, #0a0a0f 100%)',
-    'linear-gradient(135deg, #1a1a2e 0%, #150d1a 50%, #0a0a0f 100%)',
-    'linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #0a0a0f 100%)',
-    'linear-gradient(135deg, #1a1a2e 0%, #0a0a12 50%, #0a0a0f 100%)',
+    'linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #0a0a0a 100%)',
+    'linear-gradient(135deg, #1a1515 0%, #1a1a1a 50%, #0a0a0a 100%)',
+    'linear-gradient(135deg, #1a1a1a 0%, #151515 50%, #0a0a0a 100%)',
+    'linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 50%, #0a0a0a 100%)',
+    'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 50%, #0a0a0a 100%)',
   ];
   return themes[variation];
 }
