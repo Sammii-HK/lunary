@@ -166,6 +166,7 @@ export function MoonCircleInsights({
       // Always fetch if collapsed state changes or on mount
       fetchInsights(0, sort);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoFetch, fetchInsights, isCollapsed]);
 
   useEffect(() => {

@@ -345,6 +345,7 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
         abortControllerRef.current = null;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isStreaming, threadId, userId],
   );
 

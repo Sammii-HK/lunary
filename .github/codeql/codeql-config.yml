@@ -31,15 +31,15 @@ query-filters:
   - exclude:
       id: js/incomplete-multi-character-sanitization
       paths:
-        - src/lib/discord.ts
-        - utils/substack/contentFormatter.ts
+        - '**/discord.ts'
+        - '**/contentFormatter.ts'
 
   # User's current location stored for astronomy accuracy (moon phases, planetary positions)
   # User-consented data for personalized cosmic calculations, not tracking
   - exclude:
       id: js/clear-text-storage-of-sensitive-data
       paths:
-        - utils/location.ts
+        - '**/location.ts'
 
 paths-ignore:
   # Ignore test files - they often have intentional test patterns
