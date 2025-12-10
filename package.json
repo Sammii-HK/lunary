@@ -99,7 +99,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.3",
-    "googleapis": "^167.0.0",
+    "googleapis": "^168.0.0",
     "jazz-react": "^0.14.28",
     "jazz-tools": "^0.18.38",
     "lucide-react": "^0.546.0",
