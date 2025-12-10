@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Layers, Clock, Star, Lock } from 'lucide-react';
+import { Clock, Star, Lock } from 'lucide-react';
 import { TAROT_SPREADS } from '@/constants/tarotSpreads';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';

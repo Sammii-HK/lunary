@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Wind } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 

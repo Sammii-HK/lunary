@@ -63,25 +63,6 @@ const RETROGRADE_MEANINGS: Record<string, { meaning: string; advice: string }> =
     },
   };
 
-function getZodiacSign(longitude: number): string {
-  const signs = [
-    'Aries',
-    'Taurus',
-    'Gemini',
-    'Cancer',
-    'Leo',
-    'Virgo',
-    'Libra',
-    'Scorpio',
-    'Sagittarius',
-    'Capricorn',
-    'Aquarius',
-    'Pisces',
-  ];
-  const index = Math.floor((((longitude % 360) + 360) % 360) / 30);
-  return signs[index];
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

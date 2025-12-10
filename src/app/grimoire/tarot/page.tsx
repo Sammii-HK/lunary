@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Layers } from 'lucide-react';
 import { tarotCards } from '../../../../utils/tarot/tarot-cards';
 import { tarotSuits } from '@/constants/tarot';
 import { stringToKebabCase } from '../../../../utils/string';

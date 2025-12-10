@@ -99,7 +99,6 @@ export function ShareBirthChart({
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
-  const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Wand2 } from 'lucide-react';
 import { spellDatabase, spellCategories } from '@/constants/grimoire/spells';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';

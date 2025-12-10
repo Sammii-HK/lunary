@@ -20,14 +20,6 @@ interface PersonalAspect {
   interpretation: string;
 }
 
-const aspectSymbols: Record<string, string> = {
-  conjunction: '☌',
-  opposition: '☍',
-  trine: '△',
-  square: '□',
-  sextile: '⚹',
-};
-
 const formatDegree = (longitude: number, sign: string): string => {
   const degreeInSign = longitude % 30;
   const wholeDegree = Math.floor(degreeInSign);
