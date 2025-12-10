@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import { sql } from '@vercel/postgres';
 import { buildLunaryContext } from './context';
-import { getBirthChart } from './providers';
 import { getGlobalCosmicData } from '../cosmic-snapshot/global-cache';
 
 export type PromptType = 'daily' | 'weekly';

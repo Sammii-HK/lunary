@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  Minus,
-  Target,
-  TrendingUp,
-} from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Minus, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Card,

@@ -6,7 +6,6 @@ export const revalidate = 3600; // Revalidate every hour for blog content
 import {
   ArrowLeft,
   ArrowRight,
-  Calendar,
   Star,
   TrendingUp,
   Moon,

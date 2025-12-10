@@ -9,7 +9,6 @@ import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCry
 import {
   calculateCrystalRecommendation,
   getCrystalGuidance,
-  Crystal,
 } from '../../utils/crystals/personalizedCrystals';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';

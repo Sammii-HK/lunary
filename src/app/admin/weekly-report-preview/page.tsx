@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { Eye, Mail, Calendar, User, RefreshCw } from 'lucide-react';
 
 type WeeklyReport = {

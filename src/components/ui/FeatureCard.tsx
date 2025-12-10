@@ -1,5 +1,4 @@
 import { Star, LucideIcon } from 'lucide-react';
-import { ReactNode } from 'react';
 
 interface FeatureCardProps {
   title: string;

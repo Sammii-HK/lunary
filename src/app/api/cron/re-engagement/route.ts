@@ -7,7 +7,6 @@ import {
   getMilestoneUsers,
   hasReceivedCampaign,
   recordCampaignSent,
-  CampaignType,
 } from '@/lib/re-engagement/campaign-manager';
 import {
   generateReEngagement7DaysEmailHTML,

@@ -1,6 +1,6 @@
 import { SUBSTACK_CONFIG } from '../../src/config/substack';
 import { SubstackPost } from './contentFormatter';
-import { SubstackClient, createSubstackClient, PublishResult } from './client';
+import { createSubstackClient, PublishResult } from './client';
 
 export type { PublishResult };
 

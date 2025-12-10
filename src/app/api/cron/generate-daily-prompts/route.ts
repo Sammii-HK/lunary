@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import {
-  getOrGenerateDailyPrompt,
-  type AIPrompt,
-} from '@/lib/ai/prompt-generator';
+import { getOrGenerateDailyPrompt } from '@/lib/ai/prompt-generator';
 
 /**
  * Cron job: Runs daily to generate personalized prompts for all users

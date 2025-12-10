@@ -6,7 +6,6 @@ import {
   normalizePlanType,
   FEATURE_ACCESS,
 } from '../../../../../utils/pricing';
-import { getTarotPatternAnalysis } from '@/lib/ai/providers';
 import dayjs from 'dayjs';
 import { generateSpreadReading } from '@/utils/tarot/spreadReading';
 import { TAROT_SPREAD_MAP } from '@/constants/tarotSpreads';

@@ -7,10 +7,7 @@ import {
   planetUnicode,
 } from '../../../../../../utils/zodiac/zodiac';
 import { createPlanetSchema, renderJsonLd } from '@/lib/schema';
-import {
-  PLANETARY_CORRESPONDENCES,
-  getEntityRelationships,
-} from '@/constants/entity-relationships';
+import { getEntityRelationships } from '@/constants/entity-relationships';
 
 const planetKeys = Object.keys(planetaryBodies);
 

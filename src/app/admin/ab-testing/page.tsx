@@ -10,7 +10,6 @@ import {
   Sparkles,
   Loader2,
   CheckCircle,
-  XCircle,
   Zap,
 } from 'lucide-react';
 

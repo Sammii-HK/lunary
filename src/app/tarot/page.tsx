@@ -13,15 +13,7 @@ import {
 } from '../../../utils/moon/moonPhases';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Sparkles,
-  Share2,
-  Lock,
-  X,
-} from 'lucide-react';
+import { Check, Sparkles, Share2, Lock, X } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { TarotCardModal } from '@/components/TarotCardModal';

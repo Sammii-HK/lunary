@@ -3,7 +3,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSubscription } from '../hooks/useSubscription';
-import { FEATURE_ACCESS } from '../../utils/pricing';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
 import { X } from 'lucide-react';

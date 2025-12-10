@@ -4,15 +4,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Paywall } from '@/components/Paywall';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
-import {
-  Sparkles,
-  BarChart3,
-  ChevronDown,
-  ChevronUp,
-  Lock,
-} from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import dayjs from 'dayjs';
 
 type AdvancedPatternAnalysis = {
   yearOverYear: {

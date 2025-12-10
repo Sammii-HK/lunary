@@ -2,7 +2,7 @@ import { unstable_cache, revalidateTag } from 'next/cache';
 import { sql } from '@vercel/postgres';
 import { LunaryContext } from '../ai/types';
 import { buildLunaryContext } from '../ai/context';
-import { getGlobalCosmicData, GlobalCosmicData } from './global-cache';
+import { GlobalCosmicData } from './global-cache';
 
 export async function getCachedSnapshot(
   userId: string,

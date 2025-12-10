@@ -35,9 +35,7 @@ import {
   getAccurateMoonPhase,
   checkSeasonalEvents,
   calculateRealAspects,
-  checkSignIngress,
   checkRetrogradeEvents,
-  checkRetrogradeIngress,
 } from '../../../../../utils/astrology/cosmic-og';
 
 // Track if cron is already running to prevent duplicate execution

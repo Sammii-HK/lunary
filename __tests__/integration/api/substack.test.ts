@@ -1,5 +1,3 @@
-import { NextRequest } from 'next/server';
-
 jest.mock('@vercel/postgres', () => ({
   sql: jest.fn(),
 }));

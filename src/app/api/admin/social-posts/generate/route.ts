@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import {
-  selectSubredditForPostType,
-  getSubredditsForPostType,
-} from '@/config/reddit-subreddits';
+import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import {
   getArchetypePrompt,
   getWeightedArchetype,

@@ -1,6 +1,4 @@
 import { test, expect } from '../fixtures/auth';
-import { signUp, signIn } from '../utils/helpers';
-import { testUserData } from '../fixtures/test-data';
 
 // Authentication tests should run sequentially to avoid conflicts
 test.describe.serial('Authentication Journey', () => {

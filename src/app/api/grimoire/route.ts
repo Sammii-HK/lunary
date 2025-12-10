@@ -3,7 +3,6 @@ import {
   crystalDatabase,
   getCrystalById,
   getCrystalsByCategory,
-  getCrystalsByIntention,
   searchCrystals,
 } from '../../../constants/grimoire/crystals';
 import {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
 import { getEnhancedPersonalizedHoroscope } from '../../../../utils/astrology/enhancedHoroscope';

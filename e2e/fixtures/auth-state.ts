@@ -1,5 +1,4 @@
 import { Page } from '@playwright/test';
-import { expect } from '@playwright/test';
 
 /**
  * Save authentication state to reuse across tests

@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSpellById, spellCategories } from '@/constants/spells';
-import { ArrowLeft, Clock, Star, Moon, Sun, Leaf } from 'lucide-react';
+import { ArrowLeft, Clock, Star, Moon, Leaf } from 'lucide-react';
 import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 
 export default function SpellPage() {

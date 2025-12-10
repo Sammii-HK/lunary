@@ -8,7 +8,6 @@ import {
   Calendar,
   Sparkles,
   BookOpen,
-  Lightbulb,
   Target,
   Sunrise,
   Sunset,

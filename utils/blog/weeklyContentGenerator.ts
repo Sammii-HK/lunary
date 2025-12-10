@@ -6,7 +6,6 @@ import {
   GeoVector,
   Ecliptic,
   Illumination,
-  MoonPhase,
 } from 'astronomy-engine';
 import {
   crystalDatabase,

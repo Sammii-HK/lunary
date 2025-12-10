@@ -6,8 +6,6 @@ import {
   checkSeasonalEvents,
   calculateRealAspects,
   getZodiacSymbol,
-  getPlanetSymbol,
-  getAspectGlyph,
   loadAstronomiconFont,
   loadGoogleFont,
 } from '../../../../../../utils/astrology/cosmic-og';

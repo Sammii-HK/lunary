@@ -1,11 +1,4 @@
-import Link from 'next/link';
-import {
-  HelpCircle,
-  Mail,
-  MessageCircle,
-  FileText,
-  Search,
-} from 'lucide-react';
+import { HelpCircle, Mail, MessageCircle, Search } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
 export default function HelpPage() {

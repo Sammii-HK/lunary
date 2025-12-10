@@ -2,12 +2,7 @@
 
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
-import {
-  getAstrologicalChart,
-  getObserverLocation,
-  AstroChartInformation,
-} from './astrology';
-import { constellations } from '../constellations';
+import { getAstrologicalChart, AstroChartInformation } from './astrology';
 import { Observer } from 'astronomy-engine';
 import { getBirthChartFromProfile } from './birthChart';
 

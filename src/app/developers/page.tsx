@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Code, Zap, Moon, Star, Sparkles, ArrowRight, Key } from 'lucide-react';
+import { Code, Zap, Moon, Star, Sparkles, Key } from 'lucide-react';
 import Script from 'next/script';
 
 export const metadata: Metadata = {

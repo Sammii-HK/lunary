@@ -9,7 +9,6 @@ import {
   Trash2,
   Loader2,
   Settings2,
-  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';

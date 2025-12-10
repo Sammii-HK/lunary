@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Flame, Trophy, Share2 } from 'lucide-react';
+import { Flame, Trophy } from 'lucide-react';
 import { SharePersonalized } from './SharePersonalized';
 
 interface StreakData {

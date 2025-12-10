@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Circle } from 'lucide-react';
 import {
   PLANETS,
   PLANET_DISPLAY,

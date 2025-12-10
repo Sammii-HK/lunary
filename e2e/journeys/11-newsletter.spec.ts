@@ -1,5 +1,4 @@
 import { test, expect } from '../fixtures/auth';
-import { waitForPageLoad } from '../utils/helpers';
 
 test.describe('Newsletter Journey', () => {
   test('should subscribe to newsletter', async ({ page }) => {

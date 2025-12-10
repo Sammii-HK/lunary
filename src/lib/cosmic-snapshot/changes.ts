@@ -1,4 +1,3 @@
-import { LunaryContext } from '../ai/types';
 import { getCachedSnapshot } from './cache';
 
 export type CosmicChange = {

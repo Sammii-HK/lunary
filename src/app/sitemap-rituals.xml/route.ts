@@ -1,5 +1,4 @@
 import { spells } from '@/constants/spells';
-import { stringToKebabCase } from '../../../utils/string';
 
 const baseUrl = 'https://lunary.app';
 

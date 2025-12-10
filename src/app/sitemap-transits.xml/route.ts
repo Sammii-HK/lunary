@@ -2,7 +2,6 @@ import { retrogradeInfo, eclipseInfo } from '@/constants/grimoire/seo-data';
 import { monthlyMoonPhases } from '../../../utils/moon/monthlyPhases';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import { stringToKebabCase } from '../../../utils/string';
-import dayjs from 'dayjs';
 
 const baseUrl = 'https://lunary.app';
 

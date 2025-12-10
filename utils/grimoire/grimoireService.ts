@@ -5,11 +5,7 @@ import {
   getCrystalsByIntention,
   getCrystalsByCategory,
 } from '../../src/constants/grimoire/crystals';
-import {
-  spells,
-  spellCategories,
-  getSpellById,
-} from '../../src/constants/spells';
+import { spells, spellCategories } from '../../src/constants/spells';
 import { runesList } from '../../src/constants/runes';
 import { wiccanWeek } from '../../src/constants/weekDays';
 import { wheelOfTheYearSabbats } from '../../src/constants/sabbats';

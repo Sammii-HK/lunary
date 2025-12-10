@@ -1,4 +1,4 @@
-import { BirthChartSnapshot, BirthChartPlacement } from './types';
+import { BirthChartSnapshot } from './types';
 
 const ZODIAC_SIGNS = [
   'Aries',

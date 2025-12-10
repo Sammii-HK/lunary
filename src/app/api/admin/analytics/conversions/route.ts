@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
-import {
-  formatDate,
-  formatTimestamp,
-  resolveDateRange,
-} from '@/lib/analytics/date-range';
+import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
 import { getPostHogActiveUsers } from '@/lib/posthog-server';
 
 // Test user exclusion patterns - matches filtering in other analytics endpoints

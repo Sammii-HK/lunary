@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuthStatus } from '@/components/AuthStatus';
 import { AI_LIMIT_REACHED_MESSAGE } from '@/lib/ai/plans';

@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  validateApiKey,
-  incrementApiKeyUsage,
-  API_TIERS,
-  ApiTier,
-} from './keys';
+import { validateApiKey, incrementApiKeyUsage, ApiTier } from './keys';
 
 interface RateLimitInfo {
   remaining: number;

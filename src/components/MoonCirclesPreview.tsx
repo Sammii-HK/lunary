@@ -4,7 +4,6 @@ import { ReactNode } from 'react';
 import { useSubscription } from '../hooks/useSubscription';
 import { UpgradePrompt } from './UpgradePrompt';
 import { Lock } from 'lucide-react';
-import Link from 'next/link';
 
 interface MoonCirclesPreviewProps {
   children: ReactNode;

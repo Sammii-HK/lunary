@@ -7,9 +7,6 @@ import {
 } from 'astronomy-engine';
 import {
   calculateRealAspects,
-  checkRetrogradeEvents,
-  checkSeasonalEvents,
-  checkSignIngress,
   getAccurateMoonPhase,
   getRealPlanetaryPositions,
   getZodiacSign,

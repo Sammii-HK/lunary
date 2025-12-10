@@ -9,7 +9,6 @@ import {
   SIGN_ELEMENTS,
   MONTH_DISPLAY_NAMES,
   ZodiacSign,
-  Month,
 } from '@/constants/seo/monthly-horoscope';
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];

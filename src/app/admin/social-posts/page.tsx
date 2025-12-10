@@ -26,16 +26,12 @@ import {
   Image as ImageIcon,
   X,
   Send,
-  Clock,
   XCircle,
   ExternalLink,
   Download,
   Edit2,
 } from 'lucide-react';
-import {
-  getDefaultPostingTime,
-  getPlatformPostingInfo,
-} from '@/utils/posting-times';
+import { getDefaultPostingTime } from '@/utils/posting-times';
 
 type TabType = 'generate' | 'approve';
 

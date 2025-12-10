@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, Sparkles, Calendar, X, ChevronRight } from 'lucide-react';
+import { BookOpen, Sparkles, Calendar, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface FeatureTourProps {

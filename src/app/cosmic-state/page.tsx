@@ -6,18 +6,10 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { betterAuthClient } from '@/lib/auth-client';
 import Link from 'next/link';
-import {
-  Eye,
-  Lock,
-  Sparkles,
-  Moon,
-  Calendar,
-  TrendingUp,
-  Zap,
-} from 'lucide-react';
+import { Lock, Sparkles, Moon, Calendar, TrendingUp, Zap } from 'lucide-react';
 
 export default function CosmicStatePage() {
-  const { user: contextUser } = useUser();
+  useUser();
   const subscription = useSubscription();
   const [loading, setLoading] = useState(true);
   const [cosmicData, setCosmicData] = useState<any>(null);

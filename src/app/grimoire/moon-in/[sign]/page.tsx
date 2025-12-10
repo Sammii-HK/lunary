@@ -1,11 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import {
-  zodiacSigns,
-  zodiacSymbol,
-  zodiacUnicode,
-} from '../../../../../utils/zodiac/zodiac';
+import { zodiacSigns, zodiacSymbol } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
 
 const signSlugs = Object.keys(zodiacSigns);

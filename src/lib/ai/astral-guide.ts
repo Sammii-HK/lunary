@@ -7,7 +7,6 @@ import {
   TarotCard,
 } from './types';
 import { buildLunaryContext } from './context';
-import { getBirthChart } from './providers';
 import { searchSimilar, type EmbeddingResult } from '@/lib/embeddings';
 
 export interface AstralContext {

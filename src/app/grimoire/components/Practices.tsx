@@ -15,7 +15,6 @@ import {
   Cross,
   Sparkles,
   Eye,
-  Zap,
   X,
 } from 'lucide-react';
 

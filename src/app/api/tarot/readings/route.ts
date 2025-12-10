@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { TAROT_SPREAD_MAP, TarotPlan } from '@/constants/tarotSpreads';
+import { TAROT_SPREAD_MAP } from '@/constants/tarotSpreads';
 import { generateSpreadReading } from '@/utils/tarot/spreadReading';
 import {
   computeUsageSnapshot,

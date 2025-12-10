@@ -27,7 +27,6 @@ import {
   Sparkles,
   Download,
   Eye,
-  Plus,
   Wand2,
   Gem,
   Search,

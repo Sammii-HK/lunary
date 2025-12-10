@@ -11,10 +11,7 @@ import {
   personalizeNotificationBody,
   shouldPersonalize,
 } from './personalization';
-import {
-  generateUniqueNotificationText,
-  addContextualInfo,
-} from './content-generator';
+import { addContextualInfo } from './content-generator';
 
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;

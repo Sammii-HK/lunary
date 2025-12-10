@@ -6,7 +6,6 @@ import {
   checkSeasonalEvents,
   calculateRealAspects,
   getZodiacSymbol,
-  getPlanetSymbol,
   getAspectGlyph,
   loadAstronomiconFont,
   loadGoogleFont,

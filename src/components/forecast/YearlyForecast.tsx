@@ -5,7 +5,6 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { Paywall } from '@/components/Paywall';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import {
-  Calendar,
   Loader2,
   Download,
   CalendarDays,
