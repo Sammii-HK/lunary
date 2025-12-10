@@ -230,7 +230,7 @@ export async function saveExtractedMoments(
       sourceMessageId: moment.messageId,
     };
 
-    const tagsArray = `{${(moment.moodTags || []).map((t) => `"${t.replace(/"/g, '\\"')}"`).join(',')}}`;
+    const tagsArray = `{${(moment.moodTags || []).map((t) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
     await sql`
       INSERT INTO collections (user_id, title, category, content, tags, created_at)
       VALUES (

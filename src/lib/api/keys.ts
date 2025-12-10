@@ -100,6 +100,8 @@ export function generateApiKey(): {
   return { key, hash, prefix };
 }
 
+// SHA-256 is appropriate for API keys (high-entropy random tokens, not user passwords)
+// lgtm[js/insufficient-password-hash]
 export function hashApiKey(key: string): string {
   return crypto.createHash('sha256').update(key).digest('hex');
 }

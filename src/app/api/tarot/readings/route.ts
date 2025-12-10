@@ -11,7 +11,7 @@ import {
 import { auth } from '@/lib/auth';
 
 const toTextArrayLiteral = (values: string[]): string =>
-  `{${values.map((value) => `"${value.replace(/"/g, '\\"')}"`).join(',')}}`;
+  `{${values.map((value) => `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
 
 export async function GET(request: NextRequest) {
   try {

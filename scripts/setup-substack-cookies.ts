@@ -85,11 +85,20 @@ async function testCookies(cookies: any[]): Promise<boolean> {
     });
     await page.waitForTimeout(2000);
     const currentUrl = page.url();
-    return (
-      currentUrl.includes('/dashboard') ||
-      currentUrl.includes('/publish') ||
-      (currentUrl.includes('substack.com') && !currentUrl.includes('/sign-in'))
-    );
+    try {
+      const url = new URL(currentUrl);
+      const host = url.hostname.toLowerCase();
+      const path = url.pathname.toLowerCase();
+      const isSubstack =
+        host === 'substack.com' || host.endsWith('.substack.com');
+      return (
+        path.includes('/dashboard') ||
+        path.includes('/publish') ||
+        (isSubstack && !path.includes('/sign-in'))
+      );
+    } catch {
+      return false;
+    }
   } catch (error) {
     return false;
   } finally {
@@ -220,10 +229,20 @@ async function setupCookies() {
 
   try {
     const finalUrl = page.url();
-    const isLoggedIn =
-      finalUrl.includes('/dashboard') ||
-      finalUrl.includes('/publish') ||
-      (finalUrl.includes('substack.com') && !finalUrl.includes('/sign-in'));
+    let isLoggedIn = false;
+    try {
+      const url = new URL(finalUrl);
+      const host = url.hostname.toLowerCase();
+      const path = url.pathname.toLowerCase();
+      const isSubstack =
+        host === 'substack.com' || host.endsWith('.substack.com');
+      isLoggedIn =
+        path.includes('/dashboard') ||
+        path.includes('/publish') ||
+        (isSubstack && !path.includes('/sign-in'));
+    } catch {
+      isLoggedIn = false;
+    }
 
     if (!isLoggedIn) {
       console.error('❌ Error: You must be logged in before saving cookies.');

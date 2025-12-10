@@ -158,15 +158,13 @@ function extractUTMParams(): Record<string, string> {
   if (document.referrer) {
     try {
       const referrerUrl = new URL(document.referrer);
-      if (referrerUrl.hostname.includes('tiktok.com')) {
+      const hostname = referrerUrl.hostname.toLowerCase();
+      if (hostname === 'tiktok.com' || hostname.endsWith('.tiktok.com')) {
         utmParams.utm_source = 'tiktok';
         utmParams.referrer = document.referrer;
       }
     } catch {
-      if (document.referrer.includes('tiktok.com')) {
-        utmParams.utm_source = 'tiktok';
-        utmParams.referrer = document.referrer;
-      }
+      // Invalid URL, skip referrer parsing
     }
   }
 

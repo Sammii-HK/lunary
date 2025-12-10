@@ -91,7 +91,11 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
   // For EU: eu.i.posthog.com -> eu.posthog.com
   // For US: us.i.posthog.com -> app.posthog.com
   const getAppHost = (host: string): string => {
-    if (host.includes('eu.i.posthog.com')) {
+    const normalizedHost = host.toLowerCase();
+    if (
+      normalizedHost === 'eu.i.posthog.com' ||
+      normalizedHost.endsWith('.eu.i.posthog.com')
+    ) {
       return 'https://eu.posthog.com';
     }
     return 'https://app.posthog.com';
