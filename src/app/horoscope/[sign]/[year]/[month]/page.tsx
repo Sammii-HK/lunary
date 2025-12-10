@@ -75,9 +75,21 @@ export async function generateMetadata({
       title,
       description,
       url: `https://lunary.app/horoscope/${sign}/${year}/${month}`,
+      type: 'article',
       images: [
-        `/api/og/cosmic?title=${encodeURIComponent(`${signName} ${SIGN_SYMBOLS[sign]} ${monthName} ${year}`)}`,
+        {
+          url: `/api/og/horoscope?sign=${sign}&month=${month}&year=${year}`,
+          width: 1200,
+          height: 630,
+          alt: `${signName} Horoscope ${monthName} ${year}`,
+        },
       ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`/api/og/horoscope?sign=${sign}&month=${month}&year=${year}`],
     },
     alternates: {
       canonical: `https://lunary.app/horoscope/${sign}/${year}/${month}`,
