@@ -16,7 +16,7 @@ import { resolve } from 'path';
 import { writeFileSync } from 'fs';
 import { sql } from '@vercel/postgres';
 import { startWorker } from 'jazz-tools/worker';
-import { co, z, Group } from 'jazz-tools';
+import { co, z } from 'jazz-tools';
 
 // Load environment variables
 config({ path: resolve(process.cwd(), '.env.local') });

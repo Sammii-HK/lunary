@@ -167,13 +167,13 @@ export default function CrystalGalleryPage() {
         <div className='mt-8 flex gap-4 justify-center'>
           <a
             href='/admin/daily-posts-preview'
-            className='px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-md text-white font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
           >
             ← Daily Posts Preview
           </a>
           <a
             href='/admin/tarot-gallery'
-            className='px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary hover:bg-lunary-primary-400 rounded-md text-white font-medium transition-colors'
           >
             View Tarot Gallery →
           </a>

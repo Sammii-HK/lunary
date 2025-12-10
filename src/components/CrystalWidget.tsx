@@ -9,7 +9,6 @@ import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCry
 import {
   calculateCrystalRecommendation,
   getCrystalGuidance,
-  Crystal,
 } from '../../utils/crystals/personalizedCrystals';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
@@ -54,11 +53,6 @@ export const CrystalWidget = () => {
     return getGeneralCrystalRecommendation(normalizedDate);
   }, [hasChartAccess, canAccessDate, normalizedDate]);
 
-  const sunSign = useMemo(() => {
-    if (!birthChart) return 'Aries';
-    return birthChart.find((p) => p.body === 'Sun')?.sign || 'Aries';
-  }, [birthChart]);
-
   const crystalData = useMemo(() => {
     if (!birthChart || !userBirthday || !observer) return null;
     if (!canAccessDate) return null;
@@ -72,20 +66,13 @@ export const CrystalWidget = () => {
       userBirthday,
     );
 
-    const guidance = getCrystalGuidance(crystal, reasons, sunSign);
+    const guidance = getCrystalGuidance(crystal, birthChart);
 
     return {
       crystal,
       guidance,
     };
-  }, [
-    normalizedDate,
-    userBirthday,
-    observer,
-    birthChart,
-    canAccessDate,
-    sunSign,
-  ]);
+  }, [normalizedDate, userBirthday, observer, birthChart, canAccessDate]);
 
   useEffect(() => {
     if (crystalData && hasChartAccess && user?.id) {
@@ -100,7 +87,7 @@ export const CrystalWidget = () => {
         <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
           <div className='text-center'>
             <h3 className='font-bold mb-2'>Personal Crystal</h3>
-            <span className='text-xs text-purple-400'>Personalised</span>
+            <span className='text-xs text-lunary-accent'>Personalised</span>
             <p className='text-zinc-400 text-xs mt-2'>
               Access to historical and future dates requires a subscription.
             </p>
@@ -127,7 +114,7 @@ export const CrystalWidget = () => {
         <div className='space-y-2'>
           <div className='space-y-2'>
             <div className='text-center'>
-              <h4 className='font-semibold text-purple-300'>
+              <h4 className='font-semibold text-lunary-accent-300'>
                 {generalCrystal.name}
               </h4>
               <p className='text-xs text-zinc-400'>
@@ -138,12 +125,12 @@ export const CrystalWidget = () => {
             <p className='text-xs text-zinc-300'>{generalCrystal.reason}</p>
           </div>
 
-          <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20'>
+          <div className='bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
             <p className='text-xs text-zinc-400 mb-2'>
               Get crystals chosen specifically for YOUR birth chart. See what
               the universe has selected for you!
             </p>
-            <SmartTrialButton variant='link' />
+            <SmartTrialButton size='sm' />
           </div>
         </div>
       </div>
@@ -155,12 +142,15 @@ export const CrystalWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>💎</div>
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday for personalized crystal guidance
           </p>
-          <Link href='/profile' className='text-blue-400 text-xs underline'>
+          <Link
+            href='/profile'
+            className='text-lunary-accent text-xs underline'
+          >
             Complete Profile
           </Link>
         </div>
@@ -173,7 +163,7 @@ export const CrystalWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>🔮</div>
           <p className='text-zinc-400 text-xs'>
             Calculating your crystal alignment...
@@ -188,7 +178,7 @@ export const CrystalWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>🔮</div>
           <p className='text-zinc-400 text-xs'>
             Calculating your crystal alignment...
@@ -205,7 +195,7 @@ export const CrystalWidget = () => {
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative min-h-64'>
       {/* Info Icon with Popover */}
       <Popover.Root>
-        <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'>
+        <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-400 hover:text-zinc-300 transition-colors'>
           <Info size={14} />
         </Popover.Trigger>
         <Popover.Portal>
@@ -243,7 +233,7 @@ export const CrystalWidget = () => {
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
           <h3 className='font-bold'>Personal Crystal</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
         </div>
 
         <div className='text-center mb-3'>
@@ -261,7 +251,7 @@ export const CrystalWidget = () => {
         </div>
 
         <div className='text-center mb-3'>
-          <div className='text-xs text-zinc-500 italic'>
+          <div className='text-xs text-zinc-400 italic'>
             &quot;{recommendedCrystal.intention}&quot;
           </div>
         </div>

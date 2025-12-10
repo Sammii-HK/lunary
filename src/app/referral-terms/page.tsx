@@ -19,7 +19,7 @@ export default function ReferralTermsPage() {
           <h1 className='text-4xl font-semibold text-white mb-4'>
             Referral Program Terms
           </h1>
-          <p className='text-sm text-zinc-500'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
@@ -33,7 +33,7 @@ export default function ReferralTermsPage() {
               these Referral Terms in addition to our{' '}
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Terms of Service
               </Link>
@@ -274,7 +274,7 @@ export default function ReferralTermsPage() {
               collect and process personal information in accordance with our{' '}
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 Privacy Policy
               </Link>
@@ -308,7 +308,7 @@ export default function ReferralTermsPage() {
                 <strong>Referral Support:</strong>{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   support@lunary.app
                 </a>
@@ -323,19 +323,19 @@ export default function ReferralTermsPage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/acceptable-use'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Acceptable Use Policy
               </Link>

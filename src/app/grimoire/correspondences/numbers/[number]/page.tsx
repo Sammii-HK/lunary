@@ -130,10 +130,8 @@ Understanding number ${numberKey}'s correspondences helps you incorporate numeri
       faqs={faqs}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
-        {
-          label: 'Magical Correspondences',
-          href: '/grimoire/correspondences',
-        },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Numbers', href: '/grimoire/correspondences/numbers' },
         {
           label: `Number ${numberKey}`,
           href: `/grimoire/correspondences/numbers/${number}`,

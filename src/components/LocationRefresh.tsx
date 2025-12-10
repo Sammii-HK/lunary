@@ -54,12 +54,12 @@ export default function LocationRefresh({
   const descriptionClasses =
     variant === 'card'
       ? 'mt-1 text-xs text-zinc-400'
-      : 'mt-1 text-xs text-zinc-500';
+      : 'mt-1 text-xs text-zinc-400';
 
   const infoTextClasses =
     variant === 'card'
       ? 'text-center text-xs text-zinc-400'
-      : 'text-xs text-zinc-500';
+      : 'text-xs text-zinc-400';
 
   const feedbackClasses =
     variant === 'card'
@@ -68,8 +68,8 @@ export default function LocationRefresh({
 
   const successClasses =
     variant === 'card'
-      ? `${feedbackClasses} border-green-500 bg-green-900/50 text-green-300`
-      : `${feedbackClasses} border-green-500/40 bg-green-500/10 text-green-200`;
+      ? `${feedbackClasses} border-lunary-success bg-lunary-success-900/50 text-lunary-success-300`
+      : `${feedbackClasses} border-lunary-success-600 bg-lunary-success-950 text-lunary-success-200`;
 
   const errorClasses =
     variant === 'card'
@@ -79,7 +79,7 @@ export default function LocationRefresh({
   return (
     <div className={containerClasses}>
       <div className={headingClasses}>
-        <MapPin size={16} className='text-purple-400' />
+        <MapPin size={16} className='text-lunary-primary-400' />
         <h3 className={titleClasses}>Location</h3>
       </div>
 
@@ -115,7 +115,7 @@ export default function LocationRefresh({
         <button
           onClick={handleRefreshLocation}
           disabled={loading}
-          className='flex w-full items-center justify-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm text-white transition-colors hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-zinc-600'
+          className='flex w-full items-center justify-center gap-2 rounded-md bg-lunary-primary-600 px-4 py-2 text-sm text-white transition-colors hover:bg-lunary-primary-700 disabled:cursor-not-allowed disabled:bg-zinc-600'
         >
           <RotateCcw size={14} className={loading ? 'animate-spin' : ''} />
           {loading ? 'Updating Location...' : 'Refresh Location'}

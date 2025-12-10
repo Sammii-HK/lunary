@@ -51,7 +51,7 @@ export function ReportPDF({
             'inline-flex flex-1 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition',
             !resolvedPdfUrl || disabled
               ? 'cursor-not-allowed border-white/10 text-zinc-400'
-              : 'border-white/10 text-white hover:border-purple-400',
+              : 'border-white/10 text-white hover:border-lunary-primary-400',
           )}
         >
           <Download className='h-4 w-4' />
@@ -61,7 +61,7 @@ export function ReportPDF({
           <button
             onClick={handleEmail}
             disabled={!email || isSending}
-            className='inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-white transition hover:border-purple-400 disabled:opacity-50'
+            className='inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-white transition hover:border-lunary-primary-400 disabled:opacity-50'
           >
             <Mail className='h-4 w-4' />
             {isSending ? 'Sending…' : 'Email'}
@@ -74,7 +74,7 @@ export function ReportPDF({
           placeholder='Email this report'
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className='w-full rounded-xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-purple-400 focus:outline-none'
+          className='w-full rounded-xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-400 focus:border-lunary-primary-400 focus:outline-none'
         />
       )}
     </div>

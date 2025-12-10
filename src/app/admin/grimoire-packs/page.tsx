@@ -27,7 +27,6 @@ import {
   Sparkles,
   Download,
   Eye,
-  Plus,
   Wand2,
   Gem,
   Search,
@@ -297,7 +296,7 @@ export default function GrimoirePacksAdmin() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <Gem className='h-5 w-5 text-purple-500' />
+              <Gem className='h-5 w-5 text-lunary-primary-500' />
               <div>
                 <p className='text-2xl font-bold'>
                   {grimoireData?.crystals.length || 0}
@@ -311,7 +310,7 @@ export default function GrimoirePacksAdmin() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <Wand2 className='h-5 w-5 text-blue-500' />
+              <Wand2 className='h-5 w-5 text-lunary-secondary' />
               <div>
                 <p className='text-2xl font-bold'>
                   {grimoireData?.spells.length || 0}
@@ -325,7 +324,7 @@ export default function GrimoirePacksAdmin() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <Package className='h-5 w-5 text-green-500' />
+              <Package className='h-5 w-5 text-lunary-success' />
               <div>
                 <p className='text-2xl font-bold'>{grimoireData?.count || 0}</p>
                 <p className='text-sm text-muted-foreground'>Total Items</p>
@@ -337,7 +336,7 @@ export default function GrimoirePacksAdmin() {
         <Card>
           <CardContent className='p-6'>
             <div className='flex items-center gap-2'>
-              <CheckCircle className='h-5 w-5 text-blue-500' />
+              <CheckCircle className='h-5 w-5 text-lunary-secondary' />
               <div>
                 <p className='text-2xl font-bold'>{stripeProducts.length}</p>
                 <p className='text-sm text-muted-foreground'>Stripe Products</p>

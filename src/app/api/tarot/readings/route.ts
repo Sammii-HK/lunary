@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { TAROT_SPREAD_MAP, TarotPlan } from '@/constants/tarotSpreads';
+import { TAROT_SPREAD_MAP } from '@/constants/tarotSpreads';
 import { generateSpreadReading } from '@/utils/tarot/spreadReading';
 import {
   computeUsageSnapshot,
@@ -11,7 +11,7 @@ import {
 import { auth } from '@/lib/auth';
 
 const toTextArrayLiteral = (values: string[]): string =>
-  `{${values.map((value) => `"${value.replace(/"/g, '\\"')}"`).join(',')}}`;
+  `{${values.map((value) => `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
 
 export async function GET(request: NextRequest) {
   try {

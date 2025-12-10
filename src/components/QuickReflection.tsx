@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Feather } from 'lucide-react';
 
 interface QuickReflectionProps {
@@ -74,7 +74,7 @@ export function QuickReflection({
       <div className='relative w-full max-w-lg bg-zinc-900 border border-zinc-700 rounded-t-2xl sm:rounded-2xl p-4 animate-slide-up'>
         <div className='flex items-center justify-between mb-4'>
           <div className='flex items-center gap-2'>
-            <Feather className='w-5 h-5 text-purple-400' />
+            <Feather className='w-5 h-5 text-lunary-primary-400' />
             <h2 className='text-lg font-medium text-white'>Quick Reflection</h2>
           </div>
           <button
@@ -85,20 +85,20 @@ export function QuickReflection({
           </button>
         </div>
 
-        {moonPhase && <p className='text-xs text-zinc-500 mb-3'>{moonPhase}</p>}
+        {moonPhase && <p className='text-xs text-zinc-400 mb-3'>{moonPhase}</p>}
 
         <form onSubmit={handleSubmit} className='space-y-4'>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="What's on your mind?"
-            className='w-full bg-zinc-800 border border-zinc-700 rounded-lg p-3 text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 resize-none'
+            className='w-full bg-zinc-800 border border-zinc-700 rounded-lg p-3 text-white placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
             rows={4}
             autoFocus
           />
 
           <div>
-            <p className='text-xs text-zinc-500 mb-2'>How are you feeling?</p>
+            <p className='text-xs text-zinc-400 mb-2'>How are you feeling?</p>
             <div className='flex flex-wrap gap-2'>
               {MOOD_OPTIONS.map((mood) => (
                 <button
@@ -107,7 +107,7 @@ export function QuickReflection({
                   onClick={() => toggleMood(mood.value)}
                   className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                     selectedMoods.includes(mood.value)
-                      ? 'bg-purple-600 border-purple-500 text-white'
+                      ? 'bg-lunary-primary-600 border-lunary-primary text-white'
                       : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
                   }`}
                 >
@@ -120,7 +120,7 @@ export function QuickReflection({
           <button
             type='submit'
             disabled={!content.trim() || isSubmitting}
-            className='w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors'
+            className='w-full bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-lunary-primary-600/50 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors'
           >
             {isSubmitting ? 'Saving...' : 'Save Reflection'}
           </button>

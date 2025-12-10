@@ -1,4 +1,4 @@
-import { chromium, BrowserContext } from 'playwright';
+import { chromium } from 'playwright';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 

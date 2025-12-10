@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import {
   SOCIAL_HANDLES,
@@ -89,7 +87,7 @@ export function MarketingFooter() {
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8'>
           <Link
             href='/'
-            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-purple-400 transition-colors'
+            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-lunary-primary transition-colors'
           >
             <Logo size={24} />
             Lunary
@@ -101,7 +99,7 @@ export function MarketingFooter() {
                 href={social.url}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='inline-flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-purple-400 transition-colors'
+                className='inline-flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-lunary-primary transition-colors'
                 aria-label={social.label}
                 title={social.label}
               >
@@ -115,7 +113,7 @@ export function MarketingFooter() {
         <div className='grid grid-cols-2 md:grid-cols-3 gap-6 mb-8'>
           {/* Product */}
           <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
               Product
             </h3>
             <Link
@@ -152,7 +150,7 @@ export function MarketingFooter() {
 
           {/* Resources */}
           <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
               Resources
             </h3>
             <Link
@@ -183,7 +181,7 @@ export function MarketingFooter() {
 
           {/* Legal */}
           <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3'>
+            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
               Legal
             </h3>
             <Link
@@ -216,7 +214,7 @@ export function MarketingFooter() {
 
         {/* Copyright */}
         <div className='pt-6 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-500 text-center'>
+          <p className='text-xs text-zinc-400 text-center'>
             © {new Date().getFullYear()} Lunar Computing, Inc. All rights
             reserved.
           </p>

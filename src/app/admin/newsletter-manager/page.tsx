@@ -12,16 +12,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Mail,
   Send,
   Users,
-  TrendingUp,
   CheckCircle,
   XCircle,
   Plus,
-  Trash2,
   RefreshCw,
 } from 'lucide-react';
 
@@ -215,7 +212,7 @@ export default function NewsletterManagerPage() {
           <Card>
             <CardContent className='p-6'>
               <div className='flex items-center gap-2'>
-                <Users className='h-5 w-5 text-blue-500' />
+                <Users className='h-5 w-5 text-lunary-secondary' />
                 <div>
                   <p className='text-2xl font-bold'>{stats.total}</p>
                   <p className='text-sm text-muted-foreground'>
@@ -229,7 +226,7 @@ export default function NewsletterManagerPage() {
           <Card>
             <CardContent className='p-6'>
               <div className='flex items-center gap-2'>
-                <CheckCircle className='h-5 w-5 text-green-500' />
+                <CheckCircle className='h-5 w-5 text-lunary-success' />
                 <div>
                   <p className='text-2xl font-bold'>{stats.active}</p>
                   <p className='text-sm text-muted-foreground'>Active</p>
@@ -241,7 +238,7 @@ export default function NewsletterManagerPage() {
           <Card>
             <CardContent className='p-6'>
               <div className='flex items-center gap-2'>
-                <Mail className='h-5 w-5 text-purple-500' />
+                <Mail className='h-5 w-5 text-lunary-primary-500' />
                 <div>
                   <p className='text-2xl font-bold'>{stats.verified}</p>
                   <p className='text-sm text-muted-foreground'>Verified</p>
@@ -253,7 +250,7 @@ export default function NewsletterManagerPage() {
           <Card>
             <CardContent className='p-6'>
               <div className='flex items-center gap-2'>
-                <Send className='h-5 w-5 text-orange-500' />
+                <Send className='h-5 w-5 text-lunary-rose' />
                 <div>
                   <p className='text-2xl font-bold'>
                     {stats.withNewsletterEnabled}
@@ -329,14 +326,20 @@ export default function NewsletterManagerPage() {
                             {subscriber.email}
                           </span>
                           {subscriber.is_verified ? (
-                            <Badge variant='default' className='bg-green-600'>
+                            <Badge
+                              variant='default'
+                              className='bg-lunary-success-600'
+                            >
                               Verified
                             </Badge>
                           ) : (
                             <Badge variant='secondary'>Unverified</Badge>
                           )}
                           {subscriber.is_active ? (
-                            <Badge variant='default' className='bg-blue-600'>
+                            <Badge
+                              variant='default'
+                              className='bg-lunary-primary'
+                            >
                               Active
                             </Badge>
                           ) : (
@@ -358,7 +361,7 @@ export default function NewsletterManagerPage() {
                         {subscriber.is_active ? (
                           <XCircle className='h-4 w-4 text-red-500' />
                         ) : (
-                          <CheckCircle className='h-4 w-4 text-green-500' />
+                          <CheckCircle className='h-4 w-4 text-lunary-success' />
                         )}
                       </Button>
                     </div>
@@ -384,7 +387,7 @@ export default function NewsletterManagerPage() {
                   <h3 className='font-semibold mb-2'>Send Results:</h3>
                   <div className='space-y-1 text-sm'>
                     <div>Recipients: {sendResult.recipients}</div>
-                    <div className='text-green-500'>
+                    <div className='text-lunary-success'>
                       Success: {sendResult.success}
                     </div>
                     {sendResult.failed > 0 && (

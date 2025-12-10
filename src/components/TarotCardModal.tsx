@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { TarotCard } from './TarotCard';
+import { useModal } from '@/hooks/useModal';
 
 interface TarotCardModalProps {
   card: {
@@ -15,18 +15,11 @@ interface TarotCardModalProps {
 }
 
 export function TarotCardModal({ card, isOpen, onClose }: TarotCardModalProps) {
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  useModal({
+    isOpen,
+    onClose,
+    closeOnClickOutside: false,
+  });
 
   if (!isOpen || !card) return null;
 

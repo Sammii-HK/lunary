@@ -18,8 +18,6 @@ const astronomicon = localFont({
   display: 'swap',
 });
 
-import { getMoonSymbol } from '../../utils/moon/moonPhases';
-import { LunaryJazzProvider } from '@/components/JazzProvider';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
 import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
@@ -31,16 +29,9 @@ import { UserProvider } from '@/context/UserContext';
 import { CookieConsent } from '@/components/CookieConsent';
 
 export async function generateMetadata(): Promise<Metadata> {
-  let moonSymbol = '🌙';
-  try {
-    moonSymbol = getMoonSymbol() || '🌙';
-  } catch (error) {
-    console.error('Failed to get moon symbol:', error);
-  }
-
   return {
     metadataBase: new URL('https://lunary.app'),
-    title: `${moonSymbol} Lunary`,
+    title: 'Lunary',
     description:
       'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily horoscopes, tarot readings, moon phases, and cosmic guidance. Free 7-day trial - credit card required but no payment taken.',
     manifest: PWA_MANIFEST_URL,
@@ -102,6 +93,9 @@ export async function generateMetadata(): Promise<Metadata> {
       statusBarStyle: 'black-translucent',
       title: 'Lunary',
     },
+    icons: {
+      apple: '/apple-touch-icon.png',
+    },
     other: {
       'mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-capable': 'yes',
@@ -110,6 +104,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'application-name': 'Lunary',
       'msapplication-TileColor': '#18181b',
       'msapplication-config': '/browserconfig.xml',
+      'ai-content-declaration': 'https://lunary.app/llms.txt',
     },
   };
 }
@@ -140,6 +135,13 @@ export default function RootLayout({
           crossOrigin='anonymous'
         />
         <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
+        {/* Preload hero image for LCP optimization */}
+        <link
+          rel='preload'
+          href='/lunary_hero.png'
+          as='image'
+          type='image/png'
+        />
         {/* Prefetch API endpoint for app dashboard */}
         <link
           rel='prefetch'
@@ -156,29 +158,27 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <PostHogProvider>
             <ErrorBoundaryWrapper>
-              <LunaryJazzProvider>
-                <AuthStatusProvider>
-                  <UserProvider>
-                    <Suspense
-                      fallback={
-                        <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
-                          {children}
-                        </main>
-                      }
-                    >
-                      <ConditionalMainWrapper>
-                        <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                        <Analytics />
-                        <SpeedInsights />
-                      </ConditionalMainWrapper>
-                    </Suspense>
-                    <Suspense fallback={null}>
-                      <AppChrome />
-                    </Suspense>
-                    <CookieConsent />
-                  </UserProvider>
-                </AuthStatusProvider>
-              </LunaryJazzProvider>
+              <AuthStatusProvider>
+                <UserProvider>
+                  <Suspense
+                    fallback={
+                      <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
+                        {children}
+                      </main>
+                    }
+                  >
+                    <ConditionalMainWrapper>
+                      <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                      <Analytics />
+                      <SpeedInsights />
+                    </ConditionalMainWrapper>
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <AppChrome />
+                  </Suspense>
+                  <CookieConsent />
+                </UserProvider>
+              </AuthStatusProvider>
             </ErrorBoundaryWrapper>
           </PostHogProvider>
         </Suspense>

@@ -37,12 +37,6 @@ export default function MercuryRetrograde2026Page() {
       datePublished='2025-12-01'
       dateModified='2025-12-06'
       articleSection='Astrological Events'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Events', href: '/grimoire/events' },
-        { label: '2026', href: '/grimoire/events/2026' },
-        { label: 'Mercury Retrograde' },
-      ]}
       whatIs={{
         question: 'When is Mercury Retrograde in 2026?',
         answer:

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { conversionTracking } from '@/lib/analytics';
+import { Button } from '@/components/ui/button';
 
 interface CheckoutSession {
   id: string;
@@ -148,12 +149,14 @@ export default function SuccessPage() {
         <div className='text-center max-w-md'>
           <h1 className='text-3xl font-light mb-4'>Something went wrong</h1>
           <p className='text-gray-400 mb-8'>{error}</p>
-          <Link
-            href='/pricing'
-            className='bg-white text-black px-8 py-3 rounded-full font-medium hover:bg-gray-100 transition-colors'
+          <Button
+            variant='lunary-white'
+            size='lg'
+            className='rounded-full'
+            asChild
           >
-            Back to Pricing
-          </Link>
+            <Link href='/pricing'>Back to Pricing</Link>
+          </Button>
         </div>
       </div>
     );
@@ -167,7 +170,7 @@ export default function SuccessPage() {
     <div className='min-h-screen bg-black text-white'>
       <div className='max-w-4xl mx-auto px-6 py-16'>
         <div className='text-center mb-12'>
-          <div className='w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6'>
+          <div className='w-16 h-16 bg-lunary-success rounded-full flex items-center justify-center mx-auto mb-6'>
             <svg
               className='w-8 h-8 text-white'
               fill='none'
@@ -201,8 +204,8 @@ export default function SuccessPage() {
             {synced && (
               <div className='mb-4 p-3 rounded-lg bg-gray-800 border border-gray-700'>
                 <div className='flex items-center gap-3'>
-                  <div className='w-4 h-4 bg-green-500 rounded-full'></div>
-                  <span className='text-sm text-green-400'>
+                  <div className='w-4 h-4 bg-lunary-success rounded-full'></div>
+                  <span className='text-sm text-lunary-success'>
                     Subscription synced to your profile
                   </span>
                 </div>
@@ -293,20 +296,19 @@ export default function SuccessPage() {
           </div>
         </div>
 
-        <div className='text-center space-y-4'>
-          <Link
-            href='/profile'
-            className='bg-white text-black px-8 py-3 rounded-full font-medium hover:bg-gray-100 transition-colors inline-block mr-4'
+        <div className='text-center space-y-4 flex flex-wrap justify-center gap-4'>
+          <Button
+            variant='lunary-white'
+            size='lg'
+            className='rounded-full'
+            asChild
           >
-            Complete Your Profile
-          </Link>
+            <Link href='/profile'>Complete Your Profile</Link>
+          </Button>
 
-          <Link
-            href='/'
-            className='border border-white text-white px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black transition-colors inline-block'
-          >
-            Explore Your Cosmic Dashboard
-          </Link>
+          <Button variant='lunary' size='lg' asChild>
+            <Link href='/'>Explore Your Cosmic Dashboard</Link>
+          </Button>
         </div>
 
         {isTrialActive && (

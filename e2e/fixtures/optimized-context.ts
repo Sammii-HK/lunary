@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { test as base } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -46,14 +47,21 @@ export const testWithOptimizedContext = base.extend<OptimizedContextFixtures>({
         }
 
         // Block stylesheets from external CDNs (keep local CSS)
-        if (
-          resourceType === 'stylesheet' &&
-          (url.includes('fonts.googleapis.com') ||
-            url.includes('cdn.jsdelivr.net') ||
-            url.includes('unpkg.com'))
-        ) {
-          route.abort();
-          return;
+        if (resourceType === 'stylesheet') {
+          try {
+            const parsedUrl = new URL(url);
+            const host = parsedUrl.hostname.toLowerCase();
+            if (
+              host === 'fonts.googleapis.com' ||
+              host === 'cdn.jsdelivr.net' ||
+              host === 'unpkg.com'
+            ) {
+              route.abort();
+              return;
+            }
+          } catch {
+            // Invalid URL, continue
+          }
         }
 
         // Allow everything else

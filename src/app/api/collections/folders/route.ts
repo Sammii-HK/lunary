@@ -98,3 +98,55 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await requireUser(request);
+    const { searchParams } = new URL(request.url);
+    const folderId = searchParams.get('id');
+
+    if (!folderId) {
+      return NextResponse.json(
+        { success: false, error: 'Folder ID is required' },
+        { status: 400 },
+      );
+    }
+
+    const folderCheck = await sql`
+      SELECT id FROM collection_folders
+      WHERE id = ${parseInt(folderId, 10)} AND user_id = ${user.id}
+    `;
+
+    if (folderCheck.rows.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Folder not found' },
+        { status: 404 },
+      );
+    }
+
+    await sql`
+      UPDATE collections
+      SET folder_id = NULL
+      WHERE folder_id = ${parseInt(folderId, 10)} AND user_id = ${user.id}
+    `;
+
+    await sql`
+      DELETE FROM collection_folders
+      WHERE id = ${parseInt(folderId, 10)} AND user_id = ${user.id}
+    `;
+
+    return NextResponse.json({
+      success: true,
+      message: 'Folder deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting folder:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
+  }
+}

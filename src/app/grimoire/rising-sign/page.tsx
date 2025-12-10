@@ -9,7 +9,7 @@ import {
 } from '@/components/grimoire/PeopleAlsoAsk';
 
 export const metadata: Metadata = {
-  title: 'Rising Sign (Ascendant): Complete Guide - Lunary',
+  title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
   description:
     'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality, appearance, and first impressions. Discover how to calculate your rising sign and understand its meaning.',
   keywords: [
@@ -23,14 +23,14 @@ export const metadata: Metadata = {
     'rising sign calculator',
   ],
   openGraph: {
-    title: 'Rising Sign (Ascendant): Complete Guide - Lunary',
+    title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
     description:
       'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality and appearance.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Rising Sign (Ascendant): Complete Guide - Lunary',
+    title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
     description:
       'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality.',
   },
@@ -51,7 +51,7 @@ export default function RisingSignPage() {
     <>
       {renderJsonLd(qaSchema)}
       <SEOContentTemplate
-        title='Rising Sign (Ascendant): Complete Guide - Lunary'
+        title='Rising Sign Calculator: Find Your Ascendant Sign - Lunary'
         h1='Rising Sign (Ascendant)'
         description='Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality, appearance, and first impressions. Discover how to calculate your rising sign.'
         keywords={[
@@ -63,11 +63,6 @@ export default function RisingSignPage() {
           'rising sign vs sun sign',
         ]}
         canonicalUrl='https://lunary.app/grimoire/rising-sign'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Birth Chart', href: '/grimoire/birth-chart' },
-          { label: 'Rising Sign', href: '/grimoire/rising-sign' },
-        ]}
         intro='Your rising sign, also called the Ascendant, is the zodiac sign that was rising on the eastern horizon at your exact moment of birth. It represents your outer personality, how others see you, and your approach to life. Understanding your rising sign helps you understand how you present yourself to the world and how others perceive you.'
         meaning={`The rising sign changes approximately every 2 hours, making it the most time-sensitive part of your chart. It's calculated using your exact birth time (most important), birth location (latitude/longitude), and birth date.
 

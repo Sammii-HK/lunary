@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
     console.log('🔑 Environment check:', {
       hasApiKey: !!apiKey,
       hasAccountGroupId: !!accountGroupId,
-      apiKeyPrefix: apiKey ? `${apiKey.substring(0, 8)}...` : 'missing',
       baseUrl,
       nodeEnv: process.env.NODE_ENV,
     });
@@ -61,10 +60,9 @@ export async function POST(request: NextRequest) {
       media: updatedMediaItems,
     };
 
-    console.log('📤 Sending to Succulent:', succulentApiUrl);
-    console.log('📋 Post Data (full):', {
-      accountGroupId: finalPostData.accountGroupId,
-      content: finalPostData.content,
+    console.log('📤 Sending to Succulent');
+    console.log('📋 Post Data:', {
+      contentLength: finalPostData.content?.length || 0,
       platforms: finalPostData.platforms,
       scheduledDate: finalPostData.scheduledDate,
       media: finalPostData.media,

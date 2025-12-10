@@ -5,7 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Practices from '../components/Practices';
 
 export const metadata: Metadata = {
-  title: 'Spells & Rituals: Complete Guide - Lunary',
+  title: 'Spells & Rituals by Moon Phase: Beginner Witchcraft - Lunary',
   description:
     'A comprehensive collection of magical practices, rituals, and spells organized by purpose and moon phase. Learn spellcraft fundamentals, protection magic, love spells, prosperity rituals, healing, cleansing, divination, manifestation, and banishing practices.',
   keywords: [
@@ -21,14 +21,14 @@ export const metadata: Metadata = {
     'witchcraft spells',
   ],
   openGraph: {
-    title: 'Spells & Rituals: Complete Guide - Lunary',
+    title: 'Spells & Rituals by Moon Phase: Beginner Witchcraft - Lunary',
     description:
       'A comprehensive collection of magical practices, rituals, and spells organized by purpose and moon phase.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Spells & Rituals: Complete Guide - Lunary',
+    title: 'Spells & Rituals by Moon Phase: Beginner Witchcraft - Lunary',
     description:
       'A comprehensive collection of magical practices, rituals, and spells organized by purpose and moon phase.',
   },
@@ -41,7 +41,7 @@ export default function PracticesPage() {
   return (
     <>
       <SEOContentTemplate
-        title='Spells & Rituals: Complete Guide - Lunary'
+        title='Spells & Rituals by Moon Phase: Beginner Witchcraft - Lunary'
         h1='Spells & Rituals'
         description='A comprehensive collection of magical practices, rituals, and spells organized by purpose and moon phase. Learn spellcraft fundamentals, protection magic, love spells, prosperity rituals, healing, cleansing, divination, manifestation, and banishing practices.'
         keywords={[

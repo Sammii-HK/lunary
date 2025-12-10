@@ -47,7 +47,7 @@ class ErrorBoundary extends React.Component<
             <div className='text-center max-w-md'>
               <div className='mb-6'>
                 <Image
-                  src='/icons/dotty/moon-phases/new-moon.svg'
+                  src='/icons/moon-phases/new-moon.svg'
                   alt='Moon'
                   width={80}
                   height={80}
@@ -70,7 +70,7 @@ class ErrorBoundary extends React.Component<
                 </button>
                 <Link
                   href='/'
-                  className='px-5 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors text-sm'
+                  className='px-5 py-2.5 bg-lunary-primary-600 hover:bg-lunary-primary-500 rounded-lg transition-colors text-sm'
                 >
                   Return Home
                 </Link>
@@ -89,7 +89,7 @@ class ErrorBoundary extends React.Component<
               Don't worry - the cosmic energy is still flowing
             </p>
             {this.state.error && (
-              <details className='text-left text-xs text-zinc-500 mt-4 mb-4 p-3 bg-zinc-900 rounded'>
+              <details className='text-left text-xs text-zinc-400 mt-4 mb-4 p-3 bg-zinc-900 rounded'>
                 <summary className='cursor-pointer mb-2'>
                   Error details (click to expand)
                 </summary>
@@ -110,7 +110,7 @@ class ErrorBoundary extends React.Component<
             >
               Try Again
             </button>
-            <p className='text-xs text-zinc-500 mt-4'>
+            <p className='text-xs text-zinc-400 mt-4'>
               Check browser console for more details
             </p>
           </div>

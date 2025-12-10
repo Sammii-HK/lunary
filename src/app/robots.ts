@@ -6,44 +6,72 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/auth/', '/profile', '/test-', '/pwa-'],
+        disallow: [
+          '/admin/',
+          '/api/',
+          '/profile/',
+          '/settings/',
+          '/onboarding/',
+        ],
       },
-      {
-        userAgent: 'Googlebot',
-        allow: ['/', '/sitemap-*.xml'],
-        disallow: ['/api/', '/admin/', '/auth/', '/profile', '/test-', '/pwa-'],
-      },
-      {
-        userAgent: 'Googlebot-Image',
-        allow: ['/', '/api/og/', '/sitemap-images.xml'],
-        disallow: ['/api/cron/', '/api/admin/', '/api/ai/', '/api/stripe/'],
-      },
-      {
-        userAgent: 'Bingbot',
-        allow: '/',
-        disallow: ['/api/', '/admin/', '/auth/', '/profile', '/test-', '/pwa-'],
-      },
+      // Allow AI crawlers to index content
       {
         userAgent: 'GPTBot',
-        disallow: '/',
+        allow: [
+          '/grimoire/',
+          '/comparison/',
+          '/blog/',
+          '/llms.txt',
+          '/llms-full.txt',
+        ],
+        disallow: ['/api/', '/profile/', '/settings/'],
       },
       {
         userAgent: 'ChatGPT-User',
-        disallow: '/',
+        allow: [
+          '/grimoire/',
+          '/comparison/',
+          '/blog/',
+          '/llms.txt',
+          '/llms-full.txt',
+        ],
+        disallow: ['/api/', '/profile/', '/settings/'],
       },
       {
-        userAgent: 'CCBot',
-        disallow: '/',
+        userAgent: 'Claude-Web',
+        allow: [
+          '/grimoire/',
+          '/comparison/',
+          '/blog/',
+          '/llms.txt',
+          '/llms-full.txt',
+        ],
+        disallow: ['/api/', '/profile/', '/settings/'],
       },
       {
-        userAgent: 'anthropic-ai',
-        disallow: '/',
+        userAgent: 'Anthropic-AI',
+        allow: [
+          '/grimoire/',
+          '/comparison/',
+          '/blog/',
+          '/llms.txt',
+          '/llms-full.txt',
+        ],
+        disallow: ['/api/', '/profile/', '/settings/'],
+      },
+      {
+        userAgent: 'PerplexityBot',
+        allow: [
+          '/grimoire/',
+          '/comparison/',
+          '/blog/',
+          '/llms.txt',
+          '/llms-full.txt',
+        ],
+        disallow: ['/api/', '/profile/', '/settings/'],
       },
     ],
-    sitemap: [
-      'https://lunary.app/sitemap-index.xml',
-      'https://lunary.app/sitemap.xml',
-      'https://lunary.app/sitemap-images.xml',
-    ],
+    sitemap: 'https://lunary.app/sitemap.xml',
+    host: 'https://lunary.app',
   };
 }

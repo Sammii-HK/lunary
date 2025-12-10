@@ -51,10 +51,6 @@ export default function WheelOfTheYearPage() {
           'pagan calendar',
         ]}
         canonicalUrl='https://lunary.app/grimoire/wheel-of-the-year'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Wheel of the Year', href: '/grimoire/wheel-of-the-year' },
-        ]}
         intro={`The Wheel of the Year is a cycle of eight seasonal festivals that mark the turning of the seasons and the sun's journey through the year. These Sabbats connect modern practitioners with ancient traditions, natural rhythms, and cosmic cycles. Celebrating the Wheel of the Year helps you align with nature, honor the changing seasons, and deepen your spiritual practice. This comprehensive guide covers all eight Sabbats, their meanings, correspondences, and how to celebrate them.`}
         meaning={`The Wheel of the Year represents the eternal cycle of birth, growth, death, and rebirth. It honors both the solar cycle (solstices and equinoxes) and the agricultural cycle (planting, growing, harvesting, resting). Each Sabbat marks a significant point in this cycle and offers opportunities for reflection, celebration, and magical work.
 

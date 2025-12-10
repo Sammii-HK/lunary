@@ -353,15 +353,19 @@ export default function PWADiagnosePage() {
       <div className='bg-zinc-900 border border-zinc-700 rounded p-4'>
         <div className='grid grid-cols-3 gap-4 mb-4'>
           <div className='text-center'>
-            <div className='text-2xl font-bold text-green-400'>{passCount}</div>
+            <div className='text-2xl font-bold text-lunary-success'>
+              {passCount}
+            </div>
             <div className='text-xs text-zinc-400'>Passed</div>
           </div>
           <div className='text-center'>
-            <div className='text-2xl font-bold text-red-400'>{failCount}</div>
+            <div className='text-2xl font-bold text-lunary-error'>
+              {failCount}
+            </div>
             <div className='text-xs text-zinc-400'>Failed</div>
           </div>
           <div className='text-center'>
-            <div className='text-2xl font-bold text-yellow-400'>
+            <div className='text-2xl font-bold text-lunary-accent'>
               {warnCount}
             </div>
             <div className='text-xs text-zinc-400'>Warnings</div>
@@ -375,10 +379,10 @@ export default function PWADiagnosePage() {
             key={i}
             className={`p-3 rounded border ${
               result.status === 'pass'
-                ? 'bg-green-900/20 border-green-700'
+                ? 'bg-lunary-success-900/20 border-lunary-success-700'
                 : result.status === 'fail'
-                  ? 'bg-red-900/20 border-red-700'
-                  : 'bg-yellow-900/20 border-yellow-700'
+                  ? 'bg-lunary-error-900/20 border-lunary-error-700'
+                  : 'bg-lunary-accent-900/20 border-lunary-accent-700'
             }`}
           >
             <div className='flex items-start justify-between'>
@@ -394,10 +398,10 @@ export default function PWADiagnosePage() {
             <div
               className={`text-xs mt-1 ${
                 result.status === 'pass'
-                  ? 'text-green-300'
+                  ? 'text-lunary-success-300'
                   : result.status === 'fail'
-                    ? 'text-red-300'
-                    : 'text-yellow-300'
+                    ? 'text-lunary-error-300'
+                    : 'text-lunary-accent-300'
               }`}
             >
               {result.message}
@@ -407,11 +411,11 @@ export default function PWADiagnosePage() {
       </div>
 
       {failCount > 0 && (
-        <div className='bg-red-900/20 border border-red-700 rounded p-4'>
-          <h2 className='font-bold text-red-400 mb-2'>
+        <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded p-4'>
+          <h2 className='font-bold text-lunary-error mb-2'>
             ❌ Critical Issues Found
           </h2>
-          <p className='text-sm text-red-300'>
+          <p className='text-sm text-lunary-error-300'>
             Fix the issues above before adding to home screen. iOS requires all
             checks to pass for PWA installation.
           </p>
@@ -419,11 +423,11 @@ export default function PWADiagnosePage() {
       )}
 
       {failCount === 0 && warnCount === 0 && results.length > 0 && (
-        <div className='bg-green-900/20 border border-green-700 rounded p-4'>
-          <h2 className='font-bold text-green-400 mb-2'>
+        <div className='bg-lunary-success-900/20 border border-lunary-success-700 rounded p-4'>
+          <h2 className='font-bold text-lunary-success mb-2'>
             ✅ All Checks Passed!
           </h2>
-          <p className='text-sm text-green-300'>
+          <p className='text-sm text-lunary-success-300'>
             Your PWA is ready. You can now add it to home screen. If it still
             doesn't work, iOS may have cached a "not a PWA" decision - try
             deleting the app from home screen and re-adding.

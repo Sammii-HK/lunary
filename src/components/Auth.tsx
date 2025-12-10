@@ -62,7 +62,7 @@ export function AuthComponent({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            email: formData.email,
+            email: formData.email.toLowerCase().trim(),
             ...(redirectTo ? { redirectTo } : {}),
           }),
         });
@@ -89,7 +89,7 @@ export function AuthComponent({
       if (isSignUp) {
         // No timeout - let the request complete naturally
         const result = await betterAuthClient.signUp.email({
-          email: formData.email,
+          email: formData.email.toLowerCase().trim(),
           password: formData.password,
           name: formData.name || 'User',
         });
@@ -121,7 +121,7 @@ export function AuthComponent({
       } else {
         // No timeout - let the request complete naturally
         const result = await betterAuthClient.signIn.email({
-          email: formData.email,
+          email: formData.email.toLowerCase().trim(),
           password: formData.password,
         });
 
@@ -237,7 +237,7 @@ export function AuthComponent({
           <h2 className='text-2xl font-bold text-white mb-2'>Welcome back!</h2>
           <p className='text-zinc-400'>
             Signed in as:{' '}
-            <span className='text-purple-400'>
+            <span className='text-lunary-accent'>
               {authState.profile?.name || authState.user?.name || 'User'}
             </span>
           </p>
@@ -301,7 +301,7 @@ export function AuthComponent({
               required={isSignUp}
               value={formData.name}
               onChange={handleInputChange}
-              className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
+              className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
               placeholder='Enter your name'
             />
           </div>
@@ -321,7 +321,7 @@ export function AuthComponent({
             required
             value={formData.email}
             onChange={handleInputChange}
-            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
+            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
             placeholder='Enter your email'
           />
         </div>
@@ -341,7 +341,7 @@ export function AuthComponent({
               required
               value={formData.password}
               onChange={handleInputChange}
-              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text base'
+              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent text base'
               placeholder='Enter your password'
               minLength={6}
             />
@@ -357,7 +357,7 @@ export function AuthComponent({
                 setError(null);
                 setSuccess(null);
               }}
-              className='text-base text-purple-300 hover:text-purple-200 transition-colors'
+              className='text-base text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors'
             >
               Forgot password?
             </button>
@@ -371,7 +371,7 @@ export function AuthComponent({
         )}
 
         {success && (
-          <div className='bg-green-900/30 border border-green-700 text-green-300 px-4 py-3 rounded-lg text-sm'>
+          <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm'>
             {success}
           </div>
         )}
@@ -379,7 +379,7 @@ export function AuthComponent({
         <button
           type='submit'
           disabled={loading}
-          className={`w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:opacity-50 text-white font-medium rounded-lg transition-colors ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
+          className={`w-full bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-lunary-primary-800 disabled:opacity-50 text-white font-medium rounded-lg transition-colors ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
         >
           {loading ? (
             <>
@@ -409,7 +409,7 @@ export function AuthComponent({
               setSuccess(null);
               setFormData({ email: '', password: '', name: '' });
             }}
-            className='text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors'
+            className='text-lunary-accent hover:text-lunary-accent-300 text-sm font-medium transition-colors'
           >
             Remembered your password? Sign in
           </button>
@@ -421,7 +421,7 @@ export function AuthComponent({
               setSuccess(null);
               setFormData({ email: '', password: '', name: '' });
             }}
-            className='text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors'
+            className='text-lunary-accent hover:text-lunary-accent-300 text-sm font-medium transition-colors'
           >
             {isSignUp
               ? 'Already have an account? Sign in'
@@ -431,7 +431,7 @@ export function AuthComponent({
       </div>
 
       <div className='mt-4 text-center'>
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-zinc-400'>
           🔒 Your data is securely encrypted and synced across devices
         </p>
       </div>

@@ -57,7 +57,7 @@ export function Breadcrumbs({
       >
         <Link
           href={resolvedHomeHref}
-          className='hover:text-purple-400 transition-colors flex items-center gap-1'
+          className='hover:text-lunary-primary-400 transition-colors flex items-center gap-1'
         >
           <Home className='w-4 h-4' />
           <span className='sr-only'>Home</span>
@@ -73,7 +73,7 @@ export function Breadcrumbs({
             ) : (
               <Link
                 href={item.href}
-                className='hover:text-purple-400 transition-colors'
+                className='hover:text-lunary-primary-400 transition-colors'
               >
                 {item.label}
               </Link>

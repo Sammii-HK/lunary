@@ -103,7 +103,7 @@ export const ExploreMenu = () => {
         <div className='relative'>
           <Globe className='h-5 w-5' />
           {isOpen && (
-            <ChevronDown className='absolute -bottom-1 -right-1 h-3 w-3 text-zinc-500' />
+            <ChevronDown className='absolute -bottom-1 -right-1 h-3 w-3 text-zinc-400' />
           )}
         </div>
         <span className='hidden text-[10px] uppercase tracking-wide md:block md:text-center md:leading-tight md:w-full md:break-words'>

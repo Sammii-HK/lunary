@@ -42,7 +42,7 @@ export default function AuthPage() {
     return (
       <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
         <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4'></div>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary mx-auto mb-4'></div>
           <p className='text-zinc-400'>Checking authentication...</p>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function AuthPage() {
           <div className='text-center mb-8'>
             <div className='flex items-center justify-center gap-3 mb-2'>
               <Logo size={48} />
-              <h1 className='text-4xl font-bold text-purple-400'>Lunary</h1>
+              <h1 className='text-4xl font-bold text-lunary-accent'>Lunary</h1>
             </div>
             <p className='text-zinc-400'>Your Personal Cosmic Journey</p>
           </div>

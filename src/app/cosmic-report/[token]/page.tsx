@@ -63,24 +63,24 @@ export default async function SharedReportPage({ params }: PageProps) {
   return (
     <div className='w-full max-w-4xl space-y-8 px-4 py-10 text-white'>
       <section className='rounded-3xl border border-white/10 bg-black/50 p-6'>
-        <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+        <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
           Shared report
         </p>
         <h1 className='text-4xl font-semibold'>{report.report_data.title}</h1>
         <p className='text-sm text-zinc-300'>{report.report_data.subtitle}</p>
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-zinc-400'>
           Generated on {new Date(report.created_at).toLocaleDateString()}
         </p>
         <div className='mt-4 flex flex-wrap gap-3'>
           <Link
             href={`/api/cosmic-report/${report.id}/pdf`}
-            className='rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-purple-400'
+            className='rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-lunary-primary-400'
           >
             Download PDF
           </Link>
           <Link
             href='/cosmic-report-generator'
-            className='rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-purple-400'
+            className='rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-lunary-primary-400'
           >
             Get your own report
           </Link>
@@ -95,14 +95,14 @@ export default async function SharedReportPage({ params }: PageProps) {
               key={section.key}
               className='rounded-2xl border border-white/10 bg-white/5 p-4'
             >
-              <p className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+              <p className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                 {section.key}
               </p>
               <h3 className='text-xl font-semibold text-white'>
                 {section.title}
               </h3>
               <p className='text-sm text-zinc-300'>{section.summary}</p>
-              <ul className='mt-3 list-disc space-y-1 pl-6 text-sm text-purple-100'>
+              <ul className='mt-3 list-disc space-y-1 pl-6 text-sm text-lunary-primary-100'>
                 {section.highlights.map((highlight) => (
                   <li key={highlight}>{highlight}</li>
                 ))}

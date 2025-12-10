@@ -6,7 +6,6 @@ export const revalidate = 3600; // Revalidate every hour for blog content
 import {
   ArrowLeft,
   ArrowRight,
-  Calendar,
   Star,
   TrendingUp,
   Moon,
@@ -21,6 +20,7 @@ import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
 
 interface BlogPostPageProps {
   params: Promise<{ week: string }>;
+  searchParams: Promise<{ from?: string }>;
 }
 
 interface WeekInfo {
@@ -63,48 +63,48 @@ function parseWeekParam(weekParam: string): WeekInfo {
 
 function getPlanetColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'text-yellow-400',
-    Moon: 'text-blue-400',
+    Sun: 'text-lunary-accent',
+    Moon: 'text-lunary-secondary',
     Mercury: 'text-gray-400',
-    Venus: 'text-pink-400',
-    Mars: 'text-red-400',
-    Jupiter: 'text-purple-400',
-    Saturn: 'text-indigo-400',
-    Uranus: 'text-cyan-400',
-    Neptune: 'text-blue-500',
-    Pluto: 'text-violet-600',
+    Venus: 'text-lunary-rose',
+    Mars: 'text-lunary-error',
+    Jupiter: 'text-lunary-highlight',
+    Saturn: 'text-lunary-primary',
+    Uranus: 'text-lunary-secondary',
+    Neptune: 'text-lunary-secondary',
+    Pluto: 'text-lunary-highlight',
   };
   return colors[planet] || 'text-zinc-300';
 }
 
 function getPlanetBorderColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'border-yellow-400/30',
-    Moon: 'border-blue-400/30',
+    Sun: 'border-lunary-accent-800',
+    Moon: 'border-lunary-secondary-800',
     Mercury: 'border-gray-400/30',
-    Venus: 'border-pink-400/30',
-    Mars: 'border-red-400/30',
-    Jupiter: 'border-purple-400/30',
-    Saturn: 'border-indigo-400/30',
-    Uranus: 'border-cyan-400/30',
-    Neptune: 'border-blue-500/30',
-    Pluto: 'border-violet-600/30',
+    Venus: 'border-lunary-rose-800',
+    Mars: 'border-lunary-error-700/30',
+    Jupiter: 'border-lunary-highlight-700/30',
+    Saturn: 'border-lunary-primary-800',
+    Uranus: 'border-lunary-secondary-800',
+    Neptune: 'border-lunary-secondary-800',
+    Pluto: 'border-lunary-highlight-800',
   };
   return colors[planet] || 'border-zinc-700';
 }
 
 function getPlanetBgColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'bg-yellow-400/10',
-    Moon: 'bg-blue-400/10',
+    Sun: 'bg-lunary-accent-950',
+    Moon: 'bg-lunary-secondary-950',
     Mercury: 'bg-gray-400/10',
-    Venus: 'bg-pink-400/10',
-    Mars: 'bg-red-400/10',
-    Jupiter: 'bg-purple-400/10',
-    Saturn: 'bg-indigo-400/10',
-    Uranus: 'bg-cyan-400/10',
-    Neptune: 'bg-blue-500/10',
-    Pluto: 'bg-violet-600/10',
+    Venus: 'bg-lunary-rose-950',
+    Mars: 'bg-lunary-error-900/10',
+    Jupiter: 'bg-lunary-highlight-900/10',
+    Saturn: 'bg-lunary-primary-950',
+    Uranus: 'bg-lunary-secondary-950',
+    Neptune: 'bg-lunary-secondary-950',
+    Pluto: 'bg-lunary-highlight-950',
   };
   return colors[planet] || 'bg-zinc-800/50';
 }
@@ -117,7 +117,7 @@ const BLOG_SECTION_LIMITS = {
   retrogradeChanges: 2,
   moonPhases: 2,
   majorAspects: 3,
-  crystalRecommendations: 3,
+  crystalRecommendations: 7,
   bestDays: 3,
 };
 
@@ -217,9 +217,16 @@ async function getBlogData(weekInfo: WeekInfo) {
   return promise;
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
+export default async function BlogPostPage({
+  params,
+  searchParams,
+}: BlogPostPageProps) {
   let rawWeekParam: string | undefined;
   let weekInfo: WeekInfo | null = null;
+
+  const resolvedSearchParams = await searchParams;
+  const fromParam = resolvedSearchParams?.from;
+  const linkSuffix = fromParam ? `?from=${fromParam}` : '';
 
   try {
     const resolvedParams = await params;
@@ -355,7 +362,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     return (
       <div className='container mx-auto p-4 max-w-4xl'>
         <Link
-          href='/blog'
+          href={`/blog${linkSuffix}`}
           className='inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors'
         >
           <ArrowLeft className='h-4 w-4' />
@@ -603,9 +610,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                       ? crystal.date
                       : new Date(crystal.date);
                   return (
-                    <Card key={index} className='border border-purple-500/20'>
+                    <Card
+                      key={index}
+                      className='border border-lunary-primary-700'
+                    >
                       <CardHeader>
-                        <CardTitle className='text-lg text-purple-200'>
+                        <CardTitle className='text-lg text-lunary-primary-200'>
                           {crystal.crystal}
                         </CardTitle>
                         <p className='text-sm text-zinc-400'>
@@ -781,18 +791,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 return (
                   <Link
                     key={weekSlug}
-                    href={`/blog/week/${weekSlug}`}
-                    className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all group'
+                    href={`/blog/week/${weekSlug}${linkSuffix}`}
+                    className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
                   >
                     <div className='flex items-center gap-2 mb-2'>
                       <Badge variant='outline' className='text-xs'>
                         Week {related.week}
                       </Badge>
-                      <span className='text-xs text-zinc-500'>
+                      <span className='text-xs text-zinc-400'>
                         {related.year}
                       </span>
                     </div>
-                    <h3 className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-1'>
+                    <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
                       {related.label}
                     </h3>
                     <p className='text-sm text-zinc-400'>
@@ -809,8 +819,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
           <div className='mt-6'>
             <Link
-              href='/blog'
-              className='inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors text-sm font-medium'
+              href={`/blog${linkSuffix}`}
+              className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors text-sm font-medium'
             >
               View All Weekly Forecasts
               <ArrowRight className='h-4 w-4' />

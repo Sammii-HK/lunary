@@ -57,8 +57,8 @@ export default function NewPost() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-posts-secret': process.env.NEXT_PUBLIC_POSTS_CLIENT_SECRET!,
         },
+        credentials: 'include',
         body: JSON.stringify({
           title,
           description,
@@ -150,7 +150,7 @@ Remember to trust your intuition as you explore these cosmic influences.
                   onChange={(e) => setTitle(e.target.value)}
                   required
                   placeholder='How to read your rising sign — and why it matters more than your sun'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
                 />
                 {derivedSlug && (
                   <p className='text-xs text-gray-500 mt-1'>
@@ -169,7 +169,7 @@ Remember to trust your intuition as you explore these cosmic influences.
                   onChange={(e) => setDescription(e.target.value)}
                   required
                   placeholder='Short meta description for SEO'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
                 />
               </div>
 
@@ -183,7 +183,7 @@ Remember to trust your intuition as you explore these cosmic influences.
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     required
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
                   />
                 </div>
                 <div>
@@ -193,7 +193,7 @@ Remember to trust your intuition as you explore these cosmic influences.
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as any)}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
                   >
                     <option value='draft'>Draft (schedule)</option>
                     <option value='publish'>Publish now</option>
@@ -210,7 +210,7 @@ Remember to trust your intuition as you explore these cosmic influences.
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   placeholder='moon, rising sign, birth chart, astrology'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
                 />
               </div>
 
@@ -232,7 +232,7 @@ Remember to trust your intuition as you explore these cosmic influences.
                       href={cover}
                       target='_blank'
                       rel='noreferrer'
-                      className='text-sm text-blue-600 hover:text-blue-800 underline'
+                      className='text-sm text-lunary-secondary hover:text-lunary-secondary-400 underline'
                     >
                       View cover
                     </a>
@@ -259,7 +259,7 @@ Remember to trust your intuition as you explore these cosmic influences.
                   onChange={(e) => setBody(e.target.value)}
                   rows={16}
                   spellCheck={false}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm resize-none'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent font-mono text-sm resize-none'
                 />
               </div>
             </div>
@@ -268,7 +268,7 @@ Remember to trust your intuition as you explore these cosmic influences.
               <button
                 type='submit'
                 disabled={creating || !title || !description || !body}
-                className='w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium'
+                className='w-full bg-lunary-primary text-white py-2 px-4 rounded-md hover:bg-lunary-primary-400 disabled:opacity-50 disabled:cursor-not-allowed font-medium'
               >
                 {creating ? 'Creating…' : 'Create Post'}
               </button>

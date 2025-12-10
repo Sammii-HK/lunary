@@ -13,8 +13,8 @@ export function EmailFooter({
 }: EmailFooterProps) {
   const isDark = variant === 'dark';
   const textColor = isDark ? '#9ca3af' : '#6b7280';
-  const linkColor = isDark ? '#a78bfa' : '#6366f1';
-  const hrColor = isDark ? 'rgba(167, 139, 250, 0.2)' : '#e5e7eb';
+  const linkColor = isDark ? '#C77DFF' : '#8458D8';
+  const hrColor = isDark ? 'rgba(199, 125, 255, 0.2)' : '#e5e7eb';
 
   const unsubscribeUrl = userEmail
     ? `${baseUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`

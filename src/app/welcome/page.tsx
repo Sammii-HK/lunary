@@ -16,6 +16,17 @@ import {
 } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
+  description:
+    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. AI-powered insights from your natal chart. Free to start.',
+  alternates: {
+    canonical: 'https://lunary.app',
+  },
+};
 
 export default function WelcomePage() {
   return (
@@ -23,7 +34,7 @@ export default function WelcomePage() {
       {/* Section 1: Hero */}
       <section className='relative px-4 md:px-6 pt-20 pb-10 md:pt-28 md:pb-16 bg-zinc-950'>
         <div className='max-w-3xl mx-auto text-center space-y-6'>
-          <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>
+          <p className='text-xs uppercase tracking-[0.2em] text-zinc-400'>
             A calm AI companion for cosmic self understanding
           </p>
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 leading-tight tracking-tight'>
@@ -36,12 +47,9 @@ export default function WelcomePage() {
             move through your day with clarity.
           </p>
           <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
-            <Link
-              href='/profile'
-              className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
-            >
-              Start free trial
-            </Link>
+            <Button variant='lunary-solid' asChild>
+              <Link href='/profile'>Start free trial</Link>
+            </Button>
             <a
               href='#how-it-works'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
@@ -49,7 +57,7 @@ export default function WelcomePage() {
               See how it works
             </a>
           </div>
-          <p className='text-sm text-zinc-500'>Free to begin. No commitment.</p>
+          <p className='text-sm text-zinc-400'>Free to begin. No commitment.</p>
         </div>
 
         {/* Hero Screenshot */}
@@ -60,6 +68,7 @@ export default function WelcomePage() {
             className='w-full max-w-[420px] md:max-w-[380px] h-auto rounded-2xl border border-zinc-700/50'
             width={380}
             height={827}
+            priority
             style={{
               boxShadow:
                 '0 18px 28px rgba(0, 0, 0, 0.28), 0 0 22px rgba(178, 126, 255, 0.18)',
@@ -74,7 +83,7 @@ export default function WelcomePage() {
           <p className='text-base md:text-lg text-zinc-300 font-light'>
             A calm alternative to noisy horoscope apps
           </p>
-          <p className='text-sm text-zinc-500 mt-1.5'>
+          <p className='text-sm text-zinc-400 mt-1.5'>
             Built for people who want depth, not drama.
           </p>
         </div>
@@ -86,7 +95,7 @@ export default function WelcomePage() {
           <h2 className='text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100 leading-tight'>
             Most astrology apps entertain you.
             <br />
-            <span className='text-purple-300/80'>
+            <span className='text-lunary-primary-300/80'>
               Lunary helps you understand yourself.
             </span>
           </h2>
@@ -104,7 +113,7 @@ export default function WelcomePage() {
           <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
             <div className='text-center space-y-3'>
               <Telescope
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-400 mx-auto'
                 strokeWidth={1.5}
               />
               <h3 className='text-lg font-medium text-zinc-100'>
@@ -117,7 +126,7 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <Sparkles
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-300 mx-auto'
                 strokeWidth={1.5}
               />
               <h3 className='text-lg font-medium text-zinc-100'>
@@ -130,7 +139,7 @@ export default function WelcomePage() {
             </div>
             <div className='text-center space-y-3'>
               <NotebookPen
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-blue-400/70 mx-auto'
                 strokeWidth={1.5}
               />
               <h3 className='text-lg font-medium text-zinc-100'>
@@ -152,7 +161,7 @@ export default function WelcomePage() {
           <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
             <div className='space-y-3'>
               <LayoutDashboard
-                className='w-7 h-7 text-purple-400'
+                className='w-7 h-7 text-lunary-primary-400'
                 strokeWidth={1.5}
               />
               <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
@@ -169,42 +178,47 @@ export default function WelcomePage() {
             <div className='space-y-2'>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <span className='text-lg'>🌘</span>
+                  <Image
+                    src='/icons/moon-phases/waning-cresent-moon.svg'
+                    alt='Waning Crescent'
+                    width={20}
+                    height={20}
+                  />
                   <span className='text-sm font-medium text-zinc-200'>
                     Waning Crescent
                   </span>
                 </div>
-                <p className='text-xs text-zinc-500'>in Scorpio</p>
+                <p className='text-xs text-zinc-400'>in Scorpio</p>
                 <p className='text-xs text-zinc-600 mt-1'>
                   3 days until New Moon
                 </p>
               </div>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <Layers className='w-4 h-4 text-purple-400' />
+                  <Layers className='w-4 h-4 text-lunary-accent-300' />
                   <span className='text-sm font-medium text-zinc-200'>
                     Daily Card
                   </span>
-                  <span className='text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded'>
+                  <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-1.5 py-0.5 rounded'>
                     Personal
                   </span>
                 </div>
-                <p className='text-sm text-purple-300'>The Star</p>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-sm text-lunary-primary-300'>The Star</p>
+                <p className='text-xs text-zinc-400'>
                   Hope • Renewal • Serenity
                 </p>
               </div>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <Gem className='w-4 h-4 text-purple-400' />
+                  <Gem className='w-4 h-4 text-lunary-accent-200' />
                   <span className='text-sm font-medium text-zinc-200'>
                     Amethyst
                   </span>
-                  <span className='text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded'>
+                  <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-1.5 py-0.5 rounded'>
                     For you
                   </span>
                 </div>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   Supports intuition during this reflective phase
                 </p>
               </div>
@@ -217,7 +231,7 @@ export default function WelcomePage() {
               <div className='space-y-3'>
                 <div className='flex justify-end'>
                   <div className='max-w-[80%]'>
-                    <div className='rounded-2xl bg-purple-600/80 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
+                    <div className='rounded-2xl bg-lunary-primary-600/80 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
                       Why am I feeling so restless today?
                     </div>
                   </div>
@@ -235,7 +249,7 @@ export default function WelcomePage() {
             </div>
             <div className='order-1 md:order-2 space-y-3'>
               <MessageCircle
-                className='w-7 h-7 text-purple-400'
+                className='w-7 h-7 text-lunary-primary-400'
                 strokeWidth={1.5}
               />
               <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
@@ -255,7 +269,10 @@ export default function WelcomePage() {
           {/* Feature 3: Living Book of Shadows */}
           <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
             <div className='space-y-3'>
-              <BookOpen className='w-7 h-7 text-purple-400' strokeWidth={1.5} />
+              <BookOpen
+                className='w-7 h-7 text-lunary-primary-400'
+                strokeWidth={1.5}
+              />
               <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
                 Living Book of Shadows
               </h3>
@@ -270,18 +287,18 @@ export default function WelcomePage() {
             <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
               <div className='space-y-2.5'>
                 <div className='p-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
-                  <p className='text-xs text-zinc-500 mb-0.5'>Nov 28</p>
+                  <p className='text-xs text-zinc-400 mb-0.5'>Nov 28</p>
                   <p className='text-sm text-zinc-300'>
                     Feeling introspective. The Star appeared again.
                   </p>
                 </div>
                 <div className='p-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
-                  <p className='text-xs text-zinc-500 mb-0.5'>Nov 25</p>
+                  <p className='text-xs text-zinc-400 mb-0.5'>Nov 25</p>
                   <p className='text-sm text-zinc-300'>
                     New Moon intention: trust the process.
                   </p>
                 </div>
-                <div className='text-xs text-purple-400/80 pl-1'>
+                <div className='text-xs text-lunary-primary-400/80 pl-1'>
                   Pattern: Hope themes recurring during Sagittarius season
                 </div>
               </div>
@@ -296,39 +313,42 @@ export default function WelcomePage() {
                   <span className='text-sm text-zinc-400'>
                     Recurring themes
                   </span>
-                  <span className='text-xs text-zinc-500'>Last 30 days</span>
+                  <span className='text-xs text-zinc-400'>Last 30 days</span>
                 </div>
                 <div className='space-y-2'>
                   <div className='flex items-center gap-3'>
-                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
                     <span className='text-sm text-zinc-300'>
                       Transformation
                     </span>
                     <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                      <div className='w-3/4 h-full bg-purple-500/60 rounded-full'></div>
+                      <div className='w-3/4 h-full bg-lunary-primary-500/60 rounded-full'></div>
                     </div>
                   </div>
                   <div className='flex items-center gap-3'>
-                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
                     <span className='text-sm text-zinc-300'>
                       New beginnings
                     </span>
                     <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                      <div className='w-1/2 h-full bg-purple-500/60 rounded-full'></div>
+                      <div className='w-1/2 h-full bg-lunary-primary-500/60 rounded-full'></div>
                     </div>
                   </div>
                   <div className='flex items-center gap-3'>
-                    <div className='w-2 h-2 rounded-full bg-purple-400'></div>
+                    <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
                     <span className='text-sm text-zinc-300'>Inner wisdom</span>
                     <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                      <div className='w-2/5 h-full bg-purple-500/60 rounded-full'></div>
+                      <div className='w-2/5 h-full bg-lunary-primary-500/60 rounded-full'></div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div className='order-1 md:order-2 space-y-3'>
-              <Layers className='w-7 h-7 text-purple-400' strokeWidth={1.5} />
+              <Layers
+                className='w-7 h-7 text-lunary-primary-400'
+                strokeWidth={1.5}
+              />
               <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
                 Tarot and Transit Patterns
               </h3>
@@ -355,42 +375,46 @@ export default function WelcomePage() {
           <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
             <div className='text-center space-y-3'>
               <Calendar
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-400 mx-auto'
                 strokeWidth={1.5}
               />
-              <div className='text-sm text-purple-400 font-medium'>1</div>
+              <div className='text-sm text-lunary-primary-400 font-medium'>
+                1
+              </div>
               <h3 className='text-base font-medium text-zinc-100'>
                 Enter your birth details
               </h3>
               <p className='text-sm text-zinc-400 leading-relaxed'>
                 Lunary creates an accurate map of your chart.
               </p>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-zinc-400'>
                 Sets the foundation for personalised insight.
               </p>
             </div>
             <div className='text-center space-y-3'>
               <Map
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-lunary-primary-300 mx-auto'
                 strokeWidth={1.5}
               />
-              <div className='text-sm text-purple-400 font-medium'>2</div>
+              <div className='text-sm text-lunary-primary-300 font-medium'>
+                2
+              </div>
               <h3 className='text-base font-medium text-zinc-100'>
                 Explore your cosmic map
               </h3>
               <p className='text-sm text-zinc-400 leading-relaxed'>
                 Your personalised dashboard reveals today's themes and patterns.
               </p>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-zinc-400'>
                 See what is influencing your day.
               </p>
             </div>
             <div className='text-center space-y-3'>
               <MessagesSquare
-                className='w-8 h-8 text-purple-400 mx-auto'
+                className='w-8 h-8 text-blue-400/70 mx-auto'
                 strokeWidth={1.5}
               />
-              <div className='text-sm text-purple-400 font-medium'>3</div>
+              <div className='text-sm text-blue-400/70 font-medium'>3</div>
               <h3 className='text-base font-medium text-zinc-100'>
                 Talk to your astral guide
               </h3>
@@ -398,7 +422,7 @@ export default function WelcomePage() {
                 Ask questions and receive grounded insight that supports your
                 day.
               </p>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-zinc-400'>
                 Your companion for clarity and reflection.
               </p>
             </div>
@@ -412,7 +436,7 @@ export default function WelcomePage() {
           <div className='grid md:grid-cols-2 gap-4 md:gap-6'>
             {/* Other Apps */}
             <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-5 md:p-6'>
-              <h3 className='text-sm font-medium text-zinc-500 uppercase tracking-wider mb-5'>
+              <h3 className='text-sm font-medium text-zinc-400 uppercase tracking-wider mb-5'>
                 Other apps
               </h3>
               <ul className='space-y-3'>
@@ -421,7 +445,7 @@ export default function WelcomePage() {
                     className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
-                  <span className='text-sm text-zinc-500'>
+                  <span className='text-sm text-zinc-400'>
                     Generic horoscopes
                   </span>
                 </li>
@@ -430,14 +454,14 @@ export default function WelcomePage() {
                     className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
-                  <span className='text-sm text-zinc-500'>Sun sign only</span>
+                  <span className='text-sm text-zinc-400'>Sun sign only</span>
                 </li>
                 <li className='flex items-start gap-3'>
                   <X
                     className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
-                  <span className='text-sm text-zinc-500'>
+                  <span className='text-sm text-zinc-400'>
                     Drama and predictions
                   </span>
                 </li>
@@ -446,7 +470,7 @@ export default function WelcomePage() {
                     className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
-                  <span className='text-sm text-zinc-500'>
+                  <span className='text-sm text-zinc-400'>
                     Notification spam
                   </span>
                 </li>
@@ -454,14 +478,14 @@ export default function WelcomePage() {
             </div>
 
             {/* Lunary */}
-            <div className='rounded-2xl border border-purple-500/30 bg-zinc-900/50 p-5 md:p-6'>
-              <h3 className='text-sm font-medium text-purple-400 uppercase tracking-wider mb-5'>
+            <div className='rounded-2xl border border-lunary-primary-700 bg-zinc-900/50 p-5 md:p-6'>
+              <h3 className='text-sm font-medium text-lunary-primary-400 uppercase tracking-wider mb-5'>
                 Lunary
               </h3>
               <ul className='space-y-3'>
                 <li className='flex items-start gap-3'>
                   <Check
-                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
                   <span className='text-sm text-zinc-200'>
@@ -470,7 +494,7 @@ export default function WelcomePage() {
                 </li>
                 <li className='flex items-start gap-3'>
                   <Check
-                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
                   <span className='text-sm text-zinc-200'>
@@ -479,7 +503,7 @@ export default function WelcomePage() {
                 </li>
                 <li className='flex items-start gap-3'>
                   <Check
-                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
                   <span className='text-sm text-zinc-200'>
@@ -488,7 +512,7 @@ export default function WelcomePage() {
                 </li>
                 <li className='flex items-start gap-3'>
                   <Check
-                    className='w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0'
+                    className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
                     strokeWidth={2}
                   />
                   <span className='text-sm text-zinc-200'>
@@ -547,12 +571,9 @@ export default function WelcomePage() {
             and personal meaning.
           </p>
           <div className='flex flex-col sm:flex-row gap-3 justify-center items-center pt-2'>
-            <Link
-              href='/profile'
-              className='inline-flex items-center justify-center rounded-full bg-purple-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-400 transition-colors'
-            >
-              Start free trial
-            </Link>
+            <Button variant='lunary-solid' asChild>
+              <Link href='/profile'>Start free trial</Link>
+            </Button>
             <Link
               href='/app'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'

@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  crystalDatabase,
   getCrystalsByCategory,
   getCrystalsByIntention,
 } from '../../../../constants/grimoire/crystals';
-import {
-  spellDatabase,
-  getSpellsByCategory,
-} from '../../../../constants/grimoire/spells';
-import { wiccanWeek } from '../../../../constants/weekDays';
-import { wheelOfTheYearSabbats } from '../../../../constants/sabbats';
+import { getSpellsByCategory } from '../../../../constants/grimoire/spells';
 import {
   generatePackNaming,
   generatePricing,

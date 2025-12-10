@@ -446,7 +446,7 @@ export default function AnalyticsPage() {
     return (
       <div className='flex min-h-screen items-center justify-center text-zinc-400'>
         <div className='flex items-center gap-3'>
-          <Loader2 className='h-5 w-5 animate-spin text-purple-400' />
+          <Loader2 className='h-5 w-5 animate-spin text-lunary-primary-400' />
           Loading analytics…
         </div>
       </div>
@@ -457,14 +457,14 @@ export default function AnalyticsPage() {
     <div className='space-y-12 px-4 pb-16 pt-8 md:px-6'>
       <header className='flex flex-col gap-6 border-b border-zinc-800/50 pb-8 lg:flex-row lg:items-start lg:justify-between'>
         <div className='space-y-2'>
-          <div className='flex items-center gap-2 text-xs uppercase tracking-wider text-purple-400/70'>
+          <div className='flex items-center gap-2 text-xs uppercase tracking-wider text-lunary-primary-400/70'>
             <Activity className='h-4 w-4' />
             Analytics
           </div>
           <h1 className='text-2xl font-light tracking-tight text-white md:text-3xl'>
             Engagement & Growth
           </h1>
-          <p className='text-sm text-zinc-500'>
+          <p className='text-sm text-zinc-400'>
             Monitor active usage, AI engagement, conversions, and feature
             adoption
           </p>
@@ -472,7 +472,7 @@ export default function AnalyticsPage() {
 
         <div className='flex flex-wrap gap-2'>
           <div className='flex items-center gap-2 rounded-xl border border-zinc-800/30 bg-zinc-900/20 px-3 py-2'>
-            <CalendarRange className='h-3.5 w-3.5 text-zinc-500' />
+            <CalendarRange className='h-3.5 w-3.5 text-zinc-400' />
             <div className='flex items-center gap-1.5 text-xs text-zinc-400'>
               <input
                 type='date'
@@ -495,7 +495,7 @@ export default function AnalyticsPage() {
             onChange={(event) =>
               setGranularity(event.target.value as 'day' | 'week' | 'month')
             }
-            className='rounded-xl border border-zinc-800/30 bg-zinc-900/20 px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-purple-500/50'
+            className='rounded-xl border border-zinc-800/30 bg-zinc-900/20 px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-lunary-primary-9500'
           >
             <option value='day'>Daily</option>
             <option value='week'>Weekly</option>
@@ -513,7 +513,7 @@ export default function AnalyticsPage() {
 
           <Button
             onClick={fetchAnalytics}
-            className='h-9 gap-1.5 rounded-xl bg-purple-600/90 px-3 text-xs text-white hover:bg-purple-600'
+            className='h-9 gap-1.5 rounded-xl bg-lunary-primary-600/90 px-3 text-xs text-white hover:bg-lunary-primary-600'
           >
             {loading ? (
               <Loader2 className='h-3.5 w-3.5 animate-spin' />
@@ -526,7 +526,7 @@ export default function AnalyticsPage() {
       </header>
 
       {error && (
-        <div className='rounded-lg border border-rose-800/30 bg-rose-950/20 px-4 py-3 text-sm text-rose-300'>
+        <div className='rounded-lg border border-lunary-error-800/30 bg-lunary-error-950/20 px-4 py-3 text-sm text-lunary-error-300'>
           {error}
         </div>
       )}
@@ -572,21 +572,21 @@ export default function AnalyticsPage() {
             <MultiLineChart data={activity?.trends ?? []} />
             <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
               <div className='flex items-center gap-2'>
-                <div className='h-3 w-3 rounded-full bg-purple-400/80' />
+                <div className='h-3 w-3 rounded-full bg-lunary-primary-400/80' />
                 <span className='text-xs text-zinc-400'>
                   <span className='font-medium text-zinc-300'>DAU</span> - Daily
                   Active Users
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <div className='h-2 w-2 rounded-full bg-indigo-400/90' />
+                <div className='h-2 w-2 rounded-full bg-lunary-primary' />
                 <span className='text-xs text-zinc-400'>
                   <span className='font-medium text-zinc-300'>WAU</span> -
                   Weekly Active Users
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <div className='h-2 w-2 rounded-full bg-sky-400/90' />
+                <div className='h-2 w-2 rounded-full bg-lunary-secondary' />
                 <span className='text-xs text-zinc-400'>
                   <span className='font-medium text-zinc-300'>MAU</span> -
                   Monthly Active Users
@@ -601,7 +601,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Retention & Churn
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Cohort retention ({startDate} → {endDate})
             </CardDescription>
           </CardHeader>
@@ -635,7 +635,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Conversion Funnel
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Free → Trial → Paid
             </CardDescription>
           </CardHeader>
@@ -668,7 +668,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Trigger Features
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Top conversion drivers
             </CardDescription>
           </CardHeader>
@@ -685,7 +685,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div className='h-2 w-full rounded-full bg-zinc-800'>
                     <div
-                      className='h-2 rounded-full bg-gradient-to-r from-purple-400 to-fuchsia-500'
+                      className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
                       style={{ width: `${trigger.percentage.toFixed(2)}%` }}
                     />
                   </div>
@@ -701,7 +701,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               AI Mode Breakdown
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Usage by mode
             </CardDescription>
           </CardHeader>
@@ -715,7 +715,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Feature Usage Heatmap
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Past 7 days activity
             </CardDescription>
           </CardHeader>
@@ -731,7 +731,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Notification Health
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Open rates by channel
             </CardDescription>
           </CardHeader>
@@ -743,7 +743,7 @@ export default function AnalyticsPage() {
                   className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4'
                 >
                   <div className='flex items-center gap-2 text-sm font-medium text-zinc-300'>
-                    <Bell className='h-4 w-4 text-purple-300' />
+                    <Bell className='h-4 w-4 text-lunary-primary-300' />
                     {type.label}
                   </div>
                   <div className='mt-3 grid gap-2 text-sm'>
@@ -771,7 +771,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               AI Usage Summary
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               Engagement metrics
             </CardDescription>
           </CardHeader>
@@ -780,26 +780,26 @@ export default function AnalyticsPage() {
               <MiniStat
                 label='Total Sessions'
                 value={aiMetrics?.total_sessions ?? 0}
-                icon={<Sparkles className='h-5 w-5 text-purple-300' />}
+                icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
               />
               <MiniStat
                 label='Unique Users'
                 value={aiMetrics?.unique_users ?? 0}
-                icon={<Activity className='h-5 w-5 text-emerald-300' />}
+                icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
               />
               <MiniStat
                 label='Tokens / User'
                 value={
                   aiMetrics ? aiMetrics.avg_tokens_per_user.toFixed(0) : '—'
                 }
-                icon={<Target className='h-5 w-5 text-sky-300' />}
+                icon={<Target className='h-5 w-5 text-lunary-secondary-300' />}
               />
               <MiniStat
                 label='Completion Rate'
                 value={
                   aiMetrics ? `${aiMetrics.completion_rate.toFixed(1)}%` : '—'
                 }
-                icon={<Sparkles className='h-5 w-5 text-amber-300' />}
+                icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
               />
             </div>
           </CardContent>
@@ -812,7 +812,7 @@ export default function AnalyticsPage() {
             <CardTitle className='text-base font-medium'>
               Page-Level Heatmaps
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-500'>
+            <CardDescription className='text-xs text-zinc-400'>
               User interaction patterns
             </CardDescription>
           </CardHeader>
@@ -829,7 +829,7 @@ export default function AnalyticsPage() {
               <CardTitle className='text-base font-medium'>
                 Discord Bot Engagement
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-500'>
+              <CardDescription className='text-xs text-zinc-400'>
                 Command usage and interactions (last 7 days)
               </CardDescription>
             </CardHeader>
@@ -838,12 +838,14 @@ export default function AnalyticsPage() {
                 <MiniStat
                   label='Total Commands'
                   value={discordAnalytics.stats?.funnel?.totalCommands ?? 0}
-                  icon={<Activity className='h-5 w-5 text-purple-300' />}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-primary-300' />
+                  }
                 />
                 <MiniStat
                   label='Button Clicks'
                   value={discordAnalytics.stats?.funnel?.buttonClicks ?? 0}
-                  icon={<Target className='h-5 w-5 text-emerald-300' />}
+                  icon={<Target className='h-5 w-5 text-lunary-success-300' />}
                 />
                 <MiniStat
                   label='Click-Through Rate'
@@ -852,12 +854,14 @@ export default function AnalyticsPage() {
                       ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
                       : '—'
                   }
-                  icon={<Sparkles className='h-5 w-5 text-sky-300' />}
+                  icon={
+                    <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                  }
                 />
                 <MiniStat
                   label='Accounts Linked'
                   value={discordAnalytics.stats?.funnel?.accountsLinked ?? 0}
-                  icon={<Bell className='h-5 w-5 text-amber-300' />}
+                  icon={<Bell className='h-5 w-5 text-lunary-accent-300' />}
                 />
               </div>
             </CardContent>
@@ -868,7 +872,7 @@ export default function AnalyticsPage() {
               <CardTitle className='text-base font-medium'>
                 Top Discord Commands
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-500'>
+              <CardDescription className='text-xs text-zinc-400'>
                 Most popular bot interactions
               </CardDescription>
             </CardHeader>
@@ -885,7 +889,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div className='h-2 w-full rounded-full bg-zinc-800'>
                       <div
-                        className='h-2 rounded-full bg-gradient-to-r from-purple-400 to-fuchsia-500'
+                        className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
                         style={{
                           width: `${
                             discordAnalytics.stats?.commands?.[0]?.total_uses >
@@ -901,7 +905,7 @@ export default function AnalyticsPage() {
                         }}
                       />
                     </div>
-                    <div className='flex items-center justify-between text-xs text-zinc-500'>
+                    <div className='flex items-center justify-between text-xs text-zinc-400'>
                       <span>{cmd.unique_users} users</span>
                       <span>{cmd.linked_users} linked</span>
                     </div>
@@ -909,7 +913,7 @@ export default function AnalyticsPage() {
                 ))}
               {(!discordAnalytics.stats?.commands ||
                 discordAnalytics.stats.commands.length === 0) && (
-                <div className='text-sm text-zinc-500'>
+                <div className='text-sm text-zinc-400'>
                   No Discord interactions yet
                 </div>
               )}
@@ -924,7 +928,7 @@ export default function AnalyticsPage() {
 function MultiLineChart({ data }: { data: ActivityTrend[] }) {
   if (!data.length) {
     return (
-      <div className='flex h-48 items-center justify-center text-sm text-zinc-500'>
+      <div className='flex h-48 items-center justify-center text-sm text-zinc-400'>
         Not enough data for this range.
       </div>
     );
@@ -1014,12 +1018,12 @@ function RetentionCard({
 }) {
   const color =
     variant === 'negative'
-      ? 'text-rose-300 border-rose-800/20 bg-rose-900/5'
-      : 'text-emerald-300 border-emerald-800/20 bg-emerald-900/5';
+      ? 'text-lunary-error-300 border-lunary-error-800/20 bg-lunary-error-900/5'
+      : 'text-lunary-success-300 border-lunary-success-800/20 bg-lunary-success-900/5';
 
   return (
     <div className={`rounded-xl border px-3 py-2.5 ${color}`}>
-      <div className='text-xs font-medium text-zinc-500'>{label}</div>
+      <div className='text-xs font-medium text-zinc-400'>{label}</div>
       <div className='mt-1.5 text-2xl font-light tracking-tight text-white'>
         {value.toFixed(1)}%
       </div>
@@ -1030,7 +1034,7 @@ function RetentionCard({
 function ModeBreakdown({ modes }: { modes: AiMode[] }) {
   if (!modes.length) {
     return (
-      <div className='text-sm text-zinc-500'>No AI usage data available.</div>
+      <div className='text-sm text-zinc-400'>No AI usage data available.</div>
     );
   }
 
@@ -1046,7 +1050,7 @@ function ModeBreakdown({ modes }: { modes: AiMode[] }) {
           </div>
           <div className='h-2 rounded-full bg-zinc-800'>
             <div
-              className='h-2 rounded-full bg-gradient-to-r from-sky-400 to-purple-500'
+              className='h-2 rounded-full bg-gradient-to-r from-sky-400 to-lunary-primary-500'
               style={{
                 width: `${(mode.percentage / max) * 100}%`,
               }}
@@ -1068,7 +1072,7 @@ function HeatmapGrid({
 }) {
   if (!data.length) {
     return (
-      <div className='text-sm text-zinc-500'>
+      <div className='text-sm text-zinc-400'>
         No feature usage data available.
       </div>
     );
@@ -1096,7 +1100,7 @@ function HeatmapGrid({
         <tbody>
           {data.map((row) => (
             <tr key={row.date}>
-              <td className='py-2 text-zinc-500'>{row.date.slice(5)}</td>
+              <td className='py-2 text-zinc-400'>{row.date.slice(5)}</td>
               {row.entries.map((entry) => {
                 const intensity = entry.value / max;
                 return (
@@ -1134,7 +1138,7 @@ function MiniStat({
 }) {
   return (
     <div className='rounded-xl border border-zinc-800/20 bg-zinc-900/5 p-3'>
-      <div className='flex items-center gap-1.5 text-xs font-medium text-zinc-500'>
+      <div className='flex items-center gap-1.5 text-xs font-medium text-zinc-400'>
         {icon}
         {label}
       </div>

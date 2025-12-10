@@ -64,7 +64,7 @@ export default function ShopSuccessPage() {
     return (
       <div className='min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center'>
         <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4'></div>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary-400 mx-auto mb-4'></div>
           <p className='text-slate-300'>Processing your purchase...</p>
         </div>
       </div>
@@ -75,14 +75,14 @@ export default function ShopSuccessPage() {
     return (
       <div className='min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center'>
         <div className='text-center max-w-md mx-auto px-4'>
-          <div className='text-red-400 text-6xl mb-6'>⚠️</div>
+          <div className='text-lunary-error text-6xl mb-6'>⚠️</div>
           <h1 className='text-2xl font-semibold text-white mb-4'>
             Something went wrong
           </h1>
           <p className='text-slate-300 mb-6'>{error}</p>
           <Link
             href='/shop'
-            className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors'
+            className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white font-medium rounded-lg transition-colors'
           >
             Return to Shop
           </Link>
@@ -96,7 +96,7 @@ export default function ShopSuccessPage() {
       <div className='container mx-auto px-4 py-16'>
         <div className='max-w-2xl mx-auto text-center'>
           {/* Success Icon */}
-          <div className='text-green-400 text-8xl mb-8'>✅</div>
+          <div className='text-lunary-success text-8xl mb-8'>✅</div>
 
           {/* Success Message */}
           <h1 className='text-4xl font-light text-white mb-4'>
@@ -134,7 +134,7 @@ export default function ShopSuccessPage() {
           )}
 
           {/* Download Section */}
-          <div className='bg-purple-900/20 border border-purple-500/30 rounded-xl p-6 mb-8'>
+          <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6 mb-8'>
             <h2 className='text-lg font-medium text-white mb-3'>
               Download Your Pack
             </h2>
@@ -146,7 +146,7 @@ export default function ShopSuccessPage() {
 
             <button
               onClick={handleDownload}
-              className='w-full sm:w-auto px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors text-lg'
+              className='w-full sm:w-auto px-8 py-4 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white font-medium rounded-lg transition-colors text-lg'
             >
               📥 Download Now
             </button>

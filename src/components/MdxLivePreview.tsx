@@ -41,7 +41,7 @@ const components = {
   ),
   a: (props: any) => (
     <a
-      className='text-blue-600 hover:text-blue-800 underline'
+      className='text-lunary-primary hover:text-lunary-primary-400 underline'
       target='_blank'
       rel='noreferrer'
       {...props}
@@ -72,11 +72,11 @@ export function MdxLivePreview({ source }: { source: string }) {
   return (
     <div className='p-5 border-l border-gray-200 overflow-auto bg-white min-h-full'>
       <div className='prose max-w-none'>
-        <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4'>
-          <h3 className='text-yellow-800 font-medium mb-2'>
+        <div className='bg-lunary-accent-950 border border-lunary-accent-700 rounded-lg p-4 mb-4'>
+          <h3 className='text-lunary-accent-200 font-medium mb-2'>
             MDX Preview Temporarily Disabled
           </h3>
-          <p className='text-yellow-700 text-sm'>
+          <p className='text-lunary-accent-300 text-sm'>
             Live MDX preview is currently disabled. Raw content is shown below.
           </p>
         </div>

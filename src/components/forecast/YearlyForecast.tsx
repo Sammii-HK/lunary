@@ -5,7 +5,6 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { Paywall } from '@/components/Paywall';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import {
-  Calendar,
   Loader2,
   Download,
   CalendarDays,
@@ -17,15 +16,15 @@ import {
 const getAspectColor = (aspect: string): string => {
   const aspectLower = aspect.toLowerCase();
   if (aspectLower.includes('conjunction')) {
-    return 'text-blue-300';
+    return 'text-lunary-secondary-300';
   } else if (aspectLower.includes('trine')) {
-    return 'text-green-300';
+    return 'text-lunary-success-300';
   } else if (aspectLower.includes('opposition')) {
     return 'text-red-300';
   } else if (aspectLower.includes('square')) {
-    return 'text-orange-300';
+    return 'text-lunary-rose-300';
   } else if (aspectLower.includes('sextile')) {
-    return 'text-purple-300';
+    return 'text-lunary-primary-300';
   }
   return 'text-zinc-100';
 };
@@ -159,7 +158,7 @@ export function YearlyForecast() {
 
   const EmptyCard = ({ message }: { message: string }) => (
     <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4'>
-      <p className='text-sm text-zinc-500'>{message}</p>
+      <p className='text-sm text-zinc-400'>{message}</p>
     </div>
   );
 
@@ -269,7 +268,7 @@ export function YearlyForecast() {
         {forecast && !loading && (
           <div className='space-y-6'>
             {forecast.summary && (
-              <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
+              <div className='rounded-lg border border-lunary-primary/20 bg-lunary-primary-500/10 p-4'>
                 <p className='text-sm text-zinc-300 leading-relaxed'>
                   {forecast.summary}
                 </p>
@@ -289,7 +288,7 @@ export function YearlyForecast() {
                     <p className='text-xs uppercase tracking-wide text-zinc-400'>
                       {metric.label}
                     </p>
-                    <p className='text-xs text-zinc-500 leading-relaxed'>
+                    <p className='text-xs text-zinc-400 leading-relaxed'>
                       {metric.description}
                     </p>
                   </div>
@@ -479,7 +478,7 @@ export function YearlyForecast() {
                                         )}
                                       </span>
                                     </div>
-                                    <p className='text-xs uppercase tracking-wide text-zinc-500 mb-1'>
+                                    <p className='text-xs uppercase tracking-wide text-zinc-400 mb-1'>
                                       {aspect.planets
                                         .filter(Boolean)
                                         .join(' • ')}

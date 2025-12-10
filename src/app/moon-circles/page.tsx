@@ -122,13 +122,13 @@ export default async function MoonCirclesPage({
   return (
     <div className='space-y-12 p-4'>
       <header className='space-y-6 text-center'>
-        <p className='text-xs uppercase tracking-[0.3em] text-purple-200/80'>
+        <p className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200/80'>
           Moon Circle Community
         </p>
         <h1 className='text-4xl font-semibold tracking-tight text-white sm:text-5xl'>
           Share sacred insights with every moon
         </h1>
-        <p className='mx-auto max-w-3xl text-base text-purple-100/80 sm:text-lg'>
+        <p className='mx-auto max-w-3xl text-base text-lunary-primary-100/80 sm:text-lg'>
           Each new and full moon gathering invites reflection, ritual, and
           community. Browse past circles, read what others experienced, and
           anonymously share your own insight after each ceremony.
@@ -152,10 +152,10 @@ export default async function MoonCirclesPage({
                 key={filter.label}
                 href={href}
                 className={cn(
-                  'rounded-full border border-purple-500/30 px-4 py-2 text-sm font-medium transition hover:border-purple-300',
+                  'rounded-full border border-lunary-primary-700 px-4 py-2 text-sm font-medium transition hover:border-lunary-primary-300',
                   isActive
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-transparent text-purple-100',
+                    ? 'bg-lunary-primary-500 text-white'
+                    : 'bg-transparent text-lunary-primary-100',
                 )}
               >
                 {filter.label}
@@ -166,7 +166,7 @@ export default async function MoonCirclesPage({
       </header>
 
       {circles.length === 0 && (
-        <div className='rounded-3xl border border-dashed border-purple-500/40 bg-purple-500/5 p-10 text-center text-purple-100/80'>
+        <div className='rounded-3xl border border-dashed border-lunary-primary-600 bg-lunary-primary-900/5 p-10 text-center text-lunary-primary-100/80'>
           No Moon Circles found yet. Check back soon for upcoming gatherings.
         </div>
       )}
@@ -176,7 +176,7 @@ export default async function MoonCirclesPage({
           {circles.map((circle) => (
             <section
               key={circle.id}
-              className='rounded-3xl border border-purple-500/30 bg-black/40 p-6 shadow-lg shadow-purple-500/20 backdrop-blur'
+              className='rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary-900 backdrop-blur'
             >
               <div className='grid gap-8 lg:grid-cols-[1.2fr_0.8fr]'>
                 <div className='space-y-5'>
@@ -185,16 +185,16 @@ export default async function MoonCirclesPage({
                       className={cn(
                         'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
                         circle.moon_phase === 'Full Moon'
-                          ? 'bg-amber-400/20 text-amber-100'
-                          : 'bg-indigo-400/20 text-indigo-100',
+                          ? 'bg-lunary-accent-900 text-lunary-accent-100'
+                          : 'bg-lunary-primary-900 text-lunary-primary-100',
                       )}
                     >
                       {circle.moon_phase}
                     </span>
-                    <span className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'>
+                    <span className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-lunary-primary-100/80'>
                       {formatReadableDate(circle.event_date)}
                     </span>
-                    <span className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'>
+                    <span className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-lunary-primary-100/80'>
                       {circle.insight_count} insight
                       {circle.insight_count === 1 ? '' : 's'}
                     </span>
@@ -204,21 +204,21 @@ export default async function MoonCirclesPage({
                       {circle.theme || circle.title || 'Moon Circle'}
                     </h2>
                     {circle.description && (
-                      <p className='text-sm text-purple-100/80'>
+                      <p className='text-sm text-lunary-primary-100/80'>
                         {circle.description}
                       </p>
                     )}
                   </div>
                   {circle.focus_points.length > 0 && (
                     <div className='space-y-2'>
-                      <p className='text-xs uppercase tracking-[0.2em] text-purple-200/70'>
+                      <p className='text-xs uppercase tracking-[0.2em] text-lunary-primary-200/70'>
                         Focus
                       </p>
                       <div className='flex flex-wrap gap-2'>
                         {circle.focus_points.map((focus) => (
                           <span
                             key={focus}
-                            className='rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-100/80'
+                            className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-lunary-primary-100/80'
                           >
                             {focus}
                           </span>
@@ -229,13 +229,13 @@ export default async function MoonCirclesPage({
                   <div className='flex flex-wrap gap-3'>
                     <Link
                       href={`/moon-circles/${circle.date_slug || circle.id}`}
-                      className='inline-flex items-center justify-center rounded-2xl bg-white/90 px-5 py-2.5 text-sm font-semibold text-purple-900 shadow-inner hover:bg-white'
+                      className='inline-flex items-center justify-center rounded-2xl bg-white/90 px-5 py-2.5 text-sm font-semibold text-lunary-primary-900 shadow-inner hover:bg-white'
                     >
                       View circle details
                     </Link>
                     <Link
                       href={`/moon-circles/${circle.date_slug || circle.id}?share=true`}
-                      className='inline-flex items-center justify-center rounded-2xl border border-purple-500/40 px-5 py-2.5 text-sm font-semibold text-purple-100 hover:border-purple-300 hover:text-white'
+                      className='inline-flex items-center justify-center rounded-2xl border border-lunary-primary-600 px-5 py-2.5 text-sm font-semibold text-lunary-primary-100 hover:border-lunary-primary-300 hover:text-white'
                     >
                       Share an insight
                     </Link>

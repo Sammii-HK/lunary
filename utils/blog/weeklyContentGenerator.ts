@@ -6,7 +6,6 @@ import {
   GeoVector,
   Ecliptic,
   Illumination,
-  MoonPhase,
 } from 'astronomy-engine';
 import {
   crystalDatabase,
@@ -1852,5 +1851,5 @@ function getWeekNumber(date: Date): number {
   const days = Math.floor(
     (date.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000),
   );
-  return Math.ceil(days / 7);
+  return Math.floor(days / 7) + 1;
 }

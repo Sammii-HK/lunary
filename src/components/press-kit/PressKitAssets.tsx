@@ -94,7 +94,7 @@ export function PressKitAssets() {
   return (
     <section className='space-y-6 rounded-3xl border border-white/10 bg-black/40 p-6'>
       <div className='flex flex-col gap-2'>
-        <p className='text-xs uppercase tracking-[0.4em] text-purple-200'>
+        <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
           Downloadables
         </p>
         <h3 className='text-3xl font-semibold text-white'>Press Kit Assets</h3>
@@ -104,7 +104,7 @@ export function PressKitAssets() {
         </p>
         <Link
           href='/press-kit/lunary-press-kit.zip'
-          className='inline-flex w-fit items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-purple-400'
+          className='inline-flex w-fit items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-lunary-primary-400'
         >
           <Download className='h-4 w-4' />
           Download All Assets (.zip)
@@ -138,7 +138,7 @@ export function PressKitAssets() {
                         </p>
                       )}
                     </div>
-                    <span className='text-xs uppercase tracking-[0.3em] text-purple-200'>
+                    <span className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
                       {asset.format}
                     </span>
                   </div>
@@ -146,7 +146,7 @@ export function PressKitAssets() {
                   <a
                     href={asset.file}
                     download
-                    className='inline-flex items-center gap-1 text-sm text-purple-200 hover:text-purple-100'
+                    className='inline-flex items-center gap-1 text-sm text-lunary-primary-200 hover:text-lunary-primary-100'
                   >
                     <Download className='h-4 w-4' />
                     Download
@@ -158,12 +158,12 @@ export function PressKitAssets() {
         ))}
       </div>
 
-      <div className='rounded-2xl border border-purple-400/20 bg-purple-500/10 p-4'>
-        <p className='text-sm text-purple-100'>
+      <div className='rounded-2xl border border-lunary-primary-400/20 bg-lunary-primary-500/10 p-4'>
+        <p className='text-sm text-lunary-primary-100'>
           Need something specific? Email{' '}
           <a
             href='mailto:press@lunary.app'
-            className='underline decoration-purple-200 hover:text-white'
+            className='underline decoration-lunary-primary-200 hover:text-white'
           >
             press@lunary.app
           </a>{' '}

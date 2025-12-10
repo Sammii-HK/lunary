@@ -19,6 +19,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     interval: 'month',
     stripePriceId: '', // No Stripe for free plan
     features: [
+      'Your personal birth chart',
       'Daily moon phases & basic insights',
       'General tarot card of the day',
       '2 tarot spreads per month',
@@ -107,7 +108,8 @@ export const FEATURE_ACCESS = {
     'grimoire',
     'lunar_calendar',
     'weekly_ai_ritual',
-    'birthday_collection', // Allow free users to enter birthday (birth chart still requires paid)
+    'birthday_collection',
+    'birth_chart', // Allow free users to view their birth chart (encourage signups & sharing)
   ],
   lunary_plus: [
     'birth_chart',

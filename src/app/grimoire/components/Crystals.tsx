@@ -70,6 +70,27 @@ const Crystals = () => {
         </p>
       </div>
 
+      {/* Complete Guide Banner */}
+      <Link
+        href='/grimoire/guides/crystal-healing-guide'
+        className='block p-4 rounded-lg bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
+      >
+        <div className='flex items-center justify-between'>
+          <div>
+            <h3 className='text-lg font-medium text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors'>
+              📖 Read the Complete Crystal Healing Guide
+            </h3>
+            <p className='text-sm text-zinc-400'>
+              Learn crystal selection, cleansing, programming, and healing
+              practices
+            </p>
+          </div>
+          <span className='text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+            →
+          </span>
+        </div>
+      </Link>
+
       <section id='daily-selection' className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>Daily Selection</h2>
         <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
@@ -111,9 +132,9 @@ const Crystals = () => {
                       <Link
                         key={crystal.name}
                         href={`/grimoire/crystals/${crystalSlug}`}
-                        className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                        className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
                       >
-                        <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                        <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                           {crystal.name}
                         </h4>
                         <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -135,7 +156,7 @@ const Crystals = () => {
         </h2>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Crystal Grids
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -150,7 +171,7 @@ const Crystals = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Crystal Programming
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -165,7 +186,7 @@ const Crystals = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Crystal Cleansing Methods
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -194,7 +215,7 @@ const Crystals = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Chakra Crystals
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-zinc-300'>
@@ -230,7 +251,7 @@ const Crystals = () => {
         </h2>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How often should I cleanse my crystals?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -240,7 +261,7 @@ const Crystals = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Which crystals work well together?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -252,7 +273,7 @@ const Crystals = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Can I put crystals in water?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -270,42 +291,42 @@ const Crystals = () => {
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <a
+          <Link
             href='/grimoire/practices'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Spells & Rituals
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/moon'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon Magic
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/candle-magic'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Candle Magic
-          </a>
-          <a
-            href='/grimoire/correspondences#colors'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          </Link>
+          <Link
+            href='/grimoire/correspondences/colors'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Color Correspondences
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/chakras'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Chakra Healing
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/correspondences'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Magical Correspondences
-          </a>
+          </Link>
         </div>
       </section>
     </div>

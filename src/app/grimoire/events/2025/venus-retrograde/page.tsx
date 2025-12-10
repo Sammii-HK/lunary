@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Calendar, Heart, Sparkles } from 'lucide-react';
+import { Heart, Sparkles } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 export const metadata: Metadata = {
@@ -38,15 +38,6 @@ export default function VenusRetrograde2025Page() {
         datePublished='2024-12-01'
         dateModified={new Date().toISOString().split('T')[0]}
         articleSection='Astrology Events'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Events', href: '/grimoire/events' },
-          { label: '2025', href: '/grimoire/events/2025' },
-          {
-            label: 'Venus Retrograde',
-            href: '/grimoire/events/2025/venus-retrograde',
-          },
-        ]}
         intro='Venus Retrograde is a powerful time for reassessing relationships, values, and self-worth. In 2025, Venus will retrograde from March 1 to April 12, moving through Aries and Pisces. This guide covers everything you need to know about navigating love and finances during this cosmic period.'
         meaning={`**What is Venus Retrograde?**
 
@@ -93,17 +84,17 @@ Venus Retrograde asks us to:
           <h2 className='text-2xl font-medium text-zinc-100'>
             Venus Retrograde 2025 Timeline
           </h2>
-          <div className='p-6 rounded-lg border border-pink-500/30 bg-pink-500/10'>
+          <div className='p-6 rounded-lg border border-lunary-rose-700 bg-lunary-rose-950'>
             <div className='flex items-start gap-4'>
-              <div className='p-2 rounded-lg bg-pink-500/20'>
-                <Heart className='h-6 w-6 text-pink-400' />
+              <div className='p-2 rounded-lg bg-lunary-rose-900'>
+                <Heart className='h-6 w-6 text-lunary-rose' />
               </div>
               <div className='space-y-4'>
                 <div>
                   <h3 className='text-lg font-medium text-zinc-100'>
                     March 1 - April 12, 2025
                   </h3>
-                  <p className='text-pink-300'>Aries → Pisces</p>
+                  <p className='text-lunary-rose-300'>Aries → Pisces</p>
                 </div>
                 <div className='space-y-2 text-zinc-300 text-sm'>
                   <p>
@@ -134,8 +125,8 @@ Venus Retrograde asks us to:
             Venus Retrograde Guidance
           </h2>
           <div className='grid md:grid-cols-2 gap-4'>
-            <div className='p-6 rounded-lg border border-green-500/30 bg-green-500/10'>
-              <h3 className='text-lg font-medium text-green-400 mb-4'>
+            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success-950'>
+              <h3 className='text-lg font-medium text-lunary-success mb-4'>
                 Embrace During Venus Rx
               </h3>
               <ul className='space-y-2 text-zinc-300 text-sm'>
@@ -147,8 +138,8 @@ Venus Retrograde asks us to:
                 <li>• Heal past heartaches</li>
               </ul>
             </div>
-            <div className='p-6 rounded-lg border border-red-500/30 bg-red-500/10'>
-              <h3 className='text-lg font-medium text-red-400 mb-4'>
+            <div className='p-6 rounded-lg border border-lunary-error-700 bg-lunary-error-950'>
+              <h3 className='text-lg font-medium text-lunary-error mb-4'>
                 Avoid If Possible
               </h3>
               <ul className='space-y-2 text-zinc-300 text-sm'>
@@ -167,12 +158,12 @@ Venus Retrograde asks us to:
           <h2 className='text-2xl font-medium text-zinc-100'>
             Venus Retrograde Rituals
           </h2>
-          <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+          <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
             <div className='flex items-start gap-4'>
-              <Sparkles className='h-6 w-6 text-purple-400 flex-shrink-0' />
+              <Sparkles className='h-6 w-6 text-lunary-primary-400 flex-shrink-0' />
               <div className='space-y-4'>
                 <div>
-                  <h3 className='font-medium text-purple-300'>
+                  <h3 className='font-medium text-lunary-primary-300'>
                     Self-Love Bath Ritual
                   </h3>
                   <p className='text-zinc-300 text-sm'>
@@ -182,7 +173,7 @@ Venus Retrograde asks us to:
                   </p>
                 </div>
                 <div>
-                  <h3 className='font-medium text-purple-300'>
+                  <h3 className='font-medium text-lunary-primary-300'>
                     Rose Quartz Heart Healing
                   </h3>
                   <p className='text-zinc-300 text-sm'>
@@ -192,7 +183,7 @@ Venus Retrograde asks us to:
                   </p>
                 </div>
                 <div>
-                  <h3 className='font-medium text-purple-300'>
+                  <h3 className='font-medium text-lunary-primary-300'>
                     Venus Altar Creation
                   </h3>
                   <p className='text-zinc-300 text-sm'>

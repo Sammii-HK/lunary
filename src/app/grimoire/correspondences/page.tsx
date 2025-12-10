@@ -5,7 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Correspondences from '../components/Correspondences';
 
 export const metadata: Metadata = {
-  title: 'Magical Correspondences: Complete Guide - Lunary',
+  title: 'Magical Correspondences: Colors, Elements, Planets & Days - Lunary',
   description:
     'Explore magical correspondences including elements, colors, planets, days, deities, flowers, numbers, wood, herbs, and animals. Comprehensive guide to symbolic connections in witchcraft. Learn how to use correspondences in spellwork and rituals.',
   keywords: [
@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     'spell correspondences',
   ],
   openGraph: {
-    title: 'Magical Correspondences: Complete Guide - Lunary',
+    title: 'Magical Correspondences: Colors, Elements, Planets & Days - Lunary',
     description:
       'Explore magical correspondences including elements, colors, planets, days, deities, flowers, numbers, wood, herbs, and animals. Comprehensive guide to symbolic connections.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Magical Correspondences: Complete Guide - Lunary',
+    title: 'Magical Correspondences: Colors, Elements, Planets & Days - Lunary',
     description:
       'Explore magical correspondences including elements, colors, planets, days, deities, flowers, numbers, wood, herbs, and animals.',
   },
@@ -40,7 +40,7 @@ export default function CorrespondencesPage() {
   return (
     <>
       <SEOContentTemplate
-        title='Magical Correspondences: Complete Guide - Lunary'
+        title='Magical Correspondences: Colors, Elements, Planets & Days - Lunary'
         h1='Magical Correspondences'
         description='Explore the symbolic connections between elements, colors, planets, and magical practices. Understanding correspondences helps you align your spellwork with natural energies and cosmic forces.'
         keywords={[

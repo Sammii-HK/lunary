@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  grimoire,
-  grimoireItems,
-  customContentHrefs,
-} from '@/constants/grimoire';
+import { grimoire, customContentHrefs } from '@/constants/grimoire';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
@@ -12,57 +8,98 @@ import { sectionToSlug, slugToSection } from '@/utils/grimoire';
 import { useState, useEffect, useTransition, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
-  ChevronDownIcon,
   ChevronRightIcon,
   Menu,
   X,
   Sparkles,
   Moon as MoonIcon,
-  Sun,
   Star,
   Layers,
   Gem,
   BookOpen,
   Compass,
-  Heart,
-  Flame,
-  Eye,
+  Notebook,
   Hash,
-  Users,
-  Wand2,
-  Circle,
+  Wand,
 } from 'lucide-react';
 
-const SECTION_ICONS: Record<string, React.ReactNode> = {
-  moon: <MoonIcon size={18} />,
-  wheelOfTheYear: <Sun size={18} />,
-  astronomy: <Star size={18} />,
-  tarot: <Layers size={18} />,
-  runes: <Hash size={18} />,
-  chakras: <Circle size={18} />,
-  numerology: <Hash size={18} />,
-  crystals: <Gem size={18} />,
-  correspondences: <BookOpen size={18} />,
-  practices: <Wand2 size={18} />,
-  birthChart: <Compass size={18} />,
-  candleMagic: <Flame size={18} />,
-  divination: <Eye size={18} />,
-  modernWitchcraft: <Sparkles size={18} />,
-  meditation: <Heart size={18} />,
-  compatibilityChart: <Users size={18} />,
-  compatibility: <Heart size={18} />,
-  placements: <Star size={18} />,
-  aspects: <Circle size={18} />,
-  houses: <Compass size={18} />,
-  decans: <Star size={18} />,
-  cusps: <Star size={18} />,
-  birthday: <Sun size={18} />,
-  chineseZodiac: <MoonIcon size={18} />,
-  seasons: <Sun size={18} />,
-  transits: <Star size={18} />,
-  glossary: <BookOpen size={18} />,
-  events: <Sparkles size={18} />,
-};
+const currentYear = new Date().getFullYear();
+
+// Sidebar categories for organized navigation
+const SIDEBAR_CATEGORIES = [
+  {
+    name: 'Complete Guides',
+    icon: <Sparkles size={14} />,
+    sections: ['guides'],
+  },
+  {
+    name: 'Zodiac & Signs',
+    icon: <Star size={14} />,
+    sections: [
+      'zodiac',
+      'decans',
+      'cusps',
+      'birthday',
+      'seasons',
+      'compatibility',
+    ],
+  },
+  {
+    name: 'Astrology',
+    icon: <Compass size={14} />,
+    sections: [
+      'birthChart',
+      'houses',
+      'aspects',
+      'placements',
+      'transits',
+      'horoscopes',
+      'astronomy',
+    ],
+  },
+  {
+    name: 'Moon',
+    icon: <MoonIcon size={14} />,
+    sections: ['moon'],
+  },
+  {
+    name: 'Tarot & Divination',
+    icon: <Layers size={14} />,
+    sections: ['tarot', 'runes', 'divination'],
+  },
+  {
+    name: 'Crystals',
+    icon: <Gem size={14} />,
+    sections: ['crystals'],
+  },
+  {
+    name: 'Numerology',
+    icon: <Hash size={14} />,
+    sections: ['numerology'],
+  },
+  {
+    name: 'Witchcraft',
+    icon: <Wand size={14} />,
+    sections: [
+      'modernWitchcraft',
+      'practices',
+      'candleMagic',
+      'correspondences',
+      'meditation',
+    ],
+  },
+  {
+    name: 'Other',
+    icon: <BookOpen size={14} />,
+    sections: [
+      'chakras',
+      'wheelOfTheYear',
+      'chineseZodiac',
+      'events',
+      'glossary',
+    ],
+  },
+];
 import { AskTheGrimoire } from './AskTheGrimoire';
 import { captureEvent } from '@/lib/posthog-client';
 
@@ -179,6 +216,457 @@ const GrimoireContent = {
   compatibilityChart: <CompatibilityChart />,
 };
 
+// Complete Grimoire structure with all subsections linked to dedicated pages
+const GRIMOIRE_FULL_STRUCTURE = [
+  {
+    name: 'Complete Guides',
+    icon: <Star className='w-5 h-5' />,
+    items: [
+      {
+        title: 'All Guides',
+        href: '/grimoire/guides',
+        description: 'In-depth pillar content',
+      },
+      {
+        title: 'Birth Chart Guide',
+        href: '/grimoire/guides/birth-chart-complete-guide',
+        description: 'Master natal astrology',
+      },
+      {
+        title: 'Tarot Guide',
+        href: '/grimoire/guides/tarot-complete-guide',
+        description: 'All 78 cards explained',
+      },
+      {
+        title: 'Moon Phases Guide',
+        href: '/grimoire/guides/moon-phases-guide',
+        description: 'Lunar cycles & rituals',
+      },
+      {
+        title: 'Crystal Healing Guide',
+        href: '/grimoire/guides/crystal-healing-guide',
+        description: 'Properties & practices',
+      },
+    ],
+  },
+  {
+    name: 'Zodiac & Signs',
+    icon: <Compass className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Zodiac Signs',
+        href: '/grimoire/zodiac',
+        description: 'All 12 zodiac signs',
+      },
+      {
+        title: 'Zodiac Decans',
+        href: '/grimoire/decans',
+        description: '36 decans of the zodiac',
+      },
+      {
+        title: 'Zodiac Cusps',
+        href: '/grimoire/cusps',
+        description: 'Born on the cusp?',
+      },
+      {
+        title: 'Birthday Zodiac',
+        href: '/grimoire/birthday',
+        description: 'Find your sign by date',
+      },
+      {
+        title: 'Zodiac Seasons',
+        href: '/grimoire/seasons',
+        description: 'Astrological seasons',
+      },
+      {
+        title: 'Compatibility',
+        href: '/grimoire/compatibility',
+        description: 'Sign compatibility',
+      },
+    ],
+  },
+  {
+    name: 'Astrology',
+    icon: <Compass className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Birth Chart',
+        href: '/grimoire/birth-chart',
+        description: 'Your natal chart guide',
+      },
+      {
+        title: 'Astrological Houses',
+        href: '/grimoire/houses',
+        description: 'All 12 houses',
+      },
+      {
+        title: 'Aspects',
+        href: '/grimoire/aspects',
+        description: 'Planetary aspects',
+      },
+      {
+        title: 'Planet Placements',
+        href: '/grimoire/placements',
+        description: 'Planets in signs',
+      },
+      {
+        title: 'Rising Sign',
+        href: '/grimoire/rising-sign',
+        description: 'Your ascendant',
+      },
+      {
+        title: 'Synastry',
+        href: '/grimoire/synastry',
+        description: 'Relationship compatibility',
+      },
+      {
+        title: 'Lunar Nodes',
+        href: '/grimoire/lunar-nodes',
+        description: 'North & South nodes',
+      },
+      {
+        title: 'Retrogrades',
+        href: '/grimoire/retrogrades',
+        description: 'Retrograde planets',
+      },
+      {
+        title: 'Transits',
+        href: '/grimoire/transits',
+        description: 'Current planetary transits',
+      },
+      {
+        title: 'Monthly Horoscopes',
+        href: '/grimoire/horoscopes',
+        description: 'Sign forecasts',
+      },
+      {
+        title: 'Astronomy',
+        href: '/grimoire/astronomy',
+        description: 'Planets & celestial bodies',
+      },
+    ],
+  },
+  {
+    name: 'Moon',
+    icon: <MoonIcon className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Moon Phases',
+        href: '/grimoire/moon/phases',
+        description: 'New to Full Moon',
+      },
+      {
+        title: 'Full Moon Names',
+        href: '/grimoire/moon/full-moons',
+        description: 'Monthly full moons',
+      },
+      {
+        title: 'Moon Signs',
+        href: '/grimoire/moon-signs',
+        description: 'Emotional moon placements',
+      },
+      {
+        title: 'Moon in Signs',
+        href: '/grimoire/moon-signs',
+        description: 'Transit moon positions',
+      },
+      {
+        title: 'Moon Rituals',
+        href: '/grimoire/moon-rituals',
+        description: 'Lunar ceremonies',
+      },
+      {
+        title: 'Eclipses',
+        href: '/grimoire/eclipses',
+        description: 'Solar & lunar eclipses',
+      },
+    ],
+  },
+  {
+    name: 'Tarot & Divination',
+    icon: <Layers className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Tarot Cards',
+        href: '/grimoire/tarot',
+        description: 'All 78 cards',
+      },
+      {
+        title: 'Tarot Spreads',
+        href: '/grimoire/tarot/spreads',
+        description: 'Reading layouts',
+      },
+      {
+        title: 'Major Arcana',
+        href: '/grimoire/tarot/the-fool',
+        description: '22 major cards',
+      },
+      {
+        title: 'Minor Arcana',
+        href: '/grimoire/tarot-suits/wands',
+        description: '56 minor cards',
+      },
+      {
+        title: 'Reversed Cards',
+        href: '/grimoire/reversed-cards-guide',
+        description: 'Upside-down meanings',
+      },
+      {
+        title: 'Card Combinations',
+        href: '/grimoire/card-combinations',
+        description: 'Card pairs',
+      },
+      {
+        title: 'Runes',
+        href: '/grimoire/runes',
+        description: 'Elder Futhark runes',
+      },
+      {
+        title: 'Pendulum',
+        href: '/grimoire/divination/pendulum',
+        description: 'Pendulum divination',
+      },
+      {
+        title: 'Scrying',
+        href: '/grimoire/divination/scrying/crystal-ball',
+        description: 'Crystal ball & mirror',
+      },
+      {
+        title: 'Dream Interpretation',
+        href: '/grimoire/divination/dream-interpretation',
+        description: 'Dream meanings',
+      },
+      {
+        title: 'Omen Reading',
+        href: '/grimoire/divination/omen-reading',
+        description: 'Signs & omens',
+      },
+    ],
+  },
+  {
+    name: 'Numerology',
+    icon: <Hash className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Angel Numbers',
+        href: '/grimoire/angel-numbers',
+        description: '111, 222, 333...',
+      },
+      {
+        title: 'Life Path Numbers',
+        href: '/grimoire/life-path',
+        description: 'Your core number',
+      },
+      {
+        title: 'Mirror Hours',
+        href: '/grimoire/mirror-hours',
+        description: '11:11, 12:21...',
+      },
+      {
+        title: 'Double Hours',
+        href: '/grimoire/double-hours',
+        description: '12:12, 13:13...',
+      },
+      {
+        title: 'Core Numbers',
+        href: '/grimoire/numerology/core-numbers',
+        description: 'Numbers 1-9',
+      },
+      {
+        title: 'Master Numbers',
+        href: '/grimoire/numerology/master-numbers',
+        description: '11, 22, 33',
+      },
+      {
+        title: 'Expression Numbers',
+        href: '/grimoire/numerology/expression',
+        description: 'From your name',
+      },
+      {
+        title: 'Soul Urge',
+        href: '/grimoire/numerology/soul-urge',
+        description: "Heart's desire",
+      },
+      {
+        title: 'Karmic Debt',
+        href: '/grimoire/numerology/karmic-debt',
+        description: 'Karmic lessons',
+      },
+      {
+        title: 'Planetary Days',
+        href: '/grimoire/numerology/planetary-days',
+        description: 'Day energies',
+      },
+    ],
+  },
+  {
+    name: 'Crystals',
+    icon: <Gem className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Crystal Guide',
+        href: '/grimoire/crystals',
+        description: 'All crystals',
+      },
+      {
+        title: 'Crystal Healing Guide',
+        href: '/grimoire/guides/crystal-healing-guide',
+        description: 'Complete guide',
+      },
+    ],
+  },
+  {
+    name: 'Witchcraft & Practices',
+    icon: <Wand className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Modern Witchcraft',
+        href: '/grimoire/modern-witchcraft',
+        description: 'Witchcraft overview',
+      },
+      {
+        title: 'Witch Types',
+        href: '/grimoire/modern-witchcraft/witch-types',
+        description: 'Green, Kitchen, Hedge...',
+      },
+      {
+        title: 'Witchcraft Tools',
+        href: '/grimoire/modern-witchcraft/tools',
+        description: 'Athame, Wand, Cauldron...',
+      },
+      {
+        title: 'Witchcraft Ethics',
+        href: '/grimoire/witchcraft-ethics',
+        description: 'Ethical practice',
+      },
+      {
+        title: 'Spellcraft',
+        href: '/grimoire/spellcraft-fundamentals',
+        description: 'Spell basics',
+      },
+      {
+        title: 'Spells',
+        href: '/grimoire/practices',
+        description: 'Spell collection',
+      },
+      {
+        title: 'Candle Magic',
+        href: '/grimoire/candle-magic',
+        description: 'Candle spells',
+      },
+      {
+        title: 'Candle Colors',
+        href: '/grimoire/candle-magic/colors',
+        description: 'Color meanings',
+      },
+      {
+        title: 'Correspondences',
+        href: '/grimoire/correspondences',
+        description: 'Magical associations',
+      },
+      {
+        title: 'Meditation',
+        href: '/grimoire/meditation',
+        description: 'Mindfulness practices',
+      },
+      {
+        title: 'Breathwork',
+        href: '/grimoire/meditation/breathwork',
+        description: 'Breathing techniques',
+      },
+      {
+        title: 'Grounding',
+        href: '/grimoire/meditation/grounding',
+        description: 'Grounding exercises',
+      },
+    ],
+  },
+  {
+    name: 'Other',
+    icon: <BookOpen className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Chakras',
+        href: '/grimoire/chakras',
+        description: '7 energy centers',
+      },
+      {
+        title: 'Wheel of the Year',
+        href: '/grimoire/wheel-of-the-year',
+        description: '8 sabbats',
+      },
+      {
+        title: 'Chinese Zodiac',
+        href: '/grimoire/chinese-zodiac',
+        description: '12 animals',
+      },
+      {
+        title: 'Astrological Events',
+        href: '/grimoire/events',
+        description: `${currentYear} events`,
+      },
+      {
+        title: 'Glossary',
+        href: '/grimoire/glossary',
+        description: 'Astrology terms',
+      },
+    ],
+  },
+];
+
+function GrimoireIndexPage() {
+  return (
+    <div className='p-4 md:py-12 lg:py-16'>
+      <div className='max-w-6xl mx-auto'>
+        {/* Header */}
+        <div className='text-center mb-12 md:mb-16'>
+          <Notebook className='w-16 h-16 md:w-20 md:h-20 text-lunary-primary-400 mx-auto mb-6' />
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+            Welcome to the Grimoire
+          </h1>
+          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+            Explore mystical knowledge, cosmic wisdom, and ancient practices to
+            deepen your spiritual journey.
+          </p>
+        </div>
+
+        {/* Categories with all subsections */}
+        <div className='space-y-12 md:space-y-16'>
+          {GRIMOIRE_FULL_STRUCTURE.map((category) => (
+            <section key={category.name}>
+              {/* Category Header */}
+              <div className='flex items-center gap-3 mb-6'>
+                <span className='text-lunary-primary-400'>{category.icon}</span>
+                <h2 className='text-xl md:text-2xl font-medium text-zinc-100'>
+                  {category.name}
+                </h2>
+                <div className='flex-1 h-px bg-zinc-800' />
+              </div>
+
+              {/* All Items as Links */}
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3'>
+                {category.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    prefetch={true}
+                    className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                  >
+                    <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
+                      {item.title}
+                    </h3>
+                    <p className='text-xs text-zinc-400'>{item.description}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function GrimoireLayout({
   currentSectionSlug,
 }: {
@@ -281,9 +769,9 @@ export default function GrimoireLayout({
           <Link
             href='/grimoire'
             onClick={() => setSidebarOpen(false)}
-            className='text-lg md:text-xl lg:text-2xl font-bold text-white hover:text-purple-400 transition-colors flex items-center gap-2'
+            className='text-lg md:text-xl lg:text-2xl font-bold text-white hover:text-lunary-primary-400 transition-colors flex items-center gap-2'
           >
-            <Sparkles className='w-5 h-5 md:w-6 md:h-6 text-purple-400' />
+            <Sparkles className='w-5 h-5 md:w-6 md:h-6 text-lunary-primary-400' />
             Grimoire
           </Link>
           <button
@@ -301,123 +789,127 @@ export default function GrimoireLayout({
           onSidebarClose={() => setSidebarOpen(false)}
         />
 
-        {/* Navigation */}
+        {/* Navigation - Categorized */}
         <div className='flex-1 overflow-y-auto p-3 md:p-4 lg:p-5'>
-          <div className='space-y-1'>
-            {grimoireItems.map((itemKey: string) => {
-              const isExpanded = expandedSections.has(itemKey);
-              const hasContents =
-                grimoire[itemKey].contents &&
-                grimoire[itemKey].contents!.length > 0;
-              const isActive = currentSection === itemKey;
-
-              const slug = sectionToSlug(itemKey);
-              const href = `/grimoire/${slug}`;
-              const icon = SECTION_ICONS[itemKey];
-
-              return (
-                <div key={itemKey} className='w-full'>
-                  {/* Main header */}
-                  <div
-                    className={`flex items-center rounded-lg transition-all duration-200 group ${
-                      isActive
-                        ? 'bg-purple-500/10 border-l-2 border-purple-400'
-                        : 'hover:bg-zinc-800/50'
-                    }`}
-                  >
-                    {hasContents ? (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleSection(itemKey);
-                        }}
-                        className='p-2 hover:bg-zinc-700/50 rounded-lg transition-colors'
-                        aria-label={
-                          isExpanded
-                            ? `Collapse ${grimoire[itemKey].title}`
-                            : `Expand ${grimoire[itemKey].title}`
-                        }
-                        aria-expanded={isExpanded}
-                      >
-                        <ChevronRightIcon
-                          size={14}
-                          className={`text-zinc-500 transition-transform duration-200 ${
-                            isExpanded ? 'rotate-90' : ''
-                          }`}
-                          aria-hidden='true'
-                        />
-                      </button>
-                    ) : (
-                      <div className='w-8' />
-                    )}
-
-                    <Link
-                      href={href}
-                      prefetch={true}
-                      onClick={() => {
-                        startTransition(() => {
-                          setSidebarOpen(false);
-                        });
-                      }}
-                      className={`flex-1 flex items-center gap-3 py-2.5 px-2 text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'text-purple-400'
-                          : 'text-zinc-300 group-hover:text-white'
-                      }`}
-                    >
-                      <span
-                        className={`transition-colors ${
-                          isActive
-                            ? 'text-purple-400'
-                            : 'text-zinc-500 group-hover:text-purple-400'
-                        }`}
-                      >
-                        {icon}
-                      </span>
-                      {grimoire[itemKey].title}
-                    </Link>
-                  </div>
-
-                  {/* Collapsible content */}
-                  {hasContents && (
-                    <div
-                      className={`
-                          overflow-hidden transition-all duration-300 ease-in-out
-                          ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}
-                        `}
-                    >
-                      <div className='ml-8 pl-3 mt-1 mb-2 border-l border-zinc-800 space-y-0.5'>
-                        {grimoire[itemKey].contents!.map((content: string) => {
-                          const slug = sectionToSlug(itemKey);
-                          // Check if there's a custom href for this content
-                          const customHref =
-                            customContentHrefs[itemKey]?.[content];
-                          const href =
-                            customHref ||
-                            `/grimoire/${slug}#${stringToKebabCase(content)}`;
-                          return (
-                            <Link
-                              key={content}
-                              href={href}
-                              prefetch={true}
-                              onClick={() => {
-                                startTransition(() => {
-                                  setSidebarOpen(false);
-                                });
-                              }}
-                              className='block py-1.5 px-3 text-sm text-zinc-400 hover:text-purple-300 hover:bg-purple-500/5 rounded-md transition-colors'
-                            >
-                              {content}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+          <div className='space-y-4'>
+            {SIDEBAR_CATEGORIES.map((category) => (
+              <div key={category.name}>
+                {/* Category Header */}
+                <div className='flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-zinc-400 uppercase tracking-wider'>
+                  <span className='text-lunary-primary-500'>
+                    {category.icon}
+                  </span>
+                  {category.name}
                 </div>
-              );
-            })}
+
+                {/* Category Items */}
+                <div className='space-y-0.5'>
+                  {category.sections.map((itemKey: string) => {
+                    if (!grimoire[itemKey]) return null;
+                    const isExpanded = expandedSections.has(itemKey);
+                    const hasContents =
+                      grimoire[itemKey].contents &&
+                      grimoire[itemKey].contents!.length > 0;
+                    const isActive = currentSection === itemKey;
+
+                    const slug = sectionToSlug(itemKey);
+                    const href = `/grimoire/${slug}`;
+
+                    return (
+                      <div key={itemKey} className='w-full'>
+                        <div
+                          className={`flex items-center rounded-lg transition-all duration-200 group ${
+                            isActive
+                              ? 'bg-lunary-primary-900/10 border-l-2 border-lunary-primary-400'
+                              : 'hover:bg-zinc-800/50'
+                          }`}
+                        >
+                          {hasContents ? (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleSection(itemKey);
+                              }}
+                              className='p-2 hover:bg-zinc-700/50 rounded-lg transition-colors'
+                              aria-label={
+                                isExpanded
+                                  ? `Collapse ${grimoire[itemKey].title}`
+                                  : `Expand ${grimoire[itemKey].title}`
+                              }
+                              aria-expanded={isExpanded}
+                            >
+                              <ChevronRightIcon
+                                size={14}
+                                className={`text-zinc-400 transition-transform duration-200 ${
+                                  isExpanded ? 'rotate-90' : ''
+                                }`}
+                                aria-hidden='true'
+                              />
+                            </button>
+                          ) : (
+                            <div className='w-8' />
+                          )}
+
+                          <Link
+                            href={href}
+                            prefetch={true}
+                            onClick={() => {
+                              startTransition(() => {
+                                setSidebarOpen(false);
+                              });
+                            }}
+                            className={`flex-1 flex items-center gap-3 py-2 px-2 text-sm font-medium transition-colors ${
+                              isActive
+                                ? 'text-lunary-primary-400'
+                                : 'text-zinc-300 group-hover:text-white'
+                            }`}
+                          >
+                            {grimoire[itemKey].title}
+                          </Link>
+                        </div>
+
+                        {hasContents && (
+                          <div
+                            className={`
+                              overflow-hidden transition-all duration-300 ease-in-out
+                              ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}
+                            `}
+                          >
+                            <div className='ml-8 pl-3 mt-1 mb-2 border-l border-zinc-800 space-y-0.5'>
+                              {grimoire[itemKey].contents!.map(
+                                (content: string) => {
+                                  const customHref =
+                                    customContentHrefs[itemKey]?.[content];
+                                  const contentHref =
+                                    customHref ||
+                                    `/grimoire/${slug}#${stringToKebabCase(content)}`;
+                                  return (
+                                    <Link
+                                      key={content}
+                                      href={contentHref}
+                                      prefetch={true}
+                                      onClick={() => {
+                                        startTransition(() => {
+                                          setSidebarOpen(false);
+                                        });
+                                      }}
+                                      className='block py-1.5 px-3 text-sm text-zinc-400 hover:text-lunary-primary-300 hover:bg-lunary-primary-900/5 rounded-md transition-colors'
+                                    >
+                                      {content}
+                                    </Link>
+                                  );
+                                },
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -435,8 +927,8 @@ export default function GrimoireLayout({
 
         {/* Loading indicator */}
         {isPending && (
-          <div className='absolute top-0 left-0 right-0 h-1 bg-purple-500/20 z-50'>
-            <div className='h-full bg-purple-500 animate-pulse' />
+          <div className='absolute top-0 left-0 right-0 h-1 bg-lunary-primary-900/20 z-50'>
+            <div className='h-full bg-lunary-primary-500 animate-pulse' />
           </div>
         )}
 
@@ -447,45 +939,7 @@ export default function GrimoireLayout({
             </div>
           </div>
         ) : (
-          <div className='flex items-center justify-center min-h-full text-center p-4 md:py-12 lg:py-16'>
-            <div className='max-w-6xl w-full'>
-              <div className='mb-8 md:mb-12'>
-                <Sparkles className='w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 text-purple-400 mx-auto mb-6 md:mb-8' />
-                <h1 className='text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-zinc-100 mb-4 md:mb-6'>
-                  Welcome to the Grimoire
-                </h1>
-                <p className='text-base md:text-lg lg:text-xl text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
-                  Explore mystical knowledge, cosmic wisdom, and ancient
-                  practices to deepen your spiritual journey.
-                </p>
-              </div>
-
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mt-8 md:mt-12'>
-                {grimoireItems.map((itemKey) => {
-                  const item = grimoire[itemKey];
-                  const slug = sectionToSlug(itemKey);
-                  return (
-                    <Link
-                      key={itemKey}
-                      href={`/grimoire/${slug}`}
-                      prefetch={true}
-                      className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 md:p-6 lg:p-8 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all'
-                    >
-                      <h3 className='text-lg md:text-xl lg:text-2xl font-medium text-zinc-100 mb-2 md:mb-3 group-hover:text-purple-400 transition-colors'>
-                        {item.title}
-                      </h3>
-                      {item.contents && (
-                        <p className='text-sm md:text-base lg:text-lg text-zinc-400'>
-                          {item.contents.length} section
-                          {item.contents.length !== 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          <GrimoireIndexPage />
         )}
       </div>
     </div>

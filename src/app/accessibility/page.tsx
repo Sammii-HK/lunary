@@ -19,7 +19,7 @@ export default function AccessibilityPage() {
           <h1 className='text-4xl font-semibold text-white mb-4'>
             Accessibility Statement
           </h1>
-          <p className='text-sm text-zinc-500'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
@@ -165,7 +165,7 @@ export default function AccessibilityPage() {
                 <strong>Accessibility Feedback:</strong>{' '}
                 <a
                   href='mailto:accessibility@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   accessibility@lunary.app
                 </a>
@@ -173,7 +173,7 @@ export default function AccessibilityPage() {
                 <strong>General Support:</strong>{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-purple-400 hover:text-purple-300'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
                 >
                   support@lunary.app
                 </a>
@@ -214,19 +214,19 @@ export default function AccessibilityPage() {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/help'
-                className='text-purple-400 hover:text-purple-300 text-sm'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
               >
                 Help & Support
               </Link>

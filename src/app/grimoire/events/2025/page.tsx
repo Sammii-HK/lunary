@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Calendar, Moon, Sun, ArrowRight, Star, Sparkles } from 'lucide-react';
+import { Moon, Sun, ArrowRight, Star, Sparkles } from 'lucide-react';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Astrology Events 2025: Complete Calendar & Guide',
@@ -70,44 +72,64 @@ const colorClasses: Record<
   { border: string; bg: string; text: string }
 > = {
   orange: {
-    border: 'border-orange-500/30',
-    bg: 'bg-orange-500/10',
-    text: 'text-orange-400',
+    border: 'border-lunary-rose-700',
+    bg: 'bg-lunary-rose-950',
+    text: 'text-lunary-rose',
   },
   pink: {
-    border: 'border-pink-500/30',
-    bg: 'bg-pink-500/10',
-    text: 'text-pink-400',
+    border: 'border-lunary-rose-700',
+    bg: 'bg-lunary-rose-950',
+    text: 'text-lunary-rose',
   },
   amber: {
-    border: 'border-amber-500/30',
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-400',
+    border: 'border-lunary-accent-700',
+    bg: 'bg-lunary-accent-950',
+    text: 'text-lunary-accent',
   },
   blue: {
-    border: 'border-blue-500/30',
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
+    border: 'border-lunary-secondary-700',
+    bg: 'bg-lunary-secondary-950',
+    text: 'text-lunary-secondary',
   },
 };
 
 export default function Events2025Page() {
+  const events2025ListSchema = createItemListSchema({
+    name: 'Astrology Events 2025',
+    description:
+      'Complete 2025 astrology events calendar with Mercury retrograde dates, Venus retrograde, eclipses, and major planetary transits.',
+    url: 'https://lunary.app/grimoire/events/2025',
+    items: [
+      {
+        name: 'Mercury Retrograde 2025',
+        url: 'https://lunary.app/grimoire/events/2025/mercury-retrograde',
+        description: '3 retrograde periods in 2025',
+      },
+      {
+        name: 'Venus Retrograde 2025',
+        url: 'https://lunary.app/grimoire/events/2025/venus-retrograde',
+        description: 'March 1 - April 12 in Aries → Pisces',
+      },
+      {
+        name: '2025 Eclipses',
+        url: 'https://lunary.app/grimoire/events/2025/eclipses',
+        description: '4 eclipses: 2 solar and 2 lunar',
+      },
+    ],
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(events2025ListSchema)}
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        {/* Header */}
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Events', href: '/grimoire/events' },
+            { label: '2025' },
+          ]}
+        />
         <div className='mb-12'>
-          <div className='flex items-center gap-2 text-sm text-zinc-500 mb-4'>
-            <Link href='/grimoire' className='hover:text-zinc-300'>
-              Grimoire
-            </Link>
-            <span>/</span>
-            <Link href='/grimoire/events' className='hover:text-zinc-300'>
-              Events
-            </Link>
-            <span>/</span>
-            <span className='text-zinc-400'>2025</span>
-          </div>
           <h1 className='text-4xl font-light text-zinc-100 mb-4'>
             Astrology Events 2025
           </h1>
@@ -118,25 +140,33 @@ export default function Events2025Page() {
         </div>
 
         {/* Quick Summary */}
-        <div className='mb-12 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-lg font-medium text-purple-300 mb-4'>
+        <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-lg font-medium text-lunary-primary-300 mb-4'>
             2025 At a Glance
           </h2>
           <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-center'>
             <div>
-              <div className='text-3xl font-light text-purple-400'>3</div>
+              <div className='text-3xl font-light text-lunary-primary-400'>
+                3
+              </div>
               <div className='text-sm text-zinc-400'>Mercury Retrogrades</div>
             </div>
             <div>
-              <div className='text-3xl font-light text-purple-400'>1</div>
+              <div className='text-3xl font-light text-lunary-primary-400'>
+                1
+              </div>
               <div className='text-sm text-zinc-400'>Venus Retrograde</div>
             </div>
             <div>
-              <div className='text-3xl font-light text-purple-400'>4</div>
+              <div className='text-3xl font-light text-lunary-primary-400'>
+                4
+              </div>
               <div className='text-sm text-zinc-400'>Eclipses</div>
             </div>
             <div>
-              <div className='text-3xl font-light text-purple-400'>6</div>
+              <div className='text-3xl font-light text-lunary-primary-400'>
+                6
+              </div>
               <div className='text-sm text-zinc-400'>Outer Planet Rx</div>
             </div>
           </div>
@@ -163,7 +193,8 @@ export default function Events2025Page() {
                     href={category.link}
                     className={`flex items-center gap-1 text-sm ${colors.text} hover:underline`}
                   >
-                    Learn More <ArrowRight className='h-4 w-4' />
+                    View {category.category} Details{' '}
+                    <ArrowRight className='h-4 w-4' />
                   </Link>
                 </div>
                 <div className='space-y-3'>
@@ -189,8 +220,8 @@ export default function Events2025Page() {
         {/* CTA */}
         <div className='mt-12 text-center'>
           <Link
-            href='/welcome'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium text-lg transition-colors'
+            href='/horoscope'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
           >
             Get Your Personalized 2025 Forecast
             <ArrowRight className='h-5 w-5' />

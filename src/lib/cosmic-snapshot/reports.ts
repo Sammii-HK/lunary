@@ -1,6 +1,5 @@
 import { LunaryContext } from '../ai/types';
 import { getCachedSnapshot } from './cache';
-import { sql } from '@vercel/postgres';
 
 export type WeeklyReport = {
   weekStart: Date;

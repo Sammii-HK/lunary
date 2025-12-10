@@ -88,6 +88,12 @@ export async function POST(request: NextRequest) {
   try {
     const { weekStart, currentWeek } = await request.json();
 
+    console.log('📥 Generate weekly posts request:', {
+      weekStart,
+      currentWeek,
+      currentWeekType: typeof currentWeek,
+    });
+
     // Trim whitespace from API key (common issue with .env files)
     const apiKey = process.env.OPENAI_API_KEY?.trim();
     const rawKey = process.env.OPENAI_API_KEY;
@@ -435,9 +441,8 @@ export async function POST(request: NextRequest) {
         // For Reddit, select appropriate subreddit based on post type
         let subreddit: string | undefined;
         if (platform === 'reddit') {
-          const { selectSubredditForPostType } = await import(
-            '@/config/reddit-subreddits'
-          );
+          const { selectSubredditForPostType } =
+            await import('@/config/reddit-subreddits');
           const selectedSubreddit = selectSubredditForPostType(postType);
           subreddit = selectedSubreddit.name;
         }
@@ -515,9 +520,8 @@ export async function POST(request: NextRequest) {
       // Reddit-specific guidelines
       let redditGuidelines = '';
       if (postPlan.platform === 'reddit' && postPlan.subreddit) {
-        const { getSubredditByName } = await import(
-          '@/config/reddit-subreddits'
-        );
+        const { getSubredditByName } =
+          await import('@/config/reddit-subreddits');
         const subredditInfo = getSubredditByName(postPlan.subreddit);
         if (subredditInfo) {
           redditGuidelines = `\n\nREDDIT SUBREDDIT: r/${postPlan.subreddit}

@@ -86,7 +86,7 @@ export default function Moon2026Page() {
 
         <header className='mb-12'>
           <div className='flex items-center gap-3 mb-4'>
-            <Moon className='h-10 w-10 text-purple-400' />
+            <Moon className='h-10 w-10 text-lunary-primary-400' />
             <h1 className='text-4xl md:text-5xl font-light'>
               2026 <span className='font-medium'>Moon Calendar</span>
             </h1>
@@ -99,7 +99,7 @@ export default function Moon2026Page() {
 
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-white mb-6 flex items-center gap-2'>
-            <Sparkles className='h-6 w-6 text-amber-400' />
+            <Sparkles className='h-6 w-6 text-lunary-accent' />
             Full Moons 2026
           </h2>
           <div className='grid gap-4'>
@@ -107,20 +107,20 @@ export default function Moon2026Page() {
               <Link
                 key={moon.month}
                 href={`/grimoire/moon/2026/full-moon-${moon.month.toLowerCase()}`}
-                className='group flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-xl hover:bg-zinc-800/50 hover:border-purple-500/50 transition-all'
+                className='group flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-xl hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='flex items-center gap-4'>
                   <span className='text-2xl'>🌕</span>
                   <div>
-                    <h3 className='font-medium text-white group-hover:text-purple-300'>
+                    <h3 className='font-medium text-white group-hover:text-lunary-primary-300'>
                       {moon.name}
                     </h3>
-                    <p className='text-sm text-zinc-500'>
+                    <p className='text-sm text-zinc-400'>
                       {moon.date} • {moon.sign}
                     </p>
                   </div>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-600 group-hover:text-purple-400 transition-colors' />
+                <ArrowRight className='h-5 w-5 text-zinc-600 group-hover:text-lunary-primary-400 transition-colors' />
               </Link>
             ))}
           </div>
@@ -128,7 +128,7 @@ export default function Moon2026Page() {
 
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-white mb-6 flex items-center gap-2'>
-            <Moon className='h-6 w-6 text-purple-400' />
+            <Moon className='h-6 w-6 text-lunary-primary-400' />
             New Moons 2026
           </h2>
           <div className='grid gap-4'>
@@ -136,25 +136,25 @@ export default function Moon2026Page() {
               <Link
                 key={moon.month}
                 href={`/grimoire/moon/2026/new-moon-${moon.month.toLowerCase()}`}
-                className='group flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-xl hover:bg-zinc-800/50 hover:border-purple-500/50 transition-all'
+                className='group flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-xl hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='flex items-center gap-4'>
                   <span className='text-2xl'>🌑</span>
                   <div>
-                    <h3 className='font-medium text-white group-hover:text-purple-300'>
+                    <h3 className='font-medium text-white group-hover:text-lunary-primary-300'>
                       New Moon in {moon.sign}
                     </h3>
-                    <p className='text-sm text-zinc-500'>{moon.date}</p>
+                    <p className='text-sm text-zinc-400'>{moon.date}</p>
                   </div>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-600 group-hover:text-purple-400 transition-colors' />
+                <ArrowRight className='h-5 w-5 text-zinc-600 group-hover:text-lunary-primary-400 transition-colors' />
               </Link>
             ))}
           </div>
         </section>
 
-        <section className='bg-purple-900/20 border border-purple-500/30 rounded-2xl p-8 text-center'>
-          <Calendar className='h-12 w-12 text-purple-400 mx-auto mb-4' />
+        <section className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-2xl p-8 text-center'>
+          <Calendar className='h-12 w-12 text-lunary-primary-400 mx-auto mb-4' />
           <h2 className='text-2xl font-medium text-white mb-4'>
             Track the Moon Daily
           </h2>
@@ -162,10 +162,10 @@ export default function Moon2026Page() {
             Get personalized lunar insights based on your birth chart.
           </p>
           <Link
-            href='/welcome'
-            className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            href='/horoscope'
+            className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
-            Start Free
+            Get Personalized Insights
           </Link>
         </section>
       </div>

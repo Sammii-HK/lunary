@@ -153,6 +153,9 @@ export const getStoredLocation = (): LocationData | null => {
   }
 };
 
+// User's current location stored for astronomy accuracy (moon phases, planetary positions)
+// User-consented data for personalized cosmic calculations, not tracking
+// lgtm[js/clear-text-storage-of-sensitive-data]
 export const storeLocation = (location: LocationData): void => {
   if (typeof window === 'undefined') return;
 

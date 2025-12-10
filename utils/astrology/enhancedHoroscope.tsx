@@ -2,12 +2,7 @@
 
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
-import {
-  getAstrologicalChart,
-  getObserverLocation,
-  AstroChartInformation,
-} from './astrology';
-import { constellations } from '../constellations';
+import { getAstrologicalChart, AstroChartInformation } from './astrology';
 import { Observer } from 'astronomy-engine';
 import { getBirthChartFromProfile } from './birthChart';
 
@@ -173,17 +168,17 @@ const getActionGuidance = (dayRuler: string, moonSign: string): string => {
   );
 };
 
-// Calculate which house a planet is in (simplified equal house system)
-const calculateHouse = (
+// Calculate which house a planet is in using Whole Sign Houses
+// In Whole Sign Houses, the entire sign containing the Ascendant is the 1st house
+const calculateHouseWholeSig = (
   planetLongitude: number,
   ascendantLongitude: number,
 ): number => {
-  let diff = planetLongitude - ascendantLongitude;
-  if (diff < 0) diff += 360;
+  const ascendantSign = Math.floor(ascendantLongitude / 30);
+  const planetSign = Math.floor(planetLongitude / 30);
 
-  // Each house is 30 degrees in equal house system
-  const house = Math.floor(diff / 30) + 1;
-  return house > 12 ? house - 12 : house;
+  let house = ((planetSign - ascendantSign + 12) % 12) + 1;
+  return house;
 };
 
 // Get house meaning (full description for context)
@@ -516,20 +511,17 @@ const getTransitToHouseInsight = (
 } | null => {
   const ascendant = natalChart.find((p: any) => p.body === 'Ascendant');
 
-  // If no ascendant, use simplified approach based on Sun sign
+  // If no ascendant, use Sun-based approximation (less accurate)
   if (!ascendant) {
     const natalSun = natalChart.find((p: any) => p.body === 'Sun');
     if (!natalSun) return null;
 
-    // Calculate approximate house using Sun as reference (simplified)
-    const sunLongitude = natalSun.eclipticLongitude;
-    let diff = transitPlanet.eclipticLongitude - sunLongitude;
-    if (diff < 0) diff += 360;
-
-    const approximateHouse = Math.floor(diff / 30) + 1;
-    const house =
-      approximateHouse > 12 ? approximateHouse - 12 : approximateHouse;
-    const houseMeaning = getHouseMeaning(house);
+    // Whole Sign approximation using Sun as reference
+    const house = calculateHouseWholeSig(
+      transitPlanet.eclipticLongitude,
+      natalSun.eclipticLongitude,
+    );
+    const houseMeaning = `${getHouseMeaning(house)} (approximate - add birth time for accuracy)`;
     const sign = transitPlanet.sign;
 
     const insight = getPlanetHouseInsight(transitPlanet.body, house);
@@ -543,8 +535,8 @@ const getTransitToHouseInsight = (
     };
   }
 
-  // Use actual ascendant if available
-  const house = calculateHouse(
+  // Use actual ascendant with Whole Sign Houses
+  const house = calculateHouseWholeSig(
     transitPlanet.eclipticLongitude,
     ascendant.eclipticLongitude,
   );
@@ -927,30 +919,129 @@ const getNumerologyTheme = (number: number): string => {
   return themes[number as keyof typeof themes] || 'personal growth';
 };
 
-// Generate daily affirmation
+// Generate daily affirmation - rotates based on day of year
 const generateDailyAffirmation = (
   sunSign: string,
   today: dayjs.Dayjs = dayjs(),
 ): string => {
-  const affirmations = {
-    Aries: 'I embrace my pioneering spirit and lead with courage.',
-    Taurus: 'I am grounded in abundance and trust in natural timing.',
-    Gemini: 'I communicate with clarity and embrace new learning.',
-    Cancer: 'I nurture myself and others with loving compassion.',
-    Leo: 'I shine my authentic light and inspire others.',
-    Virgo: 'I perfect my craft with patience and dedication.',
-    Libra: 'I create harmony and beauty in all I do.',
-    Scorpio: 'I transform challenges into wisdom and strength.',
-    Sagittarius: 'I expand my horizons with optimism and faith.',
-    Capricorn: 'I achieve my goals through persistent effort.',
-    Aquarius: 'I innovate for the highest good of all.',
-    Pisces: 'I trust my intuition and flow with divine guidance.',
+  const affirmations: Record<string, string[]> = {
+    Aries: [
+      'I embrace my pioneering spirit and lead with courage.',
+      'My passion ignites positive change in the world.',
+      'I trust my instincts and take bold action.',
+      'My enthusiasm is contagious and uplifts those around me.',
+      'I am a fearless trailblazer on my own path.',
+      'Every challenge strengthens my warrior spirit.',
+      'I channel my fire into creative accomplishments.',
+    ],
+    Taurus: [
+      'I am grounded in abundance and trust in natural timing.',
+      'My steady presence creates security for myself and others.',
+      'I savor the beauty in each moment.',
+      'My patience allows the best outcomes to unfold.',
+      'I deserve comfort, pleasure, and prosperity.',
+      'My determination builds lasting foundations.',
+      'I trust my senses to guide me wisely.',
+    ],
+    Gemini: [
+      'I communicate with clarity and embrace new learning.',
+      'My curiosity opens doors to infinite possibilities.',
+      "I adapt with grace to life's ever-changing flow.",
+      'My words have the power to heal and connect.',
+      'I celebrate the duality within me.',
+      'My quick mind serves my highest purpose.',
+      'I find joy in exploring new ideas and perspectives.',
+    ],
+    Cancer: [
+      'I nurture myself and others with loving compassion.',
+      'My emotional depth is a source of strength.',
+      'I create safe spaces wherever I go.',
+      'My intuition guides me toward what truly matters.',
+      'I honor my needs while caring for others.',
+      'My home is a sanctuary of peace and love.',
+      'I embrace my sensitivity as a gift.',
+    ],
+    Leo: [
+      'I shine my authentic light and inspire others.',
+      'My creativity flows abundantly from my heart.',
+      'I am worthy of love, recognition, and success.',
+      'My generosity returns to me multiplied.',
+      'I lead with warmth and integrity.',
+      'My confidence empowers those around me.',
+      'I celebrate my uniqueness without apology.',
+    ],
+    Virgo: [
+      'I perfect my craft with patience and dedication.',
+      'My attention to detail creates excellence.',
+      'I serve others while honoring my own wellbeing.',
+      'My analytical mind solves problems with grace.',
+      'I release the need for perfection and embrace progress.',
+      'My practical wisdom guides me daily.',
+      'I find peace in purposeful routine.',
+    ],
+    Libra: [
+      'I create harmony and beauty in all I do.',
+      'My relationships reflect the love I give.',
+      'I make decisions that honor my truth.',
+      'My diplomacy brings peace to challenging situations.',
+      'I balance giving and receiving with ease.',
+      'My appreciation for beauty enriches my life.',
+      'I stand firmly in my values while respecting others.',
+    ],
+    Scorpio: [
+      'I transform challenges into wisdom and strength.',
+      'My depth of feeling is my superpower.',
+      'I release what no longer serves my growth.',
+      'My intuition reveals hidden truths.',
+      'I embrace rebirth in every ending.',
+      'My passion fuels meaningful transformation.',
+      'I trust the process of healing and renewal.',
+    ],
+    Sagittarius: [
+      'I expand my horizons with optimism and faith.',
+      'My adventures bring wisdom and joy.',
+      'I speak my truth with kindness and conviction.',
+      'My optimism opens doors of opportunity.',
+      'I embrace freedom while honoring my commitments.',
+      'My philosophical mind seeks higher understanding.',
+      'I trust the journey even when the destination is unclear.',
+    ],
+    Capricorn: [
+      'I achieve my goals through persistent effort.',
+      'My discipline creates the life I envision.',
+      'I balance ambition with self-compassion.',
+      'My integrity is the foundation of my success.',
+      'I climb my mountain one step at a time.',
+      'My wisdom comes from experience and reflection.',
+      'I build legacies that outlast my lifetime.',
+    ],
+    Aquarius: [
+      'I innovate for the highest good of all.',
+      'My uniqueness contributes to collective evolution.',
+      'I embrace my role as a change-maker.',
+      'My vision inspires others to think differently.',
+      'I honor both my independence and my community.',
+      'My humanitarian heart guides my actions.',
+      'I trust my unconventional path leads to progress.',
+    ],
+    Pisces: [
+      'I trust my intuition and flow with divine guidance.',
+      'My compassion heals myself and others.',
+      'I embrace my dreams as messages from my soul.',
+      'My creativity channels universal inspiration.',
+      'I set healthy boundaries while remaining open-hearted.',
+      'My spiritual connection guides my earthly journey.',
+      'I find strength in surrender and acceptance.',
+    ],
   };
 
-  return (
-    affirmations[sunSign as keyof typeof affirmations] ||
-    'I am aligned with my highest potential.'
-  );
+  const signAffirmations = affirmations[sunSign] || [
+    'I am aligned with my highest potential.',
+  ];
+  const dayOfYear = today.dayOfYear();
+  const index = dayOfYear % signAffirmations.length;
+
+  return signAffirmations[index];
 };
 
 export const getEnhancedPersonalizedHoroscope = (

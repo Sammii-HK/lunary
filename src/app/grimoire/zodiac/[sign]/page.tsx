@@ -1,6 +1,6 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import {
   zodiacSigns,
   zodiacSymbol,
@@ -8,6 +8,8 @@ import {
 } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { getEntityRelationships } from '@/constants/entity-relationships';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
+import { createZodiacSignSchema, renderJsonLd } from '@/lib/schema';
 
 const signSlugs = Object.keys(zodiacSigns);
 
@@ -21,72 +23,34 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ sign: string }>;
-}): Promise<Metadata> {
+}) {
   const { sign } = await params;
   const signKey = signSlugs.find(
     (s) => stringToKebabCase(s) === sign.toLowerCase(),
   );
 
   if (!signKey) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
   const signData = zodiacSigns[signKey as keyof typeof zodiacSigns];
-  const symbol = zodiacSymbol[signKey as keyof typeof zodiacSymbol];
-  const title = `${signData.name} Zodiac Sign: Meaning, Traits & Dates - Lunary`;
-  const description = `Discover the complete guide to ${signData.name} zodiac sign. Learn about ${signData.name} traits, dates (${signData.dates}), element (${signData.element}), and mystical properties. Explore how ${signData.name} influences your personality, relationships, and spiritual journey.`;
 
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${signData.name} Dates (${signData.dates}) | Traits & Meaning - Lunary`,
+    description: `${signData.name} dates: ${signData.dates}. ${signData.element} sign known for ${signData.mysticalProperties.split('.')[0].toLowerCase()}. Complete guide to ${signData.name} traits, compatibility & horoscope.`,
     keywords: [
-      `${signData.name} zodiac sign`,
-      `${signData.name} meaning`,
-      `${signData.name} traits`,
       `${signData.name} dates`,
+      `${signData.name.toLowerCase()} dates`,
+      `when is ${signData.name.toLowerCase()}`,
+      `${signData.name} zodiac sign`,
+      `${signData.name} traits`,
       `${signData.name} horoscope`,
       `${signData.element} sign`,
-      `zodiac sign ${signData.name}`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/zodiac/${sign}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/zodiac',
-          width: 1200,
-          height: 630,
-          alt: `${signData.name} Zodiac Sign`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/zodiac/${sign}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/zodiac/${sign}`,
+    ogImagePath: '/api/og/grimoire/zodiac',
+    ogImageAlt: `${signData.name} Zodiac Sign`,
+  });
 }
 
 export default async function ZodiacSignPage({
@@ -159,8 +123,47 @@ export default async function ZodiacSignPage({
     },
   ];
 
+  // Compatible signs by element
+  const compatibleSigns =
+    signData.element === 'Fire'
+      ? ['Aries', 'Leo', 'Sagittarius', 'Gemini', 'Libra', 'Aquarius']
+      : signData.element === 'Earth'
+        ? ['Taurus', 'Virgo', 'Capricorn', 'Cancer', 'Scorpio', 'Pisces']
+        : signData.element === 'Air'
+          ? ['Gemini', 'Libra', 'Aquarius', 'Aries', 'Leo', 'Sagittarius']
+          : ['Cancer', 'Scorpio', 'Pisces', 'Taurus', 'Virgo', 'Capricorn'];
+
+  // Ruling planet mapping
+  const rulingPlanets: Record<string, string> = {
+    Aries: 'Mars',
+    Taurus: 'Venus',
+    Gemini: 'Mercury',
+    Cancer: 'Moon',
+    Leo: 'Sun',
+    Virgo: 'Mercury',
+    Libra: 'Venus',
+    Scorpio: 'Pluto',
+    Sagittarius: 'Jupiter',
+    Capricorn: 'Saturn',
+    Aquarius: 'Uranus',
+    Pisces: 'Neptune',
+  };
+
+  // Entity schema for Knowledge Graph
+  const zodiacSchema = createZodiacSignSchema({
+    sign: signData.name,
+    element: signData.element,
+    modality: quality,
+    rulingPlanet: rulingPlanets[signData.name] || 'Unknown',
+    dates: signData.dates,
+    description: `${signData.name} is a ${signData.element} sign known for ${signData.mysticalProperties.toLowerCase()}`,
+    traits: signData.mysticalProperties.split(',').map((t) => t.trim()),
+    compatibility: compatibleSigns.slice(0, 4),
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(zodiacSchema)}
       <SEOContentTemplate
         title={`${signData.name} Zodiac Sign - Lunary`}
         h1={`${signData.name} Zodiac Sign: Complete Guide`}
@@ -255,6 +258,13 @@ Season: (varies by sign)`}
         ctaText={`Want personalized insights for your ${signData.name} chart?`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='zodiac'
+            entityKey={signKey}
+            title={`${signData.name} Cosmic Web`}
+          />
+        }
       />
     </div>
   );

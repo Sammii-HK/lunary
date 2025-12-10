@@ -128,30 +128,30 @@ export const InsightCard = memo(function InsightCard({
   return (
     <article
       className={cn(
-        'rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent p-4 shadow-lg shadow-purple-500/10 backdrop-blur',
+        'rounded-2xl border border-lunary-primary-800 bg-gradient-to-br from-lunary-primary-950 via-lunary-primary-950/50 to-transparent p-4 shadow-lg shadow-lunary-primary-950 backdrop-blur',
         className,
       )}
     >
-      <div className='flex flex-wrap items-center justify-between gap-2 text-xs text-purple-100/70'>
+      <div className='flex flex-wrap items-center justify-between gap-2 text-xs text-lunary-accent-100/70'>
         <div className='flex flex-wrap items-center gap-2'>
-          <span className='inline-flex items-center rounded-full bg-purple-500/20 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-purple-100'>
+          <span className='inline-flex items-center rounded-full bg-lunary-primary-900 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-lunary-accent-100'>
             {sourceLabel}
           </span>
           {moonCircle?.moon_phase && (
-            <span className='inline-flex items-center gap-1 text-purple-100/80'>
+            <span className='inline-flex items-center gap-1 text-lunary-accent-100/80'>
               <span
                 className={cn(
                   'h-2 w-2 rounded-full',
                   moonCircle.moon_phase === 'Full Moon'
-                    ? 'bg-amber-300'
-                    : 'bg-indigo-300',
+                    ? 'bg-lunary-accent-300'
+                    : 'bg-lunary-secondary-300',
                 )}
               />
               {moonCircle.moon_phase}
             </span>
           )}
           {moonCircle?.date && (
-            <time className='text-purple-200/70'>
+            <time className='text-lunary-accent-200/70'>
               {formatDate(moonCircle.date)}
             </time>
           )}
@@ -160,7 +160,7 @@ export const InsightCard = memo(function InsightCard({
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className='ml-auto rounded-lg p-1.5 text-purple-300/70 transition hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50'
+            className='ml-auto rounded-lg p-1.5 text-lunary-accent-300/70 transition hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50'
             aria-label='Delete insight'
             title='Delete insight (admin only)'
           >
@@ -171,7 +171,7 @@ export const InsightCard = memo(function InsightCard({
       <p className='mt-3 text-sm leading-relaxed text-white'>
         {insight.insight_text}
       </p>
-      <div className='mt-4 text-xs text-purple-200/70'>
+      <div className='mt-4 text-xs text-lunary-accent-200/70'>
         Shared on {formatDate(insight.created_at)}
       </div>
     </article>

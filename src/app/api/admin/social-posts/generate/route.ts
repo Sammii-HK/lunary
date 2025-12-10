@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import {
-  selectSubredditForPostType,
-  getSubredditsForPostType,
-} from '@/config/reddit-subreddits';
+import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import {
   getArchetypePrompt,
   getWeightedArchetype,
@@ -422,9 +419,8 @@ Return only valid JSON.`,
       : 'http://localhost:3000';
 
     // Use quote pool for Instagram posts (quotes are stored and reused)
-    const { generateCatchyQuote, getQuoteImageUrl } = await import(
-      '@/lib/social/quote-generator'
-    );
+    const { generateCatchyQuote, getQuoteImageUrl } =
+      await import('@/lib/social/quote-generator');
 
     // Calculate scheduled_date based on weekOffset
     const now = new Date();

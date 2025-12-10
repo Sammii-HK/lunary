@@ -184,7 +184,7 @@ export default function SubscriptionManagement({
           </p>
           <a
             href='/pricing'
-            className='inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2 rounded-md text-sm font-medium transition-all duration-300'
+            className='inline-block bg-gradient-to-r from-lunary-primary-600 to-lunary-rose-600 hover:from-lunary-primary-700 hover:to-lunary-rose-700 text-white px-5 py-2 rounded-md text-sm font-medium transition-all duration-300'
           >
             View Plans
           </a>
@@ -217,11 +217,11 @@ export default function SubscriptionManagement({
           <div
             className={`px-2 py-1 rounded-full text-xs font-medium ${
               displaySubscription.status === 'active'
-                ? 'bg-green-900 text-green-300'
+                ? 'bg-lunary-success-900 text-lunary-success-300'
                 : displaySubscription.status === 'trialing'
-                  ? 'bg-blue-900 text-blue-300'
+                  ? 'bg-lunary-secondary-900 text-lunary-secondary-300'
                   : displaySubscription.status === 'canceled'
-                    ? 'bg-yellow-900 text-yellow-300'
+                    ? 'bg-lunary-accent-900 text-lunary-accent-300'
                     : 'bg-zinc-700 text-zinc-300'
             }`}
           >
@@ -262,7 +262,7 @@ export default function SubscriptionManagement({
             (stripeSubscription as any)?.trial_end) && (
             <div className='flex justify-between'>
               <span className='text-zinc-400 text-sm'>Trial ends:</span>
-              <span className='text-blue-300 text-sm'>
+              <span className='text-lunary-secondary-300 text-sm'>
                 {new Date(
                   ((stripeSubscription as any)?.trial_end ||
                     parseInt(stripeSubscription?.trialEnd || '0')) * 1000,
@@ -289,7 +289,7 @@ export default function SubscriptionManagement({
         {stripeSubscription?.cancelAtPeriodEnd && (
           <div className='flex justify-between'>
             <span className='text-zinc-400 text-sm'>Ends:</span>
-            <span className='text-yellow-300 text-sm'>
+            <span className='text-lunary-accent-300 text-sm'>
               {new Date(
                 ((stripeSubscription as any)?.current_period_end ||
                   parseInt(stripeSubscription?.currentPeriodEnd || '0')) * 1000,
@@ -300,7 +300,7 @@ export default function SubscriptionManagement({
       </div>
 
       {error && (
-        <div className='bg-red-900/50 border border-red-500 text-red-300 px-3 py-2 rounded text-sm mb-3'>
+        <div className='bg-lunary-error-900/50 border border-lunary-error text-lunary-error-300 px-3 py-2 rounded text-sm mb-3'>
           {error}
         </div>
       )}
@@ -309,7 +309,7 @@ export default function SubscriptionManagement({
         <button
           onClick={handleBillingPortal}
           disabled={loading === 'portal'}
-          className='w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
+          className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
         >
           <Settings size={14} />
           {loading === 'portal' ? 'Opening...' : 'Manage Subscription'}

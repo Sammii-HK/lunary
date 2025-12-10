@@ -1,11 +1,12 @@
 import { Metadata } from 'next';
 
+const year = new Date().getFullYear();
+
 export const metadata: Metadata = {
-  title: 'Blog - Lunary',
-  description:
-    'Weekly cosmic guidance and planetary insights. Discover how planetary transits, moon phases, and astrological events affect your daily life. Personalized forecasts and cosmic wisdom.',
+  title: `Weekly Astrology Forecast ${year}: Transits, Moon Phases & More - Lunary`,
+  description: `Weekly astrology updates for ${year}. This week's planetary transits, moon phases, retrogrades & cosmic events. Your personalized cosmic forecast.`,
   openGraph: {
-    title: 'Blog - Lunary',
+    title: `Weekly Astrology Forecast ${year} - Lunary`,
     description:
       'Weekly cosmic insights, planetary highlights, moon phases, and astrological guidance.',
     url: 'https://lunary.app/blog',

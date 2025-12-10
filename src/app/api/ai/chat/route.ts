@@ -195,9 +195,8 @@ export async function POST(request: NextRequest) {
       const cardName = tarotCardMatch[1] || tarotCardMatch[2];
       if (cardName) {
         try {
-          const { getTarotCardByName } = await import(
-            '@/utils/tarot/getCardByName'
-          );
+          const { getTarotCardByName } =
+            await import('@/utils/tarot/getCardByName');
           const cardData = getTarotCardByName(cardName);
           if (cardData) {
             grimoireData = {

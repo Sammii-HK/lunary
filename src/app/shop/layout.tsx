@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Shop - Lunary',
+  title: 'Lunary Shop: Digital Moon Packs, Grimoire Guides & PDFs',
   description:
-    'Digital grimoire packs, moon phase guides, spell collections, and cosmic resources. Downloadable PDF guides for your spiritual practice. Enhance your magical journey.',
+    'Digital moon phase packs, grimoire guides, spell collections & cosmic calendars. Instant PDF downloads for your spiritual practice.',
   openGraph: {
-    title: 'Shop - Lunary',
+    title: 'Lunary Shop: Digital Moon Packs & Grimoire Guides',
     description:
       'Digital grimoire packs, moon phase guides, spell collections, and cosmic resources.',
     url: 'https://lunary.app/shop',

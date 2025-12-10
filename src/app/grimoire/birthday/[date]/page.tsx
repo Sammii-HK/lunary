@@ -140,11 +140,6 @@ export default async function BirthdayZodiacPage({
       datePublished='2025-01-01'
       dateModified='2025-12-06'
       articleSection='Birthday Zodiac'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Birthday', href: '/grimoire/birthday' },
-        { label: birthday.dateString },
-      ]}
       whatIs={{
         question: `What zodiac sign is ${birthday.dateString}?`,
         answer: `People born on ${birthday.dateString} are ${zodiac.sign}. ${zodiac.sign} is a ${zodiac.modality} ${zodiac.element} sign ruled by ${zodiac.ruler}. Those born on this date are in the ${decan}${getOrdinalSuffix(decan)} decan of ${zodiac.sign}, which is sub-ruled by ${decanRuler}, adding extra depth to their personality.`,
@@ -207,7 +202,7 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
         })),
       ]}
       ctaText='Get your personalized birthday reading'
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[
         { name: 'Traditional Western Astrology' },
         { name: 'Numerology calculations' },
@@ -218,7 +213,7 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
         {prevDay ? (
           <Link
             href={`/grimoire/birthday/${prevDay}`}
-            className='text-purple-400 hover:text-purple-300'
+            className='text-lunary-primary-400 hover:text-lunary-primary-300'
           >
             ← {birthday.monthName} {birthday.day - 1}
           </Link>
@@ -228,7 +223,7 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
         {nextDay && (
           <Link
             href={`/grimoire/birthday/${nextDay}`}
-            className='text-purple-400 hover:text-purple-300'
+            className='text-lunary-primary-400 hover:text-lunary-primary-300'
           >
             {birthday.monthName} {birthday.day + 1} →
           </Link>

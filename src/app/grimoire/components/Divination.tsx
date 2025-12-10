@@ -33,8 +33,8 @@ const Divination = () => {
       <section id='pendulum' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/pendulum-divination'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            href='/grimoire/divination/pendulum'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Pendulum Divination
           </Link>
@@ -45,7 +45,7 @@ const Divination = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How Pendulums Work
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -68,7 +68,7 @@ const Divination = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Calibrating Your Pendulum
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -84,7 +84,7 @@ const Divination = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Asking Questions
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -108,7 +108,7 @@ const Divination = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Pendulum Care
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -125,8 +125,8 @@ const Divination = () => {
       <section id='scrying' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/scrying'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            href='/grimoire/divination/scrying'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Scrying
           </Link>
@@ -137,7 +137,7 @@ const Divination = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Scrying Methods
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -160,7 +160,7 @@ const Divination = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How to Scry
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -174,7 +174,7 @@ const Divination = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Interpreting Visions
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -198,8 +198,8 @@ const Divination = () => {
       <section id='dream-interpretation' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/dream-interpretation'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            href='/grimoire/divination/dream-interpretation'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Dream Interpretation
           </Link>
@@ -210,7 +210,7 @@ const Divination = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Keeping a Dream Journal
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -236,7 +236,7 @@ const Divination = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Common Dream Symbols
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-300'>
@@ -273,7 +273,7 @@ const Divination = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Types of Dreams
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -306,8 +306,8 @@ const Divination = () => {
       <section id='omen-reading' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/reading-omens'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            href='/grimoire/divination/omen-reading'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Reading Omens
           </Link>
@@ -318,7 +318,7 @@ const Divination = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Animal Omens
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-zinc-300'>
@@ -349,7 +349,7 @@ const Divination = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Natural Omens
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -374,7 +374,7 @@ const Divination = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How to Read Omens
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>

@@ -1,11 +1,4 @@
-import Link from 'next/link';
-import {
-  HelpCircle,
-  Mail,
-  MessageCircle,
-  FileText,
-  Search,
-} from 'lucide-react';
+import { HelpCircle, Mail, MessageCircle, Search } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
 export default function HelpPage() {
@@ -58,7 +51,7 @@ export default function HelpPage() {
         <div className='grid gap-8 md:grid-cols-2 mb-12'>
           <div className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
             <div className='flex items-center gap-3 mb-4'>
-              <Search className='w-6 h-6 text-purple-400' />
+              <Search className='w-6 h-6 text-lunary-primary-400' />
               <h2 className='text-xl font-semibold text-white'>FAQ</h2>
             </div>
             <p className='text-sm text-zinc-400 mb-4'>
@@ -67,7 +60,7 @@ export default function HelpPage() {
             </p>
             <a
               href='#faq'
-              className='text-sm text-purple-400 hover:text-purple-300 transition-colors'
+              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
             >
               View FAQs →
             </a>
@@ -75,7 +68,7 @@ export default function HelpPage() {
 
           <div className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
             <div className='flex items-center gap-3 mb-4'>
-              <Mail className='w-6 h-6 text-purple-400' />
+              <Mail className='w-6 h-6 text-lunary-primary-400' />
               <h2 className='text-xl font-semibold text-white'>Contact Us</h2>
             </div>
             <p className='text-sm text-zinc-400 mb-4'>
@@ -84,7 +77,7 @@ export default function HelpPage() {
             </p>
             <a
               href='mailto:support@lunary.app'
-              className='text-sm text-purple-400 hover:text-purple-300 transition-colors'
+              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
             >
               support@lunary.app →
             </a>
@@ -93,7 +86,7 @@ export default function HelpPage() {
 
         <section id='faq' className='space-y-6 mb-12'>
           <h2 className='text-2xl font-semibold text-white flex items-center gap-2'>
-            <HelpCircle className='w-6 h-6 text-purple-400' />
+            <HelpCircle className='w-6 h-6 text-lunary-primary-400' />
             Frequently Asked Questions
           </h2>
           <div className='space-y-4'>
@@ -111,8 +104,8 @@ export default function HelpPage() {
           </div>
         </section>
 
-        <section className='rounded-2xl border border-purple-500/30 bg-purple-950/20 p-8 text-center'>
-          <MessageCircle className='w-12 h-12 text-purple-400 mx-auto mb-4' />
+        <section className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-950/20 p-8 text-center'>
+          <MessageCircle className='w-12 h-12 text-lunary-primary-400 mx-auto mb-4' />
           <h2 className='text-2xl font-semibold text-white mb-3'>
             Still need help?
           </h2>
@@ -122,7 +115,7 @@ export default function HelpPage() {
           </p>
           <a
             href='mailto:support@lunary.app'
-            className='inline-flex items-center justify-center rounded-xl bg-white/90 px-6 py-3 text-sm font-semibold text-purple-900 shadow-inner hover:bg-white transition-colors'
+            className='inline-flex items-center justify-center rounded-xl bg-white/90 px-6 py-3 text-sm font-semibold text-lunary-primary-900 shadow-inner hover:bg-white transition-colors'
           >
             <Mail className='w-4 h-4 mr-2' />
             Contact Support

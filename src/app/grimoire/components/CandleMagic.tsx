@@ -42,56 +42,68 @@ const CandleMagic = () => {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-red-400 mb-2'>Red</h3>
+            <h3 className='text-lg font-medium text-lunary-error mb-2'>Red</h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Passion, love, courage, strength, vitality, action. Use for love
               spells, courage, energy, and protection.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-pink-400 mb-2'>Pink</h3>
+            <h3 className='text-lg font-medium text-lunary-rose mb-2'>Pink</h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Romance, friendship, self-love, emotional healing, compassion. Use
               for romantic love, friendship, and emotional healing.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-orange-400 mb-2'>Orange</h3>
+            <h3 className='text-lg font-medium text-lunary-rose mb-2'>
+              Orange
+            </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Creativity, success, attraction, confidence, ambition. Use for
               career success, creativity, and attracting opportunities.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>Yellow</h3>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
+              Yellow
+            </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Communication, learning, clarity, confidence, joy. Use for
               communication, studying, mental clarity, and happiness.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Green</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Green
+            </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Prosperity, abundance, growth, healing, nature. Use for money,
               growth, fertility, and physical healing.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-blue-400 mb-2'>Blue</h3>
+            <h3 className='text-lg font-medium text-lunary-secondary mb-2'>
+              Blue
+            </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Peace, healing, protection, wisdom, truth. Use for peace, healing,
               protection, and spiritual growth.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-400 mb-2'>Purple</h3>
+            <h3 className='text-lg font-medium text-lunary-primary-400 mb-2'>
+              Purple
+            </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Spirituality, psychic ability, wisdom, power, transformation. Use
               for spiritual work, divination, and psychic development.
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-indigo-400 mb-2'>Indigo</h3>
+            <h3 className='text-lg font-medium text-lunary-primary mb-2'>
+              Indigo
+            </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Intuition, meditation, deep wisdom, psychic protection. Use for
               meditation, intuition, and psychic protection.
@@ -112,7 +124,9 @@ const CandleMagic = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-amber-400 mb-2'>Brown</h3>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
+              Brown
+            </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Grounding, stability, home, animals, earth connection. Use for
               grounding, stability, and home protection.
@@ -142,7 +156,7 @@ const CandleMagic = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What to Carve
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -165,7 +179,7 @@ const CandleMagic = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How to Carve
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -181,7 +195,7 @@ const CandleMagic = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Carving Direction
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -206,7 +220,7 @@ const CandleMagic = () => {
         <div>
           <Link
             href='/grimoire/anointing-candles'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Anointing Candles with Oils
           </Link>
@@ -218,7 +232,7 @@ const CandleMagic = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Anointing Method
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -245,7 +259,7 @@ const CandleMagic = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Common Anointing Oils
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-zinc-300'>
@@ -292,8 +306,8 @@ const CandleMagic = () => {
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-red-500/30 bg-red-500/10 p-4'>
-            <h3 className='text-lg font-medium text-red-300 mb-2'>
+          <div className='rounded-lg border border-lunary-error-700 bg-lunary-error-950 p-4'>
+            <h3 className='text-lg font-medium text-lunary-error-300 mb-2'>
               Essential Safety Rules
             </h3>
             <ul className='list-disc list-inside space-y-1 text-sm text-zinc-300'>
@@ -308,7 +322,7 @@ const CandleMagic = () => {
             </ul>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Safe Alternatives
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -338,7 +352,7 @@ const CandleMagic = () => {
         <div>
           <Link
             href='/grimoire/lighting-candles-on-altar'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Lighting Candles on Your Altar
           </Link>
@@ -349,7 +363,7 @@ const CandleMagic = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Traditional Lighting Order
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -382,7 +396,7 @@ const CandleMagic = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What to Say When Lighting
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -406,7 +420,7 @@ const CandleMagic = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Altar Setup for Candle Magic
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -445,7 +459,7 @@ const CandleMagic = () => {
         <div>
           <Link
             href='/grimoire/incantations-by-candle-color'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Incantations by Candle Color
           </Link>
@@ -456,7 +470,7 @@ const CandleMagic = () => {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-red-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-error mb-2'>
               Red Candle
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -468,7 +482,7 @@ const CandleMagic = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-pink-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-rose mb-2'>
               Pink Candle
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -481,7 +495,7 @@ const CandleMagic = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-orange-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-rose mb-2'>
               Orange Candle
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -494,7 +508,7 @@ const CandleMagic = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Yellow Candle
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -507,7 +521,7 @@ const CandleMagic = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
               Green Candle
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -520,7 +534,7 @@ const CandleMagic = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-blue-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-secondary mb-2'>
               Blue Candle
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -533,7 +547,7 @@ const CandleMagic = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-400 mb-2'>
               Purple Candle
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -587,7 +601,7 @@ const CandleMagic = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Simple Intention Candle
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -600,7 +614,7 @@ const CandleMagic = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Seven-Day Candle Spell
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -613,7 +627,7 @@ const CandleMagic = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Banishing Candle
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -634,42 +648,42 @@ const CandleMagic = () => {
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <a
-            href='/grimoire/practices#spellcraft-fundamentals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          <Link
+            href='/grimoire/practices'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Spellcraft Fundamentals
-          </a>
-          <a
-            href='/grimoire/practices#altar-setup'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          </Link>
+          <Link
+            href='/grimoire/practices'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Altar Setup
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/crystals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Crystals for Magic
-          </a>
-          <a
-            href='/grimoire/correspondences#herbs'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          </Link>
+          <Link
+            href='/grimoire/correspondences/herbs'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Herbs & Oils
-          </a>
-          <a
-            href='/grimoire/moon#rituals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          </Link>
+          <Link
+            href='/grimoire/moon-rituals'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon Rituals
-          </a>
-          <a
-            href='/grimoire/correspondences#colors'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          </Link>
+          <Link
+            href='/grimoire/correspondences/colors'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Color Correspondences
-          </a>
+          </Link>
         </div>
       </section>
 

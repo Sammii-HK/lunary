@@ -274,7 +274,7 @@ export default function CronMonitorPage() {
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               {lastResult.success ? (
-                <CheckCircle className='h-5 w-5 text-green-500' />
+                <CheckCircle className='h-5 w-5 text-lunary-success' />
               ) : (
                 <XCircle className='h-5 w-5 text-red-500' />
               )}
@@ -295,7 +295,7 @@ export default function CronMonitorPage() {
                   </div>
                 </div>
                 <div className='text-center'>
-                  <div className='text-2xl font-bold text-green-600'>
+                  <div className='text-2xl font-bold text-lunary-success'>
                     {lastResult.summary.successful}
                   </div>
                   <div className='text-sm text-muted-foreground'>
@@ -342,7 +342,7 @@ export default function CronMonitorPage() {
                     <div className='flex items-center gap-2'>
                       {result.status === 'success' ? (
                         <>
-                          <CheckCircle className='h-4 w-4 text-green-500' />
+                          <CheckCircle className='h-4 w-4 text-lunary-success' />
                           <Badge variant='secondary'>Success</Badge>
                         </>
                       ) : (

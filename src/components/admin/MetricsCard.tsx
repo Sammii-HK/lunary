@@ -20,15 +20,15 @@ export function MetricsCard({
   const hasChange = typeof change === 'number' && !Number.isNaN(change);
   const trendColor =
     trend === 'up'
-      ? 'text-emerald-400'
+      ? 'text-lunary-success'
       : trend === 'down'
-        ? 'text-rose-400'
+        ? 'text-lunary-error'
         : 'text-zinc-400';
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
 
   return (
     <div className='rounded-xl border border-zinc-800/20 bg-zinc-900/5 p-4 transition-colors hover:border-zinc-800/40 hover:bg-zinc-900/10'>
-      <div className='text-xs font-medium text-zinc-500'>{title}</div>
+      <div className='text-xs font-medium text-zinc-400'>{title}</div>
       <div className='mt-3 flex items-baseline justify-between gap-2'>
         <div className='text-2xl font-light tracking-tight text-white md:text-3xl'>
           {typeof value === 'number' ? value.toLocaleString() : value}

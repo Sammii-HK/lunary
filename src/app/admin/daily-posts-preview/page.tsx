@@ -149,7 +149,7 @@ export default function DailyPostsPreviewPage() {
               onClick={() => setViewMode('daily')}
               className={`px-4 py-2 rounded-md font-medium transition-colors ${
                 viewMode === 'daily'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-lunary-primary-600 text-white'
                   : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
               }`}
             >
@@ -159,7 +159,7 @@ export default function DailyPostsPreviewPage() {
               onClick={() => setViewMode('grid')}
               className={`px-4 py-2 rounded-md font-medium transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-lunary-primary-600 text-white'
                   : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
               }`}
             >
@@ -191,7 +191,7 @@ export default function DailyPostsPreviewPage() {
                 <div
                   key={date}
                   className={`bg-zinc-900 rounded-lg p-2 text-center cursor-pointer transition-all hover:bg-zinc-800 ${
-                    date === selectedDate ? 'ring-2 ring-purple-500' : ''
+                    date === selectedDate ? 'ring-2 ring-lunary-primary' : ''
                   }`}
                   onClick={() => {
                     setSelectedDate(date);
@@ -230,7 +230,7 @@ export default function DailyPostsPreviewPage() {
             {postTypes.map((post, index) => (
               <div
                 key={post.name}
-                className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden hover:border-purple-500 transition-colors'
+                className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden hover:border-lunary-primary transition-colors'
               >
                 {/* Post Header */}
                 <div className='p-6 border-b border-zinc-700'>
@@ -238,7 +238,7 @@ export default function DailyPostsPreviewPage() {
                     <h3 className='text-xl font-bold text-white'>
                       {post.name}
                     </h3>
-                    <div className='text-sm text-purple-400 font-medium'>
+                    <div className='text-sm text-lunary-primary-400 font-medium'>
                       {post.time}
                     </div>
                   </div>
@@ -259,7 +259,7 @@ export default function DailyPostsPreviewPage() {
                   </div>
 
                   {/* Hashtags */}
-                  {/* <div className='text-xs text-blue-400'>{post.hashtags}</div> */}
+                  {/* <div className='text-xs text-lunary-secondary'>{post.hashtags}</div> */}
                 </div>
 
                 {/* Image Preview */}
@@ -275,7 +275,7 @@ export default function DailyPostsPreviewPage() {
                   </div>
 
                   {/* Image URL for testing */}
-                  <div className='mt-3 text-xs text-zinc-500 break-all'>
+                  <div className='mt-3 text-xs text-zinc-400 break-all'>
                     {post.imageUrl}
                   </div>
 
@@ -298,10 +298,10 @@ export default function DailyPostsPreviewPage() {
             <div className='space-y-3'>
               {postTypes.map((post, index) => (
                 <div key={post.name} className='flex items-center gap-4'>
-                  <div className='w-16 text-sm text-purple-400 font-mono'>
+                  <div className='w-16 text-sm text-lunary-primary-400 font-mono'>
                     {post.time}
                   </div>
-                  <div className='w-4 h-4 bg-purple-500 rounded-full'></div>
+                  <div className='w-4 h-4 bg-lunary-primary-500 rounded-full'></div>
                   <div className='flex-1'>
                     <span className='font-medium text-white'>{post.name}</span>
                     <span className='text-zinc-400 ml-2'>→</span>
@@ -321,31 +321,31 @@ export default function DailyPostsPreviewPage() {
           <div className='flex flex-wrap gap-4'>
             <button
               onClick={() => window.open('/api/cron/daily-posts', '_blank')}
-              className='px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
             >
               Test Cron Job
             </button>
             <button
               onClick={() => window.open('/admin/scheduler', '_blank')}
-              className='px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 rounded-md text-white font-medium transition-colors'
             >
               Manual Scheduler
             </button>
             <a
               href='/admin/tarot-gallery'
-              className='px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
             >
               Tarot Gallery
             </a>
             <a
               href='/admin/crystal-gallery'
-              className='px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-success-600 hover:bg-lunary-success-700 rounded-md text-white font-medium transition-colors'
             >
               Crystal Gallery
             </a>
             <button
               onClick={() => setCacheBuster(Date.now())}
-              className='px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-error-600 hover:bg-lunary-error-700 rounded-md text-white font-medium transition-colors'
             >
               🔄 Refresh Images
             </button>

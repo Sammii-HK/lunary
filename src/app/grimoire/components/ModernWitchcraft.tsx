@@ -78,9 +78,9 @@ const ModernWitchcraft = () => {
               <Link
                 key={witch.name}
                 href={`/grimoire/witches/${witchSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-purple-300 mb-2 group-hover:text-purple-200 transition-colors'>
+                <h3 className='text-lg font-medium text-lunary-primary-300 mb-2 group-hover:text-lunary-primary-200 transition-colors'>
                   {witch.name}
                 </h3>
                 <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -97,7 +97,7 @@ const ModernWitchcraft = () => {
         <div>
           <Link
             href='/grimoire/witchcraft-tools'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Essential Witch Tools
           </Link>
@@ -108,7 +108,7 @@ const ModernWitchcraft = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Athame (Ritual Knife)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -118,7 +118,9 @@ const ModernWitchcraft = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>Wand</h3>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+              Wand
+            </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
               Used to direct energy and cast spells. Can be made from wood,
               crystal, or metal. Often personalized with carvings, crystals, or
@@ -126,7 +128,7 @@ const ModernWitchcraft = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Cauldron
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -136,7 +138,7 @@ const ModernWitchcraft = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Chalice
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -145,7 +147,7 @@ const ModernWitchcraft = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Pentacle
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -155,7 +157,7 @@ const ModernWitchcraft = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Other Common Tools
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-zinc-300'>
@@ -187,7 +189,7 @@ const ModernWitchcraft = () => {
         <div>
           <Link
             href='/grimoire/witchcraft-ethics'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Witchcraft Ethics
           </Link>
@@ -198,7 +200,7 @@ const ModernWitchcraft = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               The Wiccan Rede
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -211,7 +213,7 @@ const ModernWitchcraft = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               The Threefold Law
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -221,7 +223,7 @@ const ModernWitchcraft = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Core Ethical Principles
             </h3>
             <ul className='list-disc list-inside space-y-1 text-sm text-zinc-300'>
@@ -259,7 +261,7 @@ const ModernWitchcraft = () => {
       </section>
 
       {/* Coven vs Solitary Section */}
-      <section id='coven-solitary' className='space-y-6'>
+      <section id='coven-vs-solitary' className='space-y-6'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
             Coven vs Solitary Practice
@@ -271,7 +273,7 @@ const ModernWitchcraft = () => {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Solitary Practice
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -290,7 +292,7 @@ const ModernWitchcraft = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Coven Practice
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -309,7 +311,7 @@ const ModernWitchcraft = () => {
             </p>
           </div>
         </div>
-        <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-4'>
+        <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-4'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             Many witches practice both: solitary most of the time, with
             occasional group work or celebrations. There's no "right" way—only
@@ -323,7 +325,7 @@ const ModernWitchcraft = () => {
         <div>
           <Link
             href='/grimoire/book-of-shadows'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Book of Shadows
           </Link>
@@ -335,7 +337,7 @@ const ModernWitchcraft = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What to Include
             </h3>
             <ul className='list-disc list-inside space-y-1 text-sm text-zinc-300 ml-4'>
@@ -350,7 +352,7 @@ const ModernWitchcraft = () => {
             </ul>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How to Organize
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -376,7 +378,7 @@ const ModernWitchcraft = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Making It Personal
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>

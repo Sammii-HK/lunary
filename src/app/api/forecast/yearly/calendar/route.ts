@@ -67,15 +67,15 @@ function escapeICS(text: string): string {
 function getAspectColorICS(aspect: string): string {
   const aspectLower = aspect.toLowerCase();
   if (aspectLower.includes('conjunction')) {
-    return '#60A5FA'; // blue-400
+    return '#7B7BE8'; // lunary-secondary
   } else if (aspectLower.includes('trine')) {
-    return '#4ADE80'; // green-400
+    return '#6B9B7A'; // lunary-success
   } else if (aspectLower.includes('opposition')) {
-    return '#F87171'; // red-400
+    return '#D06060'; // lunary-error
   } else if (aspectLower.includes('square')) {
-    return '#FB923C'; // orange-400
+    return '#EE789E'; // lunary-rose
   } else if (aspectLower.includes('sextile')) {
-    return '#A78BFA'; // purple-400
+    return '#8458D8'; // lunary-primary
   }
   return '#71717A'; // zinc-500 default
 }
@@ -85,9 +85,9 @@ function getEventColorICS(
   aspect?: string,
 ): string {
   if (type === 'eclipse') {
-    return '#C084FC'; // purple-400
+    return '#D070E8'; // lunary-highlight
   } else if (type === 'retrograde') {
-    return '#FBBF24'; // amber-400
+    return '#C77DFF'; // lunary-accent
   } else if (type === 'aspect' || type === 'transit') {
     return aspect ? getAspectColorICS(aspect) : '#71717A';
   }

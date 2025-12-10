@@ -62,7 +62,7 @@ export default function BirthdayIndexPage() {
       />
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
-          <nav className='text-sm text-zinc-500 mb-8'>
+          <nav className='text-sm text-zinc-400 mb-8'>
             <Link href='/grimoire' className='hover:text-zinc-300'>
               Grimoire
             </Link>
@@ -113,7 +113,7 @@ export default function BirthdayIndexPage() {
                   </span>
                   <div>
                     <div className='font-medium'>{zodiac.sign}</div>
-                    <div className='text-sm text-zinc-500'>
+                    <div className='text-sm text-zinc-400'>
                       {MONTH_NAMES[zodiac.startMonth - 1].slice(0, 3)}{' '}
                       {zodiac.startDay} -{' '}
                       {MONTH_NAMES[zodiac.endMonth - 1].slice(0, 3)}{' '}
@@ -129,7 +129,7 @@ export default function BirthdayIndexPage() {
           <div className='space-y-8'>
             {months.map(({ name, days }) => (
               <div key={name}>
-                <h3 className='text-lg font-medium text-purple-400 mb-4'>
+                <h3 className='text-lg font-medium text-lunary-primary-400 mb-4'>
                   {name}
                 </h3>
                 <div className='flex flex-wrap gap-2'>
@@ -137,7 +137,7 @@ export default function BirthdayIndexPage() {
                     <Link
                       key={`${name}-${day}`}
                       href={`/grimoire/birthday/${name.toLowerCase()}-${day}`}
-                      className='w-10 h-10 flex items-center justify-center rounded-lg border border-zinc-800 hover:border-purple-500/50 hover:bg-zinc-800/50 text-sm transition-colors'
+                      className='w-10 h-10 flex items-center justify-center rounded-lg border border-zinc-800 hover:border-lunary-primary-600 hover:bg-zinc-800/50 text-sm transition-colors'
                     >
                       {day}
                     </Link>
@@ -147,8 +147,8 @@ export default function BirthdayIndexPage() {
             ))}
           </div>
 
-          <div className='mt-12 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-            <h2 className='text-xl font-medium text-purple-300 mb-2'>
+          <div className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+            <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
               Get Your Full Birth Chart
             </h2>
             <p className='text-zinc-300 mb-4'>
@@ -157,10 +157,10 @@ export default function BirthdayIndexPage() {
               cosmic insight.
             </p>
             <Link
-              href='/welcome'
-              className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+              href='/birth-chart'
+              className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
             >
-              Generate Your Birth Chart
+              View Your Birth Chart
             </Link>
           </div>
         </div>

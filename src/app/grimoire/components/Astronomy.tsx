@@ -53,12 +53,13 @@ const AstronomyItems = ({ type }: { type: string }) => {
     element?: string;
   };
   const content = type === 'Zodiac' ? zodiacSigns : planetaryBodies;
+  const validKeys = Object.keys(items).filter((key) => key in content);
 
   return (
     <section id={type.toLowerCase()} className='space-y-4'>
       <h2 className='text-xl font-medium text-zinc-100'>{type}</h2>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-        {Object.keys(items).map((item: string) => {
+        {validKeys.map((item: string) => {
           const itemSlug = stringToKebabCase(item);
           const linkPath =
             type === 'Zodiac'
@@ -68,9 +69,9 @@ const AstronomyItems = ({ type }: { type: string }) => {
             <Link
               key={item.toLowerCase()}
               href={linkPath}
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+              <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                 <span className='font-astro'>
                   {items[item as keyof typeof items]}
                 </span>{' '}

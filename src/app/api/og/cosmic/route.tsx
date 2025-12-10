@@ -6,7 +6,6 @@ import {
   checkSeasonalEvents,
   calculateRealAspects,
   getZodiacSymbol,
-  getPlanetSymbol,
   getAspectGlyph,
   loadAstronomiconFont,
   loadGoogleFont,
@@ -124,318 +123,316 @@ async function generateImage(req: NextRequest): Promise<Response> {
   };
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        background: theme.background,
+        fontFamily: 'Roboto Mono',
+        color: 'white',
+        padding: '60px 40px',
+        justifyContent: 'space-between',
+      }}
+    >
       <div
         style={{
-          height: '100%',
-          width: '100%',
           display: 'flex',
-          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
-          background: theme.background,
-          fontFamily: 'Roboto Mono',
-          color: 'white',
-          padding: '60px 40px',
-          justifyContent: 'space-between',
+          paddingBottom: '40px',
+          paddingTop: style.titlePadding,
         }}
       >
         <div
           style={{
+            fontSize: `${style.titleSize}px`,
+            fontWeight: '400',
+            color: 'white',
+            textAlign: 'center',
+            letterSpacing: '0.1em',
+            fontFamily: 'Roboto Mono',
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingBottom: '40px',
-            paddingTop: style.titlePadding,
+          }}
+        >
+          Lunary
+        </div>
+      </div>
+
+      {isAspectEvent ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'stretch',
+            width: '100%',
+            flex: 1,
+            padding: '0 200px',
           }}
         >
           <div
             style={{
-              fontSize: `${style.titleSize}px`,
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              fontFamily: 'Roboto Mono',
               display: 'flex',
-            }}
-          >
-            Lunary
-          </div>
-        </div>
-
-        {isAspectEvent ? (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              alignItems: 'stretch',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: style.itemSpacing,
               width: '100%',
-              flex: 1,
-              padding: '0 200px',
+              height: '90%',
             }}
           >
             <div
               style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: style.itemSpacing,
-                width: '100%',
-                height: '90%',
+                justifyContent: 'space-between',
+                flex: 1,
               }}
             >
               <div
                 style={{
+                  fontSize: `${style.planetNameSize}px`,
+                  fontWeight: '300',
+                  color: 'white',
+                  textAlign: 'center',
+                  marginBottom: '50px',
                   display: 'flex',
-                  flexDirection: 'column',
+                }}
+              >
+                {primaryEvent.planetA.name}
+              </div>
+              <div
+                style={{
+                  display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flex: 1,
+                  justifyContent: 'center',
+                  width: '180px',
+                  height: '180px',
+                  borderRadius: '20px',
+                  marginBottom: '70px',
                 }}
               >
                 <div
                   style={{
-                    fontSize: `${style.planetNameSize}px`,
-                    fontWeight: '300',
+                    fontSize: `${style.symbolSize}px`,
                     color: 'white',
-                    textAlign: 'center',
-                    marginBottom: '50px',
-                    display: 'flex',
+                    lineHeight: '1',
+                    fontFamily: 'Astronomicon',
                   }}
                 >
-                  {primaryEvent.planetA.name}
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '180px',
-                    height: '180px',
-                    borderRadius: '20px',
-                    marginBottom: '70px',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: `${style.symbolSize}px`,
-                      color: 'white',
-                      lineHeight: '1',
-                      fontFamily: 'Astronomicon',
-                    }}
-                  >
-                    {primaryEvent.planetA.symbol}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: `${style.constellationSize}px`,
-                      fontWeight: '300',
-                      color: 'white',
-                      fontFamily: 'Roboto Mono',
-                      paddingBottom: '10px',
-                    }}
-                  >
-                    {primaryEvent.planetA.constellation}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: `${style.zodiacSymbolSize}px`,
-                      color: 'white',
-                      fontFamily: 'Astronomicon',
-                    }}
-                  >
-                    {primaryEvent.planetA.constellationSymbol}
-                  </div>
+                  {primaryEvent.planetA.symbol}
                 </div>
               </div>
-
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'space-around',
-                  flex: 1,
-                  height: '400px',
-                  marginTop: '-78px',
+                  gap: '8px',
                 }}
               >
-                <div
-                  style={{
-                    fontSize: `${style.aspectSize}px`,
-                    color: 'white',
-                    fontFamily: 'Astronomicon',
-                  }}
-                >
-                  {getAspectGlyph(primaryEvent.aspect)}
-                </div>
                 <div
                   style={{
                     fontSize: `${style.constellationSize}px`,
                     fontWeight: '300',
                     color: 'white',
                     fontFamily: 'Roboto Mono',
-                    textAlign: 'center',
+                    paddingBottom: '10px',
                   }}
                 >
-                  {primaryEvent.aspect}
+                  {primaryEvent.planetA.constellation}
+                </div>
+                <div
+                  style={{
+                    fontSize: `${style.zodiacSymbolSize}px`,
+                    color: 'white',
+                    fontFamily: 'Astronomicon',
+                  }}
+                >
+                  {primaryEvent.planetA.constellationSymbol}
                 </div>
               </div>
+            </div>
 
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'space-around',
+                flex: 1,
+                height: '400px',
+                marginTop: '-78px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: `${style.aspectSize}px`,
+                  color: 'white',
+                  fontFamily: 'Astronomicon',
+                }}
+              >
+                {getAspectGlyph(primaryEvent.aspect)}
+              </div>
+              <div
+                style={{
+                  fontSize: `${style.constellationSize}px`,
+                  fontWeight: '300',
+                  color: 'white',
+                  fontFamily: 'Roboto Mono',
+                  textAlign: 'center',
+                }}
+              >
+                {primaryEvent.aspect}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flex: 1,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: `${style.planetNameSize}px`,
+                  fontWeight: '300',
+                  color: 'white',
+                  textAlign: 'center',
+                  marginBottom: '50px',
+                  display: 'flex',
+                }}
+              >
+                {primaryEvent.planetB.name}
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '180px',
+                  height: '180px',
+                  borderRadius: '20px',
+                  marginBottom: '70px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: `${style.symbolSize}px`,
+                    color: 'white',
+                    lineHeight: '1',
+                    fontFamily: 'Astronomicon',
+                  }}
+                >
+                  {primaryEvent.planetB.symbol}
+                </div>
+              </div>
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flex: 1,
+                  gap: '8px',
                 }}
               >
                 <div
                   style={{
-                    fontSize: `${style.planetNameSize}px`,
+                    fontSize: `${style.constellationSize}px`,
                     fontWeight: '300',
                     color: 'white',
-                    textAlign: 'center',
-                    marginBottom: '50px',
-                    display: 'flex',
+                    fontFamily: 'Roboto Mono',
+                    paddingBottom: '10px',
                   }}
                 >
-                  {primaryEvent.planetB.name}
+                  {primaryEvent.planetB.constellation}
                 </div>
                 <div
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '180px',
-                    height: '180px',
-                    borderRadius: '20px',
-                    marginBottom: '70px',
+                    fontSize: `${style.zodiacSymbolSize}px`,
+                    color: 'white',
+                    fontFamily: 'Astronomicon',
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: `${style.symbolSize}px`,
-                      color: 'white',
-                      lineHeight: '1',
-                      fontFamily: 'Astronomicon',
-                    }}
-                  >
-                    {primaryEvent.planetB.symbol}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: `${style.constellationSize}px`,
-                      fontWeight: '300',
-                      color: 'white',
-                      fontFamily: 'Roboto Mono',
-                      paddingBottom: '10px',
-                    }}
-                  >
-                    {primaryEvent.planetB.constellation}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: `${style.zodiacSymbolSize}px`,
-                      color: 'white',
-                      fontFamily: 'Astronomicon',
-                    }}
-                  >
-                    {primaryEvent.planetB.constellationSymbol}
-                  </div>
+                  {primaryEvent.planetB.constellationSymbol}
                 </div>
               </div>
             </div>
           </div>
-        ) : (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flex: 1,
-              width: '100%',
-            }}
-          >
-            {primaryEvent.emoji && (
-              <div
-                style={{
-                  fontSize: '120px',
-                  marginBottom: '40px',
-                  display: 'flex',
-                }}
-              >
-                {primaryEvent.emoji}
-              </div>
-            )}
-            <div
-              style={{
-                fontSize: `${style.energySize}px`,
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.8)',
-                textAlign: 'center',
-                marginTop: '40px',
-                fontFamily: 'Roboto Mono',
-                display: 'flex',
-              }}
-            >
-              {primaryEvent.energy || 'Cosmic Guidance'}
-            </div>
-          </div>
-        )}
-
+        </div>
+      ) : (
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
+            flexDirection: 'column',
             alignItems: 'center',
-            paddingTop: '40px',
-            gap: '20px',
+            justifyContent: 'center',
+            flex: 1,
+            width: '100%',
           }}
         >
+          {primaryEvent.emoji && (
+            <div
+              style={{
+                fontSize: '120px',
+                marginBottom: '40px',
+                display: 'flex',
+              }}
+            >
+              {primaryEvent.emoji}
+            </div>
+          )}
           <div
             style={{
-              fontSize: `${style.zodiacSymbolSize}px`,
-              color: 'white',
-              fontFamily: 'Astronomicon',
-            }}
-          >
-            {sunSymbol}
-          </div>
-          <div
-            style={{
-              fontSize: `${style.constellationSize}px`,
+              fontSize: `${style.energySize}px`,
               fontWeight: '300',
-              color: 'rgba(255,255,255,0.7)',
+              color: 'rgba(255,255,255,0.8)',
+              textAlign: 'center',
+              marginTop: '40px',
               fontFamily: 'Roboto Mono',
+              display: 'flex',
             }}
           >
-            {sunZodiac}
+            {primaryEvent.energy || 'Cosmic Guidance'}
           </div>
         </div>
+      )}
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingTop: '40px',
+          gap: '20px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: `${style.zodiacSymbolSize}px`,
+            color: 'white',
+            fontFamily: 'Astronomicon',
+          }}
+        >
+          {sunSymbol}
+        </div>
+        <div
+          style={{
+            fontSize: `${style.constellationSize}px`,
+            fontWeight: '300',
+            color: 'rgba(255,255,255,0.7)',
+            fontFamily: 'Roboto Mono',
+          }}
+        >
+          {sunZodiac}
+        </div>
       </div>
-    ),
+    </div>,
     {
       width: 1200,
       height: 630,

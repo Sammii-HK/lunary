@@ -7,9 +7,11 @@ import {
   PLANET_HOUSE_DISPLAY,
   getOrdinalSuffix,
 } from '@/constants/seo/houses';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'The 12 Astrological Houses: Complete Guide | Lunary',
+  title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
   description:
     'Complete guide to the 12 houses in astrology. Learn what each house represents, from identity (1st) to spirituality (12th), and how planet placements affect you.',
   keywords: [
@@ -23,16 +25,28 @@ export const metadata: Metadata = {
 };
 
 export default function HousesIndexPage() {
+  const housesListSchema = createItemListSchema({
+    name: 'The 12 Astrological Houses',
+    description:
+      'Complete guide to the 12 houses in astrology and their meanings in your birth chart.',
+    url: 'https://lunary.app/grimoire/houses',
+    items: HOUSES.map((house) => ({
+      name: `${house}${getOrdinalSuffix(house)} House`,
+      url: `https://lunary.app/grimoire/houses/overview/${house}`,
+      description: HOUSE_DATA[house].lifeArea,
+    })),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(housesListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Houses</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Houses' },
+          ]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>The 12 Astrological Houses</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
@@ -50,16 +64,16 @@ export default function HousesIndexPage() {
                 className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
               >
                 <div className='flex items-center gap-3 mb-3'>
-                  <span className='text-3xl font-light text-purple-400'>
+                  <span className='text-3xl font-light text-lunary-primary-400'>
                     {house}
                   </span>
-                  <span className='text-xs text-zinc-500'>
+                  <span className='text-xs text-zinc-400'>
                     Natural Ruler: {data.naturalSign}
                   </span>
                 </div>
                 <h3 className='text-lg font-medium mb-1'>{data.name}</h3>
                 <p className='text-sm text-zinc-400 mb-2'>{data.lifeArea}</p>
-                <p className='text-xs text-zinc-500'>
+                <p className='text-xs text-zinc-400'>
                   {data.keywords.join(' • ')}
                 </p>
               </div>
@@ -73,28 +87,28 @@ export default function HousesIndexPage() {
             <Link
               key={planet}
               href={`/grimoire/houses/${planet}/1`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 transition-all text-center group'
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center group'
             >
-              <div className='font-medium group-hover:text-purple-300 transition-colors'>
+              <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
                 {PLANET_HOUSE_DISPLAY[planet]}
               </div>
-              <div className='text-xs text-zinc-500'>in houses</div>
+              <div className='text-xs text-zinc-400'>in houses</div>
             </Link>
           ))}
         </div>
 
-        <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             Discover Your House Placements
           </h2>
           <p className='text-zinc-300 mb-4'>
             Find out which planets are in which houses in your natal chart.
           </p>
           <Link
-            href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            href='/birth-chart'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
-            Generate Your Birth Chart
+            View Your Birth Chart
           </Link>
         </div>
       </div>

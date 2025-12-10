@@ -6,7 +6,6 @@ import { useUser } from '@/context/UserContext';
 import { BirthChartData } from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
-import { bodiesSymbols } from '../../utils/zodiac/zodiac';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
 import { useAstronomyContext } from '../context/AstronomyContext';
@@ -704,7 +703,7 @@ export const HoroscopeWidget = () => {
         <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
           <div className='text-center'>
             <h3 className='font-bold mb-2'>Personal Horoscope</h3>
-            <span className='text-xs text-purple-400'>Personalised</span>
+            <span className='text-xs text-lunary-accent'>Personalised</span>
             <p className='text-zinc-400 text-xs mt-2'>
               Access to historical and future dates requires a subscription.
             </p>
@@ -722,7 +721,7 @@ export const HoroscopeWidget = () => {
         <div className='space-y-2'>
           <div className='flex items-center justify-between'>
             {/* <h3 className='font-bold'>Daily Cosmic Energy</h3> */}
-            {/* <span className='text-xs text-zinc-500'>
+            {/* <span className='text-xs text-zinc-400'>
               {generalHoroscope.moonPhase}
             </span> */}
           </div>
@@ -733,8 +732,8 @@ export const HoroscopeWidget = () => {
             </p>
           </div>
 
-          <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-2 border border-purple-500/20'>
-            <p className='text-xs text-purple-200 mb-1 font-medium'>
+          <div className='bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
+            <p className='text-xs text-lunary-accent-200 mb-1 font-medium'>
               ✨ Your personalized horoscope is ready
             </p>
             <p className='text-xs text-zinc-400 mb-2'>
@@ -742,7 +741,7 @@ export const HoroscopeWidget = () => {
               affects YOUR birth chart. Experience the difference personalized
               astrology makes!
             </p>
-            <SmartTrialButton variant='link' />
+            <SmartTrialButton size='sm' />
           </div>
         </div>
       </div>
@@ -755,11 +754,14 @@ export const HoroscopeWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <p className='text-zinc-400 text-xs mb-2'>
             Add your birthday for personalized cosmic insights
           </p>
-          <Link href='/profile' className='text-blue-400 text-xs underline'>
+          <Link
+            href='/profile'
+            className='text-lunary-accent text-xs underline'
+          >
             Complete Profile
           </Link>
         </div>
@@ -772,7 +774,7 @@ export const HoroscopeWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <p className='text-zinc-400 text-xs'>
             Calculating your cosmic influences...
           </p>
@@ -787,7 +789,7 @@ export const HoroscopeWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
           <p className='text-zinc-400 text-xs'>
             Loading cosmic calculations...
           </p>
@@ -810,7 +812,7 @@ export const HoroscopeWidget = () => {
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
       <div className='flex items-center justify-between mb-2 flex-shrink-0'>
         <h3 className='font-bold'>Personal Horoscope</h3>
-        <span className='text-xs text-purple-400'>Personalised</span>
+        <span className='text-xs text-lunary-accent'>Personalised</span>
       </div>
       <div className='relative flex-1 min-h-0'>
         <div

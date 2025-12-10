@@ -8,37 +8,41 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 
-export const metadata: Metadata = {
-  title: 'Tarot: The Complete 78-Card Guide (2025 Edition) - Lunary',
-  description:
-    'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana meanings, Minor Arcana suits, spreads, reading techniques, and interpretation methods. Perfect for beginners and experienced readers.',
-  keywords: [
-    'tarot guide',
-    'tarot cards meaning',
-    'major arcana',
-    'minor arcana',
-    'tarot reading',
-    'how to read tarot',
-    'tarot spreads',
-    'tarot for beginners',
-    'tarot interpretation',
-    'tarot deck',
-    'learn tarot',
-    'tarot card meanings',
-    '78 tarot cards',
-    'tarot symbolism',
-  ],
-  openGraph: {
-    title: 'Tarot: The Complete 78-Card Guide (2025 Edition) - Lunary',
+const currentYear = new Date().getFullYear();
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Tarot: The Complete 78-Card Guide (${currentYear} Edition) - Lunary`,
     description:
-      'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana, Minor Arcana, spreads, and reading techniques.',
-    type: 'article',
-    url: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
-  },
-  alternates: {
-    canonical: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
-  },
-};
+      'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana meanings, Minor Arcana suits, spreads, reading techniques, and interpretation methods. Perfect for beginners and experienced readers.',
+    keywords: [
+      'tarot guide',
+      'tarot cards meaning',
+      'major arcana',
+      'minor arcana',
+      'tarot reading',
+      'how to read tarot',
+      'tarot spreads',
+      'tarot for beginners',
+      'tarot interpretation',
+      'tarot deck',
+      'learn tarot',
+      'tarot card meanings',
+      '78 tarot cards',
+      'tarot symbolism',
+    ],
+    openGraph: {
+      title: `Tarot: The Complete 78-Card Guide (${currentYear} Edition) - Lunary`,
+      description:
+        'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana, Minor Arcana, spreads, and reading techniques.',
+      type: 'article',
+      url: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
+    },
+    alternates: {
+      canonical: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
+    },
+  };
+}
 
 const MAJOR_ARCANA = [
   {
@@ -244,7 +248,7 @@ const faqs = [
 
 export default function TarotCompleteGuidePage() {
   const articleSchema = createArticleWithSpeakableSchema({
-    headline: 'Tarot: The Complete 78-Card Guide (2025 Edition)',
+    headline: `Tarot: The Complete 78-Card Guide (${currentYear} Edition)`,
     description:
       'Master the tarot with our comprehensive guide to all 78 cards. Learn Major Arcana, Minor Arcana, spreads, and reading techniques.',
     url: 'https://lunary.app/grimoire/guides/tarot-complete-guide',
@@ -273,12 +277,12 @@ export default function TarotCompleteGuidePage() {
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-purple-400'>
+      <nav className='text-sm text-zinc-400 mb-8'>
+        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
         <span className='mx-2'>→</span>
-        <Link href='/grimoire/tarot' className='hover:text-purple-400'>
+        <Link href='/grimoire/tarot' className='hover:text-lunary-primary-400'>
           Tarot
         </Link>
         <span className='mx-2'>→</span>
@@ -289,7 +293,7 @@ export default function TarotCompleteGuidePage() {
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
           Tarot: The Complete Guide
-          <span className='block text-2xl text-purple-400 mt-2'>
+          <span className='block text-2xl text-lunary-primary-400 mt-2'>
             All 78 Cards Explained
           </span>
         </h1>
@@ -303,13 +307,13 @@ export default function TarotCompleteGuidePage() {
         <div className='flex flex-wrap gap-4'>
           <Link
             href='/tarot'
-            className='px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Get a Free Tarot Reading
           </Link>
           <Link
             href='#major-arcana'
-            className='px-6 py-3 border border-zinc-700 hover:border-purple-500 text-zinc-300 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
           >
             Start Learning
           </Link>
@@ -323,52 +327,52 @@ export default function TarotCompleteGuidePage() {
         </h2>
         <ol className='space-y-2 text-zinc-400'>
           <li>
-            <a href='#what-is-tarot' className='hover:text-purple-400'>
+            <a href='#what-is-tarot' className='hover:text-lunary-primary-400'>
               1. What is Tarot?
             </a>
           </li>
           <li>
-            <a href='#history' className='hover:text-purple-400'>
+            <a href='#history' className='hover:text-lunary-primary-400'>
               2. History of Tarot
             </a>
           </li>
           <li>
-            <a href='#deck-structure' className='hover:text-purple-400'>
+            <a href='#deck-structure' className='hover:text-lunary-primary-400'>
               3. Understanding the Deck Structure
             </a>
           </li>
           <li>
-            <a href='#major-arcana' className='hover:text-purple-400'>
+            <a href='#major-arcana' className='hover:text-lunary-primary-400'>
               4. The 22 Major Arcana Cards
             </a>
           </li>
           <li>
-            <a href='#minor-arcana' className='hover:text-purple-400'>
+            <a href='#minor-arcana' className='hover:text-lunary-primary-400'>
               5. The 56 Minor Arcana Cards
             </a>
           </li>
           <li>
-            <a href='#suits' className='hover:text-purple-400'>
+            <a href='#suits' className='hover:text-lunary-primary-400'>
               6. The Four Suits Explained
             </a>
           </li>
           <li>
-            <a href='#court-cards' className='hover:text-purple-400'>
+            <a href='#court-cards' className='hover:text-lunary-primary-400'>
               7. Understanding Court Cards
             </a>
           </li>
           <li>
-            <a href='#reading-basics' className='hover:text-purple-400'>
+            <a href='#reading-basics' className='hover:text-lunary-primary-400'>
               8. How to Read Tarot
             </a>
           </li>
           <li>
-            <a href='#spreads' className='hover:text-purple-400'>
+            <a href='#spreads' className='hover:text-lunary-primary-400'>
               9. Popular Tarot Spreads
             </a>
           </li>
           <li>
-            <a href='#faq' className='hover:text-purple-400'>
+            <a href='#faq' className='hover:text-lunary-primary-400'>
               10. Frequently Asked Questions
             </a>
           </li>
@@ -396,8 +400,8 @@ export default function TarotCompleteGuidePage() {
           universal human experiences.
         </p>
 
-        <div className='bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-6'>
-          <h3 className='text-lg font-medium text-purple-300 mb-3'>
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-6'>
+          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
             What Tarot Can Help You With
           </h3>
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-2 text-zinc-300'>
@@ -455,7 +459,7 @@ export default function TarotCompleteGuidePage() {
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-amber-400 mb-3'>
+            <h3 className='text-xl font-medium text-lunary-accent mb-3'>
               Major Arcana (22 cards)
             </h3>
             <p className='text-zinc-300 mb-4'>
@@ -470,7 +474,7 @@ export default function TarotCompleteGuidePage() {
           </div>
 
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-cyan-400 mb-3'>
+            <h3 className='text-xl font-medium text-lunary-secondary mb-3'>
               Minor Arcana (56 cards)
             </h3>
             <p className='text-zinc-300 mb-4'>
@@ -504,15 +508,15 @@ export default function TarotCompleteGuidePage() {
             <Link
               key={card.number}
               href={`/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}`}
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-purple-500 transition-colors'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary transition-colors'
             >
               <div className='flex items-center gap-3'>
-                <span className='text-2xl font-light text-purple-400 w-8'>
+                <span className='text-2xl font-light text-lunary-primary-400 w-8'>
                   {card.number}
                 </span>
                 <div>
                   <span className='text-zinc-100 font-medium'>{card.name}</span>
-                  <p className='text-xs text-zinc-500 mt-1'>
+                  <p className='text-xs text-zinc-400 mt-1'>
                     {card.keywords.join(' • ')}
                   </p>
                 </div>
@@ -522,7 +526,53 @@ export default function TarotCompleteGuidePage() {
         </div>
       </section>
 
-      {/* Section 6: Four Suits */}
+      {/* Section 5: Minor Arcana Overview */}
+      <section id='minor-arcana' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          5. The 56 Minor Arcana Cards
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          The Minor Arcana represents the everyday events, challenges, and
+          emotions we encounter in daily life. Unlike the Major Arcana&apos;s
+          significant life lessons, the Minor Arcana shows the day-to-day
+          energies that influence our experiences.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              56 Cards Total
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Four suits of 14 cards each: Ace through Ten plus four Court Cards
+              (Page, Knight, Queen, King).
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Numbered Cards (Ace-10)
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Each number carries meaning: Aces are new beginnings, numbers 2-10
+              show progression, and 10 represents completion.
+            </p>
+          </div>
+        </div>
+
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h4 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+            Reading Minor Arcana
+          </h4>
+          <p className='text-zinc-300'>
+            When Minor Arcana cards appear in a reading, they point to specific
+            situations, people, or temporary influences. Combine the suit&apos;s
+            element with the number&apos;s meaning for accurate interpretation.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 6: The Four Suits */}
       <section id='suits' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           6. The Four Suits Explained
@@ -545,7 +595,7 @@ export default function TarotCompleteGuidePage() {
                 <h3 className='text-xl font-medium text-zinc-100'>
                   {suit.name}
                 </h3>
-                <span className='text-sm text-zinc-500'>({suit.element})</span>
+                <span className='text-sm text-zinc-400'>({suit.element})</span>
               </div>
               <p className='text-zinc-300 mb-3'>{suit.description}</p>
               <div className='flex flex-wrap gap-2'>
@@ -622,7 +672,7 @@ export default function TarotCompleteGuidePage() {
 
         <div className='space-y-4'>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               1
             </span>
             <div>
@@ -636,7 +686,7 @@ export default function TarotCompleteGuidePage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               2
             </span>
             <div>
@@ -650,7 +700,7 @@ export default function TarotCompleteGuidePage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               3
             </span>
             <div>
@@ -664,7 +714,7 @@ export default function TarotCompleteGuidePage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               4
             </span>
             <div>
@@ -677,7 +727,7 @@ export default function TarotCompleteGuidePage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
               5
             </span>
             <div>
@@ -708,7 +758,7 @@ export default function TarotCompleteGuidePage() {
               Perfect for daily guidance or quick answers. Draw one card and
               reflect on its message for your day or situation.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Best for: Daily practice, simple questions
             </p>
           </div>
@@ -722,7 +772,7 @@ export default function TarotCompleteGuidePage() {
               Past/Present/Future, Situation/Action/Outcome, or
               Mind/Body/Spirit.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Best for: General readings, specific questions
             </p>
           </div>
@@ -735,7 +785,7 @@ export default function TarotCompleteGuidePage() {
               The classic comprehensive spread covering present situation,
               challenges, past influences, future possibilities, and outcome.
             </p>
-            <p className='text-zinc-500 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Best for: In-depth readings, complex situations
             </p>
           </div>
@@ -764,7 +814,7 @@ export default function TarotCompleteGuidePage() {
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Ready to Explore the Tarot?
         </h2>
@@ -775,13 +825,13 @@ export default function TarotCompleteGuidePage() {
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
             href='/tarot'
-            className='px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Get Free Tarot Reading
           </Link>
           <Link
             href='/grimoire/tarot'
-            className='px-8 py-3 border border-purple-500 text-purple-300 hover:bg-purple-500/10 rounded-lg font-medium transition-colors'
+            className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
           >
             Browse All Cards
           </Link>

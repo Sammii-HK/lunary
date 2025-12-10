@@ -189,6 +189,26 @@ const BirthChart = () => {
         </p>
       </div>
 
+      {/* Complete Guide Banner */}
+      <Link
+        href='/grimoire/guides/birth-chart-complete-guide'
+        className='block p-4 rounded-lg bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
+      >
+        <div className='flex items-center justify-between'>
+          <div>
+            <h3 className='text-lg font-medium text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors'>
+              📖 Read the Complete Birth Chart Guide
+            </h3>
+            <p className='text-sm text-zinc-400'>
+              In-depth tutorial on reading and interpreting your natal chart
+            </p>
+          </div>
+          <span className='text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+            →
+          </span>
+        </div>
+      </Link>
+
       <section id='planets' className='space-y-4'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
@@ -207,7 +227,7 @@ const BirthChart = () => {
               <Link
                 key={planet.name}
                 href={`/grimoire/planets/${planetSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <div className='flex items-start gap-3 mb-3'>
                   <span className='text-2xl flex-shrink-0'>
@@ -218,7 +238,7 @@ const BirthChart = () => {
                       {planet.name}
                     </h3>
                     <div className='flex flex-wrap gap-1 mb-2'>
-                      <span className='text-xs px-2 py-0.5 rounded bg-purple-900/20 text-purple-300'>
+                      <span className='text-xs px-2 py-0.5 rounded bg-lunary-primary-900/20 text-lunary-primary-300'>
                         {planet.element}
                       </span>
                       <span className='text-xs px-2 py-0.5 rounded bg-zinc-800/50 text-zinc-300'>
@@ -302,10 +322,10 @@ const BirthChart = () => {
               <Link
                 key={house.number}
                 href={`/grimoire/houses/overview/${houseSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <div className='flex items-start gap-3'>
-                  <span className='font-medium text-zinc-100 text-sm group-hover:text-purple-400 transition-colors'>
+                  <span className='font-medium text-zinc-100 text-sm group-hover:text-lunary-primary-400 transition-colors'>
                     {house.number}
                   </span>
                   <p className='text-sm text-zinc-300 flex-1'>{house.area}</p>
@@ -328,9 +348,9 @@ const BirthChart = () => {
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <Link
             href='/grimoire/aspects/types/conjunction'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-green-400 mb-2 group-hover:text-green-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-success mb-2 group-hover:text-lunary-success-300 transition-colors'>
               Conjunction (0°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -340,9 +360,9 @@ const BirthChart = () => {
           </Link>
           <Link
             href='/grimoire/aspects/types/opposition'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-red-400 mb-2 group-hover:text-red-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-error mb-2 group-hover:text-lunary-error-300 transition-colors'>
               Opposition (180°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -353,9 +373,9 @@ const BirthChart = () => {
           </Link>
           <Link
             href='/grimoire/aspects/types/trine'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-blue-400 mb-2 group-hover:text-blue-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-secondary mb-2 group-hover:text-lunary-secondary-300 transition-colors'>
               Trine (120°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -365,9 +385,9 @@ const BirthChart = () => {
           </Link>
           <Link
             href='/grimoire/aspects/types/square'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-yellow-400 mb-2 group-hover:text-yellow-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2 group-hover:text-lunary-accent-300 transition-colors'>
               Square (90°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -377,9 +397,9 @@ const BirthChart = () => {
           </Link>
           <Link
             href='/grimoire/aspects/types/sextile'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-purple-400 mb-2 group-hover:text-purple-300 transition-colors'>
+            <h3 className='text-lg font-medium text-lunary-primary-400 mb-2 group-hover:text-lunary-primary-300 transition-colors'>
               Sextile (60°)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -403,9 +423,9 @@ const BirthChart = () => {
         <div className='space-y-3'>
           <Link
             href='/grimoire/retrogrades/mercury'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
               Mercury Retrograde
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -420,9 +440,9 @@ const BirthChart = () => {
           </Link>
           <Link
             href='/grimoire/retrogrades/venus'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
               Venus Retrograde
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -437,9 +457,9 @@ const BirthChart = () => {
           </Link>
           <Link
             href='/grimoire/retrogrades/mars'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
-            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+            <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
               Mars Retrograde
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -458,7 +478,7 @@ const BirthChart = () => {
       <section id='transits' className='space-y-4'>
         <Link
           href='/grimoire/transits'
-          className='block text-xl font-medium text-zinc-100 hover:text-purple-400 transition-colors'
+          className='block text-xl font-medium text-zinc-100 hover:text-lunary-primary-400 transition-colors'
         >
           Transits — Current Planetary Movements
         </Link>
@@ -480,7 +500,7 @@ const BirthChart = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Saturn Return (Age 27-30, 57-60)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -490,7 +510,7 @@ const BirthChart = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Jupiter Return (Every 12 years)
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -507,7 +527,7 @@ const BirthChart = () => {
         <div>
           <Link
             href='/grimoire/rising-sign'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Rising Sign (Ascendant)
           </Link>
@@ -520,7 +540,7 @@ const BirthChart = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What Is the Rising Sign?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -538,7 +558,7 @@ const BirthChart = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Rising Sign Meanings
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -568,7 +588,7 @@ const BirthChart = () => {
             </ul>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How Rising Sign Differs from Sun Sign
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -588,7 +608,7 @@ const BirthChart = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Rising Sign by Element
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -634,7 +654,7 @@ const BirthChart = () => {
         <div>
           <Link
             href='/grimoire/synastry'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-purple-400 transition-colors'
+            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Synastry: Relationship Compatibility
           </Link>
@@ -645,7 +665,7 @@ const BirthChart = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Understanding Synastry
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -676,7 +696,7 @@ const BirthChart = () => {
             </ul>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Compatible Aspects
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -695,7 +715,7 @@ const BirthChart = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Challenging Aspects
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -714,7 +734,7 @@ const BirthChart = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How to Read Synastry
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -736,6 +756,25 @@ const BirthChart = () => {
               </p>
             </div>
           </div>
+          <Link
+            href='/grimoire/synastry/generate'
+            className='block p-4 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-lunary-primary-900/30 border border-lunary-rose-700 hover:border-lunary-rose-500 transition-colors group'
+          >
+            <div className='flex items-center justify-between'>
+              <div>
+                <h3 className='text-lg font-medium text-lunary-rose-300 group-hover:text-lunary-rose-200 transition-colors'>
+                  💕 Generate Synastry Chart
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  Compare two birth charts to discover relationship
+                  compatibility
+                </p>
+              </div>
+              <span className='text-lunary-rose-400 group-hover:text-lunary-rose-300 transition-colors'>
+                →
+              </span>
+            </div>
+          </Link>
         </div>
       </section>
 
@@ -746,7 +785,7 @@ const BirthChart = () => {
         </h2>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What is a rising sign (Ascendant)?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -758,7 +797,7 @@ const BirthChart = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How do I find my birth chart?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -766,14 +805,14 @@ const BirthChart = () => {
               information. You can view your complete birth chart at{' '}
               <a
                 href='/birth-chart'
-                className='text-purple-400 hover:text-purple-300 underline'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
               >
                 /birth-chart
               </a>{' '}
               or complete your birth details in your{' '}
               <a
                 href='/profile'
-                className='text-purple-400 hover:text-purple-300 underline'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
               >
                 profile
               </a>
@@ -782,7 +821,7 @@ const BirthChart = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What should I do during Mercury Retrograde?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -793,7 +832,7 @@ const BirthChart = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Are square aspects always bad?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -806,7 +845,7 @@ const BirthChart = () => {
         </div>
       </section>
 
-      <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
+      <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
         <h3 className='text-lg font-medium text-zinc-100 mb-3'>
           The Core Logic
         </h3>
@@ -827,30 +866,30 @@ const BirthChart = () => {
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <a
+          <Link
             href='/grimoire/moon'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon Phases & Influences
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/astronomy'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Astronomy & Zodiac
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/tarot'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Tarot Readings
-          </a>
-          <a
-            href='/grimoire/correspondences#planets'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          </Link>
+          <Link
+            href='/grimoire/astronomy/planets'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Planetary Correspondences
-          </a>
+          </Link>
         </div>
       </section>
     </div>

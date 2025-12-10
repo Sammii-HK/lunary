@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Code, Zap, Moon, Star, Sparkles, ArrowRight, Key } from 'lucide-react';
+import { Code, Zap, Moon, Star, Sparkles, Key } from 'lucide-react';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
@@ -263,10 +263,10 @@ export default function DevelopersPage() {
           {/* Header */}
           <div className='mb-12'>
             <div className='flex items-center gap-3 mb-4'>
-              <div className='p-2 rounded-lg bg-purple-500/20'>
-                <Code className='h-6 w-6 text-purple-400' />
+              <div className='p-2 rounded-lg bg-lunary-primary-900/20'>
+                <Code className='h-6 w-6 text-lunary-primary-400' />
               </div>
-              <span className='text-sm text-purple-400 font-medium'>
+              <span className='text-sm text-lunary-primary-400 font-medium'>
                 Developer Documentation
               </span>
             </div>
@@ -280,7 +280,7 @@ export default function DevelopersPage() {
             </p>
             <Link
               href='/developers/dashboard'
-              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
             >
               <Key className='h-5 w-5' />
               Get Your API Key
@@ -290,7 +290,7 @@ export default function DevelopersPage() {
           {/* Features */}
           <div className='grid md:grid-cols-3 gap-4 mb-12'>
             <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-              <Zap className='h-6 w-6 text-amber-400 mb-3' />
+              <Zap className='h-6 w-6 text-lunary-accent mb-3' />
               <h3 className='font-medium text-zinc-100 mb-1'>
                 Fast & Reliable
               </h3>
@@ -299,14 +299,14 @@ export default function DevelopersPage() {
               </p>
             </div>
             <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-              <Moon className='h-6 w-6 text-blue-400 mb-3' />
+              <Moon className='h-6 w-6 text-lunary-secondary mb-3' />
               <h3 className='font-medium text-zinc-100 mb-1'>Real Astronomy</h3>
               <p className='text-sm text-zinc-400'>
                 Based on actual astronomical calculations
               </p>
             </div>
             <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-              <Sparkles className='h-6 w-6 text-purple-400 mb-3' />
+              <Sparkles className='h-6 w-6 text-lunary-primary-400 mb-3' />
               <h3 className='font-medium text-zinc-100 mb-1'>Free Tier</h3>
               <p className='text-sm text-zinc-400'>
                 Core endpoints available without authentication
@@ -317,7 +317,7 @@ export default function DevelopersPage() {
           {/* Base URL */}
           <div className='mb-12 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
             <h2 className='text-sm font-medium text-zinc-400 mb-2'>Base URL</h2>
-            <code className='text-purple-300 bg-zinc-800 px-3 py-1.5 rounded text-sm'>
+            <code className='text-lunary-primary-300 bg-zinc-800 px-3 py-1.5 rounded text-sm'>
               https://lunary.app
             </code>
           </div>
@@ -335,8 +335,8 @@ export default function DevelopersPage() {
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
                       endpoint.method === 'GET'
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-blue-500/20 text-blue-400'
+                        ? 'bg-lunary-success-900 text-lunary-success'
+                        : 'bg-lunary-secondary-900 text-lunary-secondary'
                     }`}
                   >
                     {endpoint.method}
@@ -345,7 +345,7 @@ export default function DevelopersPage() {
                     {endpoint.path}
                   </code>
                   {endpoint.free && (
-                    <span className='px-2 py-1 rounded text-xs bg-purple-500/20 text-purple-300'>
+                    <span className='px-2 py-1 rounded text-xs bg-lunary-primary-900/20 text-lunary-primary-300'>
                       Free
                     </span>
                   )}
@@ -357,7 +357,7 @@ export default function DevelopersPage() {
 
                 {endpoint.params && (
                   <div className='mb-4'>
-                    <h4 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2'>
+                    <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
                       Parameters
                     </h4>
                     <div className='space-y-2'>
@@ -366,12 +366,12 @@ export default function DevelopersPage() {
                           key={i}
                           className='flex items-center gap-2 text-sm'
                         >
-                          <code className='text-purple-300 bg-zinc-800 px-2 py-0.5 rounded'>
+                          <code className='text-lunary-primary-300 bg-zinc-800 px-2 py-0.5 rounded'>
                             {param.name}
                           </code>
-                          <span className='text-zinc-500'>{param.type}</span>
+                          <span className='text-zinc-400'>{param.type}</span>
                           {param.required && (
-                            <span className='text-red-400 text-xs'>
+                            <span className='text-lunary-error text-xs'>
                               required
                             </span>
                           )}
@@ -386,7 +386,7 @@ export default function DevelopersPage() {
 
                 {endpoint.body && (
                   <div className='mb-4'>
-                    <h4 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2'>
+                    <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
                       Request Body
                     </h4>
                     <pre className='text-sm bg-zinc-800 p-3 rounded overflow-x-auto'>
@@ -396,7 +396,7 @@ export default function DevelopersPage() {
                 )}
 
                 <div>
-                  <h4 className='text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2'>
+                  <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
                     Response
                   </h4>
                   <pre className='text-sm bg-zinc-800 p-3 rounded overflow-x-auto'>
@@ -417,20 +417,22 @@ export default function DevelopersPage() {
                 <h3 className='font-medium text-zinc-100 mb-1'>Free</h3>
                 <p className='text-2xl font-light text-zinc-100 mb-2'>$0</p>
                 <p className='text-sm text-zinc-400 mb-3'>100 requests/month</p>
-                <ul className='text-xs text-zinc-500 space-y-1'>
+                <ul className='text-xs text-zinc-400 space-y-1'>
                   <li>• Basic endpoints only</li>
                   <li>• No API key required</li>
                 </ul>
               </div>
-              <div className='p-5 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-                <h3 className='font-medium text-purple-300 mb-1'>Starter</h3>
+              <div className='p-5 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+                <h3 className='font-medium text-lunary-primary-300 mb-1'>
+                  Starter
+                </h3>
                 <p className='text-2xl font-light text-zinc-100 mb-2'>
                   $9<span className='text-sm text-zinc-400'>/mo</span>
                 </p>
                 <p className='text-sm text-zinc-400 mb-3'>
                   5,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-500 space-y-1'>
+                <ul className='text-xs text-zinc-400 space-y-1'>
                   <li>• All endpoints</li>
                   <li>• API key access</li>
                 </ul>
@@ -443,7 +445,7 @@ export default function DevelopersPage() {
                 <p className='text-sm text-zinc-400 mb-3'>
                   25,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-500 space-y-1'>
+                <ul className='text-xs text-zinc-400 space-y-1'>
                   <li>• Priority support</li>
                   <li>• Higher rate limits</li>
                 </ul>
@@ -456,16 +458,16 @@ export default function DevelopersPage() {
                 <p className='text-sm text-zinc-400 mb-3'>
                   100,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-500 space-y-1'>
+                <ul className='text-xs text-zinc-400 space-y-1'>
                   <li>• Webhooks</li>
                   <li>• Dedicated support</li>
                 </ul>
               </div>
             </div>
-            <p className='mt-4 text-sm text-zinc-500 text-center'>
+            <p className='mt-4 text-sm text-zinc-400 text-center'>
               <Link
                 href='/developers/dashboard'
-                className='text-purple-400 hover:underline'
+                className='text-lunary-primary-400 hover:underline'
               >
                 Get your API key
               </Link>{' '}
@@ -480,7 +482,7 @@ export default function DevelopersPage() {
             </h2>
             <div className='grid md:grid-cols-2 gap-4'>
               <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <Star className='h-5 w-5 text-purple-400 mb-2' />
+                <Star className='h-5 w-5 text-lunary-primary-400 mb-2' />
                 <h3 className='font-medium text-zinc-100 mb-1'>
                   ChatGPT Plugins
                 </h3>
@@ -489,14 +491,14 @@ export default function DevelopersPage() {
                 </p>
               </div>
               <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <Moon className='h-5 w-5 text-blue-400 mb-2' />
+                <Moon className='h-5 w-5 text-lunary-secondary mb-2' />
                 <h3 className='font-medium text-zinc-100 mb-1'>Moon Widgets</h3>
                 <p className='text-sm text-zinc-400'>
                   Display current moon phase on your website or app
                 </p>
               </div>
               <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <Sparkles className='h-5 w-5 text-amber-400 mb-2' />
+                <Sparkles className='h-5 w-5 text-lunary-accent mb-2' />
                 <h3 className='font-medium text-zinc-100 mb-1'>
                   Daily Horoscopes
                 </h3>
@@ -505,7 +507,7 @@ export default function DevelopersPage() {
                 </p>
               </div>
               <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <Code className='h-5 w-5 text-green-400 mb-2' />
+                <Code className='h-5 w-5 text-lunary-success mb-2' />
                 <h3 className='font-medium text-zinc-100 mb-1'>
                   Productivity Apps
                 </h3>
@@ -520,16 +522,16 @@ export default function DevelopersPage() {
           <div className='mt-12 text-center'>
             <Link
               href='/developers/dashboard'
-              className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium text-lg transition-colors'
+              className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white font-medium text-lg transition-colors'
             >
               <Key className='h-5 w-5' />
               Get Started with the API
             </Link>
-            <p className='mt-4 text-sm text-zinc-500'>
+            <p className='mt-4 text-sm text-zinc-400'>
               Need enterprise limits or custom features?{' '}
               <a
                 href='mailto:api@lunary.app'
-                className='text-purple-400 hover:underline'
+                className='text-lunary-primary-400 hover:underline'
               >
                 api@lunary.app
               </a>

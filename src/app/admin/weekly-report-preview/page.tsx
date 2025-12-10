@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { Eye, Mail, Calendar, User, RefreshCw } from 'lucide-react';
 
 type WeeklyReport = {
@@ -156,7 +156,7 @@ function WeeklyReportPreviewContent() {
           <button
             onClick={generatePreview}
             disabled={loading}
-            className='px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 disabled:cursor-not-allowed rounded-md text-white font-medium transition-colors flex items-center gap-2'
+            className='px-6 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-700 disabled:cursor-not-allowed rounded-md text-white font-medium transition-colors flex items-center gap-2'
           >
             {loading ? (
               <>
@@ -173,8 +173,8 @@ function WeeklyReportPreviewContent() {
         </div>
 
         {error && (
-          <div className='bg-red-900/50 border border-red-700 rounded-lg p-4 mb-8'>
-            <p className='text-red-300'>{error}</p>
+          <div className='bg-lunary-error-900/50 border border-lunary-error-700 rounded-lg p-4 mb-8'>
+            <p className='text-lunary-error-300'>{error}</p>
           </div>
         )}
 
@@ -198,7 +198,7 @@ function WeeklyReportPreviewContent() {
                     onClick={() => setViewMode('report')}
                     className={`px-4 py-2 rounded-md transition-colors ${
                       viewMode === 'report'
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-lunary-primary-600 text-white'
                         : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                     }`}
                   >
@@ -208,7 +208,7 @@ function WeeklyReportPreviewContent() {
                     onClick={() => setViewMode('email')}
                     className={`px-4 py-2 rounded-md transition-colors ${
                       viewMode === 'email'
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-lunary-primary-600 text-white'
                         : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                     }`}
                   >
@@ -314,7 +314,7 @@ function WeeklyReportPreviewContent() {
                       const url = URL.createObjectURL(blob);
                       window.open(url, '_blank');
                     }}
-                    className='px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm'
+                    className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 rounded-md text-white text-sm'
                   >
                     Open in New Tab
                   </button>

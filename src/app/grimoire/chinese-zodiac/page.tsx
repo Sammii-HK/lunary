@@ -6,6 +6,7 @@ import {
   CHINESE_YEARS,
 } from '@/constants/seo/chinese-zodiac';
 import Script from 'next/script';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Chinese Zodiac: 12 Animal Signs, Years & Compatibility | Lunary',
@@ -60,13 +61,12 @@ export default function ChineseZodiacIndexPage() {
       />
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
-          <nav className='text-sm text-zinc-500 mb-8'>
-            <Link href='/grimoire' className='hover:text-zinc-300'>
-              Grimoire
-            </Link>
-            <span className='mx-2'>/</span>
-            <span className='text-zinc-300'>Chinese Zodiac</span>
-          </nav>
+          <Breadcrumbs
+            items={[
+              { label: 'Grimoire', href: '/grimoire' },
+              { label: 'Chinese Zodiac' },
+            ]}
+          />
 
           <h1 className='text-4xl font-light mb-4'>Chinese Zodiac</h1>
           <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
@@ -77,13 +77,13 @@ export default function ChineseZodiacIndexPage() {
           </p>
 
           {currentYearData && (
-            <div className='mb-12 p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
+            <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
               <div className='flex items-center gap-4 mb-4'>
                 <span className='text-5xl'>
                   {CHINESE_ZODIAC_DATA[currentYearData.animal].emoji}
                 </span>
                 <div>
-                  <h2 className='text-2xl font-medium text-purple-300'>
+                  <h2 className='text-2xl font-medium text-lunary-primary-300'>
                     {currentYear}: Year of the{' '}
                     {CHINESE_ZODIAC_DATA[currentYearData.animal].displayName}
                   </h2>
@@ -95,7 +95,7 @@ export default function ChineseZodiacIndexPage() {
               </div>
               <Link
                 href={`/grimoire/chinese-zodiac/${currentYearData.animal}`}
-                className='inline-flex px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 text-sm transition-colors'
+                className='inline-flex px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 text-sm transition-colors'
               >
                 Learn about the{' '}
                 {CHINESE_ZODIAC_DATA[currentYearData.animal].displayName}
@@ -113,16 +113,16 @@ export default function ChineseZodiacIndexPage() {
                 <Link
                   key={animal}
                   href={`/grimoire/chinese-zodiac/${animal}`}
-                  className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 hover:bg-zinc-900 transition-all group'
+                  className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all group'
                 >
                   <div className='flex items-center gap-3 mb-3'>
                     <span className='text-3xl'>{data.emoji}</span>
-                    <span className='text-xs text-zinc-500'>#{index + 1}</span>
+                    <span className='text-xs text-zinc-400'>#{index + 1}</span>
                   </div>
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-purple-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                     {data.displayName}
                   </h3>
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     {data.element} / {data.yinYang}
                   </p>
                   <p className='text-xs text-zinc-600 mt-2'>
@@ -151,7 +151,7 @@ export default function ChineseZodiacIndexPage() {
                       {yearData.year}:{' '}
                       {CHINESE_ZODIAC_DATA[yearData.animal].displayName}
                     </div>
-                    <div className='text-xs text-zinc-500'>
+                    <div className='text-xs text-zinc-400'>
                       {yearData.element} {yearData.yinYang}
                     </div>
                   </div>
@@ -169,7 +169,7 @@ export default function ChineseZodiacIndexPage() {
               your birth year to find your animal sign, or explore the signs
               above.
             </p>
-            <p className='text-sm text-zinc-500'>
+            <p className='text-sm text-zinc-400'>
               Note: Chinese New Year falls between late January and
               mid-February. If you were born in January or February, check
               whether your birthday falls before or after Chinese New Year in

@@ -1,0 +1,623 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Lunary AI API",
+    "version": "1.0.0",
+    "description": "API for AI assistants to provide personalized astrological insights, daily horoscopes, tarot readings, ritual suggestions, and grimoire search from Lunary.app - a calm AI companion for cosmic self understanding."
+  },
+  "servers": [
+    {
+      "url": "https://lunary.app"
+    }
+  ],
+  "paths": {
+    "/api/gpt/cosmic-today": {
+      "get": {
+        "operationId": "getCosmicToday",
+        "summary": "Get today's cosmic weather, moon phase, and planetary positions",
+        "description": "Returns current moon phase, sun sign, and key planetary transits based on real astronomical calculations.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Optional date in YYYY-MM-DD format. Defaults to today.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current cosmic conditions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "description": "Date in YYYY-MM-DD format"
+                    },
+                    "headline": {
+                      "type": "string",
+                      "description": "Summary headline of cosmic energy"
+                    },
+                    "summary": {
+                      "type": "string",
+                      "description": "Description of moon phase energy"
+                    },
+                    "moonPhase": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "emoji": { "type": "string" },
+                        "sign": { "type": "string" },
+                        "illumination": { "type": "number" }
+                      }
+                    },
+                    "sunSign": { "type": "string" },
+                    "keyTransits": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": { "type": "string" },
+                          "impact": { "type": "string" },
+                          "intensity": { "type": "number" }
+                        }
+                      }
+                    },
+                    "ctaUrl": { "type": "string" },
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/birth-chart-summary": {
+      "post": {
+        "operationId": "getBirthChartSummary",
+        "summary": "Get a brief birth chart summary (Big Three)",
+        "description": "Returns Sun sign, Moon sign, and Rising sign with a personality summary based on birth data.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["birthDate"],
+                "properties": {
+                  "birthDate": {
+                    "type": "string",
+                    "description": "Birth date in YYYY-MM-DD format"
+                  },
+                  "birthTime": {
+                    "type": "string",
+                    "description": "Birth time in HH:MM format (24h). Defaults to 12:00 if not provided."
+                  },
+                  "birthLocation": {
+                    "type": "string",
+                    "description": "Birth city name (e.g., 'London', 'New York')"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Birth chart summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sun": {
+                      "type": "object",
+                      "properties": {
+                        "sign": { "type": "string" },
+                        "house": { "type": "number" }
+                      }
+                    },
+                    "moon": {
+                      "type": "object",
+                      "properties": {
+                        "sign": { "type": "string" },
+                        "house": { "type": "number" }
+                      }
+                    },
+                    "rising": {
+                      "type": "object",
+                      "properties": { "sign": { "type": "string" } }
+                    },
+                    "summary": { "type": "string" },
+                    "themes": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "limitationsNote": { "type": "string" },
+                    "ctaUrl": { "type": "string" },
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/tarot/daily": {
+      "post": {
+        "operationId": "getDailyTarot",
+        "summary": "Draw a daily tarot card with interpretation",
+        "description": "Returns a randomly drawn Major Arcana card with message and interpretation, optionally focused on a specific life area.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "focus": {
+                    "type": "string",
+                    "description": "Optional focus area: 'career', 'love', or 'growth'"
+                  },
+                  "mood": {
+                    "type": "string",
+                    "description": "Optional current mood for personalization"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Daily tarot reading",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "card": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "arcana": { "type": "string" },
+                        "upright": { "type": "boolean" },
+                        "keywords": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
+                      }
+                    },
+                    "message": { "type": "string" },
+                    "spreadType": { "type": "string" },
+                    "interpretation": { "type": "string" },
+                    "ctaUrl": { "type": "string" },
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/ritual/suggest": {
+      "post": {
+        "operationId": "suggestRitual",
+        "summary": "Get a ritual suggestion based on intent",
+        "description": "Returns a personalized ritual with steps based on the user's intention (e.g., self-trust, abundance, protection, release, love, clarity).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["intent"],
+                "properties": {
+                  "intent": {
+                    "type": "string",
+                    "description": "What the user wants to work on (e.g., 'self-trust', 'abundance', 'protection', 'release', 'love', 'clarity')"
+                  },
+                  "experienceLevel": {
+                    "type": "string",
+                    "description": "Optional: 'beginner', 'intermediate', or 'advanced'"
+                  },
+                  "context": {
+                    "type": "object",
+                    "properties": {
+                      "moonPhase": {
+                        "type": "string",
+                        "description": "Current moon phase for timing"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ritual suggestion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "title": { "type": "string" },
+                    "summary": { "type": "string" },
+                    "steps": { "type": "array", "items": { "type": "string" } },
+                    "durationMinutes": { "type": "number" },
+                    "tools": { "type": "array", "items": { "type": "string" } },
+                    "bestMoonPhases": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "intent": { "type": "string" },
+                    "ctaUrl": { "type": "string" },
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/horoscope": {
+      "get": {
+        "operationId": "getDailyHoroscope",
+        "summary": "Get daily horoscope for a zodiac sign",
+        "description": "Returns a daily horoscope with lucky number, color, compatibility, and mood based on current planetary positions.",
+        "parameters": [
+          {
+            "name": "sign",
+            "in": "query",
+            "description": "Zodiac sign (aries, taurus, gemini, cancer, leo, virgo, libra, scorpio, sagittarius, capricorn, aquarius, pisces)",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Optional date in YYYY-MM-DD format. Defaults to today.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily horoscope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sign": { "type": "string" },
+                    "date": { "type": "string" },
+                    "horoscope": { "type": "string" },
+                    "mood": { "type": "string" },
+                    "luckyNumber": { "type": "number" },
+                    "luckyColor": { "type": "string" },
+                    "compatibility": { "type": "string" },
+                    "moonPhase": { "type": "string" },
+                    "element": { "type": "string" },
+                    "ctaUrl": { "type": "string" },
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/compatibility": {
+      "get": {
+        "operationId": "getSignCompatibility",
+        "summary": "Get compatibility between two zodiac signs",
+        "description": "Returns compatibility score, analysis, strengths, and challenges for two zodiac signs.",
+        "parameters": [
+          {
+            "name": "sign1",
+            "in": "query",
+            "description": "First zodiac sign",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "sign2",
+            "in": "query",
+            "description": "Second zodiac sign",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compatibility analysis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sign1": { "type": "string" },
+                    "sign2": { "type": "string" },
+                    "compatibilityScore": { "type": "number" },
+                    "compatibilityLevel": { "type": "string" },
+                    "summary": { "type": "string" },
+                    "elements": { "type": "object" },
+                    "modalities": { "type": "object" },
+                    "strengths": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "challenges": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "advice": { "type": "string" },
+                    "ctaUrl": { "type": "string" },
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/crystal": {
+      "get": {
+        "operationId": "getCrystalInfo",
+        "summary": "Get crystal healing properties and information",
+        "description": "Returns detailed information about a crystal including properties, chakras, zodiac associations, and how to work with it. 100+ crystals available.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Crystal name (e.g., 'amethyst', 'rose-quartz', 'black-tourmaline')",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Crystal information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "properties": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "chakras": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "zodiacSigns": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "elements": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "workingWith": { "type": "object" },
+                    "source": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/angel-number": {
+      "get": {
+        "operationId": "getAngelNumberMeaning",
+        "summary": "Get the meaning of an angel number",
+        "description": "Returns spiritual, love, and career meanings for angel numbers like 111, 222, 333, etc.",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "query",
+            "description": "Angel number (e.g., '111', '222', '333', '444', '555', '777', '888', '999')",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Angel number meaning",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "number": { "type": "string" },
+                    "meaning": { "type": "string" },
+                    "message": { "type": "string" },
+                    "spiritualMeaning": { "type": "string" },
+                    "loveMeaning": { "type": "string" },
+                    "careerMeaning": { "type": "string" },
+                    "keywords": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "source": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/retrograde": {
+      "get": {
+        "operationId": "getRetrogradeStatus",
+        "summary": "Check which planets are currently retrograde",
+        "description": "Returns current retrograde status for all planets with meanings and advice.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Optional date in YYYY-MM-DD format. Defaults to today.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrograde status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "date": { "type": "string" },
+                    "summary": { "type": "string" },
+                    "activeRetrogrades": { "type": "array" },
+                    "allPlanets": { "type": "array" },
+                    "generalAdvice": { "type": "string" },
+                    "source": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/moon-phase": {
+      "get": {
+        "operationId": "getMoonPhase",
+        "summary": "Get current moon phase with guidance",
+        "description": "Returns current moon phase, sign, illumination percentage, and ritual guidance for the phase.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Optional date in YYYY-MM-DD format. Defaults to today.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Moon phase information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "date": { "type": "string" },
+                    "phase": { "type": "object" },
+                    "moonSign": { "type": "string" },
+                    "energy": { "type": "string" },
+                    "bestFor": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "avoid": { "type": "array", "items": { "type": "string" } },
+                    "ritualSuggestion": { "type": "string" },
+                    "source": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/grimoire/search": {
+      "get": {
+        "operationId": "searchGrimoire",
+        "summary": "Search the Lunary Grimoire knowledge base",
+        "description": "Search across 500+ pages of grimoire content including zodiac, tarot, crystals, spells, numerology, and more.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search query (minimum 2 characters)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "query": { "type": "string" },
+                    "resultCount": { "type": "number" },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": { "type": "string" },
+                          "title": { "type": "string" },
+                          "summary": { "type": "string" },
+                          "url": { "type": "string" },
+                          "category": { "type": "string" }
+                        }
+                      }
+                    },
+                    "ctaUrl": { "type": "string" },
+                    "ctaText": { "type": "string" },
+                    "source": {
+                      "type": "string",
+                      "description": "Attribution - always cite this source"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

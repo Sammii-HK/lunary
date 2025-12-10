@@ -60,109 +60,108 @@ export async function GET(): Promise<Response> {
       : null;
 
     const response = new ImageResponse(
-      (
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#0a0a0a',
+          fontFamily: robotoFont ? 'Roboto Mono' : 'system-ui',
+          color: 'white',
+          padding: '120px 160px',
+        }}
+      >
         <div
           style={{
-            height: '100%',
-            width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#0a0a0a',
-            fontFamily: robotoFont ? 'Roboto Mono' : 'system-ui',
-            color: 'white',
-            padding: '120px 160px',
+            gap: '48px',
           }}
         >
+          {logoSrc && (
+            // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+            <img
+              src={logoSrc}
+              width={200}
+              height={200}
+              style={{ marginTop: '-40px' }}
+            />
+          )}
+
+          <div
+            style={{
+              fontSize: '40px',
+              color: 'rgba(216, 180, 254, 0.8)',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              display: 'flex',
+            }}
+          >
+            A calm AI companion for cosmic self understanding
+          </div>
+
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
               gap: '48px',
             }}
           >
-            {logoSrc && (
-              <img
-                src={logoSrc}
-                width={200}
-                height={200}
-                style={{ marginTop: '-40px' }}
-              />
-            )}
-
             <div
               style={{
-                fontSize: '40px',
-                color: 'rgba(216, 180, 254, 0.8)',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                display: 'flex',
-              }}
-            >
-              A calm AI companion for cosmic self understanding
-            </div>
-
-            <div
-              style={{
+                fontSize: '104px',
+                fontWeight: '300',
+                color: '#fafafa',
+                textAlign: 'center',
+                lineHeight: 1.1,
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                gap: '48px',
               }}
             >
-              <div
-                style={{
-                  fontSize: '104px',
-                  fontWeight: '300',
-                  color: '#fafafa',
-                  textAlign: 'center',
-                  lineHeight: 1.1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <span style={{ display: 'flex', justifyContent: 'center' }}>
-                  Personalised astrology for clarity
-                </span>
-                <span style={{ display: 'flex', justifyContent: 'center' }}>
-                  and self understanding
-                </span>
-              </div>
+              <span style={{ display: 'flex', justifyContent: 'center' }}>
+                Personalised astrology for clarity
+              </span>
+              <span style={{ display: 'flex', justifyContent: 'center' }}>
+                and self understanding
+              </span>
+            </div>
 
-              <div
-                style={{
-                  fontSize: '52px',
-                  fontWeight: '400',
-                  color: '#a1a1aa',
-                  textAlign: 'center',
-                  lineHeight: 1.5,
-                  maxWidth: '1800px',
-                  display: 'flex',
-                }}
-              >
-                Lunary brings together your birth chart, today's sky, tarot and
-                lunar cycles to give you calm and personal daily guidance.
-              </div>
+            <div
+              style={{
+                fontSize: '52px',
+                fontWeight: '400',
+                color: '#a1a1aa',
+                textAlign: 'center',
+                lineHeight: 1.5,
+                maxWidth: '1800px',
+                display: 'flex',
+              }}
+            >
+              Lunary brings together your birth chart, today's sky, tarot and
+              lunar cycles to give you calm and personal daily guidance.
             </div>
           </div>
-
-          <div
-            style={{
-              marginTop: '80px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '24px',
-              color: 'rgba(216, 180, 254, 0.8)',
-              fontSize: '48px',
-            }}
-          >
-            <span style={{ display: 'flex' }}>lunary.app</span>
-          </div>
         </div>
-      ),
+
+        <div
+          style={{
+            marginTop: '80px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '24px',
+            color: 'rgba(216, 180, 254, 0.8)',
+            fontSize: '48px',
+          }}
+        >
+          <span style={{ display: 'flex' }}>lunary.app</span>
+        </div>
+      </div>,
       {
         width: 2400,
         height: 1260,
@@ -188,7 +187,6 @@ export async function GET(): Promise<Response> {
     return new Response(
       JSON.stringify({
         error: 'Failed to generate image',
-        details: String(error),
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },
     );

@@ -22,9 +22,9 @@ const Chakras = () => {
             <Link
               key={chakra}
               href={`/grimoire/chakras/${chakraSlug}`}
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
             >
-              <h2 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+              <h2 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                 {chakras[chakra as keyof typeof chakras].symbol}{' '}
                 {chakras[chakra as keyof typeof chakras].name}
               </h2>

@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Sun, Moon, Calendar, Sparkles } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 export const metadata: Metadata = {
-  title: 'Solar & Lunar Eclipses 2025: Complete Guide & Dates',
+  title: 'Solar & Lunar Eclipses 2025: All Dates & Astrology Meanings',
   description:
     '2025 eclipse dates and meanings. Solar eclipses March 29 and September 21, Lunar eclipses March 14 and September 7. Learn what each eclipse means for your sign.',
   openGraph: {
-    title: 'Solar & Lunar Eclipses 2025: Complete Guide & Dates',
+    title: 'Solar & Lunar Eclipses 2025: All Dates & Astrology Meanings',
     description:
       '2025 eclipse guide with all dates, meanings, and rituals for solar and lunar eclipses.',
     url: 'https://lunary.app/grimoire/events/2025/eclipses',
@@ -98,12 +98,6 @@ export default function Eclipses2025Page() {
         datePublished='2024-12-01'
         dateModified={new Date().toISOString().split('T')[0]}
         articleSection='Astrology Events'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Events', href: '/grimoire/events' },
-          { label: '2025', href: '/grimoire/events/2025' },
-          { label: 'Eclipses', href: '/grimoire/events/2025/eclipses' },
-        ]}
         intro='2025 brings four powerful eclipses that will catalyze major changes and new beginnings. Eclipses are cosmic wild cards—they accelerate fate and bring destined events into our lives. This guide covers all four 2025 eclipses with their meanings and rituals.'
         meaning={`**What Are Eclipses?**
 
@@ -148,16 +142,16 @@ Eclipses come in pairs or clusters called "eclipse seasons." In 2025, we have tw
                   key={index}
                   className={`p-6 rounded-lg border ${
                     isSolar
-                      ? 'border-amber-500/30 bg-amber-500/10'
-                      : 'border-purple-500/30 bg-purple-500/10'
+                      ? 'border-lunary-accent-700 bg-lunary-accent-950'
+                      : 'border-lunary-primary-700 bg-lunary-primary-900/10'
                   }`}
                 >
                   <div className='flex items-start gap-4'>
                     <div
-                      className={`p-2 rounded-lg ${isSolar ? 'bg-amber-500/20' : 'bg-purple-500/20'}`}
+                      className={`p-2 rounded-lg ${isSolar ? 'bg-lunary-accent-900' : 'bg-lunary-primary-900/20'}`}
                     >
                       <Icon
-                        className={`h-6 w-6 ${isSolar ? 'text-amber-400' : 'text-purple-400'}`}
+                        className={`h-6 w-6 ${isSolar ? 'text-lunary-accent' : 'text-lunary-primary-400'}`}
                       />
                     </div>
                     <div className='flex-1'>
@@ -168,15 +162,15 @@ Eclipses come in pairs or clusters called "eclipse seasons." In 2025, we have tw
                         <span
                           className={`px-2 py-1 rounded text-xs ${
                             isSolar
-                              ? 'bg-amber-500/20 text-amber-300'
-                              : 'bg-purple-500/20 text-purple-300'
+                              ? 'bg-lunary-accent-900 text-lunary-accent-300'
+                              : 'bg-lunary-primary-900/20 text-lunary-primary-300'
                           }`}
                         >
                           {eclipse.type}
                         </span>
                       </div>
                       <p
-                        className={`text-sm mb-2 ${isSolar ? 'text-amber-300' : 'text-purple-300'}`}
+                        className={`text-sm mb-2 ${isSolar ? 'text-lunary-accent-300' : 'text-lunary-primary-300'}`}
                       >
                         {eclipse.sign} — {eclipse.theme}
                       </p>
@@ -184,7 +178,7 @@ Eclipses come in pairs or clusters called "eclipse seasons." In 2025, we have tw
                         {eclipse.description}
                       </p>
                       <div className='space-y-2'>
-                        <p className='text-xs text-zinc-500 uppercase tracking-wider'>
+                        <p className='text-xs text-zinc-400 uppercase tracking-wider'>
                           Suggested Rituals:
                         </p>
                         <ul className='text-sm text-zinc-300 space-y-1'>

@@ -131,9 +131,10 @@ The ${elementKey.toLowerCase()} element's energy is ${elementData.colors.join(',
       faqs={faqs}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Magical Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Elements', href: '/grimoire/correspondences/elements' },
         {
-          label: `${elementKey} Element`,
+          label: `${elementKey}`,
           href: `/grimoire/correspondences/elements/${element}`,
         },
       ]}

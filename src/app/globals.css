@@ -15,12 +15,21 @@ html {
   --background-start-rgb: 214, 219, 220;
   /* --background-end-rgb: 255, 255, 255; */
 
-  --lunary-violet: #7358ff;
-  --lunary-rose: #ff7b9c;
-  --lunary-blue: #4f5bff;
-  --lunary-midnight: #0a0a1a;
-  --lunary-orchid: #e066ff;
-  --lunary-lavender: #c77dff;
+  /* Lunary Brand Colors */
+  --color-bg: #0a0a0a; /* Event Horizon */
+  --color-bg-deep: #050505; /* Singularity */
+  --color-primary: #8458d8; /* Nebula Violet */
+  --color-secondary: #7b7be8; /* Comet Trail */
+  --color-accent: #c77dff; /* Galaxy Haze */
+  --color-highlight: #d070e8; /* Supernova */
+  --color-rose: #ee789e; /* Cosmic Rose */
+  --color-error: #d06060; /* Solar Flare */
+  --color-success: #6b9b7a; /* Aurora Green */
+  --color-text: #ffffff; /* Stardust */
+
+  /* Glow Effects - uses Comet Trail (secondary) */
+  --glow-primary:
+    0 0 20px rgba(123, 123, 232, 0.5), 0 0 40px rgba(123, 123, 232, 0.25);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -48,5 +57,71 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar - Comet Trail (desktop only) */
+@media (min-width: 768px) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(123, 123, 232, 0.45) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(123, 123, 232, 0.45);
+    border-radius: 3px;
+  }
+}
+
+/* Hide custom scrollbar on mobile - use native touch scrolling */
+@media (max-width: 767px) {
+  * {
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Performance optimizations */
+@layer components {
+  /* Improve paint performance for cards and widgets */
+  .contain-paint {
+    contain: paint;
+  }
+
+  /* Skip rendering for off-screen content */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+  }
+
+  /* Optimize layout calculations */
+  .contain-layout {
+    contain: layout;
+  }
+
+  /* Full containment for independent widgets */
+  .contain-strict {
+    contain: strict;
+  }
+}
+
+/* Prevent mobile zoom on input focus (iOS requires 16px minimum) */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
   }
 }

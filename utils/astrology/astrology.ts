@@ -4,7 +4,6 @@ import {
   Observer,
   AstroTime,
   Ecliptic,
-  MoonPhase,
 } from 'astronomy-engine';
 
 export const ZODIAC_SIGNS = [

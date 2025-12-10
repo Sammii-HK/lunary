@@ -6,10 +6,8 @@ import {
   bodiesSymbols,
   planetUnicode,
 } from '../../../../../../utils/zodiac/zodiac';
-import {
-  PLANETARY_CORRESPONDENCES,
-  getEntityRelationships,
-} from '@/constants/entity-relationships';
+import { createPlanetSchema, renderJsonLd } from '@/lib/schema';
+import { getEntityRelationships } from '@/constants/entity-relationships';
 
 const planetKeys = Object.keys(planetaryBodies);
 
@@ -194,8 +192,18 @@ export default async function PlanetPage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const planetSchema = createPlanetSchema({
+    planet: planetData.name,
+    description: `${planetData.name} (${unicodeSymbol}) in astrology represents ${correspondences.themes.slice(0, 3).join(', ').toLowerCase()}. ${planetData.mysticalProperties}`,
+    rules: planetData.rules || [],
+    themes: correspondences.themes,
+    day: correspondences.day,
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(planetSchema)}
       <SEOContentTemplate
         title={`${planetData.name} - Lunary`}
         h1={`${planetData.name} ${unicodeSymbol}: Astrological Meaning`}

@@ -224,6 +224,14 @@ self.addEventListener('fetch', (event) => {
 
 // Handle skip waiting message from client
 self.addEventListener('message', (event) => {
+  // Verify origin for security
+  if (
+    !event.origin ||
+    (!event.origin.includes('lunary.app') &&
+      !event.origin.includes('localhost'))
+  ) {
+    return;
+  }
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('⚠️ Received SKIP_WAITING, activating immediately');
     self.skipWaiting();

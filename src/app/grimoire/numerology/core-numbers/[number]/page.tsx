@@ -189,8 +189,9 @@ Keywords: ${numberData.keywords.join(', ')}`}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
+          { label: 'Core Numbers', href: '/grimoire/numerology/core-numbers' },
           {
-            label: `Core Number ${number}`,
+            label: `Number ${number}`,
             href: `/grimoire/numerology/core-numbers/${number}`,
           },
         ]}

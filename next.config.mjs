@@ -5,8 +5,8 @@ const require = createRequire(import.meta.url);
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
     ? require('@next/bundle-analyzer')({
-      enabled: true,
-    })
+        enabled: true,
+      })
     : (config) => config;
 
 /** @type {import('next').NextConfig} */
@@ -219,8 +219,8 @@ const nextConfig = {
     removeConsole:
       process.env.NODE_ENV === 'production'
         ? {
-          exclude: ['error', 'warn'], // Keep console.error and console.warn
-        }
+            exclude: ['error', 'warn'], // Keep console.error and console.warn
+          }
         : false,
   },
 
@@ -399,10 +399,13 @@ const nextConfig = {
         destination: '/blog/week/week-:week-:year',
         permanent: true,
       },
-      // Grimoire section redirects
+      // ========================================
+      // GRIMOIRE CONSOLIDATION REDIRECTS
+      // Phase 1: Deleted duplicate index pages
+      // ========================================
       {
-        source: '/grimoire/sabbats/:sabbat',
-        destination: '/grimoire/wheel-of-the-year/:sabbat',
+        source: '/grimoire/moon-phases',
+        destination: '/grimoire/moon/phases',
         permanent: true,
       },
       {
@@ -411,8 +414,18 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/grimoire/full-moons',
+        destination: '/grimoire/moon/full-moons',
+        permanent: true,
+      },
+      {
         source: '/grimoire/full-moons/:month',
         destination: '/grimoire/moon/full-moons/:month',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/tarot-spreads',
+        destination: '/grimoire/tarot/spreads',
         permanent: true,
       },
       {
@@ -421,15 +434,133 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/grimoire/scrying',
+        destination: '/grimoire/divination/scrying',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/dream-interpretation',
+        destination: '/grimoire/divination/dream-interpretation',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/pendulum-divination',
+        destination: '/grimoire/divination/pendulum',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/reading-omens',
+        destination: '/grimoire/divination/omen-reading',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/planets',
+        destination: '/grimoire/astronomy/planets',
+        permanent: true,
+      },
+      {
         source: '/grimoire/planets/:planet',
         destination: '/grimoire/astronomy/planets/:planet',
         permanent: true,
       },
       {
-        source: '/grimoire/witches/:witch',
-        destination: '/grimoire/modern-witchcraft/witch-types/:witch',
+        source: '/grimoire/breathwork',
+        destination: '/grimoire/meditation/breathwork',
         permanent: true,
       },
+      // Sabbats redirect (duplicate of wheel-of-the-year)
+      {
+        source: '/grimoire/sabbats',
+        destination: '/grimoire/wheel-of-the-year',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/sabbats/:sabbat',
+        destination: '/grimoire/wheel-of-the-year/:sabbat',
+        permanent: true,
+      },
+      // ========================================
+      // PHASE 2: ORPHAN PAGE MOVES
+      // ========================================
+      // Moon section moves
+      {
+        source: '/grimoire/moon-rituals',
+        destination: '/grimoire/moon/rituals',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/moon-signs',
+        destination: '/grimoire/moon/signs',
+        permanent: true,
+      },
+      // Tarot section moves
+      {
+        source: '/grimoire/tarot-suits',
+        destination: '/grimoire/tarot/suits',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/tarot-suits/:suit',
+        destination: '/grimoire/tarot/suits/:suit',
+        permanent: true,
+      },
+      // Modern witchcraft section moves
+      {
+        source: '/grimoire/witchcraft-ethics',
+        destination: '/grimoire/modern-witchcraft/ethics',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/witchcraft-tools',
+        destination: '/grimoire/modern-witchcraft/tools-guide',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/witches',
+        destination: '/grimoire/modern-witchcraft/famous-witches',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/witches/:witch',
+        destination: '/grimoire/modern-witchcraft/famous-witches/:witch',
+        permanent: true,
+      },
+      // Spells section moves
+      {
+        source: '/grimoire/spellcraft-fundamentals',
+        destination: '/grimoire/spells/fundamentals',
+        permanent: true,
+      },
+      // Candle magic section moves
+      {
+        source: '/grimoire/anointing-candles',
+        destination: '/grimoire/candle-magic/anointing',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/incantations-by-candle-color',
+        destination: '/grimoire/candle-magic/incantations',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/lighting-candles-on-altar',
+        destination: '/grimoire/candle-magic/altar-lighting',
+        permanent: true,
+      },
+      // Astronomy section moves
+      {
+        source: '/grimoire/retrogrades',
+        destination: '/grimoire/astronomy/retrogrades',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/retrogrades/:planet',
+        destination: '/grimoire/astronomy/retrogrades/:planet',
+        permanent: true,
+      },
+      // ========================================
+      // END GRIMOIRE CONSOLIDATION REDIRECTS
+      // ========================================
       // Aspects and Houses route restructure (SEO preservation)
       {
         source:
@@ -441,6 +572,25 @@ const nextConfig = {
         source:
           '/grimoire/houses/:house(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)',
         destination: '/grimoire/houses/overview/:house',
+        permanent: true,
+      },
+      // Monthly horoscopes moved under Grimoire
+      {
+        source:
+          '/horoscope/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)',
+        destination: '/grimoire/horoscopes/:sign',
+        permanent: true,
+      },
+      {
+        source:
+          '/horoscope/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)/:year(\\d{4})',
+        destination: '/grimoire/horoscopes/:sign/:year',
+        permanent: true,
+      },
+      {
+        source:
+          '/horoscope/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)/:year(\\d{4})/:month',
+        destination: '/grimoire/horoscopes/:sign/:year/:month',
         permanent: true,
       },
     ];

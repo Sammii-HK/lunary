@@ -81,9 +81,9 @@ const Correspondences = () => {
               <Link
                 key={color}
                 href={`/grimoire/correspondences/colors/${colorSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {color}
                 </h3>
                 <div className='space-y-2 text-sm text-zinc-300'>
@@ -142,7 +142,7 @@ const Correspondences = () => {
                 <div key={pantheon}>
                   <Link
                     href={`/grimoire/correspondences/deities/${pantheonSlug}`}
-                    className='block text-lg font-medium text-zinc-200 mb-3 hover:text-purple-400 transition-colors'
+                    className='block text-lg font-medium text-zinc-200 mb-3 hover:text-lunary-primary-400 transition-colors'
                   >
                     {pantheon}
                   </Link>
@@ -153,9 +153,9 @@ const Correspondences = () => {
                         <Link
                           key={name}
                           href={`/grimoire/correspondences/deities/${pantheonSlug}/${deitySlug}`}
-                          className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                          className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
                         >
-                          <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                          <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                             {name}
                           </h4>
                           <div className='text-sm text-zinc-400'>
@@ -182,9 +182,9 @@ const Correspondences = () => {
               <Link
                 key={flower}
                 href={`/grimoire/correspondences/flowers/${flowerSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {flower}
                 </h3>
                 <div className='space-y-2 text-sm text-zinc-300'>
@@ -213,9 +213,9 @@ const Correspondences = () => {
               <Link
                 key={num}
                 href={`/grimoire/correspondences/numbers/${numSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {num}
                 </h3>
                 <div className='space-y-2 text-sm text-zinc-300'>
@@ -244,9 +244,9 @@ const Correspondences = () => {
               <Link
                 key={wood}
                 href={`/grimoire/correspondences/wood/${woodSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {wood}
                 </h3>
                 <div className='space-y-2 text-sm text-zinc-300'>
@@ -275,9 +275,9 @@ const Correspondences = () => {
               <Link
                 key={herb}
                 href={`/grimoire/correspondences/herbs/${herbSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {herb}
                 </h3>
                 <div className='space-y-2 text-sm text-zinc-300'>
@@ -306,9 +306,9 @@ const Correspondences = () => {
               <Link
                 key={animal}
                 href={`/grimoire/correspondences/animals/${animalSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {animal}
                 </h3>
                 <div className='space-y-2 text-sm text-zinc-300'>
@@ -338,7 +338,7 @@ const Correspondences = () => {
         </p>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Herb Preparations
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -369,7 +369,7 @@ const Correspondences = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Herb Safety & Disclaimer
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -379,8 +379,10 @@ const Correspondences = () => {
                 content is not intended as medical advice, diagnosis, or
                 treatment.
               </p>
-              <div className='p-3 bg-red-500/10 border border-red-500/30 rounded'>
-                <strong className='text-red-300'>Important Disclaimer:</strong>
+              <div className='p-3 bg-lunary-error-950 border border-lunary-error-700 rounded'>
+                <strong className='text-lunary-error-300'>
+                  Important Disclaimer:
+                </strong>
                 <ul className='list-disc list-inside mt-2 space-y-1'>
                   <li>Always research herbs thoroughly before any use</li>
                   <li>
@@ -406,7 +408,7 @@ const Correspondences = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Wildcrafting Ethics
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -432,7 +434,9 @@ const Correspondences = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Sage</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Sage
+            </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Purification, wisdom, protection,
@@ -458,7 +462,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Rosemary
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -485,7 +489,9 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Basil</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Basil
+            </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Protection, prosperity, love,
@@ -510,7 +516,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-400 mb-2'>
               Lavender
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -537,7 +543,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-orange-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-rose mb-2'>
               Cinnamon
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -565,7 +571,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-pink-400 mb-2'>Rose</h3>
+            <h3 className='text-lg font-medium text-lunary-rose mb-2'>Rose</h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Love, beauty, healing, protection,
@@ -590,7 +596,9 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Mint</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Mint
+            </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Prosperity, protection, healing,
@@ -615,7 +623,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-yellow-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Chamomile
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -642,7 +650,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-400 mb-2'>
               Mugwort
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -671,7 +679,9 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-green-400 mb-2'>Thyme</h3>
+            <h3 className='text-lg font-medium text-lunary-success mb-2'>
+              Thyme
+            </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
               <p>
                 <strong>Properties:</strong> Courage, purification, health,
@@ -696,7 +706,7 @@ const Correspondences = () => {
           </div>
 
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-blue-400 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-secondary mb-2'>
               Eucalyptus
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -732,7 +742,7 @@ const Correspondences = () => {
         </h2>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How do I store herbs?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -743,7 +753,7 @@ const Correspondences = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Can I grow my own magical herbs?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -754,7 +764,7 @@ const Correspondences = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What's the difference between culinary and magical herbs?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -774,42 +784,42 @@ const Correspondences = () => {
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <a
-            href='/grimoire/candle-magic#color-meanings'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          <Link
+            href='/grimoire/candle-magic/colors'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Candle Color Meanings
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/practices'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Spells & Rituals
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/crystals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Crystal Correspondences
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/moon'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon & Timing
-          </a>
-          <a
-            href='/grimoire/birth-chart#planets'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          </Link>
+          <Link
+            href='/grimoire/astronomy/planets'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Planetary Influences
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/numerology'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Number Correspondences
-          </a>
+          </Link>
         </div>
       </section>
     </div>

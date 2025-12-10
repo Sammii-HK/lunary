@@ -19,7 +19,8 @@ export interface GrimoireEntry {
     | 'season'
     | 'numerology'
     | 'birthday'
-    | 'compatibility';
+    | 'compatibility'
+    | 'glossary';
   keywords: string[];
   summary: string;
   relatedSlugs: string[];
@@ -1680,6 +1681,561 @@ export const GRIMOIRE_SEARCH_INDEX: GrimoireEntry[] = [
       'zodiac/cancer',
       'crystals/labradorite',
     ],
+  },
+
+  // ============================================================================
+  // GLOSSARY TERMS
+  // ============================================================================
+  {
+    slug: 'glossary#ascendant',
+    title: 'Ascendant',
+    category: 'glossary',
+    keywords: [
+      'ascendant',
+      'rising sign',
+      'rising',
+      'first house',
+      'appearance',
+      'personality',
+    ],
+    summary:
+      'The zodiac sign rising on the eastern horizon at birth, representing your outward personality and how others perceive you.',
+    relatedSlugs: ['glossary#rising-sign', 'glossary#first-house'],
+  },
+  {
+    slug: 'glossary#rising-sign',
+    title: 'Rising Sign',
+    category: 'glossary',
+    keywords: ['rising sign', 'rising', 'ascendant', 'first impression'],
+    summary:
+      'Another name for the Ascendant. The zodiac sign ascending on the eastern horizon at birth.',
+    relatedSlugs: ['glossary#ascendant'],
+  },
+  {
+    slug: 'glossary#sun-sign',
+    title: 'Sun Sign',
+    category: 'glossary',
+    keywords: ['sun sign', 'star sign', 'zodiac sign', 'identity', 'ego'],
+    summary:
+      'The zodiac sign the Sun was in at your birth, representing your core identity and life purpose.',
+    relatedSlugs: ['glossary#moon-sign', 'glossary#rising-sign'],
+  },
+  {
+    slug: 'glossary#moon-sign',
+    title: 'Moon Sign',
+    category: 'glossary',
+    keywords: [
+      'moon sign',
+      'emotions',
+      'emotional nature',
+      'instincts',
+      'subconscious',
+    ],
+    summary:
+      'The zodiac sign the Moon was in at your birth, governing your emotional nature and instincts.',
+    relatedSlugs: ['glossary#sun-sign', 'glossary#rising-sign'],
+  },
+  {
+    slug: 'glossary#natal-chart',
+    title: 'Natal Chart',
+    category: 'glossary',
+    keywords: ['natal chart', 'birth chart', 'horoscope', 'chart', 'birth map'],
+    summary:
+      'A map of the sky at the exact moment and location of your birth, showing planetary positions.',
+    relatedSlugs: ['glossary#birth-chart'],
+  },
+  {
+    slug: 'glossary#birth-chart',
+    title: 'Birth Chart',
+    category: 'glossary',
+    keywords: ['birth chart', 'natal chart', 'chart', 'celestial snapshot'],
+    summary:
+      'Synonymous with natal chart. A celestial snapshot of the sky at your birth.',
+    relatedSlugs: ['glossary#natal-chart'],
+  },
+  {
+    slug: 'glossary#aspect',
+    title: 'Aspect',
+    category: 'glossary',
+    keywords: [
+      'aspect',
+      'planetary aspect',
+      'angle',
+      'relationship',
+      'interaction',
+    ],
+    summary:
+      'An angular relationship between two planets describing how their energies interact.',
+    relatedSlugs: [
+      'glossary#conjunction',
+      'glossary#opposition',
+      'glossary#trine',
+      'glossary#square',
+    ],
+  },
+  {
+    slug: 'glossary#conjunction',
+    title: 'Conjunction',
+    category: 'glossary',
+    keywords: [
+      'conjunction',
+      'aspect',
+      'same degree',
+      'fusion',
+      'blended energy',
+    ],
+    summary:
+      'An aspect where two planets are at the same degree, fusing their energies together intensely.',
+    relatedSlugs: ['glossary#aspect'],
+  },
+  {
+    slug: 'glossary#opposition',
+    title: 'Opposition',
+    category: 'glossary',
+    keywords: [
+      'opposition',
+      'aspect',
+      '180 degrees',
+      'tension',
+      'balance',
+      'polarity',
+    ],
+    summary:
+      'An aspect of 180° between planets, creating tension and requiring balance.',
+    relatedSlugs: ['glossary#aspect'],
+  },
+  {
+    slug: 'glossary#trine',
+    title: 'Trine',
+    category: 'glossary',
+    keywords: ['trine', 'aspect', '120 degrees', 'harmony', 'flow', 'talent'],
+    summary: 'A harmonious aspect of 120° indicating natural talent and ease.',
+    relatedSlugs: ['glossary#aspect', 'glossary#grand-trine'],
+  },
+  {
+    slug: 'glossary#square',
+    title: 'Square',
+    category: 'glossary',
+    keywords: [
+      'square',
+      'aspect',
+      '90 degrees',
+      'challenge',
+      'tension',
+      'growth',
+    ],
+    summary:
+      'A challenging aspect of 90° creating friction that drives growth.',
+    relatedSlugs: ['glossary#aspect', 'glossary#t-square'],
+  },
+  {
+    slug: 'glossary#sextile',
+    title: 'Sextile',
+    category: 'glossary',
+    keywords: ['sextile', 'aspect', '60 degrees', 'opportunity', 'support'],
+    summary:
+      'A harmonious aspect of 60° representing opportunities that require effort to activate.',
+    relatedSlugs: ['glossary#aspect'],
+  },
+  {
+    slug: 'glossary#house',
+    title: 'House',
+    category: 'glossary',
+    keywords: [
+      'house',
+      'houses',
+      'twelve houses',
+      'life area',
+      'chart division',
+    ],
+    summary:
+      'One of twelve divisions of the birth chart, each representing a different area of life.',
+    relatedSlugs: ['glossary#angular-house'],
+  },
+  {
+    slug: 'glossary#midheaven',
+    title: 'Midheaven',
+    category: 'glossary',
+    keywords: [
+      'midheaven',
+      'mc',
+      'medium coeli',
+      'career',
+      'public image',
+      'reputation',
+    ],
+    summary:
+      'The highest point in the chart representing career, public image, and life direction.',
+    relatedSlugs: ['glossary#tenth-house', 'glossary#ic'],
+  },
+  {
+    slug: 'glossary#retrograde',
+    title: 'Retrograde',
+    category: 'glossary',
+    keywords: [
+      'retrograde',
+      'backward',
+      'mercury retrograde',
+      'review',
+      'reflection',
+    ],
+    summary:
+      'When a planet appears to move backward, a time for review and reflection.',
+    relatedSlugs: ['glossary#direct', 'glossary#station'],
+  },
+  {
+    slug: 'glossary#transit',
+    title: 'Transit',
+    category: 'glossary',
+    keywords: [
+      'transit',
+      'transiting',
+      'current planets',
+      'forecast',
+      'prediction',
+    ],
+    summary:
+      'The current movement of planets through the zodiac and their aspects to your natal chart.',
+    relatedSlugs: ['glossary#progression'],
+  },
+  {
+    slug: 'glossary#north-node',
+    title: 'North Node',
+    category: 'glossary',
+    keywords: [
+      'north node',
+      'true node',
+      'dragons head',
+      'destiny',
+      'soul purpose',
+      'karma',
+    ],
+    summary:
+      "Your soul's evolutionary direction and lessons to embrace in this lifetime.",
+    relatedSlugs: ['glossary#south-node', 'glossary#lunar-nodes'],
+  },
+  {
+    slug: 'glossary#south-node',
+    title: 'South Node',
+    category: 'glossary',
+    keywords: [
+      'south node',
+      'dragons tail',
+      'past life',
+      'karma',
+      'comfort zone',
+    ],
+    summary: 'Past life gifts, comfort zones, and patterns to release.',
+    relatedSlugs: ['glossary#north-node', 'glossary#lunar-nodes'],
+  },
+  {
+    slug: 'glossary#chiron',
+    title: 'Chiron',
+    category: 'glossary',
+    keywords: ['chiron', 'wounded healer', 'asteroid', 'wound', 'healing'],
+    summary:
+      'The "Wounded Healer" showing your deepest wound and potential for healing others.',
+    relatedSlugs: [],
+  },
+  {
+    slug: 'glossary#element',
+    title: 'Element',
+    category: 'glossary',
+    keywords: ['element', 'fire', 'earth', 'air', 'water', 'temperament'],
+    summary:
+      'The four elements (Fire, Earth, Air, Water) categorizing zodiac signs by temperament.',
+    relatedSlugs: ['glossary#modality'],
+  },
+  {
+    slug: 'glossary#modality',
+    title: 'Modality',
+    category: 'glossary',
+    keywords: ['modality', 'quality', 'cardinal', 'fixed', 'mutable'],
+    summary:
+      'The three qualities (Cardinal, Fixed, Mutable) describing how signs express energy.',
+    relatedSlugs: ['glossary#cardinal', 'glossary#fixed', 'glossary#mutable'],
+  },
+  {
+    slug: 'glossary#cardinal',
+    title: 'Cardinal Signs',
+    category: 'glossary',
+    keywords: [
+      'cardinal',
+      'aries',
+      'cancer',
+      'libra',
+      'capricorn',
+      'initiator',
+      'leader',
+    ],
+    summary:
+      'Signs that begin each season - initiators, leaders, and action-oriented.',
+    relatedSlugs: ['glossary#modality'],
+  },
+  {
+    slug: 'glossary#fixed',
+    title: 'Fixed Signs',
+    category: 'glossary',
+    keywords: [
+      'fixed',
+      'taurus',
+      'leo',
+      'scorpio',
+      'aquarius',
+      'stable',
+      'persistent',
+    ],
+    summary:
+      'Signs in the middle of each season - stabilizers, persistent, and determined.',
+    relatedSlugs: ['glossary#modality'],
+  },
+  {
+    slug: 'glossary#mutable',
+    title: 'Mutable Signs',
+    category: 'glossary',
+    keywords: [
+      'mutable',
+      'gemini',
+      'virgo',
+      'sagittarius',
+      'pisces',
+      'adaptable',
+      'flexible',
+    ],
+    summary:
+      'Signs at the end of each season - adaptable, flexible, and embrace transition.',
+    relatedSlugs: ['glossary#modality'],
+  },
+  {
+    slug: 'glossary#saturn-return',
+    title: 'Saturn Return',
+    category: 'glossary',
+    keywords: [
+      'saturn return',
+      'saturn',
+      '29',
+      '30',
+      'maturity',
+      'life passage',
+    ],
+    summary:
+      'When Saturn returns to its natal position around age 29-30, marking major life transition.',
+    relatedSlugs: ['glossary#transit'],
+  },
+  {
+    slug: 'glossary#synastry',
+    title: 'Synastry',
+    category: 'glossary',
+    keywords: ['synastry', 'compatibility', 'relationship', 'chart comparison'],
+    summary:
+      'The comparison of two birth charts to analyze relationship compatibility.',
+    relatedSlugs: ['glossary#composite-chart'],
+  },
+  {
+    slug: 'glossary#eclipse',
+    title: 'Eclipse',
+    category: 'glossary',
+    keywords: ['eclipse', 'solar eclipse', 'lunar eclipse', 'fate', 'destiny'],
+    summary:
+      'Powerful lunations near the lunar nodes bringing significant beginnings or endings.',
+    relatedSlugs: ['glossary#lunar-nodes'],
+  },
+  {
+    slug: 'glossary#void-of-course',
+    title: 'Void of Course Moon',
+    category: 'glossary',
+    keywords: ['void of course', 'voc', 'moon void', 'timing', 'electional'],
+    summary:
+      'When the Moon makes no major aspects before leaving its current sign.',
+    relatedSlugs: ['glossary#transit'],
+  },
+  {
+    slug: 'glossary#grand-trine',
+    title: 'Grand Trine',
+    category: 'glossary',
+    keywords: ['grand trine', 'trine', 'three planets', 'triangle', 'talent'],
+    summary:
+      'Three planets forming trines to each other, indicating natural gifts.',
+    relatedSlugs: ['glossary#trine', 'glossary#aspect'],
+  },
+  {
+    slug: 'glossary#t-square',
+    title: 'T-Square',
+    category: 'glossary',
+    keywords: ['t-square', 'tsquare', 'opposition', 'square', 'aspect pattern'],
+    summary:
+      'Two planets in opposition both square to a third, creating dynamic tension.',
+    relatedSlugs: ['glossary#square', 'glossary#opposition'],
+  },
+  {
+    slug: 'glossary#stellium',
+    title: 'Stellium',
+    category: 'glossary',
+    keywords: [
+      'stellium',
+      'stellia',
+      'conjunction',
+      'multiple planets',
+      'concentration',
+    ],
+    summary:
+      'Three or more planets in the same sign or house, intensifying that area of life.',
+    relatedSlugs: ['glossary#conjunction'],
+  },
+  {
+    slug: 'glossary#black-moon-lilith',
+    title: 'Black Moon Lilith',
+    category: 'glossary',
+    keywords: [
+      'lilith',
+      'black moon',
+      'dark moon',
+      'shadow',
+      'feminine',
+      'power',
+    ],
+    summary:
+      'The lunar apogee representing raw feminine power, shadow, and what we suppress.',
+    relatedSlugs: [],
+  },
+  {
+    slug: 'glossary#domicile',
+    title: 'Domicile',
+    category: 'glossary',
+    keywords: ['domicile', 'rulership', 'home sign', 'dignity', 'strength'],
+    summary:
+      'A planet in the sign it rules, expressing most naturally and powerfully.',
+    relatedSlugs: ['glossary#exaltation', 'glossary#detriment'],
+  },
+  {
+    slug: 'glossary#exaltation',
+    title: 'Exaltation',
+    category: 'glossary',
+    keywords: [
+      'exaltation',
+      'exalted',
+      'dignity',
+      'honored',
+      'highest potential',
+    ],
+    summary:
+      'A sign where a planet is honored and expresses its highest potential.',
+    relatedSlugs: ['glossary#domicile', 'glossary#fall'],
+  },
+  {
+    slug: 'glossary#detriment',
+    title: 'Detriment',
+    category: 'glossary',
+    keywords: ['detriment', 'debility', 'weak placement', 'challenge'],
+    summary:
+      'A planet in the sign opposite its domicile, requiring extra effort.',
+    relatedSlugs: ['glossary#domicile'],
+  },
+  {
+    slug: 'glossary#benefic',
+    title: 'Benefic Planets',
+    category: 'glossary',
+    keywords: ['benefic', 'venus', 'jupiter', 'lucky', 'fortunate', 'positive'],
+    summary: 'Venus and Jupiter - planets considered fortunate and helpful.',
+    relatedSlugs: ['glossary#malefic'],
+  },
+  {
+    slug: 'glossary#malefic',
+    title: 'Malefic Planets',
+    category: 'glossary',
+    keywords: ['malefic', 'mars', 'saturn', 'challenging', 'difficult'],
+    summary:
+      'Mars and Saturn - planets that bring challenges that strengthen character.',
+    relatedSlugs: ['glossary#benefic'],
+  },
+  {
+    slug: 'glossary#solar-return',
+    title: 'Solar Return',
+    category: 'glossary',
+    keywords: [
+      'solar return',
+      'birthday chart',
+      'annual chart',
+      'yearly forecast',
+    ],
+    summary:
+      'A chart for the exact moment the Sun returns to its natal position each year.',
+    relatedSlugs: ['glossary#transit'],
+  },
+  {
+    slug: 'glossary#orb',
+    title: 'Orb',
+    category: 'glossary',
+    keywords: [
+      'orb',
+      'aspect orb',
+      'degree allowance',
+      'tight orb',
+      'wide orb',
+    ],
+    summary:
+      'The degree of allowance when calculating aspects - tighter orbs are stronger.',
+    relatedSlugs: ['glossary#aspect'],
+  },
+  {
+    slug: 'glossary#cusp',
+    title: 'Cusp',
+    category: 'glossary',
+    keywords: [
+      'cusp',
+      'boundary',
+      'between signs',
+      'transition',
+      'born on the cusp',
+    ],
+    summary: 'The boundary between two signs or houses.',
+    relatedSlugs: ['glossary#house'],
+  },
+  {
+    slug: 'glossary#decan',
+    title: 'Decan',
+    category: 'glossary',
+    keywords: ['decan', 'decans', '10 degrees', 'sub-ruler', 'division'],
+    summary:
+      'Each zodiac sign divided into three 10-degree segments with sub-rulers.',
+    relatedSlugs: [],
+  },
+  {
+    slug: 'glossary#progression',
+    title: 'Progression',
+    category: 'glossary',
+    keywords: [
+      'progression',
+      'secondary progression',
+      'progressed chart',
+      'evolution',
+    ],
+    summary:
+      'A forecasting technique where one day after birth equals one year of life.',
+    relatedSlugs: ['glossary#transit', 'glossary#solar-arc'],
+  },
+  {
+    slug: 'glossary#tropical-zodiac',
+    title: 'Tropical Zodiac',
+    category: 'glossary',
+    keywords: ['tropical zodiac', 'western astrology', 'seasons', 'equinox'],
+    summary: 'The zodiac used in Western astrology, based on the seasons.',
+    relatedSlugs: ['glossary#sidereal-zodiac'],
+  },
+  {
+    slug: 'glossary#sidereal-zodiac',
+    title: 'Sidereal Zodiac',
+    category: 'glossary',
+    keywords: [
+      'sidereal zodiac',
+      'vedic',
+      'jyotish',
+      'constellations',
+      'stars',
+    ],
+    summary:
+      'A zodiac aligned with actual star constellations, used in Vedic astrology.',
+    relatedSlugs: ['glossary#tropical-zodiac'],
   },
 ];
 

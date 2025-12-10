@@ -69,7 +69,10 @@ export class SubstackClient {
 
   private formatCookies(playwrightCookies: PlaywrightCookie[]): string {
     return playwrightCookies
-      .filter((c) => c.domain?.includes('substack.com'))
+      .filter((c) => {
+        const domain = c.domain?.toLowerCase() || '';
+        return domain === 'substack.com' || domain.endsWith('.substack.com');
+      })
       .map((c) => `${c.name}=${c.value}`)
       .join('; ');
   }

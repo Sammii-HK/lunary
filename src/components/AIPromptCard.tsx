@@ -45,9 +45,9 @@ export function AIPromptCard({
   const getPromptTypeColor = () => {
     switch (prompt.promptType) {
       case 'daily':
-        return 'border-purple-500/40 bg-purple-950/20';
+        return 'border-lunary-primary/40 bg-lunary-primary-950/20';
       case 'weekly':
-        return 'border-blue-500/40 bg-blue-950/20';
+        return 'border-lunary-secondary-600 bg-lunary-secondary-950';
       default:
         return 'border-zinc-700/60 bg-zinc-900/40';
     }
@@ -57,7 +57,7 @@ export function AIPromptCard({
     <div
       className={`rounded-2xl border transition-all duration-200 ${
         prompt.isNew
-          ? `${getPromptTypeColor()} shadow-lg shadow-purple-500/10 animate-pulse`
+          ? `${getPromptTypeColor()} shadow-lg shadow-lunary-primary/10 animate-pulse`
           : 'border-zinc-700/60 bg-zinc-900/40'
       }`}
     >
@@ -69,14 +69,14 @@ export function AIPromptCard({
           <span
             className={`text-xs font-medium px-2 py-1 rounded-full ${
               prompt.promptType === 'daily'
-                ? 'bg-purple-500/20 text-purple-300'
-                : 'bg-blue-500/20 text-blue-300'
+                ? 'bg-lunary-primary-500/20 text-lunary-primary-300'
+                : 'bg-lunary-secondary-900 text-lunary-secondary-300'
             }`}
           >
             {getPromptTypeLabel()}
           </span>
           {prompt.isNew && (
-            <span className='text-xs font-semibold text-lunary-orchid animate-pulse'>
+            <span className='text-xs font-semibold text-lunary-highlight animate-pulse'>
               New
             </span>
           )}
@@ -109,7 +109,7 @@ export function AIPromptCard({
           </p>
           <button
             onClick={handleUse}
-            className='w-full rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-500'
+            className='w-full rounded-xl bg-lunary-primary-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-lunary-primary-500'
           >
             Use this prompt
           </button>

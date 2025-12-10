@@ -2,6 +2,12 @@ name = "lunary-notifications"
 main = "notification-cron.js"
 compatibility_date = "2024-10-30"
 
+# =============================================================================
+# CLOUDFLARE CRONS DISABLED - Using Vercel crons instead for simplicity
+# To re-enable for free tier: uncomment the crons array below and run:
+#   cd cloudflare-worker && wrangler deploy
+# =============================================================================
+#
 # Multiple cron triggers for different tasks - spread throughout the day
 # Consolidated to 3 crons to stay within limits (5 crons max on paid plans)
 # Daily posts at 2 PM is handled by the hourly cron (hour === 14)
@@ -12,18 +18,19 @@ compatibility_date = "2024-10-30"
 # 3. Restore the 3 crons below
 # 4. Run: wrangler deploy (this adds back the 3 crons)
 [triggers]
-# Using only 1 cron to fit within account limit (other workers have crons too)
-# The hourly cron handles ALL tasks including Sunday weekly report (checked in code)
-crons = [
-  "0 * * * *"    # Every hour - routes to specific tasks based on hour:
-                  #   Sunday 10 AM: weekly cosmic report (handled in code: dayOfWeek === 0 && hour === 10)
-                  #   2 AM: cleanup + analytics
-                  #   8 AM: cosmic pulse + snapshot updates
-                  #   10 AM: moon circles check + snapshot updates  
-                  #   2 PM: daily posts (created day before for next day) + cosmic changes notification
-                  #   6 PM: personalized tarot
-                  #   Every 4h (0, 4, 12, 16): cosmic snapshot updates
-]
+# DISABLED: Using Vercel crons (vercel.json) instead
+# Uncomment below to re-enable Cloudflare scheduling:
+# crons = [
+#   "0 * * * *"    # Every hour - routes to specific tasks based on hour:
+#                   #   Sunday 10 AM: weekly cosmic report (handled in code: dayOfWeek === 0 && hour === 10)
+#                   #   2 AM: cleanup + analytics
+#                   #   8 AM: cosmic pulse + snapshot updates
+#                   #   10 AM: moon circles check + snapshot updates  
+#                   #   2 PM: daily posts (created day before for next day) + cosmic changes notification
+#                   #   6 PM: personalized tarot
+#                   #   Every 4h (0, 4, 12, 16): cosmic snapshot updates
+# ]
+crons = []  # Empty = no scheduled runs, but worker still deployable for manual triggers
 
 # Environment variables (set these in Cloudflare dashboard)
 [vars]

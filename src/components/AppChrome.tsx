@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { MarketingNavbar } from '@/components/MarketingNavbar';
-import { MarketingFooter } from '@/components/MarketingFooter';
 import { PWAHandler } from '@/components/PWAHandler';
 import { NotificationManager } from '@/components/NotificationManager';
 import { ExitIntent } from '@/components/ExitIntent';
@@ -18,7 +17,7 @@ const NAV_CONTEXT_KEY = 'lunary_nav_context';
 export function AppChrome() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const authState = useAuthStatus();
+  const _authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
 
@@ -178,11 +177,13 @@ export function AppChrome() {
 
   // Ensure marketing and app routes are mutually exclusive
   // Core marketing routes take precedence - if it's a core marketing route, it's NOT an app page
-  const isActuallyAppPage = isAppPage && !isCoreMarketingRoute;
+  // Contextual pages (blog/pricing/explore) are NOT treated as actual app pages - they respect cameFromApp
+  const isActuallyAppPage =
+    isAppPage && !isCoreMarketingRoute && !isContextualPage;
 
   // For contextual pages (blog/pricing/explore), show app nav if coming from app
   // Otherwise show marketing nav (default for contextual pages)
-  const shouldShowAppNavOnContextualPage = isContextualPage && cameFromApp;
+  const _shouldShowAppNavOnContextualPage = isContextualPage && cameFromApp;
 
   // Show marketing nav on:
   // 1. Core marketing pages (always)

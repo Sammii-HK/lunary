@@ -18,19 +18,23 @@ export type PersonalTransitImpact = {
     natalPlanet: string;
     aspectType: string;
     intensity: number;
+    transitDegree?: string;
+    natalDegree?: string;
+    transitSign?: string;
+    natalSign?: string;
   };
 };
 
-// Calculate which house a planet is in (simplified equal house system)
-const calculateHouse = (
+// Calculate which house a planet is in using Whole Sign Houses
+const calculateHouseWholeSig = (
   planetLongitude: number,
   ascendantLongitude: number,
 ): number => {
-  let diff = planetLongitude - ascendantLongitude;
-  if (diff < 0) diff += 360;
+  const ascendantSign = Math.floor(ascendantLongitude / 30);
+  const planetSign = Math.floor(planetLongitude / 30);
 
-  const house = Math.floor(diff / 30) + 1;
-  return house > 12 ? house - 12 : house;
+  let house = ((planetSign - ascendantSign + 12) % 12) + 1;
+  return house;
 };
 
 const getHouseMeaning = (house: number): string => {
@@ -55,35 +59,63 @@ const getHouseMeaning = (house: number): string => {
 const calculateAspectsToNatal = (
   transitPlanet: AstroChartInformation,
   natalChart: any[],
-): { natalPlanet: string; aspectType: string; intensity: number } | null => {
+): {
+  natalPlanet: string;
+  aspectType: string;
+  intensity: number;
+  transitDegree?: string;
+  natalDegree?: string;
+  transitSign?: string;
+  natalSign?: string;
+} | null => {
   for (const natal of natalChart) {
     let diff = Math.abs(
       transitPlanet.eclipticLongitude - natal.eclipticLongitude,
     );
     if (diff > 180) diff = 360 - diff;
 
+    const formatDegree = (longitude: number, sign: string) => {
+      const degreeInSign = longitude % 30;
+      const wholeDegree = Math.floor(degreeInSign);
+      const minutes = Math.floor((degreeInSign - wholeDegree) * 60);
+      return `${wholeDegree}°${minutes.toString().padStart(2, '0')}' ${sign}`;
+    };
+
+    const result = {
+      natalPlanet: natal.body,
+      aspectType: '',
+      intensity: 0,
+      transitDegree: formatDegree(
+        transitPlanet.eclipticLongitude,
+        transitPlanet.sign,
+      ),
+      natalDegree: formatDegree(natal.eclipticLongitude, natal.sign),
+      transitSign: transitPlanet.sign,
+      natalSign: natal.sign,
+    };
+
     // Check for major aspects
     if (Math.abs(diff - 0) <= 8) {
       return {
-        natalPlanet: natal.body,
+        ...result,
         aspectType: 'conjunction',
         intensity: 10 - Math.abs(diff - 0),
       };
     } else if (Math.abs(diff - 180) <= 8) {
       return {
-        natalPlanet: natal.body,
+        ...result,
         aspectType: 'opposition',
         intensity: 10 - Math.abs(diff - 180),
       };
     } else if (Math.abs(diff - 120) <= 6) {
       return {
-        natalPlanet: natal.body,
+        ...result,
         aspectType: 'trine',
         intensity: 8 - Math.abs(diff - 120),
       };
     } else if (Math.abs(diff - 90) <= 6) {
       return {
-        natalPlanet: natal.body,
+        ...result,
         aspectType: 'square',
         intensity: 8 - Math.abs(diff - 90),
       };
@@ -359,21 +391,20 @@ export const getPersonalTransitImpacts = (
     let houseMeaning: string | undefined;
 
     if (ascendant) {
-      house = calculateHouse(
+      house = calculateHouseWholeSig(
         transitPlanet.eclipticLongitude,
         ascendant.eclipticLongitude,
       );
       houseMeaning = getHouseMeaning(house);
     } else {
-      // Fallback to Sun-based calculation
+      // Fallback to Sun-based Whole Sign calculation (approximate)
       const natalSun = natalChart.find((p: any) => p.body === 'Sun');
       if (natalSun) {
-        let diff = transitPlanet.eclipticLongitude - natalSun.eclipticLongitude;
-        if (diff < 0) diff += 360;
-        const approximateHouse = Math.floor(diff / 30) + 1;
-        house =
-          approximateHouse > 12 ? approximateHouse - 12 : approximateHouse;
-        houseMeaning = getHouseMeaning(house);
+        house = calculateHouseWholeSig(
+          transitPlanet.eclipticLongitude,
+          natalSun.eclipticLongitude,
+        );
+        houseMeaning = `${getHouseMeaning(house)} (approximate)`;
       }
     }
 

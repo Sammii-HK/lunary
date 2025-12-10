@@ -5,7 +5,6 @@ import {
   generateLunarEventPrompt,
 } from '@/lib/ai/lunar-events';
 import { savePrompt } from '@/lib/ai/prompt-generator';
-import dayjs from 'dayjs';
 
 /**
  * Cron job: Runs every 4-6 hours to check for significant lunar events

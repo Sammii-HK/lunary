@@ -152,7 +152,7 @@ ${data.celebrities.join(', ')}
         { name: 'Cusps Overview', href: '/grimoire/cusps', type: 'Guide' },
       ]}
       ctaText="Discover if you're a cusp baby"
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[{ name: 'Cusp astrology interpretations' }]}
     >
       <div className='mt-8'>
@@ -164,7 +164,7 @@ ${data.celebrities.join(', ')}
               href={`/grimoire/cusps/${c.id}`}
               className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                 c.id === cusp
-                  ? 'bg-purple-500/30 text-purple-200 border border-purple-500/50'
+                  ? 'bg-lunary-primary-900/30 text-lunary-primary-200 border border-lunary-primary-600'
                   : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
               }`}
             >

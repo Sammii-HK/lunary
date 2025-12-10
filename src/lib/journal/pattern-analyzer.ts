@@ -1,11 +1,70 @@
 import { sql } from '@vercel/postgres';
 
 export interface JournalPattern {
-  type: 'recurring_card' | 'mood_transit' | 'theme' | 'frequency';
+  type:
+    | 'recurring_card'
+    | 'mood_transit'
+    | 'theme'
+    | 'frequency'
+    | 'season_correlation';
   title: string;
   description: string;
   data: Record<string, unknown>;
   confidence: number;
+}
+
+const ZODIAC_SEASONS: Array<{
+  sign: string;
+  startMonth: number;
+  startDay: number;
+  endMonth: number;
+  endDay: number;
+}> = [
+  { sign: 'Capricorn', startMonth: 12, startDay: 22, endMonth: 1, endDay: 19 },
+  { sign: 'Aquarius', startMonth: 1, startDay: 20, endMonth: 2, endDay: 18 },
+  { sign: 'Pisces', startMonth: 2, startDay: 19, endMonth: 3, endDay: 20 },
+  { sign: 'Aries', startMonth: 3, startDay: 21, endMonth: 4, endDay: 19 },
+  { sign: 'Taurus', startMonth: 4, startDay: 20, endMonth: 5, endDay: 20 },
+  { sign: 'Gemini', startMonth: 5, startDay: 21, endMonth: 6, endDay: 20 },
+  { sign: 'Cancer', startMonth: 6, startDay: 21, endMonth: 7, endDay: 22 },
+  { sign: 'Leo', startMonth: 7, startDay: 23, endMonth: 8, endDay: 22 },
+  { sign: 'Virgo', startMonth: 8, startDay: 23, endMonth: 9, endDay: 22 },
+  { sign: 'Libra', startMonth: 9, startDay: 23, endMonth: 10, endDay: 22 },
+  { sign: 'Scorpio', startMonth: 10, startDay: 23, endMonth: 11, endDay: 21 },
+  {
+    sign: 'Sagittarius',
+    startMonth: 11,
+    startDay: 22,
+    endMonth: 12,
+    endDay: 21,
+  },
+];
+
+function getZodiacSeason(date: Date): string {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  for (const season of ZODIAC_SEASONS) {
+    if (season.startMonth <= season.endMonth) {
+      if (
+        (month === season.startMonth && day >= season.startDay) ||
+        (month === season.endMonth && day <= season.endDay) ||
+        (month > season.startMonth && month < season.endMonth)
+      ) {
+        return season.sign;
+      }
+    } else {
+      if (
+        (month === season.startMonth && day >= season.startDay) ||
+        (month === season.endMonth && day <= season.endDay) ||
+        month > season.startMonth ||
+        month < season.endMonth
+      ) {
+        return season.sign;
+      }
+    }
+  }
+  return 'Unknown';
 }
 
 export interface PatternAnalysisResult {
@@ -80,6 +139,9 @@ export async function analyzeJournalPatterns(
 
   const themePatterns = findThemePatterns(entries);
   patterns.push(...themePatterns);
+
+  const seasonPatterns = findSeasonPatterns(entries);
+  patterns.push(...seasonPatterns);
 
   patterns.sort((a, b) => b.confidence - a.confidence);
 
@@ -254,6 +316,94 @@ function findThemePatterns(entries: JournalEntryData[]): JournalPattern[] {
       },
       confidence: Math.min(count / entries.length + 0.3, 0.9),
     });
+  }
+
+  return patterns;
+}
+
+function findSeasonPatterns(entries: JournalEntryData[]): JournalPattern[] {
+  const patterns: JournalPattern[] = [];
+
+  const themeKeywords: Record<string, string[]> = {
+    hope: [
+      'hope',
+      'hopeful',
+      'optimistic',
+      'bright',
+      'looking forward',
+      'star',
+    ],
+    transition: [
+      'change',
+      'changing',
+      'transition',
+      'moving',
+      'shift',
+      'transformation',
+    ],
+    reflection: [
+      'thinking',
+      'wondering',
+      'contemplating',
+      'introspective',
+      'reflecting',
+    ],
+    growth: ['learning', 'growing', 'progress', 'development', 'evolving'],
+    release: ['letting go', 'release', 'surrender', 'acceptance', 'peace'],
+    love: ['love', 'relationship', 'heart', 'connection', 'partner'],
+    creativity: ['creative', 'inspiration', 'art', 'create', 'express'],
+    anxiety: ['anxious', 'worried', 'stress', 'overwhelm', 'uncertain'],
+  };
+
+  const seasonThemes: Record<string, Record<string, number>> = {};
+
+  for (const entry of entries) {
+    const entryDate = new Date(entry.createdAt);
+    const season = getZodiacSeason(entryDate);
+    const lowerText = entry.text.toLowerCase();
+
+    if (!seasonThemes[season]) {
+      seasonThemes[season] = {};
+    }
+
+    for (const [theme, keywords] of Object.entries(themeKeywords)) {
+      for (const keyword of keywords) {
+        if (lowerText.includes(keyword)) {
+          seasonThemes[season][theme] = (seasonThemes[season][theme] || 0) + 1;
+          break;
+        }
+      }
+    }
+
+    for (const mood of entry.moodTags) {
+      seasonThemes[season][mood] = (seasonThemes[season][mood] || 0) + 1;
+    }
+  }
+
+  for (const [season, themes] of Object.entries(seasonThemes)) {
+    const sortedThemes = Object.entries(themes)
+      .filter(([, count]) => count >= 2)
+      .sort((a, b) => b[1] - a[1]);
+
+    if (sortedThemes.length > 0) {
+      const [topTheme, count] = sortedThemes[0];
+      const themeLabel = topTheme.charAt(0).toUpperCase() + topTheme.slice(1);
+
+      patterns.push({
+        type: 'season_correlation',
+        title: `${themeLabel} themes during ${season} season`,
+        description: `${themeLabel} themes appear ${count} times during ${season} season in your reflections`,
+        data: {
+          season,
+          theme: topTheme,
+          count,
+          allThemes: sortedThemes
+            .slice(0, 3)
+            .map(([t, c]) => ({ theme: t, count: c })),
+        },
+        confidence: Math.min(count / 4 + 0.2, 0.85),
+      });
+    }
   }
 
   return patterns;

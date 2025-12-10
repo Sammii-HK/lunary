@@ -31,9 +31,9 @@ interface ApiKeyData {
 
 const tierColors: Record<string, string> = {
   free: 'bg-zinc-500/20 text-zinc-300',
-  starter: 'bg-blue-500/20 text-blue-300',
-  developer: 'bg-purple-500/20 text-purple-300',
-  business: 'bg-amber-500/20 text-amber-300',
+  starter: 'bg-lunary-secondary-900 text-lunary-secondary-300',
+  developer: 'bg-lunary-primary-900/20 text-lunary-primary-300',
+  business: 'bg-lunary-accent-900 text-lunary-accent-300',
 };
 
 export default function DeveloperDashboard() {
@@ -147,7 +147,7 @@ export default function DeveloperDashboard() {
           </div>
           <button
             onClick={createNewKey}
-            className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             <Plus className='h-4 w-4' />
             Create API Key
@@ -155,7 +155,7 @@ export default function DeveloperDashboard() {
         </div>
 
         {error && (
-          <div className='mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300'>
+          <div className='mb-6 p-4 rounded-lg bg-lunary-error-950 border border-lunary-error-700 text-lunary-error-300'>
             {error}
             <Link href='/sign-in' className='ml-2 underline'>
               Sign in
@@ -164,10 +164,10 @@ export default function DeveloperDashboard() {
         )}
 
         {newKey && (
-          <div className='mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/30'>
+          <div className='mb-6 p-4 rounded-lg bg-lunary-success-950 border border-lunary-success-700'>
             <div className='flex items-center gap-2 mb-2'>
-              <Shield className='h-5 w-5 text-green-400' />
-              <span className='font-medium text-green-300'>
+              <Shield className='h-5 w-5 text-lunary-success' />
+              <span className='font-medium text-lunary-success-300'>
                 New API Key Created
               </span>
             </div>
@@ -183,7 +183,7 @@ export default function DeveloperDashboard() {
                 className='p-2 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors'
               >
                 {copied ? (
-                  <Check className='h-4 w-4 text-green-400' />
+                  <Check className='h-4 w-4 text-lunary-success' />
                 ) : (
                   <Copy className='h-4 w-4' />
                 )}
@@ -199,12 +199,12 @@ export default function DeveloperDashboard() {
               <h3 className='text-lg font-medium text-zinc-300 mb-2'>
                 No API Keys
               </h3>
-              <p className='text-zinc-500 mb-4'>
+              <p className='text-zinc-400 mb-4'>
                 Create your first API key to get started
               </p>
               <button
                 onClick={createNewKey}
-                className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+                className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
               >
                 <Plus className='h-4 w-4' />
                 Create API Key
@@ -230,7 +230,7 @@ export default function DeveloperDashboard() {
                           {key.tier}
                         </span>
                       </div>
-                      <code className='text-sm text-zinc-500'>
+                      <code className='text-sm text-zinc-400'>
                         {key.keyPrefix}•••••••
                       </code>
                     </div>
@@ -245,7 +245,7 @@ export default function DeveloperDashboard() {
                     </button>
                     <button
                       onClick={() => deleteKey(key.id)}
-                      className='p-2 rounded hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors'
+                      className='p-2 rounded hover:bg-zinc-800 text-zinc-400 hover:text-lunary-error transition-colors'
                       title='Delete key'
                     >
                       <Trash2 className='h-4 w-4' />
@@ -255,7 +255,7 @@ export default function DeveloperDashboard() {
 
                 <div className='grid grid-cols-3 gap-4'>
                   <div className='p-3 rounded bg-zinc-800/50'>
-                    <div className='flex items-center gap-2 text-xs text-zinc-500 mb-1'>
+                    <div className='flex items-center gap-2 text-xs text-zinc-400 mb-1'>
                       <TrendingUp className='h-3 w-3' />
                       Monthly Usage
                     </div>
@@ -265,7 +265,7 @@ export default function DeveloperDashboard() {
                     </div>
                     <div className='mt-2 h-1.5 bg-zinc-700 rounded-full overflow-hidden'>
                       <div
-                        className='h-full bg-purple-500 rounded-full transition-all'
+                        className='h-full bg-lunary-primary-500 rounded-full transition-all'
                         style={{
                           width: `${Math.min(100, (key.requests / key.requestLimit) * 100)}%`,
                         }}
@@ -274,7 +274,7 @@ export default function DeveloperDashboard() {
                   </div>
 
                   <div className='p-3 rounded bg-zinc-800/50'>
-                    <div className='flex items-center gap-2 text-xs text-zinc-500 mb-1'>
+                    <div className='flex items-center gap-2 text-xs text-zinc-400 mb-1'>
                       <Zap className='h-3 w-3' />
                       Rate Limit
                     </div>
@@ -284,14 +284,14 @@ export default function DeveloperDashboard() {
                   </div>
 
                   <div className='p-3 rounded bg-zinc-800/50'>
-                    <div className='text-xs text-zinc-500 mb-1'>Last Used</div>
+                    <div className='text-xs text-zinc-400 mb-1'>Last Used</div>
                     <div className='text-lg font-medium text-zinc-100'>
                       {formatDate(key.lastUsedAt)}
                     </div>
                   </div>
                 </div>
 
-                <div className='mt-4 text-xs text-zinc-500'>
+                <div className='mt-4 text-xs text-zinc-400'>
                   Created {formatDate(key.createdAt)} • Resets{' '}
                   {formatDate(key.resetAt)}
                 </div>
@@ -322,7 +322,7 @@ export default function DeveloperDashboard() {
                 return (
                   <div
                     key={tier}
-                    className='p-4 rounded-lg border border-zinc-700 hover:border-purple-500/50 transition-colors'
+                    className='p-4 rounded-lg border border-zinc-700 hover:border-lunary-primary-600 transition-colors'
                   >
                     <div
                       className={`inline-block px-2 py-0.5 rounded text-xs mb-2 ${tierColors[tier]}`}
@@ -331,7 +331,7 @@ export default function DeveloperDashboard() {
                     </div>
                     <div className='text-2xl font-light text-zinc-100 mb-1'>
                       ${prices[tier]}
-                      <span className='text-sm text-zinc-500'>/mo</span>
+                      <span className='text-sm text-zinc-400'>/mo</span>
                     </div>
                     <div className='text-sm text-zinc-400'>
                       {limits[tier]} requests/mo

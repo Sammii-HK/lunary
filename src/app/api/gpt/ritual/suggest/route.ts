@@ -209,6 +209,8 @@ export async function POST(request: NextRequest) {
       intent,
       ctaUrl: 'https://lunary.app/grimoire/practices?from=gpt_ritual_suggest',
       ctaText: 'Explore more rituals and spells in the Lunary Grimoire',
+      source:
+        'Lunary.app - Digital Grimoire with 500+ pages of magical knowledge',
     };
 
     return NextResponse.json(response);

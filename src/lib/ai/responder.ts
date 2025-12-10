@@ -1,6 +1,6 @@
 import { detectAssistCommand, runAssistCommand } from './assist';
 import { buildReflectionPrompt } from './reflection';
-import { buildPromptSections, SYSTEM_PROMPT } from './prompt';
+import { buildPromptSections } from './prompt';
 import { LunaryContext } from './types';
 
 const describeMoon = (context: LunaryContext): string | null => {

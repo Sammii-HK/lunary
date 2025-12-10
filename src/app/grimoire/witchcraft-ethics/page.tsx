@@ -47,14 +47,6 @@ export default function WitchcraftEthicsPage() {
         'ethical witchcraft',
       ]}
       canonicalUrl='https://lunary.app/grimoire/witchcraft-ethics'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        {
-          label: 'Modern Witchcraft',
-          href: '/grimoire/modern-witchcraft',
-        },
-        { label: 'Witchcraft Ethics', href: '/grimoire/witchcraft-ethics' },
-      ]}
       intro='Witchcraft ethics emphasize personal responsibility, harm none (or harm reduction), and respecting free will. Understanding ethical principles helps you practice responsibly and create positive change. Ethics guide your magical work and ensure you act with intention, respect, and responsibility.'
       meaning={`**The Wiccan Rede:**
 "An it harm none, do what ye will."

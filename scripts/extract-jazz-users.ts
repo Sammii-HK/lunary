@@ -5,8 +5,6 @@ config({ path: resolve(process.cwd(), '.env.local') });
 
 import { betterAuth } from 'better-auth';
 import { JazzBetterAuthDatabaseAdapter } from 'jazz-tools/better-auth/database-adapter';
-import { sql } from '@vercel/postgres';
-import { scryptSync, randomBytes } from 'crypto';
 
 async function extractJazzUsers() {
   console.log('=== Extracting Better Auth Users from Jazz ===\n');

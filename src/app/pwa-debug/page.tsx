@@ -134,7 +134,7 @@ export default function PWADebugPage() {
         </section>
       </div>
 
-      <div className='bg-yellow-900/30 p-4 rounded border border-yellow-700'>
+      <div className='bg-lunary-accent-900/30 p-4 rounded border border-lunary-accent-700'>
         <h3 className='font-bold mb-2'>⚠️ Chrome iOS PWA Requirements</h3>
         <ul className='text-sm space-y-1'>
           <li>
@@ -153,7 +153,7 @@ export default function PWADebugPage() {
                 : 'NO'}
           </li>
         </ul>
-        <p className='text-xs mt-2 text-yellow-200'>
+        <p className='text-xs mt-2 text-lunary-accent-200'>
           Chrome iOS requires HTTPS for PWAs. Local HTTP might not work. Try
           Safari instead!
         </p>

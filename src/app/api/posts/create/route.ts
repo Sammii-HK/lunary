@@ -1,6 +1,28 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 
 export const runtime = 'nodejs';
+
+async function checkAdminAuth(request: NextRequest): Promise<boolean> {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+    const userEmail = session?.user?.email?.toLowerCase();
+    const adminEmails = (
+      process.env.ADMIN_EMAILS ||
+      process.env.ADMIN_EMAIL ||
+      ''
+    )
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    return Boolean(userEmail && adminEmails.includes(userEmail));
+  } catch {
+    return false;
+  }
+}
 
 interface CreatePostRequest {
   title: string;
@@ -13,12 +35,14 @@ interface CreatePostRequest {
   openPR?: boolean;
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    // Validate secret
-    const secret = req.headers.get('x-posts-secret');
-    if (!secret || secret !== process.env.POSTS_SHARED_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const isAdmin = await checkAdminAuth(req);
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 401 },
+      );
     }
 
     const data: CreatePostRequest = await req.json();

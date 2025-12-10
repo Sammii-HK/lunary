@@ -78,7 +78,9 @@ export function ConditionalMainWrapper({
       (page) => pathname === page || pathname.startsWith(`${page}/`),
     );
 
-    const isActuallyAppPage = isAppPage && !isCoreMarketingRoute;
+    // Contextual pages (blog/pricing/explore) are NOT treated as actual app pages - they respect cameFromApp
+    const isActuallyAppPage =
+      isAppPage && !isCoreMarketingRoute && !isContextualPage;
 
     // Check if we came from an app page or explore menu
     const referrer = document.referrer;
@@ -153,12 +155,14 @@ export function ConditionalMainWrapper({
     setShowAppNav(appNav);
   }, [pathname, searchParams]);
 
+  // Marketing nav (64px h-16) + Beta banner (36px) = 100px total
+  // App nav is 48px mobile, 64px desktop
   return (
     <main
       className={cn(
-        'flex flex-col w-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-700 hover:scrollbar-thumb-zinc-600',
-        showMarketingNav && 'mt-8 h-[calc(100vh-2rem)]',
-        showAppNav && 'h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)]',
+        'flex flex-col w-full overflow-y-auto',
+        showMarketingNav && 'pt-[100px] h-screen',
+        showAppNav && 'pb-14 md:pb-16 h-screen',
         !showMarketingNav && !showAppNav && 'h-screen',
       )}
     >

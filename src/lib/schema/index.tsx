@@ -17,17 +17,21 @@ export const LUNARY_SOCIAL_LINKS = [
 
 export const LUNARY_BRAND = {
   name: 'Lunary',
-  primaryColor: '#a855f7',
-  secondaryColor: '#c084fc',
-  backgroundColor: '#09090b',
+  primaryColor: '#8458D8',
+  secondaryColor: '#7B7BE8',
+  backgroundColor: '#0A0A0A',
   foundingDate: '2024',
   colors: {
-    violet: '#7358FF',
-    rose: '#FF7B9C',
-    blue: '#4F5BFF',
-    midnight: '#0A0A1A',
-    orchid: '#E066FF',
-    lavender: '#C77DFF',
+    bg: '#0A0A0A',
+    bgDeep: '#050505',
+    primary: '#8458D8',
+    secondary: '#7B7BE8',
+    accentSoft: '#C77DFF',
+    accentHighlight: '#D070E8',
+    text: '#FFFFFF',
+    warningSoft: '#EE789E',
+    error: '#D06060',
+    success: '#6B9B7A',
   },
 };
 
@@ -1024,6 +1028,309 @@ export function createArticleWithSpeakableSchema({
     speakable: {
       '@type': 'SpeakableSpecification',
       cssSelector: speakableSections,
+    },
+  };
+}
+
+// ============================================
+// URL-to-Entity Parser for Auto-Detection
+// ============================================
+
+export interface GrimoireEntity {
+  type: string;
+  schemaType: string;
+  slug: string;
+  category: string;
+  collection: string;
+}
+
+/**
+ * Entity type mappings for grimoire URL categories
+ * Maps URL path segments to schema.org types and collection names
+ */
+const GRIMOIRE_ENTITY_MAP: Record<
+  string,
+  { schemaType: string; collection: string }
+> = {
+  zodiac: { schemaType: 'Thing', collection: 'Zodiac Signs' },
+  tarot: { schemaType: 'CreativeWork', collection: 'Tarot Cards' },
+  crystals: { schemaType: 'Thing', collection: 'Crystals & Gemstones' },
+  planets: { schemaType: 'Thing', collection: 'Planetary Bodies' },
+  moon: { schemaType: 'Thing', collection: 'Moon Phases' },
+  houses: { schemaType: 'Thing', collection: 'Astrological Houses' },
+  aspects: { schemaType: 'Thing', collection: 'Planetary Aspects' },
+  numerology: { schemaType: 'Thing', collection: 'Numerology' },
+  'life-path': { schemaType: 'Thing', collection: 'Life Path Numbers' },
+  'angel-numbers': { schemaType: 'Thing', collection: 'Angel Numbers' },
+  chakras: { schemaType: 'Thing', collection: 'Chakras' },
+  runes: { schemaType: 'CreativeWork', collection: 'Runes' },
+  correspondences: {
+    schemaType: 'Thing',
+    collection: 'Magical Correspondences',
+  },
+  spells: { schemaType: 'HowTo', collection: 'Spells & Rituals' },
+  practices: { schemaType: 'HowTo', collection: 'Magical Practices' },
+  guides: { schemaType: 'Article', collection: 'Guides' },
+  'wheel-of-the-year': { schemaType: 'Event', collection: 'Sabbats' },
+  eclipses: { schemaType: 'Event', collection: 'Eclipse Events' },
+  retrogrades: { schemaType: 'Event', collection: 'Retrograde Periods' },
+  compatibility: { schemaType: 'Thing', collection: 'Zodiac Compatibility' },
+  'birth-chart': { schemaType: 'Thing', collection: 'Birth Chart' },
+  horoscopes: { schemaType: 'Article', collection: 'Horoscopes' },
+  meditation: { schemaType: 'HowTo', collection: 'Meditation Techniques' },
+  divination: { schemaType: 'Thing', collection: 'Divination Methods' },
+  glossary: { schemaType: 'DefinedTermSet', collection: 'Astrology Glossary' },
+};
+
+/**
+ * Parse a grimoire URL to detect entity type
+ * @param url - Full URL or path (e.g., "/grimoire/zodiac/aries" or "https://lunary.app/grimoire/zodiac/aries")
+ * @returns Entity info or null if not a grimoire URL
+ */
+export function parseGrimoireUrl(url: string): GrimoireEntity | null {
+  // Extract path from URL
+  const path = url.replace(/^https?:\/\/[^/]+/, '');
+
+  // Check if it's a grimoire URL
+  if (!path.startsWith('/grimoire/')) {
+    return null;
+  }
+
+  // Parse segments: /grimoire/category/slug
+  const segments = path.replace('/grimoire/', '').split('/').filter(Boolean);
+
+  if (segments.length === 0) {
+    return null;
+  }
+
+  const category = segments[0];
+  const slug = segments[1] || '';
+
+  const entityInfo = GRIMOIRE_ENTITY_MAP[category];
+
+  if (!entityInfo) {
+    // Unknown category, return generic
+    return {
+      type: category,
+      schemaType: 'Thing',
+      slug,
+      category,
+      collection: formatCategoryName(category),
+    };
+  }
+
+  return {
+    type: category,
+    schemaType: entityInfo.schemaType,
+    slug,
+    category,
+    collection: entityInfo.collection,
+  };
+}
+
+/**
+ * Format a URL segment into a human-readable name
+ */
+function formatCategoryName(segment: string): string {
+  return segment
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Get related entities for auto-mentions based on entity type
+ * This creates semantic connections for Google's Knowledge Graph
+ */
+export function getRelatedEntities(
+  entity: GrimoireEntity,
+): Array<{ name: string; url: string; type: string }> {
+  const related: Array<{ name: string; url: string; type: string }> = [];
+
+  // Add collection as parent
+  related.push({
+    name: entity.collection,
+    url: `${BASE_URL}/grimoire/${entity.category}`,
+    type: 'ItemList',
+  });
+
+  // Add grimoire as top-level parent
+  related.push({
+    name: 'Lunary Grimoire',
+    url: `${BASE_URL}/grimoire`,
+    type: 'CollectionPage',
+  });
+
+  return related;
+}
+
+// ============================================================================
+// EVENT SCHEMA - For Sabbats, Eclipses, Retrogrades, Astrological Events
+// ============================================================================
+
+interface EventSchemaProps {
+  name: string;
+  description: string;
+  url: string;
+  startDate: string;
+  endDate?: string;
+  eventType?: 'Festival' | 'SocialEvent' | 'Event';
+  location?: string;
+  isAccessibleForFree?: boolean;
+  eventStatus?: 'EventScheduled' | 'EventCancelled' | 'EventPostponed';
+  eventAttendanceMode?:
+    | 'OnlineEventAttendanceMode'
+    | 'OfflineEventAttendanceMode'
+    | 'MixedEventAttendanceMode';
+  image?: string;
+  keywords?: string[];
+}
+
+export function createEventSchema({
+  name,
+  description,
+  url,
+  startDate,
+  endDate,
+  eventType = 'Event',
+  location = 'Worldwide',
+  isAccessibleForFree = true,
+  eventStatus = 'EventScheduled',
+  eventAttendanceMode = 'OnlineEventAttendanceMode',
+  image,
+  keywords,
+}: EventSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': eventType,
+    name,
+    description,
+    url: url.startsWith('http') ? url : `${BASE_URL}${url}`,
+    startDate,
+    ...(endDate && { endDate }),
+    eventStatus: `https://schema.org/${eventStatus}`,
+    eventAttendanceMode: `https://schema.org/${eventAttendanceMode}`,
+    location: {
+      '@type': 'VirtualLocation',
+      name: location,
+      url: `${BASE_URL}${url}`,
+    },
+    organizer: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+    isAccessibleForFree,
+    ...(image && { image }),
+    ...(keywords && { keywords: keywords.join(', ') }),
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: `${BASE_URL}${url}`,
+      validFrom: new Date().toISOString(),
+    },
+  };
+}
+
+// ============================================================================
+// SOFTWARE APPLICATION SCHEMA - For App Pages
+// ============================================================================
+
+interface SoftwareAppSchemaProps {
+  name: string;
+  description: string;
+  applicationCategory: string;
+  operatingSystem?: string;
+  offers?: {
+    price: number;
+    priceCurrency: string;
+  };
+  aggregateRating?: {
+    ratingValue: number;
+    ratingCount: number;
+  };
+  featureList?: string[];
+}
+
+export function createSoftwareAppSchema({
+  name,
+  description,
+  applicationCategory,
+  operatingSystem = 'Web, iOS, Android',
+  offers,
+  aggregateRating,
+  featureList,
+}: SoftwareAppSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name,
+    description,
+    url: BASE_URL,
+    applicationCategory,
+    operatingSystem,
+    ...(offers && {
+      offers: {
+        '@type': 'Offer',
+        price: offers.price.toString(),
+        priceCurrency: offers.priceCurrency,
+      },
+    }),
+    ...(aggregateRating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: aggregateRating.ratingValue,
+        ratingCount: aggregateRating.ratingCount,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
+    ...(featureList && { featureList }),
+    provider: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
+
+// ============================================================================
+// COLLECTION PAGE SCHEMA - For Index/List Pages
+// ============================================================================
+
+interface CollectionPageSchemaProps {
+  name: string;
+  description: string;
+  url: string;
+  numberOfItems: number;
+  hasPart?: Array<{ name: string; url: string }>;
+}
+
+export function createCollectionPageSchema({
+  name,
+  description,
+  url,
+  numberOfItems,
+  hasPart,
+}: CollectionPageSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name,
+    description,
+    url: url.startsWith('http') ? url : `${BASE_URL}${url}`,
+    numberOfItems,
+    ...(hasPart && {
+      hasPart: hasPart.map((item) => ({
+        '@type': 'WebPage',
+        name: item.name,
+        url: item.url.startsWith('http') ? item.url : `${BASE_URL}${item.url}`,
+      })),
+    }),
+    isPartOf: {
+      '@type': 'WebSite',
+      '@id': `${BASE_URL}/#website`,
+    },
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
     },
   };
 }

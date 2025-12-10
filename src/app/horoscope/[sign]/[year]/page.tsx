@@ -9,7 +9,6 @@ import {
   SIGN_ELEMENTS,
   MONTH_DISPLAY_NAMES,
   ZodiacSign,
-  Month,
 } from '@/constants/seo/monthly-horoscope';
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
@@ -86,7 +85,7 @@ export default async function YearHoroscopePage({
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
+        <nav className='text-sm text-zinc-400 mb-8'>
           <Link href='/horoscope' className='hover:text-zinc-300'>
             Horoscope
           </Link>
@@ -117,9 +116,9 @@ export default async function YearHoroscopePage({
               <Link
                 key={month}
                 href={`/horoscope/${sign}/${year}/${month}`}
-                className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 hover:bg-zinc-900 transition-all text-center group'
+                className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all text-center group'
               >
-                <div className='font-medium text-zinc-100 group-hover:text-purple-300 transition-colors'>
+                <div className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                   {MONTH_DISPLAY_NAMES[month]}
                 </div>
               </Link>
@@ -161,8 +160,8 @@ export default async function YearHoroscopePage({
           </div>
         </section>
 
-        <section className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <section className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             Get Your Full {year} Forecast
           </h2>
           <p className='text-zinc-300 mb-4'>
@@ -170,8 +169,8 @@ export default async function YearHoroscopePage({
             complete birth chart, not just your Sun sign.
           </p>
           <Link
-            href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            href='/horoscope'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Get Personalized Forecast
           </Link>

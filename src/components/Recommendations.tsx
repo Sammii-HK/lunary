@@ -14,7 +14,7 @@ interface Recommendation {
 }
 
 export function Recommendations() {
-  const authState = useAuthStatus();
+  const _authState = useAuthStatus();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,7 +79,7 @@ export function Recommendations() {
         className='flex w-full items-center justify-between mb-4'
       >
         <div className='flex items-center gap-2'>
-          <Sparkles className='w-5 h-5 text-purple-400' />
+          <Sparkles className='w-5 h-5 text-lunary-primary-400' />
           <h2 className='text-lg font-semibold text-zinc-100'>
             You Might Like
           </h2>
@@ -95,7 +95,7 @@ export function Recommendations() {
             <Link
               key={idx}
               href={rec.link}
-              className='block rounded-lg border border-zinc-800/60 bg-zinc-900/40 p-3 hover:border-purple-500/40 transition-colors'
+              className='block rounded-lg border border-zinc-800/60 bg-zinc-900/40 p-3 hover:border-lunary-primary/40 transition-colors'
             >
               <div className='flex items-start gap-3'>
                 <div className='mt-0.5'>{rec.icon}</div>

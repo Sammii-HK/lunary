@@ -1,13 +1,19 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { tarotSpreads } from '@/constants/tarot';
+import { stringToKebabCase } from '../../../../../../utils/string';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const spreadKeys = Object.keys(tarotSpreads);
 
+// Convert kebab-case slug back to camelCase key
+function kebabToCamel(str: string): string {
+  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
 export async function generateStaticParams() {
   return spreadKeys.map((spread) => ({
-    spread: spread,
+    spread: stringToKebabCase(spread),
   }));
 }
 
@@ -15,22 +21,18 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ spread: string }>;
-}): Promise<Metadata> {
+}) {
   const { spread } = await params;
-  const spreadData = tarotSpreads[spread as keyof typeof tarotSpreads];
+  const spreadKey = kebabToCamel(spread);
+  const spreadData = tarotSpreads[spreadKey as keyof typeof tarotSpreads];
 
   if (!spreadData) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
-  const title = `${spreadData.name}: How to Read & Interpret - Lunary`;
-  const description = `Learn the ${spreadData.name} for tarot reading. Discover card positions, interpretations, and tips for accurate readings with this popular tarot spread.`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${spreadData.name}: How to Read & Interpret - Lunary`,
+    description: `Learn the ${spreadData.name} for tarot reading. Discover card positions, interpretations, and tips for accurate readings with this popular tarot spread.`,
     keywords: [
       spreadData.name.toLowerCase(),
       `${spreadData.name.toLowerCase()} tarot`,
@@ -38,43 +40,10 @@ export async function generateMetadata({
       'tarot reading',
       'how to read tarot',
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/tarot/spreads/${spread}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/tarot',
-          width: 1200,
-          height: 630,
-          alt: spreadData.name,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/tarot/spreads/${spread}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `https://lunary.app/grimoire/tarot/spreads/${spread}`,
+    ogImagePath: '/api/og/grimoire/tarot',
+    ogImageAlt: spreadData.name,
+  });
 }
 
 export default async function TarotSpreadPage({
@@ -83,7 +52,9 @@ export default async function TarotSpreadPage({
   params: Promise<{ spread: string }>;
 }) {
   const { spread } = await params;
-  const spreadData = tarotSpreads[spread as keyof typeof tarotSpreads];
+  // Convert kebab-case URL slug back to camelCase key
+  const spreadKey = kebabToCamel(spread);
+  const spreadData = tarotSpreads[spreadKey as keyof typeof tarotSpreads];
 
   if (!spreadData) {
     notFound();
@@ -187,7 +158,7 @@ export default async function TarotSpreadPage({
     },
   };
 
-  const details = spreadDetails[spread] || {
+  const details = spreadDetails[spreadKey] || {
     positions: [],
     bestFor: [],
     difficulty: 'Varies',

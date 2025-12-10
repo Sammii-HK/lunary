@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function ClearCachePage() {
   const [status, setStatus] = useState<string>('Clearing...');
@@ -42,12 +43,12 @@ export default function ClearCachePage() {
     <div className='p-6 space-y-4'>
       <h1 className='text-2xl font-bold'>Clear Cache</h1>
       <p className='text-zinc-300'>{status}</p>
-      <a
+      <Link
         href='/'
-        className='block mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-center'
+        className='block mt-4 px-4 py-2 bg-lunary-primary-600 text-white rounded-lg text-center'
       >
         Go to Home
-      </a>
+      </Link>
     </div>
   );
 }

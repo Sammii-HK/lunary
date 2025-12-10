@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  Minus,
-  Target,
-  TrendingUp,
-} from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Minus, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Card,
@@ -164,12 +158,12 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
     <Card className='border-zinc-800/30 bg-zinc-900/10'>
       <CardHeader>
         <div className='flex items-center gap-2'>
-          <Target className='h-4 w-4 text-purple-400/70' />
+          <Target className='h-4 w-4 text-lunary-primary-400/70' />
           <CardTitle className='text-base font-medium'>
             Success Metrics
           </CardTitle>
         </div>
-        <CardDescription className='text-xs text-zinc-500'>
+        <CardDescription className='text-xs text-zinc-400'>
           Key performance indicators
         </CardDescription>
       </CardHeader>
@@ -211,14 +205,14 @@ function MetricCard({
   subtitle?: string;
 }) {
   const trendColors = {
-    up: 'text-emerald-400',
-    down: 'text-rose-400',
+    up: 'text-lunary-success',
+    down: 'text-lunary-error',
     stable: 'text-zinc-400',
   };
 
   const trendBgColors = {
-    up: 'bg-emerald-900/20 border-emerald-800/50',
-    down: 'bg-rose-900/20 border-rose-800/50',
+    up: 'bg-lunary-success-900/20 border-lunary-success-800',
+    down: 'bg-lunary-error-900/20 border-lunary-error-800',
     stable: 'bg-zinc-900/40 border-zinc-800',
   };
 
@@ -236,7 +230,7 @@ function MetricCard({
     >
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
-          <div className='text-xs font-medium text-zinc-500'>{label}</div>
+          <div className='text-xs font-medium text-zinc-400'>{label}</div>
           <div className='mt-2 text-xl font-light tracking-tight text-white'>
             {formattedValue}
           </div>
@@ -259,7 +253,7 @@ function MetricCard({
             <div
               className={cn(
                 'mt-1 flex items-center gap-1 text-xs',
-                isInTargetRange ? 'text-emerald-400' : 'text-amber-400',
+                isInTargetRange ? 'text-lunary-success' : 'text-lunary-accent',
               )}
             >
               <Target className='h-3 w-3' />
@@ -270,11 +264,11 @@ function MetricCard({
       </div>
       {target && (
         <div className='mt-3'>
-          <div className='mb-1 flex items-center justify-between text-xs text-zinc-500'>
+          <div className='mb-1 flex items-center justify-between text-xs text-zinc-400'>
             <span>Target Range</span>
             <span
               className={cn(
-                isInTargetRange ? 'text-emerald-400' : 'text-amber-400',
+                isInTargetRange ? 'text-lunary-success' : 'text-lunary-accent',
               )}
             >
               {isInTargetRange ? '✓ In Range' : '⚠ Outside Range'}

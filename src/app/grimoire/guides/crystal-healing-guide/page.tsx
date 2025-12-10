@@ -57,7 +57,7 @@ const ESSENTIAL_CRYSTALS = [
     properties: ['spiritual growth', 'intuition', 'calm', 'protection'],
     chakra: 'Third Eye, Crown',
     zodiac: ['Pisces', 'Virgo', 'Aquarius'],
-    color: 'bg-purple-400',
+    color: 'bg-lunary-primary-400',
   },
   {
     name: 'Rose Quartz',
@@ -70,7 +70,7 @@ const ESSENTIAL_CRYSTALS = [
     ],
     chakra: 'Heart',
     zodiac: ['Taurus', 'Libra'],
-    color: 'bg-pink-300',
+    color: 'bg-lunary-rose-300',
   },
   {
     name: 'Black Tourmaline',
@@ -91,7 +91,7 @@ const ESSENTIAL_CRYSTALS = [
     properties: ['abundance', 'joy', 'manifestation', 'confidence'],
     chakra: 'Solar Plexus',
     zodiac: ['Aries', 'Gemini', 'Leo', 'Libra'],
-    color: 'bg-yellow-400',
+    color: 'bg-lunary-accent',
   },
   {
     name: 'Selenite',
@@ -107,7 +107,7 @@ const ESSENTIAL_CRYSTALS = [
     properties: ['transformation', 'psychic abilities', 'protection', 'magic'],
     chakra: 'Third Eye, Throat',
     zodiac: ['Leo', 'Scorpio', 'Sagittarius'],
-    color: 'bg-blue-500',
+    color: 'bg-lunary-secondary',
   },
   {
     name: 'Carnelian',
@@ -115,7 +115,7 @@ const ESSENTIAL_CRYSTALS = [
     properties: ['creativity', 'courage', 'motivation', 'vitality'],
     chakra: 'Sacral',
     zodiac: ['Aries', 'Leo', 'Virgo'],
-    color: 'bg-orange-500',
+    color: 'bg-lunary-rose',
   },
 ];
 
@@ -231,12 +231,15 @@ export default function CrystalHealingGuidePage() {
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-purple-400'>
+      <nav className='text-sm text-zinc-400 mb-8'>
+        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
         <span className='mx-2'>→</span>
-        <Link href='/grimoire/crystals' className='hover:text-purple-400'>
+        <Link
+          href='/grimoire/crystals'
+          className='hover:text-lunary-primary-400'
+        >
           Crystals
         </Link>
         <span className='mx-2'>→</span>
@@ -247,7 +250,7 @@ export default function CrystalHealingGuidePage() {
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
           Crystal Healing: The Complete Guide
-          <span className='block text-2xl text-purple-400 mt-2'>
+          <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Discover the Power of Crystals
           </span>
         </h1>
@@ -260,13 +263,13 @@ export default function CrystalHealingGuidePage() {
         <div className='flex flex-wrap gap-4'>
           <Link
             href='/grimoire/crystals'
-            className='px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Explore Crystal Library
           </Link>
           <Link
             href='#essential-crystals'
-            className='px-6 py-3 border border-zinc-700 hover:border-purple-500 text-zinc-300 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
           >
             Start Learning
           </Link>
@@ -282,53 +285,62 @@ export default function CrystalHealingGuidePage() {
           <li>
             <a
               href='#what-is-crystal-healing'
-              className='hover:text-purple-400'
+              className='hover:text-lunary-primary-400'
             >
               1. What is Crystal Healing?
             </a>
           </li>
           <li>
-            <a href='#how-crystals-work' className='hover:text-purple-400'>
+            <a
+              href='#how-crystals-work'
+              className='hover:text-lunary-primary-400'
+            >
               2. How Do Crystals Work?
             </a>
           </li>
           <li>
-            <a href='#essential-crystals' className='hover:text-purple-400'>
+            <a
+              href='#essential-crystals'
+              className='hover:text-lunary-primary-400'
+            >
               3. 8 Essential Crystals for Beginners
             </a>
           </li>
           <li>
-            <a href='#choosing-crystals' className='hover:text-purple-400'>
+            <a
+              href='#choosing-crystals'
+              className='hover:text-lunary-primary-400'
+            >
               4. How to Choose the Right Crystal
             </a>
           </li>
           <li>
-            <a href='#cleansing' className='hover:text-purple-400'>
+            <a href='#cleansing' className='hover:text-lunary-primary-400'>
               5. Cleansing Your Crystals
             </a>
           </li>
           <li>
-            <a href='#charging' className='hover:text-purple-400'>
+            <a href='#charging' className='hover:text-lunary-primary-400'>
               6. Charging and Programming Crystals
             </a>
           </li>
           <li>
-            <a href='#chakras' className='hover:text-purple-400'>
+            <a href='#chakras' className='hover:text-lunary-primary-400'>
               7. Crystals for Each Chakra
             </a>
           </li>
           <li>
-            <a href='#using-crystals' className='hover:text-purple-400'>
+            <a href='#using-crystals' className='hover:text-lunary-primary-400'>
               8. Ways to Use Crystals
             </a>
           </li>
           <li>
-            <a href='#zodiac' className='hover:text-purple-400'>
+            <a href='#zodiac' className='hover:text-lunary-primary-400'>
               9. Crystals by Zodiac Sign
             </a>
           </li>
           <li>
-            <a href='#faq' className='hover:text-purple-400'>
+            <a href='#faq' className='hover:text-lunary-primary-400'>
               10. Frequently Asked Questions
             </a>
           </li>
@@ -356,8 +368,8 @@ export default function CrystalHealingGuidePage() {
           connect with the earth&apos;s energy.
         </p>
 
-        <div className='bg-purple-900/20 border border-purple-500/30 rounded-lg p-6'>
-          <h3 className='text-lg font-medium text-purple-300 mb-3'>
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
             Common Uses for Crystals
           </h3>
           <ul className='grid grid-cols-1 md:grid-cols-2 gap-2 text-zinc-300'>
@@ -388,7 +400,7 @@ export default function CrystalHealingGuidePage() {
 
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-cyan-400 mb-2'>
+            <h4 className='text-lg font-medium text-lunary-secondary mb-2'>
               Piezoelectricity
             </h4>
             <p className='text-sm text-zinc-400'>
@@ -397,7 +409,7 @@ export default function CrystalHealingGuidePage() {
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-cyan-400 mb-2'>
+            <h4 className='text-lg font-medium text-lunary-secondary mb-2'>
               Entrainment
             </h4>
             <p className='text-sm text-zinc-400'>
@@ -407,7 +419,7 @@ export default function CrystalHealingGuidePage() {
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-cyan-400 mb-2'>
+            <h4 className='text-lg font-medium text-lunary-secondary mb-2'>
               Intention Amplification
             </h4>
             <p className='text-sm text-zinc-400'>
@@ -435,7 +447,7 @@ export default function CrystalHealingGuidePage() {
             <Link
               key={crystal.name}
               href={`/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}`}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-purple-500 transition-colors'
+              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
             >
               <div className='flex items-start gap-4'>
                 <div
@@ -445,7 +457,7 @@ export default function CrystalHealingGuidePage() {
                   <h4 className='text-lg font-medium text-zinc-100'>
                     {crystal.name}
                   </h4>
-                  <p className='text-sm text-purple-400 mb-2'>
+                  <p className='text-sm text-lunary-primary-400 mb-2'>
                     {crystal.nickname}
                   </p>
                   <div className='flex flex-wrap gap-1'>
@@ -462,6 +474,62 @@ export default function CrystalHealingGuidePage() {
               </div>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* Section 4: Choosing Crystals */}
+      <section id='choosing-crystals' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          4. How to Choose the Right Crystal
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Choosing crystals is a deeply personal process. While you can select
+          based on specific properties or intentions, the most powerful
+          connections often come from intuition.
+        </p>
+
+        <div className='space-y-4'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Follow Your Intuition
+            </h4>
+            <p className='text-zinc-400'>
+              Often the crystal that catches your eye or that you feel drawn to
+              is exactly what you need. Trust your instincts when browsing
+              crystals—your subconscious knows what energy you require.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Choose by Intention
+            </h4>
+            <p className='text-zinc-400'>
+              Identify what you want to manifest or heal. For love, try Rose
+              Quartz. For protection, Black Tourmaline. For abundance, Citrine.
+              Match your crystal to your specific goal.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Choose by Chakra
+            </h4>
+            <p className='text-zinc-400'>
+              If you feel blocked in a specific area, choose a crystal that
+              corresponds to that chakra. Heart chakra issues? Green or pink
+              stones. Throat chakra? Blue stones.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Choose by Zodiac
+            </h4>
+            <p className='text-zinc-400'>
+              Each zodiac sign has crystals that resonate with its energy.
+              Working with your birth sign crystals can enhance your natural
+              strengths and support your challenges.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -518,14 +586,78 @@ export default function CrystalHealingGuidePage() {
           </div>
         </div>
 
-        <div className='bg-amber-900/20 border border-amber-500/30 rounded-lg p-6 mt-6'>
-          <h4 className='text-lg font-medium text-amber-300 mb-2'>
+        <div className='bg-lunary-accent-900/20 border border-lunary-accent-700 rounded-lg p-6 mt-6'>
+          <h4 className='text-lg font-medium text-lunary-accent-300 mb-2'>
             ⚠️ Water-Sensitive Crystals
           </h4>
           <p className='text-zinc-300'>
             Never cleanse these crystals with water: Selenite, Halite,
             Malachite, Pyrite, Hematite, Lepidolite, Azurite, Kyanite. Use
             moonlight or smoke cleansing instead.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 6: Charging and Programming */}
+      <section id='charging' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          6. Charging and Programming Crystals
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          After cleansing, charging restores a crystal&apos;s energy, while
+          programming sets a specific intention. Both practices enhance your
+          crystal&apos;s effectiveness.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+              Charging Methods
+            </h4>
+            <ul className='space-y-2 text-zinc-400 text-sm'>
+              <li>
+                <strong>Moonlight:</strong> Place under full moon overnight for
+                gentle, intuitive energy
+              </li>
+              <li>
+                <strong>Sunlight:</strong> Brief exposure (1-2 hours) for
+                energizing crystals
+              </li>
+              <li>
+                <strong>Earth:</strong> Bury in soil overnight to reconnect with
+                earth energy
+              </li>
+              <li>
+                <strong>Other crystals:</strong> Place on selenite or clear
+                quartz cluster
+              </li>
+            </ul>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+              Programming Steps
+            </h4>
+            <ol className='space-y-2 text-zinc-400 text-sm list-decimal list-inside'>
+              <li>Cleanse the crystal first</li>
+              <li>Hold it in your hands</li>
+              <li>Close your eyes and breathe deeply</li>
+              <li>Clearly state or visualize your intention</li>
+              <li>Imagine your intention flowing into the crystal</li>
+              <li>Thank the crystal and place it meaningfully</li>
+            </ol>
+          </div>
+        </div>
+
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h4 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+            When to Recharge
+          </h4>
+          <p className='text-zinc-300'>
+            Recharge your crystals monthly, after heavy use, or whenever they
+            feel energetically dull. The full moon is an ideal time for regular
+            recharging. You can reprogram a crystal anytime by cleansing it
+            first and setting a new intention.
           </p>
         </div>
       </section>
@@ -644,6 +776,92 @@ export default function CrystalHealingGuidePage() {
         </div>
       </section>
 
+      {/* Section 9: Crystals by Zodiac */}
+      <section id='zodiac' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          9. Crystals by Zodiac Sign
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Each zodiac sign has crystals that resonate with its unique energy.
+          Working with your birth sign crystals enhances your natural strengths
+          and helps balance challenges.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♈ Aries</h4>
+            <p className='text-sm text-zinc-400'>
+              Carnelian, Red Jasper, Bloodstone
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♉ Taurus</h4>
+            <p className='text-sm text-zinc-400'>
+              Rose Quartz, Emerald, Malachite
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♊ Gemini</h4>
+            <p className='text-sm text-zinc-400'>
+              Citrine, Tiger&apos;s Eye, Aquamarine
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♋ Cancer</h4>
+            <p className='text-sm text-zinc-400'>Moonstone, Pearl, Selenite</p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♌ Leo</h4>
+            <p className='text-sm text-zinc-400'>
+              Sunstone, Citrine, Tiger&apos;s Eye
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♍ Virgo</h4>
+            <p className='text-sm text-zinc-400'>
+              Amazonite, Peridot, Moss Agate
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♎ Libra</h4>
+            <p className='text-sm text-zinc-400'>
+              Rose Quartz, Lapis Lazuli, Lepidolite
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♏ Scorpio</h4>
+            <p className='text-sm text-zinc-400'>
+              Obsidian, Labradorite, Malachite
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♐ Sagittarius</h4>
+            <p className='text-sm text-zinc-400'>
+              Turquoise, Sodalite, Lapis Lazuli
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♑ Capricorn</h4>
+            <p className='text-sm text-zinc-400'>
+              Garnet, Black Tourmaline, Smoky Quartz
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♒ Aquarius</h4>
+            <p className='text-sm text-zinc-400'>
+              Amethyst, Aquamarine, Labradorite
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+            <h4 className='font-medium text-zinc-100 mb-1'>♓ Pisces</h4>
+            <p className='text-sm text-zinc-400'>
+              Amethyst, Aquamarine, Fluorite
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section id='faq' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
@@ -666,7 +884,7 @@ export default function CrystalHealingGuidePage() {
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-purple-900/30 to-cyan-900/30 border border-purple-500/30 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-cyan-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Ready to Start Your Crystal Journey?
         </h2>
@@ -678,13 +896,13 @@ export default function CrystalHealingGuidePage() {
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
             href='/grimoire/crystals'
-            className='px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Browse Crystal Library
           </Link>
           <Link
             href='/pricing'
-            className='px-8 py-3 border border-purple-500 text-purple-300 hover:bg-purple-500/10 rounded-lg font-medium transition-colors'
+            className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
           >
             Get Personalized Crystals
           </Link>

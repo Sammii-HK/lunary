@@ -72,164 +72,162 @@ export async function GET(request: NextRequest) {
   const robotoMono = await loadRobotoMono(request);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        background: theme.background,
+        color: '#ffffff',
+        padding: '60px 80px',
+        fontFamily: 'Roboto Mono',
+      }}
+    >
       <div
         style={{
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          background: theme.background,
-          color: '#ffffff',
-          padding: '60px 80px',
-          fontFamily: 'Roboto Mono',
+          fontSize: 26,
+          letterSpacing: 6,
+          textTransform: 'uppercase',
+          opacity: 0.85,
         }}
       >
-        <div
-          style={{
-            fontSize: 26,
-            letterSpacing: 6,
-            textTransform: 'uppercase',
-            opacity: 0.85,
-          }}
-        >
-          Shared from Lunary
+        Shared from Lunary
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '32px',
+          justifyContent: 'center',
+          flexGrow: 1,
+        }}
+      >
+        <div style={{ fontSize: 48, fontWeight: 300, opacity: 0.92 }}>
+          {name ? `${name}'s Birth Chart` : 'Birth Chart Highlights'}
         </div>
 
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: '32px',
-            justifyContent: 'center',
-            flexGrow: 1,
+            gap: '24px',
+            flexWrap: 'wrap',
           }}
         >
-          <div style={{ fontSize: 48, fontWeight: 300, opacity: 0.92 }}>
-            {name ? `${name}'s Birth Chart` : 'Birth Chart Highlights'}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: '24px',
-              flexWrap: 'wrap',
-            }}
-          >
-            {[
-              { label: 'Sun', value: sun },
-              { label: 'Moon', value: moon },
-              { label: 'Rising', value: rising },
-            ].map((placement) => (
-              <div
-                key={placement.label}
-                style={{
-                  flex: '1 1 30%',
-                  minWidth: '200px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '24px',
-                  padding: '24px',
-                  background: 'rgba(0,0,0,0.25)',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 16,
-                    letterSpacing: 4,
-                    textTransform: 'uppercase',
-                    opacity: 0.75,
-                    marginBottom: '12px',
-                  }}
-                >
-                  {placement.label}
-                </div>
-                <div style={{ fontSize: 32, fontWeight: 400 }}>
-                  {placement.value}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: '24px',
-              flexWrap: 'wrap',
-            }}
-          >
-            {[
-              { label: 'Dominant Element', value: element ?? 'Balanced' },
-              { label: 'Core Modality', value: modality ?? 'Dynamic' },
-            ].map((detail) => (
-              <div
-                key={detail.label}
-                style={{
-                  flex: '1 1 45%',
-                  minWidth: '240px',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  borderRadius: '20px',
-                  padding: '20px',
-                  background: 'rgba(0,0,0,0.2)',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 14,
-                    letterSpacing: 4,
-                    textTransform: 'uppercase',
-                    opacity: 0.7,
-                    marginBottom: '10px',
-                  }}
-                >
-                  {detail.label}
-                </div>
-                <div style={{ fontSize: 28 }}>{detail.value}</div>
-              </div>
-            ))}
-          </div>
-
-          {insight && (
+          {[
+            { label: 'Sun', value: sun },
+            { label: 'Moon', value: moon },
+            { label: 'Rising', value: rising },
+          ].map((placement) => (
             <div
+              key={placement.label}
               style={{
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: '20px',
+                flex: '1 1 30%',
+                minWidth: '200px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '24px',
                 padding: '24px',
-                background: 'rgba(0,0,0,0.2)',
-                fontSize: 24,
-                lineHeight: 1.5,
-                opacity: 0.92,
+                background: 'rgba(0,0,0,0.25)',
               }}
             >
-              {insight}
+              <div
+                style={{
+                  fontSize: 16,
+                  letterSpacing: 4,
+                  textTransform: 'uppercase',
+                  opacity: 0.75,
+                  marginBottom: '12px',
+                }}
+              >
+                {placement.label}
+              </div>
+              <div style={{ fontSize: 32, fontWeight: 400 }}>
+                {placement.value}
+              </div>
             </div>
-          )}
+          ))}
         </div>
 
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: 24,
-            opacity: 0.85,
+            gap: '24px',
+            flexWrap: 'wrap',
           }}
         >
-          <div>{element ? `${element} element focus` : 'Cosmic balance'}</div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <span
+          {[
+            { label: 'Dominant Element', value: element ?? 'Balanced' },
+            { label: 'Core Modality', value: modality ?? 'Dynamic' },
+          ].map((detail) => (
+            <div
+              key={detail.label}
               style={{
-                width: '10px',
-                height: '10px',
-                borderRadius: '999px',
-                backgroundColor: theme.accent,
+                flex: '1 1 45%',
+                minWidth: '240px',
+                border: '1px solid rgba(255,255,255,0.18)',
+                borderRadius: '20px',
+                padding: '20px',
+                background: 'rgba(0,0,0,0.2)',
               }}
-            />
-            <span>lunary.app/birth-chart</span>
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  letterSpacing: 4,
+                  textTransform: 'uppercase',
+                  opacity: 0.7,
+                  marginBottom: '10px',
+                }}
+              >
+                {detail.label}
+              </div>
+              <div style={{ fontSize: 28 }}>{detail.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {insight && (
+          <div
+            style={{
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '20px',
+              padding: '24px',
+              background: 'rgba(0,0,0,0.2)',
+              fontSize: 24,
+              lineHeight: 1.5,
+              opacity: 0.92,
+            }}
+          >
+            {insight}
           </div>
+        )}
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: 24,
+          opacity: 0.85,
+        }}
+      >
+        <div>{element ? `${element} element focus` : 'Cosmic balance'}</div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <span
+            style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '999px',
+              backgroundColor: theme.accent,
+            }}
+          />
+          <span>lunary.app/birth-chart</span>
         </div>
       </div>
-    ),
+    </div>,
     {
       width: WIDTH,
       height: HEIGHT,

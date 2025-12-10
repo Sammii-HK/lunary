@@ -10,7 +10,13 @@ import React, {
   Suspense,
 } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ArrowUp, ChevronDown, ChevronUp, Square } from 'lucide-react';
+import {
+  ArrowUp,
+  ChevronDown,
+  ChevronUp,
+  Square,
+  NotebookPen,
+} from 'lucide-react';
 
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -30,6 +36,11 @@ import {
 } from '@/hooks/useRitualBadge';
 import { useSubscription } from '@/hooks/useSubscription';
 import { WeeklyInsights } from '@/lib/rituals/engine';
+import { useModal } from '@/hooks/useModal';
+import {
+  extractMoodTags,
+  extractCardReferences,
+} from '@/lib/journal/extract-moments';
 
 interface CollectionFolder {
   id: number;
@@ -43,6 +54,100 @@ interface SavedCollection {
   category: string;
 }
 
+function extractMeaningfulTitle(content: string): string {
+  const cleaned = content.replace(/[*_~`#]/g, '').trim();
+
+  const sentences = cleaned
+    .split(/[.!?\n]+/)
+    .filter((s) => s.trim().length > 10);
+  const firstSentence = sentences[0]?.trim() || cleaned;
+
+  const themeKeywords = [
+    'moon',
+    'transit',
+    'energy',
+    'mercury',
+    'venus',
+    'mars',
+    'jupiter',
+    'saturn',
+    'retrograde',
+    'new moon',
+    'full moon',
+    'eclipse',
+    'equinox',
+    'solstice',
+    'aries',
+    'taurus',
+    'gemini',
+    'cancer',
+    'leo',
+    'virgo',
+    'libra',
+    'scorpio',
+    'sagittarius',
+    'capricorn',
+    'aquarius',
+    'pisces',
+    'tarot',
+    'star',
+    'tower',
+    'fool',
+    'magician',
+    'empress',
+    'emperor',
+    'lovers',
+    'chariot',
+    'strength',
+    'hermit',
+    'wheel',
+    'justice',
+    'hanged',
+    'death',
+    'temperance',
+    'devil',
+    'world',
+    'sun',
+    'judgement',
+    'ritual',
+    'intention',
+    'reflection',
+    'meditation',
+    'crystal',
+    'chakra',
+    'healing',
+    'manifestation',
+    'gratitude',
+    'release',
+    'abundance',
+  ];
+
+  const lowerContent = cleaned.toLowerCase();
+  const foundThemes: string[] = [];
+
+  for (const keyword of themeKeywords) {
+    if (lowerContent.includes(keyword)) {
+      foundThemes.push(keyword.charAt(0).toUpperCase() + keyword.slice(1));
+      if (foundThemes.length >= 2) break;
+    }
+  }
+
+  if (foundThemes.length > 0) {
+    const themePrefix = foundThemes.join(' & ');
+    const shortContent =
+      firstSentence.length > 40
+        ? firstSentence.substring(0, 40).replace(/\s+\S*$/, '') + '...'
+        : firstSentence;
+    return `${themePrefix}: ${shortContent}`;
+  }
+
+  if (firstSentence.length <= 60) {
+    return firstSentence;
+  }
+
+  return firstSentence.substring(0, 55).replace(/\s+\S*$/, '') + '...';
+}
+
 const MessageBubble = ({
   role,
   content,
@@ -51,6 +156,7 @@ const MessageBubble = ({
   savedCollections,
   folders,
   onSaved,
+  onFolderCreated,
 }: {
   role: 'user' | 'assistant';
   content: string;
@@ -63,6 +169,7 @@ const MessageBubble = ({
   savedCollections?: SavedCollection[];
   folders?: CollectionFolder[];
   onSaved?: () => void;
+  onFolderCreated?: (folder: CollectionFolder) => void;
 }) => {
   const isUser = role === 'user';
   // Only parse assistant messages for entities (user messages don't need parsing)
@@ -122,7 +229,7 @@ const MessageBubble = ({
             <button
               key={`${partIndex}-${lineIndex}`}
               onClick={() => onEntityClick(part.entity!)}
-              className='underline decoration-dotted decoration-purple-400/60 hover:decoration-purple-400 text-purple-300 hover:text-purple-200 transition-colors cursor-pointer'
+              className='underline decoration-dotted decoration-lunary-primary-400/60 hover:decoration-lunary-primary-400 text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors cursor-pointer'
             >
               {line}
             </button>,
@@ -140,10 +247,10 @@ const MessageBubble = ({
       className={`flex items-end gap-1.5 ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
     >
       <div
-        className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm ${
+        className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm transition-colors ${
           isUser
-            ? 'bg-purple-600/90 text-white'
-            : 'bg-zinc-800/80 text-zinc-100 border border-zinc-700/40'
+            ? 'bg-lunary-primary-950 text-white border border-lunary-primary-700 hover:bg-lunary-primary-950 hover:border-lunary-primary-00'
+            : 'bg-zinc-950 text-zinc-100 border border-zinc-800'
         }`}
       >
         {renderContent()}
@@ -152,20 +259,26 @@ const MessageBubble = ({
         <div className='opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mb-1'>
           <SaveToCollection
             item={{
-              title: `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}`,
+              title: extractMeaningfulTitle(content),
               description: content.substring(0, 200),
-              category: 'chat',
-              content: { messageId, content, role },
-              tags: ['ai-chat'],
+              category: 'journal',
+              content: {
+                text: content,
+                moodTags: extractMoodTags(content),
+                cardReferences: extractCardReferences(content),
+                source: 'chat',
+                sourceMessageId: messageId,
+              },
+              tags: ['from-chat'],
             }}
             isSaved={savedCollections?.some(
               (c) =>
-                c.title ===
-                  `AI Response ${messageId ? `#${messageId.slice(0, 8)}` : ''}` &&
-                c.category === 'chat',
+                c.category === 'journal' &&
+                c.title === extractMeaningfulTitle(content),
             )}
             folders={folders}
             onSaved={onSaved}
+            onFolderCreated={onFolderCreated}
           />
         </div>
       )}
@@ -223,6 +336,8 @@ function BookOfShadowsContent() {
   const [collectionFolders, setCollectionFolders] = useState<
     CollectionFolder[]
   >([]);
+  const [isJournalMode, setIsJournalMode] = useState(false);
+  const [isSubmittingJournal, setIsSubmittingJournal] = useState(false);
 
   useEffect(() => {
     if (!authState.isAuthenticated || authState.loading) return;
@@ -273,6 +388,13 @@ function BookOfShadowsContent() {
         }
       })
       .catch(() => {});
+  }, []);
+
+  const handleFolderCreated = useCallback((folder: CollectionFolder) => {
+    setCollectionFolders((prev) => {
+      if (prev.some((f) => f.id === folder.id)) return prev;
+      return [...prev, folder];
+    });
   }, []);
 
   // Initialize tarot card parser on mount (client-side only)
@@ -499,22 +621,74 @@ function BookOfShadowsContent() {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      attemptSend();
+      if (isJournalMode) {
+        handleJournalSubmit();
+      } else {
+        attemptSend();
+      }
     }
   };
 
-  useEffect(() => {
-    if (!showAuthModal) return;
+  const handleJournalSubmit = async () => {
+    const trimmed = input.trim();
+    if (!trimmed || isSubmittingJournal) return;
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowAuthModal(false);
+    setIsSubmittingJournal(true);
+    try {
+      const moodTags = extractMoodTags(trimmed);
+      const cardReferences = extractCardReferences(trimmed);
+
+      let moonPhase: string | null = null;
+      let transitHighlight: string | null = null;
+
+      try {
+        const cosmicRes = await fetch('/api/gpt/cosmic-today');
+        if (cosmicRes.ok) {
+          const cosmicData = await cosmicRes.json();
+          moonPhase = cosmicData.moonPhase?.name || null;
+          if (cosmicData.keyTransits?.length > 0) {
+            transitHighlight = cosmicData.keyTransits[0].label;
+          }
+        }
+      } catch {
+        // Continue without cosmic context
       }
-    };
 
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [showAuthModal]);
+      const response = await fetch('/api/journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          content: trimmed,
+          moodTags,
+          cardReferences,
+          moonPhase,
+          transitHighlight,
+          source: 'chat-journal',
+        }),
+      });
+
+      if (response.ok) {
+        setInput('');
+        setIsJournalMode(false);
+        addMessage({
+          id: `journal-${Date.now()}`,
+          role: 'assistant',
+          content: `✨ Journal entry saved to your Book of Shadows${moonPhase ? ` (${moonPhase})` : ''}`,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to save journal entry:', error);
+    } finally {
+      setIsSubmittingJournal(false);
+    }
+  };
+
+  useModal({
+    isOpen: showAuthModal,
+    onClose: () => setShowAuthModal(false),
+    closeOnClickOutside: false,
+  });
 
   if (authState.loading) {
     return (
@@ -551,7 +725,7 @@ function BookOfShadowsContent() {
               </p>
               <Button
                 onClick={() => setShowAuthModal(true)}
-                className='inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-purple-500'
+                className='inline-flex items-center gap-2 rounded-xl bg-lunary-primary-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-lunary-primary-500'
               >
                 Sign In
               </Button>
@@ -600,9 +774,9 @@ function BookOfShadowsContent() {
           <h1 className='text-xl font-light tracking-tight text-zinc-50 md:text-4xl'>
             Astral Guide
           </h1>
-          <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-500'>
+          <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-400'>
             {planId ? (
-              <span className='rounded-full border border-purple-500/40 px-3 py-1 text-purple-300/90'>
+              <span className='rounded-full border border-lunary-primary-600 px-3 py-1 text-lunary-primary-300/90'>
                 Plan: {planId.replace(/_/g, ' ')}
               </span>
             ) : null}
@@ -655,6 +829,7 @@ function BookOfShadowsContent() {
                         savedCollections={savedCollections}
                         folders={collectionFolders}
                         onSaved={handleCollectionSaved}
+                        onFolderCreated={handleFolderCreated}
                         onEntityClick={async (entity) => {
                           try {
                             // For spells/rituals, navigate to grimoire page
@@ -671,9 +846,8 @@ function BookOfShadowsContent() {
                                 return;
                               }
                               // Fallback: try to find the spell and get its ID
-                              const { spellDatabase } = await import(
-                                '@/constants/grimoire/spells'
-                              );
+                              const { spellDatabase } =
+                                await import('@/constants/grimoire/spells');
                               const spell = spellDatabase.find(
                                 (s) =>
                                   s.title.toLowerCase() ===
@@ -697,9 +871,8 @@ function BookOfShadowsContent() {
 
                             if (entity.type === 'tarot') {
                               // Fetch tarot card data directly from grimoire
-                              const { getTarotCardByName } = await import(
-                                '@/utils/tarot/getCardByName'
-                              );
+                              const { getTarotCardByName } =
+                                await import('@/utils/tarot/getCardByName');
                               const cardData = getTarotCardByName(entity.name);
 
                               if (cardData) {
@@ -770,14 +943,14 @@ function BookOfShadowsContent() {
                       />
                     ))}
                     {error && (
-                      <div className='rounded-2xl border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm text-red-200 md:px-6 md:py-4'>
-                        <p className='font-semibold text-red-300/90 mb-1'>
+                      <div className='rounded-2xl border border-lunary-error-700 bg-red-950/40 px-4 py-3 text-sm text-lunary-error-200 md:px-6 md:py-4'>
+                        <p className='font-semibold text-lunary-error-300/90 mb-1'>
                           Something went wrong
                         </p>
                         <p>{error}</p>
                         <button
                           onClick={clearError}
-                          className='mt-2 text-xs text-red-300/70 hover:text-red-300 underline'
+                          className='mt-2 text-xs text-lunary-error-300/70 hover:text-lunary-error-300 underline'
                         >
                           Dismiss
                         </button>
@@ -790,17 +963,32 @@ function BookOfShadowsContent() {
             </div>
 
             <div className='shrink-0 border-t border-zinc-800/70 bg-zinc-900/40'>
-              <button
-                onClick={() => setIsAssistExpanded(!isAssistExpanded)}
-                className='flex w-full items-center justify-between px-3 py-2 text-sm font-semibold text-purple-300/90 transition hover:bg-zinc-800/40 md:px-6 md:py-3'
-              >
-                <span>Assist</span>
-                {isAssistExpanded ? (
-                  <ChevronUp className='w-4 h-4' />
-                ) : (
-                  <ChevronDown className='w-4 h-4' />
-                )}
-              </button>
+              <div className='flex items-center px-3 py-2 md:px-6 md:py-3'>
+                <button
+                  onClick={() => setIsJournalMode(!isJournalMode)}
+                  className={`p-1.5 rounded-lg transition mr-2 ${
+                    isJournalMode
+                      ? 'bg-lunary-primary-600/30 text-lunary-primary-300 ring-1 ring-lunary-primary-500'
+                      : 'text-zinc-400 hover:text-lunary-primary-400 hover:bg-zinc-800/50'
+                  }`}
+                  title={
+                    isJournalMode ? 'Exit journal mode' : 'Write journal entry'
+                  }
+                >
+                  <NotebookPen className='w-4 h-4' />
+                </button>
+                <button
+                  onClick={() => setIsAssistExpanded(!isAssistExpanded)}
+                  className='flex flex-1 items-center justify-between text-sm font-semibold text-lunary-primary-300/90 transition hover:text-lunary-primary-200'
+                >
+                  <span>{isJournalMode ? 'Journal Mode' : 'Assist'}</span>
+                  {isAssistExpanded ? (
+                    <ChevronUp className='w-4 h-4' />
+                  ) : (
+                    <ChevronDown className='w-4 h-4' />
+                  )}
+                </button>
+              </div>
               {isAssistExpanded && (
                 <div className='px-3 pb-2 text-sm text-zinc-300 md:px-6 md:pb-4'>
                   <CopilotQuickActions
@@ -813,11 +1001,18 @@ function BookOfShadowsContent() {
           </section>
 
           <form
-            onSubmit={handleSubmit}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (isJournalMode) {
+                handleJournalSubmit();
+              } else {
+                attemptSend();
+              }
+            }}
             className='shrink-0 relative flex items-center'
           >
             <label htmlFor='book-of-shadows-message' className='sr-only'>
-              Share with Lunary
+              {isJournalMode ? 'Write a journal entry' : 'Share with Lunary'}
             </label>
             <textarea
               id='book-of-shadows-message'
@@ -825,24 +1020,40 @@ function BookOfShadowsContent() {
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder="Write your heart's question…"
-              className='w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30'
+              placeholder={
+                isJournalMode
+                  ? 'Write a journal entry...'
+                  : "Write your heart's question…"
+              }
+              className={`w-full resize-none rounded-xl border bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 ${
+                isJournalMode
+                  ? 'border-lunary-primary-600/50 focus:border-lunary-primary focus:ring-lunary-primary-700'
+                  : 'border-zinc-700/60 focus:border-lunary-primary focus:ring-lunary-primary-800'
+              }`}
             />
             {isStreaming ? (
               <button
                 type='button'
                 onClick={stop}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-red-600 text-white transition hover:bg-red-500'
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-lunary-error-900 text-lunary-error-300 border border-lunary-error-700 transition hover:bg-lunary-error-800'
               >
                 <Square className='w-4 h-4' />
               </button>
             ) : (
               <button
                 type='submit'
-                disabled={input.trim().length === 0}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-purple-600 text-white transition hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed'
+                disabled={input.trim().length === 0 || isSubmittingJournal}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white transition disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isJournalMode
+                    ? 'bg-lunary-primary-500 hover:bg-lunary-primary-400'
+                    : 'bg-lunary-primary-600 hover:bg-lunary-primary-500'
+                }`}
               >
-                <ArrowUp className='w-4 h-4' />
+                {isJournalMode ? (
+                  <NotebookPen className='w-4 h-4' />
+                ) : (
+                  <ArrowUp className='w-4 h-4' />
+                )}
               </button>
             )}
           </form>

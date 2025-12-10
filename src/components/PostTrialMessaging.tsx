@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from './SmartTrialButton';
-import { Calendar, Sparkles } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import Link from 'next/link';
 
 export function PostTrialMessaging() {
@@ -23,10 +23,10 @@ export function PostTrialMessaging() {
   }
 
   return (
-    <div className='bg-gradient-to-r from-purple-900/40 to-pink-900/40 rounded-lg p-6 border border-purple-500/30 mb-6'>
+    <div className='bg-gradient-to-r from-lunary-primary-900/40 to-pink-900/40 rounded-lg p-6 border border-lunary-primary/30 mb-6'>
       <div className='flex items-start gap-4'>
-        <div className='flex-shrink-0 w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center'>
-          <Calendar className='w-6 h-6 text-purple-300' />
+        <div className='flex-shrink-0 w-12 h-12 rounded-full bg-lunary-primary-500/20 flex items-center justify-center'>
+          <Calendar className='w-6 h-6 text-lunary-primary-300' />
         </div>
         <div className='flex-1'>
           <h3 className='text-lg font-semibold text-white mb-2'>
@@ -39,7 +39,7 @@ export function PostTrialMessaging() {
             journey.
           </p>
           <div className='flex flex-col sm:flex-row gap-3'>
-            <SmartTrialButton size='md' />
+            <SmartTrialButton size='default' />
             <Link
               href='/pricing'
               className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-white text-sm font-medium transition-colors text-center'

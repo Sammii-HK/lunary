@@ -63,8 +63,8 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${nodeData.name} Meaning: Karmic Destiny - Lunary`;
-  const description = `Discover the complete guide to ${nodeData.name} (${nodeData.symbol}). Learn about ${nodeData.name} meaning, karmic significance, and how it influences your birth chart and life purpose.`;
+  const title = `${nodeData.name}: Life Purpose & Destiny in Astrology - Lunary`;
+  const description = `${nodeData.name} (${nodeData.symbol}) in astrology: ${nodeData.meaning.toLowerCase()}. What your ${nodeData.name.toLowerCase()} placement reveals about karma & soul purpose.`;
 
   return {
     title,

@@ -1,21 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { Calendar, TrendingUp, Sparkles, BarChart3 } from 'lucide-react';
 import { useAuthStatus } from './AuthStatus';
 import { SharePersonalized } from './SharePersonalized';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+
+const UsageChart = lazy(() => import('./charts/UsageChart'));
 
 interface UsagePattern {
   date: string;
@@ -94,7 +84,7 @@ export function MonthlyInsights() {
   return (
     <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6'>
       <div className='flex items-center gap-3 mb-4'>
-        <Calendar className='w-5 h-5 text-purple-400' />
+        <Calendar className='w-5 h-5 text-lunary-accent' />
         <h2 className='text-lg font-semibold text-zinc-100'>
           {monthName} Insights
         </h2>
@@ -102,8 +92,8 @@ export function MonthlyInsights() {
 
       <div className='space-y-4'>
         {insight.summary && (
-          <div className='rounded-lg border border-purple-500/30 bg-purple-950/20 p-3'>
-            <h3 className='text-sm font-semibold text-purple-300 mb-1'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950/20 p-3'>
+            <h3 className='text-sm font-semibold text-lunary-accent-300 mb-1'>
               Your Cosmic Month in Review
             </h3>
             <p className='text-xs text-zinc-300 leading-relaxed'>
@@ -115,7 +105,7 @@ export function MonthlyInsights() {
         {insight.frequentCards.length > 0 ? (
           <div>
             <div className='flex items-center gap-2 mb-2'>
-              <TrendingUp className='w-4 h-4 text-purple-400' />
+              <TrendingUp className='w-4 h-4 text-lunary-accent' />
               <h3 className='text-sm font-medium text-zinc-300'>
                 Frequent Cards
               </h3>
@@ -134,7 +124,7 @@ export function MonthlyInsights() {
                     </div>
                     <div className='h-2 bg-zinc-800/60 rounded-full overflow-hidden'>
                       <div
-                        className='h-full bg-gradient-to-r from-purple-500/60 to-purple-400/40 rounded-full transition-all'
+                        className='h-full bg-gradient-to-r from-lunary-primary to-lunary-primary-400/40 rounded-full transition-all'
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -146,12 +136,12 @@ export function MonthlyInsights() {
         ) : (
           <div>
             <div className='flex items-center gap-2 mb-2'>
-              <TrendingUp className='w-4 h-4 text-purple-400' />
+              <TrendingUp className='w-4 h-4 text-lunary-accent' />
               <h3 className='text-sm font-medium text-zinc-300'>
                 Frequent Cards
               </h3>
             </div>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-zinc-400'>
               No frequent cards yet this month. Start pulling cards to see your
               patterns!
             </p>
@@ -161,7 +151,7 @@ export function MonthlyInsights() {
         {insight.transitImpacts && insight.transitImpacts.length > 0 && (
           <div>
             <div className='flex items-center gap-2 mb-2'>
-              <Sparkles className='w-4 h-4 text-purple-400' />
+              <Sparkles className='w-4 h-4 text-lunary-accent' />
               <h3 className='text-sm font-medium text-zinc-300'>
                 Transit Impacts
               </h3>
@@ -182,7 +172,7 @@ export function MonthlyInsights() {
         {insight.journalCount !== undefined && insight.journalCount > 0 && (
           <div>
             <div className='flex items-center gap-2 mb-2'>
-              <Sparkles className='w-4 h-4 text-purple-400' />
+              <Sparkles className='w-4 h-4 text-lunary-accent' />
               <h3 className='text-sm font-medium text-zinc-300'>
                 Journal Entries
               </h3>
@@ -200,7 +190,7 @@ export function MonthlyInsights() {
         {insight.themes.length > 0 && (
           <div>
             <div className='flex items-center gap-2 mb-2'>
-              <Sparkles className='w-4 h-4 text-purple-400' />
+              <Sparkles className='w-4 h-4 text-lunary-accent' />
               <h3 className='text-sm font-medium text-zinc-300'>
                 Tarot Themes
               </h3>
@@ -221,7 +211,7 @@ export function MonthlyInsights() {
         {insight.trends && (
           <div>
             <div className='flex items-center gap-2 mb-3'>
-              <BarChart3 className='w-4 h-4 text-purple-400' />
+              <BarChart3 className='w-4 h-4 text-lunary-accent' />
               <h3 className='text-sm font-medium text-zinc-300'>
                 This Month vs Last Month
               </h3>
@@ -239,7 +229,7 @@ export function MonthlyInsights() {
                         <span
                           className={
                             insight.trends.tarot.changePercent > 0
-                              ? 'text-green-400 ml-1'
+                              ? 'text-lunary-success ml-1'
                               : 'text-red-400 ml-1'
                           }
                         >
@@ -263,7 +253,7 @@ export function MonthlyInsights() {
                         <span
                           className={
                             insight.trends.journal.changePercent > 0
-                              ? 'text-green-400 ml-1'
+                              ? 'text-lunary-success ml-1'
                               : 'text-red-400 ml-1'
                           }
                         >
@@ -287,7 +277,7 @@ export function MonthlyInsights() {
                         <span
                           className={
                             insight.trends.rituals.changePercent > 0
-                              ? 'text-green-400 ml-1'
+                              ? 'text-lunary-success ml-1'
                               : 'text-red-400 ml-1'
                           }
                         >
@@ -306,67 +296,22 @@ export function MonthlyInsights() {
         {insight.usagePatterns && insight.usagePatterns.length > 0 && (
           <div>
             <div className='flex items-center gap-2 mb-3'>
-              <BarChart3 className='w-4 h-4 text-purple-400' />
+              <BarChart3 className='w-4 h-4 text-lunary-accent' />
               <h3 className='text-sm font-medium text-zinc-300'>
                 Daily Activity
               </h3>
             </div>
-            <div className='h-48'>
-              <ResponsiveContainer width='100%' height='100%'>
-                <LineChart data={insight.usagePatterns}>
-                  <CartesianGrid
-                    strokeDasharray='3 3'
-                    stroke='#3f3f46'
-                    opacity={0.3}
-                  />
-                  <XAxis
-                    dataKey='date'
-                    tick={{ fill: '#a1a1aa', fontSize: 10 }}
-                    tickFormatter={(value) => {
-                      const date = new Date(value);
-                      return `${date.getMonth() + 1}/${date.getDate()}`;
-                    }}
-                  />
-                  <YAxis tick={{ fill: '#a1a1aa', fontSize: 10 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#18181b',
-                      border: '1px solid #3f3f46',
-                      borderRadius: '8px',
-                      color: '#e4e4e7',
-                    }}
-                    labelFormatter={(value) => {
-                      const date = new Date(value);
-                      return date.toLocaleDateString();
-                    }}
-                  />
-                  <Line
-                    type='monotone'
-                    dataKey='tarotReadings'
-                    stroke='#a855f7'
-                    strokeWidth={2}
-                    dot={false}
-                    name='Tarot'
-                  />
-                  <Line
-                    type='monotone'
-                    dataKey='journalEntries'
-                    stroke='#ec4899'
-                    strokeWidth={2}
-                    dot={false}
-                    name='Journal'
-                  />
-                  <Line
-                    type='monotone'
-                    dataKey='rituals'
-                    stroke='#f59e0b'
-                    strokeWidth={2}
-                    dot={false}
-                    name='Rituals'
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <Suspense
+              fallback={
+                <div className='h-48 flex items-center justify-center'>
+                  <div className='animate-pulse text-zinc-500 text-sm'>
+                    Loading chart...
+                  </div>
+                </div>
+              }
+            >
+              <UsageChart data={insight.usagePatterns} />
+            </Suspense>
           </div>
         )}
 

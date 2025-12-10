@@ -101,13 +101,19 @@ export function AdminInstallPrompt() {
   const badge = useMemo(() => {
     switch (status) {
       case 'installed':
-        return { label: 'Installed', color: 'bg-green-500/20 text-green-300' };
+        return {
+          label: 'Installed',
+          color: 'bg-lunary-success-900 text-lunary-success-300',
+        };
       case 'prompting':
-        return { label: 'Prompting…', color: 'bg-blue-500/20 text-blue-300' };
+        return {
+          label: 'Prompting…',
+          color: 'bg-lunary-secondary-900 text-lunary-secondary-300',
+        };
       case 'error':
         return {
           label: 'Needs Attention',
-          color: 'bg-red-500/20 text-red-300',
+          color: 'bg-lunary-error-900 text-lunary-error-300',
         };
       default:
         return { label: 'Ready', color: 'bg-white/10 text-white/80' };
@@ -171,7 +177,7 @@ export function AdminInstallPrompt() {
           </button>
         </div>
       </div>
-      {error && <p className='mt-3 text-sm text-red-300'>{error}</p>}
+      {error && <p className='mt-3 text-sm text-lunary-error-300'>{error}</p>}
       {showInstructions && !isStandalone && renderInstructions()}
       {isStandalone && (
         <p className='mt-4 text-xs text-white/50'>

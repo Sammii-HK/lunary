@@ -7,7 +7,7 @@ import { crystalDatabase } from '@/constants/grimoire/crystals';
 export const revalidate = 86400; // Revalidate every 24 hours
 
 export const metadata: Metadata = {
-  title: 'Crystals: Complete Guide to Crystal Meanings & Uses - Lunary',
+  title: 'Crystals A-Z: Meanings, Properties & Healing Uses - Lunary',
   description:
     'Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic. Learn crystal properties, correspondences, and practices. Essential guide for crystal work.',
   keywords: [
@@ -21,14 +21,14 @@ export const metadata: Metadata = {
     'how to use crystals',
   ],
   openGraph: {
-    title: 'Crystals: Complete Guide to Crystal Meanings & Uses - Lunary',
+    title: 'Crystals A-Z: Meanings, Properties & Healing Uses - Lunary',
     description:
       'Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Crystals: Complete Guide to Crystal Meanings & Uses - Lunary',
+    title: 'Crystals A-Z: Meanings, Properties & Healing Uses - Lunary',
     description:
       'Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic.',
   },
@@ -54,7 +54,7 @@ export default function CrystalsPage() {
     <>
       {renderJsonLd(crystalListSchema)}
       <SEOContentTemplate
-        title='Crystals: Complete Guide to Crystal Meanings & Uses - Lunary'
+        title='Crystals A-Z: Meanings, Properties & Healing Uses - Lunary'
         h1='Crystals'
         description='Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic. Learn crystal properties, correspondences, and practices.'
         keywords={[
@@ -66,10 +66,6 @@ export default function CrystalsPage() {
           'crystal properties',
         ]}
         canonicalUrl='https://lunary.app/grimoire/crystals'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Crystals', href: '/grimoire/crystals' },
-        ]}
         intro='Crystals are powerful tools for healing, protection, and magical work. Each crystal carries unique vibrational energy that can enhance your practice, support healing, and amplify intentions. This comprehensive guide covers crystal meanings, properties, correspondences, and how to work with crystals effectively in your magical practice.'
         meaning={`Crystals are formed deep within the Earth over millions of years, absorbing and storing the planet's energy. Each crystal has a unique molecular structure that creates specific vibrational frequencies. These frequencies interact with your own energy field, helping to balance, heal, and amplify your intentions.
 

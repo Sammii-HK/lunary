@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
+import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
@@ -19,11 +22,12 @@ const ZODIAC_SYMBOLS: Record<string, string> = {
 };
 
 export const metadata: Metadata = {
-  title: 'Zodiac Compatibility Guide: Love & Relationship Matches - Lunary',
+  title:
+    'Zodiac Compatibility: Best & Worst Matches for Every Sign: Love & Relationship Matches - Lunary',
   description:
     'Complete zodiac compatibility guide. Explore love, friendship, and work compatibility between all 12 zodiac signs. 78+ detailed match analyses.',
   openGraph: {
-    title: 'Zodiac Compatibility Guide - Lunary',
+    title: 'Zodiac Compatibility: Best & Worst Matches for Every Sign - Lunary',
     description:
       'Explore compatibility between all 12 zodiac signs in love and relationships.',
     url: 'https://lunary.app/grimoire/compatibility',
@@ -36,20 +40,31 @@ export const metadata: Metadata = {
 export default function CompatibilityIndexPage() {
   const signs = Object.entries(signDescriptions);
 
+  const compatibilityListSchema = createItemListSchema({
+    name: 'Zodiac Compatibility: Best & Worst Matches for Every Sign',
+    description:
+      'Complete zodiac compatibility guide with 78+ detailed match analyses for love, friendship, and work.',
+    url: 'https://lunary.app/grimoire/compatibility',
+    items: Object.keys(signDescriptions).map((sign) => ({
+      name: `${signDescriptions[sign].name} Compatibility`,
+      url: `https://lunary.app/grimoire/zodiac/${sign}`,
+      description: `${signDescriptions[sign].element} sign compatibility`,
+    })),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(compatibilityListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        {/* Header */}
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Compatibility' },
+          ]}
+        />
         <div className='mb-12'>
-          <nav className='flex items-center gap-2 text-sm text-zinc-500 mb-4'>
-            <Link href='/grimoire' className='hover:text-zinc-300'>
-              Grimoire
-            </Link>
-            <span>/</span>
-            <span className='text-zinc-400'>Compatibility</span>
-          </nav>
           <h1 className='text-4xl font-light text-zinc-100 mb-4'>
-            Zodiac Compatibility Guide
+            Zodiac Compatibility: Best & Worst Matches for Every Sign
           </h1>
           <p className='text-lg text-zinc-400 max-w-2xl'>
             Explore how zodiac signs interact in love, friendship, and work.
@@ -60,16 +75,16 @@ export default function CompatibilityIndexPage() {
         {/* Stats */}
         <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-pink-400'>12</div>
-            <div className='text-sm text-zinc-500'>Signs</div>
+            <div className='text-3xl font-light text-lunary-rose'>12</div>
+            <div className='text-sm text-zinc-400'>Signs</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-pink-400'>78</div>
-            <div className='text-sm text-zinc-500'>Unique Pairs</div>
+            <div className='text-3xl font-light text-lunary-rose'>78</div>
+            <div className='text-sm text-zinc-400'>Unique Pairs</div>
           </div>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-3xl font-light text-pink-400'>3</div>
-            <div className='text-sm text-zinc-500'>Categories</div>
+            <div className='text-3xl font-light text-lunary-rose'>3</div>
+            <div className='text-sm text-zinc-400'>Categories</div>
           </div>
         </div>
 
@@ -79,50 +94,10 @@ export default function CompatibilityIndexPage() {
             Compatibility Matrix
           </h2>
           <p className='text-zinc-400 text-sm mb-6'>
-            Click any cell to see the full compatibility analysis
+            Hover to highlight row and column. Click any cell to see the full
+            compatibility analysis.
           </p>
-          <div className='min-w-[800px]'>
-            <table className='w-full border-collapse'>
-              <thead>
-                <tr>
-                  <th className='p-2'></th>
-                  {signs.map(([key, sign]) => (
-                    <th
-                      key={key}
-                      className='p-2 text-xs text-zinc-400 font-medium'
-                    >
-                      {sign.name.slice(0, 3)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {signs.map(([key1, sign1]) => (
-                  <tr key={key1}>
-                    <td className='p-2 text-xs text-zinc-400 font-medium'>
-                      {sign1.name.slice(0, 3)}
-                    </td>
-                    {signs.map(([key2]) => {
-                      const slug =
-                        key1 <= key2
-                          ? `${key1}-and-${key2}`
-                          : `${key2}-and-${key1}`;
-                      return (
-                        <td key={key2} className='p-1'>
-                          <Link
-                            href={`/grimoire/compatibility/${slug}`}
-                            className='block w-8 h-8 rounded bg-zinc-800 hover:bg-pink-500/30 hover:border-pink-500/50 border border-transparent transition-colors flex items-center justify-center'
-                          >
-                            <Heart className='h-3 w-3 text-zinc-600 hover:text-pink-400' />
-                          </Link>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <CompatibilityMatrix signs={signs} />
         </div>
 
         {/* Browse by Sign */}
@@ -139,7 +114,7 @@ export default function CompatibilityIndexPage() {
                   <h3 className='text-xl font-medium text-zinc-100'>
                     {sign1.name} Compatibility
                   </h3>
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     {sign1.element} • {sign1.modality}
                   </p>
                 </div>
@@ -154,7 +129,7 @@ export default function CompatibilityIndexPage() {
                     <Link
                       key={key2}
                       href={`/grimoire/compatibility/${slug}`}
-                      className='px-3 py-1.5 rounded-lg bg-zinc-800/50 hover:bg-pink-500/20 border border-zinc-700/50 hover:border-pink-500/50 text-zinc-300 hover:text-pink-300 text-sm transition-colors'
+                      className='px-3 py-1.5 rounded-lg bg-zinc-800/50 hover:bg-lunary-rose-900 border border-zinc-700/50 hover:border-lunary-rose-600 text-zinc-300 hover:text-lunary-rose-300 text-sm transition-colors'
                     >
                       {sign1.name} & {sign2.name}
                     </Link>
@@ -165,17 +140,40 @@ export default function CompatibilityIndexPage() {
           ))}
         </div>
 
-        {/* CTA */}
-        <section className='mt-12 text-center'>
+        {/* Synastry CTA */}
+        <section className='mt-12'>
           <Link
-            href='/welcome'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/30 text-pink-300 font-medium text-lg transition-colors'
+            href='/grimoire/synastry/generate'
+            className='block p-6 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-lunary-primary-900/30 border border-lunary-rose-700 hover:border-lunary-rose-500 transition-colors group'
           >
-            <Heart className='h-5 w-5' />
-            Get Your Synastry Reading
+            <div className='flex items-center justify-between'>
+              <div>
+                <h3 className='text-xl font-medium text-lunary-rose-300 group-hover:text-lunary-rose-200 transition-colors flex items-center gap-2'>
+                  <Heart className='h-5 w-5' />
+                  Generate Synastry Chart
+                </h3>
+                <p className='text-zinc-400 mt-1'>
+                  Compare two birth charts to discover deep compatibility,
+                  strengths, and growth areas
+                </p>
+              </div>
+              <span className='text-lunary-rose-400 group-hover:text-lunary-rose-300 transition-colors text-2xl'>
+                →
+              </span>
+            </div>
           </Link>
-          <p className='mt-3 text-sm text-zinc-500'>
-            Compare full birth charts for deeper compatibility insights
+        </section>
+
+        {/* Birth Chart CTA */}
+        <section className='mt-6 text-center'>
+          <Link
+            href='/birth-chart'
+            className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-zinc-100 transition-colors'
+          >
+            View Your Birth Chart
+          </Link>
+          <p className='mt-3 text-sm text-zinc-400'>
+            Understand your complete astrological profile
           </p>
         </section>
       </div>

@@ -13,21 +13,14 @@ import {
 } from '../../../utils/moon/moonPhases';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Sparkles,
-  Share2,
-  Lock,
-  X,
-} from 'lucide-react';
+import { Check, Sparkles, Share2, Lock, X } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
+import { useModal } from '@/hooks/useModal';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import {
   SubscriptionStatus,
@@ -178,18 +171,11 @@ const TarotReadings = () => {
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
 
   // Handle ESC key to close upgrade modal
-  useEffect(() => {
-    if (!showUpgradeModal) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowUpgradeModal(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [showUpgradeModal]);
+  useModal({
+    isOpen: showUpgradeModal,
+    onClose: () => setShowUpgradeModal(false),
+    closeOnClickOutside: false,
+  });
   const [selectedCard, setSelectedCard] = useState<{
     name: string;
     keywords: string[];
@@ -581,7 +567,7 @@ const TarotReadings = () => {
                 spreadsSection.scrollIntoView({ behavior: 'smooth' });
               }
             }}
-            className='flex-1 py-3 px-4 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-300 font-medium hover:bg-purple-500/30 transition-colors'
+            className='flex-1 py-3 px-4 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 font-medium hover:bg-lunary-primary-900/30 transition-colors'
           >
             Do a Reading
           </button>
@@ -599,7 +585,7 @@ const TarotReadings = () => {
                   Daily Card
                 </h3>
                 <p
-                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(generalTarot.daily.name);
                     if (card) setSelectedCard(card);
@@ -623,7 +609,7 @@ const TarotReadings = () => {
                           text: generalDailyShare.text,
                         })
                       }
-                      className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
+                      className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
                     >
                       <Share2 className='w-4 h-4' />
                       Share daily card
@@ -645,7 +631,7 @@ const TarotReadings = () => {
                   Weekly Card
                 </h3>
                 <p
-                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(generalTarot.weekly.name);
                     if (card) setSelectedCard(card);
@@ -660,8 +646,8 @@ const TarotReadings = () => {
             </div>
 
             <div className='space-y-4 pt-4 border-t border-zinc-800/50'>
-              <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-                <h3 className='text-sm font-medium text-purple-300/90 mb-2'>
+              <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
+                <h3 className='text-sm font-medium text-lunary-primary-300/90 mb-2'>
                   Daily Message
                 </h3>
                 <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -669,8 +655,8 @@ const TarotReadings = () => {
                 </p>
               </div>
 
-              <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-                <h3 className='text-sm font-medium text-indigo-300/90 mb-2'>
+              <div className='rounded-lg border border-lunary-secondary-800 bg-zinc-900/50 p-4'>
+                <h3 className='text-sm font-medium text-lunary-primary-300 mb-2'>
                   Weekly Energy
                 </h3>
                 <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -678,15 +664,15 @@ const TarotReadings = () => {
                 </p>
               </div>
 
-              <div className='rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-                <h3 className='text-sm font-medium text-emerald-300/90 mb-2'>
+              <div className='rounded-lg border border-lunary-success-800 bg-zinc-900 p-4'>
+                <h3 className='text-sm font-medium text-lunary-success-300 mb-2'>
                   Key Guidance
                 </h3>
                 <ul className='text-sm text-zinc-300 space-y-2'>
                   {generalTarot.guidance.actionPoints.map((point, index) => (
                     <li key={index} className='flex items-start gap-2'>
                       <Check
-                        className='w-4 h-4 text-emerald-400/80 mt-0.5 flex-shrink-0'
+                        className='w-4 h-4 text-lunary-success mt-0.5 flex-shrink-0'
                         strokeWidth={2}
                       />
                       <span>{point}</span>
@@ -711,7 +697,7 @@ const TarotReadings = () => {
             </HoroscopeSection>
           )}
 
-          <div className='rounded-lg border border-purple-500/30 bg-purple-500/10 p-6'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6'>
             <h3 className='text-lg font-medium text-zinc-100 mb-2'>
               Unlock Personal Tarot Patterns
             </h3>
@@ -722,28 +708,28 @@ const TarotReadings = () => {
             <ul className='text-xs text-zinc-400 space-y-2 mb-4'>
               <li className='flex items-start gap-2'>
                 <Check
-                  className='w-3 h-3 text-purple-400/80 mt-0.5 flex-shrink-0'
+                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
                   strokeWidth={2}
                 />
                 <span>Cards chosen specifically for you</span>
               </li>
               <li className='flex items-start gap-2'>
                 <Check
-                  className='w-3 h-3 text-purple-400/80 mt-0.5 flex-shrink-0'
+                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
                   strokeWidth={2}
                 />
                 <span>30-90 day pattern analysis</span>
               </li>
               <li className='flex items-start gap-2'>
                 <Check
-                  className='w-3 h-3 text-purple-400/80 mt-0.5 flex-shrink-0'
+                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
                   strokeWidth={2}
                 />
                 <span>Personal card frequency tracking</span>
               </li>
               <li className='flex items-start gap-2'>
                 <Check
-                  className='w-3 h-3 text-purple-400/80 mt-0.5 flex-shrink-0'
+                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
                   strokeWidth={2}
                 />
                 <span>Suit and number pattern insights</span>
@@ -768,8 +754,8 @@ const TarotReadings = () => {
               <h2 className='text-xl font-medium text-zinc-100'>
                 Recent Daily Cards
               </h2>
-              <div className='px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10'>
-                <span className='text-xs font-medium text-purple-300/90'>
+              <div className='px-3 py-1 rounded-full border border-lunary-primary-700 bg-lunary-primary-900/10'>
+                <span className='text-xs font-medium text-lunary-primary-300/90'>
                   Personalised Feature
                 </span>
               </div>
@@ -794,7 +780,7 @@ const TarotReadings = () => {
               <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-zinc-900/90'>
                 <div className='text-center p-6 max-w-sm'>
                   <Sparkles
-                    className='w-8 h-8 text-purple-400/80 mx-auto mb-3'
+                    className='w-8 h-8 text-lunary-primary-400/80 mx-auto mb-3'
                     strokeWidth={1.5}
                   />
                   <h3 className='text-lg font-medium text-zinc-100 mb-2'>
@@ -853,7 +839,7 @@ const TarotReadings = () => {
               spreadsSection.scrollIntoView({ behavior: 'smooth' });
             }
           }}
-          className='flex-1 py-3 px-4 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-300 font-medium hover:bg-purple-500/30 transition-colors'
+          className='flex-1 py-3 px-4 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 font-medium hover:bg-lunary-primary-900/30 transition-colors'
         >
           Do a Reading
         </button>
@@ -867,7 +853,7 @@ const TarotReadings = () => {
                 Daily Card
               </h3>
               <p
-                className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                 onClick={() => {
                   const card = getTarotCardByName(
                     personalizedReading.daily.name,
@@ -893,7 +879,7 @@ const TarotReadings = () => {
                         text: personalizedDailyShare.text,
                       })
                     }
-                    className='inline-flex items-center gap-2 text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors'
+                    className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
                   >
                     <Share2 className='w-4 h-4' />
                     Share daily card
@@ -915,7 +901,7 @@ const TarotReadings = () => {
                 Weekly Card
               </h3>
               <p
-                className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-purple-300 transition-colors'
+                className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                 onClick={() => {
                   const card = getTarotCardByName(
                     personalizedReading.weekly.name,
@@ -932,10 +918,10 @@ const TarotReadings = () => {
           </div>
         </HoroscopeSection>
 
-        <HoroscopeSection title='Guidance Highlights' color='indigo'>
+        <HoroscopeSection title='Guidance Highlights' color='zinc'>
           <div className='space-y-4'>
-            <div className='rounded-lg border border-purple-500/20 bg-purple-500/10 p-4'>
-              <h3 className='text-sm font-medium text-purple-300/90 mb-2'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
+              <h3 className='text-sm font-medium text-lunary-primary-300/90 mb-2'>
                 Daily Message
               </h3>
               <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -943,8 +929,8 @@ const TarotReadings = () => {
               </p>
             </div>
 
-            <div className='rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-4'>
-              <h3 className='text-sm font-medium text-indigo-300/90 mb-2'>
+            <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
+              <h3 className='text-sm font-medium text-lunary-primary-300 mb-2'>
                 Weekly Energy
               </h3>
               <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -952,8 +938,8 @@ const TarotReadings = () => {
               </p>
             </div>
 
-            <div className='rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4'>
-              <h3 className='text-sm font-medium text-emerald-300/90 mb-2'>
+            <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
+              <h3 className='text-sm font-medium text-lunary-success-300 mb-2'>
                 Key Guidance
               </h3>
               <ul className='text-sm text-zinc-300 space-y-2'>
@@ -961,7 +947,7 @@ const TarotReadings = () => {
                   (point, index) => (
                     <li key={index} className='flex items-start gap-2'>
                       <Check
-                        className='w-4 h-4 text-emerald-400/80 mt-0.5 flex-shrink-0'
+                        className='w-4 h-4 text-lunary-success mt-0.5 flex-shrink-0'
                         strokeWidth={2}
                       />
                       <span>{point}</span>
@@ -1016,7 +1002,7 @@ const TarotReadings = () => {
                       isLocked
                         ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
                         : selectedView === days
-                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
                           : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
                     )}
                     title={
@@ -1052,7 +1038,7 @@ const TarotReadings = () => {
                   !subscription.hasAccess('advanced_patterns')
                     ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
                     : selectedView === 'year-over-year'
-                      ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                      ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
                       : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
                 )}
                 title={
@@ -1081,7 +1067,7 @@ const TarotReadings = () => {
                   !subscription.hasAccess('advanced_patterns')
                     ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
                     : isMultidimensionalMode
-                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                      ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
                       : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
                 )}
                 title={

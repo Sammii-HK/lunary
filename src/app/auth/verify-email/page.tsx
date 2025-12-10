@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { betterAuthClient } from '@/lib/auth-client';
 
 export default function VerifyEmailPage() {
@@ -81,13 +82,13 @@ export default function VerifyEmailPage() {
   const getStatusColor = () => {
     switch (status) {
       case 'verifying':
-        return 'text-blue-400';
+        return 'text-lunary-secondary';
       case 'success':
-        return 'text-green-400';
+        return 'text-lunary-success';
       case 'error':
-        return 'text-red-400';
+        return 'text-lunary-error';
       case 'expired':
-        return 'text-yellow-400';
+        return 'text-lunary-accent';
       default:
         return 'text-gray-400';
     }
@@ -96,13 +97,13 @@ export default function VerifyEmailPage() {
   const getBackgroundColor = () => {
     switch (status) {
       case 'success':
-        return 'bg-green-900/20 border-green-700';
+        return 'bg-lunary-success-900/20 border-lunary-success-700';
       case 'error':
-        return 'bg-red-900/20 border-red-700';
+        return 'bg-lunary-error-900/20 border-lunary-error-700';
       case 'expired':
-        return 'bg-yellow-900/20 border-yellow-700';
+        return 'bg-lunary-accent-900/20 border-lunary-accent-700';
       default:
-        return 'bg-blue-900/20 border-blue-700';
+        return 'bg-lunary-secondary-900/20 border-lunary-secondary-700';
     }
   };
 
@@ -134,7 +135,7 @@ export default function VerifyEmailPage() {
               <div className='space-y-3'>
                 <a
                   href='/auth'
-                  className='inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors'
+                  className='inline-block bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors'
                 >
                   Try Again
                 </a>
@@ -148,7 +149,7 @@ export default function VerifyEmailPage() {
               <div className='space-y-3'>
                 <a
                   href='/auth'
-                  className='inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-medium transition-colors'
+                  className='inline-block bg-lunary-accent-600 hover:bg-lunary-accent-700 text-white px-6 py-3 rounded-lg font-medium transition-colors'
                 >
                   Sign Up Again
                 </a>
@@ -166,12 +167,12 @@ export default function VerifyEmailPage() {
           </div>
 
           <div className='mt-8 pt-6 border-t border-zinc-700'>
-            <a
+            <Link
               href='/'
               className='text-zinc-400 hover:text-white transition-colors text-sm'
             >
               ← Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

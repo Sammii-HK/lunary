@@ -35,9 +35,7 @@ import {
   getAccurateMoonPhase,
   checkSeasonalEvents,
   calculateRealAspects,
-  checkSignIngress,
   checkRetrogradeEvents,
-  checkRetrogradeIngress,
 } from '../../../../../utils/astrology/cosmic-og';
 
 // Track if cron is already running to prevent duplicate execution
@@ -272,21 +270,33 @@ export async function GET(request: NextRequest) {
       const notificationResult = await runNotificationCheck(dateStr);
       const executionTime = Date.now() - notificationStartTime;
 
+      const notificationsSent = notificationResult.notificationsSent || 0;
+      const hasError = notificationResult.error && !notificationResult.success;
+      const wasSkipped = notificationResult.success && notificationsSent === 0;
+
+      let notificationStatus: 'success' | 'failed' | 'skipped' = 'success';
+      if (hasError) {
+        notificationStatus = 'failed';
+      } else if (wasSkipped) {
+        notificationStatus = 'skipped';
+      }
+
       await logActivity({
         activityType: 'cron_execution',
         activityCategory: 'notifications',
-        status: notificationResult.success ? 'success' : 'failed',
+        status: notificationStatus,
         message:
           notificationResult.message ||
-          `Notification check completed for ${dateStr}`,
+          (wasSkipped
+            ? `No notifications to send for ${dateStr}`
+            : `Notification check completed for ${dateStr}: ${notificationsSent} sent`),
         metadata: {
           targetDate: dateStr,
-          notificationsSent: notificationResult.notificationsSent || 0,
+          notificationsSent,
           eventsSent: notificationResult.eventsSent || [],
+          skipped: wasSkipped,
         },
-        errorMessage: notificationResult.success
-          ? undefined
-          : notificationResult.message,
+        errorMessage: hasError ? notificationResult.message : undefined,
         executionTimeMs: executionTime,
       });
 

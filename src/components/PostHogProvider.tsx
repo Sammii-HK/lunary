@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { hasAnalyticsConsent, getCookieConsent } from './CookieConsent';
+import { getCookieConsent } from './CookieConsent';
 
 let posthogModule: any = null;
 let posthogLoaded = false;

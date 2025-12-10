@@ -14,6 +14,27 @@ import {
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
+// Helper to safely check if a referrer URL belongs to a domain
+function isFromDomain(referrer: string, domain: string): boolean {
+  try {
+    const url = new URL(referrer);
+    const host = url.hostname.toLowerCase();
+    return host === domain || host.endsWith('.' + domain);
+  } catch {
+    return false;
+  }
+}
+
+function isSearchEngine(referrer: string): boolean {
+  return (
+    isFromDomain(referrer, 'google.com') ||
+    isFromDomain(referrer, 'bing.com') ||
+    isFromDomain(referrer, 'yahoo.com') ||
+    isFromDomain(referrer, 'duckduckgo.com') ||
+    referrer.toLowerCase().includes('search')
+  );
+}
+
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
@@ -252,13 +273,7 @@ export async function GET(request: NextRequest) {
       // Categorize based on utm_source and referrer
       if (!utmSource || utmSource === 'direct' || utmSource === 'null') {
         // Check referrer for SEO
-        if (
-          referrerLower.includes('google.com') ||
-          referrerLower.includes('bing.com') ||
-          referrerLower.includes('yahoo.com') ||
-          referrerLower.includes('duckduckgo.com') ||
-          referrerLower.includes('search')
-        ) {
+        if (isSearchEngine(referrer)) {
           acquisitionSources.seo += count;
         } else {
           acquisitionSources.direct += count;
@@ -285,13 +300,7 @@ export async function GET(request: NextRequest) {
         sourceLower.includes('reddit')
       ) {
         acquisitionSources.social += count;
-      } else if (
-        sourceLower === 'seo' ||
-        referrerLower.includes('google.com') ||
-        referrerLower.includes('bing.com') ||
-        referrerLower.includes('yahoo.com') ||
-        referrerLower.includes('duckduckgo.com')
-      ) {
+      } else if (sourceLower === 'seo' || isSearchEngine(referrer)) {
         acquisitionSources.seo += count;
       } else if (
         sourceLower.includes('referral') ||

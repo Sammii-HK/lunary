@@ -45,6 +45,27 @@ const Tarot = () => {
         </p>
       </div>
 
+      {/* Complete Guide Banner */}
+      <Link
+        href='/grimoire/guides/tarot-complete-guide'
+        className='block p-4 rounded-lg bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
+      >
+        <div className='flex items-center justify-between'>
+          <div>
+            <h3 className='text-lg font-medium text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors'>
+              📖 Read the Complete Tarot Guide
+            </h3>
+            <p className='text-sm text-zinc-400'>
+              Master tarot reading with our comprehensive beginner to advanced
+              guide
+            </p>
+          </div>
+          <span className='text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+            →
+          </span>
+        </div>
+      </Link>
+
       {/* Spreads Section - Moved to Top */}
       <section id='spreads' className='space-y-6'>
         <div>
@@ -62,9 +83,9 @@ const Tarot = () => {
               <Link
                 key={spread}
                 href={`/grimoire/tarot-spreads/${spreadSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {tarotSpreads[spread as keyof typeof tarotSpreads].name}
                 </h3>
                 <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
@@ -89,7 +110,7 @@ const Tarot = () => {
                       ))}
                     {tarotSpreads[spread as keyof typeof tarotSpreads]
                       .instructions.length > 3 && (
-                      <li className='text-purple-400'>...and more</li>
+                      <li className='text-lunary-primary-400'>...and more</li>
                     )}
                   </ul>
                 ) : (
@@ -151,9 +172,9 @@ const Tarot = () => {
               <Link
                 key={suit}
                 href={`/grimoire/tarot-suits/${suitSlug}`}
-                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors'>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {tarotSuits[suit as keyof typeof tarotSuits].name}
                 </h3>
                 <p className='text-xs text-zinc-400 mb-2'>
@@ -197,7 +218,7 @@ const Tarot = () => {
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
             <Link
               href='/grimoire/reversed-cards-guide'
-              className='hover:text-purple-400 transition-colors'
+              className='hover:text-lunary-primary-400 transition-colors'
             >
               Reversed Cards Guide
             </Link>
@@ -211,7 +232,7 @@ const Tarot = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Understanding Reversed Cards
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
@@ -245,7 +266,7 @@ const Tarot = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How to Read Reversed Cards
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -269,7 +290,7 @@ const Tarot = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Common Reversed Patterns
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -296,7 +317,7 @@ const Tarot = () => {
           <h2 className='text-xl font-medium text-zinc-100 mb-2'>
             <Link
               href='/grimoire/card-combinations'
-              className='hover:text-purple-400 transition-colors'
+              className='hover:text-lunary-primary-400 transition-colors'
             >
               Reading Card Combinations
             </Link>
@@ -309,7 +330,7 @@ const Tarot = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Element Combinations
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -332,7 +353,7 @@ const Tarot = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Number Patterns
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -355,7 +376,7 @@ const Tarot = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Major Arcana Combinations
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -378,7 +399,7 @@ const Tarot = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How to Read Combinations
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -416,7 +437,7 @@ const Tarot = () => {
         </div>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               When to Read for Others
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -433,7 +454,7 @@ const Tarot = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Ethical Guidelines
             </h3>
             <div className='space-y-3 text-sm text-zinc-300'>
@@ -464,7 +485,7 @@ const Tarot = () => {
             </div>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Self-Reading Best Practices
             </h3>
             <div className='space-y-2 text-sm text-zinc-300'>
@@ -490,7 +511,7 @@ const Tarot = () => {
         </h2>
         <div className='space-y-4'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What is the difference between Major and Minor Arcana?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -501,7 +522,7 @@ const Tarot = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How do I interpret reversed cards?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -514,7 +535,7 @@ const Tarot = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               How often should I cleanse my tarot deck?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -525,7 +546,7 @@ const Tarot = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               Can I read tarot for myself?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -536,7 +557,7 @@ const Tarot = () => {
             </p>
           </div>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-purple-300 mb-2'>
+            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
               What is the best spread for beginners?
             </h3>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -555,42 +576,42 @@ const Tarot = () => {
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <a
+          <Link
             href='/grimoire/divination'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Other Divination Methods
-          </a>
-          <a
-            href='/grimoire/practices#spellcraft-fundamentals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+          </Link>
+          <Link
+            href='/grimoire/practices'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Spellcraft & Magic
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/birth-chart'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Birth Chart Reading
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/crystals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Crystals for Divination
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/numerology'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Numerology
-          </a>
-          <a
+          </Link>
+          <Link
             href='/grimoire/runes'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-purple-500/30 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-purple-300'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Runes
-          </a>
+          </Link>
         </div>
       </section>
     </div>

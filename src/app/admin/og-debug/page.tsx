@@ -89,7 +89,7 @@ export default function OGDebugPage() {
             />
             <button
               onClick={refreshCache}
-              className='px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-error-600 hover:bg-lunary-error-700 rounded-md text-white font-medium transition-colors'
             >
               🔄 Force Refresh (Bypass Cache)
             </button>
@@ -126,19 +126,19 @@ export default function OGDebugPage() {
             <div
               key={og.name}
               className={`bg-zinc-900 rounded-lg border overflow-hidden ${
-                loadErrors[og.name] ? 'border-red-500' : 'border-zinc-700'
+                loadErrors[og.name] ? 'border-lunary-error' : 'border-zinc-700'
               }`}
             >
               <div className='p-4 border-b border-zinc-700'>
                 <div className='flex items-center justify-between'>
                   <h3 className='text-lg font-bold text-white'>{og.name}</h3>
                   {loadErrors[og.name] && (
-                    <span className='px-2 py-1 text-xs bg-red-500/20 text-red-400 rounded'>
+                    <span className='px-2 py-1 text-xs bg-lunary-error-900 text-lunary-error rounded'>
                       ERROR
                     </span>
                   )}
                   {og.isJson && (
-                    <span className='px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded'>
+                    <span className='px-2 py-1 text-xs bg-lunary-secondary-900 text-lunary-secondary rounded'>
                       JSON
                     </span>
                   )}
@@ -152,7 +152,7 @@ export default function OGDebugPage() {
                     <a
                       href={og.url}
                       target='_blank'
-                      className='text-purple-400 hover:underline'
+                      className='text-lunary-primary-400 hover:underline'
                     >
                       View JSON Response →
                     </a>
@@ -160,7 +160,7 @@ export default function OGDebugPage() {
                 ) : (
                   <div className='relative aspect-square rounded-lg overflow-hidden border border-zinc-600 mb-3'>
                     {loadErrors[og.name] ? (
-                      <div className='absolute inset-0 flex items-center justify-center bg-red-900/20 text-red-400 text-sm'>
+                      <div className='absolute inset-0 flex items-center justify-center bg-lunary-error-900/20 text-lunary-error text-sm'>
                         Failed to load image
                       </div>
                     ) : (
@@ -178,13 +178,13 @@ export default function OGDebugPage() {
                   </div>
                 )}
 
-                <div className='text-xs text-zinc-500 break-all mb-2 font-mono bg-zinc-800 p-2 rounded'>
+                <div className='text-xs text-zinc-400 break-all mb-2 font-mono bg-zinc-800 p-2 rounded'>
                   {og.url}
                 </div>
 
                 <button
                   onClick={() => window.open(og.url, '_blank')}
-                  className='w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm text-white transition-colors'
+                  className='w-full px-3 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded text-sm text-white transition-colors'
                 >
                   Open in New Tab
                 </button>
@@ -219,7 +219,7 @@ export default function OGDebugPage() {
         <div className='mt-8 text-center'>
           <a
             href='/admin/daily-posts-preview'
-            className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-md text-white font-medium transition-colors'
+            className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
           >
             ← Back to Daily Posts Preview
           </a>

@@ -153,14 +153,14 @@ export function BirthdayInput({
         placeholder={placeholder}
         autoComplete='bday'
         className={cn(
-          'w-full px-4 py-3 bg-zinc-800 border rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors',
+          'w-full px-4 py-3 bg-zinc-800 border rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent transition-colors',
           error ? 'border-red-500' : 'border-zinc-700',
           disabled && 'opacity-50 cursor-not-allowed',
           className,
         )}
       />
       {error && <p className='mt-1 text-xs text-red-400'>{error}</p>}
-      <p className='mt-1 text-xs text-zinc-500'>Format: {placeholder}</p>
+      <p className='mt-1 text-xs text-zinc-400'>Format: {placeholder}</p>
     </div>
   );
 }

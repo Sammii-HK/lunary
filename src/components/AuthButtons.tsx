@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuthStatus } from './AuthStatus';
 import { SignOutButton } from './SignOutButton';
+import { Button } from './ui/button';
 
 interface AuthButtonsProps {
   variant?: 'primary' | 'secondary' | 'navbar';
@@ -33,7 +34,7 @@ export function AuthButtons({
           <span className='text-sm text-zinc-300'>👋 {displayName}</span>
           <Link
             href='/profile'
-            className='text-xs text-purple-400 hover:text-purple-300 transition-colors'
+            className='text-xs text-lunary-secondary hover:text-white transition-colors'
           >
             Profile
           </Link>
@@ -48,19 +49,19 @@ export function AuthButtons({
         <div className='text-center'>
           <p className='text-zinc-300 mb-2'>
             Welcome back,{' '}
-            <span className='text-purple-400 font-medium'>{displayName}</span>!
+            <span className='text-lunary-secondary font-medium'>
+              {displayName}
+            </span>
+            !
           </p>
-          <p className='text-sm text-zinc-500'>
+          <p className='text-sm text-zinc-400'>
             Your cosmic profile is synced and ready
           </p>
         </div>
         <div className='flex gap-3'>
-          <Link
-            href='/profile'
-            className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-medium transition-colors'
-          >
-            View Profile
-          </Link>
+          <Button variant='lunary-solid' asChild>
+            <Link href='/profile'>View Profile</Link>
+          </Button>
           <SignOutButton variant='text' />
         </div>
       </div>
@@ -68,18 +69,17 @@ export function AuthButtons({
   }
 
   // If not authenticated, show single profile creation button
-  const baseButtonClasses =
-    'font-medium transition-all duration-300 rounded-full';
-
   if (variant === 'primary') {
     return (
       <div className={`flex justify-center items-center ${className}`}>
-        <Link
-          href='/pricing'
-          className={`${baseButtonClasses} bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 px-8 py-4 text-lg transition-all`}
+        <Button
+          variant='lunary'
+          size='lg'
+          className='rounded-full px-8'
+          asChild
         >
-          Start Free Trial
-        </Link>
+          <Link href='/pricing'>Start Free Trial</Link>
+        </Button>
       </div>
     );
   }
@@ -87,12 +87,9 @@ export function AuthButtons({
   if (variant === 'secondary') {
     return (
       <div className={`flex justify-center ${className}`}>
-        <Link
-          href='/pricing'
-          className={`${baseButtonClasses} bg-purple-500/10 hover:bg-purple-500/15 text-purple-300/90 border border-purple-500/20 hover:border-purple-500/30 px-6 py-3`}
-        >
-          Start Free Trial
-        </Link>
+        <Button variant='lunary' asChild>
+          <Link href='/pricing'>Start Free Trial</Link>
+        </Button>
       </div>
     );
   }
@@ -100,12 +97,14 @@ export function AuthButtons({
   if (variant === 'navbar') {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
-        <Link
-          href='/pricing'
-          className='text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-full transition-colors'
+        <Button
+          variant='lunary-solid'
+          size='sm'
+          className='rounded-full'
+          asChild
         >
-          Pricing
-        </Link>
+          <Link href='/pricing'>Pricing</Link>
+        </Button>
       </div>
     );
   }

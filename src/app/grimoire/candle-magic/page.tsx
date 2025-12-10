@@ -5,7 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import CandleMagic from '../components/CandleMagic';
 
 export const metadata: Metadata = {
-  title: 'Candle Magic: Complete Guide - Lunary',
+  title: 'Candle Magic: Colors, Spells & Rituals for Beginners - Lunary',
   description:
     'Learn the art of candle magic: color meanings, carving techniques, anointing with oils, lighting candles on altar, incantations by color, safety practices, and candle rituals. Comprehensive guide for beginners and advanced practitioners.',
   keywords: [
@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     'how to do candle magic',
   ],
   openGraph: {
-    title: 'Candle Magic: Complete Guide - Lunary',
+    title: 'Candle Magic: Colors, Spells & Rituals for Beginners - Lunary',
     description:
       'Learn the art of candle magic: color meanings, carving techniques, anointing with oils, lighting candles on altar, incantations by color, safety practices, and candle rituals.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Candle Magic: Complete Guide - Lunary',
+    title: 'Candle Magic: Colors, Spells & Rituals for Beginners - Lunary',
     description:
       'Learn the art of candle magic: color meanings, carving techniques, anointing with oils, lighting candles on altar, incantations by color, safety practices, and candle rituals.',
   },
@@ -40,7 +40,7 @@ export default function CandleMagicPage() {
   return (
     <>
       <SEOContentTemplate
-        title='Candle Magic: Complete Guide - Lunary'
+        title='Candle Magic: Colors, Spells & Rituals for Beginners - Lunary'
         h1='Candle Magic'
         description='Learn the art of candle magic: color meanings, carving techniques, anointing, safety, and rituals. Candle magic is one of the most accessible forms of spellwork, perfect for beginners and experienced practitioners alike.'
         keywords={[
@@ -53,10 +53,6 @@ export default function CandleMagicPage() {
           'candle safety',
         ]}
         canonicalUrl='https://lunary.app/grimoire/candle-magic'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Candle Magic', href: '/grimoire/candle-magic' },
-        ]}
         intro='Candle magic is one of the most accessible and powerful forms of spellwork. By combining color correspondences, intention-setting, and the transformative power of fire, candle magic allows practitioners to manifest their desires and work with elemental energies. This comprehensive guide covers everything you need to know to practice candle magic safely and effectively, from choosing the right candle colors to advanced carving and anointing techniques.'
         meaning={`Candle magic harnesses the power of fire, one of the four classical elements, to manifest intentions and create change. The flame represents transformation, purification, and the connection between the physical and spiritual realms. When you light a candle with intention, you are activating powerful energetic forces that work to bring your desires into reality.
 

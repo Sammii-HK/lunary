@@ -39,7 +39,7 @@ export function FreeHoroscopeView() {
           description='Get insights specifically tailored to your birth chart and cosmic profile'
           icon={
             <Sparkles
-              className='w-8 h-8 text-purple-400/80 mx-auto'
+              className='w-8 h-8 text-lunary-accent-400 mx-auto'
               strokeWidth={1.5}
             />
           }
@@ -59,7 +59,7 @@ export function FreeHoroscopeView() {
           title='Solar Return Insights'
           description='Discover your personal year themes and birthday insights'
           blurredContent={
-            <div className='rounded-lg border border-amber-500/30 bg-amber-500/10 p-6 opacity-60'>
+            <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-6 opacity-60'>
               <div className='space-y-3'>
                 <div className='flex justify-between items-center'>
                   <span className='text-sm text-zinc-300'>
@@ -89,7 +89,7 @@ export function FreeHoroscopeView() {
           title='Personal Transit Impact'
           description='See how planetary transits specifically affect your birth chart'
           blurredContent={
-            <div className='rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-6 opacity-60'>
+            <div className='rounded-lg border border-lunary-secondary-700 bg-lunary-secondary-950 p-6 opacity-60'>
               <p className='text-sm text-zinc-300 mb-4'>
                 ●●● ●●●●● ●●●●●●● ●●●●●● ●●●●●●●●● ●●● ●●●● ●●●●● ●●●●●
                 ●●●●●●●●●
@@ -98,7 +98,7 @@ export function FreeHoroscopeView() {
                 {[...Array(3)].map((_, index) => (
                   <div
                     key={index}
-                    className='rounded border-l-4 border-indigo-500/50 bg-zinc-800/50 p-4'
+                    className='rounded border-l-4 border-lunary-secondary-600 bg-zinc-800/50 p-4'
                   >
                     <div className='flex justify-between items-start mb-2'>
                       <div>
@@ -109,7 +109,7 @@ export function FreeHoroscopeView() {
                           ●●● ●● • ●●●●●●● ●●●●●●
                         </p>
                       </div>
-                      <span className='bg-purple-500/20 text-purple-300/90 px-2 py-1 rounded text-xs font-medium border border-purple-500/30'>
+                      <span className='bg-lunary-primary-900 text-lunary-accent-300 px-2 py-1 rounded text-xs font-medium border border-lunary-primary-700'>
                         ●●●●●●●●
                       </span>
                     </div>

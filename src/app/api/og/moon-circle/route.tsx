@@ -7,13 +7,13 @@ function getMoonCircleTheme(type: string) {
   const lower = type.toLowerCase();
   if (lower.includes('new')) {
     return {
-      background: 'linear-gradient(135deg, #0a0a1a, #1a1a2e, #0d0d1a)',
+      background: 'linear-gradient(135deg, #0a0a0a, #1a1a1a, #0d0d0d)',
       iconPath: 'new-moon',
       subtitle: 'Set Your Intentions',
     };
   } else {
     return {
-      background: 'linear-gradient(135deg, #0d0d1a, #1a1a2e, #1a0f1f)',
+      background: 'linear-gradient(135deg, #0d0d0d, #1a1a1a, #1a0f1f)',
       iconPath: 'full-moon',
       subtitle: 'Release & Celebrate',
     };
@@ -27,13 +27,11 @@ export async function GET(request: NextRequest) {
   const date = searchParams.get('date') || '';
 
   const formattedDate = date
-    ? new Date(date + 'T12:00:00Z')
-        .toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        })
-        .replace(/\//g, '/')
+    ? new Date(date + 'T12:00:00Z').toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
     : '';
 
   const theme = getMoonCircleTheme(type);
@@ -44,117 +42,116 @@ export async function GET(request: NextRequest) {
       : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        background: theme.background,
+        color: 'white',
+        padding: '60px 40px',
+        justifyContent: 'space-between',
+      }}
+    >
       <div
         style={{
-          height: '100%',
-          width: '100%',
           display: 'flex',
-          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
-          background: theme.background,
-          color: 'white',
-          padding: '60px 40px',
-          justifyContent: 'space-between',
+          paddingBottom: '40px',
+          paddingTop: '100px',
         }}
       >
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingBottom: '40px',
-            paddingTop: '100px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '24px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              opacity: 0.7,
-            }}
-          >
-            Moon in {sign} • {theme.subtitle}
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            width: '100%',
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/dotty/moon-phases/${theme.iconPath}.png`}
-            width={160}
-            height={160}
-            alt={type}
-            style={{
-              marginBottom: '30px',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '64px',
-              fontWeight: '400',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.1em',
-              marginBottom: '20px',
-            }}
-          >
-            {type} Circle
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '32px',
-              color: 'white',
-              textAlign: 'center',
-              fontWeight: '300',
-              opacity: 0.8,
-            }}
-          >
-            Gather & Connect
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            fontSize: '28px',
-            fontWeight: '300',
+            fontSize: '24px',
+            fontWeight: '400',
             color: 'white',
             textAlign: 'center',
+            letterSpacing: '0.1em',
+            opacity: 0.7,
+          }}
+        >
+          Moon in {sign} • {theme.subtitle}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+          width: '100%',
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`${baseUrl}/icons/moon-phases/${theme.iconPath}.png`}
+          width={160}
+          height={160}
+          alt={type}
+          style={{
+            marginBottom: '30px',
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            fontSize: '64px',
+            fontWeight: '400',
+            color: 'white',
+            textAlign: 'center',
+            letterSpacing: '0.1em',
             marginBottom: '20px',
           }}
         >
-          {formattedDate}
+          {type} Circle
         </div>
-
         <div
           style={{
             display: 'flex',
-            fontSize: '28px',
-            fontWeight: '300',
+            fontSize: '32px',
             color: 'white',
-            letterSpacing: '1px',
-            marginBottom: '40px',
+            textAlign: 'center',
+            fontWeight: '300',
+            opacity: 0.8,
           }}
         >
-          lunary.app
+          Gather & Connect
         </div>
       </div>
-    ),
+
+      <div
+        style={{
+          display: 'flex',
+          fontSize: '28px',
+          fontWeight: '300',
+          color: 'white',
+          textAlign: 'center',
+          marginBottom: '20px',
+        }}
+      >
+        {formattedDate}
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          fontSize: '28px',
+          fontWeight: '300',
+          color: 'white',
+          letterSpacing: '1px',
+          marginBottom: '40px',
+        }}
+      >
+        lunary.app
+      </div>
+    </div>,
     {
       width: 1200,
       height: 1200,

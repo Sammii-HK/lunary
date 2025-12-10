@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 export const metadata: Metadata = {
-  title: 'Synastry: Relationship Compatibility Guide - Lunary',
+  title: 'Synastry Chart: How to Read Your Relationship Compatibility - Lunary',
   description:
     'Learn about synastry, the comparison of two birth charts to understand relationship dynamics and compatibility. Discover how planets interact between charts and how to read synastry aspects.',
   keywords: [
@@ -18,14 +18,16 @@ export const metadata: Metadata = {
     'how to read synastry',
   ],
   openGraph: {
-    title: 'Synastry: Relationship Compatibility Guide - Lunary',
+    title:
+      'Synastry Chart: How to Read Your Relationship Compatibility - Lunary',
     description:
       'Learn about synastry, the comparison of two birth charts to understand relationship dynamics and compatibility.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Synastry: Relationship Compatibility Guide - Lunary',
+    title:
+      'Synastry Chart: How to Read Your Relationship Compatibility - Lunary',
     description:
       'Learn about synastry, the comparison of two birth charts to understand relationship dynamics.',
   },
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
 export default function SynastryPage() {
   return (
     <SEOContentTemplate
-      title='Synastry: Relationship Compatibility Guide - Lunary'
+      title='Synastry Chart: How to Read Your Relationship Compatibility - Lunary'
       h1='Synastry: Relationship Compatibility'
       description='Learn about synastry, the comparison of two birth charts to understand relationship dynamics, compatibility, and how two people interact. Discover how planets interact between charts.'
       keywords={[
@@ -49,12 +51,9 @@ export default function SynastryPage() {
         'compatibility reading',
       ]}
       canonicalUrl='https://lunary.app/grimoire/synastry'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Birth Chart', href: '/grimoire/birth-chart' },
-        { label: 'Synastry', href: '/grimoire/synastry' },
-      ]}
       intro={`Synastry is the comparison of two birth charts to understand relationship dynamics, compatibility, and how two people interact. It reveals how planets in one person's chart interact with planets in another person's chart, showing areas of harmony, challenge, and growth potential.`}
+      ctaText='Generate Synastry Chart'
+      ctaHref='/grimoire/synastry/generate'
       meaning={`Synastry looks at how planets in one person's chart interact with planets in another person's chart. Key areas to examine:
 
 **Understanding Synastry:**

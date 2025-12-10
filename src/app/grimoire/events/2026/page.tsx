@@ -29,7 +29,7 @@ const events2026 = [
     icon: Star,
     description: 'Mercury retrograde dates, survival tips, and what to expect',
     dates: '3-4 times per year',
-    color: 'text-amber-400',
+    color: 'text-lunary-accent',
   },
   {
     title: 'Venus Retrograde 2026',
@@ -37,7 +37,7 @@ const events2026 = [
     icon: Sparkles,
     description: 'Love and relationships during Venus retrograde',
     dates: 'March 1 - April 12',
-    color: 'text-pink-400',
+    color: 'text-lunary-rose',
   },
   {
     title: '2026 Eclipses',
@@ -45,7 +45,7 @@ const events2026 = [
     icon: Moon,
     description: 'Solar and lunar eclipses of 2026',
     dates: '4 eclipses',
-    color: 'text-purple-400',
+    color: 'text-lunary-primary-400',
   },
 ];
 
@@ -63,7 +63,7 @@ export default function Events2026Page() {
 
         <header className='mb-12'>
           <div className='flex items-center gap-3 mb-4'>
-            <Calendar className='h-10 w-10 text-purple-400' />
+            <Calendar className='h-10 w-10 text-lunary-primary-400' />
             <h1 className='text-4xl md:text-5xl font-light'>
               2026 <span className='font-medium'>Cosmic Events</span>
             </h1>
@@ -80,7 +80,7 @@ export default function Events2026Page() {
             <Link
               key={event.href}
               href={event.href}
-              className='group block p-6 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl hover:bg-zinc-800/50 hover:border-purple-500/50 transition-all'
+              className='group block p-6 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-all'
             >
               <div className='flex items-start gap-4'>
                 <event.icon
@@ -88,20 +88,20 @@ export default function Events2026Page() {
                 />
                 <div className='flex-1'>
                   <div className='flex items-center justify-between mb-2'>
-                    <h2 className='text-xl font-medium text-white group-hover:text-purple-300 transition-colors'>
+                    <h2 className='text-xl font-medium text-white group-hover:text-lunary-primary-300 transition-colors'>
                       {event.title}
                     </h2>
-                    <span className='text-sm text-zinc-500'>{event.dates}</span>
+                    <span className='text-sm text-zinc-400'>{event.dates}</span>
                   </div>
                   <p className='text-zinc-400'>{event.description}</p>
                 </div>
-                <ArrowRight className='h-5 w-5 text-zinc-600 group-hover:text-purple-400 group-hover:translate-x-1 transition-all flex-shrink-0' />
+                <ArrowRight className='h-5 w-5 text-zinc-600 group-hover:text-lunary-primary-400 group-hover:translate-x-1 transition-all flex-shrink-0' />
               </div>
             </Link>
           ))}
         </div>
 
-        <section className='bg-purple-900/20 border border-purple-500/30 rounded-2xl p-8 text-center'>
+        <section className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-2xl p-8 text-center'>
           <h2 className='text-2xl font-medium text-white mb-4'>
             Get Personalized 2026 Forecasts
           </h2>
@@ -109,10 +109,10 @@ export default function Events2026Page() {
             See how these cosmic events affect your unique birth chart.
           </p>
           <Link
-            href='/welcome'
-            className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            href='/birth-chart'
+            className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
-            Create Your Birth Chart
+            View Your Birth Chart
           </Link>
         </section>
       </div>

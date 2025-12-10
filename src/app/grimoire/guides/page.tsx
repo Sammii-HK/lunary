@@ -1,8 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Complete Astrology & Spiritual Guides - Lunary',
+  title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
   description:
     'In-depth guides to astrology, tarot, crystals, and moon phases. Comprehensive pillar content for beginners and advanced practitioners. Your complete reference library.',
   keywords: [
@@ -15,7 +17,7 @@ export const metadata: Metadata = {
     'spiritual guides',
   ],
   openGraph: {
-    title: 'Complete Astrology & Spiritual Guides - Lunary',
+    title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
     description:
       'In-depth guides to astrology, tarot, crystals, and moon phases.',
     url: 'https://lunary.app/grimoire/guides',
@@ -85,120 +87,160 @@ const GUIDES = [
 ];
 
 export default function GuidesIndexPage() {
+  const guidesListSchema = createItemListSchema({
+    name: 'Astrology & Witchcraft Guides: Learn the Basics',
+    description:
+      'In-depth pillar content covering astrology, tarot, crystals, and moon phases for beginners to advanced practitioners.',
+    url: 'https://lunary.app/grimoire/guides',
+    items: GUIDES.map((guide) => ({
+      name: guide.title,
+      url: `https://lunary.app/grimoire/guides/${guide.slug}`,
+      description: guide.description,
+    })),
+  });
+
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      <div className='max-w-5xl mx-auto px-4 py-12'>
-        {/* Breadcrumbs */}
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Complete Guides</span>
-        </nav>
-
-        {/* Header */}
-        <header className='mb-12'>
-          <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-4'>
-            Complete Guides
-          </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed max-w-3xl'>
-            In-depth pillar content covering the essential topics in astrology
-            and spiritual practice. Each guide is designed to take you from
-            beginner to confident practitioner.
-          </p>
-        </header>
-
-        {/* Guide Cards */}
-        <div className='grid md:grid-cols-2 gap-6'>
-          {GUIDES.map((guide) => (
-            <Link
-              key={guide.slug}
-              href={`/grimoire/guides/${guide.slug}`}
-              className='group block p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 hover:border-purple-500/50 transition-all duration-300'
-            >
-              <div className='flex items-start gap-4'>
-                <span className='text-4xl'>{guide.icon}</span>
-                <div className='flex-1'>
-                  <h2 className='text-xl font-medium text-zinc-100 group-hover:text-purple-300 transition-colors mb-2'>
-                    {guide.title}
-                  </h2>
-                  <p className='text-zinc-400 text-sm mb-4'>
-                    {guide.description}
-                  </p>
-                  <div className='flex flex-wrap gap-2 mb-4'>
-                    {guide.topics.map((topic) => (
-                      <span
-                        key={topic}
-                        className='text-xs px-2 py-1 rounded bg-zinc-800 text-zinc-400'
-                      >
-                        {topic}
+    <>
+      {renderJsonLd(guidesListSchema)}
+      <SEOContentTemplate
+        title='Astrology & Witchcraft Guides: Learn the Basics'
+        h1='Complete Guides'
+        description='In-depth pillar content covering the essential topics in astrology and spiritual practice. Each guide is designed to take you from beginner to confident practitioner.'
+        keywords={[
+          'astrology guides',
+          'tarot guide',
+          'crystal healing guide',
+          'moon phases guide',
+          'spiritual guides',
+        ]}
+        canonicalUrl='https://lunary.app/grimoire/guides'
+        whatIs={{
+          question: 'What are these complete guides?',
+          answer:
+            'Our complete guides are comprehensive, in-depth resources covering major topics in astrology and spiritual practice. Each guide is 5,000-8,000+ words of thoroughly researched content, covering everything from fundamentals to advanced concepts. They serve as your go-to reference for mastering each subject.',
+        }}
+        tldr='Four comprehensive guides covering the essentials: Birth Chart (read your cosmic blueprint), Tarot (master all 78 cards), Crystal Healing (properties and uses), and Moon Phases (lunar cycles and rituals). Each 5,000-8,000+ words, beginner to advanced.'
+        faqs={[
+          {
+            question: 'Are these guides suitable for beginners?',
+            answer:
+              "Absolutely. Each guide starts with foundational concepts and progressively covers more advanced material. Whether you're just starting or deepening existing knowledge, you'll find valuable content.",
+          },
+          {
+            question: 'How are these different from other grimoire pages?',
+            answer:
+              'These are comprehensive pillar guides — extensive, in-depth resources covering entire topics. Regular grimoire pages cover specific cards, crystals, or concepts. These guides tie everything together with complete explanations and practical applications.',
+          },
+          {
+            question: 'Can I use these guides for reference during readings?',
+            answer:
+              'Yes! These guides are designed to be both learning resources and ongoing references. Bookmark them for quick lookups during tarot readings, chart interpretations, or crystal work.',
+          },
+        ]}
+        relatedItems={[
+          {
+            name: 'Birth Chart Calculator',
+            href: '/birth-chart',
+            type: 'tool',
+          },
+          { name: 'Tarot Cards', href: '/grimoire/tarot', type: 'reference' },
+          { name: 'Crystals', href: '/grimoire/crystals', type: 'reference' },
+          {
+            name: 'Moon Phases',
+            href: '/grimoire/moon/phases',
+            type: 'reference',
+          },
+        ]}
+      >
+        <div className='space-y-12'>
+          <div className='grid md:grid-cols-2 gap-6'>
+            {GUIDES.map((guide) => (
+              <Link
+                key={guide.slug}
+                href={`/grimoire/guides/${guide.slug}`}
+                className='group block p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 hover:border-lunary-primary-600 transition-all duration-300'
+              >
+                <div className='flex items-start gap-4'>
+                  <span className='text-4xl'>{guide.icon}</span>
+                  <div className='flex-1'>
+                    <h2 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-2'>
+                      {guide.title}
+                    </h2>
+                    <p className='text-zinc-400 text-sm mb-4'>
+                      {guide.description}
+                    </p>
+                    <div className='flex flex-wrap gap-2 mb-4'>
+                      {guide.topics.map((topic) => (
+                        <span
+                          key={topic}
+                          className='text-xs px-2 py-1 rounded bg-zinc-800 text-zinc-400'
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-xs text-zinc-400'>
+                        {guide.wordCount} words
                       </span>
-                    ))}
-                  </div>
-                  <div className='flex items-center justify-between'>
-                    <span className='text-xs text-zinc-500'>
-                      {guide.wordCount} words
-                    </span>
-                    <span className='text-purple-400 text-sm group-hover:translate-x-1 transition-transform'>
-                      Read guide →
-                    </span>
+                      <span className='text-lunary-primary-400 text-sm group-hover:translate-x-1 transition-transform'>
+                        Read guide →
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* What's in a Guide */}
-        <section className='mt-16 p-8 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-          <h2 className='text-2xl font-light text-zinc-100 mb-6'>
-            What Makes These Guides Complete?
-          </h2>
-          <div className='grid md:grid-cols-3 gap-6'>
-            <div>
-              <h3 className='font-medium text-zinc-100 mb-2'>
-                Comprehensive Coverage
-              </h3>
-              <p className='text-sm text-zinc-400'>
-                Each guide covers the topic from foundations to advanced
-                concepts, so you never need to look elsewhere.
-              </p>
-            </div>
-            <div>
-              <h3 className='font-medium text-zinc-100 mb-2'>
-                Practical Application
-              </h3>
-              <p className='text-sm text-zinc-400'>
-                Beyond theory, each guide includes actionable techniques,
-                rituals, and exercises you can use immediately.
-              </p>
-            </div>
-            <div>
-              <h3 className='font-medium text-zinc-100 mb-2'>
-                Cross-Referenced
-              </h3>
-              <p className='text-sm text-zinc-400'>
-                Guides link to related grimoire entries, giving you a complete
-                web of interconnected knowledge.
-              </p>
-            </div>
+              </Link>
+            ))}
           </div>
-        </section>
 
-        {/* CTA */}
-        <section className='mt-12 text-center'>
-          <p className='text-zinc-400 mb-4'>
-            Want personalized insights based on your birth chart?
-          </p>
-          <Link
-            href='/birth-chart'
-            className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Calculate Your Birth Chart Free
-          </Link>
-        </section>
-      </div>
-    </div>
+          <section className='p-8 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+            <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+              What Makes These Guides Complete?
+            </h2>
+            <div className='grid md:grid-cols-3 gap-6'>
+              <div>
+                <h3 className='font-medium text-zinc-100 mb-2'>
+                  Comprehensive Coverage
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  Each guide covers the topic from foundations to advanced
+                  concepts, so you never need to look elsewhere.
+                </p>
+              </div>
+              <div>
+                <h3 className='font-medium text-zinc-100 mb-2'>
+                  Practical Application
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  Beyond theory, each guide includes actionable techniques,
+                  rituals, and exercises you can use immediately.
+                </p>
+              </div>
+              <div>
+                <h3 className='font-medium text-zinc-100 mb-2'>
+                  Cross-Referenced
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  Guides link to related grimoire entries, giving you a complete
+                  web of interconnected knowledge.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className='text-center'>
+            <p className='text-zinc-400 mb-4'>
+              Want personalized insights based on your birth chart?
+            </p>
+            <Link
+              href='/birth-chart'
+              className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
+            >
+              Calculate Your Birth Chart Free
+            </Link>
+          </section>
+        </div>
+      </SEOContentTemplate>
+    </>
   );
 }

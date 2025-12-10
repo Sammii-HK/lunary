@@ -76,11 +76,11 @@ export function RitualTracker() {
     <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6'>
       <div className='flex items-center justify-between mb-4'>
         <div className='flex items-center gap-2'>
-          <Flame className='w-5 h-5 text-orange-500' />
+          <Flame className='w-5 h-5 text-lunary-rose' />
           <h3 className='text-lg font-semibold text-zinc-100'>Ritual Streak</h3>
         </div>
         <div className='text-right'>
-          <div className='text-2xl font-bold text-orange-500'>
+          <div className='text-2xl font-bold text-lunary-rose'>
             {status.ritualStreak}
           </div>
           <div className='text-xs text-zinc-400'>days</div>
@@ -128,11 +128,11 @@ export function RitualTracker() {
           className='flex items-center justify-between p-3 rounded-lg border border-zinc-800/40 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
         >
           <div className='flex items-center gap-3'>
-            <Sunrise className='w-4 h-4 text-yellow-500' />
+            <Sunrise className='w-4 h-4 text-lunary-accent' />
             <span className='text-sm text-zinc-300'>Morning Ritual</span>
           </div>
           {status.morning ? (
-            <CheckCircle2 className='w-5 h-5 text-green-500' />
+            <CheckCircle2 className='w-5 h-5 text-lunary-success' />
           ) : (
             <Circle className='w-5 h-5 text-zinc-600' />
           )}
@@ -172,11 +172,11 @@ export function RitualTracker() {
           className='flex items-center justify-between p-3 rounded-lg border border-zinc-800/40 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
         >
           <div className='flex items-center gap-3'>
-            <Sunset className='w-4 h-4 text-purple-500' />
+            <Sunset className='w-4 h-4 text-lunary-primary-500' />
             <span className='text-sm text-zinc-300'>Evening Ritual</span>
           </div>
           {status.evening ? (
-            <CheckCircle2 className='w-5 h-5 text-green-500' />
+            <CheckCircle2 className='w-5 h-5 text-lunary-success' />
           ) : (
             <Circle className='w-5 h-5 text-zinc-600' />
           )}

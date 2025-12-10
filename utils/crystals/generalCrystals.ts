@@ -2,12 +2,129 @@ import dayjs from 'dayjs';
 import { getAstrologicalChart } from '../astrology/astrology';
 import { Observer } from 'astronomy-engine';
 import { getMoonPhase } from '../moon/moonPhases';
-import {
-  crystalDatabase,
-  getCrystalsByZodiacSign,
-  getCrystalsByMoonPhase,
-  getCrystalByName,
-} from '../../src/constants/grimoire/crystals';
+
+// Super lightweight crystal index (~7KB)
+import crystalIndex from '@/data/crystal-index.json';
+
+type CrystalIndexEntry = {
+  n: string; // name
+  z: string; // zodiac codes (comma-sep)
+  m: string; // moon codes (comma-sep)
+  e: string; // element codes (comma-sep)
+  p: string; // property codes (comma-sep)
+};
+
+const index = crystalIndex as CrystalIndexEntry[];
+
+// Decode mappings
+const zodiacDecode: Record<string, string> = {
+  AR: 'Aries',
+  TA: 'Taurus',
+  GE: 'Gemini',
+  CA: 'Cancer',
+  LE: 'Leo',
+  VI: 'Virgo',
+  LI: 'Libra',
+  SC: 'Scorpio',
+  SA: 'Sagittarius',
+  CP: 'Capricorn',
+  AQ: 'Aquarius',
+  PI: 'Pisces',
+  '*': 'All Signs',
+};
+
+const moonDecode: Record<string, string> = {
+  NM: 'New Moon',
+  WC: 'Waxing Crescent',
+  FQ: 'First Quarter',
+  WG: 'Waxing Gibbous',
+  FM: 'Full Moon',
+  VG: 'Waning Gibbous',
+  TQ: 'Third Quarter',
+  VC: 'Waning Crescent',
+  WX: 'Waxing Moon',
+  WN: 'Waning Moon',
+  DM: 'Dark Moon',
+  '*': 'All Moon Phases',
+};
+
+const elementDecode: Record<string, string> = {
+  F: 'Fire',
+  W: 'Water',
+  E: 'Earth',
+  A: 'Air',
+  S: 'Spirit',
+  '*': 'All Elements',
+};
+
+const propDecode: Record<string, string> = {
+  INT: 'intuition',
+  SPG: 'spiritual growth',
+  LOV: 'love',
+  EMH: 'emotional healing',
+  PRO: 'protection',
+  GRD: 'grounding',
+  CLR: 'clarity',
+  ABD: 'abundance',
+  MAN: 'manifestation',
+  TRN: 'transformation',
+  CRG: 'courage',
+  CRE: 'creativity',
+  WIS: 'wisdom',
+  HEA: 'healing',
+  COM: 'communication',
+  PEA: 'peace',
+  BAL: 'balance',
+  ENG: 'energy',
+  VIT: 'vitality',
+  STR: 'strength',
+  CAL: 'calming',
+  FOC: 'focus',
+  LCK: 'luck',
+  OPP: 'opportunity',
+  TRU: 'truth',
+  LOG: 'logic',
+  PAS: 'passion',
+  CNF: 'confidence',
+  PSP: 'prosperity',
+  FEM: 'feminine energy',
+  MAG: 'magic',
+  AMP: 'amplification',
+  STB: 'stability',
+  PUR: 'purification',
+  PAT: 'patience',
+  HAR: 'harmony',
+  GRO: 'growth',
+  INS: 'inspiration',
+  PTY: 'purity',
+  LDR: 'leadership',
+  MCL: 'mental clarity',
+  CLS: 'cleansing',
+  DRW: 'dream work',
+  PSY: 'psychic ability',
+  SPC: 'spiritual connection',
+  SPV: 'spiritual vision',
+  ALN: 'alignment',
+  SPA: 'spiritual awakening',
+  ANG: 'angelic communication',
+  OPT: 'optimism',
+  JOY: 'joy',
+  HRT: 'heart opening',
+  ADP: 'adaptability',
+  MED: 'meditation',
+  PLC: 'past life connection',
+  ILL: 'illumination',
+  EMF: 'EMF protection',
+  GRF: 'grief healing',
+  EMB: 'emotional balance',
+  PRP: 'prophecy',
+  NAT: 'connection to nature',
+  SPP: 'spiritual protection',
+};
+
+// Helper to decode comma-separated codes
+const decodeList = (codes: string, map: Record<string, string>): string[] =>
+  codes.split(',').map((c) => map[c] || c);
 
 export type GeneralCrystalRecommendation = {
   name: string;
@@ -17,63 +134,54 @@ export type GeneralCrystalRecommendation = {
   moonPhaseAlignment: string;
 };
 
-// Get crystal properties from database (SSOT)
-const getCrystalProperties = (crystalName: string): string[] => {
-  const crystal = getCrystalByName(crystalName);
-  return crystal?.properties || ['balance', 'harmony', 'energy', 'healing'];
+// Get crystal from index
+const getCrystalFromIndex = (name: string): CrystalIndexEntry | undefined =>
+  index.find((c) => c.n.toLowerCase() === name.toLowerCase());
+
+// Get crystals matching zodiac sign
+const getCrystalsByZodiac = (sign: string): string[] => {
+  const code = Object.entries(zodiacDecode).find(([, v]) => v === sign)?.[0];
+  if (!code) return [];
+  return index
+    .filter((c) => c.z.includes(code) || c.z.includes('*'))
+    .map((c) => c.n);
+};
+
+// Get crystals matching moon phase
+const getCrystalsByMoonPhase = (phase: string): string[] => {
+  const code = Object.entries(moonDecode).find(([, v]) => v === phase)?.[0];
+  if (!code) return [];
+  return index
+    .filter((c) => c.m.includes(code) || c.m.includes('*'))
+    .map((c) => c.n);
+};
+
+// Get crystals by element
+const getCrystalsByElement = (element: string): string[] => {
+  const code = Object.entries(elementDecode).find(
+    ([, v]) => v === element,
+  )?.[0];
+  if (!code) return [];
+  return index
+    .filter((c) => c.e.includes(code) || c.e.includes('*'))
+    .map((c) => c.n);
 };
 
 const getDominantEnergy = (currentChart: any[]): string => {
-  // Find the most prominent elements based on planetary positions
-  const elements = {
-    fire: 0, // Aries, Leo, Sagittarius
-    earth: 0, // Taurus, Virgo, Capricorn
-    air: 0, // Gemini, Libra, Aquarius
-    water: 0, // Cancer, Scorpio, Pisces
-  };
-
-  const fireSignsRegex = /(Aries|Leo|Sagittarius)/;
-  const earthSignsRegex = /(Taurus|Virgo|Capricorn)/;
-  const airSignsRegex = /(Gemini|Libra|Aquarius)/;
-  const waterSignsRegex = /(Cancer|Scorpio|Pisces)/;
+  const elements = { fire: 0, earth: 0, air: 0, water: 0 };
 
   currentChart.forEach((planet) => {
-    if (fireSignsRegex.test(planet.sign)) elements.fire++;
-    else if (earthSignsRegex.test(planet.sign)) elements.earth++;
-    else if (airSignsRegex.test(planet.sign)) elements.air++;
-    else if (waterSignsRegex.test(planet.sign)) elements.water++;
+    if (/(Aries|Leo|Sagittarius)/.test(planet.sign)) elements.fire++;
+    else if (/(Taurus|Virgo|Capricorn)/.test(planet.sign)) elements.earth++;
+    else if (/(Gemini|Libra|Aquarius)/.test(planet.sign)) elements.air++;
+    else if (/(Cancer|Scorpio|Pisces)/.test(planet.sign)) elements.water++;
   });
 
-  // Find dominant element
-  const maxElement = Object.keys(elements).reduce((a, b) =>
+  return Object.keys(elements).reduce((a, b) =>
     elements[a as keyof typeof elements] > elements[b as keyof typeof elements]
       ? a
       : b,
   );
-
-  return maxElement;
-};
-
-const getElementalCrystals = (element: string): string[] => {
-  // Use the crystal database instead of hardcoded lists
-  const elementMap: Record<string, string[]> = {
-    fire: ['Fire'],
-    earth: ['Earth'],
-    air: ['Air'],
-    water: ['Water'],
-  };
-
-  const elementName = elementMap[element]?.[0] || 'Air';
-
-  // Get crystals from database that match this element
-  const matchingCrystals = crystalDatabase.filter(
-    (crystal) =>
-      crystal.elements.includes(elementName) ||
-      crystal.elements.includes('All Elements'),
-  );
-
-  // Return crystal names
-  return matchingCrystals.map((c) => c.name);
 };
 
 const getCrystalGuidance = (
@@ -81,120 +189,90 @@ const getCrystalGuidance = (
   moonPhase: string,
   dominantElement: string,
 ): string => {
-  const properties = getCrystalProperties(crystal);
+  const crystalData = getCrystalFromIndex(crystal);
+  const properties = crystalData
+    ? decodeList(crystalData.p, propDecode)
+    : ['balance', 'harmony'];
   const primaryProperty = properties[0];
 
-  const guidanceTemplates = [
+  const templates = [
     `Work with ${crystal} today to enhance your ${primaryProperty}. ${getMoonPhaseGuidance(moonPhase, crystal)}.`,
-    `${crystal} supports your ${dominantElement} energy today, bringing ${properties.slice(0, 2).join(' and ')}. ${getMoonPhaseGuidance(moonPhase, crystal)}.`,
-    `The cosmic energies favor ${crystal} for ${primaryProperty} and ${properties[1] || 'balance'}. ${getMoonPhaseGuidance(moonPhase, crystal)}.`,
-    `${crystal} resonates with today's ${dominantElement} energy, offering ${properties.slice(0, 2).join(' and ')}. ${getMoonPhaseGuidance(moonPhase, crystal)}.`,
+    `${crystal} supports your ${dominantElement} energy today, bringing ${properties.join(' and ')}. ${getMoonPhaseGuidance(moonPhase, crystal)}.`,
+    `The cosmic energies favor ${crystal} for ${primaryProperty}. ${getMoonPhaseGuidance(moonPhase, crystal)}.`,
   ];
 
-  // Use a simple hash to get consistent but varied guidance
-  const hash = (crystal + moonPhase + dominantElement).length;
-  return guidanceTemplates[hash % guidanceTemplates.length];
+  return templates[(crystal + moonPhase).length % templates.length];
 };
 
 const getMoonPhaseGuidance = (moonPhase: string, crystal: string): string => {
-  const phaseGuidance: { [key: string]: string } = {
-    'New Moon': `Place ${crystal} under tonight's new moon to set intentions for the lunar cycle ahead`,
-    'Waxing Crescent': `Use ${crystal} to support the building energy as the moon grows brighter`,
-    'First Quarter': `${crystal} helps you push through challenges with the moon's determined energy`,
-    'Waxing Gibbous': `Let ${crystal} help refine your approach as the moon nears fullness`,
-    'Full Moon': `Charge ${crystal} under the full moon's peak energy for maximum potency`,
-    'Waning Gibbous': `Work with ${crystal} to integrate the lessons of this lunar cycle`,
-    'Third Quarter': `${crystal} supports release and letting go as the moon wanes`,
-    'Waning Crescent': `Use ${crystal} for rest and reflection before the next new moon`,
+  const guidance: Record<string, string> = {
+    'New Moon': `Place ${crystal} under tonight's new moon to set intentions`,
+    'Waxing Crescent': `Use ${crystal} to support building energy`,
+    'First Quarter': `${crystal} helps push through challenges`,
+    'Waxing Gibbous': `Let ${crystal} refine your approach`,
+    'Full Moon': `Charge ${crystal} under the full moon's peak energy`,
+    'Waning Gibbous': `Work with ${crystal} to integrate lessons`,
+    'Third Quarter': `${crystal} supports release and letting go`,
+    'Waning Crescent': `Use ${crystal} for rest and reflection`,
   };
-
   return (
-    phaseGuidance[moonPhase] ||
-    `Work with ${crystal} in harmony with the current lunar energy`
+    guidance[moonPhase] || `Work with ${crystal} in harmony with lunar energy`
   );
 };
 
 export const getGeneralCrystalRecommendation = (
   date?: Date,
 ): GeneralCrystalRecommendation => {
-  // Normalize date to noon UTC to ensure static seeding per day (remove time component)
-  let normalizedDate: Date;
-  if (date) {
-    const dateStr = dayjs(date).format('YYYY-MM-DD');
-    normalizedDate = new Date(dateStr + 'T12:00:00Z');
-  } else {
-    const todayStr = dayjs().format('YYYY-MM-DD');
-    normalizedDate = new Date(todayStr + 'T12:00:00Z');
-  }
+  const normalizedDate = date
+    ? new Date(dayjs(date).format('YYYY-MM-DD') + 'T12:00:00Z')
+    : new Date(dayjs().format('YYYY-MM-DD') + 'T12:00:00Z');
 
   const today = dayjs(normalizedDate);
-  const observer = new Observer(51.4769, 0.0005, 0); // Default location
+  const observer = new Observer(51.4769, 0.0005, 0);
   const currentChart = getAstrologicalChart(today.toDate(), observer);
   const moonPhase = getMoonPhase(today.toDate());
-
-  // Get dominant elemental energy
   const dominantElement = getDominantEnergy(currentChart);
 
-  // Get current sun and moon signs for selection
   const sun = currentChart.find((p) => p.body === 'Sun');
   const moon = currentChart.find((p) => p.body === 'Moon');
 
-  // Create pools of crystals from different sources using the database
-  const sunCrystals = sun
-    ? getCrystalsByZodiacSign(sun.sign).map((c) => c.name)
-    : [];
-  const moonCrystals = moon
-    ? getCrystalsByZodiacSign(moon.sign).map((c) => c.name)
-    : [];
-  const moonPhaseCrystals = getCrystalsByMoonPhase(moonPhase).map(
-    (c) => c.name,
-  );
-  const elementalCrystals = getElementalCrystals(dominantElement);
-
-  // Combine all crystal options and remove duplicates
+  // Collect matching crystals
   const allCrystals = [
-    ...sunCrystals,
-    ...moonCrystals,
-    ...moonPhaseCrystals,
-    ...elementalCrystals,
+    ...(sun ? getCrystalsByZodiac(sun.sign) : []),
+    ...(moon ? getCrystalsByZodiac(moon.sign) : []),
+    ...getCrystalsByMoonPhase(moonPhase),
+    ...getCrystalsByElement(
+      dominantElement.charAt(0).toUpperCase() + dominantElement.slice(1),
+    ),
   ];
 
-  // Remove duplicates while preserving order (first occurrence wins)
-  const uniqueCrystals = Array.from(new Set(allCrystals));
+  // Score by frequency
+  const freq = new Map<string, number>();
+  allCrystals.forEach((c) => freq.set(c, (freq.get(c) || 0) + 1));
 
-  // If we have duplicates, prefer crystals that appear in multiple categories
-  // This gives more variety and better matches cosmic energy
-  const crystalFrequency = new Map<string, number>();
-  allCrystals.forEach((crystal) => {
-    crystalFrequency.set(crystal, (crystalFrequency.get(crystal) || 0) + 1);
-  });
+  const sorted = [...new Set(allCrystals)].sort(
+    (a, b) => (freq.get(b) || 0) - (freq.get(a) || 0),
+  );
 
-  // Sort by frequency (most common first) then by original order
-  const sortedCrystals = uniqueCrystals.sort((a, b) => {
-    const freqA = crystalFrequency.get(a) || 0;
-    const freqB = crystalFrequency.get(b) || 0;
-    if (freqA !== freqB) return freqB - freqA; // Higher frequency first
-    return uniqueCrystals.indexOf(a) - uniqueCrystals.indexOf(b); // Preserve order
-  });
+  // Select based on day
+  const dayOfYear = today.diff(today.startOf('year'), 'day') + 1;
+  const selected = sorted[dayOfYear % sorted.length] || 'Amethyst';
 
-  // Select crystal based on current day to ensure consistency
-  // Calculate day of year manually to avoid plugin issues
-  const startOfYear = dayjs(normalizedDate).startOf('year');
-  const currentDayOfYear = today.diff(startOfYear, 'day') + 1;
-  const selectedCrystal =
-    sortedCrystals[currentDayOfYear % sortedCrystals.length];
+  const crystalData = getCrystalFromIndex(selected);
+  const properties = crystalData
+    ? decodeList(crystalData.p, propDecode)
+    : ['balance', 'harmony'];
 
-  // Generate reason
   let reason = `Based on today's cosmic energy`;
-  if (sun) reason += ` with the Sun in ${sun.sign}`;
+  if (sun) reason += ` with Sun in ${sun.sign}`;
   if (moon) reason += ` and Moon in ${moon.sign}`;
-  reason += `, ${selectedCrystal} resonates perfectly with the ${dominantElement} elemental influence.`;
+  reason += `, ${selected} resonates with ${dominantElement} energy.`;
 
   return {
-    name: selectedCrystal,
+    name: selected,
     reason,
-    properties: getCrystalProperties(selectedCrystal),
-    guidance: getCrystalGuidance(selectedCrystal, moonPhase, dominantElement),
-    moonPhaseAlignment: getMoonPhaseGuidance(moonPhase, selectedCrystal),
+    properties,
+    guidance: getCrystalGuidance(selected, moonPhase, dominantElement),
+    moonPhaseAlignment: getMoonPhaseGuidance(moonPhase, selected),
   };
 };

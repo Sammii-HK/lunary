@@ -5,7 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Divination from '../components/Divination';
 
 export const metadata: Metadata = {
-  title: 'Divination Methods: Complete Guide - Lunary',
+  title: 'Divination Methods: Pendulum, Scrying, Dreams & Omens - Lunary',
   description:
     'Explore various divination methods beyond tarot: pendulum reading, scrying, dream interpretation, and reading omens from nature. Each method offers unique insights into the past, present, and future. Learn how to practice divination safely and effectively.',
   keywords: [
@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     'divination guide',
   ],
   openGraph: {
-    title: 'Divination Methods: Complete Guide - Lunary',
+    title: 'Divination Methods: Pendulum, Scrying, Dreams & Omens - Lunary',
     description:
       'Explore various divination methods beyond tarot: pendulum reading, scrying, dream interpretation, and reading omens from nature.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Divination Methods: Complete Guide - Lunary',
+    title: 'Divination Methods: Pendulum, Scrying, Dreams & Omens - Lunary',
     description:
       'Explore various divination methods beyond tarot: pendulum reading, scrying, dream interpretation, and reading omens from nature.',
   },
@@ -40,7 +40,7 @@ export default function DivinationPage() {
   return (
     <>
       <SEOContentTemplate
-        title='Divination Methods: Complete Guide - Lunary'
+        title='Divination Methods: Pendulum, Scrying, Dreams & Omens - Lunary'
         h1='Divination Methods'
         description='Explore various divination methods beyond tarot: pendulum, scrying, dream interpretation, and reading omens. Each method offers unique insights into the past, present, and future.'
         keywords={[

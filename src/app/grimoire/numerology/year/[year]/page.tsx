@@ -86,6 +86,7 @@ export default async function NumerologyYearPage({
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Numerology', href: '/grimoire/numerology' },
+        { label: 'Personal Year', href: '/grimoire/numerology/year' },
         { label: `${year}` },
       ]}
       whatIs={{
@@ -162,7 +163,7 @@ ${data.opportunities.map((o) => `- ${o}`).join('\n')}
         },
       ]}
       ctaText='Calculate your personal year number'
-      ctaHref='/welcome'
+      ctaHref='/horoscope'
       sources={[
         { name: 'Pythagorean numerology' },
         { name: 'Universal year calculations' },
@@ -177,7 +178,7 @@ ${data.opportunities.map((o) => `- ${o}`).join('\n')}
               href={`/grimoire/numerology/year/${y}`}
               className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                 y === yearNum
-                  ? 'bg-purple-500/30 text-purple-200 border border-purple-500/50'
+                  ? 'bg-lunary-primary-900/30 text-lunary-primary-200 border border-lunary-primary-600'
                   : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
               }`}
             >

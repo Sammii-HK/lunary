@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuthStatus } from '@/components/AuthStatus';
 import { AI_LIMIT_REACHED_MESSAGE } from '@/lib/ai/plans';
@@ -345,6 +345,7 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
         abortControllerRef.current = null;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isStreaming, threadId, userId],
   );
 

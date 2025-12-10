@@ -6,6 +6,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { Clock, Zap } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface TrialReminderProps {
   showWhenDaysRemaining?: number[];
@@ -19,7 +20,7 @@ export function TrialReminder({
   className = '',
 }: TrialReminderProps) {
   const subscription = useSubscription();
-  const authState = useAuthStatus();
+  const _authState = useAuthStatus();
   const [hasTracked, setHasTracked] = useState(false);
 
   const { isTrialActive, trialDaysRemaining, isSubscribed } = subscription;
@@ -61,7 +62,7 @@ export function TrialReminder({
       <Link
         href='/pricing'
         onClick={handleUpgradeClick}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-rose/20 border border-lunary-rose/30 text-lunary-rose text-xs font-medium hover:bg-lunary-rose/30 transition-colors ${className}`}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-rose-900 border border-lunary-rose-700 text-lunary-rose text-xs font-medium hover:bg-lunary-rose-800 transition-colors ${className}`}
       >
         <Zap className='w-3 h-3' />
         <span>{trialDaysRemaining} days left</span>
@@ -71,11 +72,11 @@ export function TrialReminder({
 
   return (
     <div
-      className={`bg-gradient-to-r from-lunary-lavender/10 to-lunary-rose/10 border border-lunary-lavender/20 rounded-lg p-4 ${className}`}
+      className={`bg-gradient-to-r from-lunary-accent-950 to-lunary-rose-950 border border-lunary-accent-800 rounded-lg p-4 ${className}`}
     >
       <div className='flex items-center justify-between gap-4'>
         <div className='flex items-center gap-3'>
-          <Clock className='w-5 h-5 text-lunary-lavender' />
+          <Clock className='w-5 h-5 text-lunary-accent' />
           <div>
             <h3 className='text-sm font-medium text-white'>{getMessage()}</h3>
             <p className='text-xs text-gray-400'>
@@ -83,13 +84,15 @@ export function TrialReminder({
             </p>
           </div>
         </div>
-        <Link
-          href='/pricing'
+        <Button
+          variant='lunary-white'
+          size='sm'
+          className='rounded-full'
           onClick={handleUpgradeClick}
-          className='bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors whitespace-nowrap'
+          asChild
         >
-          Upgrade Now
-        </Link>
+          <Link href='/pricing'>Upgrade Now</Link>
+        </Button>
       </div>
     </div>
   );

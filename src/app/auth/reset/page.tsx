@@ -110,11 +110,11 @@ function ResetPasswordContent() {
                 name='token'
                 value={token}
                 onChange={(event) => setToken(event.target.value)}
-                className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+                className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
                 placeholder='Paste your reset token'
                 required
               />
-              <p className='mt-2 text-xs text-zinc-500'>
+              <p className='mt-2 text-xs text-zinc-400'>
                 Paste the token from your password reset email.
               </p>
             </div>
@@ -134,7 +134,7 @@ function ResetPasswordContent() {
               minLength={8}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
               placeholder='Enter a strong password'
               required
             />
@@ -154,26 +154,26 @@ function ResetPasswordContent() {
               minLength={8}
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
-              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'
+              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
               placeholder='Re-enter your new password'
               required
             />
           </div>
 
           {password && confirmPassword && password !== confirmPassword && (
-            <p className='text-xs text-red-400'>
+            <p className='text-xs text-lunary-error'>
               Passwords must match before you can reset.
             </p>
           )}
 
           {error && (
-            <div className='bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm'>
+            <div className='bg-lunary-error-900/30 border border-lunary-error-700 text-lunary-error-300 px-4 py-3 rounded-lg text-sm'>
               {error}
             </div>
           )}
 
           {success && (
-            <div className='bg-green-900/30 border border-green-700 text-green-300 px-4 py-3 rounded-lg text-sm'>
+            <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm'>
               {success}
             </div>
           )}
@@ -181,7 +181,7 @@ function ResetPasswordContent() {
           <button
             type='submit'
             disabled={!canSubmit}
-            className='w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-900 disabled:text-purple-300/60 text-white font-medium rounded-lg py-3 transition-colors flex items-center justify-center gap-2'
+            className='w-full bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-lunary-primary-900 disabled:text-lunary-primary-300/60 text-white font-medium rounded-lg py-3 transition-colors flex items-center justify-center gap-2'
           >
             {loading ? (
               <>
@@ -197,7 +197,7 @@ function ResetPasswordContent() {
         <div className='mt-6 text-center'>
           <button
             onClick={() => router.push('/auth')}
-            className='text-sm text-purple-300 hover:text-purple-200 transition-colors'
+            className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
           >
             Back to sign in
           </button>

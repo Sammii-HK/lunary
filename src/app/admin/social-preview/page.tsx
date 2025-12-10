@@ -62,14 +62,14 @@ export default function SocialPreviewPage() {
         <button
           onClick={generateVoiceover}
           disabled={loading}
-          className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded disabled:opacity-50'
+          className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white px-4 py-2 rounded disabled:opacity-50'
         >
           {loading ? 'Generating...' : 'Generate Voiceover'}
         </button>
       </div>
 
       {error && (
-        <div className='bg-red-900/50 text-red-200 p-4 rounded mb-6'>
+        <div className='bg-lunary-error-900/50 text-lunary-error-200 p-4 rounded mb-6'>
           {error}
         </div>
       )}
@@ -85,6 +85,7 @@ export default function SocialPreviewPage() {
         {formats.map((format) => (
           <div key={format} className='bg-zinc-900 p-4 rounded'>
             <h3 className='text-white mb-2 capitalize'>{format}</h3>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/social/images?week=${week}&format=${format}&t=${Date.now()}`}
               alt={format}
@@ -104,6 +105,7 @@ export default function SocialPreviewPage() {
         </p>
         <div className='flex gap-6'>
           <div className='w-64'>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/social/images?week=${week}&format=story&t=${Date.now()}`}
               alt='Story preview'
@@ -119,7 +121,7 @@ export default function SocialPreviewPage() {
                 autoPlay={false}
               />
             ) : (
-              <p className='text-zinc-500'>
+              <p className='text-zinc-400'>
                 Click "Generate Voiceover" to hear the audio
               </p>
             )}

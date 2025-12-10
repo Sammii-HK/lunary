@@ -6,9 +6,11 @@ import {
   SIGN_SYMBOLS,
   getDecanData,
 } from '@/constants/seo/decans';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Zodiac Decans: All 36 Decans Explained | Lunary',
+  title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
   description:
     'Complete guide to the 36 zodiac decans. Each sign is divided into three 10-degree sections with unique sub-rulers and traits. Find your decan.',
   keywords: [
@@ -23,16 +25,28 @@ export const metadata: Metadata = {
 };
 
 export default function DecansIndexPage() {
+  const decansListSchema = createItemListSchema({
+    name: 'Zodiac Decans',
+    description:
+      'Complete guide to the 36 zodiac decans. Each sign is divided into three 10-degree sections.',
+    url: 'https://lunary.app/grimoire/decans',
+    items: ZODIAC_SIGNS.map((sign) => ({
+      name: `${SIGN_DISPLAY[sign]} Decans`,
+      url: `https://lunary.app/grimoire/decans/${sign}/1`,
+      description: `The three decans of ${SIGN_DISPLAY[sign]}`,
+    })),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(decansListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Decans</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Decans' },
+          ]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>Zodiac Decans</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
@@ -64,14 +78,14 @@ export default function DecansIndexPage() {
                         href={`/grimoire/decans/${sign}/${d}`}
                         className='p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors group'
                       >
-                        <div className='text-sm text-purple-400 mb-1'>
+                        <div className='text-sm text-lunary-primary-400 mb-1'>
                           {d === 1 ? 'First' : d === 2 ? 'Second' : 'Third'}{' '}
                           Decan
                         </div>
-                        <div className='font-medium group-hover:text-purple-300 transition-colors'>
+                        <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
                           {data.dateRange}
                         </div>
-                        <div className='text-sm text-zinc-500'>
+                        <div className='text-sm text-zinc-400'>
                           Sub-ruler: {data.subruler}
                         </div>
                       </Link>

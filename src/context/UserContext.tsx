@@ -17,6 +17,7 @@ export interface BirthChartPlacement {
   minute: number;
   eclipticLongitude: number;
   retrograde: boolean;
+  house?: number;
 }
 
 export interface PersonalCard {
@@ -97,12 +98,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       const profile = data.profile;
       const subscription = data.subscription;
-
-      console.log('[UserContext] Profile loaded:', {
-        hasBirthday: !!profile?.birthday,
-        birthday: profile?.birthday || 'NOT SET',
-        name: profile?.name,
-      });
 
       const birthChart = profile?.birthChart as
         | BirthChartPlacement[]

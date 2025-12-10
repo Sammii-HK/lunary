@@ -17,7 +17,7 @@ import {
   History,
   AlertCircle,
   Share2,
-  Image,
+  Image as ImageIcon,
   Download,
   Copy,
 } from 'lucide-react';
@@ -356,8 +356,8 @@ export default function SubstackManagerPage() {
             <div
               className={`mt-4 p-3 rounded-lg border ${
                 verificationStatus.authenticated
-                  ? 'bg-green-500/10 border-green-500/20 text-green-400'
-                  : 'bg-red-500/10 border-red-500/20 text-red-400'
+                  ? 'bg-lunary-success-950 border-lunary-success-900 text-lunary-success'
+                  : 'bg-lunary-error-950 border-lunary-error-900 text-lunary-error'
               }`}
             >
               <p className='text-sm font-medium'>
@@ -492,13 +492,13 @@ export default function SubstackManagerPage() {
                     <span className='text-sm'>Free Post</span>
                     {publishResults.free.success ? (
                       <div className='flex items-center gap-2'>
-                        <CheckCircle className='h-4 w-4 text-green-500' />
+                        <CheckCircle className='h-4 w-4 text-lunary-success' />
                         {publishResults.free.postUrl && (
                           <a
                             href={publishResults.free.postUrl}
                             target='_blank'
                             rel='noopener noreferrer'
-                            className='text-blue-400 hover:underline'
+                            className='text-lunary-secondary hover:underline'
                           >
                             <ExternalLink className='h-3 w-3' />
                           </a>
@@ -507,7 +507,7 @@ export default function SubstackManagerPage() {
                     ) : (
                       <div className='flex items-center gap-2'>
                         <XCircle className='h-4 w-4 text-red-500' />
-                        <span className='text-xs text-red-400'>
+                        <span className='text-xs text-lunary-error'>
                           {publishResults.free.error?.substring(0, 30)}
                         </span>
                       </div>
@@ -519,13 +519,13 @@ export default function SubstackManagerPage() {
                     <span className='text-sm'>Paid Post</span>
                     {publishResults.paid.success ? (
                       <div className='flex items-center gap-2'>
-                        <CheckCircle className='h-4 w-4 text-green-500' />
+                        <CheckCircle className='h-4 w-4 text-lunary-success' />
                         {publishResults.paid.postUrl && (
                           <a
                             href={publishResults.paid.postUrl}
                             target='_blank'
                             rel='noopener noreferrer'
-                            className='text-blue-400 hover:underline'
+                            className='text-lunary-secondary hover:underline'
                           >
                             <ExternalLink className='h-3 w-3' />
                           </a>
@@ -534,7 +534,7 @@ export default function SubstackManagerPage() {
                     ) : (
                       <div className='flex items-center gap-2'>
                         <XCircle className='h-4 w-4 text-red-500' />
-                        <span className='text-xs text-red-400'>
+                        <span className='text-xs text-lunary-error'>
                           {publishResults.paid.error?.substring(0, 30)}
                         </span>
                       </div>
@@ -542,7 +542,7 @@ export default function SubstackManagerPage() {
                   </div>
                 )}
                 {!publishResults.free && !publishResults.paid && (
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-zinc-400'>
                     No posts published yet
                   </p>
                 )}
@@ -560,9 +560,9 @@ export default function SubstackManagerPage() {
           </CardHeader>
           <CardContent>
             <div className='space-y-4'>
-              <div className='flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg'>
-                <AlertCircle className='h-5 w-5 text-amber-400 flex-shrink-0' />
-                <p className='text-sm text-amber-200'>
+              <div className='flex items-center gap-2 p-3 bg-lunary-accent-950 border border-lunary-accent-900 rounded-lg'>
+                <AlertCircle className='h-5 w-5 text-lunary-accent flex-shrink-0' />
+                <p className='text-sm text-lunary-accent-200'>
                   Backfill publishes multiple weeks at once. Start with a small
                   range (1-2 weeks) to test before doing a larger backfill.
                 </p>
@@ -671,7 +671,7 @@ export default function SubstackManagerPage() {
                         <span className='flex items-center gap-1'>
                           Free:
                           {result.free.success ? (
-                            <CheckCircle className='h-4 w-4 text-green-500' />
+                            <CheckCircle className='h-4 w-4 text-lunary-success' />
                           ) : (
                             <XCircle className='h-4 w-4 text-red-500' />
                           )}
@@ -679,7 +679,7 @@ export default function SubstackManagerPage() {
                         <span className='flex items-center gap-1'>
                           Paid:
                           {result.paid.success ? (
-                            <CheckCircle className='h-4 w-4 text-green-500' />
+                            <CheckCircle className='h-4 w-4 text-lunary-success' />
                           ) : (
                             <XCircle className='h-4 w-4 text-red-500' />
                           )}
@@ -718,7 +718,7 @@ export default function SubstackManagerPage() {
                     </>
                   ) : (
                     <>
-                      <Image className='mr-2 h-4 w-4' />
+                      <ImageIcon className='mr-2 h-4 w-4' />
                       Generate Content
                     </>
                   )}
@@ -748,7 +748,7 @@ export default function SubstackManagerPage() {
                               <a
                                 href={url}
                                 download={`lunary-${format}.png`}
-                                className='text-purple-400 hover:text-purple-300'
+                                className='text-lunary-primary-400 hover:text-lunary-primary-300'
                               >
                                 <Download className='h-4 w-4' />
                               </a>
@@ -771,7 +771,7 @@ export default function SubstackManagerPage() {
                               </span>
                               <button
                                 onClick={() => copyToClipboard(caption)}
-                                className='text-purple-400 hover:text-purple-300'
+                                className='text-lunary-primary-400 hover:text-lunary-primary-300'
                               >
                                 <Copy className='h-4 w-4' />
                               </button>
@@ -789,7 +789,7 @@ export default function SubstackManagerPage() {
                       {socialContent.hashtags.map((tag) => (
                         <span
                           key={tag}
-                          className='text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded'
+                          className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-2 py-1 rounded'
                         >
                           {tag}
                         </span>
@@ -799,7 +799,7 @@ export default function SubstackManagerPage() {
                       onClick={() =>
                         copyToClipboard(socialContent.hashtags.join(' '))
                       }
-                      className='text-xs text-purple-400 hover:text-purple-300 mt-2'
+                      className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300 mt-2'
                     >
                       Copy all hashtags
                     </button>
@@ -824,12 +824,12 @@ export default function SubstackManagerPage() {
                             {Object.entries(content).map(([type, text]) => (
                               <div key={type} className='mb-2'>
                                 <div className='flex items-center justify-between'>
-                                  <span className='text-xs text-zinc-500 capitalize'>
+                                  <span className='text-xs text-zinc-400 capitalize'>
                                     {type}
                                   </span>
                                   <button
                                     onClick={() => copyToClipboard(text)}
-                                    className='text-purple-400 hover:text-purple-300'
+                                    className='text-lunary-primary-400 hover:text-lunary-primary-300'
                                   >
                                     <Copy className='h-3 w-3' />
                                   </button>

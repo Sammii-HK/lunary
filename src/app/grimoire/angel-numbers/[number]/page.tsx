@@ -1,7 +1,8 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { angelNumbers } from '@/constants/grimoire/numerology-data';
+import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
+import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 const angelNumberKeys = Object.keys(angelNumbers);
 
@@ -15,66 +16,29 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ number: string }>;
-}): Promise<Metadata> {
+}) {
   const { number } = await params;
   const numberData = angelNumbers[number as keyof typeof angelNumbers];
 
   if (!numberData) {
-    return {
-      title: 'Not Found - Lunary Grimoire',
-    };
+    return { title: 'Not Found - Lunary Grimoire' };
   }
 
-  const title = `${numberData.name} Meaning: Spiritual Significance - Lunary`;
-  const description = `Discover the complete meaning of ${numberData.name}. Learn about ${numberData.name} spiritual significance, love meaning, career meaning, and what it means when you see this angel number.`;
-
-  return {
-    title,
-    description,
+  return createGrimoireMetadata({
+    title: `${numberData.name}: Meaning in Love, Career & Manifestation - Lunary`,
+    description: `${numberData.name} meaning: spiritual significance, love & twin flame messages, career guidance. What does ${numberData.number} mean? Complete angel number interpretation.`,
     keywords: [
       `${numberData.name} meaning`,
-      `angel number ${numberData.number}`,
+      `${numberData.number} angel number`,
       `seeing ${numberData.number}`,
-      `${numberData.number} spiritual meaning`,
-      `${numberData.number} meaning`,
+      `${numberData.number} love meaning`,
+      `${numberData.number} twin flame`,
+      `${numberData.number} manifestation`,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/angel-numbers/${number}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/angel-numbers',
-          width: 1200,
-          height: 630,
-          alt: `${numberData.name}`,
-        },
-      ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/cosmic'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/angel-numbers/${number}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+    url: `/grimoire/angel-numbers/${number}`,
+    ogImagePath: '/api/og/grimoire/angel-numbers',
+    ogImageAlt: `${numberData.name} Angel Number`,
+  });
 }
 
 export default async function AngelNumberPage({
@@ -112,8 +76,25 @@ export default async function AngelNumberPage({
     },
   ];
 
+  // Entity schema for Knowledge Graph
+  const angelNumberSchema = createCosmicEntitySchema({
+    name: numberData.name,
+    description: `${numberData.name} spiritual meaning: ${numberData.spiritualMeaning.slice(0, 150)}...`,
+    url: `/grimoire/angel-numbers/${number}`,
+    additionalType: 'https://en.wikipedia.org/wiki/Angel_number',
+    keywords: [
+      numberData.name,
+      `${numberData.number} meaning`,
+      'angel number',
+      'spiritual meaning',
+      'numerology',
+      'divine message',
+    ],
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(angelNumberSchema)}
       <SEOContentTemplate
         title={`${numberData.name} - Lunary`}
         h1={`${numberData.name}: Complete Spiritual Guide`}

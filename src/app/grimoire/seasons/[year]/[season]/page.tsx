@@ -165,7 +165,7 @@ ${seasonData.displayName} Season falls during ${seasonData.season} in the Northe
         },
       ]}
       ctaText={`Discover how ${seasonData.displayName} Season affects your chart`}
-      ctaHref='/welcome'
+      ctaHref='/horoscope'
       sources={[
         { name: 'Solar transit calculations' },
         { name: 'Traditional astrological seasons' },
@@ -174,13 +174,13 @@ ${seasonData.displayName} Season falls during ${seasonData.season} in the Northe
       <div className='mt-8 flex justify-between text-sm'>
         <Link
           href={`/grimoire/seasons/${year}/${prevSeason.sign}`}
-          className='text-purple-400 hover:text-purple-300'
+          className='text-lunary-primary-400 hover:text-lunary-primary-300'
         >
           ← {prevSeason.symbol} {prevSeason.displayName} Season
         </Link>
         <Link
           href={`/grimoire/seasons/${year}/${nextSeason.sign}`}
-          className='text-purple-400 hover:text-purple-300'
+          className='text-lunary-primary-400 hover:text-lunary-primary-300'
         >
           {nextSeason.displayName} Season {nextSeason.symbol} →
         </Link>

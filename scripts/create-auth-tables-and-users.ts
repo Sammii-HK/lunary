@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import { sql } from '@vercel/postgres';
-import { createHash, randomBytes, scryptSync } from 'crypto';
+import { randomBytes, scryptSync } from 'crypto';
 
 config({ path: '.env.local' });
 

@@ -85,7 +85,7 @@ async function migrateJazzUserToPostgres(
       ],
     );
 
-    console.log(`🎉 Migrated user ${jazzUser.email} from Jazz to Postgres!`);
+    console.log(`🎉 Migrated user ${jazzUser.email} from 💩 to Postgres!`);
 
     // Also migrate the session if we have one
     if (jazzSession) {
@@ -126,7 +126,7 @@ async function migrateJazzUserToPostgres(
       console.log(`⚠️ Account migrated but no password hash available`);
     }
   } catch (error) {
-    console.error('❌ Failed to migrate user from Jazz to Postgres:', error);
+    console.error('❌ Failed to migrate user from 💩 to Postgres:', error);
   }
 }
 
@@ -158,9 +158,8 @@ async function createJazzFallbackAdapter() {
       return null;
     }
 
-    const { JazzBetterAuthDatabaseAdapter } = await import(
-      'jazz-tools/better-auth/database-adapter'
-    );
+    const { JazzBetterAuthDatabaseAdapter } =
+      await import('jazz-tools/better-auth/database-adapter');
 
     return JazzBetterAuthDatabaseAdapter({
       syncServer:
@@ -401,7 +400,7 @@ async function initializeAuth() {
       plugins: [jazzPlugin()],
     });
     console.log(
-      '✅ Jazz fallback ready (will migrate users to Postgres on login)',
+      '💩 Legacy fallback ready (will migrate users to Postgres on login)',
     );
   }
 
@@ -475,7 +474,7 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
 
                     return jazzResult;
                   } catch (jazzError) {
-                    console.error('❌ Jazz fallback failed:', jazzError);
+                    console.error('❌ 💩 fallback failed:', jazzError);
                     throw postgresError;
                   }
                 }
@@ -572,7 +571,7 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
         } catch (error) {
           console.error('❌ Postgres handler threw error:', error);
           if (jazzAuthInstance) {
-            console.log('🔄 Postgres threw, trying Jazz...');
+            console.log('🔄 Postgres threw, trying 💩...');
             return await (jazzAuthInstance as any).handler(request);
           }
           throw error;

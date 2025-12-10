@@ -51,12 +51,12 @@ export const DailyInsightCard = () => {
     return (
       <Link
         href='/horoscope'
-        className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group h-full'
+        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full min-h-20'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
             <div className='flex items-center gap-2 mb-1'>
-              <Sparkles className='w-4 h-4 text-purple-400' />
+              <Sparkles className='w-4 h-4 text-lunary-primary-300' />
               <span className='text-sm font-medium text-zinc-200'>
                 Your Day
               </span>
@@ -64,12 +64,12 @@ export const DailyInsightCard = () => {
             <p className='text-sm text-zinc-300 leading-relaxed'>
               {insight.text}
             </p>
-            <div className='flex items-center gap-1.5 mt-2 text-xs text-purple-400 group-hover:text-purple-300'>
+            <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 group-hover:text-lunary-primary-100'>
               <Lock className='w-3 h-3' />
               <span>Unlock readings based on your full birth chart</span>
             </div>
           </div>
-          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1' />
+          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
         </div>
       </Link>
     );
@@ -78,14 +78,18 @@ export const DailyInsightCard = () => {
   return (
     <Link
       href='/horoscope'
-      className='block py-3 px-4 border border-stone-800 rounded-md hover:border-purple-500/50 transition-colors group h-full'
+      className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full min-h-20'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>
-          <div className='flex items-center gap-2 mb-1'>
-            <Sparkles className='w-4 h-4 text-purple-400' />
-            <span className='text-sm font-medium text-zinc-200'>Your Day</span>
-            <span className='text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded'>
+          <div className='flex items-center justify-between mb-1'>
+            <div className='flex items-center gap-2'>
+              <Sparkles className='w-4 h-4 text-lunary-primary-300' />
+              <span className='text-sm font-medium text-zinc-200'>
+                Your Day
+              </span>
+            </div>
+            <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
               Personal
             </span>
           </div>
@@ -93,7 +97,7 @@ export const DailyInsightCard = () => {
             {insight.text}
           </p>
         </div>
-        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1' />
+        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
       </div>
     </Link>
   );

@@ -7,6 +7,8 @@ import {
   PLANET_SYMBOLS,
   ASPECT_DATA,
 } from '@/constants/seo/aspects';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -27,16 +29,28 @@ export const metadata: Metadata = {
 };
 
 export default function AspectsIndexPage() {
+  const aspectsListSchema = createItemListSchema({
+    name: 'Astrological Aspects',
+    description:
+      'Complete guide to astrological aspects including conjunctions, trines, squares, sextiles, and oppositions.',
+    url: 'https://lunary.app/grimoire/aspects',
+    items: ASPECTS.map((aspect) => ({
+      name: ASPECT_DATA[aspect].displayName,
+      url: `https://lunary.app/grimoire/aspects/types/${aspect}`,
+      description: `${ASPECT_DATA[aspect].degrees}° - ${ASPECT_DATA[aspect].keywords.join(', ')}`,
+    })),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(aspectsListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Aspects</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Aspects' },
+          ]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>Astrological Aspects</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
@@ -57,13 +71,13 @@ export default function AspectsIndexPage() {
                 <div className='flex items-center gap-3 mb-3'>
                   <span className='text-3xl'>{data.symbol}</span>
                   <span
-                    className={`text-xs px-2 py-1 rounded ${data.nature === 'harmonious' ? 'bg-green-500/20 text-green-300' : data.nature === 'challenging' ? 'bg-red-500/20 text-red-300' : 'bg-blue-500/20 text-blue-300'}`}
+                    className={`text-xs px-2 py-1 rounded ${data.nature === 'harmonious' ? 'bg-lunary-success-900 text-lunary-success-300' : data.nature === 'challenging' ? 'bg-lunary-error-900 text-lunary-error-300' : 'bg-lunary-secondary-900 text-lunary-secondary-300'}`}
                   >
                     {data.nature}
                   </span>
                 </div>
                 <h3 className='text-lg font-medium mb-1'>{data.displayName}</h3>
-                <p className='text-sm text-zinc-500 mb-2'>{data.degrees}°</p>
+                <p className='text-sm text-zinc-400 mb-2'>{data.degrees}°</p>
                 <p className='text-sm text-zinc-400'>
                   {data.keywords.join(', ')}
                 </p>
@@ -80,21 +94,21 @@ export default function AspectsIndexPage() {
             <Link
               key={planet}
               href={`/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}`}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
             >
               <div className='text-3xl mb-2'>{PLANET_SYMBOLS[planet]}</div>
-              <h3 className='text-lg font-medium group-hover:text-purple-300 transition-colors'>
+              <h3 className='text-lg font-medium group-hover:text-lunary-primary-300 transition-colors'>
                 {PLANET_DISPLAY[planet]} Aspects
               </h3>
-              <p className='text-sm text-zinc-500'>
+              <p className='text-sm text-zinc-400'>
                 Explore all {PLANET_DISPLAY[planet]} aspect combinations
               </p>
             </Link>
           ))}
         </div>
 
-        <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             Find Aspects in Your Chart
           </h2>
           <p className='text-zinc-300 mb-4'>
@@ -102,10 +116,10 @@ export default function AspectsIndexPage() {
             planetary energies interact.
           </p>
           <Link
-            href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            href='/birth-chart'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
-            Generate Your Birth Chart
+            View Your Birth Chart
           </Link>
         </div>
       </div>

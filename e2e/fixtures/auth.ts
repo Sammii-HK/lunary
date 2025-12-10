@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { test as base, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { TEST_USERS } from './test-users';
@@ -50,14 +51,21 @@ export const test = base.extend<AuthFixtures>({
         return;
       }
 
-      if (
-        resourceType === 'stylesheet' &&
-        (url.includes('fonts.googleapis.com') ||
-          url.includes('cdn.jsdelivr.net') ||
-          url.includes('unpkg.com'))
-      ) {
-        route.abort();
-        return;
+      if (resourceType === 'stylesheet') {
+        try {
+          const parsedUrl = new URL(url);
+          const host = parsedUrl.hostname.toLowerCase();
+          if (
+            host === 'fonts.googleapis.com' ||
+            host === 'cdn.jsdelivr.net' ||
+            host === 'unpkg.com'
+          ) {
+            route.abort();
+            return;
+          }
+        } catch {
+          // Invalid URL, continue
+        }
       }
 
       route.continue();
@@ -156,14 +164,21 @@ export const test = base.extend<AuthFixtures>({
         route.abort();
         return;
       }
-      if (
-        resourceType === 'stylesheet' &&
-        (url.includes('fonts.googleapis.com') ||
-          url.includes('cdn.jsdelivr.net') ||
-          url.includes('unpkg.com'))
-      ) {
-        route.abort();
-        return;
+      if (resourceType === 'stylesheet') {
+        try {
+          const parsedUrl = new URL(url);
+          const host = parsedUrl.hostname.toLowerCase();
+          if (
+            host === 'fonts.googleapis.com' ||
+            host === 'cdn.jsdelivr.net' ||
+            host === 'unpkg.com'
+          ) {
+            route.abort();
+            return;
+          }
+        } catch {
+          // Invalid URL, continue
+        }
       }
       route.continue();
     });

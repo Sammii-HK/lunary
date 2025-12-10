@@ -4,6 +4,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import Link from 'next/link';
 import { Clock, Sparkles } from 'lucide-react';
+import { Button } from './ui/button';
 
 export function TrialCountdownBanner() {
   const subscription = useSubscription();
@@ -16,29 +17,31 @@ export function TrialCountdownBanner() {
   }
 
   return (
-    <div className='fixed top-0 left-0 right-0 z-50 border-b border-lunary-rose/30 bg-gradient-to-r from-lunary-violet/20 to-lunary-rose/20 backdrop-blur-sm'>
+    <div className='fixed top-0 left-0 right-0 z-50 border-b border-lunary-rose-700 bg-gradient-to-r from-lunary-primary-900 to-lunary-rose-900 backdrop-blur-sm'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between gap-4 py-3'>
           <div className='flex items-center gap-3 flex-1'>
-            <Clock className='w-5 h-5 text-lunary-lavender flex-shrink-0' />
+            <Clock className='w-5 h-5 text-lunary-accent flex-shrink-0' />
             <span className='text-sm font-medium text-white'>
               Your trial ends in {trialDaysRemaining} day
               {trialDaysRemaining !== 1 ? 's' : ''} ·{' '}
               <Link
                 href='/pricing'
-                className='underline hover:text-lunary-lavender transition-colors inline-flex items-center gap-1'
+                className='underline hover:text-lunary-accent transition-colors inline-flex items-center gap-1'
               >
                 Unlock deeper insights
                 <Sparkles className='w-4 h-4' />
               </Link>
             </span>
           </div>
-          <Link
-            href='/pricing'
-            className='px-4 py-1.5 bg-white text-black rounded-full text-xs font-medium hover:bg-gray-100 transition-colors whitespace-nowrap'
+          <Button
+            variant='lunary-white'
+            size='sm'
+            className='rounded-full'
+            asChild
           >
-            Upgrade Now
-          </Link>
+            <Link href='/pricing'>Upgrade Now</Link>
+          </Button>
         </div>
       </div>
     </div>

@@ -184,7 +184,7 @@ export default function SchedulerAdminPage() {
   return (
     <div className='min-h-screen bg-black text-white p-8'>
       <div className='max-w-4xl mx-auto'>
-        <h1 className='text-3xl font-bold mb-8 text-purple-400'>
+        <h1 className='text-3xl font-bold mb-8 text-lunary-primary-400'>
           🌟 Cosmic Social Media Scheduler
         </h1>
 
@@ -209,7 +209,7 @@ export default function SchedulerAdminPage() {
                 placeholder={getNextMonth()}
                 className='bg-zinc-800 border border-zinc-700 rounded px-3 py-2 w-48 text-white'
               />
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-zinc-400 mt-1'>
                 Default:{' '}
                 {new Date(getNextMonth() + '-01').toLocaleDateString('en-US', {
                   month: 'long',
@@ -235,7 +235,7 @@ export default function SchedulerAdminPage() {
           <button
             onClick={scheduleMonth}
             disabled={loading}
-            className='bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:opacity-50 px-6 py-3 rounded font-medium text-white transition-colors'
+            className='bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-lunary-primary-800 disabled:opacity-50 px-6 py-3 rounded font-medium text-white transition-colors'
           >
             {loading ? '⏳ Scheduling Posts...' : '🚀 Schedule Month'}
           </button>
@@ -251,7 +251,7 @@ export default function SchedulerAdminPage() {
               <button
                 onClick={scheduleToday}
                 disabled={loading}
-                className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
+                className='bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-lunary-secondary-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
               >
                 {loading ? '⏳ Creating Post...' : "⚡ Test Today's Post"}
               </button>
@@ -291,7 +291,7 @@ export default function SchedulerAdminPage() {
                   }
                 }}
                 disabled={loading}
-                className='bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
+                className='bg-lunary-success-600 hover:bg-lunary-success-700 disabled:bg-lunary-success-800 disabled:opacity-50 px-4 py-2 rounded font-medium text-white transition-colors'
               >
                 {loading ? '⏳ Testing...' : '🔍 Test Cosmic API'}
               </button>
@@ -303,8 +303,8 @@ export default function SchedulerAdminPage() {
           <div
             className={`rounded-lg p-6 mb-8 ${
               result.success
-                ? 'bg-green-900/30 border border-green-700'
-                : 'bg-red-900/30 border border-red-700'
+                ? 'bg-lunary-success-900/30 border border-lunary-success-700'
+                : 'bg-lunary-error-900/30 border border-lunary-error-700'
             }`}
           >
             <h3 className='text-lg font-semibold mb-4 flex items-center'>
@@ -362,7 +362,7 @@ export default function SchedulerAdminPage() {
                       </details>
                     )}
                     {(result as any).timestamp && (
-                      <div className='text-xs text-zinc-500 mt-2'>
+                      <div className='text-xs text-zinc-400 mt-2'>
                         Time:{' '}
                         {new Date((result as any).timestamp).toLocaleString()}
                       </div>
@@ -387,25 +387,25 @@ export default function SchedulerAdminPage() {
             {result.summary && (
               <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
                 <div className='bg-zinc-800 rounded p-3'>
-                  <div className='text-2xl font-bold text-purple-400'>
+                  <div className='text-2xl font-bold text-lunary-primary-400'>
                     {result.summary.totalPosts}
                   </div>
                   <div className='text-sm text-zinc-400'>Total Posts</div>
                 </div>
                 <div className='bg-zinc-800 rounded p-3'>
-                  <div className='text-2xl font-bold text-green-400'>
+                  <div className='text-2xl font-bold text-lunary-success'>
                     {result.summary.successful}
                   </div>
                   <div className='text-sm text-zinc-400'>Successful</div>
                 </div>
                 <div className='bg-zinc-800 rounded p-3'>
-                  <div className='text-2xl font-bold text-red-400'>
+                  <div className='text-2xl font-bold text-lunary-error'>
                     {result.summary.failed}
                   </div>
                   <div className='text-sm text-zinc-400'>Failed</div>
                 </div>
                 <div className='bg-zinc-800 rounded p-3'>
-                  <div className='text-lg font-bold text-blue-400'>
+                  <div className='text-lg font-bold text-lunary-secondary'>
                     {result.summary.month}
                   </div>
                   <div className='text-sm text-zinc-400'>Target Month</div>
@@ -424,8 +424,8 @@ export default function SchedulerAdminPage() {
                       key={index}
                       className={`flex justify-between items-center p-2 rounded text-sm ${
                         item.status === 'success'
-                          ? 'bg-green-900/30 text-green-300'
-                          : 'bg-red-900/30 text-red-300'
+                          ? 'bg-lunary-success-900/30 text-lunary-success-300'
+                          : 'bg-lunary-error-900/30 text-lunary-error-300'
                       }`}
                     >
                       <span>{item.date}</span>
@@ -485,7 +485,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary hover:bg-lunary-primary-400 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         𝕏 Twitter
                       </button>
@@ -496,7 +496,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-blue-800 hover:bg-blue-900 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-secondary-800 hover:bg-lunary-secondary-900 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📘 Facebook
                       </button>
@@ -507,7 +507,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-blue-700 hover:bg-blue-800 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-secondary-700 hover:bg-lunary-secondary-800 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         💼 LinkedIn
                       </button>
@@ -515,7 +515,7 @@ export default function SchedulerAdminPage() {
                         onClick={() =>
                           socialPrefillUrls.instagram(currentPostData)
                         }
-                        className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-gradient-to-r from-lunary-primary-600 to-lunary-rose-600 hover:from-lunary-primary-700 hover:to-lunary-rose-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📸 Instagram
                       </button>
@@ -526,7 +526,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-red-600 hover:bg-red-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-error-600 hover:bg-lunary-error-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📌 Pinterest
                       </button>
@@ -537,7 +537,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-rose-600 hover:bg-lunary-rose-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         🤖 Reddit
                       </button>
@@ -548,7 +548,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         🌀 Tumblr
                       </button>
@@ -568,7 +568,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-success-600 hover:bg-lunary-success-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         💬 WhatsApp
                       </button>
@@ -579,7 +579,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-secondary hover:bg-lunary-primary px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         ✈️ Telegram
                       </button>
@@ -616,7 +616,7 @@ export default function SchedulerAdminPage() {
                             );
                           }
                         }}
-                        className='bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary-600 hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📋 Copy Text
                       </button>
@@ -634,7 +634,7 @@ export default function SchedulerAdminPage() {
                             );
                           }
                         }}
-                        className='bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary-600 hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📋 Copy All
                       </button>
@@ -646,7 +646,7 @@ export default function SchedulerAdminPage() {
                             `cosmic-post-${today}.txt`,
                           );
                         }}
-                        className='bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-success-600 hover:bg-lunary-success-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📥 Download
                       </button>
@@ -654,7 +654,7 @@ export default function SchedulerAdminPage() {
                   </div>
 
                   <div className='mt-4 pt-4 border-t border-zinc-600'>
-                    <p className='text-xs text-zinc-500'>
+                    <p className='text-xs text-zinc-400'>
                       💡 <strong>Tip:</strong> Instagram doesn't support URL
                       prefilling, so the content will be copied to your
                       clipboard instead. For best results with images, save or
@@ -681,7 +681,7 @@ export default function SchedulerAdminPage() {
                 {`SUCCULENT_SECRET_KEY=sk_live_your_api_key_here
 SUCCULENT_ACCOUNT_GROUP_ID=group_your_group_id_here`}
               </pre>
-              <p className='text-xs text-zinc-500 mt-2'>
+              <p className='text-xs text-zinc-400 mt-2'>
                 💡 <strong>Debugging tip:</strong> The enhanced error logging
                 will now show if these variables are missing or malformed. Check
                 the server logs or use the "Test Today's Post" button to see

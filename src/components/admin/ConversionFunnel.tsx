@@ -48,7 +48,7 @@ export function ConversionFunnel({
             <div className='relative h-10 rounded-xl bg-zinc-800/60'>
               <div
                 className={cn(
-                  'absolute inset-y-0 rounded-xl bg-gradient-to-r from-purple-500/70 to-violet-500/80 transition-all',
+                  'absolute inset-y-0 rounded-xl bg-gradient-to-r from-lunary-primary-500/70 to-violet-500/80 transition-all',
                 )}
                 style={{ width: `${widthPercent}%` }}
               />
@@ -59,7 +59,7 @@ export function ConversionFunnel({
               )}
             </div>
             {stage.subtitle && (
-              <div className='text-xs text-zinc-500'>{stage.subtitle}</div>
+              <div className='text-xs text-zinc-400'>{stage.subtitle}</div>
             )}
             {index < stages.length - 1 && (
               <div className='flex items-center justify-center text-xs text-zinc-600'>

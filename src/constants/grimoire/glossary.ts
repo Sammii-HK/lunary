@@ -288,6 +288,136 @@ export const ASTROLOGY_GLOSSARY: GlossaryTerm[] = [
     category: 'planet',
     relatedTerms: ['sun', 'moon'],
   },
+  {
+    term: 'Sun',
+    slug: 'sun',
+    definition:
+      'The core of your identity, ego, and life purpose. Represents your conscious self, vitality, and how you express your individuality. Rules Leo.',
+    category: 'planet',
+    relatedTerms: ['luminary', 'moon', 'personal-planets'],
+  },
+  {
+    term: 'Moon',
+    slug: 'moon',
+    definition:
+      'Your emotional nature, instincts, and subconscious patterns. Represents how you nurture and need to be nurtured. Changes signs every 2.5 days. Rules Cancer.',
+    category: 'planet',
+    relatedTerms: ['luminary', 'sun', 'personal-planets'],
+  },
+  {
+    term: 'Mercury',
+    slug: 'mercury',
+    definition:
+      'The planet of communication, thinking, and information processing. Governs how you learn, speak, and connect ideas. Rules Gemini and Virgo.',
+    category: 'planet',
+    relatedTerms: ['personal-planets', 'mercury-retrograde'],
+  },
+  {
+    term: 'Venus',
+    slug: 'venus',
+    definition:
+      'The planet of love, beauty, pleasure, and values. Governs relationships, aesthetics, and what you attract. Rules Taurus and Libra.',
+    category: 'planet',
+    relatedTerms: ['personal-planets', 'benefic', 'mars'],
+  },
+  {
+    term: 'Mars',
+    slug: 'mars',
+    definition:
+      'The planet of action, desire, and assertion. Governs how you pursue goals, express anger, and take initiative. Rules Aries and co-rules Scorpio.',
+    category: 'planet',
+    relatedTerms: ['personal-planets', 'malefic', 'venus'],
+  },
+  {
+    term: 'Jupiter',
+    slug: 'jupiter',
+    definition:
+      'The planet of expansion, luck, and wisdom. Governs growth, optimism, higher learning, and abundance. The Greater Benefic. Rules Sagittarius and co-rules Pisces.',
+    category: 'planet',
+    relatedTerms: ['social-planets', 'benefic', 'saturn'],
+  },
+  {
+    term: 'Saturn',
+    slug: 'saturn',
+    definition:
+      'The planet of structure, discipline, and karma. Governs responsibility, limitations, and life lessons. The Greater Malefic. Rules Capricorn and co-rules Aquarius.',
+    category: 'planet',
+    relatedTerms: ['social-planets', 'malefic', 'jupiter', 'saturn-return'],
+  },
+  {
+    term: 'Uranus',
+    slug: 'uranus',
+    definition:
+      'The planet of revolution, innovation, and sudden change. Governs originality, rebellion, and awakening. Co-rules Aquarius with Saturn.',
+    category: 'planet',
+    relatedTerms: ['outer-planets', 'generational-planets'],
+  },
+  {
+    term: 'Neptune',
+    slug: 'neptune',
+    definition:
+      'The planet of dreams, spirituality, and dissolution. Governs intuition, imagination, and transcendence. Co-rules Pisces with Jupiter.',
+    category: 'planet',
+    relatedTerms: ['outer-planets', 'generational-planets'],
+  },
+  {
+    term: 'Pluto',
+    slug: 'pluto',
+    definition:
+      'The planet of transformation, power, and rebirth. Governs deep psychological change, death/rebirth cycles, and hidden truths. Co-rules Scorpio with Mars.',
+    category: 'planet',
+    relatedTerms: ['outer-planets', 'generational-planets'],
+  },
+  {
+    term: 'Generational Planets',
+    slug: 'generational-planets',
+    definition:
+      'Uranus, Neptune, and Pluto. These slow-moving outer planets stay in each sign for years to decades, affecting entire generations with shared themes and collective transformation.',
+    category: 'planet',
+    relatedTerms: ['outer-planets', 'transpersonal-planets'],
+  },
+  {
+    term: 'Transpersonal Planets',
+    slug: 'transpersonal-planets',
+    definition:
+      'Another name for the outer planets (Uranus, Neptune, Pluto). Called transpersonal because their influence extends beyond individual personality into collective and spiritual realms.',
+    category: 'planet',
+    relatedTerms: ['outer-planets', 'generational-planets'],
+  },
+
+  // Elements
+  {
+    term: 'Fire Signs',
+    slug: 'fire-signs',
+    definition:
+      'Aries, Leo, and Sagittarius. Fire signs are passionate, energetic, and action-oriented. They lead with enthusiasm, creativity, and a pioneering spirit.',
+    category: 'sign',
+    relatedTerms: ['earth-signs', 'air-signs', 'water-signs'],
+  },
+  {
+    term: 'Earth Signs',
+    slug: 'earth-signs',
+    definition:
+      'Taurus, Virgo, and Capricorn. Earth signs are practical, grounded, and focused on material reality. They value stability, hard work, and tangible results.',
+    category: 'sign',
+    relatedTerms: ['fire-signs', 'air-signs', 'water-signs'],
+  },
+  {
+    term: 'Air Signs',
+    slug: 'air-signs',
+    definition:
+      'Gemini, Libra, and Aquarius. Air signs are intellectual, communicative, and socially oriented. They lead with ideas, logic, and connection.',
+    category: 'sign',
+    relatedTerms: ['fire-signs', 'earth-signs', 'water-signs'],
+  },
+  {
+    term: 'Water Signs',
+    slug: 'water-signs',
+    definition:
+      'Cancer, Scorpio, and Pisces. Water signs are emotional, intuitive, and deeply feeling. They navigate life through instinct, empathy, and emotional intelligence.',
+    category: 'sign',
+    relatedTerms: ['fire-signs', 'earth-signs', 'air-signs'],
+  },
 
   // Dignities & Debilities
   {
@@ -527,14 +657,6 @@ export const ASTROLOGY_GLOSSARY: GlossaryTerm[] = [
 
   // Other Points
   {
-    term: 'Chiron',
-    slug: 'chiron',
-    definition:
-      'An asteroid/comet known as the "Wounded Healer." Chiron in your chart shows your deepest wound and your greatest potential for healing others.',
-    category: 'planet',
-    relatedTerms: ['asteroid'],
-  },
-  {
     term: 'Part of Fortune',
     slug: 'part-of-fortune',
     definition:
@@ -608,14 +730,6 @@ export const ASTROLOGY_GLOSSARY: GlossaryTerm[] = [
     category: 'technique',
     relatedTerms: ['electional-astrology'],
   },
-  {
-    term: 'Mundane Astrology',
-    slug: 'mundane-astrology',
-    definition:
-      'The study of world events, nations, and collective trends through astrology. Analyzes eclipses, ingresses, and planetary cycles.',
-    category: 'technique',
-    relatedTerms: ['world-astrology'],
-  },
 
   // Systems
   {
@@ -657,6 +771,144 @@ export const ASTROLOGY_GLOSSARY: GlossaryTerm[] = [
       "The oldest house system, where each sign equals one house. The Ascendant's sign becomes the entire 1st house.",
     category: 'chart',
     relatedTerms: ['house-system', 'placidus'],
+  },
+
+  // Additional Terms
+  {
+    term: 'Lilith',
+    slug: 'lilith',
+    definition:
+      "Black Moon Lilith represents the lunar apogee—the Moon's farthest point from Earth. Symbolizes raw feminine power, sexuality, independence, and the shadow self.",
+    category: 'planet',
+    relatedTerms: ['moon', 'asteroid'],
+  },
+  {
+    term: 'Horary Astrology',
+    slug: 'horary',
+    definition:
+      'A branch of astrology that answers specific questions by casting a chart for the moment the question is asked. Used for predictions and finding lost objects.',
+    category: 'technique',
+    relatedTerms: ['mundane-astrology', 'electional'],
+  },
+  {
+    term: 'Mundane Astrology',
+    slug: 'mundane-astrology',
+    definition:
+      'The branch of astrology dealing with world events, nations, and collective phenomena. Studies eclipses, ingresses, and planetary cycles affecting humanity.',
+    category: 'technique',
+    relatedTerms: ['horary', 'electional'],
+  },
+  {
+    term: 'Vedic Astrology',
+    slug: 'vedic-astrology',
+    definition:
+      'Also called Jyotish, the traditional Hindu system of astrology. Uses the sidereal zodiac and includes techniques like dashas (planetary periods) and nakshatras (lunar mansions).',
+    category: 'technique',
+    relatedTerms: ['sidereal-zodiac', 'tropical-zodiac'],
+  },
+  {
+    term: 'Lot of Fortune',
+    slug: 'lot-of-fortune',
+    definition:
+      'An Arabic Part calculated from the Ascendant, Sun, and Moon. Indicates material fortune, physical wellbeing, and worldly success in the birth chart.',
+    category: 'chart',
+    relatedTerms: ['arabic-parts', 'ascendant'],
+  },
+  {
+    term: 'Arabic Parts',
+    slug: 'arabic-parts',
+    definition:
+      'Sensitive points calculated from three chart factors (usually Ascendant + Planet A - Planet B). Include the Lot of Fortune, Lot of Spirit, and many others.',
+    category: 'chart',
+    relatedTerms: ['lot-of-fortune'],
+  },
+  {
+    term: 'Electional Astrology',
+    slug: 'electional',
+    definition:
+      'The practice of choosing optimal times for important events like weddings, business launches, or surgeries based on favorable planetary alignments.',
+    category: 'technique',
+    relatedTerms: ['horary', 'mundane-astrology'],
+  },
+  {
+    term: 'Planetary Ruler',
+    slug: 'planetary-ruler',
+    definition:
+      'Each zodiac sign is governed by a planet that shares its essential nature. The ruler of a sign or house adds another layer of influence. For example, Mars rules Aries, Venus rules Taurus and Libra, Mercury rules Gemini and Virgo.',
+    category: 'planet',
+    relatedTerms: ['domicile', 'rulership'],
+  },
+  {
+    term: 'Asteroid',
+    slug: 'asteroid',
+    definition:
+      'Minor celestial bodies used in astrology for additional nuance. Popular asteroids include Ceres (nurturing), Pallas (wisdom), Juno (partnership), and Vesta (devotion). They add layers of meaning to the birth chart.',
+    category: 'planet',
+    relatedTerms: ['lilith', 'chiron'],
+  },
+  {
+    term: 'Chiron',
+    slug: 'chiron',
+    definition:
+      'Known as the "Wounded Healer," Chiron represents our deepest wounds and our capacity to heal others through our own pain. Its house and sign placement shows where we experience vulnerability and ultimately wisdom.',
+    category: 'planet',
+    relatedTerms: ['asteroid', 'lilith'],
+  },
+  {
+    term: 'Imum Coeli',
+    slug: 'imum-coeli',
+    definition:
+      'The IC or "Bottom of the Sky" - the lowest point of the chart opposite the Midheaven. Represents roots, home, family, private life, and psychological foundations. The cusp of the 4th house.',
+    category: 'chart',
+    relatedTerms: ['midheaven', 'fourth-house', 'ascendant'],
+  },
+  {
+    term: 'Stellium',
+    slug: 'stellium',
+    definition:
+      'Three or more planets clustered in the same sign or house. Creates an intense concentration of energy in that area of life, making it a dominant theme in the chart.',
+    category: 'chart',
+    relatedTerms: ['conjunction', 'grand-trine'],
+  },
+  {
+    term: 'Cazimi',
+    slug: 'cazimi',
+    definition:
+      "When a planet is within 17 minutes of arc of the Sun's exact degree. Considered highly fortunate - the planet is 'in the heart of the Sun' and greatly strengthened.",
+    category: 'aspect',
+    relatedTerms: ['combust', 'conjunction'],
+  },
+  {
+    term: 'Combust',
+    slug: 'combust',
+    definition:
+      "When a planet is within 8 degrees of the Sun but not cazimi. The Sun's light overwhelms the planet, weakening its expression. The planet's significations become hidden or burned.",
+    category: 'aspect',
+    relatedTerms: ['cazimi', 'conjunction'],
+  },
+  {
+    term: 'Applying Aspect',
+    slug: 'applying',
+    definition:
+      'When a faster planet is moving toward exact aspect with a slower planet. Applying aspects are building in strength and represent future developments or incoming influences.',
+    category: 'aspect',
+    relatedTerms: ['separating', 'orb'],
+  },
+  {
+    term: 'Separating Aspect',
+    slug: 'separating',
+    definition:
+      'When a faster planet is moving away from exact aspect with a slower planet. Separating aspects are waning in influence and represent past events or diminishing effects.',
+    category: 'aspect',
+    relatedTerms: ['applying', 'orb'],
+  },
+  {
+    term: 'Intercepted Sign',
+    slug: 'intercepted',
+    definition:
+      'A sign fully contained within a house, not appearing on any house cusp. The sign and any planets within it may feel blocked or require extra effort to access and express.',
+    category: 'chart',
+    relatedTerms: ['cusp', 'house-system'],
   },
 ];
 

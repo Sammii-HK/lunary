@@ -149,7 +149,7 @@ export default function AppDashboard() {
               {greeting()}
               {firstName && (
                 <>
-                  , <span className='text-purple-400'>{firstName}</span>
+                  , <span className='text-lunary-accent'>{firstName}</span>
                 </>
               )}
             </p>

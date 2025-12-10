@@ -1,11 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import {
-  zodiacSigns,
-  zodiacSymbol,
-  zodiacUnicode,
-} from '../../../../../utils/zodiac/zodiac';
+import { zodiacSigns, zodiacSymbol } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
 
 const signSlugs = Object.keys(zodiacSigns);
@@ -34,8 +30,8 @@ export async function generateMetadata({
 
   const signData = zodiacSigns[signKey as keyof typeof zodiacSigns];
   const symbol = zodiacSymbol[signKey as keyof typeof zodiacSymbol];
-  const title = `Moon in ${signData.name} Meaning: Emotional Guide - Lunary`;
-  const description = `Discover what it means when the Moon is in ${signData.name}. Learn about Moon in ${signData.name} emotional themes, traits, and how to work with this lunar placement.`;
+  const title = `Moon in ${signData.name}: Emotions, Traits & Compatibility - Lunary`;
+  const description = `Moon in ${signData.name} natal chart meaning: emotional needs, personality traits & compatibility. What your ${signData.name} moon sign reveals about you.`;
 
   return {
     title,

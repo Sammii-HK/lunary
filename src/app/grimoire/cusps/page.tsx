@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ZODIAC_CUSPS, getCuspData, CuspId } from '@/constants/seo/cusps';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Zodiac Cusps: All 12 Cusp Signs Explained | Lunary',
+  title: 'Zodiac Cusps: Born on the Cusp? What It Means | Lunary',
   description:
     'Complete guide to zodiac cusps. Born on the cusp of two signs? Learn about the Cusp of Power, Magic, Rebirth, and more. Find your cusp personality.',
   keywords: [
@@ -18,16 +20,28 @@ export const metadata: Metadata = {
 };
 
 export default function CuspsIndexPage() {
+  const cuspsListSchema = createItemListSchema({
+    name: 'Zodiac Cusps',
+    description:
+      'Complete guide to all 12 zodiac cusps - born between two signs.',
+    url: 'https://lunary.app/grimoire/cusps',
+    items: ZODIAC_CUSPS.map((cusp) => {
+      const data = getCuspData(cusp.id as CuspId);
+      return {
+        name: `${data.sign1}-${data.sign2} Cusp: The ${data.name}`,
+        url: `https://lunary.app/grimoire/cusps/${cusp.id}`,
+        description: `${data.dates} - ${data.element1} + ${data.element2}`,
+      };
+    }),
+  });
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(cuspsListSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Cusps</span>
-        </nav>
+        <Breadcrumbs
+          items={[{ label: 'Grimoire', href: '/grimoire' }, { label: 'Cusps' }]}
+        />
 
         <h1 className='text-4xl font-light mb-4'>Zodiac Cusps</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
@@ -43,14 +57,16 @@ export default function CuspsIndexPage() {
               <Link
                 key={cusp.id}
                 href={`/grimoire/cusps/${cusp.id}`}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <div className='text-sm text-purple-400 mb-1'>{data.dates}</div>
-                <h3 className='text-lg font-medium mb-1 group-hover:text-purple-300 transition-colors'>
+                <div className='text-sm text-lunary-primary-400 mb-1'>
+                  {data.dates}
+                </div>
+                <h3 className='text-lg font-medium mb-1 group-hover:text-lunary-primary-300 transition-colors'>
                   {data.sign1}-{data.sign2} Cusp
                 </h3>
                 <div className='text-zinc-300 mb-2'>The {data.name}</div>
-                <div className='text-sm text-zinc-500'>
+                <div className='text-sm text-zinc-400'>
                   {data.element1} + {data.element2}
                 </div>
               </Link>
@@ -58,8 +74,8 @@ export default function CuspsIndexPage() {
           })}
         </div>
 
-        <div className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             Are You a Cusp Baby?
           </h2>
           <p className='text-zinc-300 mb-4'>
@@ -67,8 +83,8 @@ export default function CuspsIndexPage() {
             one.
           </p>
           <Link
-            href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            href='/birth-chart'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Check Your Birth Chart
           </Link>

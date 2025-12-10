@@ -429,6 +429,8 @@ export async function sendDiscordAdminNotification(
 
   const color = colorMap[input.priority || 'normal'] || 'info';
 
+  // Convert HTML to Discord markdown - this is display formatting for Discord embeds,
+  // not security sanitization. The output goes to Discord's API, not rendered as HTML.
   const description = input.message
     .replace(/<b>/g, '**')
     .replace(/<\/b>/g, '**')
@@ -436,7 +438,7 @@ export async function sendDiscordAdminNotification(
     .replace(/<\/i>/g, '*')
     .replace(/<br\s*\/?>/g, '\n')
     .replace(/&nbsp;/g, ' ')
-    .replace(/<[^>]+>/g, '');
+    .replace(/<[^>]+>/g, ''); // Strip remaining HTML tags for plain text
 
   // Default to 'todo' for admin notifications (content generation needs action)
   // Only 'emergency'/'high' priority get 'urgent' for bypassing all filters

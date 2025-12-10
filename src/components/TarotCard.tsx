@@ -19,11 +19,11 @@ export function TarotCard({
   return (
     <Link
       href={`/grimoire/tarot/${cardSlug}`}
-      className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-purple-500/50 transition-all group'
+      className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary/50 transition-all group'
     >
       <h3
-        className={`text-lg font-medium mb-2 group-hover:text-purple-400 transition-colors ${
-          variant === 'major' ? 'text-purple-300' : 'text-zinc-100'
+        className={`text-lg font-medium mb-2 group-hover:text-lunary-primary-400 transition-colors ${
+          variant === 'major' ? 'text-lunary-primary-300' : 'text-zinc-100'
         }`}
       >
         {name}
@@ -36,7 +36,7 @@ export function TarotCard({
               key={index}
               className={`text-xs px-2 py-0.5 rounded ${
                 variant === 'major'
-                  ? 'bg-purple-900/20 text-purple-300'
+                  ? 'bg-lunary-primary-900/20 text-lunary-primary-300'
                   : 'bg-zinc-800/50 text-zinc-300'
               }`}
             >

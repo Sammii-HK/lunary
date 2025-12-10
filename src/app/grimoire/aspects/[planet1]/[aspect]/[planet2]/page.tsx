@@ -100,11 +100,6 @@ export default async function AspectPage({
       datePublished='2025-01-01'
       dateModified={new Date().toISOString().split('T')[0]}
       articleSection='Astrological Aspects'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Aspects', href: '/grimoire/aspects' },
-        { label: interp.title },
-      ]}
       whatIs={{
         question: `What does ${PLANET_DISPLAY[p1]} ${aspectData.displayName.toLowerCase()} ${PLANET_DISPLAY[p2]} mean?`,
         answer: interp.summary,
@@ -161,7 +156,7 @@ ${interp.inSynastry}
         { name: 'Aspects Overview', href: '/grimoire/aspects', type: 'Guide' },
       ]}
       ctaText='Discover aspects in your chart'
-      ctaHref='/welcome'
+      ctaHref='/birth-chart'
       sources={[{ name: 'Traditional astrological aspects' }]}
     >
       <div className='mt-8'>
@@ -173,7 +168,7 @@ ${interp.inSynastry}
               href={`/grimoire/aspects/${planet1}/${a}/${planet2}`}
               className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                 a === asp
-                  ? 'bg-purple-500/30 text-purple-200 border border-purple-500/50'
+                  ? 'bg-lunary-primary-900/30 text-lunary-primary-200 border border-lunary-primary-600'
                   : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
               }`}
             >

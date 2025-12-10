@@ -36,7 +36,7 @@ export const TarotWidget = () => {
       return (
         <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden min-h-64'>
           <div className='h-full flex items-center justify-center'>
-            <div className='w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin' />
+            <div className='w-5 h-5 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin' />
           </div>
         </div>
       );
@@ -45,7 +45,7 @@ export const TarotWidget = () => {
       <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden min-h-64'>
         <div className='space-y-3 flex-1 min-w-0 overflow-y-auto overflow-x-hidden'>
           <div className='text-center'>
-            <h4 className='font-semibold text-purple-300 mb-2'>
+            <h4 className='font-semibold text-lunary-accent-300 mb-2'>
               {generalTarot.daily.name}
             </h4>
             <p className='text-xs text-zinc-400 mb-3 break-words'>
@@ -57,15 +57,15 @@ export const TarotWidget = () => {
             {generalTarot.guidance.dailyMessage}
           </p>
 
-          <div className='bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded p-3 border border-purple-500/20'>
-            <p className='text-xs text-purple-200 mb-1 font-medium'>
+          <div className='bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded p-3 border border-lunary-primary-800'>
+            <p className='text-xs text-lunary-accent-200 mb-1 font-medium'>
               Your personalized tarot pattern has been calculated
             </p>
             <p className='text-xs text-zinc-400 mb-2'>
               Unlock it now to see what's influencing you today based on your
               name and birthday. Discover what the cards reveal about you!
             </p>
-            <SmartTrialButton variant='link' />
+            <SmartTrialButton size='sm' />
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ export const TarotWidget = () => {
       <div className='space-y-3 flex-1 min-w-0 overflow-y-auto overflow-x-hidden'>
         <div className='flex items-center justify-between'>
           <h3 className='font-bold'>Personal Tarot Card</h3>
-          <span className='text-xs text-purple-400'>Personalised</span>
+          <span className='text-xs text-lunary-accent'>Personalised</span>
         </div>
 
         <div className='text-center'>

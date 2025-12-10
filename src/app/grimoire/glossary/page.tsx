@@ -9,15 +9,72 @@ import {
 } from '@/lib/schema';
 import {
   ASTROLOGY_GLOSSARY,
-  glossaryCategories,
   type GlossaryTerm,
 } from '@/constants/grimoire/glossary';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+
+const GRIMOIRE_PAGE_LINKS: Record<string, string> = {
+  sun: '/grimoire/astronomy/planets/sun',
+  moon: '/grimoire/astronomy/planets/moon',
+  mercury: '/grimoire/astronomy/planets/mercury',
+  venus: '/grimoire/astronomy/planets/venus',
+  mars: '/grimoire/astronomy/planets/mars',
+  jupiter: '/grimoire/astronomy/planets/jupiter',
+  saturn: '/grimoire/astronomy/planets/saturn',
+  uranus: '/grimoire/astronomy/planets/uranus',
+  neptune: '/grimoire/astronomy/planets/neptune',
+  pluto: '/grimoire/astronomy/planets/pluto',
+  chiron: '/grimoire/astronomy/planets/chiron',
+  lilith: '/grimoire/astronomy/planets/lilith',
+  retrograde: '/grimoire/astronomy/retrogrades',
+  'fire-signs': '/grimoire/zodiac',
+  'earth-signs': '/grimoire/zodiac',
+  'air-signs': '/grimoire/zodiac',
+  'water-signs': '/grimoire/zodiac',
+  house: '/grimoire/houses/overview',
+  'angular-house': '/grimoire/houses/overview',
+  'succedent-house': '/grimoire/houses/overview',
+  'cadent-house': '/grimoire/houses/overview',
+  aspect: '/grimoire/aspects/types',
+  conjunction: '/grimoire/aspects/types',
+  opposition: '/grimoire/aspects/types',
+  trine: '/grimoire/aspects/types',
+  square: '/grimoire/aspects/types',
+  sextile: '/grimoire/aspects/types',
+  'grand-trine': '/grimoire/aspects/types',
+  't-square': '/grimoire/aspects/types',
+  'grand-cross': '/grimoire/aspects/types',
+  transit: '/grimoire/transits',
+  eclipse: '/grimoire/eclipses',
+  'solar-eclipse': '/grimoire/eclipses/solar',
+  'lunar-eclipse': '/grimoire/eclipses/lunar',
+  'north-node': '/grimoire/lunar-nodes',
+  'south-node': '/grimoire/lunar-nodes',
+  'lunar-nodes': '/grimoire/lunar-nodes',
+  midheaven: '/grimoire/houses/overview/10',
+  ic: '/grimoire/houses/overview/4',
+  ascendant: '/grimoire/houses/overview/1',
+  descendant: '/grimoire/houses/overview/7',
+  'saturn-return': '/grimoire/astronomy/retrogrades/saturn',
+  synastry: '/grimoire/compatibility',
+  zodiac: '/grimoire/zodiac',
+  element: '/grimoire/zodiac',
+  modality: '/grimoire/zodiac',
+  cardinal: '/grimoire/zodiac',
+  fixed: '/grimoire/zodiac',
+  mutable: '/grimoire/zodiac',
+  decan: '/grimoire/decans',
+  cusp: '/grimoire/cusps',
+  'natal-chart': '/birth-chart',
+  'birth-chart': '/birth-chart',
+  horoscope: '/horoscope',
+};
 
 export const metadata: Metadata = {
   title:
-    'Astrology Glossary: Complete Dictionary of 80+ Astrological Terms - Lunary',
+    'Astrology Glossary: Complete Dictionary of 90+ Astrological Terms - Lunary',
   description:
-    'Comprehensive astrology glossary with 80+ definitions. Learn about aspects, houses, signs, planets, retrogrades, lunar nodes, synastry, and more. Essential reference for astrology students and enthusiasts.',
+    'Comprehensive astrology glossary with 90+ definitions. Learn about aspects, houses, signs, planets, retrogrades, lunar nodes, synastry, and more. Essential reference for astrology students and enthusiasts.',
   keywords: [
     'astrology glossary',
     'astrological terms',
@@ -30,7 +87,7 @@ export const metadata: Metadata = {
     'natal chart glossary',
   ],
   openGraph: {
-    title: 'Astrology Glossary: 80+ Essential Terms - Lunary',
+    title: 'Astrology Glossary: 90+ Essential Terms - Lunary',
     description:
       'Comprehensive astrology glossary with definitions for all astrological terms.',
     type: 'article',
@@ -42,7 +99,75 @@ export const metadata: Metadata = {
 
 const GLOSSARY_TERMS = ASTROLOGY_GLOSSARY;
 
-const CATEGORIES = [...new Set(GLOSSARY_TERMS.map((t) => t.category))].sort();
+function getTermLink(slug: string): string | null {
+  return GRIMOIRE_PAGE_LINKS[slug] || null;
+}
+
+function TermCard({ term }: { term: GlossaryTerm }) {
+  const grimoireLink = getTermLink(term.slug);
+
+  return (
+    <article
+      id={term.slug}
+      className='p-4 rounded-lg bg-zinc-900/30 border border-zinc-800/50 scroll-mt-24'
+    >
+      <div className='flex items-start justify-between gap-3 mb-2'>
+        <h4 className='font-medium text-zinc-100 text-sm'>{term.term}</h4>
+        {grimoireLink && (
+          <Link
+            href={grimoireLink}
+            className='text-xs px-2 py-1 rounded bg-lunary-primary-900/20 text-lunary-primary-400 hover:bg-lunary-primary-900/40 transition-colors whitespace-nowrap'
+          >
+            Learn more →
+          </Link>
+        )}
+      </div>
+      <p className='text-zinc-400 text-sm leading-relaxed'>{term.definition}</p>
+      {term.example && (
+        <p className='text-zinc-400 text-xs italic mt-2'>
+          Example: {term.example}
+        </p>
+      )}
+      {term.relatedTerms && term.relatedTerms.length > 0 && (
+        <div className='flex flex-wrap gap-2 mt-3'>
+          <span className='text-zinc-400 text-xs'>See also:</span>
+          {term.relatedTerms.map((relatedSlug) => {
+            const relatedTerm = GLOSSARY_TERMS.find(
+              (t) => t.slug === relatedSlug,
+            );
+            const relatedGrimoireLink = getTermLink(relatedSlug);
+
+            if (relatedGrimoireLink) {
+              return (
+                <Link
+                  key={relatedSlug}
+                  href={relatedGrimoireLink}
+                  className='text-xs text-lunary-accent hover:text-lunary-accent/80 transition-colors'
+                >
+                  {relatedTerm?.term || relatedSlug}
+                </Link>
+              );
+            }
+
+            if (relatedTerm) {
+              return (
+                <a
+                  key={relatedSlug}
+                  href={`#${relatedTerm.slug}`}
+                  className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                >
+                  {relatedTerm.term}
+                </a>
+              );
+            }
+
+            return null;
+          })}
+        </div>
+      )}
+    </article>
+  );
+}
 
 export default function GlossaryPage() {
   const glossaryListSchema = createItemListSchema({
@@ -65,14 +190,6 @@ export default function GlossaryPage() {
     }),
   );
 
-  const groupedTerms = CATEGORIES.reduce(
-    (acc, category) => {
-      acc[category] = GLOSSARY_TERMS.filter((t) => t.category === category);
-      return acc;
-    },
-    {} as Record<string, GlossaryTerm[]>,
-  );
-
   return (
     <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(glossaryListSchema)}
@@ -80,45 +197,24 @@ export default function GlossaryPage() {
         <span key={index}>{renderJsonLd(schema)}</span>
       ))}
 
-      {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-500 mb-8'>
-        <Link href='/grimoire' className='hover:text-purple-400'>
-          Grimoire
-        </Link>
-        <span className='mx-2'>→</span>
-        <span className='text-zinc-300'>Glossary</span>
-      </nav>
+      <Breadcrumbs
+        items={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Glossary' },
+        ]}
+      />
 
-      {/* Header */}
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-4'>
           Astrology Glossary
         </h1>
         <p className='text-xl text-zinc-400 leading-relaxed'>
-          Complete dictionary of astrological terms. Reference guide for
-          understanding birth charts, planetary aspects, houses, and more.
+          Complete dictionary of {GLOSSARY_TERMS.length} astrological terms.
+          Reference guide for understanding birth charts, planetary aspects,
+          houses, and more.
         </p>
       </header>
 
-      {/* Quick Navigation */}
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
-          Browse by Category
-        </h2>
-        <div className='flex flex-wrap gap-2'>
-          {CATEGORIES.map((category) => (
-            <a
-              key={category}
-              href={`#${category.toLowerCase().replace(/\s+/g, '-')}`}
-              className='px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-300 text-sm hover:bg-purple-900/30 hover:text-purple-300 transition-colors'
-            >
-              {category}
-            </a>
-          ))}
-        </div>
-      </nav>
-
-      {/* Alphabetical Index */}
       <nav className='mb-8'>
         <div className='flex flex-wrap gap-2 justify-center'>
           {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map((letter) => {
@@ -129,7 +225,7 @@ export default function GlossaryPage() {
               <a
                 key={letter}
                 href={`#letter-${letter}`}
-                className='w-8 h-8 flex items-center justify-center rounded bg-zinc-800 text-zinc-300 text-sm hover:bg-purple-900/30 hover:text-purple-300 transition-colors'
+                className='w-8 h-8 flex items-center justify-center rounded bg-zinc-800 text-zinc-300 text-sm hover:bg-lunary-primary-900/30 hover:text-lunary-primary-300 transition-colors'
               >
                 {letter}
               </a>
@@ -145,7 +241,6 @@ export default function GlossaryPage() {
         </div>
       </nav>
 
-      {/* Alphabetical Listing */}
       <section className='mb-16'>
         <h2 className='text-2xl font-light text-zinc-100 mb-6'>
           All Terms A-Z
@@ -163,23 +258,12 @@ export default function GlossaryPage() {
               id={`letter-${letter}`}
               className='mb-8 scroll-mt-24'
             >
-              <h3 className='text-xl font-medium text-purple-400 mb-4 pb-2 border-b border-zinc-800'>
+              <h3 className='text-xl font-medium text-lunary-primary-400 mb-4 pb-2 border-b border-zinc-800'>
                 {letter}
               </h3>
-              <div className='grid gap-2'>
+              <div className='grid gap-3'>
                 {letterTerms.map((term) => (
-                  <Link
-                    key={term.slug}
-                    href={`/grimoire/glossary/${term.slug}`}
-                    className='p-3 rounded-lg bg-zinc-900/30 hover:bg-zinc-900/50 border border-zinc-800/50 hover:border-purple-500/30 transition-colors group'
-                  >
-                    <span className='font-medium text-zinc-100 group-hover:text-purple-300'>
-                      {term.term}
-                    </span>
-                    <span className='text-zinc-500 text-sm ml-2'>
-                      — {term.definition.slice(0, 80)}...
-                    </span>
-                  </Link>
+                  <TermCard key={term.slug} term={term} />
                 ))}
               </div>
             </div>
@@ -187,60 +271,7 @@ export default function GlossaryPage() {
         })}
       </section>
 
-      {/* Terms by Category */}
-      {CATEGORIES.map((category) => (
-        <section
-          key={category}
-          id={category.toLowerCase().replace(/\s+/g, '-')}
-          className='mb-12'
-        >
-          <h2 className='text-2xl font-light text-zinc-100 mb-6 pb-2 border-b border-zinc-800'>
-            {category}
-          </h2>
-          <div className='space-y-6'>
-            {groupedTerms[category].map((term) => (
-              <article
-                key={term.slug}
-                id={term.slug}
-                className='bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-6 scroll-mt-24'
-              >
-                <h3 className='text-xl font-medium text-zinc-100 mb-2'>
-                  {term.term}
-                </h3>
-                <p className='text-zinc-300 leading-relaxed mb-3'>
-                  {term.definition}
-                </p>
-                {term.relatedTerms && term.relatedTerms.length > 0 && (
-                  <div className='flex flex-wrap gap-2'>
-                    <span className='text-zinc-500 text-sm'>See also:</span>
-                    {term.relatedTerms.map((related) => {
-                      const relatedTerm = GLOSSARY_TERMS.find(
-                        (t) => t.term === related,
-                      );
-                      return relatedTerm ? (
-                        <a
-                          key={related}
-                          href={`#${relatedTerm.slug}`}
-                          className='text-sm text-purple-400 hover:text-purple-300 transition-colors'
-                        >
-                          {related}
-                        </a>
-                      ) : (
-                        <span key={related} className='text-sm text-zinc-500'>
-                          {related}
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
-              </article>
-            ))}
-          </div>
-        </section>
-      ))}
-
-      {/* CTA */}
-      <section className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           See These Terms in Action
         </h2>
@@ -250,7 +281,7 @@ export default function GlossaryPage() {
         </p>
         <Link
           href='/birth-chart'
-          className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+          className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
         >
           Calculate Your Birth Chart Free
         </Link>

@@ -5,7 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -13,21 +13,25 @@ const buttonVariants = cva(
         destructive:
           'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         outline:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+          'border border-lunary-primary-700 bg-transparent text-lunary-primary-300 hover:bg-lunary-primary-900 hover:border-lunary-primary-600 transition-all',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        ghost:
+          'text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors',
         link: 'text-primary underline-offset-4 hover:underline',
         lunary:
-          'bg-lunary-violet/10 text-lunary-violet border border-lunary-violet/20 hover:bg-lunary-violet/20 hover:border-lunary-violet/40',
-        'lunary-solid': 'bg-lunary-violet text-white hover:bg-lunary-violet/90',
+          'bg-lunary-primary-900 text-lunary-accent border border-lunary-primary-700 hover:bg-lunary-primary-800 hover:border-lunary-primary-600 hover:shadow-[0_0_20px_#8458D866] transition-all',
+        'lunary-solid':
+          'bg-lunary-primary text-white font-semibold hover:brightness-110 hover:shadow-[0_0_20px_#7B7BE880,0_0_40px_#7B7BE840] transition-all',
         'lunary-soft':
-          'bg-lunary-lavender/10 text-lunary-lavender border border-lunary-lavender/20 hover:bg-lunary-lavender/15',
+          'bg-lunary-accent-900 text-lunary-accent border border-lunary-accent-700 hover:bg-lunary-accent-800 hover:text-white transition-colors',
+        'lunary-white':
+          'bg-white text-black font-medium hover:bg-gray-100 transition-colors',
       },
       size: {
         default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
+        sm: 'h-9 px-3',
+        lg: 'h-11 px-8',
         icon: 'h-10 w-10',
       },
     },
@@ -39,7 +43,8 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }

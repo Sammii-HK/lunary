@@ -75,7 +75,7 @@ export default async function SignHoroscopePage({
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-500 mb-8'>
+        <nav className='text-sm text-zinc-400 mb-8'>
           <Link href='/horoscope' className='hover:text-zinc-300'>
             Horoscope
           </Link>
@@ -102,12 +102,12 @@ export default async function SignHoroscopePage({
               <Link
                 key={year}
                 href={`/horoscope/${sign}/${year}`}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 hover:bg-zinc-900 transition-all text-center group'
+                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all text-center group'
               >
-                <div className='text-2xl font-light text-zinc-100 group-hover:text-purple-300 transition-colors'>
+                <div className='text-2xl font-light text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
                   {year}
                 </div>
-                <div className='text-sm text-zinc-500 mt-1'>
+                <div className='text-sm text-zinc-400 mt-1'>
                   {signName} Horoscopes
                 </div>
               </Link>
@@ -132,8 +132,8 @@ export default async function SignHoroscopePage({
           </div>
         </section>
 
-        <section className='p-6 rounded-lg border border-purple-500/30 bg-purple-500/10'>
-          <h2 className='text-xl font-medium text-purple-300 mb-2'>
+        <section className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
             Get Personalized {signName} Insights
           </h2>
           <p className='text-zinc-300 mb-4'>
@@ -141,8 +141,8 @@ export default async function SignHoroscopePage({
             based on your complete birth chart.
           </p>
           <Link
-            href='/welcome'
-            className='inline-flex px-6 py-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-medium transition-colors'
+            href='/horoscope'
+            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
             Get Your Personal Horoscope
           </Link>

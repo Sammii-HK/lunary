@@ -2,17 +2,64 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { MoonPhaseLabels } from '../../../utils/moon/moonPhases';
-import {
-  zodiacSigns,
-  bodiesSymbols,
-  zodiacSymbol,
-} from '../../../utils/zodiac/zodiac';
+import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 import {
   ExpandableCard,
   ExpandableCardHeader,
 } from '@/components/ui/expandable-card';
+
+const ZODIAC_ELEMENTS: Record<string, string> = {
+  aries: 'Fire',
+  taurus: 'Earth',
+  gemini: 'Air',
+  cancer: 'Water',
+  leo: 'Fire',
+  virgo: 'Earth',
+  libra: 'Air',
+  scorpio: 'Water',
+  sagittarius: 'Fire',
+  capricorn: 'Earth',
+  aquarius: 'Air',
+  pisces: 'Water',
+};
+
+const NAMED_FULL_MOONS = [
+  'wolf moon',
+  'snow moon',
+  'worm moon',
+  'pink moon',
+  'flower moon',
+  'strawberry moon',
+  'buck moon',
+  'sturgeon moon',
+  'harvest moon',
+  'hunter moon',
+  'beaver moon',
+  'cold moon',
+];
+
+function getMoonPhaseIconPath(phase: string | undefined): string {
+  if (!phase) return 'full-moon';
+  const lower = phase.toLowerCase();
+  if (NAMED_FULL_MOONS.some((name) => lower.includes(name))) return 'full-moon';
+  if (lower.includes('new')) return 'new-moon';
+  if (lower.includes('waxing') && lower.includes('crescent'))
+    return 'waxing-cresent-moon';
+  if (lower.includes('first quarter')) return 'first-quarter';
+  if (lower.includes('waxing') && lower.includes('gibbous'))
+    return 'waxing-gibbous-moon';
+  if (lower.includes('full')) return 'full-moon';
+  if (lower.includes('waning') && lower.includes('gibbous'))
+    return 'waning-gibbous-moon';
+  if (lower.includes('last quarter') || lower.includes('third quarter'))
+    return 'last-quarter';
+  if (lower.includes('waning') && lower.includes('crescent'))
+    return 'waning-cresent-moon';
+  return 'full-moon';
+}
 
 interface Spell {
   id: string;
@@ -71,8 +118,8 @@ const getMoonPhaseGuidance = (phase: MoonPhaseLabels, sign: string): string => {
 };
 
 const getZodiacInfo = (sign: string) => {
-  const signKey = sign.toLowerCase() as keyof typeof zodiacSigns;
-  const signData = zodiacSigns[signKey];
+  const signKey = sign.toLowerCase();
+  const element = ZODIAC_ELEMENTS[signKey] || 'Unknown';
 
   const rulingPlanets: Record<string, string> = {
     aries: 'Mars',
@@ -136,8 +183,8 @@ const getZodiacInfo = (sign: string) => {
     zodiacSymbol[signKey as keyof typeof zodiacSymbol] || '';
 
   return {
-    element: signData?.element || 'Unknown',
-    elementSymbol: elementSymbols[signData?.element || ''] || '',
+    element,
+    elementSymbol: elementSymbols[element] || '',
     rulingPlanet: rulingPlanets[signKey] || 'Unknown',
     rulingPlanetSymbol:
       bodiesSymbols[
@@ -186,10 +233,10 @@ export const MoonPreview = () => {
   const {
     currentMoonPhase,
     currentMoonConstellationPosition,
-    symbol,
     moonIllumination,
     moonAge,
   } = useAstronomyContext();
+  const iconPath = getMoonPhaseIconPath(currentMoonPhase);
   const [spells, setSpells] = useState<Spell[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -238,7 +285,7 @@ export const MoonPreview = () => {
 
   if (!currentMoonPhase) {
     return (
-      <div className='py-3 px-4 border border-stone-800 rounded-md animate-pulse'>
+      <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse'>
         <div className='h-5 w-32 bg-zinc-800 rounded' />
       </div>
     );
@@ -247,7 +294,14 @@ export const MoonPreview = () => {
   const preview = (
     <>
       <ExpandableCardHeader
-        icon={<span className='text-xl'>{symbol}</span>}
+        icon={
+          <Image
+            src={`/icons/moon-phases/${iconPath}.svg`}
+            alt={currentMoonPhase}
+            width={24}
+            height={24}
+          />
+        }
         title={currentMoonPhase}
         subtitle={
           currentMoonConstellationPosition
@@ -255,7 +309,7 @@ export const MoonPreview = () => {
             : `${illuminationDisplay}% illuminated`
         }
       />
-      <p className='text-xs text-zinc-500 mt-1'>
+      <p className='text-xs text-zinc-400 mt-1'>
         {nextPhaseInfo.days} {nextPhaseInfo.days === 1 ? 'day' : 'days'} until{' '}
         {nextPhaseInfo.phase}
       </p>
@@ -268,25 +322,25 @@ export const MoonPreview = () => {
         <div className='grid grid-cols-4 gap-2 text-center'>
           <div>
             <span className='block text-base'>{zodiacInfo.elementSymbol}</span>
-            <span className='text-xs text-zinc-500'>{zodiacInfo.element}</span>
+            <span className='text-xs text-zinc-400'>{zodiacInfo.element}</span>
           </div>
           <div>
             <span className='block text-base font-astro'>
               {zodiacInfo.rulingPlanetSymbol}
             </span>
-            <span className='text-xs text-zinc-500'>
+            <span className='text-xs text-zinc-400'>
               {zodiacInfo.rulingPlanet}
             </span>
           </div>
           <div>
             <span className='block text-base'>{zodiacInfo.modalitySymbol}</span>
-            <span className='text-xs text-zinc-500'>{zodiacInfo.modality}</span>
+            <span className='text-xs text-zinc-400'>{zodiacInfo.modality}</span>
           </div>
           <div>
             <span className='block text-base font-astro'>
               {zodiacInfo.zodiacSymbol}
             </span>
-            <span className='text-xs text-zinc-500'>{zodiacInfo.symbol}</span>
+            <span className='text-xs text-zinc-400'>{zodiacInfo.symbol}</span>
           </div>
         </div>
       )}
@@ -305,7 +359,7 @@ export const MoonPreview = () => {
         </div>
       ) : spells.length > 0 ? (
         <div>
-          <h4 className='text-xs font-medium text-purple-400 uppercase tracking-wide mb-2'>
+          <h4 className='text-xs font-medium text-lunary-accent uppercase tracking-wide mb-2'>
             Recommended Spells
           </h4>
           <div className='space-y-2'>
@@ -316,7 +370,7 @@ export const MoonPreview = () => {
                 className='block p-2 rounded bg-zinc-800/50 hover:bg-zinc-800 transition-colors'
               >
                 <p className='text-sm text-zinc-200'>{spell.title}</p>
-                <p className='text-xs text-zinc-500'>{spell.purpose}</p>
+                <p className='text-xs text-zinc-400'>{spell.purpose}</p>
               </Link>
             ))}
           </div>
@@ -325,7 +379,7 @@ export const MoonPreview = () => {
 
       <Link
         href='/grimoire/moon'
-        className='inline-block text-xs text-purple-400 hover:text-purple-300 transition-colors'
+        className='inline-block text-xs text-lunary-accent hover:text-lunary-accent-300 transition-colors'
       >
         Learn more about moon phases →
       </Link>

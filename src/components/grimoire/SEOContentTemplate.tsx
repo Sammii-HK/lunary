@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
 import {
@@ -10,6 +10,32 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 import { ParsedMarkdown } from '@/utils/markdown';
+
+/**
+ * Format a URL segment into a human-readable label
+ * "the-fool" → "The Fool"
+ * "birth-chart" → "Birth Chart"
+ */
+function formatSegmentLabel(segment: string): string {
+  return segment
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Auto-generate breadcrumbs from a canonical URL
+ * https://lunary.app/grimoire/zodiac/aries → [Grimoire, Zodiac, Aries]
+ */
+function generateBreadcrumbsFromUrl(canonicalUrl: string): BreadcrumbItem[] {
+  const path = canonicalUrl.replace(/^https?:\/\/[^/]+/, '');
+  const segments = path.split('/').filter(Boolean);
+
+  return segments.map((segment, index) => ({
+    label: formatSegmentLabel(segment),
+    href: '/' + segments.slice(0, index + 1).join('/'),
+  }));
+}
 
 export interface FAQItem {
   question: string;
@@ -60,6 +86,9 @@ export interface SEOContentTemplateProps {
   // FAQs
   faqs?: FAQItem[];
 
+  // Cosmic Connections (custom component slot)
+  cosmicConnections?: React.ReactNode;
+
   // Internal links
   internalLinks?: Array<{ text: string; href: string }>;
 
@@ -107,6 +136,7 @@ export function SEOContentTemplate({
   glyphs,
   examplePlacements,
   faqs,
+  cosmicConnections,
   internalLinks,
   breadcrumbs,
   ctaText,
@@ -115,11 +145,20 @@ export function SEOContentTemplate({
   sources,
   children,
 }: SEOContentTemplateProps) {
+  // Auto-generate breadcrumbs from URL if not provided
+  const autoBreadcrumbs = useMemo(() => {
+    if (breadcrumbs && breadcrumbs.length > 0) {
+      return breadcrumbs;
+    }
+    return generateBreadcrumbsFromUrl(canonicalUrl);
+  }, [canonicalUrl, breadcrumbs]);
+
   const faqSchema = faqs ? createFAQPageSchema(faqs) : null;
 
   const articleImage = image || `https://lunary.app/api/og/cosmic`;
   const articleImageAlt = imageAlt || `${h1} - Lunary Grimoire`;
 
+  // Create article schema with auto-speakable for AI/voice results
   const articleSchema = createArticleSchema({
     headline: h1,
     description,
@@ -130,6 +169,24 @@ export function SEOContentTemplate({
     image: articleImage,
     section: articleSection,
   });
+
+  // Add speakable specification for Google AI Overviews and voice assistants
+  const speakableSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: h1,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: [
+        'h1',
+        '.tldr',
+        '.what-is-answer',
+        'header p',
+        'section > p:first-of-type',
+      ],
+    },
+    url: canonicalUrl,
+  };
 
   const imageSchema = createImageObjectSchema({
     url: articleImage,
@@ -142,11 +199,10 @@ export function SEOContentTemplate({
       {renderJsonLd(faqSchema)}
       {renderJsonLd(articleSchema)}
       {renderJsonLd(imageSchema)}
+      {renderJsonLd(speakableSchema)}
 
-      {/* Breadcrumbs */}
-      {breadcrumbs && breadcrumbs.length > 0 && (
-        <Breadcrumbs items={breadcrumbs} />
-      )}
+      {/* Breadcrumbs - auto-generated from URL if not provided */}
+      {autoBreadcrumbs.length > 0 && <Breadcrumbs items={autoBreadcrumbs} />}
 
       {/* H1 */}
       <header className='mb-8'>
@@ -164,14 +220,16 @@ export function SEOContentTemplate({
           <h2 className='text-2xl font-medium text-zinc-100 mb-3'>
             {whatIs.question}
           </h2>
-          <p className='text-zinc-300 leading-relaxed'>{whatIs.answer}</p>
+          <p className='what-is-answer text-zinc-300 leading-relaxed'>
+            {whatIs.answer}
+          </p>
         </section>
       )}
 
       {/* TL;DR Quick Meaning Block */}
       {tldr && (
-        <div className='bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-8'>
-          <h2 className='text-xl font-medium text-purple-300 mb-3'>
+        <div className='tldr bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-8'>
+          <h2 className='text-xl font-medium text-lunary-accent-300 mb-3'>
             Quick Meaning
           </h2>
           <p className='text-zinc-200 leading-relaxed'>{tldr}</p>
@@ -204,7 +262,7 @@ export function SEOContentTemplate({
           <ul className='space-y-2'>
             {emotionalThemes.map((theme, index) => (
               <li key={index} className='flex items-start gap-3 text-zinc-300'>
-                <span className='text-purple-400 mt-1'>•</span>
+                <span className='text-lunary-accent mt-1'>•</span>
                 <span>{theme}</span>
               </li>
             ))}
@@ -242,7 +300,7 @@ export function SEOContentTemplate({
               <Link
                 key={index}
                 href={`/grimoire/zodiac/${sign.toLowerCase()}`}
-                className='px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-purple-300 transition-colors'
+                className='px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors'
               >
                 {sign}
               </Link>
@@ -402,7 +460,7 @@ export function SEOContentTemplate({
             {journalPrompts.map((prompt, index) => (
               <div
                 key={index}
-                className='bg-purple-900/10 border border-purple-500/20 rounded-lg p-4'
+                className='bg-lunary-primary-950 border border-lunary-primary-800 rounded-lg p-4'
               >
                 <p className='text-zinc-300 leading-relaxed italic'>
                   "{prompt}"
@@ -424,11 +482,11 @@ export function SEOContentTemplate({
               <Link
                 key={index}
                 href={item.href}
-                className='block p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg hover:bg-zinc-800/50 hover:border-purple-500/50 transition-colors'
+                className='block p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors'
               >
                 <div className='flex items-center justify-between'>
                   <span className='text-zinc-300 font-medium'>{item.name}</span>
-                  <span className='text-xs text-zinc-500 uppercase'>
+                  <span className='text-xs text-zinc-400 uppercase'>
                     {item.type}
                   </span>
                 </div>
@@ -449,7 +507,7 @@ export function SEOContentTemplate({
               <Link
                 key={index}
                 href={link.href}
-                className='px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-purple-300 transition-colors'
+                className='px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors'
               >
                 {link.text}
               </Link>
@@ -460,16 +518,19 @@ export function SEOContentTemplate({
 
       {/* CTA */}
       {ctaText && ctaHref && (
-        <section className='bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-lg p-8 text-center'>
+        <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-8 text-center'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-3'>{ctaText}</h2>
           <Link
             href={ctaHref}
-            className='inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors'
+            className='inline-block px-6 py-3 bg-lunary-primary hover:bg-lunary-primary-400 text-white rounded-lg font-medium transition-colors'
           >
             Get Started
           </Link>
         </section>
       )}
+
+      {/* Cosmic Connections */}
+      {cosmicConnections}
 
       {/* FAQs */}
       {faqs && faqs.length > 0 && (
@@ -499,7 +560,7 @@ export function SEOContentTemplate({
       {/* E-A-T Credibility Section */}
       {showEAT && (
         <footer className='mt-12 pt-8 border-t border-zinc-800/50'>
-          <div className='space-y-4 text-sm text-zinc-500'>
+          <div className='space-y-4 text-sm text-zinc-400'>
             <div className='flex flex-wrap gap-x-6 gap-y-2'>
               <span>
                 <strong className='text-zinc-400'>Written by:</strong> Sammii,
@@ -534,7 +595,7 @@ export function SEOContentTemplate({
                           href={source.url}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='text-purple-400 hover:text-purple-300 transition-colors'
+                          className='text-lunary-accent hover:text-lunary-accent-300 transition-colors'
                         >
                           {source.name}
                         </a>
