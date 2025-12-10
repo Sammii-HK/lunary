@@ -13,10 +13,10 @@ export const metadata: Metadata = {
     siteName: 'Lunary',
     images: [
       {
-        url: '/api/og/cosmic',
+        url: '/api/og/blog',
         width: 1200,
         height: 630,
-        alt: 'Lunary Blog',
+        alt: 'Weekly Astrology Forecast - Lunary Blog',
       },
     ],
     locale: 'en_US',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: 'Blog - Lunary',
     description:
       'Weekly cosmic insights, planetary highlights, moon phases, and astrological guidance.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/blog'],
   },
   alternates: {
     canonical: 'https://lunary.app/blog',

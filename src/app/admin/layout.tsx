@@ -47,9 +47,6 @@ export function generateMetadata(): Metadata {
     },
     other: {
       'mobile-web-app-capable': 'yes',
-      'apple-mobile-web-app-capable': 'yes',
-      'apple-mobile-web-app-status-bar-style': 'black-translucent',
-      'apple-mobile-web-app-title': 'Lunary Admin',
       'application-name': 'Lunary Admin',
     },
   };

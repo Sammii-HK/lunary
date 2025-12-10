@@ -7,6 +7,7 @@ import {
   createFAQPageSchema,
   renderJsonLd,
 } from '@/lib/schema';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Moon Phases: The Complete Guide to Lunar Cycles & Rituals - Lunary',
@@ -336,18 +337,12 @@ export default function MoonPhasesGuidePage() {
           rituals for every part of the cycle.
         </p>
         <div className='flex flex-wrap gap-4'>
-          <Link
-            href='/moon'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Today&apos;s Moon Phase
-          </Link>
-          <Link
-            href='#eight-phases'
-            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
-          >
-            Explore the Phases
-          </Link>
+          <Button asChild variant='lunary-solid' size='lg'>
+            <Link href='/moon'>Today&apos;s Moon Phase</Link>
+          </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='#eight-phases'>Explore the Phases</Link>
+          </Button>
         </div>
       </header>
 

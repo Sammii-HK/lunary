@@ -6,9 +6,9 @@ export default function ComparisonLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      {children}
+    <div className='flex flex-col min-h-screen'>
+      <main className='flex-1'>{children}</main>
       <MarketingFooter />
-    </>
+    </div>
   );
 }

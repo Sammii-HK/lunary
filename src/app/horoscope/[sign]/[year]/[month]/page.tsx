@@ -197,6 +197,11 @@ Wearing or surrounding yourself with ${theme.powerColor} can help align your ene
           type: 'Zodiac',
         },
         {
+          name: `${monthName} Moon Phases`,
+          href: `/grimoire/moon/phases`,
+          type: 'Lunar',
+        },
+        {
           name: `${SIGN_DISPLAY_NAMES[prevSign]} Horoscope ${monthName}`,
           href: `/horoscope/${prevSign}/${year}/${month}`,
           type: 'Horoscope',
@@ -210,6 +215,11 @@ Wearing or surrounding yourself with ${theme.powerColor} can help align your ene
           name: `${ruler} in Astrology`,
           href: `/grimoire/astronomy/planets/${ruler.toLowerCase()}`,
           type: 'Planet',
+        },
+        {
+          name: 'Current Transits',
+          href: `/cosmic-state`,
+          type: 'Transits',
         },
       ]}
       ctaText={`Get your personalized ${signName} reading`}

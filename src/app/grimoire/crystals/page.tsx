@@ -25,12 +25,21 @@ export const metadata: Metadata = {
     description:
       'Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic.',
     type: 'article',
+    images: [
+      {
+        url: '/api/og/grimoire/crystals',
+        width: 1200,
+        height: 630,
+        alt: 'Crystals A-Z Guide - Lunary',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Crystals A-Z: Meanings, Properties & Healing Uses - Lunary',
     description:
       'Comprehensive crystal guide with daily selections, categories, and how to work with crystals for healing and magic.',
+    images: ['/api/og/grimoire/crystals'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/crystals',

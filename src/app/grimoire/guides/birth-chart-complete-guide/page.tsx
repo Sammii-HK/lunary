@@ -8,6 +8,7 @@ import {
   createFAQPageSchema,
   renderJsonLd,
 } from '@/lib/schema';
+import { Button } from '@/components/ui/button';
 
 const currentYear = new Date().getFullYear();
 
@@ -146,18 +147,12 @@ export default function BirthChartCompleteGuidePage() {
           basics to advanced techniques.
         </p>
         <div className='flex flex-wrap gap-4'>
-          <Link
-            href='/birth-chart'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Get Your Birth Chart
-          </Link>
-          <Link
-            href='#what-is-birth-chart'
-            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
-          >
-            Start Reading
-          </Link>
+          <Button asChild variant='lunary-solid' size='lg'>
+            <Link href='/birth-chart'>Get Your Birth Chart</Link>
+          </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='#what-is-birth-chart'>Start Reading</Link>
+          </Button>
         </div>
       </header>
 
@@ -332,12 +327,9 @@ export default function BirthChartCompleteGuidePage() {
           </p>
         </div>
 
-        <Link
-          href='/birth-chart'
-          className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-        >
-          Get Your Personalized Birth Chart →
-        </Link>
+        <Button asChild variant='lunary-solid' size='lg'>
+          <Link href='/birth-chart'>Get Your Personalized Birth Chart →</Link>
+        </Button>
       </section>
 
       {/* Section 3: Big Three */}

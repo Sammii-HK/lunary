@@ -828,6 +828,76 @@ export default async function BlogPostPage({
           </div>
         </section>
 
+        <section className='mt-12 pt-8 border-t border-zinc-800'>
+          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+            Learn More in the Grimoire
+          </h2>
+          <p className='text-sm text-zinc-400 mb-6'>
+            Deepen your understanding of the cosmic energies mentioned in this
+            forecast.
+          </p>
+          <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-3'>
+            <Link
+              href='/grimoire/astronomy/planets'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>
+                Planetary Meanings
+              </span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Understand planet influences
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/moon/phases'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>Moon Phases</span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Work with lunar energy
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/astronomy/retrogrades'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>
+                Retrogrades Guide
+              </span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Navigate retrograde periods
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/zodiac'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>Zodiac Signs</span>
+              <p className='text-xs text-zinc-500 mt-1'>Explore all 12 signs</p>
+            </Link>
+            <Link
+              href='/grimoire/aspects/types'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>Aspect Types</span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Learn about planetary aspects
+              </p>
+            </Link>
+            <Link
+              href='/birth-chart'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>
+                Your Birth Chart
+              </span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Personalized cosmic insights
+              </p>
+            </Link>
+          </div>
+        </section>
+
         {/* Breadcrumb Schema */}
         <script
           type='application/ld+json'

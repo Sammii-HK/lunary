@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
@@ -21,6 +22,21 @@ export const metadata: Metadata = {
     description:
       'In-depth guides to astrology, tarot, crystals, and moon phases.',
     url: 'https://lunary.app/grimoire/guides',
+    images: [
+      {
+        url: '/api/og/grimoire/guides',
+        width: 1200,
+        height: 630,
+        alt: 'Astrology & Witchcraft Guides - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
+    description:
+      'In-depth guides to astrology, tarot, crystals, and moon phases. Comprehensive pillar content for beginners and advanced practitioners.',
+    images: ['/api/og/grimoire/guides'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/guides',
@@ -232,12 +248,9 @@ export default function GuidesIndexPage() {
             <p className='text-zinc-400 mb-4'>
               Want personalized insights based on your birth chart?
             </p>
-            <Link
-              href='/birth-chart'
-              className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-            >
-              Calculate Your Birth Chart Free
-            </Link>
+            <Button asChild variant='lunary-solid' size='lg'>
+              <Link href='/birth-chart'>Calculate Your Birth Chart Free</Link>
+            </Button>
           </section>
         </div>
       </SEOContentTemplate>

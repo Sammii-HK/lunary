@@ -7,6 +7,7 @@ import {
   createFAQPageSchema,
   renderJsonLd,
 } from '@/lib/schema';
+import { Button } from '@/components/ui/button';
 
 const currentYear = new Date().getFullYear();
 
@@ -305,18 +306,12 @@ export default function TarotCompleteGuidePage() {
           meaning behind every card.
         </p>
         <div className='flex flex-wrap gap-4'>
-          <Link
-            href='/tarot'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Get a Free Tarot Reading
-          </Link>
-          <Link
-            href='#major-arcana'
-            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
-          >
-            Start Learning
-          </Link>
+          <Button asChild variant='lunary-solid' size='lg'>
+            <Link href='/tarot'>Get a Free Tarot Reading</Link>
+          </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='#major-arcana'>Start Learning</Link>
+          </Button>
         </div>
       </header>
 

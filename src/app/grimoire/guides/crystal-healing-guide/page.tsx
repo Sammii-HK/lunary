@@ -7,6 +7,7 @@ import {
   createFAQPageSchema,
   renderJsonLd,
 } from '@/lib/schema';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title:
@@ -261,18 +262,12 @@ export default function CrystalHealingGuidePage() {
           choosing and cleansing to programming and placement.
         </p>
         <div className='flex flex-wrap gap-4'>
-          <Link
-            href='/grimoire/crystals'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Explore Crystal Library
-          </Link>
-          <Link
-            href='#essential-crystals'
-            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
-          >
-            Start Learning
-          </Link>
+          <Button asChild variant='lunary-solid' size='lg'>
+            <Link href='/grimoire/crystals'>Explore Crystal Library</Link>
+          </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='#essential-crystals'>Start Learning</Link>
+          </Button>
         </div>
       </header>
 

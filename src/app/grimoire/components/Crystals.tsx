@@ -27,7 +27,8 @@ const Crystals = () => {
       .then((data) => {
         const categories = data.categories.map((categoryName: string) => {
           const crystalsInCategory = data.crystals.filter(
-            (c: Crystal & { category?: string }) => c.category === categoryName,
+            (c: Crystal & { categories?: string[] }) =>
+              c.categories?.includes(categoryName),
           );
           return {
             name: categoryName,

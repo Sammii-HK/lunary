@@ -276,14 +276,17 @@ export function GrimoireSearch({
       if (
         crystal.name.toLowerCase().includes(query) ||
         crystal.chakras?.some((c: string) => c.toLowerCase().includes(query)) ||
-        crystal.properties?.healing?.toLowerCase().includes(query)
+        crystal.properties?.some((p: string) =>
+          p.toLowerCase().includes(query),
+        ) ||
+        crystal.description?.toLowerCase().includes(query)
       ) {
         results.push({
           type: 'crystal',
           title: `Crystal - ${crystal.name}`,
           section: 'crystals',
           href: `/grimoire/crystals/${crystal.id}`,
-          match: crystal.properties?.healing?.slice(0, 80),
+          match: crystal.description?.slice(0, 80),
         });
       }
     });

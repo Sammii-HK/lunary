@@ -98,9 +98,6 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     other: {
       'mobile-web-app-capable': 'yes',
-      'apple-mobile-web-app-capable': 'yes',
-      'apple-mobile-web-app-status-bar-style': 'black-translucent',
-      'apple-mobile-web-app-title': 'Lunary',
       'application-name': 'Lunary',
       'msapplication-TileColor': '#18181b',
       'msapplication-config': '/browserconfig.xml',

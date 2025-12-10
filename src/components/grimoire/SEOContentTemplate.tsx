@@ -103,6 +103,10 @@ export interface SEOContentTemplateProps {
   showEAT?: boolean;
   sources?: Array<{ name: string; url?: string }>;
 
+  // Entity linking for schema (links Article to Thing entity)
+  entityId?: string;
+  entityName?: string;
+
   // Children (for custom content)
   children?: React.ReactNode;
 }
@@ -143,6 +147,8 @@ export function SEOContentTemplate({
   ctaHref,
   showEAT = true,
   sources,
+  entityId,
+  entityName,
   children,
 }: SEOContentTemplateProps) {
   // Auto-generate breadcrumbs from URL if not provided
@@ -168,6 +174,13 @@ export function SEOContentTemplate({
     dateModified,
     image: articleImage,
     section: articleSection,
+    ...(entityId &&
+      entityName && {
+        aboutEntity: {
+          '@id': entityId,
+          name: entityName,
+        },
+      }),
   });
 
   // Add speakable specification for Google AI Overviews and voice assistants

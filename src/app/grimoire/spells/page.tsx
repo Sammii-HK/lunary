@@ -25,6 +25,21 @@ export const metadata: Metadata = {
     siteName: 'Lunary',
     locale: 'en_US',
     type: 'article',
+    images: [
+      {
+        url: '/api/og/grimoire/spells',
+        width: 1200,
+        height: 630,
+        alt: 'Spell Collection - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Spells for Beginners: Love, Protection & Prosperity Magic - Lunary',
+    description:
+      'Explore our collection of spells for protection, love, prosperity, healing, and more.',
+    images: ['/api/og/grimoire/spells'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/spells',

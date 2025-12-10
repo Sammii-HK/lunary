@@ -25,12 +25,21 @@ export const metadata: Metadata = {
     description:
       "Explore moon phases, full moon names, and lunar wisdom. Learn about the moon's influence on magic and daily life.",
     type: 'article',
+    images: [
+      {
+        url: '/api/og/grimoire/moon',
+        width: 1200,
+        height: 630,
+        alt: 'Moon Phases Guide - Lunary',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Moon Phases: New, Full, Waxing & Waning Meanings - Lunary',
     description:
       "Explore moon phases, full moon names, and lunar wisdom. Learn about the moon's influence on magic and daily life.",
+    images: ['/api/og/grimoire/moon'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/moon',
