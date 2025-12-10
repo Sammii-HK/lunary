@@ -957,6 +957,39 @@ const BirthChartPage = () => {
 
   return (
     <div className='h-full space-y-6 p-4 overflow-auto'>
+      {/* Internal Links for SEO */}
+      <nav className='mb-4 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800'>
+        <p className='text-sm text-zinc-400 mb-3'>
+          Learn more about your cosmic blueprint:
+        </p>
+        <div className='flex flex-wrap gap-2'>
+          <Link
+            href='/grimoire/birth-chart'
+            className='text-xs px-3 py-1.5 bg-lunary-primary-900/30 text-lunary-primary-300 border border-lunary-primary-700/50 rounded-full hover:bg-lunary-primary-900/50 transition-colors'
+          >
+            Birth Chart Guide
+          </Link>
+          <Link
+            href='/grimoire/astronomy/planets'
+            className='text-xs px-3 py-1.5 bg-lunary-accent-900/30 text-lunary-accent-300 border border-lunary-accent-700/50 rounded-full hover:bg-lunary-accent-900/50 transition-colors'
+          >
+            Planet Meanings
+          </Link>
+          <Link
+            href='/grimoire/houses/overview/first'
+            className='text-xs px-3 py-1.5 bg-lunary-secondary-900/30 text-lunary-secondary-300 border border-lunary-secondary-700/50 rounded-full hover:bg-lunary-secondary-900/50 transition-colors'
+          >
+            The 12 Houses
+          </Link>
+          <Link
+            href='/grimoire/zodiac'
+            className='text-xs px-3 py-1.5 bg-lunary-rose-900/30 text-lunary-rose-300 border border-lunary-rose-700/50 rounded-full hover:bg-lunary-rose-900/50 transition-colors'
+          >
+            Zodiac Signs
+          </Link>
+        </div>
+      </nav>
+
       <BirthChart
         birthChart={birthChartData}
         userName={userName}

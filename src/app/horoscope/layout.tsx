@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     siteName: 'Lunary',
     images: [
       {
-        url: '/api/og/cosmic',
+        url: '/api/og/horoscope',
         width: 1200,
         height: 630,
         alt: 'Lunary Personalized Horoscope',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     title: 'Daily Horoscope [Personalized to Your Birth Chart] | Lunary',
     description:
       'Not generic zodiac predictions. YOUR daily horoscope calculated from your exact birth time. Try free for 7 days.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/horoscope'],
   },
   robots: {
     index: true,

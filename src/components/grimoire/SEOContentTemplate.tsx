@@ -545,6 +545,73 @@ export function SEOContentTemplate({
       {/* Cosmic Connections */}
       {cosmicConnections}
 
+      {/* Universal Grimoire Exploration - always shown */}
+      <section className='mt-12 pt-8 border-t border-zinc-800'>
+        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          Explore the Grimoire
+        </h2>
+        <p className='text-sm text-zinc-400 mb-4'>
+          Continue your cosmic journey through Lunary&apos;s library of
+          astrological wisdom.
+        </p>
+        <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
+          <Link
+            href='/birth-chart'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Birth Chart
+          </Link>
+          <Link
+            href='/grimoire/zodiac'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Zodiac Signs
+          </Link>
+          <Link
+            href='/grimoire/astronomy/planets'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Planets
+          </Link>
+          <Link
+            href='/grimoire/tarot'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Tarot
+          </Link>
+          <Link
+            href='/grimoire/crystals'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Crystals
+          </Link>
+          <Link
+            href='/grimoire/moon/phases'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Moon Phases
+          </Link>
+          <Link
+            href='/grimoire/houses/overview/first'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Houses
+          </Link>
+          <Link
+            href='/grimoire/spells'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Spells
+          </Link>
+          <Link
+            href='/horoscope'
+            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+          >
+            Horoscopes
+          </Link>
+        </div>
+      </section>
+
       {/* FAQs */}
       {faqs && faqs.length > 0 && (
         <section>
