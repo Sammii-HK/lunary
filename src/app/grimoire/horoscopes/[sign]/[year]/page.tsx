@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   ZODIAC_SIGNS,
   MONTHS,
@@ -182,6 +183,7 @@ export default async function YearHoroscopePage({
             Get Personalized Forecast
           </Link>
         </section>
+        <ExploreGrimoire />
       </div>
     </div>
   );

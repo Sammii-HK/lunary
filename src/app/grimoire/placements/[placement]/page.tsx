@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ArrowRight, Star, AlertTriangle, Lightbulb } from 'lucide-react';
 import {
   generatePlanetSignContent,
@@ -310,6 +311,7 @@ export default async function PlacementPage({ params }: PageProps) {
             astrology interpretations
           </p>
         </footer>
+        <ExploreGrimoire />
       </div>
     </div>
   );

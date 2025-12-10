@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Calendar } from 'lucide-react';
 
 const personalYears = [
@@ -164,6 +165,7 @@ export default function PersonalYearIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

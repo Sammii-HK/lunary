@@ -22,6 +22,7 @@ import {
   Hash,
   Wand,
 } from 'lucide-react';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
 const currentYear = new Date().getFullYear();
 
@@ -936,10 +937,16 @@ export default function GrimoireLayout({
           <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
             <div className='max-w-7xl mx-auto'>
               {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
+              <ExploreGrimoire />
             </div>
           </div>
         ) : (
-          <GrimoireIndexPage />
+          <div>
+            <GrimoireIndexPage />
+            <div className='max-w-7xl mx-auto px-4'>
+              <ExploreGrimoire />
+            </div>
+          </div>
         )}
       </div>
     </div>

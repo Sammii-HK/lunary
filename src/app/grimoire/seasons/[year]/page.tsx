@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Sun } from 'lucide-react';
 
 const VALID_YEARS = ['2024', '2025', '2026'];
@@ -199,6 +200,7 @@ export default async function YearSeasonsPage({
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

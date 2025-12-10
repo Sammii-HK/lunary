@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
@@ -239,6 +240,7 @@ export default function LunarNodesIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

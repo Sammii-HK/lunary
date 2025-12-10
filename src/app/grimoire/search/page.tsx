@@ -8,6 +8,7 @@ import {
   type GrimoireEntry,
 } from '@/constants/seo/grimoire-search-index';
 import { AskTheGrimoire } from '@/components/grimoire/AskTheGrimoire';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
 export const metadata: Metadata = {
   title: 'Search the Grimoire | Lunary',
@@ -302,6 +303,10 @@ export default async function GrimoireSearchPage({
           }),
         }}
       />
+
+      <div className='max-w-4xl mx-auto px-4'>
+        <ExploreGrimoire />
+      </div>
     </main>
   );
 }

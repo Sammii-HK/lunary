@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   ZODIAC_SIGNS,
   SIGN_DISPLAY,
@@ -96,6 +97,7 @@ export default function DecansIndexPage() {
             );
           })}
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

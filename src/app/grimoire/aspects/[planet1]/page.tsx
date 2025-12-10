@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   PLANETS,
   PLANET_DISPLAY,
@@ -147,6 +148,7 @@ export default async function PlanetAspectsPage({
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

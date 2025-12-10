@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Flame } from 'lucide-react';
 
 const candleColors = [
@@ -196,6 +197,7 @@ export default function CandleColorsIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { mirrorHourKeys } from '@/constants/grimoire/clock-numbers-data';
 
 export const metadata: Metadata = {
@@ -69,6 +70,7 @@ export default function MirrorHoursIndexPage() {
             message and energy.
           </p>
         </section>
+        <ExploreGrimoire />
       </div>
     </div>
   );

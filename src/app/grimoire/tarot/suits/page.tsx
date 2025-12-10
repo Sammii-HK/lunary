@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Layers } from 'lucide-react';
 import { tarotSuits } from '@/constants/tarot';
 
@@ -216,6 +217,7 @@ export default function TarotSuitsIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

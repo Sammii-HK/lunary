@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Moon, Sun, ArrowRight, Star, Sparkles } from 'lucide-react';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
@@ -260,6 +261,7 @@ export default function Events2025Page() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

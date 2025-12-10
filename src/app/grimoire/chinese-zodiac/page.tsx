@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   CHINESE_ANIMALS,
   CHINESE_ZODIAC_DATA,
@@ -177,6 +178,8 @@ export default function ChineseZodiacIndexPage() {
             </p>
           </div>
         </div>
+
+        <ExploreGrimoire />
       </div>
     </>
   );

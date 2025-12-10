@@ -2,6 +2,7 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   createItemListSchema,
   createDefinedTermSchema,
@@ -286,6 +287,8 @@ export default function GlossaryPage() {
           Calculate Your Birth Chart Free
         </Link>
       </section>
+
+      <ExploreGrimoire />
     </div>
   );
 }

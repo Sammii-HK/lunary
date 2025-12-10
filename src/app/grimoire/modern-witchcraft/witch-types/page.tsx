@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Wand2 } from 'lucide-react';
 
 const witchTypes = [
@@ -181,6 +182,7 @@ export default function WitchTypesIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Star } from 'lucide-react';
 import {
   ZODIAC_SIGNS,
@@ -159,6 +160,7 @@ export default async function SignDecansPage({
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

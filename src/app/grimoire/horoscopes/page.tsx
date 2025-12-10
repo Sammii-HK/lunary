@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   ZODIAC_SIGNS,
   SIGN_DISPLAY_NAMES,
@@ -131,6 +132,8 @@ export default function GrimoireHoroscopesPage() {
             </Link>
           </div>
         </div>
+
+        <ExploreGrimoire />
       </div>
     </>
   );

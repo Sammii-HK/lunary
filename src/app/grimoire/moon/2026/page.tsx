@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Moon, Calendar, ArrowRight, Sparkles } from 'lucide-react';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
@@ -168,6 +169,8 @@ export default function Moon2026Page() {
             Get Personalized Insights
           </Link>
         </section>
+
+        <ExploreGrimoire />
       </div>
     </main>
   );

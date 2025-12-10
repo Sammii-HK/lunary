@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   PLANETS,
   ASPECTS,
@@ -122,6 +123,7 @@ export default function AspectsIndexPage() {
             View Your Birth Chart
           </Link>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

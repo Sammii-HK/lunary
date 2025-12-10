@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   YEARLY_TRANSITS,
   getTransitsForYear,
@@ -127,6 +128,7 @@ export default function TransitsIndexPage() {
             View Your Personal Transits
           </Link>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

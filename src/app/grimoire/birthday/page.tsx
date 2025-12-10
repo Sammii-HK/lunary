@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   MONTH_NAMES,
   ZODIAC_DATE_RANGES,
@@ -164,6 +165,8 @@ export default function BirthdayIndexPage() {
             </Link>
           </div>
         </div>
+
+        <ExploreGrimoire />
       </div>
     </>
   );

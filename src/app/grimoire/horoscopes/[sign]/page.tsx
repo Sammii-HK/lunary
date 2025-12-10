@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   ZODIAC_SIGNS,
   SIGN_DISPLAY_NAMES,
@@ -151,6 +152,7 @@ export default async function SignHoroscopePage({
             Get Your Personal Horoscope
           </Link>
         </section>
+        <ExploreGrimoire />
       </div>
     </div>
   );

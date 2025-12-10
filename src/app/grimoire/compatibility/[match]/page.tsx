@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ArrowRight, Heart, Users, Briefcase, Star } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
 import {
@@ -82,6 +83,7 @@ function ScoreBar({ score, label }: { score: number; label: string }) {
           }`}
           style={{ width: `${score * 10}%` }}
         />
+        <ExploreGrimoire />
       </div>
     </div>
   );

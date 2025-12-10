@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Sun } from 'lucide-react';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { stringToKebabCase } from '../../../../utils/string';
@@ -122,6 +123,7 @@ export default function SabbatsIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

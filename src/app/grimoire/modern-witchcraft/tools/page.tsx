@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Wand2 } from 'lucide-react';
 
 const witchcraftTools = [
@@ -208,6 +209,7 @@ export default function WitchcraftToolsIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

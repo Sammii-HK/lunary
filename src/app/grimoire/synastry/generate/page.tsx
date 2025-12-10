@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { useUser } from '@/context/UserContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../../../utils/pricing';
@@ -434,6 +435,8 @@ export default function SynastryGeneratorPage() {
             Learn more about synastry and relationship astrology →
           </Link>
         </div>
+
+        <ExploreGrimoire />
       </div>
     </div>
   );

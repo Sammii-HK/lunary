@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Calendar, Moon, Star, ArrowRight, Sparkles } from 'lucide-react';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
@@ -115,6 +116,8 @@ export default function Events2026Page() {
             View Your Birth Chart
           </Link>
         </section>
+
+        <ExploreGrimoire />
       </div>
     </main>
   );

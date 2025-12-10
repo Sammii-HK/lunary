@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { doubleHourKeys } from '@/constants/grimoire/clock-numbers-data';
 
 export const metadata: Metadata = {
@@ -68,6 +69,7 @@ export default function DoubleHoursIndexPage() {
             energies and messages from the universe.
           </p>
         </section>
+        <ExploreGrimoire />
       </div>
     </div>
   );

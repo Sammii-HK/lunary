@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ZODIAC_SEASONS, getSeasonDates } from '@/constants/seo/zodiac-seasons';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
@@ -123,6 +124,7 @@ export default function SeasonsIndexPage() {
             View Your Personalized Horoscope
           </Link>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );
