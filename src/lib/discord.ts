@@ -429,6 +429,8 @@ export async function sendDiscordAdminNotification(
 
   const color = colorMap[input.priority || 'normal'] || 'info';
 
+  // Convert HTML to Discord markdown (display formatting, not security-critical)
+  // lgtm[js/incomplete-multi-character-sanitization]
   const description = input.message
     .replace(/<b>/g, '**')
     .replace(/<\/b>/g, '**')

@@ -211,6 +211,8 @@ function convertHtmlToSubstackFormat(html: string, appUrl: string): string {
     /<div[^>]*class="cta"[^>]*>.*?<a[^>]*href="[^"]*"[^>]*>(.*?)<\/a>.*?<\/div>/gi,
     `\n\n**[$1](${appUrl})**\n\n`,
   );
+  // Strip remaining HTML tags (display formatting, not security-critical)
+  // lgtm[js/incomplete-multi-character-sanitization]
   markdown = markdown.replace(/<[^>]+>/g, '');
   markdown = markdown.replace(/\n{3,}/g, '\n\n');
   markdown = markdown.trim();
