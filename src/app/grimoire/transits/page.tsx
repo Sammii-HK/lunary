@@ -21,6 +21,26 @@ export const metadata: Metadata = {
     '2025 transits',
     '2026 transits',
   ],
+  openGraph: {
+    title: 'Yearly Astrological Transits 2025-2030 | Lunary',
+    description:
+      'Complete guide to major astrological transits. Saturn Return, Jupiter transits, and more.',
+    url: 'https://lunary.app/grimoire/transits',
+    images: [
+      {
+        url: '/api/og/grimoire/transits',
+        width: 1200,
+        height: 630,
+        alt: 'Astrological Transits Guide',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Yearly Astrological Transits 2025-2030 | Lunary',
+    description: 'Complete guide to major astrological transits.',
+    images: ['/api/og/grimoire/transits'],
+  },
   alternates: { canonical: 'https://lunary.app/grimoire/transits' },
 };
 

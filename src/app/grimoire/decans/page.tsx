@@ -22,6 +22,26 @@ export const metadata: Metadata = {
     'third decan',
     'sub-ruler',
   ],
+  openGraph: {
+    title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
+    description:
+      'Complete guide to the 36 zodiac decans. Each sign is divided into three 10-degree sections.',
+    url: 'https://lunary.app/grimoire/decans',
+    images: [
+      {
+        url: '/api/og/grimoire/decans',
+        width: 1200,
+        height: 630,
+        alt: 'Zodiac Decans Guide',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
+    description: 'Complete guide to the 36 zodiac decans.',
+    images: ['/api/og/grimoire/decans'],
+  },
   alternates: { canonical: 'https://lunary.app/grimoire/decans' },
 };
 

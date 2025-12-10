@@ -26,6 +26,27 @@ export const metadata: Metadata = {
     'natal aspects',
     'synastry aspects',
   ],
+  openGraph: {
+    title:
+      'Astrological Aspects: Conjunct, Trine, Square, Sextile, Opposition | Lunary',
+    description:
+      'Complete guide to astrological aspects in natal charts, transits, and synastry.',
+    url: 'https://lunary.app/grimoire/aspects',
+    images: [
+      {
+        url: '/api/og/grimoire/aspects',
+        width: 1200,
+        height: 630,
+        alt: 'Astrological Aspects Guide',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Astrological Aspects Guide | Lunary',
+    description: 'Complete guide to astrological aspects.',
+    images: ['/api/og/grimoire/aspects'],
+  },
   alternates: { canonical: 'https://lunary.app/grimoire/aspects' },
 };
 

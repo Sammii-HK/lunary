@@ -17,6 +17,26 @@ export const metadata: Metadata = {
     'aries taurus cusp',
     'pisces aries cusp',
   ],
+  openGraph: {
+    title: 'Zodiac Cusps: Born on the Cusp? What It Means | Lunary',
+    description:
+      'Complete guide to zodiac cusps. Born between two signs? Find your cusp personality.',
+    url: 'https://lunary.app/grimoire/cusps',
+    images: [
+      {
+        url: '/api/og/grimoire/cusps',
+        width: 1200,
+        height: 630,
+        alt: 'Zodiac Cusps Guide',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zodiac Cusps: Born on the Cusp? What It Means | Lunary',
+    description: 'Complete guide to zodiac cusps.',
+    images: ['/api/og/grimoire/cusps'],
+  },
   alternates: { canonical: 'https://lunary.app/grimoire/cusps' },
 };
 
