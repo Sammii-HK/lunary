@@ -187,7 +187,6 @@ export async function GET(): Promise<Response> {
     return new Response(
       JSON.stringify({
         error: 'Failed to generate image',
-        details: String(error),
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },
     );

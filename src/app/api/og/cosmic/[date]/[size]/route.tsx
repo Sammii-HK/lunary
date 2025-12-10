@@ -187,14 +187,11 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   };
 
   // Format date for display
-  const formattedDate = targetDate
-    .toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-    .replace(/\//g, '/');
-
+  const formattedDate = targetDate.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
   // Check event types for layout
   const isAspectEvent =
     primaryEvent.planetA && primaryEvent.planetB && primaryEvent.aspect;

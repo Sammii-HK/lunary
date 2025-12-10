@@ -27,13 +27,11 @@ export async function GET(request: NextRequest) {
   const date = searchParams.get('date') || '';
 
   const formattedDate = date
-    ? new Date(date + 'T12:00:00Z')
-        .toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        })
-        .replace(/\//g, '/')
+    ? new Date(date + 'T12:00:00Z').toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
     : '';
 
   const theme = getMoonCircleTheme(type);

@@ -32,14 +32,21 @@ export async function blockUnnecessaryResources(page: Page) {
     }
 
     // Block external stylesheets from CDNs
-    if (
-      resourceType === 'stylesheet' &&
-      (url.includes('fonts.googleapis.com') ||
-        url.includes('cdn.jsdelivr.net') ||
-        url.includes('unpkg.com'))
-    ) {
-      route.abort();
-      return;
+    if (resourceType === 'stylesheet') {
+      try {
+        const parsedUrl = new URL(url);
+        const host = parsedUrl.hostname.toLowerCase();
+        if (
+          host === 'fonts.googleapis.com' ||
+          host === 'cdn.jsdelivr.net' ||
+          host === 'unpkg.com'
+        ) {
+          route.abort();
+          return;
+        }
+      } catch {
+        // Invalid URL, continue
+      }
     }
 
     // Allow everything else
