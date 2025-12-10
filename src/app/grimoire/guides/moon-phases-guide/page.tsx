@@ -8,6 +8,7 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
 export const metadata: Metadata = {
   title: 'Moon Phases: The Complete Guide to Lunar Cycles & Rituals - Lunary',
@@ -942,6 +943,8 @@ export default function MoonPhasesGuidePage() {
           </Link>
         </div>
       </section>
+
+      <ExploreGrimoire />
     </div>
   );
 }

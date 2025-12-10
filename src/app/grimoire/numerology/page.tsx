@@ -23,6 +23,7 @@ import {
 } from '@/constants/grimoire/numerology-extended-data';
 import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
@@ -45,6 +46,21 @@ export const metadata: Metadata = {
     description:
       'Complete guide to numerology - angel numbers, life path numbers, and universal year meanings.',
     url: 'https://lunary.app/grimoire/numerology',
+    images: [
+      {
+        url: '/api/og/grimoire/numerology',
+        width: 1200,
+        height: 630,
+        alt: 'Numerology Guide - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Numerology Guide: Angel Numbers, Life Path & Universal Years',
+    description:
+      'Complete guide to numerology - angel numbers, life path numbers, and universal year meanings.',
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/numerology',
@@ -438,6 +454,8 @@ export default function NumerologyIndexPage() {
             </div>
           </div>
         </div>
+
+        <ExploreGrimoire />
       </div>
     </div>
   );

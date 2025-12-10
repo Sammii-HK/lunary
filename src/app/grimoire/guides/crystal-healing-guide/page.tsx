@@ -8,6 +8,7 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
 export const metadata: Metadata = {
   title:
@@ -903,6 +904,8 @@ export default function CrystalHealingGuidePage() {
           </Link>
         </div>
       </section>
+
+      <ExploreGrimoire />
     </div>
   );
 }

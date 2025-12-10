@@ -8,6 +8,7 @@ import {
   getOrdinalSuffix,
 } from '@/constants/seo/houses';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
@@ -22,6 +23,27 @@ export const metadata: Metadata = {
     'planets in houses',
   ],
   alternates: { canonical: 'https://lunary.app/grimoire/houses' },
+  openGraph: {
+    title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
+    description:
+      'Complete guide to the 12 houses in astrology. Learn what each house represents.',
+    url: 'https://lunary.app/grimoire/houses',
+    images: [
+      {
+        url: '/api/og/grimoire/houses',
+        width: 1200,
+        height: 630,
+        alt: 'The 12 Astrological Houses - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
+    description:
+      'Complete guide to the 12 houses in astrology. Learn what each house represents.',
+    images: ['/api/og/grimoire/houses'],
+  },
 };
 
 export default function HousesIndexPage() {
@@ -111,6 +133,8 @@ export default function HousesIndexPage() {
             View Your Birth Chart
           </Link>
         </div>
+
+        <ExploreGrimoire />
       </div>
     </div>
   );

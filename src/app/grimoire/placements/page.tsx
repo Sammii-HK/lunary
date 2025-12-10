@@ -4,6 +4,7 @@ import {
   planetDescriptions,
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
 export const metadata: Metadata = {
   title:
@@ -14,6 +15,20 @@ export const metadata: Metadata = {
     title: 'Astrological Placements: Sun, Moon & Rising in Every Sign - Lunary',
     description: 'Explore 144+ planet-in-sign combinations and their meanings.',
     url: 'https://lunary.app/grimoire/placements',
+    images: [
+      {
+        url: '/api/og/grimoire/placements',
+        width: 1200,
+        height: 630,
+        alt: 'Astrological Placements Guide - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Astrological Placements: Sun, Moon & Rising in Every Sign - Lunary',
+    description: 'Explore 144+ planet-in-sign combinations and their meanings.',
+    images: ['/api/og/grimoire/placements'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/placements',
@@ -141,6 +156,8 @@ export default function PlacementsIndexPage() {
             placements
           </p>
         </section>
+
+        <ExploreGrimoire />
       </div>
     </div>
   );

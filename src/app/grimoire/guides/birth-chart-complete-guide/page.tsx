@@ -9,6 +9,7 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
 const currentYear = new Date().getFullYear();
 
@@ -737,6 +738,8 @@ export default function BirthChartCompleteGuidePage() {
           </Link>
         </div>
       </section>
+
+      <ExploreGrimoire />
     </div>
   );
 }
