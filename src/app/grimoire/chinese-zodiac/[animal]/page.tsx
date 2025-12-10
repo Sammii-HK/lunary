@@ -123,7 +123,7 @@ Notable people born in ${data.displayName} years include ${data.famousPeople.joi
         rituals={[
           `Wear ${data.luckyColors.join(' or ')} for good fortune`,
           `Display ${data.luckyFlowers.join(' or ')} in your home`,
-          'Celebrate Chinese New Year with ${data.displayName} imagery',
+          `Celebrate Chinese New Year with ${data.displayName} imagery`,
         ]}
         emotionalThemes={data.traits.map(
           (t) => t.charAt(0).toUpperCase() + t.slice(1),
