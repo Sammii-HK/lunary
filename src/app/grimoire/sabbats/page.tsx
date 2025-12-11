@@ -1,9 +1,50 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Sun } from 'lucide-react';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { stringToKebabCase } from '../../../../utils/string';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
+import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
+
+const faqs = [
+  {
+    question: 'What are sabbats?',
+    answer:
+      'Sabbats are the eight seasonal festivals in the Wheel of the Year. They mark significant points in the solar cycle: solstices, equinoxes, and the cross-quarter days between them. Many modern witches, pagans, and nature-spirituality practitioners celebrate these as times for ritual, reflection, and renewal.',
+  },
+  {
+    question: 'Do I need to celebrate all eight sabbats?',
+    answer:
+      'No. Many practitioners celebrate only the sabbats that resonate with them, or start with just a few and expand over time. Some focus on the solstices and equinoxes; others prefer the cross-quarter fire festivals. There is no requirement to observe all eight.',
+  },
+  {
+    question: 'What is the difference between Greater and Lesser Sabbats?',
+    answer:
+      'Greater Sabbats (Samhain, Imbolc, Beltane, Lammas) are the cross-quarter fire festivals, traditionally more community-focused. Lesser Sabbats (Yule, Ostara, Litha, Mabon) are the solstices and equinoxes, marking astronomical turning points. Both are equally valid to celebrate.',
+  },
+];
+
+const cosmicConnectionsSections: CosmicConnectionSection[] = [
+  {
+    title: 'Seasonal Practice',
+    links: [
+      { label: 'Wheel of the Year', href: '/grimoire/wheel-of-the-year' },
+      { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+      { label: 'Correspondences', href: '/grimoire/correspondences' },
+      { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+    ],
+  },
+  {
+    title: 'Related Topics',
+    links: [
+      { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
+      { label: 'Spellcraft', href: '/grimoire/spells/fundamentals' },
+      { label: 'Book of Shadows', href: '/book-of-shadows' },
+    ],
+  },
+];
 
 export const metadata: Metadata = {
   title: 'Sabbats: The 8 Pagan Holidays | Lunary',
@@ -37,10 +78,20 @@ export const metadata: Metadata = {
 };
 
 export default function SabbatsIndexPage() {
+  const faqSchema = createFAQPageSchema(faqs);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(faqSchema)}
       <div className='max-w-5xl mx-auto'>
-        <div className='text-center mb-12'>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Sabbats' },
+          ]}
+        />
+
+        <div className='text-center mb-12 mt-8'>
           <div className='flex justify-center mb-4'>
             <Sun className='w-16 h-16 text-amber-400' />
           </div>
@@ -92,38 +143,31 @@ export default function SabbatsIndexPage() {
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
-            Related Resources
-          </h3>
-          <div className='flex flex-wrap gap-3'>
-            <Link
-              href='/grimoire/wheel-of-the-year'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
-            >
-              Wheel of the Year
-            </Link>
-            <Link
-              href='/grimoire/moon'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
-            >
-              Moon Phases
-            </Link>
-            <Link
-              href='/grimoire/correspondences'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
-            >
-              Correspondences
-            </Link>
-            <Link
-              href='/grimoire/practices'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
-            >
-              Spellcraft
-            </Link>
+        <section className='mb-12'>
+          <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+            Frequently Asked Questions
+          </h2>
+          <div className='space-y-4'>
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/30'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  {faq.question}
+                </h3>
+                <p className='text-zinc-400 text-sm'>{faq.answer}</p>
+              </div>
+            ))}
           </div>
-        </div>
-        <ExploreGrimoire />
+        </section>
+
+        <CosmicConnections
+          entityType='hub-glossary'
+          entityKey='sabbats'
+          title='Sabbat Connections'
+          sections={cosmicConnectionsSections}
+        />
       </div>
     </div>
   );
