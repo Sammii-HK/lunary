@@ -1,9 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { redirect } from 'next/navigation';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
 
 export default function PWAResetPage() {
+  if (process.env.NODE_ENV === 'production') {
+    redirect('/');
+  }
   const [logs, setLogs] = useState<string[]>([]);
   const [status, setStatus] = useState<'idle' | 'clearing' | 'done'>('idle');
 

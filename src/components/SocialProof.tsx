@@ -1,3 +1,4 @@
+// NOTE: Currently unused but kept for future use - displays user count social proof
 'use client';
 
 import { useState, useEffect } from 'react';

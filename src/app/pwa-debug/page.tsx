@@ -1,9 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { redirect } from 'next/navigation';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
 
 export default function PWADebugPage() {
+  if (process.env.NODE_ENV === 'production') {
+    redirect('/');
+  }
   const [status, setStatus] = useState<any>({});
 
   useEffect(() => {

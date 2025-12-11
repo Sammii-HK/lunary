@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { redirect } from 'next/navigation';
 
 export default function PWATestPage() {
+  if (process.env.NODE_ENV === 'production') {
+    redirect('/');
+  }
   const [result, setResult] = useState<string>('Testing...');
 
   useEffect(() => {

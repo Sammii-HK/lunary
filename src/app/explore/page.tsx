@@ -18,6 +18,9 @@ import {
 export const metadata = {
   title: 'Explore | Lunary',
   description: 'Discover all features and resources in Lunary',
+  alternates: {
+    canonical: 'https://lunary.app/explore',
+  },
 };
 
 type ExploreItem = {

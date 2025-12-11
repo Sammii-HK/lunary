@@ -1,10 +1,11 @@
+import Link from 'next/link';
 import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
 import { TransitCard } from './TransitCard';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ChevronRight } from 'lucide-react';
 
 export function FreeHoroscopeView() {
   const generalHoroscope = getGeneralHoroscope();
@@ -19,6 +20,20 @@ export function FreeHoroscopeView() {
         <p className='text-sm text-zinc-400'>
           General cosmic guidance based on universal energies
         </p>
+        <div className='flex gap-3 mt-3'>
+          <Link
+            href='/horoscope/today'
+            className='inline-flex items-center gap-1 text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+          >
+            See all daily horoscopes <ChevronRight className='w-3 h-3' />
+          </Link>
+          <Link
+            href='/horoscope/weekly'
+            className='inline-flex items-center gap-1 text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+          >
+            Browse weekly horoscopes <ChevronRight className='w-3 h-3' />
+          </Link>
+        </div>
       </div>
 
       <div className='space-y-6'>

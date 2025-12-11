@@ -87,12 +87,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire/astronomy`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
       url: `${baseUrl}/grimoire/spells`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
@@ -166,12 +160,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/grimoire/moon`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/moon/rituals`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -268,12 +256,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/grimoire/modern-witchcraft`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/astronomy`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -460,12 +442,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/grimoire/card-combinations`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/moon/rituals`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.6,

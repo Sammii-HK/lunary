@@ -146,6 +146,12 @@ export function MarketingFooter() {
             >
               Developers
             </Link>
+            <Link
+              href='/explore'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Explore Features
+            </Link>
           </nav>
 
           {/* Resources */}
