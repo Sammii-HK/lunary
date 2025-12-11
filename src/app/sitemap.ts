@@ -616,6 +616,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     weekNumber++;
   }
 
+  // Generate blog pagination pages
+  const BLOG_POSTS_PER_PAGE = 8;
+  const totalBlogPosts = blogRoutes.length;
+  const totalBlogPages = Math.ceil(totalBlogPosts / BLOG_POSTS_PER_PAGE);
+  const blogPaginationRoutes: MetadataRoute.Sitemap = [];
+
+  for (let page = 2; page <= totalBlogPages; page++) {
+    blogPaginationRoutes.push({
+      url: `${baseUrl}/blog/page/${page}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    });
+  }
+
   // Add all grimoire sections
   const grimoireItems = Object.keys(grimoire);
   const grimoireRoutes = grimoireItems.map((item) => ({
@@ -1486,6 +1501,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...routes,
     ...blogRoutes,
+    ...blogPaginationRoutes,
     ...grimoireRoutes,
     ...spellRoutes,
     ...crystalRoutes,
