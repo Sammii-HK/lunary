@@ -77,14 +77,14 @@ const SAMHAIN_RITUALS: PdfSeasonalRitual[] = [
     title: 'Ancestor Altar Ritual',
     timing: 'Samhain Eve or during the three-day veil thinning period',
     description:
-      'Create a sacred space to honour those who have passed before you. This ritual strengthens your connection to ancestral wisdom and offers a moment of remembrance.',
+      'Create a sacred space to honour those who have passed before you. This ritual strengthens your connection to ancestral wisdom and offers a meaningful moment of remembrance.',
     activities: [
-      'Set up a small table or shelf as your altar space',
-      'Add photos, mementos, or names of ancestors you wish to honour',
-      'Light a white or black candle as a beacon for their presence',
-      'Offer food and drink that your ancestors enjoyed',
-      'Spend time in quiet reflection, speaking to them if you wish',
-      'Thank them for their guidance before closing the ritual',
+      'Choose a small table, shelf, or dedicated corner to serve as your altar.',
+      'Gather photos, mementos, or written names of the ancestors you wish to honour.',
+      'Light a white or black candle to act as a beacon for their presence.',
+      'Place offerings of food or drink that your ancestors would have enjoyed.',
+      'Sit quietly with the altar, speaking to your ancestors if it feels right.',
+      'When you feel complete, thank them for their guidance and gently close the ritual.',
     ],
     correspondences: [
       {
@@ -97,14 +97,14 @@ const SAMHAIN_RITUALS: PdfSeasonalRitual[] = [
     title: 'Releasing the Old Year',
     timing: 'Samhain evening, as the sun sets',
     description:
-      'Samhain marks the Celtic new year. This ritual helps you release what no longer serves you, making space for new growth in the coming cycle.',
+      'Samhain marks the Celtic new year. This ritual supports you in releasing what no longer serves you, creating space for new growth in the coming cycle.',
     activities: [
-      'Write down what you wish to release on small pieces of paper',
-      'Light a fire or a candle in a fireproof container',
-      'Read each item aloud, acknowledging its role in your life',
-      'Safely burn each paper, visualising the release',
-      'Scatter the cooled ashes outside or bury them',
-      'State an intention for what you wish to invite in',
+      'Write down what you are ready to release on small pieces of paper.',
+      'Light a fire or place a candle safely in a fireproof container.',
+      'Read each item aloud, acknowledging the role it has played in your life.',
+      'Safely burn each paper while visualising the energy transforming.',
+      'Once cooled, scatter the ashes outside or bury them in the earth.',
+      'Close by stating an intention for what you wish to welcome in.',
     ],
     correspondences: [
       {
@@ -117,28 +117,28 @@ const SAMHAIN_RITUALS: PdfSeasonalRitual[] = [
     title: 'Dumb Supper',
     timing: 'Samhain night, preferably in candlelight',
     description:
-      'A silent meal shared with the spirits of the departed. This ancient tradition honours the dead by setting a place for them at your table.',
+      'A silent meal shared with the spirits of the departed. This ancient tradition honours those who have passed by setting a place for them at your table.',
     activities: [
-      'Prepare a meal that would have pleased your ancestors',
-      'Set an extra place at the table for the spirits',
-      'Eat the meal in complete silence, focusing on memories',
-      'Serve the ancestors first before taking your own portion',
-      "Leave the ancestor's plate outside after the meal",
-      'Break the silence only after the meal is complete',
+      'Prepare a meal that your ancestors would have enjoyed.',
+      'Set an extra place at the table to welcome the spirits.',
+      'Eat the meal in complete silence, allowing memories to surface.',
+      'Serve the ancestors first, before taking your own portion.',
+      "After the meal, leave the ancestor's plate outside as an offering.",
+      'Break the silence only once the meal is fully complete.',
     ],
   },
   {
     title: 'Divination Night',
     timing: 'Samhain, when the veil is thinnest',
     description:
-      'Samhain is the most powerful night for divination. The thin veil allows clearer messages to come through from the spirit realm.',
+      'Samhain is considered the most powerful night of the year for divination. The thinning veil allows clearer messages to pass between realms.',
     activities: [
-      'Cleanse your divination tools with smoke or moonlight',
-      'Create sacred space with candles and protective crystals',
-      'Ask open-ended questions about the year ahead',
-      'Use tarot, oracle cards, scrying, or pendulum work',
-      'Record all messages and impressions in your journal',
-      'Thank any spirits or guides who offered messages',
+      'Cleanse your divination tools with smoke, moonlight, or sound.',
+      'Create sacred space by lighting candles and placing protective crystals nearby.',
+      'Ask open-ended questions about the year ahead, remaining receptive to answers.',
+      'Use tarot cards, oracle decks, scrying, or a pendulum—whatever feels natural.',
+      'Record all messages and impressions in your journal as they arise.',
+      'Close the session by thanking any spirits or guides who offered insight.',
     ],
   },
 ];
@@ -149,24 +149,24 @@ function buildSamhainPack(): PdfSeasonalPack {
     slug: 'samhain',
     title: 'Samhain',
     subtitle: 'Honouring the ancestors',
-    sabbatDate: 'October 31 - November 1',
+    sabbatDate: 'October 31 – November 1',
     theme: 'Endings, Ancestors, Divination',
     moodText:
-      'As the veil thins between worlds, we honour those who walked before us. Samhain is a time for reflection, release, and connection with the unseen.',
+      'As the veil thins between worlds, we honour those who walked before us. Samhain is a time for quiet reflection, conscious release, and connection with the unseen.',
     perfectFor: [
-      'Those honouring ancestors and departed loved ones',
-      'Anyone seeking powerful divination practice',
-      'Releasing what no longer serves before the new cycle',
-      'Deep shadow work and transformation',
+      'Those who wish to honour ancestors and departed loved ones',
+      'Anyone seeking powerful divination and spirit communication',
+      'Those ready to release what no longer serves before the new cycle',
+      'Deep shadow work and personal transformation',
     ],
     introText:
-      'Samhain (pronounced SOW-in) marks the Celtic new year and the final harvest. It is a liminal time when the veil between worlds is at its thinnest, making it ideal for ancestral work, divination, and letting go of the old.',
+      'Samhain (pronounced SOW-in) marks the Celtic new year and the final harvest. It is a liminal time when the veil between worlds is at its thinnest, making it ideal for ancestral work, divination, and the conscious release of what belongs to the past.',
     rituals: SAMHAIN_RITUALS,
     correspondences: SAMHAIN_CORRESPONDENCES,
     closingText:
-      'Thank you for celebrating Samhain with Lunary. As the wheel turns and the year ends, may you find peace in release and connection with those who guide you from beyond.',
+      'Thank you for celebrating Samhain with Lunary. As the wheel turns and the year draws to a close, may you find peace in release and comfort in the presence of those who guide you from beyond the veil.',
     optionalAffirmation:
-      'I honour my ancestors and the wisdom they carry. I release what no longer serves me and welcome the new cycle with open arms.',
+      'I honour my ancestors and the wisdom they carry. I release what no longer serves me and welcome the new cycle with an open heart.',
   };
 }
 

@@ -986,9 +986,62 @@ async function setupDatabase() {
 
     console.log('✅ Collection folders table created');
 
+    // User attribution table for SEO/marketing tracking
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_attribution (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT UNIQUE,
+        anonymous_id TEXT,
+        first_touch_source TEXT,
+        first_touch_medium TEXT,
+        first_touch_campaign TEXT,
+        first_touch_keyword TEXT,
+        first_touch_page TEXT,
+        first_touch_referrer TEXT,
+        first_touch_at TIMESTAMP WITH TIME ZONE,
+        utm_source TEXT,
+        utm_medium TEXT,
+        utm_campaign TEXT,
+        utm_term TEXT,
+        utm_content TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_user_id ON user_attribution(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_source ON user_attribution(first_touch_source)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_medium ON user_attribution(first_touch_medium)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_created_at ON user_attribution(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_first_touch_at ON user_attribution(first_touch_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_source_medium ON user_attribution(first_touch_source, first_touch_medium)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_user_attribution_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_user_attribution_timestamp ON user_attribution
+    `;
+
+    await sql`
+      CREATE TRIGGER update_user_attribution_timestamp
+          BEFORE UPDATE ON user_attribution
+          FOR EACH ROW
+          EXECUTE FUNCTION update_user_attribution_updated_at()
+    `;
+
+    console.log('✅ User attribution table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, and email preferences',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, email preferences, and user attribution',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);

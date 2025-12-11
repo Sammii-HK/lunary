@@ -48,7 +48,7 @@ export function ProductCard({
             <span className='text-lg font-semibold text-white'>
               {formatPrice(product.price)}
             </span>
-            <span className='text-sm text-lunary-primary group-hover:text-lunary-accent transition-colors'>
+            <span className='text-sm text-white/60 group-hover:text-white transition-colors'>
               View Pack →
             </span>
           </div>

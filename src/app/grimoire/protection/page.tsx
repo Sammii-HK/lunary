@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   createArticleSchema,
   createFAQPageSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
@@ -89,11 +90,16 @@ export default function ProtectionPage() {
   });
 
   const faqSchema = createFAQPageSchema(faqs);
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Protection', url: '/grimoire/protection' },
+  ]);
 
   return (
     <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
       {renderJsonLd(faqSchema)}
+      {renderJsonLd(breadcrumbSchema)}
 
       <Breadcrumbs
         items={[

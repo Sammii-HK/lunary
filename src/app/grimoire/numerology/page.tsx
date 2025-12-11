@@ -28,6 +28,7 @@ import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import {
   createItemListSchema,
   createFAQPageSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 
@@ -165,6 +166,12 @@ export default function NumerologyIndexPage() {
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(numerologyListSchema)}
       {renderJsonLd(faqSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Numerology', url: '/grimoire/numerology' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

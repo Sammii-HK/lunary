@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import {
   createArticleSchema,
   createFAQPageSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
@@ -105,6 +106,12 @@ export default function RunesPage() {
     <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
       {renderJsonLd(faqSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Runes', url: '/grimoire/runes' },
+        ]),
+      )}
 
       <Breadcrumbs
         items={[{ label: 'Grimoire', href: '/grimoire' }, { label: 'Runes' }]}

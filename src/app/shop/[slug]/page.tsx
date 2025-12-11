@@ -10,6 +10,11 @@ import { CATEGORY_LABELS } from '@/lib/shop/types';
 import { ProductDetail } from '@/components/shop/ProductDetail';
 import { RelatedProducts } from '@/components/shop/RelatedProducts';
 import { UpsellSidebar } from '@/components/shop/UpsellSidebar';
+import {
+  createProductSchema,
+  createBreadcrumbSchema,
+  renderJsonLd,
+} from '@/lib/schema';
 
 interface ProductPageProps {
   params: Promise<{
@@ -111,8 +116,27 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const relatedProducts = getRelatedProducts(product, 4);
   const upsellProducts = getUpsellProducts(product);
 
+  const categoryLabel = CATEGORY_LABELS[product.category];
+
+  const productSchema = createProductSchema({
+    name: product.title,
+    description: product.description,
+    price: product.price,
+    priceCurrency: 'USD',
+    sku: product.slug,
+    features: product.features || [],
+  });
+
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Shop', url: '/shop' },
+    { name: categoryLabel, url: `/shop?category=${product.category}` },
+    { name: product.title, url: `/shop/${product.slug}` },
+  ]);
+
   return (
     <div className='min-h-screen bg-lunary-bg'>
+      {renderJsonLd(productSchema)}
+      {renderJsonLd(breadcrumbSchema)}
       <ProductDetail product={product} />
 
       <div className='container mx-auto max-w-6xl px-4 py-16'>

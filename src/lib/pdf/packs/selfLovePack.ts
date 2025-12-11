@@ -47,7 +47,7 @@ function polishMaterialText(text: string): string {
   return polished;
 }
 
-// Polish step text to ensure proper imperative form
+// Polish step text to ensure natural, flowing language
 function polishStepText(step: string): string {
   if (!step) return step;
 
@@ -63,20 +63,43 @@ function polishStepText(step: string): string {
     polished += '.';
   }
 
-  // Common fixes for noun fragments
+  // Common fixes for clipped phrases and noun fragments
   const fixes: [RegExp, string][] = [
+    // Convert clipped fragments to natural sentences
     [/^Deep breathing/i, 'Take slow, grounding breaths'],
-    [/^Intention writing/i, 'Write your intention'],
+    [/^Intention writing/i, 'Write your intention clearly'],
     [/^Visualisation of/i, 'Visualise'],
     [/^Meditation on/i, 'Meditate on'],
-    [/as boundary reminder/gi, 'as a boundary reminder'],
+    [/^Focus on/i, 'Bring your attention to'],
+    [/^Think about/i, 'Reflect on'],
+
+    // Fix missing articles and prepositions
+    [/as boundary reminder/gi, 'as a reminder of your boundaries'],
     [/as protection/gi, 'as a form of protection'],
     [/for grounding/gi, 'to ground yourself'],
+    [/for calmness/gi, 'to cultivate calm'],
+    [/for peace/gi, 'to invite peace'],
+    [/for clarity/gi, 'to bring clarity'],
+    [/for healing/gi, 'to support your healing'],
+    [/Carry (\w+) as /gi, 'Carry $1 to serve as '],
+    [/Use (\w+) for /gi, 'Work with $1 to support '],
+    [/Hold (\w+) for /gi, 'Hold $1 to encourage '],
+
+    // Soften harsh imperatives
     [/Let go of negativity/gi, 'Release what no longer supports you'],
+    [/Release negativity/gi, 'Let go of what weighs on you'],
+    [/Remove negative energy/gi, 'Gently clear any stagnant energy'],
     [
       /Think about boundaries/gi,
-      'Reflect gently on where your energy needs protection',
+      'Reflect on where your energy needs protection',
     ],
+
+    // Fix clipped action phrases
+    [/Place crystal on/gi, 'Place the crystal on'],
+    [/Light candle/gi, 'Light a candle'],
+    [/Take breath/gi, 'Take a breath'],
+    [/Close eyes/gi, 'Close your eyes'],
+    [/Open eyes/gi, 'Open your eyes'],
   ];
 
   for (const [pattern, replacement] of fixes) {

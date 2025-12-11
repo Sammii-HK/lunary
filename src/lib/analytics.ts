@@ -3,6 +3,7 @@
 import { track } from '@vercel/analytics';
 import { betterAuthClient } from '@/lib/auth-client';
 import { captureEvent } from '@/lib/posthog-client';
+import { getAttributionForTracking } from '@/lib/attribution';
 
 export type ConversionEvent =
   | 'signup'
@@ -177,6 +178,7 @@ export async function trackConversion(
 ): Promise<void> {
   try {
     const utmParams = extractUTMParams();
+    const attributionData = getAttributionForTracking();
     const existingMetadata = data?.metadata || {};
 
     const eventData: ConversionEventData = {
@@ -185,6 +187,7 @@ export async function trackConversion(
       metadata: {
         ...existingMetadata,
         ...utmParams,
+        ...attributionData,
         referrer:
           (typeof document !== 'undefined' ? document.referrer : undefined) ||
           existingMetadata.referrer,

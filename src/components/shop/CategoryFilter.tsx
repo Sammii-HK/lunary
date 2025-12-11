@@ -1,11 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  ShopCategory,
-  CATEGORY_LABELS,
-  CATEGORY_GRADIENTS,
-} from '@/lib/shop/types';
+import { ShopCategory, CATEGORY_LABELS } from '@/lib/shop/types';
 
 interface CategoryFilterProps {
   selectedCategory: ShopCategory | 'all';
@@ -40,24 +36,9 @@ export function CategoryFilter({
         return (
           <Button
             key={category}
-            variant={isSelected ? 'lunary' : 'ghost'}
+            variant={isSelected ? 'lunary-solid' : 'outline'}
             size='sm'
             onClick={() => onCategoryChange(category)}
-            className={`
-              rounded-full transition-all duration-300
-              ${isSelected ? 'shadow-lg' : 'text-white/60 hover:text-white/80'}
-            `}
-            style={
-              isSelected
-                ? {
-                    background:
-                      category === 'all'
-                        ? 'linear-gradient(135deg, #8458D8 0%, #D070E8 100%)'
-                        : CATEGORY_GRADIENTS[category],
-                    borderColor: 'transparent',
-                  }
-                : undefined
-            }
           >
             {label}
             {count !== undefined && (

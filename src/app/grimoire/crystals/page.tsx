@@ -6,6 +6,7 @@ import {
   createArticleSchema,
   createFAQPageSchema,
   createItemListSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
@@ -142,6 +143,12 @@ export default function CrystalsPage() {
       {renderJsonLd(articleSchema)}
       {renderJsonLd(faqSchema)}
       {renderJsonLd(crystalListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Crystals', url: '/grimoire/crystals' },
+        ]),
+      )}
 
       <Breadcrumbs
         items={[

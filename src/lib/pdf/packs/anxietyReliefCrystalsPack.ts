@@ -57,6 +57,42 @@ async function loadFonts(
   }
 }
 
+// Polish how-to-use text for natural flow
+function polishHowToUse(text: string): string {
+  if (!text) return text;
+
+  let polished = text;
+
+  // Fix clipped phrases
+  const fixes: [RegExp, string][] = [
+    [/^Hold for /i, 'Hold the crystal to support '],
+    [/^Carry for /i, 'Carry this stone to encourage '],
+    [/^Place for /i, 'Place the crystal nearby to invite '],
+    [/^Use for /i, 'Work with this crystal to cultivate '],
+    [/^Meditate for /i, 'Meditate with this stone to deepen '],
+    [/for calm$/i, 'to cultivate a sense of calm'],
+    [/for peace$/i, 'to invite inner peace'],
+    [/for grounding$/i, 'to feel more grounded'],
+    [/for clarity$/i, 'to bring mental clarity'],
+    [/for protection$/i, 'to create a sense of protection'],
+  ];
+
+  for (const [pattern, replacement] of fixes) {
+    polished = polished.replace(pattern, replacement);
+  }
+
+  // Ensure proper sentence structure
+  if (
+    !polished.endsWith('.') &&
+    !polished.endsWith('!') &&
+    !polished.endsWith('?')
+  ) {
+    polished += '.';
+  }
+
+  return polished.charAt(0).toUpperCase() + polished.slice(1);
+}
+
 function crystalToPdfCrystal(crystal: Crystal): PdfCrystal {
   return {
     id: crystal.id,
@@ -71,10 +107,9 @@ function crystalToPdfCrystal(crystal: Crystal): PdfCrystal {
       crystal.workingWith.manifestation,
     ]
       .filter(Boolean)
+      .map(polishHowToUse)
       .slice(0, 4),
-    affirmation: crystal.correspondences.tarot?.[0]
-      ? `Channel the energy of ${crystal.name} to find calm and clarity.`
-      : `I am calm, grounded, and at peace with the support of ${crystal.name}.`,
+    affirmation: `I welcome the soothing energy of ${crystal.name}. I am calm, grounded, and safe in this moment.`,
     cleansing: crystal.careInstructions.cleansing[0],
   };
 }
@@ -104,10 +139,10 @@ function buildAnxietyReliefPack(): PdfCrystalPack {
     moodText:
       'These crystals have been selected for their soothing, grounding properties. Each one offers a different pathway to peace, meeting you wherever you are.',
     perfectFor: [
-      'Those navigating anxious thoughts',
-      'Anyone seeking daily grounding rituals',
-      'Sensitive souls who need energetic protection',
-      'Building a calming crystal collection',
+      'Those who experience anxious thoughts or overwhelm',
+      'Anyone seeking daily grounding and calming rituals',
+      'Sensitive souls who need gentle energetic protection',
+      'Those building a supportive crystal collection',
     ],
     introText:
       'Anxiety can feel all-encompassing, yet you are not alone. These crystals offer gentle support as you navigate challenging moments. Use them as companions for presence, not as substitutes for professional care.',

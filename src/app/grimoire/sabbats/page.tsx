@@ -6,7 +6,11 @@ import { stringToKebabCase } from '../../../../utils/string';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
-import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createFAQPageSchema,
+  createBreadcrumbSchema,
+  renderJsonLd,
+} from '@/lib/schema';
 
 const faqs = [
   {
@@ -83,6 +87,12 @@ export default function SabbatsIndexPage() {
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       {renderJsonLd(faqSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Sabbats', url: '/grimoire/sabbats' },
+        ]),
+      )}
       <div className='max-w-5xl mx-auto'>
         <Breadcrumbs
           items={[

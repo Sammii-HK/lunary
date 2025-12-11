@@ -43,7 +43,7 @@ export function SeasonalHighlight({
             <span className='text-2xl font-semibold text-white'>
               {formatPrice(product.price)}
             </span>
-            <span className='px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white text-sm font-medium group-hover:bg-white/20 transition-colors'>
+            <span className='px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl text-white text-sm font-medium group-hover:bg-white/20 transition-colors'>
               Explore Pack →
             </span>
           </div>

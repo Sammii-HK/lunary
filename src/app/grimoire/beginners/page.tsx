@@ -4,6 +4,7 @@ import { ArrowRight, Sparkles, Moon, Stars, BookOpen } from 'lucide-react';
 import {
   createFAQPageSchema,
   createArticleSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
@@ -163,11 +164,16 @@ export default function BeginnersGuidePage() {
     ],
     section: 'Beginner Guides',
   });
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: "Beginner's Guide", url: '/grimoire/beginners' },
+  ]);
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(faqSchema)}
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

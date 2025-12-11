@@ -6,6 +6,7 @@ import {
   createArticleSchema,
   createFAQPageSchema,
   createHowToSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
@@ -127,6 +128,12 @@ export default function JarSpellsPage() {
       {renderJsonLd(articleSchema)}
       {renderJsonLd(faqSchema)}
       {renderJsonLd(howToSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Jar Spells', url: '/grimoire/jar-spells' },
+        ]),
+      )}
 
       <Breadcrumbs
         items={[

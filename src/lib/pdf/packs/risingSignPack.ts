@@ -258,26 +258,26 @@ function buildRisingSignPack(): PdfBirthChartPack {
     title: 'Rising Sign Guide',
     subtitle: 'Understanding your Ascendant',
     moodText:
-      'Your rising sign is your cosmic first impression: the lens through which you see the world and how the world first sees you.',
+      'Your rising sign is your cosmic first impression—the lens through which you see the world, and how the world first sees you.',
     perfectFor: [
-      'Those new to understanding their birth chart',
+      'Those who are new to understanding their birth chart',
       'Anyone curious about first impressions and social approach',
-      'Understanding the difference between Sun and Rising signs',
-      'Deepening self-awareness through astrology',
+      'Those exploring the difference between Sun and Rising signs',
+      'Anyone seeking to deepen self-awareness through astrology',
     ],
     introText:
-      'While your Sun sign represents your core identity, your rising sign shapes how you move through the world. This is the sign that was rising on the eastern horizon at your exact moment of birth, making your birth time essential for accuracy.',
+      'While your Sun sign represents your core identity, your rising sign shapes how you move through the world. This is the sign that was rising on the eastern horizon at your exact moment of birth—which is why your birth time is essential for accuracy.',
     sections: RISING_SIGN_SECTIONS,
     journalPrompts: [
-      'How do people describe me when they first meet me?',
+      'How do people tend to describe me when they first meet me?',
       'Does my rising sign description resonate with how I approach new situations?',
-      'How does my rising sign work with (or against) my Sun sign?',
-      'What strengths and challenges does my rising sign bring?',
+      'How does my rising sign energy work with (or against) my Sun sign?',
+      'What unique strengths and challenges does my rising sign bring to my life?',
     ],
     closingText:
-      'Thank you for exploring your rising sign with Lunary. Understanding your Ascendant adds depth to your astrological portrait. You are not just one sign; you are a complex blend of cosmic influences.',
+      'Thank you for exploring your rising sign with Lunary. Understanding your Ascendant adds valuable depth to your astrological portrait. You are not just one sign—you are a complex and beautiful blend of cosmic influences.',
     optionalAffirmation:
-      'I embrace how I show up in the world. My first impression is authentic, and I move through life with intention.',
+      'I embrace how I show up in the world. My first impression is authentic, and I move through life with intention and presence.',
   };
 }
 

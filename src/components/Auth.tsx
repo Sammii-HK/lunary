@@ -5,6 +5,11 @@ import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 import { SignOutButton } from './SignOutButton';
 import { conversionTracking } from '@/lib/analytics';
+import {
+  getStoredAttribution,
+  getAttributionForTracking,
+} from '@/lib/attribution';
+import { captureEvent } from '@/lib/posthog-client';
 
 interface AuthFormData {
   email: string;
@@ -102,7 +107,29 @@ export function AuthComponent({
 
         const user = result.data?.user;
         if (user) {
+          const attribution = getStoredAttribution();
+          const attributionData = getAttributionForTracking();
+
           conversionTracking.signup(user.id, formData.email);
+
+          captureEvent('signup_completed', {
+            user_id: user.id,
+            ...attributionData,
+            signup_source: attribution?.source,
+            signup_landing_page: attribution?.landingPage,
+            signup_keyword: attribution?.keyword,
+          });
+
+          if (attribution) {
+            fetch('/api/attribution', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: user.id,
+                ...attributionData,
+              }),
+            }).catch(() => {});
+          }
         }
 
         setSuccess('Account created successfully! You are now signed in.');

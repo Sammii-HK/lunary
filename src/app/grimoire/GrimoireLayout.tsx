@@ -108,6 +108,7 @@ const SIDEBAR_CATEGORIES = [
 ];
 import { AskTheGrimoire } from './AskTheGrimoire';
 import { captureEvent } from '@/lib/posthog-client';
+import { getStoredAttribution, extractSearchQuery } from '@/lib/attribution';
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -769,13 +770,25 @@ export default function GrimoireLayout({
 
   useEffect(() => {
     if (currentSection && currentSection !== trackedSectionRef.current) {
+      const attribution = getStoredAttribution();
+      const referrer =
+        typeof document !== 'undefined' ? document.referrer : undefined;
+      const searchQuery = referrer ? extractSearchQuery(referrer) : undefined;
+
       captureEvent('grimoire_viewed', {
         section: currentSection,
         section_title: grimoire[currentSection]?.title,
+        source: attribution?.source || 'direct',
+        landing_page: pathname,
+        referrer,
+        search_query: searchQuery || attribution?.keyword,
+        first_touch_source: attribution?.source,
+        first_touch_page: attribution?.landingPage,
+        is_seo_traffic: attribution?.source === 'seo',
       });
       trackedSectionRef.current = currentSection;
     }
-  }, [currentSection]);
+  }, [currentSection, pathname]);
 
   // Auto-expand active section
   useEffect(() => {

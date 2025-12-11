@@ -3,7 +3,11 @@ import Link from 'next/link';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
-import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createFAQPageSchema,
+  createBreadcrumbSchema,
+  renderJsonLd,
+} from '@/lib/schema';
 import { mirrorHourKeys } from '@/constants/grimoire/clock-numbers-data';
 
 export const metadata: Metadata = {
@@ -72,6 +76,13 @@ export default function MirrorHoursIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(faqSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Numerology', url: '/grimoire/numerology' },
+          { name: 'Mirror Hours', url: '/grimoire/mirror-hours' },
+        ]),
+      )}
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

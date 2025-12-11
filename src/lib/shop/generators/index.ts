@@ -24,6 +24,54 @@ import { generateBundles, getBundleBySlug } from './bundles';
 
 let cachedProducts: ShopProduct[] | null = null;
 
+/**
+ * Interleave products from different categories for variety
+ * Takes products from each category in round-robin fashion
+ */
+function interleaveProducts(products: ShopProduct[]): ShopProduct[] {
+  // Group products by category
+  const byCategory = new Map<ShopCategory, ShopProduct[]>();
+
+  products.forEach((product) => {
+    const existing = byCategory.get(product.category) || [];
+    existing.push(product);
+    byCategory.set(product.category, existing);
+  });
+
+  // Define preferred category order for interleaving
+  const categoryOrder: ShopCategory[] = [
+    'spell',
+    'crystal',
+    'tarot',
+    'astrology',
+    'seasonal',
+    'birthchart',
+    'bundle',
+  ];
+
+  // Create interleaved array
+  const interleaved: ShopProduct[] = [];
+  const categoryIndices = new Map<ShopCategory, number>();
+  categoryOrder.forEach((cat) => categoryIndices.set(cat, 0));
+
+  let hasMore = true;
+  while (hasMore) {
+    hasMore = false;
+    for (const category of categoryOrder) {
+      const categoryProducts = byCategory.get(category) || [];
+      const index = categoryIndices.get(category) || 0;
+
+      if (index < categoryProducts.length) {
+        interleaved.push(categoryProducts[index]);
+        categoryIndices.set(category, index + 1);
+        hasMore = true;
+      }
+    }
+  }
+
+  return interleaved;
+}
+
 export function getAllProducts(): ShopProduct[] {
   if (cachedProducts) {
     return cachedProducts;
@@ -40,8 +88,9 @@ export function getAllProducts(): ShopProduct[] {
     ...generateBundles(),
   ];
 
-  cachedProducts = products;
-  return products;
+  // Interleave products so each page has variety
+  cachedProducts = interleaveProducts(products);
+  return cachedProducts;
 }
 
 export function getProductBySlug(slug: string): ShopProduct | undefined {

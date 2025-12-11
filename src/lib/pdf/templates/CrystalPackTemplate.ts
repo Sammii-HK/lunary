@@ -393,61 +393,148 @@ export async function generateCrystalPackPdf(
     );
   }
 
-  // Simple closing page
+  // Closing page with callout boxes
   const { regular, bold } = fonts;
   const closing = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   drawBackground(closing);
 
   let y = PAGE_HEIGHT - MARGIN - 30;
-  closing.drawText('Working With Your Crystals', {
+  closing.drawText('Closing Reflections', {
     x: MARGIN,
     y,
     size: FONT_SIZES.h2,
     font: bold,
     color: COLORS.stardust,
   });
-  y -= SPACING.lg;
+  y -= 25;
 
+  closing.drawText('Working with your crystals', {
+    x: MARGIN,
+    y,
+    size: FONT_SIZES.small,
+    font: regular,
+    color: COLORS.textMuted,
+  });
+  y -= SPACING.sm;
+
+  y = drawDivider(closing, y);
+
+  // Closing text callout
   const closingText =
     pack.closingText ||
     'Thank you for exploring these crystals with Lunary. May they support your journey with their gentle, grounding energy.';
+  const closingPadding = 18;
   const closingLines = wrapText(
     closingText,
     regular,
     FONT_SIZES.body,
-    CONTENT_WIDTH,
+    CONTENT_WIDTH - closingPadding * 2 - 15,
   );
+  const closingBoxHeight =
+    closingLines.length * (FONT_SIZES.body * LINE_HEIGHT) + closingPadding * 2;
+
+  closing.drawRectangle({
+    x: MARGIN,
+    y: y - closingBoxHeight,
+    width: CONTENT_WIDTH,
+    height: closingBoxHeight,
+    color: COLORS.backgroundAlt,
+    borderColor: COLORS.border,
+    borderWidth: 0.5,
+  });
+  closing.drawRectangle({
+    x: MARGIN,
+    y: y - closingBoxHeight,
+    width: 4,
+    height: closingBoxHeight,
+    color: COLORS.cosmicRose,
+  });
+
+  let closingTextY = y - closingPadding - FONT_SIZES.body;
   for (const line of closingLines) {
     closing.drawText(line, {
-      x: MARGIN,
-      y,
+      x: MARGIN + closingPadding + 8,
+      y: closingTextY,
       size: FONT_SIZES.body,
       font: regular,
       color: COLORS.textMuted,
     });
-    y -= FONT_SIZES.body * LINE_HEIGHT;
+    closingTextY -= FONT_SIZES.body * LINE_HEIGHT;
   }
+  y = y - closingBoxHeight - SPACING.md;
 
-  y -= SPACING.xl;
+  // Affirmation callout
+  const affirmation =
+    pack.optionalAffirmation ||
+    'I am open to the healing energy of these crystals. I trust the wisdom of the Earth to support my journey.';
+  const affLines = wrapText(
+    affirmation,
+    regular,
+    FONT_SIZES.body,
+    CONTENT_WIDTH - closingPadding * 2 - 15,
+  );
+  const affBoxHeight =
+    affLines.length * (FONT_SIZES.body * LINE_HEIGHT) + closingPadding * 2;
+
+  closing.drawRectangle({
+    x: MARGIN,
+    y: y - affBoxHeight,
+    width: CONTENT_WIDTH,
+    height: affBoxHeight,
+    color: COLORS.backgroundAlt,
+    borderColor: COLORS.border,
+    borderWidth: 0.5,
+  });
+  closing.drawRectangle({
+    x: MARGIN,
+    y: y - affBoxHeight,
+    width: 4,
+    height: affBoxHeight,
+    color: COLORS.galaxyHaze,
+  });
+
+  let affTextY = y - closingPadding - FONT_SIZES.body;
+  for (const line of affLines) {
+    closing.drawText(line, {
+      x: MARGIN + closingPadding + 8,
+      y: affTextY,
+      size: FONT_SIZES.body,
+      font: regular,
+      color: COLORS.textMuted,
+    });
+    affTextY -= FONT_SIZES.body * LINE_HEIGHT;
+  }
+  y = y - affBoxHeight - SPACING.xl;
+
   drawCenteredText(
     closing,
-    'lunary.app',
+    'Thank you for practising with Lunary.',
     y,
     regular,
     FONT_SIZES.body,
     COLORS.textMuted,
   );
+  y -= SPACING.lg;
 
   if (logo) {
-    const logoScale = 0.1;
+    const logoScale = 0.12;
     const logoWidth = logo.width * logoScale;
     const logoHeight = logo.height * logoScale;
     closing.drawImage(logo, {
       x: (PAGE_WIDTH - logoWidth) / 2,
-      y: 60,
+      y: y - logoHeight,
       width: logoWidth,
       height: logoHeight,
     });
+    y -= logoHeight + SPACING.sm;
+    drawCenteredText(
+      closing,
+      'lunary.app',
+      y,
+      regular,
+      FONT_SIZES.tiny,
+      COLORS.textSoft,
+    );
   }
 
   drawFooter(closing, pack.title, pageNum, totalPages, regular);
