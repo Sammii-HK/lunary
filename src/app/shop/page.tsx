@@ -72,6 +72,18 @@ export default function ShopPage() {
   const products = allProducts.slice(0, PRODUCTS_PER_PAGE);
   const featuredProduct = getCurrentSeasonalPack() || getFeaturedProducts()[0];
 
+  // Calculate counts for all products
+  const allProductCounts = {
+    all: allProducts.length,
+    spell: allProducts.filter((p) => p.category === 'spell').length,
+    crystal: allProducts.filter((p) => p.category === 'crystal').length,
+    tarot: allProducts.filter((p) => p.category === 'tarot').length,
+    seasonal: allProducts.filter((p) => p.category === 'seasonal').length,
+    astrology: allProducts.filter((p) => p.category === 'astrology').length,
+    birthchart: allProducts.filter((p) => p.category === 'birthchart').length,
+    bundle: allProducts.filter((p) => p.category === 'bundle').length,
+  } as const;
+
   return (
     <ShopClient
       products={products}
@@ -79,6 +91,7 @@ export default function ShopPage() {
       currentPage={1}
       totalPages={totalPages}
       totalProducts={allProducts.length}
+      allProductCounts={allProductCounts}
     />
   );
 }

@@ -15,6 +15,7 @@ interface ShopClientProps {
   currentPage?: number;
   totalPages?: number;
   totalProducts?: number;
+  allProductCounts?: Record<ShopCategory | 'all', number>;
 }
 
 export function ShopClient({
@@ -23,6 +24,7 @@ export function ShopClient({
   currentPage = 1,
   totalPages = 1,
   totalProducts,
+  allProductCounts,
 }: ShopClientProps) {
   const [selectedCategory, setSelectedCategory] = useState<
     ShopCategory | 'all'
@@ -56,6 +58,12 @@ export function ShopClient({
   }, [products, selectedCategory, searchQuery]);
 
   const productCounts = useMemo(() => {
+    // Use pre-calculated counts from server if available
+    if (allProductCounts) {
+      return allProductCounts;
+    }
+
+    // Fallback to calculating from current products
     const counts: Record<ShopCategory | 'all', number> = {
       all: products.length,
       spell: 0,
@@ -72,7 +80,7 @@ export function ShopClient({
     });
 
     return counts;
-  }, [products]);
+  }, [products, allProductCounts]);
 
   return (
     <div className='min-h-screen bg-lunary-bg'>
