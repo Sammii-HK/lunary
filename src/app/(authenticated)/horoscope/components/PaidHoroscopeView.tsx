@@ -16,6 +16,7 @@ import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalen
 import { HoroscopeSection } from './HoroscopeSection';
 import { PersonalTransitImpactCard } from './PersonalTransitImpact';
 import { TodaysAspects } from './TodaysAspects';
+import { TransitWisdom } from './TransitWisdom';
 import { GuideNudge } from '@/components/GuideNudge';
 import { StreakBanner } from '@/components/StreakBanner';
 import { ReflectionBox } from '@/components/horoscope/ReflectionBox';
@@ -565,6 +566,26 @@ function MoreForToday({
   );
 }
 
+// Type for cached horoscope from API
+interface CachedHoroscope {
+  sunSign: string;
+  moonPhase: string;
+  headline: string;
+  overview: string;
+  focusAreas: Array<{
+    area: 'love' | 'work' | 'inner';
+    title: string;
+    guidance: string;
+  }>;
+  tinyAction: string;
+  dailyGuidance: string;
+  personalInsight: string;
+  luckyElements: string[];
+  cosmicHighlight: string;
+  dailyAffirmation: string;
+  cached?: boolean;
+}
+
 export function PaidHoroscopeView({
   userBirthday,
   userName,
@@ -573,13 +594,44 @@ export function PaidHoroscopeView({
   const [observer, setObserver] = useState<any>(null);
   const [fullHoroscope, setFullHoroscope] = useState<string | null>(null);
   const [currentTransits, setCurrentTransits] = useState<any[]>([]);
+  const [horoscope, setHoroscope] = useState<CachedHoroscope | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const birthChart = getBirthChartFromProfile(profile);
-  const horoscope = getEnhancedPersonalizedHoroscope(
-    userBirthday,
-    userName,
-    profile,
-  );
+
+  // Fetch cached horoscope from API
+  useEffect(() => {
+    async function fetchHoroscope() {
+      try {
+        const response = await fetch('/api/horoscope/daily');
+        if (response.ok) {
+          const data = await response.json();
+          setHoroscope(data);
+        } else {
+          // Fallback to client-side generation if API fails
+          const fallback = getEnhancedPersonalizedHoroscope(
+            userBirthday,
+            userName,
+            profile,
+          );
+          setHoroscope(fallback);
+        }
+      } catch (error) {
+        console.error('[Horoscope] API fetch failed, using fallback:', error);
+        // Fallback to client-side generation
+        const fallback = getEnhancedPersonalizedHoroscope(
+          userBirthday,
+          userName,
+          profile,
+        );
+        setHoroscope(fallback);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchHoroscope();
+  }, [userBirthday, userName, profile]);
 
   const today = dayjs();
   const universalDay = getDailyNumerology(today);
@@ -618,6 +670,22 @@ export function PaidHoroscopeView({
       setFullHoroscope(generatedHoroscope);
     }
   }, [observer, birthChart, userBirthday, userName]);
+
+  // Show loading skeleton while fetching
+  if (isLoading) {
+    return (
+      <div className='h-full space-y-6 p-4 overflow-auto'>
+        <div className='pt-6'>
+          <div className='h-8 bg-zinc-800 rounded animate-pulse w-48 mb-2' />
+          <div className='h-4 bg-zinc-800 rounded animate-pulse w-64' />
+        </div>
+        <div className='space-y-4'>
+          <div className='h-32 bg-zinc-800/50 rounded-xl animate-pulse' />
+          <div className='h-24 bg-zinc-800/50 rounded-xl animate-pulse' />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='h-full space-y-6 p-4 overflow-auto'>
@@ -700,6 +768,19 @@ export function PaidHoroscopeView({
         </HoroscopeSection>
 
         <GuideNudge location='horoscope' />
+
+        {birthChart && currentTransits.length > 0 && (
+          <HoroscopeSection title='Transit Wisdom' color='indigo'>
+            <p className='text-sm text-zinc-400 mb-4'>
+              Today&apos;s most significant transits to your birth chart
+            </p>
+            <TransitWisdom
+              birthChart={birthChart}
+              currentTransits={currentTransits}
+              maxItems={3}
+            />
+          </HoroscopeSection>
+        )}
 
         {birthChart && currentTransits.length > 0 && (
           <HoroscopeSection title="Today's Aspects to Your Chart" color='zinc'>
