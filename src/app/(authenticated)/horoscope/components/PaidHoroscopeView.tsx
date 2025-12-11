@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
+import { ChevronDown, Heart, Briefcase, Sparkles } from 'lucide-react';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import {
   getBirthChartFromProfile,
@@ -510,6 +511,60 @@ const getPersonalDayNumber = (
   };
 };
 
+// Collapsible "More for today" section for focus areas
+function MoreForToday({
+  focusAreas,
+}: {
+  focusAreas: Array<{
+    area: 'love' | 'work' | 'inner';
+    title: string;
+    guidance: string;
+  }>;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const areaIcons = {
+    love: <Heart className='w-4 h-4 text-pink-400' />,
+    work: <Briefcase className='w-4 h-4 text-amber-400' />,
+    inner: <Sparkles className='w-4 h-4 text-lunary-primary-400' />,
+  };
+
+  return (
+    <div className='mb-4'>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className='flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-300 transition-colors'
+      >
+        <ChevronDown
+          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
+        <span>More for today</span>
+      </button>
+
+      {isOpen && (
+        <div className='mt-3 space-y-3 pl-6'>
+          {focusAreas.map((focus) => (
+            <div
+              key={focus.area}
+              className='p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50'
+            >
+              <div className='flex items-center gap-2 mb-1'>
+                {areaIcons[focus.area]}
+                <span className='text-xs font-medium text-zinc-300 uppercase tracking-wide'>
+                  {focus.title}
+                </span>
+              </div>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                {focus.guidance}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PaidHoroscopeView({
   userBirthday,
   userName,
@@ -578,8 +633,47 @@ export function PaidHoroscopeView({
       </div>
 
       <div className='space-y-6'>
+        {/* Main Daily Reading - Headline + Overview */}
         <HoroscopeSection title="Today's Horoscope" color='purple'>
-          {fullHoroscope ? (
+          {horoscope.headline ? (
+            <>
+              {/* Headline */}
+              <h2 className='text-lg font-medium text-zinc-100 mb-3'>
+                {horoscope.headline}
+              </h2>
+
+              {/* Overview - the main reading */}
+              <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+                {horoscope.overview || fullHoroscope}
+              </p>
+
+              {/* Tiny Action anchor */}
+              {horoscope.tinyAction && (
+                <div className='p-3 rounded-lg bg-lunary-primary-950/50 border border-lunary-primary-900/50 mb-4'>
+                  <p className='text-sm text-lunary-primary-300 italic'>
+                    {horoscope.tinyAction}
+                  </p>
+                </div>
+              )}
+
+              {/* Collapsible "More for today" section */}
+              {horoscope.focusAreas && horoscope.focusAreas.length > 0 && (
+                <MoreForToday focusAreas={horoscope.focusAreas} />
+              )}
+
+              <div className='pt-3 border-t border-zinc-800/50 space-y-3'>
+                <div className='flex flex-wrap gap-3 text-xs'>
+                  <Link
+                    href='/horoscope/weekly'
+                    className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                  >
+                    Week ahead →
+                  </Link>
+                </div>
+                <ReflectionBox />
+              </div>
+            </>
+          ) : fullHoroscope ? (
             <>
               <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
                 {fullHoroscope}

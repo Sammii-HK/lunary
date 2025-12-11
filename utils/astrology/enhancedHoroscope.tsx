@@ -8,9 +8,21 @@ import { getBirthChartFromProfile } from './birthChart';
 
 dayjs.extend(dayOfYear);
 
+type FocusArea = {
+  area: 'love' | 'work' | 'inner';
+  title: string;
+  guidance: string;
+};
+
 type EnhancedHoroscopeReading = {
   sunSign: string;
   moonPhase: string;
+  // New structured fields
+  headline: string;
+  overview: string;
+  focusAreas: FocusArea[];
+  tinyAction: string;
+  // Legacy fields (kept for backwards compatibility)
   dailyGuidance: string;
   personalInsight: string;
   luckyElements: string[];
@@ -1044,6 +1056,400 @@ const generateDailyAffirmation = (
   return signAffirmations[index];
 };
 
+// Generate a concise, evocative headline based on chart context
+const generateHeadline = (
+  currentChart: AstroChartInformation[],
+  birthChart: any,
+  moonPhase: string,
+  today: dayjs.Dayjs,
+): string => {
+  const currentMoon = currentChart.find((p) => p.body === 'Moon');
+  const currentSun = currentChart.find((p) => p.body === 'Sun');
+  const natalSun = birthChart?.find((p: any) => p.body === 'Sun');
+
+  // Check for special alignments
+  if (natalSun && currentSun?.sign === natalSun.sign) {
+    return `Your Solar Season: A Day of Personal Power`;
+  }
+
+  // Moon phase based headlines
+  const phaseHeadlines: Record<string, string[]> = {
+    'New Moon': [
+      'Seeds in the Dark: Plant Your Intentions',
+      'The Void Speaks: Listen Inward',
+      'Beginnings Stir Beneath the Surface',
+    ],
+    'Full Moon': [
+      'Illumination Arrives: What Do You See?',
+      'The Light Reveals: Harvest Your Truth',
+      'Culmination and Release',
+    ],
+    'Waxing Crescent': [
+      'Momentum Builds: Take Your First Step',
+      'The Spark Catches: Nurture Your Vision',
+    ],
+    'First Quarter': [
+      'A Crossroads Moment: Choose Your Path',
+      'Obstacles Become Openings',
+    ],
+    'Waxing Gibbous': [
+      'Refining Your Approach: Almost There',
+      'The Details Matter Now',
+    ],
+    'Waning Gibbous': [
+      'Gratitude and Wisdom: Share What You Know',
+      'The Teaching Moon: Integrate and Offer',
+    ],
+    'Last Quarter': [
+      'Release What Weighs: Clear the Way',
+      'Letting Go Creates Space',
+    ],
+    'Waning Crescent': [
+      'Rest Before Renewal: Honor the Pause',
+      'The Sacred Retreat: Dream and Restore',
+    ],
+  };
+
+  const headlines = phaseHeadlines[moonPhase] || ['A Day of Cosmic Flow'];
+  const dayIndex = today.dayOfYear() % headlines.length;
+
+  // Add Moon sign flavor
+  const moonSign = currentMoon?.sign;
+  if (moonSign) {
+    return `${headlines[dayIndex]} (Moon in ${moonSign})`;
+  }
+
+  return headlines[dayIndex];
+};
+
+// Generate the main overview - personal and chart-referenced
+const generateOverview = (
+  currentChart: AstroChartInformation[],
+  birthChart: any,
+  moonPhase: string,
+  userName?: string,
+  today: dayjs.Dayjs = dayjs(),
+): string => {
+  const natalSun = birthChart?.find((p: any) => p.body === 'Sun');
+  const natalMoon = birthChart?.find((p: any) => p.body === 'Moon');
+  const natalAsc = birthChart?.find((p: any) => p.body === 'Ascendant');
+  const currentMoon = currentChart.find((p) => p.body === 'Moon');
+  const currentSun = currentChart.find((p) => p.body === 'Sun');
+
+  const parts: string[] = [];
+
+  // Opening that references actual chart
+  if (natalSun && currentSun) {
+    if (currentSun.sign === natalSun.sign) {
+      parts.push(
+        `With the Sun in your birth sign of ${natalSun.sign}, this is your time to shine authentically.`,
+      );
+    } else {
+      const houseArea = getSignHouseRelation(currentSun.sign, natalSun.sign);
+      parts.push(
+        `The Sun in ${currentSun.sign} activates ${houseArea} for you, ${natalSun.sign}.`,
+      );
+    }
+  }
+
+  // Moon influence - specific to user's chart
+  if (currentMoon && natalMoon) {
+    if (currentMoon.sign === natalMoon.sign) {
+      parts.push(
+        `The Moon returns to your natal ${natalMoon.sign}, amplifying your emotional instincts and inner knowing.`,
+      );
+    } else {
+      const moonRelation = getElementRelation(currentMoon.sign, natalMoon.sign);
+      parts.push(
+        `Today's ${currentMoon.sign} Moon ${moonRelation} your ${natalMoon.sign} emotional nature.`,
+      );
+    }
+  } else if (currentMoon) {
+    parts.push(
+      `The Moon in ${currentMoon.sign} colors your emotional landscape with ${getSignQuality(currentMoon.sign)} energy.`,
+    );
+  }
+
+  // Add rising sign context if available
+  if (natalAsc) {
+    const ascContext = getAscendantContext(natalAsc.sign, currentChart, today);
+    if (ascContext) {
+      parts.push(ascContext);
+    }
+  }
+
+  return parts.join(' ');
+};
+
+// Helper functions for overview generation
+const getSignHouseRelation = (
+  transitSign: string,
+  natalSign: string,
+): string => {
+  const relations: Record<string, string> = {
+    same: 'your sense of identity and self-expression',
+    next: 'matters of resources and self-worth',
+    opposite: 'your relationships and how you partner',
+  };
+  // Simplified - in full implementation would calculate actual house
+  return 'themes of growth and expansion';
+};
+
+const getElementRelation = (
+  moonSign: string,
+  natalMoonSign: string,
+): string => {
+  const elements: Record<string, string> = {
+    Fire: 'Aries,Leo,Sagittarius',
+    Earth: 'Taurus,Virgo,Capricorn',
+    Air: 'Gemini,Libra,Aquarius',
+    Water: 'Cancer,Scorpio,Pisces',
+  };
+
+  const getMoonElement = (sign: string): string => {
+    for (const [element, signs] of Object.entries(elements)) {
+      if (signs.includes(sign)) return element;
+    }
+    return 'Earth';
+  };
+
+  const transitElement = getMoonElement(moonSign);
+  const natalElement = getMoonElement(natalMoonSign);
+
+  if (transitElement === natalElement) {
+    return 'harmonizes beautifully with';
+  }
+
+  const compatible: Record<string, string> = {
+    Fire: 'Air',
+    Air: 'Fire',
+    Earth: 'Water',
+    Water: 'Earth',
+  };
+
+  if (compatible[transitElement] === natalElement) {
+    return 'gently supports';
+  }
+
+  return 'brings a different texture to';
+};
+
+const getSignQuality = (sign: string): string => {
+  const qualities: Record<string, string> = {
+    Aries: 'bold and initiating',
+    Taurus: 'grounded and sensual',
+    Gemini: 'curious and versatile',
+    Cancer: 'nurturing and intuitive',
+    Leo: 'warm and expressive',
+    Virgo: 'discerning and practical',
+    Libra: 'harmonious and relational',
+    Scorpio: 'deep and transformative',
+    Sagittarius: 'expansive and philosophical',
+    Capricorn: 'structured and ambitious',
+    Aquarius: 'innovative and humanitarian',
+    Pisces: 'dreamy and compassionate',
+  };
+  return qualities[sign] || 'flowing';
+};
+
+const getAscendantContext = (
+  ascSign: string,
+  currentChart: AstroChartInformation[],
+  today: dayjs.Dayjs,
+): string | null => {
+  const dayOfWeek = today.day();
+  // Only add ascending context some days to avoid repetition
+  if (dayOfWeek % 3 !== 0) return null;
+
+  return `Your ${ascSign} rising invites you to approach the day with ${getSignQuality(ascSign)} presence.`;
+};
+
+// Generate focus areas for love, work, and inner world
+const generateFocusAreas = (
+  currentChart: AstroChartInformation[],
+  birthChart: any,
+  today: dayjs.Dayjs,
+): FocusArea[] => {
+  const areas: FocusArea[] = [];
+  const venus = currentChart.find((p) => p.body === 'Venus');
+  const mars = currentChart.find((p) => p.body === 'Mars');
+  const mercury = currentChart.find((p) => p.body === 'Mercury');
+  const currentMoon = currentChart.find((p) => p.body === 'Moon');
+  const natalVenus = birthChart?.find((p: any) => p.body === 'Venus');
+  const natalMars = birthChart?.find((p: any) => p.body === 'Mars');
+
+  // Love focus (Venus-based)
+  if (venus) {
+    const loveGuidance = natalVenus
+      ? `Venus in ${venus.sign} interacts with your natal Venus in ${natalVenus.sign}, ${getVenusInteraction(venus.sign, natalVenus.sign)}.`
+      : `Venus in ${venus.sign} invites ${getVenusThemeShort(venus.sign)} in your connections today.`;
+
+    areas.push({
+      area: 'love',
+      title: 'Relationships & Connection',
+      guidance: loveGuidance,
+    });
+  }
+
+  // Work focus (Mars + Mercury)
+  if (mars || mercury) {
+    const workPlanet = mars || mercury;
+    const workGuidance =
+      natalMars && mars
+        ? `Mars in ${mars.sign} energizes your natal Mars in ${natalMars.sign}, ${getMarsInteraction(mars.sign, natalMars.sign)}.`
+        : `${workPlanet?.body} in ${workPlanet?.sign} supports ${getWorkFocus(workPlanet?.sign || 'Aries')} today.`;
+
+    areas.push({
+      area: 'work',
+      title: 'Work & Action',
+      guidance: workGuidance,
+    });
+  }
+
+  // Inner world focus (Moon-based)
+  if (currentMoon) {
+    areas.push({
+      area: 'inner',
+      title: 'Inner World',
+      guidance: `The Moon in ${currentMoon.sign} asks you to ${getInnerWorldFocus(currentMoon.sign)}.`,
+    });
+  }
+
+  return areas;
+};
+
+const getVenusInteraction = (
+  transitSign: string,
+  natalSign: string,
+): string => {
+  if (transitSign === natalSign) {
+    return 'amplifying your natural way of giving and receiving love';
+  }
+  return 'inviting you to explore new dimensions of connection';
+};
+
+const getVenusThemeShort = (sign: string): string => {
+  const themes: Record<string, string> = {
+    Aries: 'bold declarations and spontaneous affection',
+    Taurus: 'sensual presence and steady devotion',
+    Gemini: 'playful conversation and curious connection',
+    Cancer: 'nurturing gestures and emotional safety',
+    Leo: 'generous appreciation and heartfelt recognition',
+    Virgo: 'thoughtful acts of service and practical care',
+    Libra: 'harmonious partnership and aesthetic beauty',
+    Scorpio: 'depth, intensity, and transformative bonding',
+    Sagittarius: 'adventurous connection and philosophical sharing',
+    Capricorn: 'commitment, loyalty, and building together',
+    Aquarius: 'friendship-based love and unconventional connection',
+    Pisces: 'spiritual union and compassionate tenderness',
+  };
+  return themes[sign] || 'heart-centered connection';
+};
+
+const getMarsInteraction = (transitSign: string, natalSign: string): string => {
+  if (transitSign === natalSign) {
+    return 'giving you extra drive and confidence in your actions';
+  }
+  return 'channeling your energy in a different but productive direction';
+};
+
+const getWorkFocus = (sign: string): string => {
+  const focuses: Record<string, string> = {
+    Aries: 'initiating bold moves and leading with confidence',
+    Taurus: 'steady progress and building lasting results',
+    Gemini: 'multitasking, networking, and sharing ideas',
+    Cancer: 'nurturing projects and caring for your team',
+    Leo: 'creative leadership and visible accomplishment',
+    Virgo: 'detailed work, organization, and refinement',
+    Libra: 'collaboration, diplomacy, and fair dealing',
+    Scorpio: 'strategic depth and transformative projects',
+    Sagittarius: 'big-picture thinking and expansive goals',
+    Capricorn: 'disciplined execution and long-term planning',
+    Aquarius: 'innovation, technology, and unconventional solutions',
+    Pisces: 'intuitive work, creativity, and compassionate service',
+  };
+  return focuses[sign] || 'focused effort';
+};
+
+const getInnerWorldFocus = (moonSign: string): string => {
+  const focuses: Record<string, string> = {
+    Aries: 'honor your need for independence and trust your impulses',
+    Taurus: 'slow down, ground yourself, and savor simple pleasures',
+    Gemini: 'let your mind wander freely and follow your curiosity',
+    Cancer: 'tend to your emotional needs and seek comfort',
+    Leo: 'celebrate yourself and let your heart lead',
+    Virgo: 'find peace in useful activity and gentle self-improvement',
+    Libra: 'seek balance and beauty in your inner landscape',
+    Scorpio: 'go deep, process what is hidden, and trust transformation',
+    Sagittarius: 'expand your perspective and find meaning',
+    Capricorn: 'honor your ambitions and set quiet intentions',
+    Aquarius: 'embrace your uniqueness and envision the future',
+    Pisces: 'dream, rest, and connect with your spiritual nature',
+  };
+  return focuses[moonSign] || 'tend to your inner world with care';
+};
+
+// Generate tiny action - one sentence anchor for the day
+const generateTinyAction = (
+  currentChart: AstroChartInformation[],
+  birthChart: any,
+  moonPhase: string,
+  today: dayjs.Dayjs,
+): string => {
+  const currentMoon = currentChart.find((p) => p.body === 'Moon');
+  const natalSun = birthChart?.find((p: any) => p.body === 'Sun');
+
+  // Phase-based anchors
+  const phaseAnchors: Record<string, string[]> = {
+    'New Moon': [
+      'Write down one intention you want to grow.',
+      'Spend five minutes in stillness.',
+      'Plant a seed—literal or metaphorical.',
+    ],
+    'Full Moon': [
+      'Name one thing you are ready to release.',
+      'Celebrate a recent accomplishment, however small.',
+      'Share gratitude with someone who matters.',
+    ],
+    'Waxing Crescent': [
+      'Take one small step toward a recent goal.',
+      'Nurture something you have started.',
+    ],
+    'First Quarter': [
+      'Face one small challenge you have been avoiding.',
+      'Make a decision you have been postponing.',
+    ],
+    'Waxing Gibbous': [
+      'Refine one detail in an ongoing project.',
+      'Ask yourself: what needs adjusting?',
+    ],
+    'Waning Gibbous': [
+      'Share a piece of wisdom with someone who needs it.',
+      'Practice gratitude for lessons learned.',
+    ],
+    'Last Quarter': [
+      'Let go of one expectation that no longer serves you.',
+      'Clear one small space in your life.',
+    ],
+    'Waning Crescent': [
+      'Give yourself permission to rest.',
+      'Spend time in reflection without agenda.',
+    ],
+  };
+
+  const anchors = phaseAnchors[moonPhase] || [
+    'Move through the day with presence.',
+  ];
+  const dayIndex = today.dayOfYear() % anchors.length;
+
+  // Add sign-specific flavor if we have natal data
+  if (natalSun && currentMoon) {
+    return `Today's anchor: ${anchors[dayIndex]} Your ${natalSun.sign} spirit knows how.`;
+  }
+
+  return `Today's anchor: ${anchors[dayIndex]}`;
+};
+
 export const getEnhancedPersonalizedHoroscope = (
   userBirthday?: string,
   userName?: string,
@@ -1092,9 +1498,32 @@ export const getEnhancedPersonalizedHoroscope = (
   const cosmicHighlight = generateCosmicHighlight(currentChart, today);
   const dailyAffirmation = generateDailyAffirmation(sunSign, today);
 
+  // Generate new structured fields
+  const headline = generateHeadline(currentChart, birthChart, moonPhase, today);
+  const overview = generateOverview(
+    currentChart,
+    birthChart,
+    moonPhase,
+    userName,
+    today,
+  );
+  const focusAreas = generateFocusAreas(currentChart, birthChart, today);
+  const tinyAction = generateTinyAction(
+    currentChart,
+    birthChart,
+    moonPhase,
+    today,
+  );
+
   return {
     sunSign,
     moonPhase,
+    // New structured fields
+    headline,
+    overview,
+    focusAreas,
+    tinyAction,
+    // Legacy fields
     dailyGuidance,
     personalInsight,
     luckyElements,
