@@ -5,7 +5,24 @@
  * for all downloadable PDF packs.
  */
 
+// ============================================
+// PACK TYPES
+// ============================================
+
+export type PackType =
+  | 'spell'
+  | 'crystal'
+  | 'tarot'
+  | 'seasonal'
+  | 'astrology'
+  | 'birthchart'
+  | 'retrograde';
+
 export type SpellLevel = 'beginner' | 'intermediate' | 'advanced';
+
+// ============================================
+// SPELL PACK TYPES
+// ============================================
 
 export interface PdfSpell {
   id: string;
@@ -19,6 +36,217 @@ export interface PdfSpell {
   incantation?: string;
 }
 
+export interface PdfSpellPack {
+  type: 'spell';
+  slug: string;
+  title: string;
+  subtitle?: string;
+  moodText?: string;
+  perfectFor?: string[];
+  introText?: string;
+  beforeYouBegin?: string;
+  spells: PdfSpell[];
+  closingText?: string;
+  optionalAffirmation?: string;
+}
+
+// ============================================
+// CRYSTAL PACK TYPES
+// ============================================
+
+export interface PdfCrystal {
+  id: string;
+  name: string;
+  chakras: string[];
+  element: string;
+  zodiacSigns?: string[];
+  properties: string[];
+  howToUse: string[];
+  affirmation?: string;
+  cleansing?: string;
+}
+
+export interface PdfCrystalPack {
+  type: 'crystal';
+  slug: string;
+  title: string;
+  subtitle?: string;
+  moodText?: string;
+  perfectFor?: string[];
+  introText?: string;
+  crystals: PdfCrystal[];
+  closingText?: string;
+  optionalAffirmation?: string;
+}
+
+// ============================================
+// TAROT PACK TYPES
+// ============================================
+
+export interface PdfTarotSpread {
+  name: string;
+  description: string;
+  cardCount: number;
+  positions: { position: number; name: string; meaning: string }[];
+  bestFor: string[];
+  journalPrompts?: string[];
+}
+
+export interface PdfTarotCard {
+  name: string;
+  arcana: 'major' | 'minor';
+  suit?: string;
+  keywords: string[];
+  uprightMeaning: string;
+  reversedMeaning?: string;
+  shadowAspect?: string;
+}
+
+export interface PdfTarotPack {
+  type: 'tarot';
+  slug: string;
+  title: string;
+  subtitle?: string;
+  moodText?: string;
+  perfectFor?: string[];
+  introText?: string;
+  spreads: PdfTarotSpread[];
+  cards?: PdfTarotCard[];
+  journalPrompts?: string[];
+  closingText?: string;
+  optionalAffirmation?: string;
+}
+
+// ============================================
+// SEASONAL PACK TYPES
+// ============================================
+
+export interface PdfCorrespondence {
+  type: string;
+  items: string[];
+}
+
+export interface PdfSeasonalRitual {
+  title: string;
+  timing?: string;
+  description: string;
+  activities: string[];
+  correspondences?: PdfCorrespondence[];
+}
+
+export interface PdfSeasonalPack {
+  type: 'seasonal';
+  slug: string;
+  title: string;
+  subtitle?: string;
+  moodText?: string;
+  perfectFor?: string[];
+  introText?: string;
+  sabbatDate?: string;
+  theme?: string;
+  rituals: PdfSeasonalRitual[];
+  correspondences?: PdfCorrespondence[];
+  closingText?: string;
+  optionalAffirmation?: string;
+}
+
+// ============================================
+// ASTROLOGY PACK TYPES
+// ============================================
+
+export interface PdfAstrologySection {
+  title: string;
+  description: string;
+  keyDates?: string[];
+  practicalTips: string[];
+  journalPrompts?: string[];
+}
+
+export interface PdfAstrologyPack {
+  type: 'astrology';
+  slug: string;
+  title: string;
+  subtitle?: string;
+  moodText?: string;
+  perfectFor?: string[];
+  introText?: string;
+  sections: PdfAstrologySection[];
+  practicalTips?: string[];
+  journalPrompts?: string[];
+  closingText?: string;
+  optionalAffirmation?: string;
+}
+
+// ============================================
+// BIRTH CHART PACK TYPES
+// ============================================
+
+export interface PdfBirthChartSection {
+  placement: string;
+  sign?: string;
+  meaning: string;
+  traits: string[];
+  guidance: string;
+  integration?: string;
+}
+
+export interface PdfBirthChartPack {
+  type: 'birthchart';
+  slug: string;
+  title: string;
+  subtitle?: string;
+  moodText?: string;
+  perfectFor?: string[];
+  introText?: string;
+  sections: PdfBirthChartSection[];
+  journalPrompts?: string[];
+  closingText?: string;
+  optionalAffirmation?: string;
+}
+
+// ============================================
+// RETROGRADE PACK TYPES
+// ============================================
+
+export interface PdfRetrogradeSurvival {
+  planet: string;
+  phase: string;
+  description: string;
+  doList: string[];
+  dontList: string[];
+  affirmation?: string;
+}
+
+export interface PdfRetrogradePack {
+  type: 'retrograde';
+  slug: string;
+  title: string;
+  subtitle?: string;
+  moodText?: string;
+  perfectFor?: string[];
+  introText?: string;
+  planet: string;
+  survivalGuide: PdfRetrogradeSurvival[];
+  practicalTips?: string[];
+  journalPrompts?: string[];
+  closingText?: string;
+  optionalAffirmation?: string;
+}
+
+// ============================================
+// UNIFIED PACK TYPE
+// ============================================
+
+export type PdfPackUnion =
+  | PdfSpellPack
+  | PdfCrystalPack
+  | PdfTarotPack
+  | PdfSeasonalPack
+  | PdfAstrologyPack
+  | PdfBirthChartPack
+  | PdfRetrogradePack;
+
+// Legacy type for backward compatibility
 export interface PdfPack {
   slug: string;
   title: string;
