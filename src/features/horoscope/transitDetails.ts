@@ -7,6 +7,36 @@ export interface TransitAspect {
   natalSign: string;
   natalDegree: string;
   orbDegrees: number;
+  house?: number;
+}
+
+export type IntensityLevel =
+  | 'Mild'
+  | 'Noticeable'
+  | 'Highly Prominent'
+  | 'Life-Defining';
+
+export type ThemeTag =
+  | 'Identity'
+  | 'Creativity'
+  | 'Boundaries'
+  | 'Love'
+  | 'Work'
+  | 'Healing'
+  | 'Transformation'
+  | 'Communication'
+  | 'Growth'
+  | 'Intuition'
+  | 'Power'
+  | 'Freedom';
+
+export interface TransitPremiumDetail {
+  houseSummary?: string;
+  natalContext?: string;
+  orbExplanation?: string;
+  timingSummary?: string;
+  stackingNotes?: string;
+  pastPattern?: string;
 }
 
 export interface TransitDetail {
@@ -15,8 +45,11 @@ export interface TransitDetail {
   header: string;
   degreeInfo: string;
   intensity: 'Subtle' | 'Strong' | 'Exact';
+  intensityLevel: IntensityLevel;
+  themes: ThemeTag[];
   meaning: string;
   suggestion: string;
+  premium?: TransitPremiumDetail;
 }
 
 type Intensity = 'Subtle' | 'Strong' | 'Exact';
@@ -25,6 +58,101 @@ function getIntensity(orb: number): Intensity {
   if (orb <= 1.0) return 'Exact';
   if (orb <= 3.0) return 'Strong';
   return 'Subtle';
+}
+
+const PLANET_WEIGHT: Record<string, number> = {
+  Sun: 3,
+  Moon: 3,
+  Mercury: 2,
+  Venus: 2,
+  Mars: 2,
+  Jupiter: 3,
+  Saturn: 4,
+  Uranus: 4,
+  Neptune: 4,
+  Pluto: 5,
+  Ascendant: 3,
+  Midheaven: 3,
+};
+
+function getIntensityLevel(
+  orb: number,
+  transitPlanet: string,
+  natalPlanet: string,
+): IntensityLevel {
+  const transitWeight = PLANET_WEIGHT[transitPlanet] || 2;
+  const natalWeight = PLANET_WEIGHT[natalPlanet] || 2;
+  const maxWeight = Math.max(transitWeight, natalWeight);
+
+  const orbScore = orb <= 1 ? 4 : orb <= 2 ? 3 : orb <= 4 ? 2 : 1;
+  const totalScore = orbScore + maxWeight;
+
+  if (totalScore >= 8) return 'Life-Defining';
+  if (totalScore >= 6) return 'Highly Prominent';
+  if (totalScore >= 4) return 'Noticeable';
+  return 'Mild';
+}
+
+const PLANET_THEME_TAGS: Record<string, ThemeTag[]> = {
+  Sun: ['Identity', 'Power', 'Creativity'],
+  Moon: ['Healing', 'Intuition'],
+  Mercury: ['Communication'],
+  Venus: ['Love', 'Creativity'],
+  Mars: ['Power', 'Work'],
+  Jupiter: ['Growth', 'Freedom'],
+  Saturn: ['Boundaries', 'Work'],
+  Uranus: ['Freedom', 'Transformation'],
+  Neptune: ['Intuition', 'Healing'],
+  Pluto: ['Transformation', 'Power'],
+  Ascendant: ['Identity'],
+  Midheaven: ['Work', 'Identity'],
+};
+
+const ASPECT_THEME_MODIFIER: Record<string, ThemeTag[]> = {
+  conjunction: ['Power'],
+  opposition: ['Boundaries'],
+  square: ['Growth', 'Transformation'],
+  trine: ['Creativity', 'Growth'],
+  sextile: ['Communication', 'Growth'],
+};
+
+function getThemeTags(
+  transitPlanet: string,
+  natalPlanet: string,
+  aspectType: string,
+): ThemeTag[] {
+  const themes = new Set<ThemeTag>();
+
+  (PLANET_THEME_TAGS[transitPlanet] || []).forEach((t) => themes.add(t));
+  (PLANET_THEME_TAGS[natalPlanet] || []).forEach((t) => themes.add(t));
+  (ASPECT_THEME_MODIFIER[aspectType] || []).forEach((t) => themes.add(t));
+
+  return Array.from(themes).slice(0, 3);
+}
+
+function buildPastPattern(
+  transitPlanet: string,
+  natalPlanet: string,
+  aspectType: string,
+): string {
+  const outerPlanets = ['Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  const isOuterTransit = outerPlanets.includes(transitPlanet);
+
+  if (!isOuterTransit) {
+    return `This ${transitPlanet} transit recurs monthly, offering regular opportunities to work with these themes.`;
+  }
+
+  const cycles: Record<string, string> = {
+    Saturn:
+      'roughly every 7 years when Saturn makes major aspects to this point',
+    Uranus: 'roughly every 21 years when Uranus aspects this placement',
+    Neptune:
+      'roughly every 40+ years, making this a rare and significant influence',
+    Pluto:
+      'once or twice in a lifetime, marking a profound transformational period',
+  };
+
+  return `This transit occurs ${cycles[transitPlanet] || 'periodically'}. Reflect on similar themes from past cycles.`;
 }
 
 const DOMAIN_MAP: Record<string, Record<string, string>> = {
@@ -294,6 +422,142 @@ function formatAspectName(aspectType: string): string {
   return names[aspectType] || aspectType;
 }
 
+const HOUSE_THEMES: Record<number, string> = {
+  1: 'identity, appearance, how you meet the world',
+  2: 'resources, money, self-worth',
+  3: 'communication, local environment, learning',
+  4: 'home, roots, emotional foundations',
+  5: 'creativity, romance, joy',
+  6: 'work, routines, health',
+  7: 'partnerships, contracts, long-term commitments',
+  8: 'intimacy, shared resources, transformation',
+  9: 'beliefs, travel, higher learning',
+  10: 'career, public life, reputation',
+  11: 'friends, networks, collective projects',
+  12: 'rest, the unconscious, spiritual retreat',
+};
+
+function buildHouseSummary(house?: number): string | undefined {
+  if (!house || !HOUSE_THEMES[house]) return undefined;
+  return `This transit activates your ${house}${getOrdinalSuffix(house)} house, highlighting ${HOUSE_THEMES[house]}.`;
+}
+
+function getOrdinalSuffix(n: number): string {
+  if (n === 11 || n === 12 || n === 13) return 'th';
+  const lastDigit = n % 10;
+  if (lastDigit === 1) return 'st';
+  if (lastDigit === 2) return 'nd';
+  if (lastDigit === 3) return 'rd';
+  return 'th';
+}
+
+const SIGN_EXPRESSIONS: Record<string, string> = {
+  Aries: 'through bold initiative and direct action',
+  Taurus: 'through patience, stability, and sensory grounding',
+  Gemini: 'through curiosity, communication, and mental agility',
+  Cancer: 'through nurturing, emotional depth, and protective care',
+  Leo: 'through creative self-expression and warm generosity',
+  Virgo: 'through analysis, practical care, and attention to detail',
+  Libra: 'through harmony, relationship, and aesthetic balance',
+  Scorpio: 'through intensity, emotional depth, and transformative focus',
+  Sagittarius:
+    'through expansive vision, optimism, and philosophical exploration',
+  Capricorn: 'through discipline, ambition, and long-term commitment',
+  Aquarius: 'through innovation, independence, and collective vision',
+  Pisces: 'through intuition, compassion, and spiritual sensitivity',
+};
+
+const PLANET_NATAL_VERBS: Record<string, string> = {
+  Sun: 'expresses identity',
+  Moon: 'processes emotion',
+  Mercury: 'thinks and communicates',
+  Venus: 'relates and values',
+  Mars: 'asserts and acts',
+  Jupiter: 'expands and believes',
+  Saturn: 'structures and commits',
+  Uranus: 'innovates and liberates',
+  Neptune: 'imagines and dissolves',
+  Pluto: 'transforms and empowers',
+  Ascendant: 'presents itself',
+  Midheaven: 'aims publicly',
+};
+
+function buildNatalContext(planet: string, sign: string): string {
+  const verb = PLANET_NATAL_VERBS[planet] || 'expresses itself';
+  const expression = SIGN_EXPRESSIONS[sign] || 'in its own unique way';
+  return `Your natal ${planet} in ${sign} ${verb} ${expression}.`;
+}
+
+function buildOrbExplanation(orb: number, intensity: Intensity): string {
+  if (orb <= 1.0) {
+    return `With an orb under 1°, this transit is exact and highly noticeable today.`;
+  }
+  if (orb <= 3.0) {
+    return `With a moderately tight orb of ${Math.round(orb * 10) / 10}°, this energy is strong but not overwhelming.`;
+  }
+  return `With a wider orb of ${Math.round(orb * 10) / 10}°, this influence is present in the background rather than at peak intensity.`;
+}
+
+function buildTimingSummary(intensity: Intensity): string {
+  if (intensity === 'Exact') {
+    return 'Exact influence today. You may feel this most strongly over a one to two day window.';
+  }
+  if (intensity === 'Strong') {
+    return 'Strong influence across a three to five day window.';
+  }
+  return 'Subtle influence that colours a longer period rather than a single day.';
+}
+
+function detectStacking(
+  aspects: TransitAspect[],
+  selectedIndices: number[],
+): Map<number, string> {
+  const stackingNotes = new Map<number, string>();
+
+  const planetCounts = new Map<string, number[]>();
+  const houseCounts = new Map<number, number[]>();
+
+  selectedIndices.forEach((idx) => {
+    const aspect = aspects[idx];
+    const planet = aspect.natalPlanet;
+    if (!planetCounts.has(planet)) {
+      planetCounts.set(planet, []);
+    }
+    planetCounts.get(planet)!.push(idx);
+
+    if (aspect.house) {
+      if (!houseCounts.has(aspect.house)) {
+        houseCounts.set(aspect.house, []);
+      }
+      houseCounts.get(aspect.house)!.push(idx);
+    }
+  });
+
+  planetCounts.forEach((indices, planet) => {
+    if (indices.length > 1) {
+      const theme = PLANET_THEMES[planet] || `${planet} themes`;
+      indices.forEach((idx) => {
+        const existing = stackingNotes.get(idx) || '';
+        const note = `Another transit is also activating your natal ${planet}, so themes of ${theme.replace('your ', '')} are especially highlighted.`;
+        stackingNotes.set(idx, existing ? `${existing} ${note}` : note);
+      });
+    }
+  });
+
+  houseCounts.forEach((indices, house) => {
+    if (indices.length > 1) {
+      const theme = HOUSE_THEMES[house] || 'this life area';
+      indices.forEach((idx) => {
+        const existing = stackingNotes.get(idx) || '';
+        const note = `Multiple transits currently activate your ${house}${getOrdinalSuffix(house)} house, drawing attention to ${theme}.`;
+        stackingNotes.set(idx, existing ? `${existing} ${note}` : note);
+      });
+    }
+  });
+
+  return stackingNotes;
+}
+
 export function buildTransitDetails(
   aspects: TransitAspect[],
   options?: { maxItems?: number },
@@ -306,11 +570,37 @@ export function buildTransitDetails(
 
   const sorted = [...aspects].sort((a, b) => a.orbDegrees - b.orbDegrees);
   const selected = sorted.slice(0, maxItems);
+  const selectedIndices = selected.map((_, i) => i);
+
+  const stackingNotes = detectStacking(selected, selectedIndices);
 
   return selected.map((aspect, index) => {
     const intensity = getIntensity(aspect.orbDegrees);
+    const intensityLevel = getIntensityLevel(
+      aspect.orbDegrees,
+      aspect.transitPlanet,
+      aspect.natalPlanet,
+    );
+    const themes = getThemeTags(
+      aspect.transitPlanet,
+      aspect.natalPlanet,
+      aspect.aspectType,
+    );
     const orbRounded = Math.round(aspect.orbDegrees * 10) / 10;
     const aspectName = formatAspectName(aspect.aspectType);
+
+    const premium: TransitPremiumDetail = {
+      houseSummary: buildHouseSummary(aspect.house),
+      natalContext: buildNatalContext(aspect.natalPlanet, aspect.natalSign),
+      orbExplanation: buildOrbExplanation(aspect.orbDegrees, intensity),
+      timingSummary: buildTimingSummary(intensity),
+      stackingNotes: stackingNotes.get(index),
+      pastPattern: buildPastPattern(
+        aspect.transitPlanet,
+        aspect.natalPlanet,
+        aspect.aspectType,
+      ),
+    };
 
     return {
       id: `transit-${index}-${aspect.transitPlanet}-${aspect.natalPlanet}`,
@@ -318,12 +608,15 @@ export function buildTransitDetails(
       header: getDomain(aspect.transitPlanet, aspect.natalPlanet),
       degreeInfo: `${aspect.transitPlanet} at ${aspect.transitDegree} ${aspectName} ${aspect.natalPlanet} at ${aspect.natalDegree} (${orbRounded}° orb)`,
       intensity,
+      intensityLevel,
+      themes,
       meaning: buildMeaning(
         aspect.transitPlanet,
         aspect.natalPlanet,
         aspect.aspectType,
       ),
       suggestion: buildSuggestion(aspect.transitPlanet),
+      premium,
     };
   });
 }

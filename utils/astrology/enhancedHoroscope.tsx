@@ -1,5 +1,3 @@
-'use client';
-
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
