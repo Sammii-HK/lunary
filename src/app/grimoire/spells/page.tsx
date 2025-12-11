@@ -54,37 +54,47 @@ export const metadata: Metadata = {
   },
 };
 
+// Spell type for the client component
+interface SpellForClient {
+  id: string;
+  title: string;
+  category: string;
+  subcategory?: string;
+  type: string;
+  difficulty: string;
+  duration: string;
+  description: string;
+  purpose: string;
+  timing?: {
+    moonPhase?: string[];
+    planetaryDay?: string[];
+  };
+  correspondences?: {
+    elements?: string[];
+    planets?: string[];
+  };
+}
+
 // Combine spells from JSON and constants, avoiding duplicates
-function getAllSpells() {
+function getAllSpells(): SpellForClient[] {
   const jsonSpellIds = new Set(spellsJson.map((s: { id: string }) => s.id));
   const constantsSpellsFiltered = constantsSpells.filter(
     (s: { id: string }) => !jsonSpellIds.has(s.id),
   );
 
-  return [...spellsJson, ...constantsSpellsFiltered].map(
-    (spell: {
-      id: string;
-      title: string;
-      category: string;
-      subcategory?: string;
-      type?: string;
-      difficulty?: string;
-      duration?: string;
-      description?: string;
-    }) => ({
-      id: spell.id,
-      title: spell.title,
-      category: spell.category,
-      subcategory: spell.subcategory,
-      type: spell.type,
-      difficulty: spell.difficulty,
-      duration: spell.duration,
-      description: spell.description,
-      purpose: spell.purpose,
-      timing: spell.timing,
-      correspondences: spell.correspondences,
-    }),
-  );
+  return [...spellsJson, ...constantsSpellsFiltered].map((spell) => ({
+    id: spell.id || '',
+    title: spell.title || '',
+    category: spell.category || '',
+    subcategory: spell.subcategory,
+    type: spell.type || 'spell',
+    difficulty: spell.difficulty || 'beginner',
+    duration: spell.duration || '10-15 minutes',
+    description: spell.description || spell.purpose || '',
+    purpose: spell.purpose || spell.description || '',
+    timing: spell.timing,
+    correspondences: spell.correspondences,
+  }));
 }
 
 // Merge categories from both sources

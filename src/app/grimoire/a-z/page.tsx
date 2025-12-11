@@ -4,12 +4,13 @@ import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Astrology A-Z: Complete Topic Index | Lunary Grimoire',
+  title: 'Lunary Grimoire A–Z: Complete Topic Index | Lunary',
   description:
-    'Alphabetical index of all astrology topics. Browse zodiac signs, planets, houses, aspects, tarot, crystals, and more. Your complete astrology reference guide.',
+    'Alphabetical index of all grimoire topics. Browse zodiac signs, planets, houses, aspects, tarot, crystals, spells, witchcraft, and more. Your complete spiritual reference guide.',
   openGraph: {
-    title: 'Astrology A-Z Index | Lunary',
-    description: 'Complete alphabetical guide to astrology topics.',
+    title: 'Lunary Grimoire A–Z Index | Lunary',
+    description:
+      'Complete alphabetical guide to astrology, tarot, witchcraft, and spiritual topics.',
     url: 'https://lunary.app/grimoire/a-z',
   },
   alternates: { canonical: 'https://lunary.app/grimoire/a-z' },
@@ -201,12 +202,42 @@ export default function AZIndexPage() {
 
         <header className='mb-8'>
           <h1 className='text-4xl md:text-5xl font-light mb-4'>
-            Astrology A-Z
+            Lunary Grimoire A–Z
           </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed'>
+          <p className='text-xl text-zinc-400 leading-relaxed mb-6'>
             Complete alphabetical index of astrology topics, zodiac signs,
-            planets, and spiritual practices.
+            planets, tarot, crystals, spells, and spiritual practices.
           </p>
+          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+            <h2 className='text-lg font-medium text-zinc-100 mb-3'>
+              How to Use This Index
+            </h2>
+            <p className='text-zinc-400 text-sm mb-4'>
+              Jump to any letter using the navigation bar below, or scroll
+              through to browse all topics. Each entry links directly to its
+              dedicated grimoire page with detailed information.
+            </p>
+            <div className='flex flex-wrap gap-3'>
+              <Link
+                href='/grimoire/beginners'
+                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+              >
+                New here? Start with the Beginners Guide →
+              </Link>
+              <Link
+                href='/grimoire/guides/birth-chart-complete-guide'
+                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+              >
+                Birth Chart Guide →
+              </Link>
+              <Link
+                href='/grimoire/guides/moon-phases-guide'
+                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+              >
+                Moon Phases Guide →
+              </Link>
+            </div>
+          </div>
         </header>
 
         <nav className='mb-8 flex flex-wrap gap-1'>

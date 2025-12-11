@@ -179,28 +179,55 @@ export default function AstronomyVsAstrologyPage() {
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-light mb-6'>How Lunary Bridges Both</h2>
-          <div className='grid md:grid-cols-2 gap-6'>
+          <h2 className='text-2xl font-light mb-6'>
+            How Lunary Uses Astronomical Accuracy
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            Lunary sits at the intersection of scientific precision and symbolic
+            meaning. We believe that accurate data makes for better reflection.
+          </p>
+          <div className='grid md:grid-cols-2 gap-6 mb-6'>
             <div className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'>
               <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
                 Astronomical Precision
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-zinc-400 text-sm mb-3'>
                 We use the Astronomy Engine library to calculate planetary
                 positions to arcsecond precision—the same accuracy as scientific
                 applications. Our data matches NASA ephemeris.
               </p>
+              <ul className='text-zinc-500 text-xs space-y-1'>
+                <li>• Real-time planetary positions</li>
+                <li>• Accurate moon phase calculations</li>
+                <li>• Precise eclipse and retrograde timing</li>
+                <li>• Location-specific house calculations</li>
+              </ul>
             </div>
             <div className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'>
               <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
                 Symbolic Interpretation
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-zinc-400 text-sm mb-3'>
                 We apply this precise astronomical data through the lens of
                 Western astrological tradition, offering interpretations for
                 self-reflection and personal insight.
               </p>
+              <ul className='text-zinc-500 text-xs space-y-1'>
+                <li>• Zodiac sign meanings and traits</li>
+                <li>• Planetary symbolism and archetypes</li>
+                <li>• House-based life area interpretations</li>
+                <li>• Transit-based timing guidance</li>
+              </ul>
             </div>
+          </div>
+          <div className='p-5 rounded-xl border border-lunary-primary-700/50 bg-lunary-primary-900/10'>
+            <p className='text-zinc-300 text-sm'>
+              <strong className='text-lunary-primary-300'>Our position:</strong>{' '}
+              We do not claim astrology is science. We offer it as a framework
+              for self-reflection, using the most accurate astronomical data
+              available. You are always free to take what resonates and leave
+              what doesn&apos;t.
+            </p>
           </div>
         </section>
 
@@ -224,25 +251,47 @@ export default function AstronomyVsAstrologyPage() {
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-light mb-4'>Related Resources</h2>
-          <div className='grid md:grid-cols-3 gap-4'>
-            <Link
-              href='/grimoire/glossary'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
-            >
-              <span className='text-zinc-200'>Astrology Glossary</span>
-            </Link>
+          <h2 className='text-2xl font-light mb-4'>Continue Exploring</h2>
+          <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-4'>
             <Link
               href='/grimoire/astronomy/planets'
               className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200'>The Planets</span>
+              <span className='text-zinc-200 font-medium'>The Planets</span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Astronomical data + astrological meaning
+              </p>
             </Link>
             <Link
-              href='/about/methodology'
+              href='/grimoire/zodiac'
               className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200'>Our Methodology</span>
+              <span className='text-zinc-200 font-medium'>Zodiac Signs</span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                The 12 signs of the zodiac
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/guides/birth-chart-complete-guide'
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-200 font-medium'>
+                Birth Chart Guide
+              </span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Learn to read your chart
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/glossary'
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-200 font-medium'>
+                Astrology Glossary
+              </span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Terms and definitions
+              </p>
             </Link>
           </div>
         </section>

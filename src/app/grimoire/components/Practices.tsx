@@ -554,6 +554,30 @@ const Practices = () => {
           >
             Other Divination Methods
           </Link>
+          <Link
+            href='/grimoire/protection'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+          >
+            Protection & Warding
+          </Link>
+          <Link
+            href='/grimoire/manifestation'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+          >
+            Manifestation Magic
+          </Link>
+          <Link
+            href='/grimoire/jar-spells'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+          >
+            Jar Spells Guide
+          </Link>
+          <Link
+            href='/grimoire/shadow-work'
+            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+          >
+            Shadow Work
+          </Link>
         </div>
       </section>
     </div>

@@ -920,6 +920,81 @@ export default function MoonPhasesGuidePage() {
         </div>
       </section>
 
+      {/* Where to Go Next */}
+      <section className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          Continue Your Lunar Journey
+        </h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          <Link
+            href='/grimoire/moon/rituals'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Moon Rituals
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Detailed rituals for each lunar phase
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/spells/fundamentals'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Spellcraft Fundamentals
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Learn how to time spells with the Moon
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/events/2026'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              2026 Cosmic Events
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Upcoming eclipses, supermoons, and retrogrades
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/wheel-of-the-year'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Wheel of the Year
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Seasonal sabbats and their lunar connections
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/moon-in'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Moon in Signs
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              How each zodiac sign colors lunar energy
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/crystals'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Crystals for Moon Work
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Moonstone, selenite, and lunar allies
+            </p>
+          </Link>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className='bg-gradient-to-r from-lunary-primary-900/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>

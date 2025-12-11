@@ -216,8 +216,16 @@ export default function BirthChartCompleteGuidePage() {
             </a>
           </li>
           <li>
+            <a
+              href='#how-lunary-uses-chart'
+              className='hover:text-lunary-primary-400'
+            >
+              10. How Lunary Uses Your Chart
+            </a>
+          </li>
+          <li>
             <a href='#faq' className='hover:text-lunary-primary-400'>
-              10. Frequently Asked Questions
+              11. Frequently Asked Questions
             </a>
           </li>
         </ol>
@@ -663,13 +671,16 @@ export default function BirthChartCompleteGuidePage() {
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+          <Link
+            href='/grimoire/lunar-nodes'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 hover:border-lunary-primary transition-colors'
+          >
             <h4 className='font-medium text-zinc-100 mb-2'>Lunar Nodes</h4>
             <p className='text-sm text-zinc-400'>
               North and South Nodes reveal your soul&apos;s purpose and past
               life patterns
             </p>
-          </div>
+          </Link>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
             <h4 className='font-medium text-zinc-100 mb-2'>Chiron</h4>
             <p className='text-sm text-zinc-400'>
@@ -692,10 +703,106 @@ export default function BirthChartCompleteGuidePage() {
         </div>
       </section>
 
+      {/* Section 10: How Lunary Uses Your Chart */}
+      <section id='how-lunary-uses-chart' className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          10. How Lunary Uses Your Chart
+        </h2>
+
+        <p className='text-zinc-300 leading-relaxed mb-6'>
+          Lunary calculates your birth chart using precise astronomical data
+          from the Astronomy Engine library. Your chart powers personalized
+          insights throughout the app.
+        </p>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Daily Horoscope
+            </h4>
+            <p className='text-zinc-400 text-sm'>
+              Your horoscope considers not just your Sun sign, but your Moon,
+              Rising, and current transits to your natal chart.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Transit Alerts
+            </h4>
+            <p className='text-zinc-400 text-sm'>
+              Receive notifications when significant planetary transits activate
+              important points in your birth chart.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Archetype Patterns
+            </h4>
+            <p className='text-zinc-400 text-sm'>
+              Your chart placements inform which{' '}
+              <Link
+                href='/grimoire/archetypes'
+                className='text-lunary-primary-400 hover:underline'
+              >
+                Lunary archetypes
+              </Link>{' '}
+              resonate most with your cosmic blueprint.
+            </p>
+          </div>
+          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Life Path Integration
+            </h4>
+            <p className='text-zinc-400 text-sm'>
+              Your chart combines with{' '}
+              <Link
+                href='/grimoire/life-path'
+                className='text-lunary-primary-400 hover:underline'
+              >
+                numerology life path
+              </Link>{' '}
+              for deeper personality insights.
+            </p>
+          </div>
+        </div>
+
+        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h4 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+            Where to Go Next
+          </h4>
+          <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+            <Link
+              href='/grimoire/houses/overview'
+              className='text-sm text-zinc-300 hover:text-lunary-primary-400'
+            >
+              → Houses Overview
+            </Link>
+            <Link
+              href='/grimoire/aspects/types'
+              className='text-sm text-zinc-300 hover:text-lunary-primary-400'
+            >
+              → Aspect Types
+            </Link>
+            <Link
+              href='/grimoire/placements'
+              className='text-sm text-zinc-300 hover:text-lunary-primary-400'
+            >
+              → All Placements
+            </Link>
+            <Link
+              href='/grimoire/archetypes'
+              className='text-sm text-zinc-300 hover:text-lunary-primary-400'
+            >
+              → Archetypes
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section id='faq' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          10. Frequently Asked Questions
+          11. Frequently Asked Questions
         </h2>
 
         <div className='space-y-4'>
