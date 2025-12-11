@@ -90,6 +90,11 @@ const SIDEBAR_CATEGORIES = [
     ],
   },
   {
+    name: 'Self-Discovery',
+    icon: <Sparkles size={14} />,
+    sections: ['archetypes'],
+  },
+  {
     name: 'Other',
     icon: <BookOpen size={14} />,
     sections: [
@@ -247,6 +252,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         title: 'Crystal Healing Guide',
         href: '/grimoire/guides/crystal-healing-guide',
         description: 'Properties & practices',
+      },
+      {
+        title: 'Archetypes Guide',
+        href: '/grimoire/archetypes',
+        description: 'Inner patterns & shadow work',
       },
     ],
   },
@@ -579,6 +589,77 @@ const GRIMOIRE_FULL_STRUCTURE = [
         title: 'Grounding',
         href: '/grimoire/meditation/grounding',
         description: 'Grounding exercises',
+      },
+    ],
+  },
+  {
+    name: 'Self-Discovery',
+    icon: <Sparkles className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Lunary Archetypes',
+        href: '/grimoire/archetypes',
+        description: 'Explore inner patterns',
+      },
+      {
+        title: 'The Restorer',
+        href: '/grimoire/archetypes#restorer',
+        description: 'Healing & recovery',
+      },
+      {
+        title: 'The Seeker',
+        href: '/grimoire/archetypes#seeker',
+        description: 'Quest for meaning',
+      },
+      {
+        title: 'The Catalyst',
+        href: '/grimoire/archetypes#catalyst',
+        description: 'Transformative energy',
+      },
+      {
+        title: 'The Grounded One',
+        href: '/grimoire/archetypes#grounded-one',
+        description: 'Stability & roots',
+      },
+      {
+        title: 'The Empath',
+        href: '/grimoire/archetypes#empath',
+        description: 'Emotional sensitivity',
+      },
+      {
+        title: 'The Shadow Dancer',
+        href: '/grimoire/archetypes#shadow-dancer',
+        description: 'Embrace the shadow',
+      },
+      {
+        title: 'The Visionary',
+        href: '/grimoire/archetypes#visionary',
+        description: 'Future sight',
+      },
+      {
+        title: 'The Mystic',
+        href: '/grimoire/archetypes#mystic',
+        description: 'Spiritual depths',
+      },
+      {
+        title: 'The Protector',
+        href: '/grimoire/archetypes#protector',
+        description: 'Guardian energy',
+      },
+      {
+        title: 'The Heart Opener',
+        href: '/grimoire/archetypes#heart-opener',
+        description: 'Love & connection',
+      },
+      {
+        title: 'The Lunar Weaver',
+        href: '/grimoire/archetypes#lunar-weaver',
+        description: 'Moon mysteries',
+      },
+      {
+        title: 'The Alchemist',
+        href: '/grimoire/archetypes#alchemist',
+        description: 'Transformation',
       },
     ],
   },

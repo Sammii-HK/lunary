@@ -31,7 +31,7 @@ type ExploreItem = {
 const exploreItems: ExploreItem[] = [
   // Your Space - Personalized features
   {
-    href: '/book-of-shadows/journal',
+    href: '/book-of-shadows',
     label: 'Book of Shadows',
     description: 'Your reflections and patterns connected',
     icon: NotebookPen,

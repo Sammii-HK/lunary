@@ -946,6 +946,46 @@ async function setupDatabase() {
 
     console.log('✅ Email preferences table created');
 
+    // Collections table for Book of Shadows (journal entries, dreams, etc.)
+    await sql`
+      CREATE TABLE IF NOT EXISTS collections (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT,
+        category TEXT NOT NULL CHECK (category IN ('chat', 'ritual', 'insight', 'moon_circle', 'tarot', 'journal', 'dream')),
+        content JSONB NOT NULL,
+        tags TEXT[],
+        folder_id INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_user_id ON collections(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_category ON collections(category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_created_at ON collections(created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_tags ON collections USING GIN(tags)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_dream_category ON collections(user_id, created_at DESC) WHERE category = 'dream'`;
+
+    console.log('✅ Collections table created');
+
+    // Collection folders for organizing entries
+    await sql`
+      CREATE TABLE IF NOT EXISTS collection_folders (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        color TEXT DEFAULT '#6366f1',
+        icon TEXT DEFAULT 'book',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collection_folders_user_id ON collection_folders(user_id)`;
+
+    console.log('✅ Collection folders table created');
+
     console.log('✅ Database setup complete!');
     console.log(
       '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, and email preferences',

@@ -29,19 +29,29 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
   useEffect(() => {
     async function loadTheme() {
       try {
-        const [journalRes, patternsRes] = await Promise.all([
+        const [journalRes, patternsRes, dreamsRes] = await Promise.all([
           fetch('/api/journal?limit=30', { credentials: 'include' }).catch(
             () => null,
           ),
           fetch('/api/patterns?days=30', { credentials: 'include' }).catch(
             () => null,
           ),
+          fetch('/api/journal/dreams?limit=20', {
+            credentials: 'include',
+          }).catch(() => null),
         ]);
 
         const journalData = journalRes?.ok
           ? await journalRes.json()
           : { entries: [] };
         const patternsData = patternsRes?.ok ? await patternsRes.json() : null;
+        const dreamsData = dreamsRes?.ok
+          ? await dreamsRes.json()
+          : { entries: [] };
+
+        const dreamTags = (dreamsData.entries || []).flatMap(
+          (e: any) => e.dreamTags || [],
+        );
 
         const input: LifeThemeInput = {
           journalEntries: (journalData.entries || []).map((e: any) => ({
@@ -56,6 +66,7 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
                 suitDistribution: patternsData.suitDistribution || [],
               }
             : null,
+          dreamTags,
         };
 
         if (hasEnoughDataForThemes(input)) {

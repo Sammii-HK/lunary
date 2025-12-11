@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   BookOpen,
@@ -11,8 +10,8 @@ import {
   Star,
   Brain,
   Trash2,
-  ChevronRight,
   Feather,
+  MessageCircle,
 } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import {
@@ -26,7 +25,6 @@ import {
   extractMoodTags,
   extractCardReferences,
 } from '@/lib/journal/extract-moments';
-import { GuideNudge } from '@/components/GuideNudge';
 import { LifeThemeBanner } from '@/components/journal/LifeThemeBanner';
 import { ArchetypeBar } from '@/components/journal/ArchetypeBar';
 import { DreamTagChips } from '@/components/journal/DreamTagChips';
@@ -40,6 +38,17 @@ interface JournalEntry {
   moonPhase?: string;
   source: string;
   createdAt: string;
+  category?: string;
+}
+
+interface DreamEntry {
+  id: number;
+  content: string;
+  moodTags: string[];
+  moonPhase?: string;
+  source: string;
+  createdAt: string;
+  dreamTags: string[];
 }
 
 interface UserMemory {
@@ -49,11 +58,6 @@ interface UserMemory {
   confidence: number;
   mentionedCount: number;
   lastMentionedAt: string;
-}
-
-interface JournalPattern {
-  title: string;
-  description: string;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -66,7 +70,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   goal: 'Goals',
 };
 
-function EntryCard({ entry }: { entry: JournalEntry }) {
+function JournalEntryCard({ entry }: { entry: JournalEntry }) {
   const date = new Date(entry.createdAt);
   const formattedDate = date.toLocaleDateString('en-GB', {
     month: 'short',
@@ -78,19 +82,18 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       <div className='flex items-center gap-2 mb-1.5'>
         <span className='text-sm text-zinc-400'>{formattedDate}</span>
         {entry.moonPhase && (
-          <span className='text-xs text-zinc-400 flex items-center gap-1'>
+          <span className='text-xs text-zinc-500 flex items-center gap-1'>
             <Moon className='w-3 h-3' />
             {entry.moonPhase}
           </span>
         )}
         {entry.source === 'chat' && (
-          <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-2 py-0.5 rounded'>
+          <span className='text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded'>
             from chat
           </span>
         )}
       </div>
       <p className='text-white text-sm leading-relaxed'>{entry.content}</p>
-      <DreamTagChips entry={entry} className='mt-1.5' />
       {(entry.moodTags.length > 0 || entry.cardReferences.length > 0) && (
         <div className='flex flex-wrap gap-1.5 mt-2'>
           {entry.moodTags.map((tag) => (
@@ -112,6 +115,37 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function DreamCard({ entry }: { entry: DreamEntry }) {
+  const date = new Date(entry.createdAt);
+  const formattedDate = date.toLocaleDateString('en-GB', {
+    month: 'short',
+    day: 'numeric',
+  });
+
+  return (
+    <div className='border-l-2 border-indigo-600 pl-4 py-3'>
+      <div className='flex items-center gap-2 mb-1.5'>
+        <span className='text-sm text-zinc-400'>{formattedDate}</span>
+        {entry.moonPhase && (
+          <span className='text-xs text-zinc-500 flex items-center gap-1'>
+            <Moon className='w-3 h-3' />
+            {entry.moonPhase}
+          </span>
+        )}
+        {entry.source === 'astral-guide' && (
+          <span className='text-xs bg-indigo-900/30 text-indigo-300 px-2 py-0.5 rounded'>
+            via guide
+          </span>
+        )}
+      </div>
+      <p className='text-white text-sm leading-relaxed line-clamp-3'>
+        {entry.content}
+      </p>
+      <DreamTagChips entry={entry} className='mt-2' />
     </div>
   );
 }
@@ -176,30 +210,14 @@ function MemoryCard({
   );
 }
 
-function PatternCard({ pattern }: { pattern: JournalPattern }) {
-  return (
-    <div className='bg-gradient-to-br from-lunary-primary-900/20 to-indigo-900/20 border border-lunary-primary-700 rounded-lg p-4'>
-      <div className='flex items-center gap-2 mb-2'>
-        <Sparkles className='w-4 h-4 text-lunary-primary-400' />
-        <span className='text-sm font-medium text-lunary-primary-300'>
-          Pattern
-        </span>
-      </div>
-      <p className='text-white font-medium mb-1'>{pattern.title}</p>
-      <p className='text-sm text-zinc-400'>{pattern.description}</p>
-    </div>
-  );
-}
-
-type TabId = 'journal' | 'memories' | 'patterns';
+type TabId = 'journal' | 'dreams' | 'memories' | 'patterns';
 
 export default function BookOfShadowsPage() {
-  const _router = useRouter();
   const { user, loading: authLoading } = useAuthStatus();
   const [activeTab, setActiveTab] = useState<TabId>('journal');
   const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [dreams, setDreams] = useState<DreamEntry[]>([]);
   const [memories, setMemories] = useState<UserMemory[]>([]);
-  const [patterns, setPatterns] = useState<JournalPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newReflection, setNewReflection] = useState('');
@@ -207,27 +225,28 @@ export default function BookOfShadowsPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [entriesRes, memoriesRes, patternsRes] = await Promise.all([
+      const [entriesRes, dreamsRes, memoriesRes] = await Promise.all([
         fetch('/api/journal', { credentials: 'include' }),
+        fetch('/api/journal/dreams?limit=30', { credentials: 'include' }),
         fetch('/api/user-memory', { credentials: 'include' }),
-        fetch('/api/journal/patterns', { credentials: 'include' }).catch(
-          () => null,
-        ),
       ]);
 
       if (entriesRes.ok) {
         const data = await entriesRes.json();
-        setEntries(data.entries || []);
+        const journalOnly = (data.entries || []).filter(
+          (e: JournalEntry) => e.category !== 'dream',
+        );
+        setEntries(journalOnly);
+      }
+
+      if (dreamsRes.ok) {
+        const data = await dreamsRes.json();
+        setDreams(data.entries || []);
       }
 
       if (memoriesRes.ok) {
         const data = await memoriesRes.json();
         setMemories(data.memories || []);
-      }
-
-      if (patternsRes?.ok) {
-        const data = await patternsRes.json();
-        setPatterns(data.patterns || []);
       }
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -266,7 +285,7 @@ export default function BookOfShadowsPage() {
           }
         }
       } catch {
-        // Continue without cosmic context if fetch fails
+        // Continue without cosmic context
       }
 
       const response = await fetch('/api/journal', {
@@ -285,7 +304,11 @@ export default function BookOfShadowsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setEntries((prev) => [data.entry, ...prev]);
+        if (data.entry.category === 'dream') {
+          setDreams((prev) => [data.entry, ...prev]);
+        } else {
+          setEntries((prev) => [data.entry, ...prev]);
+        }
         setNewReflection('');
         setShowAddForm(false);
       }
@@ -354,8 +377,14 @@ export default function BookOfShadowsPage() {
       count: entries.length,
     },
     {
+      id: 'dreams',
+      label: 'Dreams',
+      icon: <Moon className='w-4 h-4' />,
+      count: dreams.length,
+    },
+    {
       id: 'memories',
-      label: 'What I Know',
+      label: 'Memories',
       icon: <Brain className='w-4 h-4' />,
       count: memories.length,
     },
@@ -363,7 +392,6 @@ export default function BookOfShadowsPage() {
       id: 'patterns',
       label: 'Patterns',
       icon: <Sparkles className='w-4 h-4' />,
-      count: patterns.length,
     },
   ];
 
@@ -381,9 +409,10 @@ export default function BookOfShadowsPage() {
             </div>
             <Link
               href='/guide'
-              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 flex items-center gap-1'
+              className='flex items-center gap-1.5 bg-zinc-800/50 hover:bg-zinc-800 px-3 py-1.5 rounded-lg text-sm text-zinc-300 transition-colors'
             >
-              Chat <ChevronRight className='w-4 h-4' />
+              <MessageCircle className='w-4 h-4' />
+              <span className='hidden sm:inline'>Ask Guide</span>
             </Link>
           </div>
 
@@ -392,9 +421,11 @@ export default function BookOfShadowsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-lunary-primary-600/20 text-lunary-primary-300 border border-lunary-primary-700'
+                    ? tab.id === 'dreams'
+                      ? 'bg-indigo-900/30 text-indigo-300 border border-indigo-700/50'
+                      : 'bg-lunary-primary-600/20 text-lunary-primary-300 border border-lunary-primary-700'
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
                 }`}
               >
@@ -415,13 +446,13 @@ export default function BookOfShadowsPage() {
         {activeTab === 'journal' && (
           <div className='space-y-4'>
             <LifeThemeBanner className='mb-2' />
-            <GuideNudge location='journal' />
+
             {showAddForm ? (
               <form onSubmit={handleSubmitReflection} className='space-y-3'>
                 <textarea
                   value={newReflection}
                   onChange={(e) => setNewReflection(e.target.value)}
-                  placeholder="What's on your mind today?"
+                  placeholder="What's on your mind today? (Dreams are auto-detected)"
                   className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-4 text-white placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
                   rows={4}
                   autoFocus
@@ -432,7 +463,7 @@ export default function BookOfShadowsPage() {
                     disabled={isSubmitting || !newReflection.trim()}
                     className='flex-1'
                   >
-                    {isSubmitting ? 'Saving...' : 'Save Reflection'}
+                    {isSubmitting ? 'Saving...' : 'Save'}
                   </Button>
                   <Button
                     type='button'
@@ -458,16 +489,44 @@ export default function BookOfShadowsPage() {
 
             {entries.length === 0 ? (
               <div className='text-center py-12'>
-                <Moon className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-                <p className='text-zinc-400'>No reflections yet</p>
-                <p className='text-xs text-zinc-600 mt-1'>
-                  Add a reflection or chat with your Astral Guide
+                <Feather className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
+                <p className='text-zinc-400'>No journal entries yet</p>
+                <p className='text-xs text-zinc-500 mt-1'>
+                  Write a reflection or chat with your Astral Guide
                 </p>
               </div>
             ) : (
               <div className='space-y-2'>
                 {entries.map((entry) => (
-                  <EntryCard key={entry.id} entry={entry} />
+                  <JournalEntryCard key={entry.id} entry={entry} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'dreams' && (
+          <div className='space-y-4'>
+            <div className='bg-indigo-950/20 border border-indigo-800/30 rounded-lg p-4'>
+              <p className='text-sm text-indigo-200/80'>
+                Dreams you've shared in your journal or with Astral Guide appear
+                here, tagged with symbols and themes.
+              </p>
+            </div>
+
+            {dreams.length === 0 ? (
+              <div className='text-center py-12'>
+                <Moon className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
+                <p className='text-zinc-400'>No dreams recorded yet</p>
+                <p className='text-xs text-zinc-500 mt-2 max-w-xs mx-auto'>
+                  Write about a dream in your journal or tell Astral Guide about
+                  one — they'll appear here automatically.
+                </p>
+              </div>
+            ) : (
+              <div className='space-y-2'>
+                {dreams.map((dream) => (
+                  <DreamCard key={dream.id} entry={dream} />
                 ))}
               </div>
             )}
@@ -478,9 +537,8 @@ export default function BookOfShadowsPage() {
           <div className='space-y-4'>
             <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
               <p className='text-sm text-zinc-400'>
-                These are personal details Lunary has learned about you from
-                your conversations. They help personalize your readings and
-                guidance.
+                Personal details Lunary has learned from your conversations.
+                These help personalize your readings and guidance.
               </p>
             </div>
 
@@ -488,8 +546,8 @@ export default function BookOfShadowsPage() {
               <div className='text-center py-12'>
                 <Brain className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
                 <p className='text-zinc-400'>No memories yet</p>
-                <p className='text-xs text-zinc-600 mt-1'>
-                  Chat with your Astral Guide to build your profile
+                <p className='text-xs text-zinc-500 mt-1'>
+                  Chat with Astral Guide to build your profile
                 </p>
               </div>
             ) : (
@@ -509,21 +567,20 @@ export default function BookOfShadowsPage() {
         {activeTab === 'patterns' && (
           <div className='space-y-4'>
             <ArchetypeBar className='mb-4' />
-            {patterns.length === 0 ? (
-              <div className='text-center py-12'>
-                <Sparkles className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-                <p className='text-zinc-400'>No patterns detected yet</p>
-                <p className='text-xs text-zinc-600 mt-1'>
-                  Keep journaling to reveal recurring themes
-                </p>
+
+            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+              <div className='flex items-center gap-2 mb-2'>
+                <Sparkles className='w-4 h-4 text-lunary-primary-400' />
+                <span className='text-sm font-medium text-zinc-300'>
+                  Life Themes & Archetypes
+                </span>
               </div>
-            ) : (
-              <div className='space-y-3'>
-                {patterns.map((pattern, i) => (
-                  <PatternCard key={i} pattern={pattern} />
-                ))}
-              </div>
-            )}
+              <p className='text-xs text-zinc-500'>
+                As you journal, record dreams, and pull tarot, Lunary detects
+                recurring themes and archetypal patterns in your journey.
+              </p>
+            </div>
+
             <PremiumPathway variant='shadow' className='mt-6' />
           </div>
         )}

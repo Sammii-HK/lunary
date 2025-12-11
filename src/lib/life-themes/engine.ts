@@ -1,3 +1,22 @@
+/**
+ * Life Themes Engine
+ *
+ * Analyzes user activity across multiple data sources to identify
+ * recurring life themes and patterns.
+ *
+ * Data Sources:
+ * - Journal entries: collections table (category = 'journal' or 'dream')
+ * - Tarot patterns: tarot_readings table (daily pulls + spreads)
+ * - Dream tags: extracted via dream-classifier from dream entries
+ * - Transits: cosmic data (optional)
+ *
+ * Thresholds:
+ * - MIN_JOURNAL_ENTRIES = 3 (lowered from 5 for better activation)
+ * - MIN_TAROT_READINGS = 5 (lowered from 7 for better activation)
+ * - MIN_DREAM_TAGS = 2 (dreams count as additional signal)
+ * - minScoreThreshold = 3 (minimum score to qualify as a theme)
+ */
+
 import { LIFE_THEMES, LifeTheme } from './themes';
 
 export interface LifeThemeResult {
@@ -27,10 +46,12 @@ export interface LifeThemeInput {
     moonSign?: string;
   };
   activeTransits?: string[];
+  dreamTags?: string[];
 }
 
-const MIN_JOURNAL_ENTRIES = 5;
-const MIN_TAROT_READINGS = 7;
+const MIN_JOURNAL_ENTRIES = 3;
+const MIN_TAROT_READINGS = 5;
+const MIN_DREAM_TAGS = 2;
 
 function extractKeywords(text: string): string[] {
   return text
@@ -90,6 +111,12 @@ function scoreTheme(theme: LifeTheme, input: LifeThemeInput): number {
       countArrayOverlap(input.activeTransits, theme.triggers.transits) * 2;
   }
 
+  if (input.dreamTags && input.dreamTags.length > 0) {
+    score +=
+      countArrayOverlap(input.dreamTags, theme.triggers.journalKeywords) * 3;
+    score += countArrayOverlap(input.dreamTags, theme.triggers.moodTags) * 2;
+  }
+
   return score;
 }
 
@@ -99,8 +126,11 @@ export function hasEnoughDataForThemes(input: LifeThemeInput): boolean {
     input.tarotPatterns &&
     input.tarotPatterns.frequentCards.length >= MIN_TAROT_READINGS,
   );
+  const hasDreamData = Boolean(
+    input.dreamTags && input.dreamTags.length >= MIN_DREAM_TAGS,
+  );
 
-  return hasJournalData || hasTarotData;
+  return hasJournalData || hasTarotData || hasDreamData;
 }
 
 export function analyzeLifeThemes(
@@ -139,4 +169,22 @@ export function getPrimaryLifeTheme(
 ): LifeThemeResult | null {
   const themes = analyzeLifeThemes(input, 1);
   return themes[0] || null;
+}
+
+export function debugLifeThemes(userId: string, input: LifeThemeInput): void {
+  if (process.env.DEBUG_LIFE_THEMES !== 'true') return;
+
+  const allThemes = LIFE_THEMES.map((theme) => ({
+    id: theme.id,
+    score: scoreTheme(theme, input),
+  })).sort((a, b) => b.score - a.score);
+
+  console.log('[LifeThemes Debug]', {
+    userId: userId.slice(0, 8) + '...',
+    journalEntries: input.journalEntries.length,
+    tarotCards: input.tarotPatterns?.frequentCards.length ?? 0,
+    dreamTags: input.dreamTags?.length ?? 0,
+    hasEnoughData: hasEnoughDataForThemes(input),
+    topThemes: allThemes.slice(0, 3),
+  });
 }

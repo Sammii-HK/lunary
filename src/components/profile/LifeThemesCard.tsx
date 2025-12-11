@@ -27,19 +27,29 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
   useEffect(() => {
     async function loadThemes() {
       try {
-        const [journalRes, patternsRes] = await Promise.all([
+        const [journalRes, patternsRes, dreamsRes] = await Promise.all([
           fetch('/api/journal?limit=30', { credentials: 'include' }).catch(
             () => null,
           ),
           fetch('/api/patterns?days=30', { credentials: 'include' }).catch(
             () => null,
           ),
+          fetch('/api/journal/dreams?limit=20', {
+            credentials: 'include',
+          }).catch(() => null),
         ]);
 
         const journalData = journalRes?.ok
           ? await journalRes.json()
           : { entries: [] };
         const patternsData = patternsRes?.ok ? await patternsRes.json() : null;
+        const dreamsData = dreamsRes?.ok
+          ? await dreamsRes.json()
+          : { entries: [] };
+
+        const dreamTags = (dreamsData.entries || []).flatMap(
+          (e: any) => e.dreamTags || [],
+        );
 
         const input: LifeThemeInput = {
           journalEntries: (journalData.entries || []).map((e: any) => ({
@@ -54,6 +64,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
                 suitDistribution: patternsData.suitDistribution || [],
               }
             : null,
+          dreamTags,
         };
 
         setHasEnoughData(hasEnoughDataForThemes(input));
@@ -92,16 +103,30 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
           <Sparkles className='w-4 h-4 text-zinc-600' />
           <h3 className='text-sm font-medium text-zinc-400'>Life Themes</h3>
         </div>
-        <p className='text-xs text-zinc-500'>
-          As you use Lunary more, patterns and themes will emerge from your
-          journey.
+        <p className='text-xs text-zinc-500 leading-relaxed'>
+          Life themes appear as you write more in your journal and pull more
+          tarot. Try saving a few reflections, record a dream, or do some
+          spreads, then check back here.
         </p>
       </div>
     );
   }
 
   if (themes.length === 0) {
-    return null;
+    return (
+      <div
+        className={`rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4 ${className}`}
+      >
+        <div className='flex items-center gap-2 mb-2'>
+          <Sparkles className='w-4 h-4 text-zinc-600' />
+          <h3 className='text-sm font-medium text-zinc-400'>Life Themes</h3>
+        </div>
+        <p className='text-xs text-zinc-500 leading-relaxed'>
+          Themes are emerging from your activity. Keep journaling, pulling
+          tarot, and recording dreams to reveal stronger patterns.
+        </p>
+      </div>
+    );
   }
 
   return (

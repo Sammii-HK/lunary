@@ -100,6 +100,20 @@ const GUIDES = [
       'Full moon names',
     ],
   },
+  {
+    title: 'The 12 Lunary Archetypes',
+    slug: '../archetypes',
+    description:
+      "Explore the twelve inner patterns that reveal your emotional cycles, strengths, and spiritual themes. Learn each archetype's light and shadow traits.",
+    icon: '🔮',
+    wordCount: '6,000+',
+    topics: [
+      'Light & shadow traits',
+      'Archetypal patterns',
+      'Personal growth',
+      'Self-discovery',
+    ],
+  },
 ];
 
 export default function GuidesIndexPage() {

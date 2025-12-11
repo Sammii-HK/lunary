@@ -20,7 +20,8 @@ export interface GrimoireEntry {
     | 'numerology'
     | 'birthday'
     | 'compatibility'
-    | 'glossary';
+    | 'glossary'
+    | 'archetype';
   keywords: string[];
   summary: string;
   relatedSlugs: string[];
@@ -2236,6 +2237,273 @@ export const GRIMOIRE_SEARCH_INDEX: GrimoireEntry[] = [
     summary:
       'A zodiac aligned with actual star constellations, used in Vedic astrology.',
     relatedSlugs: ['glossary#tropical-zodiac'],
+  },
+
+  // ============================================================================
+  // LUNARY ARCHETYPES
+  // ============================================================================
+  {
+    slug: 'archetypes',
+    title: 'Lunary Archetypes',
+    category: 'archetype',
+    keywords: [
+      'archetype',
+      'archetypes',
+      'lunary archetypes',
+      'inner patterns',
+      'psychological archetypes',
+      'jungian',
+      'shadow work',
+      'self-discovery',
+      'soul archetypes',
+    ],
+    summary:
+      'The 12 Lunary Archetypes reveal your emotional cycles, strengths, and spiritual themes through universal inner patterns.',
+    relatedSlugs: [
+      'archetypes#restorer',
+      'archetypes#seeker',
+      'archetypes#mystic',
+    ],
+  },
+  {
+    slug: 'archetypes#restorer',
+    title: 'The Restorer',
+    category: 'archetype',
+    keywords: [
+      'restorer',
+      'the restorer',
+      'healing',
+      'recovery',
+      'emotional healing',
+      'self-healing',
+      'resilience',
+      'nurturing',
+    ],
+    summary:
+      'The Restorer archetype embodies the profound capacity for healing and emotional reconstruction, rebuilding foundations that support future growth.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#empath',
+      'archetypes#heart-opener',
+    ],
+  },
+  {
+    slug: 'archetypes#seeker',
+    title: 'The Seeker',
+    category: 'archetype',
+    keywords: [
+      'seeker',
+      'the seeker',
+      'searching',
+      'meaning',
+      'purpose',
+      'spiritual quest',
+      'wisdom',
+      'explorer',
+      'truth',
+    ],
+    summary:
+      'The Seeker archetype represents the eternal quest for meaning, driven by an unquenchable thirst for understanding and deeper truth.',
+    relatedSlugs: ['archetypes', 'archetypes#visionary', 'archetypes#mystic'],
+  },
+  {
+    slug: 'archetypes#catalyst',
+    title: 'The Catalyst',
+    category: 'archetype',
+    keywords: [
+      'catalyst',
+      'the catalyst',
+      'change',
+      'transformation',
+      'disruption',
+      'innovation',
+      'breakthrough',
+      'revolutionary',
+    ],
+    summary:
+      'The Catalyst archetype embodies the power to initiate profound change, challenging stagnation and awakening dormant potential.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#alchemist',
+      'archetypes#shadow-dancer',
+    ],
+  },
+  {
+    slug: 'archetypes#grounded-one',
+    title: 'The Grounded One',
+    category: 'archetype',
+    keywords: [
+      'grounded one',
+      'the grounded one',
+      'stability',
+      'earth',
+      'practical',
+      'centered',
+      'reliable',
+      'foundation',
+    ],
+    summary:
+      'The Grounded One archetype represents stability, practical wisdom, and the capacity to create secure foundations in uncertain times.',
+    relatedSlugs: ['archetypes', 'archetypes#protector', 'archetypes#restorer'],
+  },
+  {
+    slug: 'archetypes#empath',
+    title: 'The Empath',
+    category: 'archetype',
+    keywords: [
+      'empath',
+      'the empath',
+      'empathy',
+      'emotions',
+      'sensitivity',
+      'feelings',
+      'compassion',
+      'intuition',
+    ],
+    summary:
+      "The Empath archetype represents profound emotional sensitivity and the gift of deeply feeling and understanding others' experiences.",
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#heart-opener',
+      'archetypes#mystic',
+    ],
+  },
+  {
+    slug: 'archetypes#shadow-dancer',
+    title: 'The Shadow Dancer',
+    category: 'archetype',
+    keywords: [
+      'shadow dancer',
+      'the shadow dancer',
+      'shadow work',
+      'dark side',
+      'integration',
+      'unconscious',
+      'transformation',
+    ],
+    summary:
+      'The Shadow Dancer archetype represents mastery of the unconscious, transforming darkness into wisdom through integration.',
+    relatedSlugs: ['archetypes', 'archetypes#alchemist', 'archetypes#catalyst'],
+  },
+  {
+    slug: 'archetypes#visionary',
+    title: 'The Visionary',
+    category: 'archetype',
+    keywords: [
+      'visionary',
+      'the visionary',
+      'vision',
+      'future',
+      'dreams',
+      'imagination',
+      'innovation',
+      'possibility',
+    ],
+    summary:
+      'The Visionary archetype perceives possibilities that others cannot see, holding space for what could be and inspiring collective evolution.',
+    relatedSlugs: ['archetypes', 'archetypes#seeker', 'archetypes#mystic'],
+  },
+  {
+    slug: 'archetypes#mystic',
+    title: 'The Mystic',
+    category: 'archetype',
+    keywords: [
+      'mystic',
+      'the mystic',
+      'spiritual',
+      'transcendence',
+      'divine',
+      'meditation',
+      'enlightenment',
+      'sacred',
+    ],
+    summary:
+      'The Mystic archetype represents the direct experience of the divine and the capacity to perceive sacred dimensions of reality.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#lunar-weaver',
+      'archetypes#visionary',
+    ],
+  },
+  {
+    slug: 'archetypes#protector',
+    title: 'The Protector',
+    category: 'archetype',
+    keywords: [
+      'protector',
+      'the protector',
+      'guardian',
+      'safety',
+      'boundaries',
+      'strength',
+      'defender',
+      'security',
+    ],
+    summary:
+      'The Protector archetype represents the fierce capacity to create safety, defend what is precious, and maintain healthy boundaries.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#grounded-one',
+      'archetypes#heart-opener',
+    ],
+  },
+  {
+    slug: 'archetypes#heart-opener',
+    title: 'The Heart Opener',
+    category: 'archetype',
+    keywords: [
+      'heart opener',
+      'the heart opener',
+      'love',
+      'vulnerability',
+      'connection',
+      'intimacy',
+      'openness',
+      'compassion',
+    ],
+    summary:
+      'The Heart Opener archetype represents the courage to love fully, embracing vulnerability as the path to authentic connection.',
+    relatedSlugs: ['archetypes', 'archetypes#empath', 'archetypes#restorer'],
+  },
+  {
+    slug: 'archetypes#lunar-weaver',
+    title: 'The Lunar Weaver',
+    category: 'archetype',
+    keywords: [
+      'lunar weaver',
+      'the lunar weaver',
+      'moon',
+      'cycles',
+      'rhythm',
+      'intuition',
+      'feminine',
+      'flow',
+    ],
+    summary:
+      'The Lunar Weaver archetype represents attunement to natural rhythms and cycles, weaving together the threads of intuition and timing.',
+    relatedSlugs: ['archetypes', 'archetypes#mystic', 'archetypes#empath'],
+  },
+  {
+    slug: 'archetypes#alchemist',
+    title: 'The Alchemist',
+    category: 'archetype',
+    keywords: [
+      'alchemist',
+      'the alchemist',
+      'transformation',
+      'transmutation',
+      'change',
+      'magic',
+      'evolution',
+      'gold',
+    ],
+    summary:
+      'The Alchemist archetype represents the power to transmute base experiences into gold, finding meaning and growth in all circumstances.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#shadow-dancer',
+      'archetypes#catalyst',
+    ],
   },
 ];
 

@@ -798,6 +798,100 @@ export function AskTheGrimoire({
       }
     });
 
+    const archetypes = [
+      {
+        id: 'restorer',
+        name: 'The Restorer',
+        keywords: ['healing', 'recovery', 'restoration'],
+      },
+      {
+        id: 'seeker',
+        name: 'The Seeker',
+        keywords: ['exploration', 'truth', 'questioning'],
+      },
+      {
+        id: 'catalyst',
+        name: 'The Catalyst',
+        keywords: ['change', 'transformation', 'action'],
+      },
+      {
+        id: 'grounded-one',
+        name: 'The Grounded One',
+        keywords: ['stability', 'foundation', 'earth'],
+      },
+      {
+        id: 'empath',
+        name: 'The Empath',
+        keywords: ['sensitivity', 'feeling', 'emotions'],
+      },
+      {
+        id: 'shadow-dancer',
+        name: 'The Shadow Dancer',
+        keywords: ['shadow work', 'darkness', 'integration'],
+      },
+      {
+        id: 'visionary',
+        name: 'The Visionary',
+        keywords: ['future', 'dreams', 'possibilities'],
+      },
+      {
+        id: 'mystic',
+        name: 'The Mystic',
+        keywords: ['spiritual', 'mystery', 'intuition'],
+      },
+      {
+        id: 'protector',
+        name: 'The Protector',
+        keywords: ['boundaries', 'safety', 'guardian'],
+      },
+      {
+        id: 'heart-opener',
+        name: 'The Heart Opener',
+        keywords: ['love', 'vulnerability', 'connection'],
+      },
+      {
+        id: 'lunar-weaver',
+        name: 'The Lunar Weaver',
+        keywords: ['moon', 'cycles', 'patterns'],
+      },
+      {
+        id: 'alchemist',
+        name: 'The Alchemist',
+        keywords: ['transformation', 'magic', 'transmutation'],
+      },
+    ];
+    archetypes.forEach((arch) => {
+      const keywordMatch = arch.keywords.some((k) => matchesQuery(k) > 0);
+      const score =
+        matchesAny(arch.name, 'archetype', ...arch.keywords) ||
+        (keywordMatch ? 2 : 0);
+      if (score > 0) {
+        scoredResults.push({
+          type: 'archetype',
+          title: arch.name,
+          section: 'archetypes',
+          href: `/grimoire/archetypes#${arch.id}`,
+          score,
+        });
+      }
+    });
+
+    const archetypeGuideScore = matchesAny(
+      'archetype',
+      'archetypes',
+      'inner patterns',
+      'shadow work',
+    );
+    if (archetypeGuideScore > 0) {
+      scoredResults.push({
+        type: 'guide',
+        title: 'Lunary Archetypes Guide',
+        section: 'guides',
+        href: '/grimoire/archetypes',
+        score: archetypeGuideScore + 1,
+      });
+    }
+
     // Sort by score (highest first) and deduplicate by href
     const seen = new Set<string>();
     const results: SearchResult[] = [];

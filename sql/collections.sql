@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS collections (
   user_id TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
-  category TEXT NOT NULL CHECK (category IN ('chat', 'ritual', 'insight', 'moon_circle', 'tarot', 'journal')),
+  category TEXT NOT NULL CHECK (category IN ('chat', 'ritual', 'insight', 'moon_circle', 'tarot', 'journal', 'dream')),
   content JSONB NOT NULL,
   tags TEXT[],
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

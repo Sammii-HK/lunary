@@ -32,7 +32,8 @@ export type EntityType =
   | 'hub-transits'
   | 'hub-moon'
   | 'hub-placements'
-  | 'hub-glossary';
+  | 'hub-glossary'
+  | 'archetype';
 
 function toSlug(str: string): string {
   return str
@@ -503,6 +504,40 @@ function getHubGlossaryConnections(): CosmicConnectionSection[] {
   ];
 }
 
+function getArchetypeConnections(
+  archetypeId: string,
+): CosmicConnectionSection[] {
+  const sections: CosmicConnectionSection[] = [];
+
+  // About archetypes section
+  const aboutArchetypes: CosmicConnectionLink[] = [
+    { label: 'All 12 Archetypes', href: '/grimoire/archetypes' },
+    { label: 'Book of Shadows', href: '/book-of-shadows' },
+    { label: 'Your Profile', href: '/profile' },
+  ];
+  sections.push({ title: 'Explore Archetypes', links: aboutArchetypes });
+
+  // Related practices based on archetype
+  const practices: CosmicConnectionLink[] = [
+    { label: 'Tarot Reading', href: '/tarot' },
+    { label: 'Birth Chart', href: '/birth-chart' },
+    { label: 'Moon Phases', href: '/grimoire/moon' },
+    { label: 'Shadow Work', href: '/grimoire/meditation' },
+  ];
+  sections.push({ title: 'Related Practices', links: practices.slice(0, 4) });
+
+  // Grimoire resources
+  const grimoire: CosmicConnectionLink[] = [
+    { label: 'Tarot Cards', href: '/grimoire/tarot' },
+    { label: 'Crystals', href: '/grimoire/crystals' },
+    { label: 'Chakras', href: '/grimoire/chakras' },
+    { label: 'Zodiac Signs', href: '/grimoire/zodiac' },
+  ];
+  sections.push({ title: 'Grimoire Resources', links: grimoire.slice(0, 4) });
+
+  return sections;
+}
+
 export function getCosmicConnections(
   entityType: EntityType,
   slugOrKey: string,
@@ -542,6 +577,8 @@ export function getCosmicConnections(
       return getHubPlacementsConnections();
     case 'hub-glossary':
       return getHubGlossaryConnections();
+    case 'archetype':
+      return getArchetypeConnections(slugOrKey);
     default:
       return [];
   }
