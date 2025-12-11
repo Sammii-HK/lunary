@@ -42,6 +42,12 @@ export function MarketingNavbar() {
               Blog
             </Link>
             <Link
+              href='/shop'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
+            >
+              Shop
+            </Link>
+            <Link
               href='/pricing'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
             >

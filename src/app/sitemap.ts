@@ -34,6 +34,7 @@ import {
 } from '@/constants/grimoire/numerology-extended-data';
 import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
+import { getAllProducts } from '@/lib/shop/generators';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Use canonical domain (non-www)
@@ -1498,6 +1499,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
+  // Add shop product routes
+  const shopProducts = getAllProducts();
+  const shopProductRoutes = shopProducts.map((product) => ({
+    url: `${baseUrl}/shop/${product.slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  // Add shop pagination routes
+  const PRODUCTS_PER_PAGE = 12;
+  const shopTotalPages = Math.ceil(shopProducts.length / PRODUCTS_PER_PAGE);
+  const shopPaginationRoutes = Array.from(
+    { length: shopTotalPages },
+    (_, i) => ({
+      url: i === 0 ? `${baseUrl}/shop` : `${baseUrl}/shop/page/${i + 1}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: i === 0 ? 0.8 : 0.4,
+    }),
+  );
+
   return [
     ...routes,
     ...blogRoutes,
@@ -1566,5 +1589,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...tarotSuitRoutes,
     ...dailyHoroscopeSignRoutes,
     ...weeklyHoroscopeSignRoutes,
+    ...shopProductRoutes,
+    ...shopPaginationRoutes,
   ];
 }

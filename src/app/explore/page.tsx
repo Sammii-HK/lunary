@@ -99,9 +99,9 @@ const exploreItems: ExploreItem[] = [
     icon: BookOpen,
   },
   {
-    href: '/shop',
+    href: '/shop?from=explore',
     label: 'Shop',
-    description: 'Crystals, tools, and magical supplies',
+    description: 'Digital packs, rituals, and cosmic guides',
     icon: Store,
   },
   {

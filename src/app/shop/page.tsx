@@ -1,65 +1,84 @@
+import { Metadata } from 'next';
 import { ShopClient } from './ShopClient';
+import {
+  getAllProducts,
+  getFeaturedProducts,
+  getCurrentSeasonalPack,
+} from '@/lib/shop/generators';
 
-interface DigitalPack {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  subcategory?: string;
-  price: number;
-  imageUrl?: string;
-  stripePriceId?: string;
-  isActive: boolean;
-  metadata?: {
-    dateRange?: string;
-    format?: string;
-    itemCount?: number;
-  };
-}
+export const PRODUCTS_PER_PAGE = 12;
 
-async function getProducts(): Promise<DigitalPack[]> {
-  try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
-    const response = await fetch(`${baseUrl}/api/shop/products`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (!response.ok) {
-      return [];
-    }
-
-    const data = await response.json();
-
-    if (!data.success) {
-      return [];
-    }
-
-    return (data.packs || []).map((pack: any) => ({
-      id: pack.id || 'unknown',
-      name: pack.name || 'Unnamed Product',
-      description: pack.description || '',
-      category: pack.category || 'spells',
-      subcategory: pack.subcategory,
-      price: pack.price || 0,
-      imageUrl: pack.imageUrl,
-      stripePriceId: pack.stripePriceId,
-      isActive: pack.isActive !== false,
-      metadata: {
-        dateRange: pack.metadata?.dateRange,
-        format: pack.metadata?.format || 'PDF',
-        itemCount: pack.metadata?.itemCount,
+export const metadata: Metadata = {
+  title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
+  description:
+    'Curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom. Instant digital access to deepen your spiritual practice. 100+ packs for witchcraft, astrology, and moon magic.',
+  keywords: [
+    'ritual packs',
+    'digital witchcraft',
+    'tarot spreads',
+    'crystal guides',
+    'spell packs',
+    'astrology packs',
+    'moon magic',
+    'witchcraft downloads',
+    'spiritual digital products',
+  ],
+  authors: [{ name: 'Lunary' }],
+  creator: 'Lunary',
+  publisher: 'Lunary',
+  openGraph: {
+    title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
+    description:
+      'Curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom. Instant digital access.',
+    url: 'https://lunary.app/shop',
+    siteName: 'Lunary',
+    images: [
+      {
+        url: '/api/og/shop',
+        width: 1200,
+        height: 630,
+        alt: 'Lunary Shop - Digital Ritual Packs',
       },
-    }));
-  } catch {
-    return [];
-  }
-}
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
+    description:
+      '100+ curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom.',
+    images: ['/api/og/shop'],
+  },
+  alternates: {
+    canonical: 'https://lunary.app/shop',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
 
-export default async function ShopPage() {
-  const packs = await getProducts();
+export default function ShopPage() {
+  const allProducts = getAllProducts();
+  const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE);
+  const products = allProducts.slice(0, PRODUCTS_PER_PAGE);
+  const featuredProduct = getCurrentSeasonalPack() || getFeaturedProducts()[0];
 
-  return <ShopClient initialPacks={packs} />;
+  return (
+    <ShopClient
+      products={products}
+      featuredProduct={featuredProduct}
+      currentPage={1}
+      totalPages={totalPages}
+      totalProducts={allProducts.length}
+    />
+  );
 }
