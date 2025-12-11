@@ -7,6 +7,7 @@ import {
   createArticleSchema,
   createFAQPageSchema,
   createImageObjectSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 import { ParsedMarkdown } from '@/utils/markdown';
@@ -206,6 +207,16 @@ export function SEOContentTemplate({
     caption: articleImageAlt,
   });
 
+  const breadcrumbSchema = useMemo(() => {
+    if (autoBreadcrumbs.length === 0) return null;
+    return createBreadcrumbSchema(
+      autoBreadcrumbs.map((crumb) => ({
+        name: crumb.label,
+        url: crumb.href || '',
+      })),
+    );
+  }, [autoBreadcrumbs]);
+
   return (
     <article className='max-w-4xl mx-auto space-y-8 p-4'>
       {/* JSON-LD Schemas */}
@@ -213,6 +224,7 @@ export function SEOContentTemplate({
       {renderJsonLd(articleSchema)}
       {renderJsonLd(imageSchema)}
       {renderJsonLd(speakableSchema)}
+      {renderJsonLd(breadcrumbSchema)}
 
       {/* Breadcrumbs - auto-generated from URL if not provided */}
       {autoBreadcrumbs.length > 0 && <Breadcrumbs items={autoBreadcrumbs} />}
