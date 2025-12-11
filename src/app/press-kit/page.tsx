@@ -28,6 +28,9 @@ export const metadata: Metadata = {
       'Download logos, product screenshots, brand assets, and press materials.',
     images: ['/api/og/cosmic'],
   },
+  alternates: {
+    canonical: 'https://lunary.app/press-kit',
+  },
 };
 
 const brandColors = [

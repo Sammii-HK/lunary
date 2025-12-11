@@ -15,6 +15,7 @@ import { getUpcomingTransits } from '../../../../utils/astrology/transitCalendar
 import { HoroscopeSection } from './HoroscopeSection';
 import { PersonalTransitImpactCard } from './PersonalTransitImpact';
 import { TodaysAspects } from './TodaysAspects';
+import { GuideNudge } from '@/components/growth/GuideNudge';
 
 interface PaidHoroscopeViewProps {
   userBirthday?: string;
@@ -585,6 +586,8 @@ export function PaidHoroscopeView({
             </div>
           )}
         </HoroscopeSection>
+
+        <GuideNudge location='horoscope' />
 
         {birthChart && currentTransits.length > 0 && (
           <HoroscopeSection title="Today's Aspects to Your Chart" color='zinc'>

@@ -5,7 +5,8 @@ import {
   MONTH_NAMES,
   ZODIAC_DATE_RANGES,
 } from '@/constants/seo/birthday-zodiac';
-import Script from 'next/script';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Birthday Zodiac Signs: Find Your Sun Sign by Birth Date | Lunary',
@@ -56,20 +57,15 @@ export default function BirthdayIndexPage() {
 
   return (
     <>
-      <Script
-        id='birthday-structured-data'
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      {renderJsonLd(structuredData)}
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
-          <nav className='text-sm text-zinc-400 mb-8'>
-            <Link href='/grimoire' className='hover:text-zinc-300'>
-              Grimoire
-            </Link>
-            <span className='mx-2'>/</span>
-            <span className='text-zinc-300'>Birthday</span>
-          </nav>
+          <Breadcrumbs
+            items={[
+              { label: 'Grimoire', href: '/grimoire' },
+              { label: 'Birthday' },
+            ]}
+          />
 
           <h1 className='text-4xl font-light mb-4'>Birthday Zodiac Calendar</h1>
           <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>

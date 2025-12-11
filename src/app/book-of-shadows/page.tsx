@@ -26,6 +26,9 @@ import {
   extractMoodTags,
   extractCardReferences,
 } from '@/lib/journal/extract-moments';
+import { GuideNudge } from '@/components/growth/GuideNudge';
+import { LifeThemesInBookOfShadows } from '@/features/themes';
+import { ShadowArchetypeCard } from '@/features/shadow';
 
 interface JournalEntry {
   id: number;
@@ -408,6 +411,8 @@ export default function BookOfShadowsPage() {
       <main className='px-4 py-6'>
         {activeTab === 'journal' && (
           <div className='space-y-4'>
+            <LifeThemesInBookOfShadows className='mb-2' />
+            <GuideNudge location='journal' />
             {showAddForm ? (
               <form onSubmit={handleSubmitReflection} className='space-y-3'>
                 <textarea
@@ -500,6 +505,7 @@ export default function BookOfShadowsPage() {
 
         {activeTab === 'patterns' && (
           <div className='space-y-4'>
+            <ShadowArchetypeCard />
             {patterns.length === 0 ? (
               <div className='text-center py-12'>
                 <Sparkles className='w-10 h-10 text-zinc-700 mx-auto mb-3' />

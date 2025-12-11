@@ -6,8 +6,8 @@ import {
   CHINESE_ZODIAC_DATA,
   CHINESE_YEARS,
 } from '@/constants/seo/chinese-zodiac';
-import Script from 'next/script';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Chinese Zodiac: 12 Animal Signs, Years & Compatibility | Lunary',
@@ -55,11 +55,7 @@ export default function ChineseZodiacIndexPage() {
 
   return (
     <>
-      <Script
-        id='chinese-zodiac-structured-data'
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      {renderJsonLd(structuredData)}
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
           <Breadcrumbs

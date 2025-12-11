@@ -7,8 +7,8 @@ import {
   SIGN_SYMBOLS,
   SIGN_ELEMENTS,
 } from '@/constants/seo/monthly-horoscope';
-import Script from 'next/script';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { renderJsonLd } from '@/lib/schema';
 
 const currentYear = new Date().getFullYear();
 const nextYear = currentYear + 1;
@@ -70,11 +70,7 @@ const currentMonth = currentDate
 export default function GrimoireHoroscopesPage() {
   return (
     <>
-      <Script
-        id='horoscope-structured-data'
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      {renderJsonLd(structuredData)}
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
           <Breadcrumbs

@@ -1,3 +1,5 @@
+import { renderJsonLd } from '@/lib/schema';
+
 export function FAQStructuredData({
   faqs,
 }: {
@@ -16,12 +18,5 @@ export function FAQStructuredData({
     })),
   };
 
-  return (
-    <script
-      type='application/ld+json'
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(faqSchema),
-      }}
-    />
-  );
+  return renderJsonLd(faqSchema);
 }

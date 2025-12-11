@@ -95,6 +95,27 @@ const Paywall = dynamic(
   () => import('@/components/Paywall').then((m) => ({ default: m.Paywall })),
   { ssr: false },
 );
+const GuideNudge = dynamic(
+  () =>
+    import('@/components/growth/GuideNudge').then((m) => ({
+      default: m.GuideNudge,
+    })),
+  { ssr: false },
+);
+const LifeThemesOverview = dynamic(
+  () =>
+    import('@/features/themes').then((m) => ({
+      default: m.LifeThemesOverview,
+    })),
+  { ssr: false },
+);
+const DailyCosmicOverview = dynamic(
+  () =>
+    import('@/components/growth/DailyCosmicOverview').then((m) => ({
+      default: m.DailyCosmicOverview,
+    })),
+  { ssr: false },
+);
 
 export default function ProfilePage() {
   const { user, updateProfile, refetch: refetchUser } = useUser();
@@ -618,6 +639,9 @@ export default function ProfilePage() {
               <MonthlyInsights />
             </div>
           </Paywall>
+          <DailyCosmicOverview className='mt-4' />
+          <LifeThemesOverview className='mt-4' />
+          <GuideNudge location='profile' />
         </div>
       )}
 

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { astrologicalHouses } from '@/constants/grimoire/seo-data';
 import { stringToKebabCase } from '../../../../../../utils/string';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
@@ -228,6 +229,13 @@ Area: ${houseData.area}`}
         ctaText={`Want to see planets in your ${houseData.name}?`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='house'
+            entityKey={`${houseData.number}`}
+            title={`${houseData.name} Cosmic Connections`}
+          />
+        }
       />
     </div>
   );

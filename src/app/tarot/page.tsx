@@ -29,6 +29,7 @@ import {
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
 import { cn } from '@/lib/utils';
+import { GuideNudge } from '@/components/growth/GuideNudge';
 
 const SUIT_ELEMENTS: Record<string, string> = {
   Cups: 'Water',
@@ -958,6 +959,8 @@ const TarotReadings = () => {
             </div>
           </div>
         </HoroscopeSection>
+
+        <GuideNudge location='tarot' className='mb-2' />
 
         {subscription.hasAccess('tarot_patterns') && (
           <HoroscopeSection

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import {
   planetaryBodies,
   bodiesSymbols,
@@ -291,6 +292,13 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
         ctaText={`Discover ${planetData.name} in your birth chart`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='planet'
+            entityKey={planetKey.toLowerCase()}
+            title={`${planetData.name} Cosmic Connections`}
+          />
+        }
       />
     </div>
   );
