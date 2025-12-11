@@ -58,3 +58,6 @@ prisma/migrations/*/migration.sql.tmp
 
 # Repomix audit exports
 project-audit.txt
+
+# Internal TODO docs (not for git)
+PRESS-KIT-TODO.md
