@@ -2,6 +2,7 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import Moon from '../components/Moon';
 
 export const metadata: Metadata = {
@@ -113,6 +114,13 @@ Understanding these phases and aligning your practice with them creates powerful
           { text: 'Spells & Rituals', href: '/grimoire/practices' },
           { text: 'Birth Chart', href: '/grimoire/birth-chart' },
         ]}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-moon'
+            entityKey='moon'
+            title='Moon Cosmic Connections'
+          />
+        }
       />
       <div className='max-w-4xl mx-auto p-4'>
         <Moon />

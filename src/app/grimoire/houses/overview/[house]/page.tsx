@@ -232,7 +232,7 @@ Area: ${houseData.area}`}
         cosmicConnections={
           <CosmicConnections
             entityType='house'
-            entityKey={`${houseData.number}`}
+            entityKey={house}
             title={`${houseData.name} Cosmic Connections`}
           />
         }

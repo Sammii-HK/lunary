@@ -1,4 +1,4 @@
-import { PersonalTransitImpact } from '../../../../utils/astrology/personalTransits';
+import { PersonalTransitImpact } from '../../../../../utils/astrology/personalTransits';
 
 interface PersonalTransitImpactProps {
   impact: PersonalTransitImpact;

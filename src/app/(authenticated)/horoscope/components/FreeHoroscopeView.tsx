@@ -1,5 +1,5 @@
-import { getGeneralHoroscope } from '../../../../utils/astrology/generalHoroscope';
-import { getUpcomingTransits } from '../../../../utils/astrology/transitCalendar';
+import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
+import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
 import { TransitCard } from './TransitCard';

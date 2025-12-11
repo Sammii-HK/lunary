@@ -6,6 +6,7 @@ import {
   getTransitsForYear,
 } from '@/constants/seo/yearly-transits';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
@@ -147,6 +148,13 @@ export default function TransitsIndexPage() {
           >
             View Your Personal Transits
           </Link>
+        </div>
+        <div className='mt-8'>
+          <CosmicConnections
+            entityType='hub-transits'
+            entityKey='transits'
+            title='Transits Connections'
+          />
         </div>
         <ExploreGrimoire />
       </div>

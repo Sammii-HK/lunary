@@ -5,17 +5,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { HelpCircle, Stars, Layers, X, Hash } from 'lucide-react';
-import { generateBirthChart } from '../../../utils/astrology/birthChart';
-import { useSubscription } from '../../hooks/useSubscription';
+import { generateBirthChart } from '../../../../utils/astrology/birthChart';
+import { useSubscription } from '../../../hooks/useSubscription';
 import {
   canCollectBirthday,
   hasBirthChartAccess,
-} from '../../../utils/pricing';
+} from '../../../../utils/pricing';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
-import { calculateLifePathNumber } from '../../../utils/personalization';
+import { calculateLifePathNumber } from '../../../../utils/personalization';
 import { useModal } from '@/hooks/useModal';
 
 const SkeletonCard = () => (
@@ -23,30 +23,30 @@ const SkeletonCard = () => (
 );
 
 const SubscriptionManagement = dynamic(
-  () => import('../../components/SubscriptionManagement'),
+  () => import('../../../components/SubscriptionManagement'),
   { loading: () => <SkeletonCard /> },
 );
 const LocationRefresh = dynamic(
-  () => import('../../components/LocationRefresh'),
+  () => import('../../../components/LocationRefresh'),
   { ssr: false },
 );
 const NotificationSettings = dynamic(
   () =>
-    import('../../components/NotificationSettings').then((m) => ({
+    import('../../../components/NotificationSettings').then((m) => ({
       default: m.NotificationSettings,
     })),
   { ssr: false },
 );
 const EmailSubscriptionSettings = dynamic(
   () =>
-    import('../../components/EmailSubscriptionSettings').then((m) => ({
+    import('../../../components/EmailSubscriptionSettings').then((m) => ({
       default: m.EmailSubscriptionSettings,
     })),
   { ssr: false },
 );
 const ReferralProgram = dynamic(
   () =>
-    import('../../components/ReferralProgram').then((m) => ({
+    import('../../../components/ReferralProgram').then((m) => ({
       default: m.ReferralProgram,
     })),
   { ssr: false },
@@ -97,22 +97,29 @@ const Paywall = dynamic(
 );
 const GuideNudge = dynamic(
   () =>
-    import('@/components/growth/GuideNudge').then((m) => ({
+    import('@/components/GuideNudge').then((m) => ({
       default: m.GuideNudge,
     })),
   { ssr: false },
 );
-const LifeThemesOverview = dynamic(
+const LifeThemesCard = dynamic(
   () =>
-    import('@/features/themes').then((m) => ({
-      default: m.LifeThemesOverview,
+    import('@/components/profile/LifeThemesCard').then((m) => ({
+      default: m.LifeThemesCard,
     })),
   { ssr: false },
 );
 const DailyCosmicOverview = dynamic(
   () =>
-    import('@/components/growth/DailyCosmicOverview').then((m) => ({
+    import('@/components/profile/DailyCosmicOverview').then((m) => ({
       default: m.DailyCosmicOverview,
+    })),
+  { ssr: false },
+);
+const PremiumPathway = dynamic(
+  () =>
+    import('@/components/PremiumPathway').then((m) => ({
+      default: m.PremiumPathway,
     })),
   { ssr: false },
 );
@@ -265,7 +272,7 @@ export default function ProfilePage() {
         if (!hasExistingPersonalCard) {
           console.log('Generating personal card...');
           const { calculatePersonalCard } =
-            await import('../../../utils/tarot/personalCard');
+            await import('../../../../utils/tarot/personalCard');
           const personalCard = calculatePersonalCard(birthday, name);
 
           await fetch('/api/profile/personal-card', {
@@ -640,8 +647,9 @@ export default function ProfilePage() {
             </div>
           </Paywall>
           <DailyCosmicOverview className='mt-4' />
-          <LifeThemesOverview className='mt-4' />
+          <LifeThemesCard className='mt-4' />
           <GuideNudge location='profile' />
+          <PremiumPathway variant='guide' className='mt-4' />
         </div>
       )}
 

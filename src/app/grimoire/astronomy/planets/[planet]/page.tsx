@@ -295,7 +295,7 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
         cosmicConnections={
           <CosmicConnections
             entityType='planet'
-            entityKey={planetKey.toLowerCase()}
+            entityKey={planetKey}
             title={`${planetData.name} Cosmic Connections`}
           />
         }

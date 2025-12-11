@@ -433,7 +433,7 @@ function BookOfShadowsContent() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Pre-load tarot cards to populate parser cache
-      import('../../../utils/tarot/tarot-cards')
+      import('../../../../utils/tarot/tarot-cards')
         .then((module) => {
           const tarotCards = module.tarotCards;
           // Initialize the cache in messageParser

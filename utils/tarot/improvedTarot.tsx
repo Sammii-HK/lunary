@@ -10,7 +10,7 @@ type TarotCard = {
   information: string;
 };
 
-type TrendAnalysis = {
+export type TrendAnalysis = {
   dominantThemes: string[];
   frequentCards: Array<{ name: string; count: number; reading: string }>;
   suitPatterns: Array<{

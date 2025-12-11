@@ -9,6 +9,7 @@ import {
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 const currentYear = new Date().getFullYear();
 
@@ -833,6 +834,26 @@ export default function TarotCompleteGuidePage() {
           </Link>
         </div>
       </section>
+
+      <CosmicConnections
+        entityType='tarot'
+        entityKey='tarot-guide'
+        title='Tarot Connections'
+        sections={[
+          {
+            title: 'Related Pages',
+            links: [
+              { label: 'All Tarot Cards', href: '/grimoire/tarot' },
+              { label: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
+              { label: 'Daily Tarot Reading', href: '/tarot' },
+              {
+                label: 'Card Combinations',
+                href: '/grimoire/card-combinations',
+              },
+            ],
+          },
+        ]}
+      />
 
       <ExploreGrimoire />
     </div>

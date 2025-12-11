@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
@@ -9,6 +9,11 @@ import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
+import {
+  analyzeLifeThemes,
+  hasEnoughDataForThemes,
+  LifeThemeInput,
+} from '@/lib/life-themes/engine';
 
 export const DailyInsightCard = () => {
   const { user } = useUser();
@@ -17,11 +22,59 @@ export const DailyInsightCard = () => {
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;
+  const [lifeThemeName, setLifeThemeName] = useState<string | null>(null);
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
     subscription.plan,
   );
+
+  useEffect(() => {
+    if (!hasChartAccess) return;
+
+    async function loadTheme() {
+      try {
+        const [journalRes, patternsRes] = await Promise.all([
+          fetch('/api/journal?limit=30', { credentials: 'include' }).catch(
+            () => null,
+          ),
+          fetch('/api/patterns?days=30', { credentials: 'include' }).catch(
+            () => null,
+          ),
+        ]);
+
+        const journalData = journalRes?.ok
+          ? await journalRes.json()
+          : { entries: [] };
+        const patternsData = patternsRes?.ok ? await patternsRes.json() : null;
+
+        const input: LifeThemeInput = {
+          journalEntries: (journalData.entries || []).map((e: any) => ({
+            content: e.content || '',
+            moodTags: e.moodTags || [],
+            createdAt: e.createdAt,
+          })),
+          tarotPatterns: patternsData
+            ? {
+                dominantThemes: patternsData.dominantThemes || [],
+                frequentCards: patternsData.frequentCards || [],
+              }
+            : null,
+        };
+
+        if (hasEnoughDataForThemes(input)) {
+          const themes = analyzeLifeThemes(input, 1);
+          if (themes.length > 0) {
+            setLifeThemeName(themes[0].name);
+          }
+        }
+      } catch (error) {
+        // Silently fail - this is a subtle enhancement
+      }
+    }
+
+    loadTheme();
+  }, [hasChartAccess]);
 
   const insight = useMemo(() => {
     const selectedDate = currentDate ? new Date(currentDate) : new Date();
@@ -96,6 +149,11 @@ export const DailyInsightCard = () => {
           <p className='text-sm text-zinc-300 leading-relaxed'>
             {insight.text}
           </p>
+          {lifeThemeName && (
+            <p className='text-xs text-zinc-500 mt-1.5'>
+              Connects to your theme: {lifeThemeName}
+            </p>
+          )}
         </div>
         <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
       </div>

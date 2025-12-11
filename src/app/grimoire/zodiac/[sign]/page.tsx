@@ -278,7 +278,7 @@ Season: (varies by sign)`}
         faqs={faqs}
         cosmicConnections={
           <CosmicConnections
-            entityType='zodiac'
+            entityType='sign'
             entityKey={signKey}
             title={`${signData.name} Cosmic Web`}
           />

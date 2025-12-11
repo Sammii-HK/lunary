@@ -7,8 +7,13 @@ import { useSubscription } from '@/hooks/useSubscription';
 interface TarotReflectionPromptsProps {
   period: number | 'year-over-year';
   dominantThemes: string[];
-  frequentCards: Array<{ name: string; count: number }>;
-  suitPatterns: Array<{ suit: string; count: number }>;
+  frequentCards: Array<{ name: string; count: number; reading?: string }>;
+  suitPatterns: Array<{
+    suit: string;
+    count: number;
+    reading?: string;
+    cards?: Array<{ name: string; count: number }>;
+  }>;
   className?: string;
 }
 

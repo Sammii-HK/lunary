@@ -26,9 +26,11 @@ import {
   extractMoodTags,
   extractCardReferences,
 } from '@/lib/journal/extract-moments';
-import { GuideNudge } from '@/components/growth/GuideNudge';
-import { LifeThemesInBookOfShadows } from '@/features/themes';
-import { ShadowArchetypeCard } from '@/features/shadow';
+import { GuideNudge } from '@/components/GuideNudge';
+import { LifeThemeBanner } from '@/components/journal/LifeThemeBanner';
+import { ArchetypeBar } from '@/components/journal/ArchetypeBar';
+import { DreamTagChips } from '@/components/journal/DreamTagChips';
+import { PremiumPathway } from '@/components/PremiumPathway';
 
 interface JournalEntry {
   id: number;
@@ -88,6 +90,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         )}
       </div>
       <p className='text-white text-sm leading-relaxed'>{entry.content}</p>
+      <DreamTagChips entry={entry} className='mt-1.5' />
       {(entry.moodTags.length > 0 || entry.cardReferences.length > 0) && (
         <div className='flex flex-wrap gap-1.5 mt-2'>
           {entry.moodTags.map((tag) => (
@@ -411,7 +414,7 @@ export default function BookOfShadowsPage() {
       <main className='px-4 py-6'>
         {activeTab === 'journal' && (
           <div className='space-y-4'>
-            <LifeThemesInBookOfShadows className='mb-2' />
+            <LifeThemeBanner className='mb-2' />
             <GuideNudge location='journal' />
             {showAddForm ? (
               <form onSubmit={handleSubmitReflection} className='space-y-3'>
@@ -505,7 +508,7 @@ export default function BookOfShadowsPage() {
 
         {activeTab === 'patterns' && (
           <div className='space-y-4'>
-            <ShadowArchetypeCard />
+            <ArchetypeBar className='mb-4' />
             {patterns.length === 0 ? (
               <div className='text-center py-12'>
                 <Sparkles className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
@@ -521,6 +524,7 @@ export default function BookOfShadowsPage() {
                 ))}
               </div>
             )}
+            <PremiumPathway variant='shadow' className='mt-6' />
           </div>
         )}
       </main>

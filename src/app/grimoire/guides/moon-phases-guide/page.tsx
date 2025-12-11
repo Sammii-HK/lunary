@@ -9,6 +9,7 @@ import {
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 export const metadata: Metadata = {
   title: 'Moon Phases: The Complete Guide to Lunar Cycles & Rituals - Lunary',
@@ -943,6 +944,12 @@ export default function MoonPhasesGuidePage() {
           </Link>
         </div>
       </section>
+
+      <CosmicConnections
+        entityType='hub-moon'
+        entityKey='moon-phases-guide'
+        title='Moon Phases Connections'
+      />
 
       <ExploreGrimoire />
     </div>

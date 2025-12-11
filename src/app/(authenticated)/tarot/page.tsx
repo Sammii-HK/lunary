@@ -4,15 +4,15 @@ import dayjs from 'dayjs';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { getTarotCard } from '../../../utils/tarot/tarot';
-import { getImprovedTarotReading } from '../../../utils/tarot/improvedTarot';
-import { getGeneralTarotReading } from '../../../utils/tarot/generalTarot';
+import { getTarotCard } from '../../../../utils/tarot/tarot';
+import { getImprovedTarotReading } from '../../../../utils/tarot/improvedTarot';
+import { getGeneralTarotReading } from '../../../../utils/tarot/generalTarot';
 import {
   getMoonPhase,
   type MoonPhaseLabels,
-} from '../../../utils/moon/moonPhases';
-import { useSubscription } from '../../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+} from '../../../../utils/moon/moonPhases';
+import { useSubscription } from '../../../hooks/useSubscription';
+import { hasBirthChartAccess } from '../../../../utils/pricing';
 import { Check, Sparkles, Share2, Lock, X } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
@@ -29,7 +29,12 @@ import {
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
 import { cn } from '@/lib/utils';
-import { GuideNudge } from '@/components/growth/GuideNudge';
+import { GuideNudge } from '@/components/GuideNudge';
+import { TarotSeasonReading } from '@/components/tarot/TarotSeasonReading';
+import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPatterns';
+import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';
+import { PremiumPathway } from '@/components/PremiumPathway';
+import Link from 'next/link';
 
 const SUIT_ELEMENTS: Record<string, string> = {
   Cups: 'Water',
@@ -1109,6 +1114,22 @@ const TarotReadings = () => {
           </HoroscopeSection>
         )}
 
+        {subscription.hasAccess('tarot_patterns') &&
+          personalizedReading?.trendAnalysis && (
+            <div className='space-y-3'>
+              <TarotSeasonReading
+                trendAnalysis={personalizedReading.trendAnalysis}
+                period={timeFrame as 7 | 14 | 30 | 90 | 180 | 365}
+              />
+              <TarotRitualForPatterns
+                trendAnalysis={personalizedReading.trendAnalysis}
+              />
+              <TarotReflectionPrompts
+                trendAnalysis={personalizedReading.trendAnalysis}
+              />
+            </div>
+          )}
+
         <div id='tarot-spreads-section'>
           <CollapsibleSection title='Tarot Spreads' defaultCollapsed={false}>
             <TarotSpreadExperience
@@ -1119,6 +1140,28 @@ const TarotReadings = () => {
             />
           </CollapsibleSection>
         </div>
+
+        <div className='mt-6 pt-4 border-t border-zinc-800/50 space-y-3'>
+          <p className='text-xs text-zinc-500 text-center'>
+            Come back tomorrow to see how your patterns evolve.
+          </p>
+          <div className='flex flex-wrap justify-center gap-4 text-xs'>
+            <Link
+              href='/horoscope'
+              className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            >
+              See how this aligns with your horoscope →
+            </Link>
+            <Link
+              href='/grimoire/moon'
+              className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            >
+              Check today's moon influence →
+            </Link>
+          </div>
+        </div>
+
+        <PremiumPathway variant='tarot' className='mt-6' />
       </div>
 
       <TarotCardModal

@@ -1,4 +1,4 @@
-import { TransitEvent } from '../../../../utils/astrology/transitCalendar';
+import { TransitEvent } from '../../../../../utils/astrology/transitCalendar';
 
 interface TransitCardProps {
   transit: TransitEvent;

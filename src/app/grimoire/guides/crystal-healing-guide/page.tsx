@@ -9,6 +9,7 @@ import {
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 export const metadata: Metadata = {
   title:
@@ -904,6 +905,23 @@ export default function CrystalHealingGuidePage() {
           </Link>
         </div>
       </section>
+
+      <CosmicConnections
+        entityType='crystal'
+        entityKey='crystal-guide'
+        title='Crystal Connections'
+        sections={[
+          {
+            title: 'Related Pages',
+            links: [
+              { label: 'All Crystals', href: '/grimoire/crystals' },
+              { label: 'Chakras Guide', href: '/grimoire/chakras' },
+              { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+              { label: 'Meditation', href: '/grimoire/meditation' },
+            ],
+          },
+        ]}
+      />
 
       <ExploreGrimoire />
     </div>

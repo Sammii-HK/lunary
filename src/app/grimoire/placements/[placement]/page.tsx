@@ -334,9 +334,9 @@ export default async function PlacementPage({ params }: PageProps) {
 
         {/* Cosmic Connections */}
         <CosmicConnections
-          entityType='zodiac'
-          entityKey={parsed.sign}
-          title={`${content.sign} Cosmic Connections`}
+          entityType='placement'
+          entityKey={placement}
+          title={`${content.planet} in ${content.sign} Cosmic Web`}
         />
 
         {/* CTA */}

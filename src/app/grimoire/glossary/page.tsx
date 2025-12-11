@@ -10,6 +10,7 @@ import {
 } from '@/lib/schema';
 import { ASTROLOGY_GLOSSARY } from '@/constants/grimoire/glossary';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { GlossaryClient } from './GlossaryClient';
 
 export const metadata: Metadata = {
@@ -102,6 +103,12 @@ export default function GlossaryPage() {
           Calculate Your Birth Chart Free
         </Link>
       </section>
+
+      <CosmicConnections
+        entityType='hub-glossary'
+        entityKey='glossary'
+        title='Glossary Connections'
+      />
 
       <ExploreGrimoire />
     </div>

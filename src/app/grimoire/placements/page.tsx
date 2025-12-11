@@ -6,6 +6,7 @@ import {
 } from '@/constants/seo/planet-sign-content';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import {
   createItemListSchema,
   createFAQPageSchema,
@@ -240,6 +241,13 @@ export default function PlacementsIndexPage() {
           </p>
         </section>
 
+        <div className='mt-8'>
+          <CosmicConnections
+            entityType='hub-placements'
+            entityKey='placements'
+            title='Placements Connections'
+          />
+        </div>
         <ExploreGrimoire />
       </div>
     </div>

@@ -1,0 +1,237 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { ChevronDown, BookOpen, Check, Loader2 } from 'lucide-react';
+import { useSubscription } from '@/hooks/useSubscription';
+import { hasBirthChartAccess } from '../../../utils/pricing';
+import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
+
+interface TarotReflectionPromptsProps {
+  trendAnalysis: TrendAnalysis | null;
+  className?: string;
+}
+
+const THEME_PROMPTS: Record<string, string[]> = {
+  healing: [
+    'What part of me is asking for healing right now?',
+    'How have I been caring for my emotional wellbeing lately?',
+    'What old wound feels ready to be released?',
+    'Where do I need to be more gentle with myself?',
+    'What would deep self-compassion look like today?',
+  ],
+  transformation: [
+    'What am I being asked to let go of?',
+    'What is trying to emerge in my life right now?',
+    'Where am I resisting change, and why?',
+    'How would I describe the person I am becoming?',
+    'What feels like it is dying in order for something new to be born?',
+  ],
+  creativity: [
+    'What creative impulse have I been ignoring?',
+    'How can I express myself more authentically today?',
+    'What would I create if I knew I could not fail?',
+    'Where does inspiration find me most easily?',
+    'What project or idea keeps calling to me?',
+  ],
+  action: [
+    'What action have I been delaying that I know I need to take?',
+    'Where do I need to be more decisive?',
+    'What gives me the courage to move forward?',
+    'How can I channel my energy more effectively?',
+    'What first step could I take today?',
+  ],
+  truth: [
+    'What truth have I been avoiding?',
+    'Where am I not being honest with myself?',
+    'What would change if I saw this situation clearly?',
+    'How can I communicate more authentically?',
+    'What insight is trying to break through?',
+  ],
+  abundance: [
+    'What am I grateful for in this moment?',
+    'Where do I already have enough?',
+    'What beliefs about scarcity am I ready to release?',
+    'How can I be more generous with myself and others?',
+    'What would true abundance feel like?',
+  ],
+  connection: [
+    'How open is my heart right now?',
+    'What relationship needs more of my attention?',
+    'Where am I holding back from connection?',
+    'How can I deepen intimacy in my life?',
+    'What do I truly need from others?',
+  ],
+};
+
+const SUIT_PROMPTS: Record<string, string[]> = {
+  Cups: [
+    'What emotions am I experiencing most strongly?',
+    'How am I honoring my intuition?',
+    'What does my heart want me to know?',
+    'Where do I need more emotional flow?',
+    'How can I better nurture my inner world?',
+  ],
+  Wands: [
+    'What ignites my passion right now?',
+    'Where am I being called to take action?',
+    'What creative project wants my attention?',
+    'How can I sustain my energy for what matters?',
+    'What adventure is calling to me?',
+  ],
+  Swords: [
+    'What thoughts are dominating my mind?',
+    'Where do I need more clarity?',
+    'What conversation have I been avoiding?',
+    'How can I think more clearly about this situation?',
+    'What truth is trying to emerge?',
+  ],
+  Pentacles: [
+    'What am I building in my life right now?',
+    'How am I caring for my body and physical needs?',
+    'What practical steps can I take today?',
+    'Where do I feel most grounded?',
+    'What resources do I have that I am not using?',
+  ],
+};
+
+const DEFAULT_PROMPTS = [
+  'What message from my recent readings feels most important?',
+  'How can I apply the wisdom of the cards to my life today?',
+  'What patterns am I noticing in my readings?',
+  'What question do I want to bring to my next reading?',
+  'How has tarot helped me understand myself better?',
+];
+
+export function TarotReflectionPrompts({
+  trendAnalysis,
+  className = '',
+}: TarotReflectionPromptsProps) {
+  const subscription = useSubscription();
+  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [savingPrompt, setSavingPrompt] = useState<number | null>(null);
+  const [savedPrompts, setSavedPrompts] = useState<Set<number>>(new Set());
+
+  const prompts = useMemo(() => {
+    if (!trendAnalysis) return DEFAULT_PROMPTS.slice(0, isPremium ? 5 : 1);
+
+    const topTheme = trendAnalysis.dominantThemes[0]?.toLowerCase();
+    const topSuit = trendAnalysis.suitPatterns[0];
+
+    let selectedPrompts: string[] = [];
+
+    if (topTheme && THEME_PROMPTS[topTheme]) {
+      selectedPrompts = [...THEME_PROMPTS[topTheme]];
+    } else if (topSuit && SUIT_PROMPTS[topSuit.suit]) {
+      selectedPrompts = [...SUIT_PROMPTS[topSuit.suit]];
+    } else {
+      selectedPrompts = [...DEFAULT_PROMPTS];
+    }
+
+    return isPremium
+      ? selectedPrompts.slice(0, 5)
+      : selectedPrompts.slice(0, 1);
+  }, [trendAnalysis, isPremium]);
+
+  const handleSaveToJournal = async (prompt: string, index: number) => {
+    setSavingPrompt(index);
+
+    try {
+      const response = await fetch('/api/journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          content: `Reflection prompt: ${prompt}\n\n[Write your reflection here...]`,
+          moodTags: ['reflection'],
+          cardReferences: [],
+          source: 'tarot-prompt',
+        }),
+      });
+
+      if (response.ok) {
+        setSavedPrompts((prev) => new Set([...prev, index]));
+      }
+    } catch (error) {
+      console.error('[TarotReflectionPrompts] Failed to save:', error);
+    } finally {
+      setSavingPrompt(null);
+    }
+  };
+
+  return (
+    <div
+      className={`rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden ${className}`}
+    >
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className='w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/30 transition-colors'
+      >
+        <div className='flex items-center gap-3'>
+          <div className='p-2 rounded-lg bg-lunary-accent-900/30'>
+            <BookOpen className='w-4 h-4 text-lunary-accent-400' />
+          </div>
+          <div>
+            <p className='text-sm font-medium text-zinc-100'>
+              Reflection Prompts
+            </p>
+            <p className='text-xs text-zinc-400'>
+              {isPremium ? `${prompts.length} prompts` : '1 prompt'} for your
+              journal
+            </p>
+          </div>
+        </div>
+        <ChevronDown
+          className={`w-4 h-4 text-zinc-500 transition-transform ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      {isExpanded && (
+        <div className='px-4 pb-4 space-y-3'>
+          {prompts.map((prompt, i) => {
+            const isSaved = savedPrompts.has(i);
+            const isSaving = savingPrompt === i;
+
+            return (
+              <div
+                key={i}
+                className='p-3 rounded-lg border border-zinc-800/50 bg-zinc-800/20'
+              >
+                <p className='text-sm text-zinc-300 mb-2'>{prompt}</p>
+                {isPremium && (
+                  <button
+                    onClick={() => handleSaveToJournal(prompt, i)}
+                    disabled={isSaved || isSaving}
+                    className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                      isSaved
+                        ? 'text-lunary-success-400'
+                        : 'text-lunary-accent-400 hover:text-lunary-accent-300'
+                    }`}
+                  >
+                    {isSaving ? (
+                      <Loader2 className='w-3 h-3 animate-spin' />
+                    ) : isSaved ? (
+                      <Check className='w-3 h-3' />
+                    ) : (
+                      <BookOpen className='w-3 h-3' />
+                    )}
+                    {isSaved ? 'Saved' : 'Save to Book of Shadows'}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+
+          {!isPremium && (
+            <p className='text-xs text-zinc-500'>
+              Upgrade for more prompts and the ability to save directly to your
+              journal.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

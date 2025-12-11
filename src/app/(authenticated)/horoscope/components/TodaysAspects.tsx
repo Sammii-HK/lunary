@@ -1,6 +1,6 @@
 'use client';
 
-import { BirthChartData } from '../../../../utils/astrology/birthChart';
+import { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
 interface TodaysAspectsProps {
   birthChart: BirthChartData[];

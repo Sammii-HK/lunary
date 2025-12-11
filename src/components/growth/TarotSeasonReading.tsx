@@ -3,15 +3,7 @@
 import { useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-
-interface TrendAnalysis {
-  dominantThemes: string[];
-  frequentCards: Array<{ name: string; count: number; reading?: string }>;
-  suitPatterns: Array<{ suit: string; count: number; reading?: string }>;
-  arcanaPatterns: Array<{ type: string; count: number; reading?: string }>;
-  numberPatterns: Array<{ number: number; count: number; reading?: string }>;
-  timeFrame: number;
-}
+import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
 
 interface TarotSeasonReadingProps {
   period: number | 'year-over-year';

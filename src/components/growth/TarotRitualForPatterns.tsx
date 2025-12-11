@@ -8,11 +8,14 @@ import { getMoonPhase } from '../../../utils/moon/moonPhases';
 interface SuitPattern {
   suit: string;
   count: number;
+  reading?: string;
+  cards?: Array<{ name: string; count: number }>;
 }
 
 interface ArcanaPattern {
   type: string;
   count: number;
+  reading?: string;
 }
 
 interface TarotRitualForPatternsProps {

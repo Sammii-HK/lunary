@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import { recordCheckIn } from '@/lib/streak/check-in';
 
 import { DateWidget } from '@/components/DateWidget';
@@ -137,49 +136,47 @@ export default function AppDashboard() {
 
   return (
     <div className='flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4'>
-      <AstronomyContextProvider>
-        <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
+      <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
 
-        <PostTrialMessaging />
+      <PostTrialMessaging />
 
-        <header className='py-4'>
-          <div className='flex items-center justify-between mb-2'>
-            <div className='w-16' />
-            <p className='text-lg text-zinc-300 text-center flex-1'>
-              {greeting()}
-              {firstName && (
-                <>
-                  , <span className='text-lunary-accent'>{firstName}</span>
-                </>
-              )}
-            </p>
-            <div className='w-16 flex justify-end'>
-              <ShareDailyInsight />
-            </div>
-          </div>
-          <div className='text-center'>
-            <DateWidget />
-          </div>
-        </header>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          {/* Row 1: Expandable widgets side by side */}
-          <MoonPreview />
-          <SkyNowCard />
-
-          {/* Row 2: Your Day + Daily Card */}
-          <DailyInsightCard />
-          <DailyCardPreview />
-
-          {/* Row 3: Transit + Crystal */}
-          <TransitOfTheDay />
-          <CrystalPreview />
-
-          <div className='md:col-span-2'>
-            <ConditionalWheel />
+      <header className='py-4'>
+        <div className='flex items-center justify-between mb-2'>
+          <div className='w-16' />
+          <p className='text-lg text-zinc-300 text-center flex-1'>
+            {greeting()}
+            {firstName && (
+              <>
+                , <span className='text-lunary-accent'>{firstName}</span>
+              </>
+            )}
+          </p>
+          <div className='w-16 flex justify-end'>
+            <ShareDailyInsight />
           </div>
         </div>
-      </AstronomyContextProvider>
+        <div className='text-center'>
+          <DateWidget />
+        </div>
+      </header>
+
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+        {/* Row 1: Expandable widgets side by side */}
+        <MoonPreview />
+        <SkyNowCard />
+
+        {/* Row 2: Your Day + Daily Card */}
+        <DailyInsightCard />
+        <DailyCardPreview />
+
+        {/* Row 3: Transit + Crystal */}
+        <TransitOfTheDay />
+        <CrystalPreview />
+
+        <div className='md:col-span-2'>
+          <ConditionalWheel />
+        </div>
+      </div>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import {
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 const currentYear = new Date().getFullYear();
 
@@ -738,6 +739,12 @@ export default function BirthChartCompleteGuidePage() {
           </Link>
         </div>
       </section>
+
+      <CosmicConnections
+        entityType='hub-placements'
+        entityKey='birth-chart-guide'
+        title='Birth Chart Connections'
+      />
 
       <ExploreGrimoire />
     </div>

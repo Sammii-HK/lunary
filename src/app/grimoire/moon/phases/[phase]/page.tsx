@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { monthlyMoonPhases } from '../../../../../../utils/moon/monthlyPhases';
 import { stringToKebabCase } from '../../../../../../utils/string';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
@@ -267,6 +268,13 @@ During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords.join
         ctaText={`Want personalized moon insights for your chart?`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='moon'
+            entityKey={phase}
+            title={`${phaseName} Cosmic Connections`}
+          />
+        }
       />
     </div>
   );

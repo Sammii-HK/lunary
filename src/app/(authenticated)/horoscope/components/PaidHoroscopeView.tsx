@@ -3,19 +3,22 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
-import { getEnhancedPersonalizedHoroscope } from '../../../../utils/astrology/enhancedHoroscope';
+import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import {
   getBirthChartFromProfile,
   BirthChartData,
-} from '../../../../utils/astrology/birthChart';
-import { getAstrologicalChart } from '../../../../utils/astrology/astrology';
-import { getSolarReturnInsights } from '../../../../utils/astrology/transitCalendar';
-import { getPersonalTransitImpacts } from '../../../../utils/astrology/personalTransits';
-import { getUpcomingTransits } from '../../../../utils/astrology/transitCalendar';
+} from '../../../../../utils/astrology/birthChart';
+import { getAstrologicalChart } from '../../../../../utils/astrology/astrology';
+import { getSolarReturnInsights } from '../../../../../utils/astrology/transitCalendar';
+import { getPersonalTransitImpacts } from '../../../../../utils/astrology/personalTransits';
+import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
 import { PersonalTransitImpactCard } from './PersonalTransitImpact';
 import { TodaysAspects } from './TodaysAspects';
-import { GuideNudge } from '@/components/growth/GuideNudge';
+import { GuideNudge } from '@/components/GuideNudge';
+import { StreakBanner } from '@/components/StreakBanner';
+import { ReflectionBox } from '@/components/horoscope/ReflectionBox';
+import { PremiumPathway } from '@/components/PremiumPathway';
 
 interface PaidHoroscopeViewProps {
   userBirthday?: string;
@@ -563,6 +566,8 @@ export function PaidHoroscopeView({
 
   return (
     <div className='h-full space-y-6 p-4 overflow-auto'>
+      <StreakBanner location='horoscope' className='mb-2' />
+
       <div className='pt-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           {userName ? `${userName}'s Horoscope` : 'Your Horoscope'}
@@ -575,9 +580,22 @@ export function PaidHoroscopeView({
       <div className='space-y-6'>
         <HoroscopeSection title="Today's Horoscope" color='purple'>
           {fullHoroscope ? (
-            <p className='text-sm text-zinc-300 leading-relaxed'>
-              {fullHoroscope}
-            </p>
+            <>
+              <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+                {fullHoroscope}
+              </p>
+              <div className='pt-3 border-t border-zinc-800/50 space-y-3'>
+                <div className='flex flex-wrap gap-3 text-xs'>
+                  <Link
+                    href='/horoscope/weekly'
+                    className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                  >
+                    Week ahead →
+                  </Link>
+                </div>
+                <ReflectionBox />
+              </div>
+            </>
           ) : (
             <div className='space-y-2'>
               <div className='h-4 bg-zinc-800 rounded animate-pulse' />
@@ -702,6 +720,8 @@ export function PaidHoroscopeView({
             </div>
           </HoroscopeSection>
         )}
+
+        <PremiumPathway variant='transits' className='mt-6' />
       </div>
     </div>
   );

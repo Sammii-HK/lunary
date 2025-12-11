@@ -1,8 +1,8 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { useSubscription } from '../../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { useSubscription } from '../../../hooks/useSubscription';
+import { hasBirthChartAccess } from '../../../../utils/pricing';
 import { FreeHoroscopeView } from './components/FreeHoroscopeView';
 import { PaidHoroscopeView } from './components/PaidHoroscopeView';
 import { conversionTracking } from '@/lib/analytics';
