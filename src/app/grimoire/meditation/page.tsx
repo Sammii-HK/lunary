@@ -68,7 +68,7 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
     links: [
       { label: 'Book of Shadows', href: '/book-of-shadows' },
       { label: 'Archetypes', href: '/grimoire/archetypes' },
-      { label: 'Shadow Work', href: '/grimoire/archetypes#shadow-dancer' },
+      { label: 'Shadow Work', href: '/grimoire/shadow-work' },
       { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
     ],
   },

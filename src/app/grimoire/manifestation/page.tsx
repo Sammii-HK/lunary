@@ -114,6 +114,11 @@ export default function ManifestationPage() {
           to create desired outcomes. It bridges the spiritual and
           practical—combining focused intention with real-world effort.
         </p>
+        <p className='text-sm text-zinc-500 mt-4'>
+          Note: Ethical manifestation focuses on your own growth and
+          circumstances—never on controlling specific people or overriding
+          others&apos; free will.
+        </p>
       </header>
 
       <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>

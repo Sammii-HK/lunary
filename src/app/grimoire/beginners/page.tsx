@@ -135,6 +135,18 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
       { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
     ],
   },
+  {
+    title: 'Practical Magic',
+    links: [
+      {
+        label: 'Spellcraft Fundamentals',
+        href: '/grimoire/spells/fundamentals',
+      },
+      { label: 'Protection & Warding', href: '/grimoire/protection' },
+      { label: 'Manifestation', href: '/grimoire/manifestation' },
+      { label: 'Shadow Work', href: '/grimoire/shadow-work' },
+    ],
+  },
 ];
 
 export default function BeginnersGuidePage() {

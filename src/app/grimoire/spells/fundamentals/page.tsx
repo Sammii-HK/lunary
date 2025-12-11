@@ -71,12 +71,12 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
     ],
   },
   {
-    title: 'Spell Library',
+    title: 'Spell Types',
     links: [
       { label: 'All Spells', href: '/grimoire/spells' },
-      { label: 'Protection Spells', href: '/grimoire/spells' },
-      { label: 'Moon Phase Magic', href: '/grimoire/moon/phases' },
-      { label: 'Crystals', href: '/grimoire/crystals' },
+      { label: 'Protection & Warding', href: '/grimoire/protection' },
+      { label: 'Manifestation', href: '/grimoire/manifestation' },
+      { label: 'Jar Spells', href: '/grimoire/jar-spells' },
     ],
   },
   {

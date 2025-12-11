@@ -415,7 +415,7 @@ const CandleMagic = () => {
               </p>
               <p>
                 <strong>After lighting:</strong> "By fire and will, so mote it
-                be" or "And so it is" to seal your intention.
+                complete" to seal your intention.
               </p>
             </div>
           </div>

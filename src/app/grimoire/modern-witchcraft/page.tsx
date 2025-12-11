@@ -87,6 +87,15 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
       { label: 'Wheel of the Year', href: '/grimoire/wheel-of-the-year' },
     ],
   },
+  {
+    title: 'Inner Work & Protection',
+    links: [
+      { label: 'Shadow Work', href: '/grimoire/shadow-work' },
+      { label: 'Protection Magic', href: '/grimoire/protection' },
+      { label: 'Manifestation', href: '/grimoire/manifestation' },
+      { label: 'Meditation & Grounding', href: '/grimoire/meditation' },
+    ],
+  },
 ];
 
 export default function ModernWitchcraftPage() {

@@ -75,7 +75,7 @@ export default function LightingCandlesOnAltarPage() {
 - **General lighting phrase:** "I light this flame with intention clear, may my will be made manifest here."
 - **Before lighting:** State your intention aloud or silently. Be specific and clear.
 - **As you light:** Visualize your intention flowing into the flame. See it burning brightly with your desired outcome.
-- **After lighting:** "By fire and will, so mote it be" or "And so it is" to seal your intention.
+- **After lighting:** State your intention clearly as you light—something personal and meaningful to you.
 
 **Altar Setup for Candle Magic:**
 

@@ -327,7 +327,7 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
       },
       { label: 'Moon Phases', href: '/grimoire/moon' },
       { label: 'Tarot Cards', href: '/grimoire/tarot' },
-      { label: 'Shadow Work', href: '/grimoire/meditation' },
+      { label: 'Shadow Work', href: '/grimoire/shadow-work' },
     ],
   },
   {

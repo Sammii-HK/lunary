@@ -74,7 +74,7 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
       },
       { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
       { label: 'Manifestation', href: '/grimoire/manifestation' },
-      { label: 'Protection', href: '/grimoire/protection' },
+      { label: 'Book of Shadows', href: '/book-of-shadows' },
     ],
   },
 ];
@@ -404,7 +404,7 @@ export default function JarSpellsPage() {
                 <h4 className='font-medium text-zinc-100'>Seal the Jar</h4>
                 <p className='text-zinc-400 text-sm'>
                   Close the lid. Light your candle and drip wax over the lid to
-                  seal. State: &quot;This spell is sealed. So it is.&quot;
+                  seal. State your intention clearly as you do.
                 </p>
               </div>
             </li>
