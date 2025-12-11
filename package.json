@@ -57,7 +57,9 @@
     "cleanup:port": "bash scripts/cleanup-port-3000.sh",
     "clear-cache": "bash scripts/clear-all-cache.sh",
     "discord:register": "tsx scripts/register-discord-commands.ts",
-    "check": "pnpm lint && pnpm test && pnpm build"
+    "check": "pnpm lint && pnpm test && pnpm build",
+    "legacy:audit": "tsx tools/remove-legacy-framework.ts",
+    "legacy:purge": "tsx tools/remove-legacy-framework.ts --delete-scripts --execute"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -74,6 +76,7 @@
     "@astrodraw/astrochart": "^3.0.2",
     "@getbrevo/brevo": "^3.0.1",
     "@mdx-js/runtime": "^2.0.0",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
@@ -81,6 +84,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.0",
+    "@react-pdf/renderer": "^4.3.1",
     "@stripe/stripe-js": "^7.8.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/pg": "^8.15.5",
