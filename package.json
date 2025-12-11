@@ -46,6 +46,8 @@
     "qa:check:lighthouse": "USE_LIGHTHOUSE_CLI=true tsx scripts/qa-checklist.ts",
     "qa:e2e": "playwright test e2e/qa-checklist.spec.ts",
     "qa:e2e:prod": "BASE_URL=https://lunary.app playwright test e2e/qa-checklist.spec.ts",
+    "seo:e2e": "playwright test e2e/journeys/18-seo.spec.ts",
+    "seo:e2e:prod": "BASE_URL=https://lunary.app playwright test e2e/journeys/18-seo.spec.ts",
     "analyze": "ANALYZE=true pnpm build",
     "generate-price-mapping": "tsx scripts/generate-price-mapping.ts",
     "update-yearly-pricing": "tsx scripts/update-yearly-pricing.ts",

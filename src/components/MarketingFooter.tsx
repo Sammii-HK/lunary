@@ -172,10 +172,22 @@ export function MarketingFooter() {
               Press Kit
             </Link>
             <Link
-              href='/accessibility'
+              href='/about/sammii'
               className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
             >
-              Accessibility
+              About the Founder
+            </Link>
+            <Link
+              href='/about/editorial-guidelines'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Editorial Guidelines
+            </Link>
+            <Link
+              href='/about/methodology'
+              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            >
+              Methodology
             </Link>
           </nav>
 

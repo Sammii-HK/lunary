@@ -519,6 +519,75 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
+    // New hub pages
+    {
+      url: `${baseUrl}/transits`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/moon-calendar`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/horoscope/today`,
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/horoscope/weekly`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    // E-E-A-T pages
+    {
+      url: `${baseUrl}/about/sammii`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/about/editorial-guidelines`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/about/methodology`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    // Topical authority pages
+    {
+      url: `${baseUrl}/birth-chart/example`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/a-z`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/beginners`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire/astronomy-vs-astrology`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
   ];
 
   // Generate all blog week posts (from start of 2025 to current week)
@@ -907,6 +976,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
+  }));
+
+  // Add daily horoscope sign pages
+  const dailyHoroscopeSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/horoscope/today/${stringToKebabCase(sign)}`,
+    lastModified: now,
+    changeFrequency: 'daily' as const,
+    priority: 0.7,
+  }));
+
+  // Add weekly horoscope sign pages
+  const weeklyHoroscopeSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/horoscope/weekly/${stringToKebabCase(sign)}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
   }));
 
   // Add all house pages
@@ -1463,5 +1548,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...additionalGrimoirePages,
     ...eventSubpages,
     ...tarotSuitRoutes,
+    ...dailyHoroscopeSignRoutes,
+    ...weeklyHoroscopeSignRoutes,
   ];
 }

@@ -387,6 +387,17 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // Forecast -> Transits hub redirect
+      {
+        source: '/forecast',
+        destination: '/transits',
+        permanent: true,
+      },
+      {
+        source: '/forecast/:year',
+        destination: '/grimoire/transits#year-:year',
+        permanent: true,
+      },
       // Book of Shadows -> Guide redirect (chat renamed)
       {
         source: '/book-of-shadows',

@@ -5,7 +5,7 @@ import { getSpellById, spells, spellCategories } from '@/constants/spells';
 import { Clock, Star, Moon, Leaf } from 'lucide-react';
 import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { stringToKebabCase } from '@/utils/string';
+import { stringToKebabCase } from '../../../../../utils/string';
 
 export async function generateStaticParams() {
   return spells.map((spell) => ({
