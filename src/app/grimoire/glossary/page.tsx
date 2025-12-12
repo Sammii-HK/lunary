@@ -7,6 +7,7 @@ import {
   createItemListSchema,
   createDefinedTermSchema,
   renderJsonLd,
+  createBreadcrumbSchema,
 } from '@/lib/schema';
 import { ASTROLOGY_GLOSSARY } from '@/constants/grimoire/glossary';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
@@ -64,6 +65,12 @@ export default function GlossaryPage() {
   return (
     <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(glossaryListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Glossary', url: '/grimoire/glossary' },
+        ]),
+      )}
       {definedTermSchemas.map((schema, index) => (
         <span key={index}>{renderJsonLd(schema)}</span>
       ))}

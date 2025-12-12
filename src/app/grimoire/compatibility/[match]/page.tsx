@@ -7,7 +7,11 @@ import {
   generateCompatibilityContent,
   getAllCompatibilitySlugs,
 } from '@/constants/seo/compatibility-content';
-import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createArticleSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
@@ -118,6 +122,12 @@ export default async function CompatibilityPage({ params }: PageProps) {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Compatibility', url: '/grimoire/compatibility' },
+        ]),
+      )}
 
       <div className='max-w-4xl mx-auto px-4 py-12'>
         {/* Breadcrumbs */}

@@ -135,9 +135,9 @@ function generateSunSeasonPack(
       `Daily practices for the month`,
     ],
     perfectFor: [
-      `Making the most of ${sign} season`,
-      `${sign} sun, moon, or rising signs`,
-      `Anyone drawn to ${themes.theme}`,
+      `Anyone wanting to make the most of ${sign} season.`,
+      `${sign} sun, moon, or rising signs seeking alignment.`,
+      `Those drawn to the themes of ${themes.theme}.`,
     ],
     related: [
       `${ZODIAC_SIGNS[(ZODIAC_SIGNS.indexOf(sign) + 1) % 12].toLowerCase()}-season-pack`,
@@ -169,9 +169,9 @@ function generateSaturnReturnPack(): ShopProduct {
       'Journal prompts for integration',
     ],
     perfectFor: [
-      'Those approaching or in their late 20s/early 30s',
-      'Anyone experiencing major life restructuring',
-      'Second Saturn Return preparation (late 50s)',
+      'Those in their late twenties or early thirties.',
+      'Anyone experiencing major life restructuring.',
+      'Those preparing for their second Saturn Return.',
     ],
     related: [
       'saturn-grounding-pack',
@@ -203,9 +203,9 @@ function generateJupiterExpansionPack(): ShopProduct {
       'Gratitude and growth journal prompts',
     ],
     perfectFor: [
-      'Those experiencing a Jupiter return (every 12 years)',
-      'Anyone wanting to expand abundance',
-      'Growth and opportunity manifestation',
+      'Those experiencing a Jupiter return.',
+      'Anyone wanting to expand their sense of abundance.',
+      'Those focused on growth and opportunity manifestation.',
     ],
     related: [
       'sagittarius-season-pack',

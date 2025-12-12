@@ -794,12 +794,12 @@ export default function ProfilePage() {
         <div className='flex flex-col items-center gap-2 text-sm'>
           <span className='text-zinc-400'>Looking for more?</span>
           <div className='flex flex-wrap justify-center gap-3'>
-            <a
+            <Link
               href='/shop'
               className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
             >
               Browse Shop
-            </a>
+            </Link>
             <a
               href='/blog'
               className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'

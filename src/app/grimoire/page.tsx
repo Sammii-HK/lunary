@@ -1,5 +1,9 @@
 import GrimoireLayout from './GrimoireLayout';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 const grimoireCategories = [
   {
@@ -67,6 +71,12 @@ const GrimoireHome = () => {
   return (
     <div className='h-full w-full'>
       {renderJsonLd(grimoireListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Page.tsx', url: '/grimoire/page.tsx' },
+        ]),
+      )}
       <GrimoireLayout />
     </div>
   );

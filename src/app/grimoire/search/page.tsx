@@ -10,6 +10,7 @@ import {
 import { AskTheGrimoire } from '@/components/grimoire/AskTheGrimoire';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 export const metadata: Metadata = {
   title: 'Search the Grimoire | Lunary',
   description:
@@ -135,8 +136,14 @@ function SearchContent({ query }: { query: string }) {
 
   const isDefaultView = !query;
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Search', url: '/grimoire/search' },
+  ]);
+
   return (
     <div className='space-y-6'>
+      {renderJsonLd(breadcrumbSchema)}
       {/* Results Header */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2 text-lunary-primary-300/70'>

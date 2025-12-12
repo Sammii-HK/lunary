@@ -8,7 +8,11 @@ import {
   getDecanData,
 } from '@/constants/seo/decans';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
@@ -61,6 +65,12 @@ export default function DecansIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(decansListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Decans', url: '/grimoire/decans' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

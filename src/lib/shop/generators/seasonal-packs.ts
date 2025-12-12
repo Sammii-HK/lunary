@@ -64,9 +64,9 @@ function generateSabbatWhatInside(sabbat: Sabbat): string[] {
 
 function generateSabbatPerfectFor(sabbat: Sabbat): string[] {
   return [
-    `Celebrating ${sabbat.name} alone or with your circle`,
-    `Deepening your connection to the Wheel of the Year`,
-    `${sabbat.keywords.slice(0, 2).join(' and ')} work`,
+    `Those celebrating ${sabbat.name} alone or with their circle.`,
+    `Anyone deepening their connection to the Wheel of the Year.`,
+    `Practitioners exploring ${sabbat.keywords.slice(0, 2).join(' and ').toLowerCase()} themes.`,
   ];
 }
 
@@ -108,9 +108,9 @@ function generateLunarNewYearPack(): ShopProduct {
       'Lucky colour and food correspondences',
     ],
     perfectFor: [
-      'Setting powerful yearly intentions',
-      'Abundance and prosperity magic',
-      'Honouring lunar cycles in your practice',
+      'Those setting powerful yearly intentions.',
+      'Anyone drawn to abundance and prosperity magic.',
+      'Practitioners who honour lunar cycles in their work.',
     ],
     related: [
       'yule-seasonal-pack',

@@ -8,7 +8,7 @@ import {
   SIGN_ELEMENTS,
 } from '@/constants/seo/monthly-horoscope';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { renderJsonLd } from '@/lib/schema';
+import { renderJsonLd, createBreadcrumbSchema } from '@/lib/schema';
 
 const currentYear = new Date().getFullYear();
 const nextYear = currentYear + 1;
@@ -71,6 +71,12 @@ export default function GrimoireHoroscopesPage() {
   return (
     <>
       {renderJsonLd(structuredData)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Horoscopes', url: '/grimoire/horoscopes' },
+        ]),
+      )}
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
           <Breadcrumbs

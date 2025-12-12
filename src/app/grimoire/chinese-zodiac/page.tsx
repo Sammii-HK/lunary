@@ -7,7 +7,7 @@ import {
   CHINESE_YEARS,
 } from '@/constants/seo/chinese-zodiac';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { renderJsonLd } from '@/lib/schema';
+import { renderJsonLd, createBreadcrumbSchema } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Chinese Zodiac: 12 Animal Signs, Years & Compatibility | Lunary',
@@ -56,6 +56,12 @@ export default function ChineseZodiacIndexPage() {
   return (
     <>
       {renderJsonLd(structuredData)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Chinese Zodiac', url: '/grimoire/chinese-zodiac' },
+        ]),
+      )}
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
           <Breadcrumbs

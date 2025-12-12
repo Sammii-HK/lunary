@@ -1,6 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createFAQPageSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
 export const metadata: Metadata = {
@@ -99,6 +103,15 @@ export default function AstronomyVsAstrologyPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(faqSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          {
+            name: 'Astronomy Vs Astrology',
+            url: '/grimoire/astronomy-vs-astrology',
+          },
+        ]),
+      )}
       <div className='max-w-5xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

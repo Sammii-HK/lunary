@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Circle } from 'lucide-react';
 
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 const aspectTypes = [
   {
     slug: 'conjunction',
@@ -79,8 +80,15 @@ export const metadata: Metadata = {
 };
 
 export default function AspectTypesIndexPage() {
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Aspects', url: '/grimoire/aspects' },
+    { name: 'Types', url: '/grimoire/aspects/types' },
+  ]);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-5xl mx-auto'>
         <div className='text-center mb-12'>
           <div className='flex justify-center mb-4'>

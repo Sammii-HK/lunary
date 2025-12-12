@@ -3,7 +3,11 @@ import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Moon, Sun, ArrowRight, Star, Sparkles } from 'lucide-react';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Astrology Events 2025: Complete Calendar & Guide',
@@ -122,6 +126,13 @@ export default function Events2025Page() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(events2025ListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Events', url: '/grimoire/events' },
+          { name: '2025', url: '/grimoire/events/2025' },
+        ]),
+      )}
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

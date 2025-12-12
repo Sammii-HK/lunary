@@ -5,7 +5,11 @@ import { signDescriptions } from '@/constants/seo/planet-sign-content';
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
@@ -71,6 +75,12 @@ export default function CompatibilityIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(compatibilityListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Compatibility', url: '/grimoire/compatibility' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

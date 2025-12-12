@@ -3,7 +3,11 @@ import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ZODIAC_CUSPS, getCuspData, CuspId } from '@/constants/seo/cusps';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Zodiac Cusps: Born on the Cusp? What It Means | Lunary',
@@ -59,6 +63,12 @@ export default function CuspsIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(cuspsListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Cusps', url: '/grimoire/cusps' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[{ label: 'Grimoire', href: '/grimoire' }, { label: 'Cusps' }]}

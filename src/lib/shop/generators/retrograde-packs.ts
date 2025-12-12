@@ -48,9 +48,9 @@ const RETROGRADE_PACK_CONFIGS: RetrogradePackConfig[] = [
       'Retrograde survival daily practices',
     ],
     perfectFor: [
-      'Anyone dreading the next Mercury retrograde',
-      'People who work with technology daily',
-      'Those who travel frequently',
+      'Anyone dreading the next Mercury retrograde.',
+      'Those who work with technology daily.',
+      'Frequent travellers seeking peace of mind.',
     ],
     price: PRICE_TIERS.seasonal,
     gradient: SHOP_GRADIENTS.horizCometToRose, // Mercury's airy, shifting communication
@@ -93,9 +93,9 @@ const RETROGRADE_PACK_CONFIGS: RetrogradePackConfig[] = [
       'Rose quartz working for Venus energy',
     ],
     perfectFor: [
-      'Processing past relationship patterns',
-      'Those experiencing the return of an ex',
-      'Anyone working on self-worth',
+      'Those processing past relationship patterns.',
+      'Anyone experiencing the return of an ex.',
+      'Those doing deep work on self-worth.',
     ],
     price: PRICE_TIERS.seasonal,
     gradient: SHOP_GRADIENTS.lightHazeToRose, // Venus's love energy
@@ -131,9 +131,9 @@ const RETROGRADE_PACK_CONFIGS: RetrogradePackConfig[] = [
       'Bloodstone and red jasper workings',
     ],
     perfectFor: [
-      'Managing frustration during Mars retrograde',
-      'Reviewing and revising big goals',
-      'Channeling anger into positive change',
+      'Those managing frustration during Mars retrograde.',
+      'Anyone reviewing and revising their big goals.',
+      'Those channelling anger into positive change.',
     ],
     price: PRICE_TIERS.seasonal,
     gradient: SHOP_GRADIENTS.supernovaToNebula, // Mars's intense, fiery energy

@@ -30,9 +30,9 @@ const BIRTHCHART_PACK_CONFIGS: BirthChartPackConfig[] = [
       'Reflection prompts for your rising',
     ],
     perfectFor: [
-      'Understanding how others perceive you',
-      'Exploring your life path direction',
-      'Beginners learning birth chart basics',
+      'Those curious about how others perceive them.',
+      'Anyone exploring their life path direction.',
+      'Beginners learning the basics of birth chart interpretation.',
     ],
     price: PRICE_TIERS.mini,
     gradient: SHOP_GRADIENTS.nebulaToHaze, // Rising/ascendant energy
@@ -54,9 +54,9 @@ const BIRTHCHART_PACK_CONFIGS: BirthChartPackConfig[] = [
       'Integration journal prompts',
     ],
     perfectFor: [
-      'Understanding your emotional patterns',
-      'Improving self-care based on your moon',
-      'Deepening emotional intelligence',
+      'Those seeking to understand their emotional patterns.',
+      'Anyone wanting to improve self-care based on their moon.',
+      'Those deepening their emotional intelligence.',
     ],
     price: PRICE_TIERS.mini,
     gradient: SHOP_GRADIENTS.lightCometToHaze, // Moon emotional depth
@@ -79,9 +79,9 @@ const BIRTHCHART_PACK_CONFIGS: BirthChartPackConfig[] = [
       'Journal prompts for each placement',
     ],
     perfectFor: [
-      'Understanding your core astrological identity',
-      'Seeing how your placements interact',
-      'Foundation for deeper chart study',
+      'Those seeking to understand their core astrological identity.',
+      'Anyone curious how their placements interact.',
+      'Those building a foundation for deeper chart study.',
     ],
     price: PRICE_TIERS.standard,
     gradient: SHOP_GRADIENTS.nebulaSupernovaRose, // Trinity of placements blending
@@ -103,9 +103,9 @@ const BIRTHCHART_PACK_CONFIGS: BirthChartPackConfig[] = [
       'Worksheet for mapping your chart houses',
     ],
     perfectFor: [
-      'Understanding where life themes manifest',
-      'Reading your birth chart more deeply',
-      'Knowing which houses transits affect',
+      'Those seeking to understand where life themes manifest.',
+      'Anyone wanting to read their birth chart more deeply.',
+      'Those tracking which houses transits will affect.',
     ],
     price: PRICE_TIERS.standard,
     gradient: SHOP_GRADIENTS.coolSpectrum, // 12 houses, complete system

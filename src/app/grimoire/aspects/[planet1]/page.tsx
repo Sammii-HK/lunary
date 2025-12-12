@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 import {
   PLANETS,
   PLANET_DISPLAY,
@@ -71,8 +72,14 @@ export default async function PlanetAspectsPage({
   const planetName = PLANET_DISPLAY[planet1 as Planet];
   const symbol = PLANET_SYMBOLS[planet1 as Planet];
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Aspects', url: '/grimoire/aspects' },
+  ]);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-5xl mx-auto'>
         <div className='text-center mb-12'>
           <div className='flex justify-center mb-4'>

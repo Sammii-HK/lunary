@@ -6,6 +6,7 @@ import { ZODIAC_SIGNS } from '../../../../../utils/zodiac/zodiac';
 import {
   createArticleWithSpeakableSchema,
   createFAQPageSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
@@ -117,6 +118,16 @@ export default function BirthChartCompleteGuidePage() {
     <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
       {renderJsonLd(faqSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Guides', url: '/grimoire/guides' },
+          {
+            name: 'Birth Chart Guide',
+            url: '/grimoire/guides/birth-chart-complete-guide',
+          },
+        ]),
+      )}
 
       {/* Breadcrumbs */}
       <nav className='text-sm text-zinc-400 mb-8'>

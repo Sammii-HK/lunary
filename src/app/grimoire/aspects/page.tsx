@@ -9,7 +9,11 @@ import {
   ASPECT_DATA,
 } from '@/constants/seo/aspects';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -66,6 +70,12 @@ export default function AspectsIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(aspectsListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Aspects', url: '/grimoire/aspects' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

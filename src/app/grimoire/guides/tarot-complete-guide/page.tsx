@@ -6,6 +6,7 @@ import {
   createArticleWithSpeakableSchema,
   createFAQPageSchema,
   renderJsonLd,
+  createBreadcrumbSchema,
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
@@ -277,6 +278,16 @@ export default function TarotCompleteGuidePage() {
   return (
     <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Guides', url: '/grimoire/guides' },
+          {
+            name: 'Tarot Complete Guide',
+            url: '/grimoire/guides/tarot-complete-guide',
+          },
+        ]),
+      )}
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}

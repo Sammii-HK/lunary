@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Wand2 } from 'lucide-react';
 
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 const witchTypes = [
   {
     slug: 'green-witch',
@@ -92,8 +93,15 @@ export const metadata: Metadata = {
 };
 
 export default function WitchTypesIndexPage() {
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Modern Witchcraft', url: '/grimoire/modern-witchcraft' },
+    { name: 'Witch Types', url: '/grimoire/modern-witchcraft/witch-types' },
+  ]);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-5xl mx-auto'>
         {/* Header */}
         <div className='text-center mb-12'>

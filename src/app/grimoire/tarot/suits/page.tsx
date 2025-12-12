@@ -4,6 +4,7 @@ import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Layers } from 'lucide-react';
 import { tarotSuits } from '@/constants/tarot';
 
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 export const metadata: Metadata = {
   title: 'Tarot Suits: Wands, Cups, Swords & Pentacles Meanings | Lunary',
   description:
@@ -118,8 +119,15 @@ const suitDetails: Record<
 };
 
 export default function TarotSuitsIndexPage() {
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Tarot', url: '/grimoire/tarot' },
+    { name: 'Suits', url: '/grimoire/tarot/suits' },
+  ]);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-5xl mx-auto'>
         <div className='text-center mb-12'>
           <div className='flex justify-center mb-4'>

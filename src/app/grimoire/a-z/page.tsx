@@ -1,6 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
 export const metadata: Metadata = {
@@ -192,6 +196,12 @@ export default function AZIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(itemListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'A Z', url: '/grimoire/a-z' },
+        ]),
+      )}
       <div className='max-w-5xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

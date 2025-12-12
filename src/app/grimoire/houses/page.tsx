@@ -9,7 +9,11 @@ import {
 } from '@/constants/seo/houses';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
@@ -62,6 +66,12 @@ export default function HousesIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(housesListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Houses', url: '/grimoire/houses' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

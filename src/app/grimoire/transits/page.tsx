@@ -7,7 +7,11 @@ import {
 } from '@/constants/seo/yearly-transits';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -63,6 +67,12 @@ export default function TransitsIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(transitsListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Transits', url: '/grimoire/transits' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[

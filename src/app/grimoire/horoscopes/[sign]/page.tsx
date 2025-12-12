@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 import {
   ZODIAC_SIGNS,
   SIGN_DISPLAY_NAMES,
@@ -73,8 +74,14 @@ export default async function SignHoroscopePage({
   const element = SIGN_ELEMENTS[signKey];
   const ruler = SIGN_RULERS[signKey];
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Horoscopes', url: '/grimoire/horoscopes' },
+  ]);
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <nav className='text-sm text-zinc-400 mb-8'>
           <Link href='/grimoire' className='hover:text-zinc-300'>

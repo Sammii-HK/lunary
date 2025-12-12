@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   createArticleSchema,
   createFAQPageSchema,
+  createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
@@ -154,6 +155,12 @@ export default function WheelOfTheYearPage() {
     <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
       {renderJsonLd(faqSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Wheel of the Year', url: '/grimoire/wheel-of-the-year' },
+        ]),
+      )}
 
       <Breadcrumbs
         items={[

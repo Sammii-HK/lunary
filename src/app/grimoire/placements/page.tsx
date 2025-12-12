@@ -11,6 +11,7 @@ import {
   createItemListSchema,
   createFAQPageSchema,
   renderJsonLd,
+  createBreadcrumbSchema,
 } from '@/lib/schema';
 
 export const metadata: Metadata = {
@@ -94,6 +95,12 @@ export default function PlacementsIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(itemListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Placements', url: '/grimoire/placements' },
+        ]),
+      )}
       {renderJsonLd(faqSchema)}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs

@@ -11,7 +11,11 @@ import {
   planetDescriptions,
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
-import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createArticleSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 interface PageProps {
   params: Promise<{ placement: string }>;
@@ -110,6 +114,12 @@ export default async function PlacementPage({ params }: PageProps) {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Placements', url: '/grimoire/placements' },
+        ]),
+      )}
 
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <Breadcrumbs

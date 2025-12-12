@@ -6,6 +6,7 @@ import {
   createArticleSchema,
   createFAQPageSchema,
   renderJsonLd,
+  createBreadcrumbSchema,
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
@@ -94,6 +95,16 @@ export default function WitchcraftToolsPage() {
   return (
     <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Modern Witchcraft', url: '/grimoire/modern-witchcraft' },
+          {
+            name: 'Tools Guide',
+            url: '/grimoire/modern-witchcraft/tools-guide',
+          },
+        ]),
+      )}
       {renderJsonLd(faqSchema)}
 
       <Breadcrumbs
